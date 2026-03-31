@@ -1,58 +1,79 @@
-import { cache } from "react";
-import { prisma } from "@/lib/prisma";
+import "server-only";
 
-export type AppSessionUser = {
-  id: string;
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
+export type PlatformRole = "USER" | "SUPER_ADMIN" | "PLATFORM_ADMIN";
+export type OrgRole =
+  | "ADMIN"
+  | "MANAGER"
+  | "OFFICE"
+  | "ACCOUNTANT"
+  | "CARETAKER"
+  | "TENANT";
+
+export type ScopeType = "ORG" | "PROPERTY" | "BUILDING" | "UNIT";
+
+export type AppSession = {
+  userId: string;
   email: string | null;
   fullName: string;
-  orgId?: string | null;
+  platformRole: PlatformRole;
+  activeOrgId: string | null;
+  activeOrgRole: OrgRole | null;
+  membershipScope:
+    | {
+        scopeType: ScopeType;
+        scopeId: string;
+      }
+    | null;
 };
 
-export const getCurrentUser = cache(async (): Promise<AppSessionUser | null> => {
-  /**
-   * Replace this with your real auth integration:
-   * - Clerk
-   * - NextAuth/Auth.js
-   * - Better Auth
-   * - custom JWT/cookie session
-   */
+const SESSION_COOKIE_NAME = "estatedesk_session";
 
-  const mockUserId = process.env.DEV_USER_ID;
+export async function setUserSession(session: AppSession) {
+  const cookieStore = await cookies();
 
-  if (!mockUserId) return null;
-
-  const user = await prisma.user.findUnique({
-    where: { id: mockUserId },
-    select: {
-      id: true,
-      email: true,
-      fullName: true,
-      memberships: {
-        take: 1,
-        orderBy: { createdAt: "desc" },
-        select: {
-          orgId: true,
-        },
-      },
-    },
+  cookieStore.set(SESSION_COOKIE_NAME, JSON.stringify(session), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
   });
+}
 
-  if (!user) return null;
+export async function getUserSession(): Promise<AppSession | null> {
+  const cookieStore = await cookies();
+  const raw = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
-  return {
-    id: user.id,
-    email: user.email,
-    fullName: user.fullName,
-    orgId: user.memberships[0]?.orgId ?? null,
-  };
-});
+  if (!raw) return null;
 
-export async function requireUser() {
-  const user = await getCurrentUser();
+  try {
+    return JSON.parse(raw) as AppSession;
+  } catch {
+    return null;
+  }
+}
 
-  if (!user) {
-    throw new Error("Unauthorized");
+export async function clearUserSession() {
+  const cookieStore = await cookies();
+
+  cookieStore.set(SESSION_COOKIE_NAME, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: new Date(0),
+  });
+}
+
+export async function requireUserSession(): Promise<AppSession> {
+  const session = await getUserSession();
+
+  if (!session) {
+    redirect("/login");
   }
 
-  return user;
+  return session;
 }
