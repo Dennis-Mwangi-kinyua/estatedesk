@@ -1,18 +1,34 @@
-import { requireManagementAccess } from "@/lib/permissions/guards";
+import { redirect } from "next/navigation";
+import { getUserSession } from "@/lib/auth/session";
 
 export default async function DashboardPage() {
-  const session = await requireManagementAccess();
+  const session = await getUserSession();
 
-  return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <p className="text-sm text-neutral-500">
-        Welcome back, {session.fullName}.
-      </p>
-      <div className="rounded-2xl border p-4">
-        <p>Role: {session.activeOrgRole}</p>
-        <p>Organization: {session.activeOrgId}</p>
-      </div>
-    </div>
-  );
+  if (!session) {
+    redirect("/login");
+  }
+
+  if (
+    session.platformRole === "SUPER_ADMIN" ||
+    session.platformRole === "PLATFORM_ADMIN"
+  ) {
+    redirect("/platform");
+  }
+
+  switch (session.activeOrgRole) {
+    case "TENANT":
+      redirect("/dashboard/tenant");
+
+    case "CARETAKER":
+      redirect("/dashboard/caretaker");
+
+    case "ADMIN":
+    case "MANAGER":
+    case "OFFICE":
+    case "ACCOUNTANT":
+      redirect("/dashboard/org");
+
+    default:
+      redirect("/login");
+  }
 }

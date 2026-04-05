@@ -8,6 +8,7 @@ datasource db {
 
 model User {
   id                      String                @id @default(cuid())
+  username                String?               @unique
   fullName                String
   phone                   String?               @unique
   email                   String?               @unique
@@ -42,6 +43,7 @@ model User {
   createdBy               User?                 @relation("UserCreatedBy", fields: [createdByUserId], references: [id])
   createdUsers            User[]                @relation("UserCreatedBy")
 
+  @@index([username])
   @@index([email])
   @@index([phone])
   @@index([status])
@@ -710,12 +712,12 @@ model Invitation {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   email     String
-  token     String   @unique
+  token     String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([email])
   @@index([token])

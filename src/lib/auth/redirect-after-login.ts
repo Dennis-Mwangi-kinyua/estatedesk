@@ -1,60 +1,37 @@
-import type { OrgRole, PlatformRole, ScopeType } from "@/lib/auth/session";
-
-type LoginMembership = {
-  orgId: string;
-  orgSlug: string;
-  orgStatus: string;
-  role: OrgRole;
-  scopeType: ScopeType;
-  scopeId: string;
-};
+import type { OrgRole, PlatformRole } from "@/lib/auth/session";
 
 type RedirectInput = {
   platformRole: PlatformRole;
-  memberships: LoginMembership[];
+  activeOrgRole: OrgRole | null;
   hasTenantProfile: boolean;
 };
 
 export function getRedirectAfterLogin(input: RedirectInput): string {
-  const { platformRole, memberships, hasTenantProfile } = input;
+  const { platformRole, activeOrgRole, hasTenantProfile } = input;
 
   if (platformRole === "SUPER_ADMIN" || platformRole === "PLATFORM_ADMIN") {
     return "/platform";
   }
 
-  if (memberships.length === 0) {
-    return hasTenantProfile ? "/dashboard/tenant" : "/login";
+  // Do NOT send a successfully authenticated user back to /login
+  if (!activeOrgRole) {
+    return hasTenantProfile ? "/dashboard/tenant" : "/onboarding";
   }
 
-  const sorted = [...memberships].sort((a, b) => {
-    const rank: Record<OrgRole, number> = {
-      ADMIN: 1,
-      MANAGER: 2,
-      OFFICE: 3,
-      ACCOUNTANT: 4,
-      CARETAKER: 5,
-      TENANT: 6,
-    };
-
-    return rank[a.role] - rank[b.role];
-  });
-
-  const primary = sorted[0];
-
-  switch (primary.role) {
-    case "ADMIN":
-    case "MANAGER":
-    case "OFFICE":
-    case "ACCOUNTANT":
-      return "/dashboard";
+  switch (activeOrgRole) {
+    case "TENANT":
+      return "/dashboard/tenant";
 
     case "CARETAKER":
       return "/dashboard/caretaker";
 
-    case "TENANT":
-      return "/dashboard/tenant";
+    case "ADMIN":
+    case "MANAGER":
+    case "OFFICE":
+    case "ACCOUNTANT":
+      return "/dashboard/org";
 
     default:
-      return "/dashboard";
+      return "/dashboard/org";
   }
 }

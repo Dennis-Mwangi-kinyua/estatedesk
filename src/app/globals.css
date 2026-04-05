@@ -120,17 +120,18 @@
 @layer base {
   html,
   body {
-    height: 100%;
-    overflow: hidden;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   * {
-    @apply border-border outline-ring/50;
     box-sizing: border-box;
   }
 
   html {
-    @apply font-sans;
+    font-family: var(--font-sans);
   }
 
   body {
@@ -140,6 +141,6 @@
   }
 
   #__next {
-    height: 100%;
+    min-height: 100%;
   }
 }

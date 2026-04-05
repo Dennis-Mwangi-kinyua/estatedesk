@@ -103,7 +103,8 @@ export async function loginAction(
 
     const activeMemberships = user.memberships.filter(
       (membership) =>
-        membership.org.deletedAt === null && membership.org.status === "ACTIVE",
+        membership.org.deletedAt === null &&
+        membership.org.status === "ACTIVE",
     );
 
     const primaryMembership = activeMemberships[0] ?? null;
@@ -130,14 +131,7 @@ export async function loginAction(
 
     const destination = getRedirectAfterLogin({
       platformRole: user.platformRole,
-      memberships: activeMemberships.map((membership) => ({
-        orgId: membership.orgId,
-        orgSlug: membership.org.slug,
-        orgStatus: membership.org.status,
-        role: membership.role,
-        scopeType: membership.scopeType,
-        scopeId: membership.scopeId,
-      })),
+      activeOrgRole: primaryMembership?.role ?? null,
       hasTenantProfile: Boolean(user.tenant),
     });
 

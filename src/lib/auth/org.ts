@@ -1,14 +1,16 @@
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/auth/session";
+import { requireUserSession } from "@/lib/auth/session";
 
 export async function requireCurrentOrgId() {
-  const user = await requireUser();
+  const session = await requireUserSession();
 
-  if (user.orgId) return user.orgId;
+  if (session.activeOrgId) {
+    return session.activeOrgId;
+  }
 
   const membership = await prisma.membership.findFirst({
     where: {
-      userId: user.id,
+      userId: session.userId,
       org: {
         deletedAt: null,
       },
@@ -32,11 +34,11 @@ export async function requireCurrentOrgId() {
 }
 
 export async function requireOrgAccess(orgId: string) {
-  const user = await requireUser();
+  const session = await requireUserSession();
 
   const membership = await prisma.membership.findFirst({
     where: {
-      userId: user.id,
+      userId: session.userId,
       orgId,
       org: {
         deletedAt: null,
