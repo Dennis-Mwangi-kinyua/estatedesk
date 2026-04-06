@@ -18,12 +18,19 @@ const createOrganizationSchema = z
       .or(z.literal("")),
     organizationPhone: z.string().trim().optional(),
     organizationAddress: z.string().trim().optional(),
-    currencyCode: z.string().trim().min(3).max(3),
+    currencyCode: z
+      .string()
+      .trim()
+      .min(3, "Currency code must be 3 characters")
+      .max(3, "Currency code must be 3 characters"),
     timezone: z.string().trim().min(1, "Timezone is required"),
     dataRetentionDays: z.coerce
       .number()
       .int("Must be a whole number")
       .positive("Must be greater than zero"),
+    plan: z.enum(["FREE", "PRO", "PLUS", "ENTERPRISE"], {
+      message: "Select a valid plan",
+    }),
 
     adminFullName: z.string().trim().min(2, "Admin full name is required"),
     adminEmail: z.string().trim().email("Enter a valid admin email"),
@@ -63,9 +70,10 @@ export async function createOrganizationAction(
   _prevState: CreateOrganizationState,
   formData: FormData,
 ): Promise<CreateOrganizationState> {
-  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
-    redirectTo: "/dashboard",
-  });
+  const session = await requirePlatformRole(
+    ["SUPER_ADMIN", "PLATFORM_ADMIN"],
+    { redirectTo: "/login" },
+  );
 
   const parsed = createOrganizationSchema.safeParse({
     organizationName: formData.get("organizationName"),
@@ -76,6 +84,7 @@ export async function createOrganizationAction(
     currencyCode: formData.get("currencyCode"),
     timezone: formData.get("timezone"),
     dataRetentionDays: formData.get("dataRetentionDays"),
+    plan: formData.get("plan"),
 
     adminFullName: formData.get("adminFullName"),
     adminEmail: formData.get("adminEmail"),
@@ -191,7 +200,7 @@ export async function createOrganizationAction(
     await tx.subscription.create({
       data: {
         orgId: org.id,
-        plan: "FREE",
+        plan: data.plan,
         status: "TRIALING",
         currentPeriodStart: now,
         currentPeriodEnd: trialEnd,

@@ -44,6 +44,7 @@ export default function NewOrganizationPage() {
   const [currencyCode, setCurrencyCode] = useState("KES");
   const [timezone, setTimezone] = useState("Africa/Nairobi");
   const [dataRetentionDays, setDataRetentionDays] = useState("2555");
+  const [plan, setPlan] = useState("FREE");
 
   const [adminFullName, setAdminFullName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
@@ -63,7 +64,11 @@ export default function NewOrganizationPage() {
   }, [organizationName, organizationSlug]);
 
   function canGoStep2() {
-    return organizationName.trim().length >= 2 && timezone.trim().length > 0;
+    return (
+      organizationName.trim().length >= 2 &&
+      timezone.trim().length > 0 &&
+      plan.trim().length > 0
+    );
   }
 
   function canGoStep3() {
@@ -100,7 +105,10 @@ export default function NewOrganizationPage() {
                 Platform
               </Link>
               <span>/</span>
-              <Link href="/platform/organizations" className="hover:text-neutral-900">
+              <Link
+                href="/platform/organizations"
+                className="hover:text-neutral-900"
+              >
                 Organizations
               </Link>
               <span>/</span>
@@ -137,8 +145,8 @@ export default function NewOrganizationPage() {
                     active
                       ? "border-neutral-900 bg-neutral-900 text-white"
                       : completed
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                      : "border-neutral-200 bg-neutral-50 text-neutral-500"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        : "border-neutral-200 bg-neutral-50 text-neutral-500"
                   }`}
                 >
                   <div className="mb-1 text-xs font-medium sm:text-sm">
@@ -164,10 +172,19 @@ export default function NewOrganizationPage() {
           <input type="hidden" name="organizationSlug" value={organizationSlug} />
           <input type="hidden" name="organizationEmail" value={organizationEmail} />
           <input type="hidden" name="organizationPhone" value={organizationPhone} />
-          <input type="hidden" name="organizationAddress" value={organizationAddress} />
+          <input
+            type="hidden"
+            name="organizationAddress"
+            value={organizationAddress}
+          />
           <input type="hidden" name="currencyCode" value={currencyCode} />
           <input type="hidden" name="timezone" value={timezone} />
-          <input type="hidden" name="dataRetentionDays" value={dataRetentionDays} />
+          <input
+            type="hidden"
+            name="dataRetentionDays"
+            value={dataRetentionDays}
+          />
+          <input type="hidden" name="plan" value={plan} />
           <input type="hidden" name="adminFullName" value={adminFullName} />
           <input type="hidden" name="adminEmail" value={adminEmail} />
           <input type="hidden" name="adminPhone" value={adminPhone} />
@@ -264,7 +281,9 @@ export default function NewOrganizationPage() {
                   <Field label="Currency code">
                     <input
                       value={currencyCode}
-                      onChange={(e) => setCurrencyCode(e.target.value.toUpperCase())}
+                      onChange={(e) =>
+                        setCurrencyCode(e.target.value.toUpperCase())
+                      }
                       placeholder="KES"
                       className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm uppercase outline-none transition focus:border-neutral-400"
                     />
@@ -296,6 +315,19 @@ export default function NewOrganizationPage() {
                     />
                   </Field>
                 </div>
+
+                <Field label="Plan" required error={state.fieldErrors?.plan?.[0]}>
+                  <select
+                    value={plan}
+                    onChange={(e) => setPlan(e.target.value)}
+                    className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"
+                  >
+                    <option value="FREE">Free</option>
+                    <option value="PRO">Pro</option>
+                    <option value="PLUS">Plus</option>
+                    <option value="ENTERPRISE">Enterprise</option>
+                  </select>
+                </Field>
               </div>
             </section>
           ) : null}
@@ -424,6 +456,7 @@ export default function NewOrganizationPage() {
                     ["Address", organizationAddress || "—"],
                     ["Currency", currencyCode || "—"],
                     ["Timezone", timezone || "—"],
+                    ["Plan", plan || "—"],
                     ["Retention", `${dataRetentionDays || "—"} days`],
                   ]}
                 />

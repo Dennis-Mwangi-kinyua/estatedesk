@@ -53,6 +53,9 @@ export async function loginAction(
   const { email, password } = parsed.data;
 
   try {
+    console.time("loginAction-total");
+
+    console.time("login-find-user");
     const user = await prisma.user.findFirst({
       where: {
         email: {
@@ -61,16 +64,19 @@ export async function loginAction(
         },
         deletedAt: null,
       },
-      include: {
-        memberships: {
-          include: { org: true },
-          orderBy: { createdAt: "asc" },
-        },
-        tenant: true,
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+        platformRole: true,
+        status: true,
+        passwordHash: true,
       },
     });
+    console.timeEnd("login-find-user");
 
     if (!user) {
+      console.timeEnd("loginAction-total");
       return {
         success: false,
         error: INVALID_CREDENTIALS_MESSAGE,
@@ -78,6 +84,7 @@ export async function loginAction(
     }
 
     if (user.status !== "ACTIVE") {
+      console.timeEnd("loginAction-total");
       return {
         success: false,
         error:
@@ -86,34 +93,70 @@ export async function loginAction(
     }
 
     if (!user.passwordHash || typeof user.passwordHash !== "string") {
+      console.timeEnd("loginAction-total");
       return {
         success: false,
         error: INVALID_CREDENTIALS_MESSAGE,
       };
     }
 
+    console.time("login-bcrypt-compare");
     const passwordMatches = await bcrypt.compare(password, user.passwordHash);
+    console.timeEnd("login-bcrypt-compare");
 
     if (!passwordMatches) {
+      console.timeEnd("loginAction-total");
       return {
         success: false,
         error: INVALID_CREDENTIALS_MESSAGE,
       };
     }
 
-    const activeMemberships = user.memberships.filter(
-      (membership) =>
-        membership.org.deletedAt === null &&
-        membership.org.status === "ACTIVE",
-    );
-
-    const primaryMembership = activeMemberships[0] ?? null;
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+    console.time("login-load-memberships");
+    const memberships = await prisma.membership.findMany({
+      where: {
+        userId: user.id,
+        org: {
+          deletedAt: null,
+        },
+        user: {
+          deletedAt: null,
+        },
+      },
+      select: {
+        orgId: true,
+        role: true,
+        scopeType: true,
+        scopeId: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
+    console.timeEnd("login-load-memberships");
 
+    console.time("login-load-tenant");
+    const tenant = await prisma.tenant.findFirst({
+      where: {
+        userId: user.id,
+      },
+      select: {
+        id: true,
+      },
+    });
+    console.timeEnd("login-load-tenant");
+
+    const primaryMembership = memberships[0] ?? null;
+
+    if (!primaryMembership && !tenant) {
+      console.timeEnd("loginAction-total");
+      return {
+        success: false,
+        error: "No active organization or tenant account is linked to this user.",
+      };
+    }
+
+    console.time("login-set-session");
     await setUserSession({
       userId: user.id,
       email: user.email,
@@ -128,13 +171,27 @@ export async function loginAction(
           }
         : null,
     });
+    console.timeEnd("login-set-session");
 
+    void prisma.user
+      .update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      })
+      .catch((error) => {
+        console.error("lastLoginAt update failed:", error);
+      });
+
+    console.time("login-get-destination");
     const destination = getRedirectAfterLogin({
       platformRole: user.platformRole,
       activeOrgRole: primaryMembership?.role ?? null,
-      hasTenantProfile: Boolean(user.tenant),
+      activeOrgId: primaryMembership?.orgId ?? null,
+      hasTenantProfile: Boolean(tenant),
     });
+    console.timeEnd("login-get-destination");
 
+    console.timeEnd("loginAction-total");
     redirect(destination);
   } catch (error) {
     if (isRedirectError(error)) {

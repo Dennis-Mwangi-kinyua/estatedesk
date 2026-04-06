@@ -12,13 +12,29 @@ export default async function OrgDashboardLayout({
   const session = await requireUserSession();
 
   if (!session.activeOrgId) {
-    redirect("/onboarding");
+    redirect("/login?error=missing_org_context");
+  }
+
+  if (
+    session.activeOrgRole !== "ADMIN" &&
+    session.activeOrgRole !== "MANAGER" &&
+    session.activeOrgRole !== "OFFICE" &&
+    session.activeOrgRole !== "ACCOUNTANT" &&
+    session.activeOrgRole !== "CARETAKER"
+  ) {
+    redirect("/login?error=invalid_org_role");
   }
 
   const membership = await prisma.membership.findFirst({
     where: {
       userId: session.userId,
       orgId: session.activeOrgId,
+      org: {
+        deletedAt: null,
+      },
+      user: {
+        deletedAt: null,
+      },
     },
     include: {
       org: true,
@@ -26,7 +42,7 @@ export default async function OrgDashboardLayout({
   });
 
   if (!membership?.org) {
-    redirect("/onboarding");
+    redirect("/login?error=org_access_not_found");
   }
 
   return (
