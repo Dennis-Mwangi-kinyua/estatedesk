@@ -67,29 +67,44 @@ export default async function PlatformUsersPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
-      <div className="shrink-0 border-b border-neutral-200 px-6 py-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-neutral-950">
+      <div className="shrink-0 border-b border-neutral-200 px-4 py-4 sm:px-5 sm:py-5 lg:px-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500">
+              Platform
+            </p>
+            <h1 className="mt-1 text-xl font-semibold tracking-tight text-neutral-950 sm:text-2xl">
               Platform Users
             </h1>
-            <p className="mt-1 text-sm text-neutral-500">
+            <p className="mt-1 max-w-2xl text-sm text-neutral-500">
               View all users, platform roles, permissions, and organization memberships.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <MetricCard label="Total Users" value={users.length} icon={<Users className="h-4 w-4" />} />
-            <MetricCard label="Admins" value={totalAdmins} icon={<Shield className="h-4 w-4" />} />
-            <MetricCard label="Active" value={activeUsers} icon={<CheckCircle2 className="h-4 w-4" />} />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <MetricCard
+              label="Total Users"
+              value={users.length}
+              icon={<Users className="h-4 w-4" />}
+            />
+            <MetricCard
+              label="Admins"
+              value={totalAdmins}
+              icon={<Shield className="h-4 w-4" />}
+            />
+            <MetricCard
+              label="Active"
+              value={activeUsers}
+              icon={<CheckCircle2 className="h-4 w-4" />}
+            />
           </div>
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden px-6 py-6">
+      <div className="min-h-0 flex-1 overflow-hidden px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
         {users.length === 0 ? (
           <div className="flex h-full items-center justify-center rounded-3xl border border-dashed border-neutral-300 bg-neutral-50">
-            <div className="text-center">
+            <div className="px-6 py-10 text-center">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-neutral-200 bg-white">
                 <Users className="h-6 w-6 text-neutral-700" />
               </div>
@@ -100,22 +115,22 @@ export default async function PlatformUsersPage() {
             </div>
           </div>
         ) : (
-          <div className="grid h-full min-h-0 grid-cols-1 gap-5 overflow-auto pr-1 xl:grid-cols-2 2xl:grid-cols-3">
+          <div className="grid h-full min-h-0 grid-cols-1 gap-4 overflow-auto pr-1 xl:grid-cols-2 2xl:grid-cols-3">
             {users.map((user) => (
               <Link
                 key={user.id}
                 href={`/platform/users/${user.id}`}
-                className="group flex h-full min-h-[420px] flex-col rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-neutral-300"
+                className="group flex min-h-[440px] flex-col rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-neutral-300 sm:p-5"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex min-w-0 items-center gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 text-sm font-semibold text-neutral-900">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 text-sm font-semibold text-neutral-900 sm:h-14 sm:w-14">
                       {getInitials(user.fullName)}
                     </div>
 
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="break-words text-lg font-semibold text-neutral-950">
+                        <h2 className="break-words text-base font-semibold text-neutral-950 sm:text-lg">
                           {user.fullName}
                         </h2>
                         {user.isRootSuperAdmin && (
@@ -150,7 +165,7 @@ export default async function PlatformUsersPage() {
                   )}
                 </div>
 
-                <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <InfoRow
                     icon={<Mail className="h-4 w-4" />}
                     label="Email"
@@ -174,7 +189,7 @@ export default async function PlatformUsersPage() {
                   />
                 </div>
 
-                <section className="mt-5 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                <section className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
                   <div className="mb-3 flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-neutral-700" />
                     <h3 className="text-sm font-semibold text-neutral-900">Memberships</h3>
@@ -187,7 +202,7 @@ export default async function PlatformUsersPage() {
                     <p className="text-sm text-neutral-500">No memberships.</p>
                   ) : (
                     <div className="space-y-2">
-                      {user.memberships.map((membership) => (
+                      {user.memberships.slice(0, 4).map((membership) => (
                         <div
                           key={membership.id}
                           className="rounded-2xl border border-neutral-200 bg-white p-3"
@@ -204,11 +219,16 @@ export default async function PlatformUsersPage() {
                           </div>
                         </div>
                       ))}
+                      {user.memberships.length > 4 && (
+                        <p className="text-xs font-medium text-neutral-500">
+                          +{user.memberships.length - 4} more memberships
+                        </p>
+                      )}
                     </div>
                   )}
                 </section>
 
-                <section className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                <section className="mt-4 flex-1 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
                   <div className="mb-3 flex items-center gap-2">
                     <Shield className="h-4 w-4 text-neutral-700" />
                     <h3 className="text-sm font-semibold text-neutral-900">
@@ -225,7 +245,7 @@ export default async function PlatformUsersPage() {
                     </p>
                   ) : (
                     <div className="space-y-2">
-                      {user.platformPermissions.map((permission) => (
+                      {user.platformPermissions.slice(0, 4).map((permission) => (
                         <div
                           key={permission.id}
                           className="flex items-start justify-between gap-3 rounded-2xl border border-neutral-200 bg-white p-3"
@@ -254,6 +274,11 @@ export default async function PlatformUsersPage() {
                           </span>
                         </div>
                       ))}
+                      {user.platformPermissions.length > 4 && (
+                        <p className="text-xs font-medium text-neutral-500">
+                          +{user.platformPermissions.length - 4} more permissions
+                        </p>
+                      )}
                     </div>
                   )}
                 </section>

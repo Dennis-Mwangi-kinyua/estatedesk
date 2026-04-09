@@ -88,7 +88,7 @@ export default async function LeasesPage() {
         </div>
 
         <Link
-          href="/tenants"
+          href="/dashboard/caretaker/tenants"
           className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
         >
           View Tenants

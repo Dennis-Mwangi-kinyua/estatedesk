@@ -8,23 +8,32 @@ export function OrgDashboardFooter({
   organizationName,
 }: OrgDashboardFooterProps) {
   return (
-    <footer className="border-t border-black/10 bg-white px-4 py-4 text-sm text-neutral-500 sm:px-6 lg:px-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p>
-          © {new Date().getFullYear()} {organizationName}. All rights reserved.
+    <footer className="fixed bottom-0 left-0 right-0 z-[85] border-t border-black/10 bg-white/95 backdrop-blur-md lg:left-72">
+      <div className="flex h-10 items-center justify-between px-4 sm:px-6 lg:px-8">
+        <p className="truncate text-[11px] text-neutral-500">
+          © {new Date().getFullYear()} {organizationName}
         </p>
 
-        <div className="flex gap-4">
-          <Link href="/settings" className="hover:text-neutral-900">
+        <nav aria-label="Footer navigation" className="flex items-center gap-1">
+          <Link
+            href="/dashboard/org/settings"
+            className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950"
+          >
             Settings
           </Link>
-          <Link href="/reports" className="hover:text-neutral-900">
+          <Link
+            href="/reports"
+            className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950"
+          >
             Reports
           </Link>
-          <Link href="/support" className="hover:text-neutral-900">
-            Support
+          <Link
+            href="/notifications"
+            className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950"
+          >
+            Alerts
           </Link>
-        </div>
+        </nav>
       </div>
     </footer>
   );

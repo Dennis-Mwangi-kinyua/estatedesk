@@ -1,17 +1,42 @@
 import Link from "next/link";
+import {
+  AlertCircle,
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  ClipboardList,
+  FileText,
+  Sparkles,
+  Users,
+  Wrench,
+  Droplets,
+} from "lucide-react";
 
-function Sticker({
-  emoji,
+function SoftBadge({
   label,
 }: {
-  emoji: string;
   label: string;
 }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm backdrop-blur">
-      <span className="text-sm">{emoji}</span>
-      <span>{label}</span>
-    </div>
+    <span className="inline-flex items-center rounded-full border border-neutral-200 bg-white/90 px-3 py-1 text-[11px] font-medium text-neutral-600 shadow-sm backdrop-blur">
+      {label}
+    </span>
+  );
+}
+
+function SectionCard({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={`rounded-[24px] border border-neutral-200/80 bg-white/85 shadow-[0_8px_30px_rgba(0,0,0,0.04)] backdrop-blur-xl ${className}`}
+    >
+      {children}
+    </section>
   );
 }
 
@@ -19,315 +44,369 @@ function StatCard({
   label,
   value,
   hint,
-  emoji,
+  icon: Icon,
+  tone = "neutral",
 }: {
   label: string;
   value: string;
   hint: string;
-  emoji: string;
+  icon: React.ComponentType<{ className?: string }>;
+  tone?: "neutral" | "blue" | "green" | "amber" | "rose";
 }) {
+  const tones = {
+    neutral: "bg-neutral-100 text-neutral-700",
+    blue: "bg-sky-50 text-sky-700",
+    green: "bg-emerald-50 text-emerald-700",
+    amber: "bg-amber-50 text-amber-700",
+    rose: "bg-rose-50 text-rose-700",
+  };
+
   return (
-    <div className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm transition hover:shadow-md">
+    <div className="rounded-[22px] border border-neutral-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-neutral-500">{label}</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-neutral-900">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">
+            {label}
+          </p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
             {value}
           </p>
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-neutral-100 text-2xl">
-          {emoji}
+
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${tones[tone]}`}
+        >
+          <Icon className="h-5 w-5" />
         </div>
       </div>
-      <p className="mt-3 text-xs leading-5 text-neutral-500">{hint}</p>
+
+      <p className="mt-3 text-sm leading-6 text-neutral-500">{hint}</p>
     </div>
   );
 }
 
-function ActivityItem({
-  title,
-  meta,
-  emoji,
-}: {
-  title: string;
-  meta: string;
-  emoji: string;
-}) {
-  return (
-    <div className="flex items-start gap-3 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:bg-neutral-50">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-100 text-xl">
-        {emoji}
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm font-semibold text-neutral-900">{title}</p>
-        <p className="mt-1 text-xs text-neutral-500">{meta}</p>
-      </div>
-    </div>
-  );
-}
-
-function ActionCard({
+function QuickActionCard({
   href,
   title,
   subtitle,
-  emoji,
+  icon: Icon,
+  tone = "neutral",
 }: {
   href: string;
   title: string;
   subtitle: string;
-  emoji: string;
+  icon: React.ComponentType<{ className?: string }>;
+  tone?: "neutral" | "blue" | "green" | "amber" | "purple";
 }) {
+  const tones = {
+    neutral: "bg-neutral-100 text-neutral-700",
+    blue: "bg-sky-50 text-sky-700",
+    green: "bg-emerald-50 text-emerald-700",
+    amber: "bg-amber-50 text-amber-700",
+    purple: "bg-violet-50 text-violet-700",
+  };
+
   return (
     <Link
       href={href}
-      className="group rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+      className="group block rounded-[22px] border border-neutral-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-neutral-100 text-2xl transition group-hover:bg-neutral-900 group-hover:text-white">
-          {emoji}
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${tones[tone]}`}
+        >
+          <Icon className="h-5 w-5" />
         </div>
-        <div>
-          <p className="text-sm font-semibold text-neutral-900">{title}</p>
-          <p className="mt-1 text-xs leading-5 text-neutral-500">{subtitle}</p>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-neutral-900">{title}</p>
+              <p className="mt-1 text-xs leading-5 text-neutral-500">
+                {subtitle}
+              </p>
+            </div>
+
+            <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400 transition group-hover:text-neutral-700" />
+          </div>
         </div>
       </div>
     </Link>
   );
 }
 
+function ActivityItem({
+  title,
+  subtitle,
+  icon: Icon,
+  tone = "neutral",
+}: {
+  title: string;
+  subtitle: string;
+  icon: React.ComponentType<{ className?: string }>;
+  tone?: "neutral" | "green" | "amber" | "blue";
+}) {
+  const tones = {
+    neutral: "bg-neutral-100 text-neutral-700",
+    green: "bg-emerald-50 text-emerald-700",
+    amber: "bg-amber-50 text-amber-700",
+    blue: "bg-sky-50 text-sky-700",
+  };
+
+  return (
+    <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 transition hover:bg-neutral-50">
+      <div className="flex items-start gap-3">
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${tones[tone]}`}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
+
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-neutral-900">{title}</p>
+          <p className="mt-1 text-xs text-neutral-500">{subtitle}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MiniMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50 p-4">
+      <p className="text-xs font-medium text-neutral-500">{label}</p>
+      <p className="mt-2 text-2xl font-bold tracking-tight text-neutral-900">
+        {value}
+      </p>
+    </div>
+  );
+}
+
 export default function CaretakerDashboardPage() {
   return (
     <div className="space-y-5 sm:space-y-6">
-      <section className="relative overflow-hidden rounded-[28px] border border-neutral-200 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-800 p-5 text-white shadow-sm sm:p-6">
-        <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-
-        <div className="relative">
-          <div className="flex flex-wrap gap-2">
-            <Sticker emoji="🛠️" label="Daily Operations" />
-            <Sticker emoji="🏢" label="Property Care" />
-            <Sticker emoji="📱" label="Mobile Ready" />
-          </div>
-
-          <div className="mt-4">
-            <p className="text-sm font-medium text-neutral-300">
-              Caretaker Workspace
-            </p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-              Keep buildings, tenants, and maintenance running smoothly.
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-300 sm:text-base">
-              Track issues, inspections, leases, and tenant activity from one
-              clean dashboard designed for fast daily work.
-            </p>
-          </div>
-
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/issues"
-              className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-100"
-            >
-              View Issues
-            </Link>
-            <Link
-              href="/inspections"
-              className="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
-            >
-              Start Inspection
-            </Link>
-          </div>
+      <SectionCard className="p-5 sm:p-6">
+        <div className="flex flex-wrap gap-2">
+          <SoftBadge label="Operations" />
+          <SoftBadge label="Caretaker" />
+          <SoftBadge label="Mobile First" />
         </div>
-      </section>
+
+        <div className="mt-4">
+          <p className="text-sm font-medium text-neutral-500">
+            EstateDesk Workspace
+          </p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
+            Caretaker dashboard
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-500 sm:text-base">
+            Monitor issues, inspections, leases, tenants, and water billing in
+            one calm, well-organized workspace.
+          </p>
+        </div>
+
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/dashboard/caretaker/issues"
+            className="inline-flex items-center justify-center rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
+          >
+            Open issues
+          </Link>
+
+          <Link
+            href="/dashboard/caretaker/inspections"
+            className="inline-flex items-center justify-center rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
+          >
+            View inspections
+          </Link>
+        </div>
+      </SectionCard>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Assigned Buildings"
           value="12"
           hint="Buildings currently under your supervision."
-          emoji="🏢"
+          icon={Building2}
+          tone="blue"
         />
         <StatCard
           label="Open Issues"
-          value="8"
-          hint="Maintenance and tenant concerns awaiting action."
-          emoji="🚨"
+          value="08"
+          hint="Maintenance requests awaiting attention."
+          icon={AlertCircle}
+          tone="amber"
         />
         <StatCard
-          label="Due Inspections"
-          value="5"
-          hint="Inspections scheduled and pending completion."
-          emoji="📝"
+          label="Completed Today"
+          value="03"
+          hint="Tasks marked complete during today’s workflow."
+          icon={CheckCircle2}
+          tone="green"
         />
         <StatCard
-          label="Active Leases"
-          value="24"
-          hint="Occupied units you actively support."
-          emoji="🔑"
+          label="Water Bills"
+          value="11"
+          hint="Bills currently pending verification or follow-up."
+          icon={Droplets}
+          tone="rose"
         />
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="xl:col-span-2 rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
+        <SectionCard className="p-4 sm:p-5 xl:col-span-2">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-neutral-500">
-                Recent Activity
+                Recent activity
               </p>
-              <h2 className="text-lg font-bold tracking-tight text-neutral-900">
-                What needs your attention
+              <h2 className="text-lg font-semibold tracking-tight text-neutral-900">
+                Latest updates
               </h2>
             </div>
-            <div className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600">
-              Live Feed
-            </div>
+
+            <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-600">
+              Today
+            </span>
           </div>
 
           <div className="mt-4 space-y-3">
             <ActivityItem
-              emoji="💧"
-              title="Water leakage reported in Block A"
-              meta="Unit A-12 · 2 hours ago"
+              icon={AlertCircle}
+              title="Leakage issue reported in Block A"
+              subtitle="Unit A-12 · 2 hours ago"
+              tone="amber"
             />
             <ActivityItem
-              emoji="✅"
+              icon={CheckCircle2}
               title="Inspection completed for Sunrise Apartments"
-              meta="Today at 10:30 AM"
+              subtitle="Today at 10:30 AM"
+              tone="green"
             />
             <ActivityItem
-              emoji="⚡"
-              title="Tenant complaint logged for power outage"
-              meta="Block C · Yesterday"
+              icon={ClipboardList}
+              title="New inspection request submitted"
+              subtitle="Block C · This morning"
+              tone="blue"
             />
             <ActivityItem
-              emoji="🧹"
-              title="Common area cleaning marked complete"
-              meta="Block B · Yesterday"
+              icon={Wrench}
+              title="Maintenance follow-up scheduled"
+              subtitle="Block B · Yesterday"
+              tone="neutral"
             />
           </div>
-        </div>
+        </SectionCard>
 
-        <div className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
-          <p className="text-sm font-medium text-neutral-500">Quick Actions</p>
-          <h2 className="text-lg font-bold tracking-tight text-neutral-900">
-            Jump into work
+        <SectionCard className="p-4 sm:p-5">
+          <p className="text-sm font-medium text-neutral-500">Quick actions</p>
+          <h2 className="text-lg font-semibold tracking-tight text-neutral-900">
+            Open a section
           </h2>
 
-          <div className="mt-4 grid grid-cols-1 gap-3">
-            <ActionCard
-              href="/issues"
-              title="View Issues"
-              subtitle="Review and follow up on open maintenance requests."
-              emoji="🛠️"
+          <div className="mt-4 grid gap-3">
+            <QuickActionCard
+              href="/dashboard/caretaker/issues"
+              title="Issues"
+              subtitle="Review open maintenance and tenant concerns."
+              icon={Wrench}
+              tone="amber"
             />
-            <ActionCard
-              href="/inspections"
-              title="Open Inspections"
-              subtitle="Check scheduled inspections and submit reports."
-              emoji="📋"
+            <QuickActionCard
+              href="/dashboard/caretaker/inspections"
+              title="Inspections"
+              subtitle="Check scheduled inspections and reports."
+              icon={ClipboardList}
+              tone="blue"
             />
-            <ActionCard
-              href="/leases"
-              title="Review Leases"
-              subtitle="See active lease records linked to your work."
-              emoji="📄"
+            <QuickActionCard
+              href="/dashboard/caretaker/leases"
+              title="Leases"
+              subtitle="View lease records tied to your assignments."
+              icon={FileText}
+              tone="green"
             />
-            <ActionCard
-              href="/tenants"
-              title="Manage Tenants"
-              subtitle="Access tenant-related information quickly."
-              emoji="🙂"
+            <QuickActionCard
+              href="/dashboard/caretaker/tenants"
+              title="Tenants"
+              subtitle="Access tenant information and communication."
+              icon={Users}
+              tone="purple"
             />
           </div>
-        </div>
+        </SectionCard>
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
-          <div className="flex items-center justify-between">
+        <SectionCard className="p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-neutral-500">
-                Today’s Focus
+                Today’s focus
               </p>
-              <h2 className="text-lg font-bold tracking-tight text-neutral-900">
+              <h2 className="text-lg font-semibold tracking-tight text-neutral-900">
                 Priority tasks
               </h2>
             </div>
-            <div className="text-2xl">🎯</div>
+
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-700">
+              <Sparkles className="h-5 w-5" />
+            </div>
           </div>
 
           <div className="mt-4 space-y-3">
-            <div className="rounded-2xl bg-neutral-50 p-4">
+            <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50 p-4">
               <p className="text-sm font-semibold text-neutral-900">
-                Follow up on 3 urgent maintenance tickets
+                Review urgent maintenance tickets
               </p>
-              <p className="mt-1 text-xs text-neutral-500">
-                Plumbing, electricity, and water pressure issues.
+              <p className="mt-1 text-xs leading-5 text-neutral-500">
+                Confirm status for plumbing, power, and water issues.
               </p>
             </div>
 
-            <div className="rounded-2xl bg-neutral-50 p-4">
+            <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50 p-4">
               <p className="text-sm font-semibold text-neutral-900">
-                Complete scheduled inspection for 2 buildings
+                Complete scheduled inspections
               </p>
-              <p className="mt-1 text-xs text-neutral-500">
-                Capture notes, photos, and any follow-up work needed.
+              <p className="mt-1 text-xs leading-5 text-neutral-500">
+                Capture notes, photos, and recommended follow-up work.
               </p>
             </div>
 
-            <div className="rounded-2xl bg-neutral-50 p-4">
+            <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50 p-4">
               <p className="text-sm font-semibold text-neutral-900">
-                Review tenant complaints submitted this week
+                Follow up on tenant requests
               </p>
-              <p className="mt-1 text-xs text-neutral-500">
-                Make sure all reports have updates or assignments.
+              <p className="mt-1 text-xs leading-5 text-neutral-500">
+                Make sure unresolved reports have updates or assignments.
               </p>
             </div>
           </div>
-        </div>
+        </SectionCard>
 
-        <div className="rounded-[28px] border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-neutral-500">
-                Performance Snapshot
-              </p>
-              <h2 className="text-lg font-bold tracking-tight text-neutral-900">
-                Weekly momentum
-              </h2>
-            </div>
-            <div className="text-2xl">📈</div>
+        <SectionCard className="p-4 sm:p-5">
+          <div>
+            <p className="text-sm font-medium text-neutral-500">
+              Weekly snapshot
+            </p>
+            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">
+              Performance overview
+            </h2>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-emerald-50 p-4">
-              <p className="text-xs font-medium text-emerald-700">
-                Resolved Issues
-              </p>
-              <p className="mt-2 text-2xl font-bold text-emerald-900">14</p>
-            </div>
-
-            <div className="rounded-2xl bg-blue-50 p-4">
-              <p className="text-xs font-medium text-blue-700">
-                Inspections Done
-              </p>
-              <p className="mt-2 text-2xl font-bold text-blue-900">9</p>
-            </div>
-
-            <div className="rounded-2xl bg-amber-50 p-4">
-              <p className="text-xs font-medium text-amber-700">
-                Pending Reviews
-              </p>
-              <p className="mt-2 text-2xl font-bold text-amber-900">4</p>
-            </div>
-
-            <div className="rounded-2xl bg-purple-50 p-4">
-              <p className="text-xs font-medium text-purple-700">
-                Tenant Requests
-              </p>
-              <p className="mt-2 text-2xl font-bold text-purple-900">11</p>
-            </div>
+            <MiniMetric label="Resolved Issues" value="14" />
+            <MiniMetric label="Inspections Done" value="09" />
+            <MiniMetric label="Pending Reviews" value="04" />
+            <MiniMetric label="Tenant Requests" value="11" />
           </div>
-        </div>
+        </SectionCard>
       </section>
     </div>
   );

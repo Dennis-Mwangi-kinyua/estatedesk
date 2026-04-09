@@ -16,6 +16,27 @@ function formatCurrency(value: unknown) {
   }).format(amount);
 }
 
+function formatLabel(value: string | null | undefined) {
+  if (!value) return "Unknown";
+  return value.replaceAll("_", " ");
+}
+
+function statusClasses(status: string | null | undefined) {
+  switch (status) {
+    case "OCCUPIED":
+    case "ACTIVE":
+      return "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200";
+    case "VACANT":
+    case "PENDING":
+      return "bg-amber-50 text-amber-700 ring-1 ring-amber-200";
+    case "INACTIVE":
+    case "DISABLED":
+      return "bg-slate-100 text-slate-700 ring-1 ring-slate-200";
+    default:
+      return "bg-slate-100 text-slate-700 ring-1 ring-slate-200";
+  }
+}
+
 export default async function UnitsPage() {
   const units = await prisma.unit.findMany({
     where: {
@@ -56,7 +77,7 @@ export default async function UnitsPage() {
         </div>
 
         <Link
-          href="/properties"
+          href="/dashboard/org/properties"
           className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
         >
           View Properties
@@ -113,11 +134,18 @@ export default async function UnitsPage() {
               <tbody>
                 {units.map((unit) => (
                   <tr key={unit.id} className="border-t">
-                    <td className="px-4 py-3 font-medium">{unit.houseNo}</td>
+                    <td className="px-4 py-3 font-medium">
+                      <Link
+                        href={`/dashboard/org/units/${unit.id}`}
+                        className="underline underline-offset-4"
+                      >
+                        {unit.houseNo}
+                      </Link>
+                    </td>
 
                     <td className="px-4 py-3">
                       <Link
-                        href={`/properties/${unit.property.id}`}
+                        href={`/dashboard/org/properties/${unit.property.id}`}
                         className="underline underline-offset-4"
                       >
                         {unit.property.name}
@@ -128,11 +156,15 @@ export default async function UnitsPage() {
                       {unit.building ? unit.building.name : "—"}
                     </td>
 
-                    <td className="px-4 py-3">{unit.type}</td>
+                    <td className="px-4 py-3">{formatLabel(unit.type)}</td>
 
                     <td className="px-4 py-3">
-                      <span className="inline-flex rounded-full border px-2.5 py-1 text-xs">
-                        {unit.status}
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusClasses(
+                          unit.status
+                        )}`}
+                      >
+                        {formatLabel(unit.status)}
                       </span>
                     </td>
 

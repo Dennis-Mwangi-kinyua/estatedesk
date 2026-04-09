@@ -1,5 +1,18 @@
 import Link from "next/link";
-import type { PropertyCardItem } from "@/features/properties/queries/get-properties";
+
+type PropertyCardItem = {
+  id: string;
+  name: string;
+  type: string | null | undefined;
+  status: string;
+  location?: string | null;
+  address?: string | null;
+  unitCount: number;
+  activeTenants: number;
+  occupiedUnits: number;
+  vacantUnits: number;
+  monthlyRentTotal: number;
+};
 
 function formatCurrency(value: number) {
   return `KES ${value.toLocaleString()}`;
@@ -48,6 +61,10 @@ export function PropertiesGrid({
           property.unitCount
         );
 
+        const propertyTypeLabel = property.type
+          ? property.type.replaceAll("_", " ")
+          : "Unknown";
+
         return (
           <Link
             key={property.id}
@@ -71,7 +88,7 @@ export function PropertiesGrid({
                 </div>
 
                 <p className="mt-2 text-sm text-gray-500">
-                  {property.type.replaceAll("_", " ")}
+                  {propertyTypeLabel}
                 </p>
               </div>
 
