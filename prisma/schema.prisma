@@ -9,6 +9,7 @@ datasource db {
 model User {
   id                      String                @id @default(cuid())
   username                String?               @unique
+  slug                    String?               @unique
   fullName                String
   phone                   String?               @unique
   email                   String?               @unique
@@ -40,6 +41,7 @@ model User {
   notifications           Notification[]        @relation("NotificationUser")
   platformPermissions     PlatformPermission[]
   tenant                  Tenant?
+  tenantActionLogs        TenantActionLog[]     @relation("TenantActionActor")
   createdBy               User?                 @relation("UserCreatedBy", fields: [createdByUserId], references: [id])
   createdUsers            User[]                @relation("UserCreatedBy")
 
@@ -97,6 +99,7 @@ model Organization {
   subscription         Subscription?
   taxCharges           TaxCharge[]
   tenants              Tenant[]
+  tenantActionLogs     TenantActionLog[]
   waterBills           WaterBill[]
 
   @@index([slug])
@@ -204,6 +207,8 @@ model Membership {
   @@index([userId])
   @@index([role])
   @@index([scopeType, scopeId])
+  @@index([userId, orgId, role])
+  @@index([userId, role, createdAt])
 }
 
 model Property {
@@ -231,6 +236,7 @@ model Property {
   @@index([orgId])
   @@index([isActive])
   @@index([deletedAt])
+  @@index([orgId, deletedAt])
 }
 
 model Building {
@@ -253,67 +259,73 @@ model Building {
 }
 
 model Unit {
-  id            String         @id @default(cuid())
-  propertyId    String
-  buildingId    String?
-  houseNo       String
-  type          UnitType       @default(APARTMENT)
-  bedrooms      Int?
-  bathrooms     Int?
-  floorArea     Float?
-  rentAmount    Decimal        @db.Decimal(12, 2)
-  depositAmount Decimal?       @db.Decimal(12, 2)
-  status        UnitStatus     @default(VACANT)
-  vacantSince   DateTime?
-  notes         String?
-  isActive      Boolean        @default(true)
-  deletedAt     DateTime?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  issues        IssueTicket[]
-  leases        Lease[]
-  meterReadings MeterReading[]
-  building      Building?      @relation(fields: [buildingId], references: [id])
-  property      Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  waterBills    WaterBill[]
+  id               String            @id @default(cuid())
+  propertyId       String
+  buildingId       String?
+  houseNo          String
+  type             UnitType          @default(APARTMENT)
+  bedrooms         Int?
+  bathrooms        Int?
+  floorArea        Float?
+  rentAmount       Decimal           @db.Decimal(12, 2)
+  depositAmount    Decimal?          @db.Decimal(12, 2)
+  status           UnitStatus        @default(VACANT)
+  vacantSince      DateTime?
+  notes            String?
+  isActive         Boolean           @default(true)
+  deletedAt        DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  issues           IssueTicket[]
+  leases           Lease[]
+  meterReadings    MeterReading[]
+  building         Building?         @relation(fields: [buildingId], references: [id])
+  property         Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  waterBills       WaterBill[]
+  tenantActionLogs TenantActionLog[]
 
   @@index([propertyId])
   @@index([buildingId])
   @@index([status])
   @@index([isActive])
   @@index([deletedAt])
+  @@index([propertyId, isActive, deletedAt, status])
 }
 
 model Tenant {
-  id               String          @id @default(cuid())
+  id               String            @id @default(cuid())
   orgId            String
-  userId           String?         @unique
-  type             TenantType      @default(INDIVIDUAL)
+  userId           String?           @unique
+  type             TenantType        @default(INDIVIDUAL)
   fullName         String
   companyName      String?
   kraPin           String?
   phone            String
   email            String?
   nationalId       String?
-  status           TenantStatus    @default(ACTIVE)
+  status           TenantStatus      @default(ACTIVE)
   notes            String?
-  dataConsent      Boolean         @default(false)
+  dataConsent      Boolean           @default(false)
   consentUpdatedAt DateTime?
-  marketingConsent Boolean         @default(false)
+  marketingConsent Boolean           @default(false)
+  archivedAt       DateTime?
+  blacklistedAt    DateTime?
+  blacklistReason  String?
   deletedAt        DateTime?
-  profileImageId   String?         @unique
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  profileImageId   String?           @unique
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
   leases           Lease[]
   moveOutNotices   MoveOutNotice[]
   nextOfKin        NextOfKin?
-  notifications    Notification[]  @relation("NotificationTenant")
+  notifications    Notification[]    @relation("NotificationTenant")
   payments         Payment[]
   taxCharges       TaxCharge[]
-  org              Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  profileImage     Asset?          @relation("TenantProfileImage", fields: [profileImageId], references: [id])
-  user             User?           @relation(fields: [userId], references: [id])
   waterBills       WaterBill[]
+  actionLogs       TenantActionLog[]
+  org              Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  profileImage     Asset?            @relation("TenantProfileImage", fields: [profileImageId], references: [id])
+  user             User?             @relation(fields: [userId], references: [id])
 
   @@unique([orgId, phone])
   @@unique([orgId, email])
@@ -321,7 +333,10 @@ model Tenant {
   @@index([status])
   @@index([fullName])
   @@index([nationalId])
+  @@index([archivedAt])
+  @@index([blacklistedAt])
   @@index([deletedAt])
+  @@index([orgId, deletedAt, status])
 }
 
 model NextOfKin {
@@ -335,30 +350,31 @@ model NextOfKin {
 }
 
 model Lease {
-  id                 String          @id @default(cuid())
+  id                 String            @id @default(cuid())
   orgId              String
   unitId             String
   tenantId           String
   caretakerUserId    String?
   startDate          DateTime
   endDate            DateTime?
-  dueDay             Int             @default(5)
-  monthlyRent        Decimal         @db.Decimal(12, 2)
-  deposit            Decimal?        @db.Decimal(12, 2)
-  status             LeaseStatus     @default(ACTIVE)
+  dueDay             Int               @default(5)
+  monthlyRent        Decimal           @db.Decimal(12, 2)
+  deposit            Decimal?          @db.Decimal(12, 2)
+  status             LeaseStatus       @default(ACTIVE)
   notes              String?
   deletedAt          DateTime?
-  contractDocumentId String?         @unique
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-  caretaker          User?           @relation("LeaseCaretaker", fields: [caretakerUserId], references: [id])
-  contractDocument   Asset?          @relation("LeaseContract", fields: [contractDocumentId], references: [id])
-  org                Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  tenant             Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  unit               Unit            @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  contractDocumentId String?           @unique
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  caretaker          User?             @relation("LeaseCaretaker", fields: [caretakerUserId], references: [id])
+  contractDocument   Asset?            @relation("LeaseContract", fields: [contractDocumentId], references: [id])
+  org                Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenant             Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unit               Unit              @relation(fields: [unitId], references: [id], onDelete: Cascade)
   moveOutNotices     MoveOutNotice[]
   rentCharges        RentCharge[]
   taxCharges         TaxCharge[]
+  tenantActionLogs   TenantActionLog[]
 
   @@index([orgId])
   @@index([unitId])
@@ -369,6 +385,7 @@ model Lease {
   @@index([startDate])
   @@index([endDate])
   @@index([deletedAt])
+  @@index([orgId, status, deletedAt])
 }
 
 model CaretakerAssignment {
@@ -422,6 +439,7 @@ model RentCharge {
   @@index([period, status])
   @@index([dueDate])
   @@index([chargeType])
+  @@index([orgId, status, dueDate])
 }
 
 model MeterReading {
@@ -478,6 +496,7 @@ model WaterBill {
   @@index([unitId, period])
   @@index([status])
   @@index([dueDate])
+  @@index([orgId, status])
 }
 
 model TaxCharge {
@@ -562,6 +581,7 @@ model Payment {
   @@index([externalReference])
   @@index([paidAt])
   @@index([remittedToKra, remittedAt])
+  @@index([orgId, gatewayStatus, verificationStatus])
 }
 
 model Receipt {
@@ -596,6 +616,7 @@ model Notification {
   @@index([tenantId, createdAt])
   @@index([status, channel])
   @@index([type, createdAt])
+  @@index([orgId, readAt])
 }
 
 model MoveOutNotice {
@@ -687,6 +708,33 @@ model AuditLog {
   @@index([actorUserId, createdAt])
   @@index([entityType, entityId])
   @@index([createdAt])
+}
+
+model TenantActionLog {
+  id          String           @id @default(cuid())
+  orgId       String
+  tenantId    String
+  leaseId     String?
+  unitId      String?
+  actorUserId String
+  action      TenantActionType
+  reason      String?
+  notes       String?
+  metadata    Json?
+  createdAt   DateTime         @default(now())
+
+  org    Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenant Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  lease  Lease?       @relation(fields: [leaseId], references: [id], onDelete: SetNull)
+  unit   Unit?        @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  actor  User         @relation("TenantActionActor", fields: [actorUserId], references: [id])
+
+  @@index([orgId, tenantId, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([leaseId])
+  @@index([unitId])
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
 }
 
 model Invitation {
@@ -822,6 +870,17 @@ enum TenantStatus {
   ACTIVE
   INACTIVE
   BLACKLISTED
+}
+
+enum TenantActionType {
+  CREATED
+  UPDATED
+  UNLINKED
+  BLACKLISTED
+  UNBLACKLISTED
+  ARCHIVED
+  RESTORED
+  SOFT_DELETED
 }
 
 enum UnitStatus {

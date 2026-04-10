@@ -5,23 +5,28 @@ import { updateMembership } from "@/features/staff/actions/update-membership";
 import { MemberForm } from "@/features/staff/components/member-form";
 
 type Props = {
-  params: Promise<{ role: string; membershipId: string }>;
+  params: Promise<{ role: string; slug: string }>;
 };
 
 export default async function EditMemberPage({ params }: Props) {
-  const { membershipId } = await params;
+  const { slug } = await params;
   const orgId = await requireCurrentOrgId();
 
   const member = await prisma.membership.findFirst({
     where: {
-      id: membershipId,
       orgId,
+      user: {
+        slug,
+        deletedAt: null,
+      },
     },
     select: {
       id: true,
       role: true,
       user: {
         select: {
+          id: true,
+          slug: true,
           fullName: true,
           email: true,
           phone: true,

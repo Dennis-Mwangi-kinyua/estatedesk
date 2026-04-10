@@ -1,17 +1,14 @@
 import Link from "next/link";
 import {
-  AlertCircle,
   ArrowRight,
-  Bell,
   Building2,
   CreditCard,
   Home,
   Users,
   Wrench,
-  ChevronRight,
-  ReceiptText,
 } from "lucide-react";
 import { redirect } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 
@@ -91,286 +88,144 @@ async function getCurrentOrgContext() {
   return fallbackMembership;
 }
 
-async function getOrgDashboardStats(orgId: string) {
-  const now = new Date();
-  const next7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-  const [
-    totalTenants,
-    activeTenants,
-    totalUnits,
-    occupiedUnits,
-    vacantUnits,
-    openIssues,
-    urgentIssues,
-    pendingPayments,
-    recentTenants,
-    recentIssues,
-    recentNotifications,
-    unreadNotifications,
-    activeLeases,
-    overdueRentCharges,
-    dueSoonRentCharges,
-    pendingWaterBills,
-    recentPayments,
-  ] = await Promise.all([
-    prisma.tenant.count({
-      where: {
-        orgId,
-        deletedAt: null,
-      },
-    }),
-
-    prisma.tenant.count({
-      where: {
-        orgId,
-        deletedAt: null,
-        status: "ACTIVE",
-      },
-    }),
-
-    prisma.unit.count({
-      where: {
-        deletedAt: null,
-        isActive: true,
-        property: {
+const getOrgDashboardSummary = unstable_cache(
+  async (orgId: string) => {
+    const [
+      totalTenants,
+      activeTenants,
+      totalUnits,
+      occupiedUnits,
+      vacantUnits,
+      openIssues,
+      urgentIssues,
+      pendingPayments,
+      unreadNotifications,
+      activeLeases,
+    ] = await Promise.all([
+      prisma.tenant.count({
+        where: {
           orgId,
           deletedAt: null,
         },
-      },
-    }),
+      }),
 
-    prisma.unit.count({
-      where: {
-        deletedAt: null,
-        isActive: true,
-        status: "OCCUPIED",
-        property: {
+      prisma.tenant.count({
+        where: {
           orgId,
           deletedAt: null,
+          status: "ACTIVE",
         },
-      },
-    }),
+      }),
 
-    prisma.unit.count({
-      where: {
-        deletedAt: null,
-        isActive: true,
-        status: "VACANT",
-        property: {
-          orgId,
+      prisma.unit.count({
+        where: {
           deletedAt: null,
-        },
-      },
-    }),
-
-    prisma.issueTicket.count({
-      where: {
-        orgId,
-        status: {
-          in: ["OPEN", "IN_PROGRESS"],
-        },
-      },
-    }),
-
-    prisma.issueTicket.count({
-      where: {
-        orgId,
-        status: {
-          in: ["OPEN", "IN_PROGRESS"],
-        },
-        priority: "URGENT",
-      },
-    }),
-
-    prisma.payment.count({
-      where: {
-        orgId,
-        OR: [
-          {
-            gatewayStatus: {
-              in: ["INITIATED", "PENDING"],
-            },
-          },
-          {
-            gatewayStatus: "SUCCESS",
-            verificationStatus: "PENDING",
-          },
-        ],
-      },
-    }),
-
-    prisma.tenant.findMany({
-      take: 5,
-      orderBy: {
-        createdAt: "desc",
-      },
-      where: {
-        orgId,
-        deletedAt: null,
-      },
-      select: {
-        id: true,
-        fullName: true,
-        createdAt: true,
-        leases: {
-          where: {
-            status: "ACTIVE",
-            deletedAt: null,
+          isActive: true,
+          property: {
             orgId,
+            deletedAt: null,
           },
-          take: 1,
-          select: {
-            unit: {
-              select: {
-                houseNo: true,
-                property: {
-                  select: {
-                    name: true,
-                  },
-                },
+        },
+      }),
+
+      prisma.unit.count({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          status: "OCCUPIED",
+          property: {
+            orgId,
+            deletedAt: null,
+          },
+        },
+      }),
+
+      prisma.unit.count({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          status: "VACANT",
+          property: {
+            orgId,
+            deletedAt: null,
+          },
+        },
+      }),
+
+      prisma.issueTicket.count({
+        where: {
+          orgId,
+          status: {
+            in: ["OPEN", "IN_PROGRESS"],
+          },
+        },
+      }),
+
+      prisma.issueTicket.count({
+        where: {
+          orgId,
+          status: {
+            in: ["OPEN", "IN_PROGRESS"],
+          },
+          priority: "URGENT",
+        },
+      }),
+
+      prisma.payment.count({
+        where: {
+          orgId,
+          OR: [
+            {
+              gatewayStatus: {
+                in: ["INITIATED", "PENDING"],
               },
             },
-          },
+            {
+              gatewayStatus: "SUCCESS",
+              verificationStatus: "PENDING",
+            },
+          ],
         },
-      },
-    }),
+      }),
 
-    prisma.issueTicket.findMany({
-      take: 5,
-      orderBy: {
-        createdAt: "desc",
-      },
-      where: {
-        orgId,
-      },
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        priority: true,
-        createdAt: true,
-      },
-    }),
-
-    prisma.notification.findMany({
-      take: 5,
-      orderBy: {
-        createdAt: "desc",
-      },
-      where: {
-        orgId,
-      },
-      select: {
-        id: true,
-        title: true,
-        message: true,
-        type: true,
-        channel: true,
-        status: true,
-        readAt: true,
-        createdAt: true,
-      },
-    }),
-
-    prisma.notification.count({
-      where: {
-        orgId,
-        readAt: null,
-      },
-    }),
-
-    prisma.lease.count({
-      where: {
-        orgId,
-        deletedAt: null,
-        status: "ACTIVE",
-      },
-    }),
-
-    prisma.rentCharge.count({
-      where: {
-        orgId,
-        status: {
-          in: ["UNPAID", "PARTIAL", "OVERDUE"],
+      prisma.notification.count({
+        where: {
+          orgId,
+          readAt: null,
         },
-        dueDate: {
-          lt: now,
-        },
-      },
-    }),
+      }),
 
-    prisma.rentCharge.count({
-      where: {
-        orgId,
-        status: {
-          in: ["UNPAID", "PARTIAL"],
+      prisma.lease.count({
+        where: {
+          orgId,
+          deletedAt: null,
+          status: "ACTIVE",
         },
-        dueDate: {
-          gte: now,
-          lte: next7Days,
-        },
-      },
-    }),
+      }),
+    ]);
 
-    prisma.waterBill.count({
-      where: {
-        orgId,
-        status: {
-          in: ["ISSUED", "PAYMENT_PENDING", "PAID_PENDING_VERIFICATION"],
-        },
-      },
-    }),
+    const occupancyRate =
+      totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
 
-    prisma.payment.findMany({
-      take: 5,
-      orderBy: {
-        createdAt: "desc",
-      },
-      where: {
-        orgId,
-      },
-      select: {
-        id: true,
-        amount: true,
-        method: true,
-        targetType: true,
-        gatewayStatus: true,
-        verificationStatus: true,
-        createdAt: true,
-        payerTenant: {
-          select: {
-            fullName: true,
-          },
-        },
-      },
-    }),
-  ]);
-
-  const occupancyRate =
-    totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
-
-  return {
-    totalTenants,
-    activeTenants,
-    totalUnits,
-    occupiedUnits,
-    vacantUnits,
-    openIssues,
-    urgentIssues,
-    pendingPayments,
-    recentTenants,
-    recentIssues,
-    recentNotifications,
-    unreadNotifications,
-    activeLeases,
-    overdueRentCharges,
-    dueSoonRentCharges,
-    pendingWaterBills,
-    recentPayments,
-    occupancyRate,
-  };
-}
+    return {
+      totalTenants,
+      activeTenants,
+      totalUnits,
+      occupiedUnits,
+      vacantUnits,
+      openIssues,
+      urgentIssues,
+      pendingPayments,
+      unreadNotifications,
+      activeLeases,
+      occupancyRate,
+    };
+  },
+  ["org-dashboard-summary"],
+  {
+    revalidate: 60,
+  },
+);
 
 function StatCard({
   title,
@@ -402,13 +257,9 @@ function StatCard({
   );
 }
 
-function formatNotificationType(type: string) {
-  return type.replaceAll("_", " ");
-}
-
 export default async function OrganizationDashboardPage() {
   const membership = await getCurrentOrgContext();
-  const data = await getOrgDashboardStats(membership.orgId);
+  const data = await getOrgDashboardSummary(membership.orgId);
 
   return (
     <div className="space-y-6">
@@ -587,268 +438,6 @@ export default async function OrganizationDashboardPage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-        </div>
-      </section>
-
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-        <div className="rounded-3xl border border-black/10 bg-white p-5 shadow-sm xl:col-span-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-base font-semibold text-neutral-950 sm:text-lg">
-                Billing Snapshot
-              </h2>
-              <p className="mt-1 text-sm text-neutral-500">
-                Rent and utility items needing attention
-              </p>
-            </div>
-
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-800">
-              <ReceiptText className="h-5 w-5" />
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-3">
-            <div className="rounded-2xl bg-neutral-50 p-4">
-              <p className="text-xs text-neutral-500">Overdue Rent Charges</p>
-              <p className="mt-2 text-2xl font-semibold text-neutral-950">
-                {data.overdueRentCharges}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-neutral-50 p-4">
-              <p className="text-xs text-neutral-500">Due in 7 Days</p>
-              <p className="mt-2 text-2xl font-semibold text-neutral-950">
-                {data.dueSoonRentCharges}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-neutral-50 p-4">
-              <p className="text-xs text-neutral-500">Pending Water Bills</p>
-              <p className="mt-2 text-2xl font-semibold text-neutral-950">
-                {data.pendingWaterBills}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <Link
-          href="/dashboard/org/notifications"
-          className="group rounded-3xl border border-black/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md xl:col-span-8"
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
-                <Bell className="h-3.5 w-3.5" />
-                Notifications
-              </div>
-
-              <h2 className="mt-3 text-base font-semibold text-neutral-950 sm:text-lg">
-                Notification Center
-              </h2>
-              <p className="mt-1 max-w-2xl text-sm text-neutral-500">
-                Review unread alerts, delivery status, and recent organization
-                communication from one place.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm font-medium text-neutral-700 transition group-hover:text-neutral-950">
-              <span>Open</span>
-              <ChevronRight className="h-4 w-4" />
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-2xl bg-neutral-50 p-4">
-              <p className="text-xs text-neutral-500">Unread Alerts</p>
-              <p className="mt-2 text-2xl font-semibold text-neutral-950">
-                {data.unreadNotifications}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-neutral-50 p-4">
-              <p className="text-xs text-neutral-500">Recent Items</p>
-              <p className="mt-2 text-2xl font-semibold text-neutral-950">
-                {data.recentNotifications.length}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-neutral-50 p-4">
-              <p className="text-xs text-neutral-500">Latest Channel</p>
-              <p className="mt-2 text-sm font-semibold text-neutral-950">
-                {data.recentNotifications[0]?.channel ?? "—"}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-neutral-50 p-4">
-              <p className="text-xs text-neutral-500">Latest Status</p>
-              <p className="mt-2 text-sm font-semibold text-neutral-950">
-                {data.recentNotifications[0]?.status ?? "—"}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6 space-y-3">
-            {data.recentNotifications.length === 0 ? (
-              <p className="text-sm text-neutral-500">No notifications yet.</p>
-            ) : (
-              data.recentNotifications.slice(0, 3).map((notification) => (
-                <div
-                  key={notification.id}
-                  className="rounded-2xl border border-black/5 bg-neutral-50 px-4 py-3"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 text-neutral-700">
-                      <Bell className="h-4 w-4" />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate text-sm font-medium text-neutral-950">
-                          {notification.title}
-                        </p>
-                        {!notification.readAt && (
-                          <span className="rounded-full bg-neutral-950 px-2 py-0.5 text-[10px] font-medium text-white">
-                            New
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="mt-1 line-clamp-2 text-sm text-neutral-600">
-                        {notification.message}
-                      </p>
-
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                        <span>{formatNotificationType(notification.type)}</span>
-                        <span>•</span>
-                        <span>{notification.channel}</span>
-                        <span>•</span>
-                        <span>{notification.status}</span>
-                        <span>•</span>
-                        <span>
-                          {new Date(notification.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </Link>
-      </section>
-
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-3xl border border-black/10 bg-white p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-neutral-950 sm:text-lg">
-            Recent Tenants
-          </h2>
-          <p className="mt-1 text-sm text-neutral-500">
-            Latest tenant records added
-          </p>
-
-          <div className="mt-5 space-y-3">
-            {data.recentTenants.length === 0 ? (
-              <p className="text-sm text-neutral-500">No tenants yet.</p>
-            ) : (
-              data.recentTenants.map((tenant) => (
-                <div
-                  key={tenant.id}
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-black/5 bg-neutral-50 px-4 py-3"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-neutral-950">
-                      {tenant.fullName}
-                    </p>
-                    <p className="mt-1 text-xs text-neutral-500">
-                      {tenant.leases[0]?.unit?.houseNo
-                        ? `${tenant.leases[0].unit.property.name} • Unit ${tenant.leases[0].unit.houseNo}`
-                        : "No active unit"}
-                    </p>
-                  </div>
-
-                  <span className="shrink-0 text-xs text-neutral-400">
-                    {new Date(tenant.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-black/10 bg-white p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-neutral-950 sm:text-lg">
-            Recent Issues
-          </h2>
-          <p className="mt-1 text-sm text-neutral-500">
-            Latest reported issue tickets
-          </p>
-
-          <div className="mt-5 space-y-3">
-            {data.recentIssues.length === 0 ? (
-              <p className="text-sm text-neutral-500">No issues reported yet.</p>
-            ) : (
-              data.recentIssues.map((issue) => (
-                <div
-                  key={issue.id}
-                  className="flex items-start gap-3 rounded-2xl border border-black/5 bg-neutral-50 px-4 py-3"
-                >
-                  <div className="mt-0.5 text-amber-600">
-                    <AlertCircle className="h-4 w-4" />
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-neutral-950">
-                      {issue.title}
-                    </p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                      <span>{issue.status.replaceAll("_", " ")}</span>
-                      <span>•</span>
-                      <span>{issue.priority}</span>
-                      <span>•</span>
-                      <span>{new Date(issue.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-black/10 bg-white p-5 shadow-sm">
-        <h2 className="text-base font-semibold text-neutral-950 sm:text-lg">
-          Recent Payments
-        </h2>
-        <p className="mt-1 text-sm text-neutral-500">
-          Latest payment activity in the organization
-        </p>
-
-        <div className="mt-5 space-y-3">
-          {data.recentPayments.length === 0 ? (
-            <p className="text-sm text-neutral-500">No payments yet.</p>
-          ) : (
-            data.recentPayments.map((payment) => (
-              <div
-                key={payment.id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-black/5 bg-neutral-50 px-4 py-3"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-neutral-950">
-                    {payment.payerTenant.fullName}
-                  </p>
-                  <p className="mt-1 text-xs text-neutral-500">
-                    {payment.targetType} • {payment.method} •{" "}
-                    {payment.gatewayStatus} / {payment.verificationStatus}
-                  </p>
-                </div>
-
-                <span className="shrink-0 text-sm font-medium text-neutral-900">
-                  {membership.org.currencyCode}{" "}
-                  {Number(payment.amount).toLocaleString()}
-                </span>
-              </div>
-            ))
-          )}
         </div>
       </section>
     </div>

@@ -45,7 +45,7 @@ export default async function RoleMembersPage({ params }: Props) {
         {members.map((member) => (
           <Link
             key={member.id}
-            href={`/staff/${normalizedRole.toLowerCase()}/${member.id}`}
+            href={`/staff/${normalizedRole.toLowerCase()}/${member.user.slug ?? member.id}`}
             className="rounded-[24px] border bg-white p-5 shadow-sm transition hover:shadow-md"
           >
             <div className="flex items-start justify-between gap-3">

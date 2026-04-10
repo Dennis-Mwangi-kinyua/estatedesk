@@ -24,6 +24,7 @@ export async function getRoleMembers(role: StaffRole) {
       user: {
         select: {
           id: true,
+          slug: true,
           fullName: true,
           email: true,
           phone: true,

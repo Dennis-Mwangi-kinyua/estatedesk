@@ -56,14 +56,8 @@ export async function loginAction(
     console.time("loginAction-total");
 
     console.time("login-find-user");
-    const user = await prisma.user.findFirst({
-      where: {
-        email: {
-          equals: email,
-          mode: "insensitive",
-        },
-        deletedAt: null,
-      },
+    const user = await prisma.user.findUnique({
+      where: { email },
       select: {
         id: true,
         email: true,
@@ -71,11 +65,12 @@ export async function loginAction(
         platformRole: true,
         status: true,
         passwordHash: true,
+        deletedAt: true,
       },
     });
     console.timeEnd("login-find-user");
 
-    if (!user) {
+    if (!user || user.deletedAt) {
       console.timeEnd("loginAction-total");
       return {
         success: false,
@@ -112,16 +107,10 @@ export async function loginAction(
       };
     }
 
-    console.time("login-load-memberships");
-    const memberships = await prisma.membership.findMany({
+    console.time("login-load-membership");
+    const primaryMembership = await prisma.membership.findFirst({
       where: {
         userId: user.id,
-        org: {
-          deletedAt: null,
-        },
-        user: {
-          deletedAt: null,
-        },
       },
       select: {
         orgId: true,
@@ -133,20 +122,22 @@ export async function loginAction(
         createdAt: "desc",
       },
     });
-    console.timeEnd("login-load-memberships");
+    console.timeEnd("login-load-membership");
 
-    console.time("login-load-tenant");
-    const tenant = await prisma.tenant.findFirst({
-      where: {
-        userId: user.id,
-      },
-      select: {
-        id: true,
-      },
-    });
-    console.timeEnd("login-load-tenant");
+    let tenant: { id: string } | null = null;
 
-    const primaryMembership = memberships[0] ?? null;
+    if (!primaryMembership) {
+      console.time("login-load-tenant");
+      tenant = await prisma.tenant.findFirst({
+        where: {
+          userId: user.id,
+        },
+        select: {
+          id: true,
+        },
+      });
+      console.timeEnd("login-load-tenant");
+    }
 
     if (!primaryMembership && !tenant) {
       console.timeEnd("loginAction-total");
@@ -159,7 +150,7 @@ export async function loginAction(
     console.time("login-set-session");
     await setUserSession({
       userId: user.id,
-      email: user.email,
+      email: user.email ?? email,
       fullName: user.fullName,
       platformRole: user.platformRole,
       activeOrgId: primaryMembership?.orgId ?? null,
