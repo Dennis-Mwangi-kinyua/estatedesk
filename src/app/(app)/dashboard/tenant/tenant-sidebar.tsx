@@ -2,16 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  HiOutlineArrowLeftOnRectangle,
-  HiOutlineCreditCard,
-  HiOutlineDocumentText,
-  HiOutlineFolder,
-  HiOutlineHome,
-  HiOutlineReceiptRefund,
-  HiOutlineUser,
-  HiOutlineWrenchScrewdriver,
-} from "react-icons/hi2";
+import { HiOutlineArrowLeftOnRectangle } from "react-icons/hi2";
+import { tenantNavItems } from "./tenant-nav";
 
 type TenantSidebarProps = {
   fullName: string;
@@ -20,32 +12,42 @@ type TenantSidebarProps = {
 export function TenantSidebar({ fullName }: TenantSidebarProps) {
   const pathname = usePathname();
 
-  const navItems = [
-    { label: "Dashboard", href: "/dashboard/tenant", icon: HiOutlineHome },
-    { label: "Profile", href: "/dashboard/tenant/profile", icon: HiOutlineUser },
-    { label: "Lease", href: "/dashboard/tenant/lease", icon: HiOutlineDocumentText },
-    { label: "Payments", href: "/dashboard/tenant/payments", icon: HiOutlineCreditCard },
-    { label: "Invoices", href: "/dashboard/tenant/invoice", icon: HiOutlineReceiptRefund },
-    { label: "Maintenance", href: "/dashboard/tenant/maintenance", icon: HiOutlineWrenchScrewdriver },
-    { label: "Documents", href: "/dashboard/tenant/documents", icon: HiOutlineFolder },
-  ];
-
   return (
-    <aside className="hidden border-r border-neutral-200 bg-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[290px] lg:flex-col">
-      <div className="border-b border-neutral-200 px-6 py-6">
-        <div className="rounded-[28px] bg-neutral-900 p-5 text-white shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/60">
-            Tenant Portal
-          </p>
-          <h2 className="mt-2 truncate text-lg font-semibold tracking-tight">
-            {fullName}
-          </h2>
+    <aside className="hidden border-r border-neutral-200/80 bg-white/95 backdrop-blur lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex lg:h-screen lg:w-[290px] lg:flex-col">
+      <div className="border-b border-neutral-200/80 px-5 py-5">
+        <div className="rounded-[30px] border border-neutral-200/80 bg-neutral-50 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-white text-xl shadow-sm ring-1 ring-neutral-200">
+              🏡
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">
+                Tenant Portal
+              </p>
+              <h2 className="truncate text-base font-semibold tracking-tight text-neutral-950">
+                {fullName}
+              </h2>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
+              ✨ Secure
+            </span>
+            <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-medium text-sky-700">
+              💳 Payments
+            </span>
+            <span className="rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-[11px] font-medium text-violet-700">
+              📄 Lease
+            </span>
+          </div>
         </div>
       </div>
 
       <div className="flex flex-1 flex-col justify-between overflow-y-auto px-4 py-4">
         <nav className="space-y-2">
-          {navItems.map((item) => {
+          {tenantNavItems.map((item) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -54,10 +56,10 @@ export function TenantSidebar({ fullName }: TenantSidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition ${
+                className={`flex items-center gap-3 rounded-[22px] px-4 py-3 text-sm font-medium transition ${
                   isActive
-                    ? "bg-neutral-900 text-white shadow-sm"
-                    : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                    ? "bg-neutral-950 text-white shadow-sm"
+                    : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-950"
                 }`}
               >
                 <Icon className="h-5 w-5 shrink-0" />
@@ -70,7 +72,7 @@ export function TenantSidebar({ fullName }: TenantSidebarProps) {
         <div className="border-t border-neutral-200 pt-4">
           <Link
             href="/logout"
-            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            className="flex items-center gap-3 rounded-[22px] px-4 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50"
           >
             <HiOutlineArrowLeftOnRectangle className="h-5 w-5 shrink-0" />
             <span>Logout</span>

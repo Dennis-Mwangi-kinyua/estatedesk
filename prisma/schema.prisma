@@ -8,8 +8,6 @@ datasource db {
 
 model User {
   id                      String                @id @default(cuid())
-  username                String?               @unique
-  slug                    String?               @unique
   fullName                String
   phone                   String?               @unique
   email                   String?               @unique
@@ -26,6 +24,8 @@ model User {
   createdByUserId         String?
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @updatedAt
+  username                String?               @unique
+  slug                    String?               @unique
   createdApiKeys          ApiKey[]              @relation("CreatedBy")
   uploadedAssets          Asset[]               @relation("AssetUploader")
   auditLogs               AuditLog[]            @relation("AuditActor")
@@ -279,10 +279,10 @@ model Unit {
   issues           IssueTicket[]
   leases           Lease[]
   meterReadings    MeterReading[]
+  tenantActionLogs TenantActionLog[]
   building         Building?         @relation(fields: [buildingId], references: [id])
   property         Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   waterBills       WaterBill[]
-  tenantActionLogs TenantActionLog[]
 
   @@index([propertyId])
   @@index([buildingId])
@@ -308,24 +308,24 @@ model Tenant {
   dataConsent      Boolean           @default(false)
   consentUpdatedAt DateTime?
   marketingConsent Boolean           @default(false)
-  archivedAt       DateTime?
-  blacklistedAt    DateTime?
-  blacklistReason  String?
   deletedAt        DateTime?
   profileImageId   String?           @unique
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+  archivedAt       DateTime?
+  blacklistReason  String?
+  blacklistedAt    DateTime?
   leases           Lease[]
   moveOutNotices   MoveOutNotice[]
   nextOfKin        NextOfKin?
   notifications    Notification[]    @relation("NotificationTenant")
   payments         Payment[]
   taxCharges       TaxCharge[]
-  waterBills       WaterBill[]
-  actionLogs       TenantActionLog[]
   org              Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
   profileImage     Asset?            @relation("TenantProfileImage", fields: [profileImageId], references: [id])
   user             User?             @relation(fields: [userId], references: [id])
+  actionLogs       TenantActionLog[]
+  waterBills       WaterBill[]
 
   @@unique([orgId, phone])
   @@unique([orgId, email])
@@ -722,12 +722,11 @@ model TenantActionLog {
   notes       String?
   metadata    Json?
   createdAt   DateTime         @default(now())
-
-  org    Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  tenant Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  lease  Lease?       @relation(fields: [leaseId], references: [id], onDelete: SetNull)
-  unit   Unit?        @relation(fields: [unitId], references: [id], onDelete: SetNull)
-  actor  User         @relation("TenantActionActor", fields: [actorUserId], references: [id])
+  actor       User             @relation("TenantActionActor", fields: [actorUserId], references: [id])
+  lease       Lease?           @relation(fields: [leaseId], references: [id])
+  org         Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unit        Unit?            @relation(fields: [unitId], references: [id])
 
   @@index([orgId, tenantId, createdAt])
   @@index([tenantId, createdAt])

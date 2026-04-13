@@ -1,22 +1,10 @@
-import { notFound } from "next/navigation";
-import { PropertyDetailsView } from "@/features/properties/components/property-details-view";
-import { getPropertyDetails } from "@/features/properties/queries/get-property-details";
+import { redirect } from "next/navigation";
 
-type PropertyDetailsPageProps = {
-  params: Promise<{
-    propertyId: string;
-  }>;
-};
-
-export default async function PropertyDetailsPage({
+export default async function PropertyAliasPage({
   params,
-}: PropertyDetailsPageProps) {
+}: {
+  params: Promise<{ propertyId: string }>;
+}) {
   const { propertyId } = await params;
-  const property = await getPropertyDetails(propertyId);
-
-  if (!property) {
-    notFound();
-  }
-
-  return <PropertyDetailsView property={property} />;
+  redirect(`/dashboard/org/properties/${propertyId}`);
 }

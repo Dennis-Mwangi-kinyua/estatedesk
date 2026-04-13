@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { memo, useActionState, useCallback, useState } from "react";
 import {
   ArrowRight,
   Eye,
@@ -16,6 +16,18 @@ const initialState: LoginActionState = {
   success: false,
 };
 
+const InputShell = memo(function InputShell({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="group flex min-h-[54px] items-center gap-3 rounded-[18px] border border-neutral-200/90 bg-[#f8fafc]/90 px-4 transition duration-200 focus-within:border-[#0b1720] focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(15,23,42,0.04)]">
+      {children}
+    </div>
+  );
+});
+
 export default function LoginForm() {
   const [state, formAction, isPending] = useActionState(
     loginAction,
@@ -24,6 +36,10 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   const globalError = state?.error ?? null;
+
+  const togglePassword = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
 
   return (
     <div className="px-5 py-4 sm:px-6 sm:py-5">
@@ -36,7 +52,7 @@ export default function LoginForm() {
             Email address
           </label>
 
-          <div className="group flex min-h-[54px] items-center gap-3 rounded-[18px] border border-neutral-200/90 bg-[#f8fafc]/90 px-4 transition duration-200 focus-within:border-[#0b1720] focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(15,23,42,0.04)]">
+          <InputShell>
             <Mail className="h-4 w-4 shrink-0 text-neutral-400 transition group-focus-within:text-neutral-700" />
             <input
               id="email"
@@ -46,7 +62,7 @@ export default function LoginForm() {
               placeholder="you@company.com"
               className="w-full bg-transparent text-[15px] text-neutral-950 outline-none placeholder:text-neutral-400"
             />
-          </div>
+          </InputShell>
 
           {state.fieldErrors?.email?.length ? (
             <p className="text-sm text-red-600">{state.fieldErrors.email[0]}</p>
@@ -54,7 +70,7 @@ export default function LoginForm() {
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <label
               htmlFor="password"
               className="text-sm font-medium text-neutral-800"
@@ -70,7 +86,7 @@ export default function LoginForm() {
             </Link>
           </div>
 
-          <div className="group flex min-h-[54px] items-center gap-3 rounded-[18px] border border-neutral-200/90 bg-[#f8fafc]/90 px-4 transition duration-200 focus-within:border-[#0b1720] focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(15,23,42,0.04)]">
+          <InputShell>
             <LockKeyhole className="h-4 w-4 shrink-0 text-neutral-400 transition group-focus-within:text-neutral-700" />
             <input
               id="password"
@@ -82,8 +98,8 @@ export default function LoginForm() {
             />
             <button
               type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="shrink-0 rounded-full p-1 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
+              onClick={togglePassword}
+              className="shrink-0 rounded-full p-2 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -92,7 +108,7 @@ export default function LoginForm() {
                 <Eye className="h-4 w-4" />
               )}
             </button>
-          </div>
+          </InputShell>
 
           {state.fieldErrors?.password?.length ? (
             <p className="text-sm text-red-600">
@@ -101,7 +117,7 @@ export default function LoginForm() {
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between gap-4 pt-1">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
           <label className="inline-flex items-center gap-3 text-sm text-neutral-600">
             <input
               type="checkbox"

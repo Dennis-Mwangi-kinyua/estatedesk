@@ -25,7 +25,7 @@ export function OrgDashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="h-dvh overflow-hidden bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50">
       <OrgDashboardSidebar
         organizationName={organizationName}
         mobileOpen={mobileOpen}
@@ -33,18 +33,26 @@ export function OrgDashboardShell({
         role={role}
       />
 
+      <OrgDashboardHeader
+        onMenuClick={() => setMobileOpen(true)}
+        userName={userName}
+        userRole={userRole}
+      />
+
       <div className="lg:pl-72">
-        <OrgDashboardHeader
-          onMenuClick={() => setMobileOpen(true)}
-          userName={userName}
-          userRole={userRole}
-        />
+        <div className="flex min-h-screen flex-col pt-16">
+          <main className="flex-1 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+            <div className="mx-auto w-full max-w-[1440px]">
+              {children}
+            </div>
+          </main>
 
-        <main className="fixed inset-x-0 bottom-10 top-16 overflow-y-auto px-4 py-4 sm:px-6 lg:left-72 lg:right-0 lg:px-8">
-          {children}
-        </main>
-
-        <OrgDashboardFooter organizationName={organizationName} />
+          <div className="px-4 pb-4 sm:px-6 lg:px-8">
+            <div className="mx-auto w-full max-w-[1440px]">
+              <OrgDashboardFooter organizationName={organizationName} />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

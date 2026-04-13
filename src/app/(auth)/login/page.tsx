@@ -13,7 +13,7 @@ import LoginForm from "./LoginForm";
 
 export default function LoginPage() {
   return (
-    <div className="h-dvh overflow-hidden bg-[#eef2f6] text-neutral-950">
+    <div className="min-h-screen bg-[#eef2f6] text-neutral-950">
       <style>{`
         @keyframes dotGlow {
           0%,
@@ -34,12 +34,12 @@ export default function LoginPage() {
         }
       `}</style>
 
-      <div className="relative h-full overflow-hidden lg:grid lg:grid-cols-[1.12fr_0.88fr]">
-        <div className="min-h-0 overflow-hidden">
+      <div className="lg:grid lg:min-h-screen lg:grid-cols-[1.08fr_0.92fr]">
+        <aside className="hidden lg:block lg:min-h-screen">
           <OperationsShowcase />
-        </div>
+        </aside>
 
-        <main className="relative flex h-full min-h-0 items-center justify-center overflow-hidden px-4 py-4 sm:px-6 sm:py-6 lg:px-8 xl:px-10">
+        <main className="relative flex min-h-screen items-center justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-10">
           <div className="absolute inset-0 lg:hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.12),transparent_26%),linear-gradient(180deg,#f9fafb_0%,#eef2f6_50%,#e8edf4_100%)]" />
             <div className="absolute left-1/2 top-[-88px] h-[220px] w-[220px] -translate-x-1/2 rounded-full bg-white/80 blur-3xl" />
@@ -51,7 +51,7 @@ export default function LoginPage() {
             <div className="absolute inset-[10%] rounded-[40px] border border-white/20" />
           </div>
 
-          <div className="relative z-10 mx-auto flex h-full max-h-full w-full max-w-[500px] min-h-0 flex-col justify-center">
+          <div className="relative z-10 mx-auto flex w-full max-w-md flex-col">
             <div className="mb-3 px-1 lg:hidden">
               <div className="flex w-full items-center rounded-[22px] border border-white/80 bg-white/75 px-4 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.05)] backdrop-blur-2xl">
                 <Link
@@ -64,9 +64,9 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="relative w-full overflow-hidden rounded-[30px] border border-white/70 bg-white/72 shadow-[0_30px_90px_rgba(15,23,42,0.16),0_10px_25px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.8)] backdrop-blur-2xl">
-              <div className="pointer-events-none absolute inset-0 rounded-[30px] ring-1 ring-white/40" />
-              <div className="pointer-events-none absolute -inset-px rounded-[30px] [box-shadow:0_0_0_1px_rgba(255,255,255,0.18),0_0_25px_rgba(96,165,250,0.08),0_0_45px_rgba(255,255,255,0.12)]" />
+            <div className="relative w-full overflow-hidden rounded-[28px] border border-white/70 bg-white/72 shadow-[0_30px_90px_rgba(15,23,42,0.16),0_10px_25px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.8)] backdrop-blur-2xl sm:rounded-[30px]">
+              <div className="pointer-events-none absolute inset-0 rounded-[28px] ring-1 ring-white/40 sm:rounded-[30px]" />
+              <div className="pointer-events-none absolute -inset-px rounded-[28px] [box-shadow:0_0_0_1px_rgba(255,255,255,0.18),0_0_25px_rgba(96,165,250,0.08),0_0_45px_rgba(255,255,255,0.12)] sm:rounded-[30px]" />
               <div className="pointer-events-none absolute inset-x-6 top-0 h-20 rounded-b-[28px] bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0))]" />
               <div className="pointer-events-none absolute -right-10 top-8 h-28 w-28 rounded-full bg-blue-100/60 blur-2xl" />
               <div className="pointer-events-none absolute -left-8 bottom-10 h-24 w-24 rounded-full bg-cyan-100/50 blur-2xl" />

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { memo, useCallback, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import {
   Bell,
@@ -30,11 +31,11 @@ type SidebarLink = {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
-  roles: OrgRole[];
+  roles: readonly OrgRole[];
   emoji: string;
 };
 
-const sidebarLinks: SidebarLink[] = [
+const SIDEBAR_LINKS: readonly SidebarLink[] = [
   {
     label: "Overview",
     href: "/dashboard/org",
@@ -44,14 +45,14 @@ const sidebarLinks: SidebarLink[] = [
   },
   {
     label: "Properties",
-    href: "/properties",
+    href: "/dashboard/org/properties",
     icon: Building,
     emoji: "🏘️",
     roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
   },
   {
     label: "Buildings",
-    href: "/buildings",
+    href: "/dashboard/org/buildings",
     icon: Building2,
     emoji: "🏢",
     roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
@@ -72,56 +73,56 @@ const sidebarLinks: SidebarLink[] = [
   },
   {
     label: "Leases",
-    href: "/leases",
+    href: "/dashboard/org/leases",
     icon: FileText,
     emoji: "📄",
     roles: ["ADMIN", "MANAGER", "OFFICE"],
   },
   {
     label: "Payments",
-    href: "/payments",
+    href: "/dashboard/org/payments",
     icon: CreditCard,
     emoji: "💳",
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
   },
   {
     label: "Charges",
-    href: "/charges",
+    href: "/dashboard/org/charges",
     icon: Receipt,
     emoji: "🧾",
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
   },
   {
     label: "Issues",
-    href: "/issues",
+    href: "/dashboard/org/issues",
     icon: Wrench,
     emoji: "🛠️",
     roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
   },
   {
     label: "Staff",
-    href: "/staff",
+    href: "/dashboard/org/staff",
     icon: Users,
     emoji: "👷",
     roles: ["ADMIN", "MANAGER"],
   },
   {
     label: "Notifications",
-    href: "/notifications",
+    href: "/dashboard/org/notifications",
     icon: Bell,
     emoji: "🔔",
     roles: ["ADMIN", "MANAGER", "OFFICE"],
   },
   {
     label: "Reports",
-    href: "/reports",
+    href: "/dashboard/org/reports",
     icon: ShieldCheck,
     emoji: "📊",
     roles: ["ADMIN", "MANAGER", "ACCOUNTANT"],
   },
   {
     label: "Taxes",
-    href: "/taxes",
+    href: "/dashboard/org/taxes",
     icon: Receipt,
     emoji: "🏛️",
     roles: ["ADMIN", "ACCOUNTANT"],
@@ -133,7 +134,7 @@ const sidebarLinks: SidebarLink[] = [
     emoji: "⚙️",
     roles: ["ADMIN"],
   },
-];
+] as const;
 
 type OrgDashboardSidebarProps = {
   organizationName: string;
@@ -150,6 +151,137 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+type SidebarNavItemProps = {
+  item: SidebarLink;
+  pathname: string;
+  mobile?: boolean;
+  onNavigate?: () => void;
+};
+
+const SidebarNavItem = memo(function SidebarNavItem({
+  item,
+  pathname,
+  mobile = false,
+  onNavigate,
+}: SidebarNavItemProps) {
+  const Icon = item.icon;
+  const active = isActivePath(pathname, item.href);
+
+  if (mobile) {
+    return (
+      <Link
+        href={item.href}
+        onClick={onNavigate}
+        className={[
+          "flex items-center gap-3 rounded-[22px] px-4 py-3.5 text-sm font-medium transition-all duration-200",
+          active
+            ? "bg-neutral-950 text-white shadow-sm"
+            : "bg-white/80 text-neutral-800 hover:bg-neutral-50",
+        ].join(" ")}
+      >
+        <span
+          className={[
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl",
+            active ? "bg-white/10 text-white" : "bg-neutral-100 text-neutral-700",
+          ].join(" ")}
+        >
+          <span className="text-lg">{item.emoji}</span>
+        </span>
+
+        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+          <span className="truncate">{item.label}</span>
+          <Icon
+            className={
+              active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-neutral-400"
+            }
+          />
+        </div>
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      href={item.href}
+      className={[
+        "group flex items-center gap-3 rounded-[22px] px-4 py-3 text-sm font-medium transition",
+        active
+          ? "bg-neutral-950 text-white shadow-sm"
+          : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-950",
+      ].join(" ")}
+    >
+      <span
+        className={[
+          "flex h-10 w-10 items-center justify-center rounded-2xl",
+          active ? "bg-white/10 text-white" : "bg-neutral-100 text-neutral-700",
+        ].join(" ")}
+      >
+        <span className="text-base">{item.emoji}</span>
+      </span>
+
+      <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+        <span className="truncate">{item.label}</span>
+        <Icon className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-neutral-400"} />
+      </div>
+    </Link>
+  );
+});
+
+const SidebarBrand = memo(function SidebarBrand({
+  organizationName,
+}: {
+  organizationName: string;
+}) {
+  return (
+    <Link href="/dashboard/org" className="flex items-center gap-3">
+      <div className="flex h-12 w-12 items-center justify-center rounded-[22px] bg-neutral-950 text-white shadow-sm">
+        <span className="text-xl">🏢</span>
+      </div>
+
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold text-neutral-950">
+          {organizationName}
+        </p>
+        <p className="text-xs text-neutral-500">Organization Workspace</p>
+      </div>
+    </Link>
+  );
+});
+
+const LogoutButton = memo(function LogoutButton({
+  mobile = false,
+  onClick,
+}: {
+  mobile?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <form action="/logout" method="post" onSubmit={onClick}>
+      <button
+        type="submit"
+        className={[
+          "flex w-full items-center gap-3 rounded-[22px] text-sm font-medium transition",
+          mobile
+            ? "px-4 py-3.5 text-red-600 hover:bg-red-50 hover:text-red-700"
+            : "px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700",
+        ].join(" ")}
+      >
+        <span
+          className={[
+            "flex items-center justify-center rounded-2xl bg-red-50 text-red-600",
+            mobile ? "h-11 w-11 shrink-0" : "h-10 w-10",
+          ].join(" ")}
+        >
+          <span className={mobile ? "text-lg" : "text-base"}>👋</span>
+        </span>
+
+        <span className="truncate">Logout</span>
+        <LogOut className="ml-auto h-4 w-4 text-red-500" />
+      </button>
+    </form>
+  );
+});
+
 export function OrgDashboardSidebar({
   organizationName,
   mobileOpen,
@@ -157,94 +289,47 @@ export function OrgDashboardSidebar({
   role = "ADMIN",
 }: OrgDashboardSidebarProps) {
   const pathname = usePathname();
-  const visibleLinks = sidebarLinks.filter((item) => item.roles.includes(role));
+
+  const visibleLinks = useMemo(() => {
+    return SIDEBAR_LINKS.filter((item) => item.roles.includes(role));
+  }, [role]);
+
+  const closeMobile = useCallback(() => {
+    setMobileOpen(false);
+  }, [setMobileOpen]);
 
   return (
     <>
-      {/* Desktop sidebar */}
-      <aside className="fixed bottom-0 left-0 top-0 z-[95] hidden w-72 flex-col border-r border-black/10 bg-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r border-black/10 bg-white lg:flex">
         <div className="border-b border-black/10 px-6 py-6">
-          <Link href="/dashboard/org" className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-[22px] bg-neutral-950 text-white shadow-sm">
-              <span className="text-xl">🏢</span>
-            </div>
-
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-neutral-950">
-                {organizationName}
-              </p>
-              <p className="text-xs text-neutral-500">Organization Workspace</p>
-            </div>
-          </Link>
+          <SidebarBrand organizationName={organizationName} />
         </div>
 
         <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
-          {visibleLinks.map((item) => {
-            const Icon = item.icon;
-            const active = isActivePath(pathname, item.href);
-
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={[
-                  "group flex items-center gap-3 rounded-[22px] px-4 py-3 text-sm font-medium transition",
-                  active
-                    ? "bg-neutral-950 text-white shadow-sm"
-                    : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-950",
-                ].join(" ")}
-              >
-                <span
-                  className={[
-                    "flex h-10 w-10 items-center justify-center rounded-2xl",
-                    active
-                      ? "bg-white/10 text-white"
-                      : "bg-neutral-100 text-neutral-700",
-                  ].join(" ")}
-                >
-                  <span className="text-base">{item.emoji}</span>
-                </span>
-
-                <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                  <span className="truncate">{item.label}</span>
-                  <Icon
-                    className={
-                      active
-                        ? "h-4 w-4 text-white/80"
-                        : "h-4 w-4 text-neutral-400"
-                    }
-                  />
-                </div>
-              </Link>
-            );
-          })}
+          {visibleLinks.map((item) => (
+            <SidebarNavItem
+              key={item.href}
+              item={item}
+              pathname={pathname}
+            />
+          ))}
         </nav>
 
         <div className="p-4">
-          <Link
-            href="/logout"
-            className="flex items-center gap-3 rounded-[22px] px-4 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700"
-          >
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-              <span className="text-base">👋</span>
-            </span>
-            <span>Logout</span>
-            <LogOut className="ml-auto h-4 w-4 text-red-500" />
-          </Link>
+          <LogoutButton />
         </div>
       </aside>
 
-      {/* Mobile sidebar */}
       <div
         className={[
-          "fixed inset-0 z-[100] lg:hidden transition-all duration-300 ease-out",
+          "fixed inset-0 z-40 lg:hidden transition-all duration-300 ease-out",
           mobileOpen ? "pointer-events-auto" : "pointer-events-none",
         ].join(" ")}
       >
         <button
           type="button"
           aria-label="Close navigation overlay"
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobile}
           className={[
             "absolute inset-0 bg-black/30 backdrop-blur-md transition-opacity duration-300 ease-out",
             mobileOpen ? "opacity-100" : "opacity-0",
@@ -260,24 +345,13 @@ export function OrgDashboardSidebar({
           <div className="flex h-full flex-col justify-between">
             <div className="min-h-0">
               <div className="flex items-center justify-between border-b border-black/5 px-4 pb-4 pt-5">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[22px] bg-neutral-950 text-white shadow-sm">
-                    <span className="text-xl">🏢</span>
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-neutral-950">
-                      {organizationName}
-                    </p>
-                    <p className="text-xs text-neutral-500">
-                      Organization Workspace
-                    </p>
-                  </div>
+                <div className="min-w-0">
+                  <SidebarBrand organizationName={organizationName} />
                 </div>
 
                 <button
                   type="button"
-                  onClick={() => setMobileOpen(false)}
+                  onClick={closeMobile}
                   aria-label="Close navigation"
                   className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-black/10 bg-white text-neutral-900 shadow-sm"
                 >
@@ -287,63 +361,22 @@ export function OrgDashboardSidebar({
 
               <nav className="overflow-y-auto px-3 py-4">
                 <div className="space-y-2">
-                  {visibleLinks.map((item) => {
-                    const active = isActivePath(pathname, item.href);
-                    const Icon = item.icon;
-
-                    return (
-                      <Link
-                        key={item.label}
-                        href={item.href}
-                        onClick={() => setMobileOpen(false)}
-                        className={[
-                          "flex items-center gap-3 rounded-[22px] px-4 py-3.5 text-sm font-medium transition-all duration-200",
-                          active
-                            ? "bg-neutral-950 text-white shadow-sm"
-                            : "bg-white/80 text-neutral-800 hover:bg-neutral-50",
-                        ].join(" ")}
-                      >
-                        <span
-                          className={[
-                            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl",
-                            active
-                              ? "bg-white/10 text-white"
-                              : "bg-neutral-100 text-neutral-700",
-                          ].join(" ")}
-                        >
-                          <span className="text-lg">{item.emoji}</span>
-                        </span>
-
-                        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                          <span className="truncate">{item.label}</span>
-                          <Icon
-                            className={
-                              active
-                                ? "h-4 w-4 text-white/80"
-                                : "h-4 w-4 text-neutral-400"
-                            }
-                          />
-                        </div>
-                      </Link>
-                    );
-                  })}
+                  {visibleLinks.map((item) => (
+                    <SidebarNavItem
+                      key={item.href}
+                      item={item}
+                      pathname={pathname}
+                      mobile
+                      onNavigate={closeMobile}
+                    />
+                  ))}
                 </div>
               </nav>
             </div>
 
             <div className="px-3 pb-4 pt-3 [padding-bottom:max(1rem,env(safe-area-inset-bottom))]">
               <div className="rounded-[28px] bg-neutral-50 p-2 shadow-sm">
-                <Link
-                  href="/logout"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 rounded-[22px] px-4 py-3.5 text-sm font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700"
-                >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-                    <span className="text-lg">👋</span>
-                  </span>
-                  <span className="truncate">Logout</span>
-                  <LogOut className="ml-auto h-4 w-4 text-red-500" />
-                </Link>
+                <LogoutButton mobile onClick={closeMobile} />
               </div>
             </div>
           </div>
