@@ -32,6 +32,19 @@ const INVALID_CREDENTIALS_MESSAGE = "Invalid email or password.";
 const GENERIC_LOGIN_ERROR_MESSAGE =
   "Unable to sign in right now. Please try again.";
 
+function makeLabel(prefix: string, requestId: string) {
+  return `${prefix}-${requestId}`;
+}
+
+async function timed<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  console.time(label);
+  try {
+    return await fn();
+  } finally {
+    console.timeEnd(label);
+  }
+}
+
 export async function loginAction(
   _prevState: LoginActionState,
   formData: FormData,
@@ -51,27 +64,31 @@ export async function loginAction(
   }
 
   const { email, password } = parsed.data;
+  const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  const totalLabel = makeLabel("loginAction-total", requestId);
+  console.time(totalLabel);
 
   try {
-    console.time("loginAction-total");
-
-    console.time("login-find-user");
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        platformRole: true,
-        status: true,
-        passwordHash: true,
-        deletedAt: true,
+    const user = await timed(
+      makeLabel("login-find-user", requestId),
+      async () => {
+        return prisma.user.findUnique({
+          where: { email },
+          select: {
+            id: true,
+            email: true,
+            fullName: true,
+            platformRole: true,
+            status: true,
+            passwordHash: true,
+            deletedAt: true,
+          },
+        });
       },
-    });
-    console.timeEnd("login-find-user");
+    );
 
     if (!user || user.deletedAt) {
-      console.timeEnd("loginAction-total");
       return {
         success: false,
         error: INVALID_CREDENTIALS_MESSAGE,
@@ -79,7 +96,6 @@ export async function loginAction(
     }
 
     if (user.status !== "ACTIVE") {
-      console.timeEnd("loginAction-total");
       return {
         success: false,
         error:
@@ -88,81 +104,76 @@ export async function loginAction(
     }
 
     if (!user.passwordHash || typeof user.passwordHash !== "string") {
-      console.timeEnd("loginAction-total");
       return {
         success: false,
         error: INVALID_CREDENTIALS_MESSAGE,
       };
     }
 
-    console.time("login-bcrypt-compare");
-    const passwordMatches = await bcrypt.compare(password, user.passwordHash);
-    console.timeEnd("login-bcrypt-compare");
+    const passwordMatches = await timed(
+      makeLabel("login-bcrypt-compare", requestId),
+      async () => bcrypt.compare(password, user.passwordHash),
+    );
 
     if (!passwordMatches) {
-      console.timeEnd("loginAction-total");
       return {
         success: false,
         error: INVALID_CREDENTIALS_MESSAGE,
       };
     }
 
-    console.time("login-load-membership");
-    const primaryMembership = await prisma.membership.findFirst({
-      where: {
-        userId: user.id,
+    const primaryMembership = await timed(
+      makeLabel("login-load-membership", requestId),
+      async () => {
+        return prisma.membership.findFirst({
+          where: {
+            userId: user.id,
+          },
+          select: {
+            id: true,
+            orgId: true,
+            role: true,
+            scopeType: true,
+            scopeId: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
       },
-      select: {
-        orgId: true,
-        role: true,
-        scopeType: true,
-        scopeId: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-    console.timeEnd("login-load-membership");
+    );
 
     let tenant: { id: string } | null = null;
 
     if (!primaryMembership) {
-      console.time("login-load-tenant");
-      tenant = await prisma.tenant.findFirst({
-        where: {
-          userId: user.id,
+      tenant = await timed(
+        makeLabel("login-load-tenant", requestId),
+        async () => {
+          return prisma.tenant.findFirst({
+            where: {
+              userId: user.id,
+            },
+            select: {
+              id: true,
+            },
+          });
         },
-        select: {
-          id: true,
-        },
-      });
-      console.timeEnd("login-load-tenant");
+      );
     }
 
     if (!primaryMembership && !tenant) {
-      console.timeEnd("loginAction-total");
       return {
         success: false,
         error: "No active organization or tenant account is linked to this user.",
       };
     }
 
-    console.time("login-set-session");
-    await setUserSession({
-      userId: user.id,
-      email: user.email ?? email,
-      fullName: user.fullName,
-      platformRole: user.platformRole,
-      activeOrgId: primaryMembership?.orgId ?? null,
-      activeOrgRole: primaryMembership?.role ?? null,
-      membershipScope: primaryMembership
-        ? {
-            scopeType: primaryMembership.scopeType,
-            scopeId: primaryMembership.scopeId,
-          }
-        : null,
+    await timed(makeLabel("login-set-session", requestId), async () => {
+      await setUserSession({
+        userId: user.id,
+        activeMembershipId: primaryMembership?.id ?? null,
+      });
     });
-    console.timeEnd("login-set-session");
 
     void prisma.user
       .update({
@@ -173,16 +184,17 @@ export async function loginAction(
         console.error("lastLoginAt update failed:", error);
       });
 
-    console.time("login-get-destination");
-    const destination = getRedirectAfterLogin({
-      platformRole: user.platformRole,
-      activeOrgRole: primaryMembership?.role ?? null,
-      activeOrgId: primaryMembership?.orgId ?? null,
-      hasTenantProfile: Boolean(tenant),
-    });
-    console.timeEnd("login-get-destination");
+    const destination = await timed(
+      makeLabel("login-get-destination", requestId),
+      async () =>
+        getRedirectAfterLogin({
+          platformRole: user.platformRole,
+          activeOrgRole: primaryMembership?.role ?? null,
+          activeOrgId: primaryMembership?.orgId ?? null,
+          hasTenantProfile: Boolean(tenant),
+        }),
+    );
 
-    console.timeEnd("loginAction-total");
     redirect(destination);
   } catch (error) {
     if (isRedirectError(error)) {
@@ -195,5 +207,7 @@ export async function loginAction(
       success: false,
       error: GENERIC_LOGIN_ERROR_MESSAGE,
     };
+  } finally {
+    console.timeEnd(totalLabel);
   }
 }

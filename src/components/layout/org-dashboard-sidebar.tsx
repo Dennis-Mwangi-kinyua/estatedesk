@@ -182,7 +182,9 @@ const SidebarNavItem = memo(function SidebarNavItem({
         <span
           className={[
             "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl",
-            active ? "bg-white/10 text-white" : "bg-neutral-100 text-neutral-700",
+            active
+              ? "bg-white/10 text-white"
+              : "bg-neutral-100 text-neutral-700",
           ].join(" ")}
         >
           <span className="text-lg">{item.emoji}</span>
@@ -213,7 +215,9 @@ const SidebarNavItem = memo(function SidebarNavItem({
       <span
         className={[
           "flex h-10 w-10 items-center justify-center rounded-2xl",
-          active ? "bg-white/10 text-white" : "bg-neutral-100 text-neutral-700",
+          active
+            ? "bg-white/10 text-white"
+            : "bg-neutral-100 text-neutral-700",
         ].join(" ")}
       >
         <span className="text-base">{item.emoji}</span>
@@ -221,7 +225,9 @@ const SidebarNavItem = memo(function SidebarNavItem({
 
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
         <span className="truncate">{item.label}</span>
-        <Icon className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-neutral-400"} />
+        <Icon
+          className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-neutral-400"}
+        />
       </div>
     </Link>
   );

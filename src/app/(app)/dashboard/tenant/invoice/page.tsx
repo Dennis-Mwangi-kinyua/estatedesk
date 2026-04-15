@@ -183,7 +183,10 @@ function getLatestReceiptUrlFromPayments(
     return null;
   }
 
-  return matchingPayment.receipt.pdfUrl ?? `/tenant/receipts/${matchingPayment.receipt.id}`;
+  return (
+    matchingPayment.receipt.pdfUrl ??
+    `/dashboard/tenant/receipts/${matchingPayment.receipt.id}`
+  );
 }
 
 export default async function TenantInvoicePage() {
@@ -241,7 +244,7 @@ export default async function TenantInvoicePage() {
           isPaid,
           payNowHref: isPaid
             ? null
-            : `/tenant/payments/new?source=rent_charge&id=${charge.id}`,
+            : `/dashboard/tenant/payments/new?source=rent_charge&id=${charge.id}`,
         },
       ];
     }) ?? [];
@@ -271,7 +274,7 @@ export default async function TenantInvoicePage() {
           isPaid,
           payNowHref: isPaid
             ? null
-            : `/tenant/payments/new?source=water_bill&id=${bill.id}`,
+            : `/dashboard/tenant/payments/new?source=water_bill&id=${bill.id}`,
         };
       }) ?? [];
 
@@ -309,10 +312,11 @@ export default async function TenantInvoicePage() {
                   Billing Overview
                 </p>
                 <h1 className="mt-2 text-[28px] font-semibold tracking-tight text-neutral-950 sm:text-[32px]">
-                  Bills & Invoices
+                  Bills &amp; Invoices
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
-                  View all your bills in one place, including rent, water, service charge, and garbage.
+                  View all your bills in one place, including rent, water,
+                  service charge, and garbage.
                 </p>
               </div>
 
@@ -414,7 +418,9 @@ export default async function TenantInvoicePage() {
                           <p className="text-sm font-semibold text-neutral-950">
                             {bill.typeLabel}
                           </p>
-                          <p className="mt-1 text-xs text-neutral-500">{bill.period}</p>
+                          <p className="mt-1 text-xs text-neutral-500">
+                            {bill.period}
+                          </p>
                         </div>
 
                         <span
@@ -484,7 +490,9 @@ export default async function TenantInvoicePage() {
                           <p className="text-[11px] uppercase tracking-wide text-neutral-500">
                             Notes
                           </p>
-                          <p className="mt-1 text-sm text-neutral-700">{bill.description}</p>
+                          <p className="mt-1 text-sm text-neutral-700">
+                            {bill.description}
+                          </p>
                         </div>
                       ) : null}
                     </div>
@@ -513,7 +521,9 @@ export default async function TenantInvoicePage() {
                           <td className="px-5 py-4 font-semibold text-neutral-950">
                             {bill.typeLabel}
                           </td>
-                          <td className="px-5 py-4 text-neutral-600">{bill.period}</td>
+                          <td className="px-5 py-4 text-neutral-600">
+                            {bill.period}
+                          </td>
                           <td className="px-5 py-4 text-neutral-600">
                             {formatDate(bill.dueDate)}
                           </td>
@@ -542,7 +552,9 @@ export default async function TenantInvoicePage() {
                                   Download Receipt
                                 </Link>
                               ) : (
-                                <span className="text-sm text-neutral-500">Paid</span>
+                                <span className="text-sm text-neutral-500">
+                                  Paid
+                                </span>
                               )
                             ) : bill.payNowHref ? (
                               <Link
@@ -561,7 +573,10 @@ export default async function TenantInvoicePage() {
 
                     <tfoot className="border-t border-neutral-200 bg-[#fafafa]">
                       <tr>
-                        <td colSpan={3} className="px-5 py-4 text-sm font-semibold text-neutral-950">
+                        <td
+                          colSpan={3}
+                          className="px-5 py-4 text-sm font-semibold text-neutral-950"
+                        >
                           Total Bill
                         </td>
                         <td className="px-5 py-4 text-sm font-semibold text-neutral-950">

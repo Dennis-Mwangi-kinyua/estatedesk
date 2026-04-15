@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { clearUserSession } from "@/lib/auth/session";
+"use server";
 
-export async function POST(request: NextRequest) {
+import { clearUserSession } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
+
+export async function logoutAction() {
   await clearUserSession();
-  return NextResponse.redirect(new URL("/login", request.url), 303);
+  redirect("/login");
 }

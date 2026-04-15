@@ -16,23 +16,15 @@ function deny(redirectTo = "/login"): never {
   redirect(redirectTo);
 }
 
-export async function requireAuthenticated(
-  options?: GuardOptions,
-): Promise<AppSession> {
-  const session = await requireUserSession();
-
-  if (!session.userId) {
-    deny(options?.redirectTo ?? "/login");
-  }
-
-  return session;
+export async function requireAuthenticated(): Promise<AppSession> {
+  return requireUserSession();
 }
 
 export async function requirePlatformRole(
   allowedRoles: PlatformRole[],
   options?: GuardOptions,
 ): Promise<AppSession> {
-  const session = await requireAuthenticated(options);
+  const session = await requireAuthenticated();
 
   if (!allowedRoles.includes(session.platformRole)) {
     deny(options?.redirectTo ?? "/dashboard");
@@ -44,7 +36,7 @@ export async function requirePlatformRole(
 export async function requireOrgMembership(
   options?: GuardOptions,
 ): Promise<AppSession> {
-  const session = await requireAuthenticated(options);
+  const session = await requireAuthenticated();
 
   if (!session.activeOrgId || !session.activeOrgRole) {
     deny(options?.redirectTo ?? "/login");

@@ -270,116 +270,124 @@ async function getCurrentOrgContext(): Promise<OrgContext> {
 async function loadNotificationsPageData(): Promise<PageData> {
   const membership = await getCurrentOrgContext();
 
-  const [approvalQueue, notifications, recentPayments] = await Promise.all([
-    prisma.meterReading.findMany({
-      where: {
-        status: "SUBMITTED",
-        unit: {
-          property: {
-            orgId: membership.orgId,
-            deletedAt: null,
-          },
+  const approvalQueue = await prisma.meterReading.findMany({
+    where: {
+      status: "SUBMITTED",
+      unit: {
+        property: {
+          orgId: membership.orgId,
+          deletedAt: null,
         },
       },
-      orderBy: { createdAt: "asc" },
-      take: 8,
-      select: {
-        id: true,
-        period: true,
-        prevReading: true,
-        currentReading: true,
-        unitsUsed: true,
-        createdAt: true,
-        submittedBy: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-          },
+    },
+    orderBy: { createdAt: "asc" },
+    take: 8,
+    select: {
+      id: true,
+      period: true,
+      prevReading: true,
+      currentReading: true,
+      unitsUsed: true,
+      createdAt: true,
+      submittedBy: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
         },
-        unit: {
-          select: {
-            id: true,
-            houseNo: true,
-            property: {
-              select: {
-                name: true,
-                waterRatePerUnit: true,
-                waterFixedCharge: true,
-              },
+      },
+      unit: {
+        select: {
+          id: true,
+          houseNo: true,
+          property: {
+            select: {
+              name: true,
+              waterRatePerUnit: true,
+              waterFixedCharge: true,
             },
           },
         },
       },
-    }),
-    prisma.notification.findMany({
-      where: {
-        orgId: membership.orgId,
-      },
-      orderBy: { createdAt: "desc" },
-      take: 18,
-      include: {
-        user: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-            phone: true,
-            status: true,
-          },
-        },
-        tenant: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-            phone: true,
-            status: true,
-          },
-        },
-      },
-    }),
-    prisma.payment.findMany({
-      where: {
-        orgId: membership.orgId,
-      },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-      select: {
-        id: true,
-        amount: true,
-        method: true,
-        targetType: true,
-        gatewayStatus: true,
-        verificationStatus: true,
-        reference: true,
-        externalReference: true,
-        createdAt: true,
-        paidAt: true,
-        payerTenant: {
-          select: {
-            fullName: true,
-          },
-        },
-        rentCharge: {
-          select: {
-            period: true,
-          },
-        },
-        waterBill: {
-          select: {
-            period: true,
-          },
-        },
-        taxCharge: {
-          select: {
-            period: true,
-            taxType: true,
-          },
+    },
+  });
+
+  const notifications = await prisma.notification.findMany({
+    where: {
+      orgId: membership.orgId,
+    },
+    orderBy: { createdAt: "desc" },
+    take: 18,
+    select: {
+      id: true,
+      title: true,
+      message: true,
+      type: true,
+      channel: true,
+      status: true,
+      readAt: true,
+      createdAt: true,
+      user: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phone: true,
+          status: true,
         },
       },
-    }),
-  ]);
+      tenant: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phone: true,
+          status: true,
+        },
+      },
+    },
+  });
+
+  const recentPayments = await prisma.payment.findMany({
+    where: {
+      orgId: membership.orgId,
+    },
+    orderBy: { createdAt: "desc" },
+    take: 10,
+    select: {
+      id: true,
+      amount: true,
+      method: true,
+      targetType: true,
+      gatewayStatus: true,
+      verificationStatus: true,
+      reference: true,
+      externalReference: true,
+      createdAt: true,
+      paidAt: true,
+      payerTenant: {
+        select: {
+          fullName: true,
+        },
+      },
+      rentCharge: {
+        select: {
+          period: true,
+        },
+      },
+      waterBill: {
+        select: {
+          period: true,
+        },
+      },
+      taxCharge: {
+        select: {
+          period: true,
+          taxType: true,
+        },
+      },
+    },
+  });
 
   return {
     membership,
