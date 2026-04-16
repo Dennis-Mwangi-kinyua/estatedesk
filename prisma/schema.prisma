@@ -761,28 +761,47 @@ model TenantActionLog {
 }
 
 model Invitation {
-  id          String       @id @default(cuid())
-  orgId       String
-  email       String
-  role        OrgRole
-  scopeType   ScopeType    @default(ORG)
-  scopeId     String       @default("ORG_SCOPE")
-  token       String       @unique
-  expiresAt   DateTime
-  status      String       @default("PENDING")
-  invitedById String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  invitedBy   User         @relation("InvitedBy", fields: [invitedById], references: [id])
-  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  orgId          String
+  email          String
+  phone          String?
+  role           OrgRole
+  scopeType      ScopeType    @default(ORG)
+  scopeId        String       @default("ORG_SCOPE")
+  token          String       @unique
+  expiresAt      DateTime
+  status         String       @default("PENDING")
+  invitedById    String
+  emailSentAt    DateTime?
+  whatsappSentAt DateTime?
+  deliveryMeta   Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  invitedBy      User         @relation("InvitedBy", fields: [invitedById], references: [id])
+  org            Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
   @@index([orgId])
   @@index([email])
+  @@index([phone])
   @@index([token])
   @@index([expiresAt])
 }
 
 model PasswordResetToken {
+  id        String    @id @default(cuid())
+  email     String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+  @@index([token])
+  @@index([expiresAt])
+  @@index([usedAt])
+}
+
+model EmailVerificationToken {
   id        String    @id @default(cuid())
   email     String
   token     String    @unique
@@ -1016,6 +1035,7 @@ enum NotificationChannel {
   IN_APP
   SMS
   EMAIL
+  WHATSAPP
 }
 
 enum NotificationStatus {
