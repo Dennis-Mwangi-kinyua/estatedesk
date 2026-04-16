@@ -118,7 +118,7 @@ export default async function ChargesPage() {
         </div>
 
         <Link
-          href="/leases"
+          href="/dashboard/org/leases"
           className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
         >
           View Leases
