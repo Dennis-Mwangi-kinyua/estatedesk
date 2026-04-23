@@ -1,4 +1,4 @@
-export const STAFF_ROLES = [
+export const ORG_ROLES = [
   "ADMIN",
   "MANAGER",
   "OFFICE",
@@ -7,64 +7,117 @@ export const STAFF_ROLES = [
   "TENANT",
 ] as const;
 
+export const STAFF_ROLES = [
+  "ADMIN",
+  "MANAGER",
+  "OFFICE",
+  "ACCOUNTANT",
+  "CARETAKER",
+] as const;
+
+export const TENANT_ROLE = "TENANT" as const;
+
+export type OrgRole = (typeof ORG_ROLES)[number];
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
-export const ROLE_META: Record<
-  StaffRole,
-  {
-    label: string;
-    emoji: string;
-    description: string;
-    badgeClass: string;
-    cardClass: string;
-  }
-> = {
+type RoleMeta = {
+  label: string;
+  shortLabel: string;
+  description: string;
+  emoji: string;
+  badgeClass: string;
+  cardClass: string;
+};
+
+export const ROLE_META: Record<OrgRole, RoleMeta> = {
   ADMIN: {
     label: "Admin",
-    emoji: "👑",
-    description: "Full organisation control",
-    badgeClass: "border-violet-200 bg-violet-100 text-violet-800",
-    cardClass: "from-violet-50 to-white",
+    shortLabel: "AD",
+    description: "Organisation oversight, access control, and configuration.",
+    emoji: "AD",
+    badgeClass: "border-slate-200 bg-slate-100 text-slate-700",
+    cardClass: "from-white to-slate-50",
   },
   MANAGER: {
     label: "Manager",
-    emoji: "📋",
-    description: "Operations and supervision",
-    badgeClass: "border-sky-200 bg-sky-100 text-sky-800",
-    cardClass: "from-sky-50 to-white",
+    shortLabel: "MG",
+    description: "Day-to-day supervision across properties and operations.",
+    emoji: "MG",
+    badgeClass: "border-slate-200 bg-slate-100 text-slate-700",
+    cardClass: "from-white to-slate-50",
   },
   OFFICE: {
     label: "Office",
-    emoji: "🗂️",
-    description: "Office and support workflow",
-    badgeClass: "border-slate-200 bg-slate-100 text-slate-800",
-    cardClass: "from-slate-50 to-white",
+    shortLabel: "OF",
+    description: "Administrative coordination, support, and records workflow.",
+    emoji: "OF",
+    badgeClass: "border-slate-200 bg-slate-100 text-slate-700",
+    cardClass: "from-white to-slate-50",
   },
   ACCOUNTANT: {
     label: "Accountant",
-    emoji: "💰",
-    description: "Finance and rent records",
-    badgeClass: "border-emerald-200 bg-emerald-100 text-emerald-800",
-    cardClass: "from-emerald-50 to-white",
+    shortLabel: "AC",
+    description: "Finance operations, billing, reconciliation, and reporting.",
+    emoji: "AC",
+    badgeClass: "border-slate-200 bg-slate-100 text-slate-700",
+    cardClass: "from-white to-slate-50",
   },
   CARETAKER: {
     label: "Caretaker",
-    emoji: "🛠️",
-    description: "Property support and maintenance",
-    badgeClass: "border-amber-200 bg-amber-100 text-amber-800",
-    cardClass: "from-amber-50 to-white",
+    shortLabel: "CT",
+    description: "On-site property support, maintenance coordination, and follow-up.",
+    emoji: "CT",
+    badgeClass: "border-slate-200 bg-slate-100 text-slate-700",
+    cardClass: "from-white to-slate-50",
   },
   TENANT: {
     label: "Tenant",
-    emoji: "🏠",
-    description: "Residents linked to this organisation",
-    badgeClass: "border-rose-200 bg-rose-100 text-rose-800",
-    cardClass: "from-rose-50 to-white",
+    shortLabel: "TN",
+    description: "Residents and occupants linked to the organisation.",
+    emoji: "TN",
+    badgeClass: "border-slate-200 bg-slate-100 text-slate-700",
+    cardClass: "from-white to-slate-50",
   },
 };
 
+export const DIRECTORY_META = {
+  staff: {
+    label: "Staff Directory",
+    shortLabel: "ST",
+    description: "View and manage all staff members across organisation roles.",
+    href: "/staff",
+  },
+  caretaker: {
+    label: "Caretaker Directory",
+    shortLabel: "CT",
+    description: "Manage caretakers assigned to operational and on-site responsibilities.",
+    href: "/staff/caretaker",
+  },
+  admin: {
+    label: "Admin Directory",
+    shortLabel: "AD",
+    description: "Manage administrators with organisation-wide oversight and access.",
+    href: "/staff/admin",
+  },
+  tenant: {
+    label: "Tenant Directory",
+    shortLabel: "TN",
+    description: "Access tenant records, occupancy details, and tenant management tools.",
+    href: "/tenants",
+  },
+} as const;
+
+export function isOrgRole(value: string): value is OrgRole {
+  return ORG_ROLES.includes(value as OrgRole);
+}
+
 export function isStaffRole(value: string): value is StaffRole {
   return STAFF_ROLES.includes(value as StaffRole);
+}
+
+export function normalizeOrgRole(value: string): OrgRole | null {
+  const upper = value.toUpperCase();
+  return isOrgRole(upper) ? upper : null;
 }
 
 export function normalizeStaffRole(value: string): StaffRole | null {

@@ -14,12 +14,42 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard/caretaker", label: "Overview", icon: Home, tone: "blue" },
-  { href: "/dashboard/caretaker/issues", label: "Issues", icon: Wrench, tone: "amber" },
-  { href: "/dashboard/caretaker/inspections", label: "Inspections", icon: ClipboardList, tone: "indigo" },
-  { href: "/dashboard/caretaker/leases", label: "Leases", icon: FileText, tone: "emerald" },
-  { href: "/dashboard/caretaker/tenants", label: "Tenants", icon: Users, tone: "violet" },
-  { href: "/dashboard/caretaker/water-bills", label: "Water Bills", icon: Droplets, tone: "sky" },
+  {
+    href: "/dashboard/caretaker",
+    label: "Overview",
+    icon: Home,
+    tone: "blue",
+  },
+  {
+    href: "/dashboard/caretaker/issues",
+    label: "My Issues",
+    icon: Wrench,
+    tone: "amber",
+  },
+  {
+    href: "/dashboard/caretaker/inspections",
+    label: "My Inspections",
+    icon: ClipboardList,
+    tone: "indigo",
+  },
+  {
+    href: "/dashboard/caretaker/leases",
+    label: "My Leases",
+    icon: FileText,
+    tone: "emerald",
+  },
+  {
+    href: "/dashboard/caretaker/tenants",
+    label: "My Tenants",
+    icon: Users,
+    tone: "violet",
+  },
+  {
+    href: "/dashboard/caretaker/water-bills",
+    label: "My Water Bills",
+    icon: Droplets,
+    tone: "sky",
+  },
 ] as const;
 
 type Props = {
@@ -52,9 +82,7 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
                 Caretaker Dashboard
               </h2>
 
-              <p className="mt-1 text-sm text-neutral-500">
-                {fullName}
-              </p>
+              <p className="mt-1 text-sm text-neutral-500">{fullName}</p>
             </Link>
           </div>
 
@@ -80,9 +108,7 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
                     <span
                       className={clsx(
                         "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition",
-                        active
-                          ? "bg-white/10 text-white"
-                          : iconToneMap[item.tone]
+                        active ? "bg-white/10 text-white" : iconToneMap[item.tone]
                       )}
                     >
                       <Icon className="h-[18px] w-[18px]" />
@@ -96,13 +122,15 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
           </div>
 
           <div className="shrink-0 border-t border-neutral-200/80 p-3">
-            <Link
-              href="/logout"
-              className="flex items-center justify-center gap-2 rounded-[20px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
-            </Link>
+            <form action="/logout" method="post">
+              <button
+                type="submit"
+                className="flex w-full items-center justify-center gap-2 rounded-[20px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </button>
+            </form>
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ type PageProps = {
   searchParams?: Promise<{
     search?: string;
     status?: string;
+    created?: string;
   }>;
 };
 
@@ -34,7 +35,11 @@ function getStatusClasses(status: string) {
   }
 }
 
-function buildFilterHref(search: string, status: TenantFilterStatus) {
+function buildFilterHref(
+  search: string,
+  status: TenantFilterStatus,
+  created?: string,
+) {
   const params = new URLSearchParams();
 
   if (search.trim()) {
@@ -43,6 +48,10 @@ function buildFilterHref(search: string, status: TenantFilterStatus) {
 
   if (status !== "ALL") {
     params.set("status", status);
+  }
+
+  if (created === "1") {
+    params.set("created", "1");
   }
 
   const query = params.toString();
@@ -110,6 +119,7 @@ export default async function OrgTenantsPage({ searchParams }: PageProps) {
   const params = searchParams ? await searchParams : {};
   const search = normalizeSearch(params.search);
   const status = normalizeStatus(params.status);
+  const created = params.created === "1";
 
   const orgId = String(session.activeOrgId ?? "").trim();
 
@@ -222,15 +232,31 @@ export default async function OrgTenantsPage({ searchParams }: PageProps) {
     <div className="min-h-screen bg-[#f5f5f7] px-3 pb-6 pt-3 sm:px-4 sm:pt-4">
       <div className="mx-auto max-w-6xl space-y-4">
         <div className="rounded-[28px] border border-black/5 bg-white/90 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur">
-          <div className="space-y-1">
-            <h2 className="text-xl font-semibold tracking-tight text-neutral-950 sm:text-2xl">
-              {organization?.name ?? "Organisation"} Tenants
-            </h2>
-            <p className="text-sm text-neutral-600">
-              Search, filter, and manage tenant records.
-            </p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold tracking-tight text-neutral-950 sm:text-2xl">
+                {organization?.name ?? "Organisation"} Tenants
+              </h2>
+              <p className="text-sm text-neutral-600">
+                Search, filter, and manage tenant records.
+              </p>
+            </div>
+
+            <Link
+              href="/dashboard/org/tenants/new"
+              className="inline-flex h-11 items-center justify-center rounded-2xl bg-neutral-950 px-5 text-sm font-medium text-white transition hover:bg-neutral-800 active:scale-[0.99]"
+            >
+              Create new tenant
+            </Link>
           </div>
         </div>
+
+        {created ? (
+          <div className="rounded-[28px] border border-green-200 bg-green-50 p-4 text-sm text-green-800 shadow-sm">
+            Tenant created successfully. If a unit was selected during creation,
+            it has already been mapped through an active lease.
+          </div>
+        ) : null}
 
         <div className="sticky top-2 z-10 rounded-[28px] border border-black/5 bg-white/90 p-3 shadow-[0_8px_24px_rgba(0,0,0,0.05)] backdrop-blur">
           <form className="space-y-3">
@@ -244,6 +270,7 @@ export default async function OrgTenantsPage({ searchParams }: PageProps) {
               />
 
               <input type="hidden" name="status" value={status} />
+              {created ? <input type="hidden" name="created" value="1" /> : null}
 
               <button
                 type="submit"
@@ -260,7 +287,7 @@ export default async function OrgTenantsPage({ searchParams }: PageProps) {
                 return (
                   <Link
                     key={option}
-                    href={buildFilterHref(search, option)}
+                    href={buildFilterHref(search, option, created ? "1" : undefined)}
                     className={[
                       "inline-flex h-10 shrink-0 items-center justify-center rounded-full border px-4 text-sm font-medium transition",
                       active

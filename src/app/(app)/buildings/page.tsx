@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { Prisma } from "@prisma/client";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { requireUserSession, type OrgRole } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -15,18 +18,174 @@ type BuildingsPageProps = {
   searchParams?: Promise<{ q?: string }> | { q?: string };
 };
 
-export default async function BuildingsPage({ searchParams }: BuildingsPageProps) {
+const ALLOWED_ROLES = new Set<OrgRole>([
+  "ADMIN",
+  "MANAGER",
+  "OFFICE",
+  "CARETAKER",
+]);
+
+export default async function BuildingsPage({
+  searchParams,
+}: BuildingsPageProps) {
+  const session = await requireUserSession();
+
+  if (!session.activeOrgId) {
+    redirect("/dashboard");
+  }
+
+  if (!session.activeOrgRole || !ALLOWED_ROLES.has(session.activeOrgRole)) {
+    redirect("/dashboard/org");
+  }
+
   const resolvedSearchParams =
-    searchParams && typeof (searchParams as Promise<{ q?: string }>).then === "function"
+    searchParams &&
+    typeof (searchParams as Promise<{ q?: string }>).then === "function"
       ? await (searchParams as Promise<{ q?: string }>)
       : (searchParams as { q?: string } | undefined);
 
   const query = resolvedSearchParams?.q?.trim() ?? "";
-  const normalizedQuery = query.toLowerCase();
+
+  const scopeWhere: Prisma.BuildingWhereInput =
+    session.membershipScope?.scopeType === "PROPERTY"
+      ? {
+          propertyId: session.membershipScope.scopeId,
+        }
+      : session.membershipScope?.scopeType === "BUILDING"
+        ? {
+            id: session.membershipScope.scopeId,
+          }
+        : session.membershipScope?.scopeType === "UNIT"
+          ? {
+              units: {
+                some: {
+                  id: session.membershipScope.scopeId,
+                  deletedAt: null,
+                },
+              },
+            }
+          : {};
+
+  const searchWhere: Prisma.BuildingWhereInput = query
+    ? {
+        OR: [
+          {
+            name: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            notes: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            property: {
+              is: {
+                name: {
+                  contains: query,
+                  mode: "insensitive",
+                },
+              },
+            },
+          },
+          {
+            property: {
+              is: {
+                location: {
+                  contains: query,
+                  mode: "insensitive",
+                },
+              },
+            },
+          },
+          {
+            property: {
+              is: {
+                address: {
+                  contains: query,
+                  mode: "insensitive",
+                },
+              },
+            },
+          },
+          {
+            units: {
+              some: {
+                deletedAt: null,
+                houseNo: {
+                  contains: query,
+                  mode: "insensitive",
+                },
+              },
+            },
+          },
+          {
+            caretakerAssignments: {
+              some: {
+                active: true,
+                caretaker: {
+                  is: {
+                    fullName: {
+                      contains: query,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            caretakerAssignments: {
+              some: {
+                active: true,
+                caretaker: {
+                  is: {
+                    phone: {
+                      contains: query,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            caretakerAssignments: {
+              some: {
+                active: true,
+                caretaker: {
+                  is: {
+                    email: {
+                      contains: query,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      }
+    : {};
 
   const buildings = await prisma.building.findMany({
     where: {
-      deletedAt: null,
+      AND: [
+        {
+          deletedAt: null,
+          property: {
+            is: {
+              orgId: session.activeOrgId,
+              deletedAt: null,
+            },
+          },
+        },
+        scopeWhere,
+        searchWhere,
+      ],
     },
     orderBy: {
       createdAt: "desc",
@@ -69,46 +228,19 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
     },
   });
 
-  const filteredBuildings = query
-    ? buildings.filter((building) => {
-        const searchableText = [
-          building.name,
-          building.notes,
-          building.property.name,
-          building.property.location,
-          building.property.address,
-          ...building.units.map((unit) => unit.houseNo),
-          ...building.caretakerAssignments.map(
-            (assignment) => assignment.caretaker.fullName
-          ),
-          ...building.caretakerAssignments.map(
-            (assignment) => assignment.caretaker.phone ?? ""
-          ),
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        return searchableText.includes(normalizedQuery);
-      })
-    : buildings;
-
-  const totalBuildings = filteredBuildings.length;
-  const totalUnits = filteredBuildings.reduce(
-    (sum, building) => sum + building.units.length,
-    0
-  );
-  const occupiedUnits = filteredBuildings.reduce(
+  const totalBuildings = buildings.length;
+  const totalUnits = buildings.reduce((sum, building) => sum + building.units.length, 0);
+  const occupiedUnits = buildings.reduce(
     (sum, building) =>
       sum + building.units.filter((unit) => unit.status === "OCCUPIED").length,
-    0
+    0,
   );
-  const vacantUnits = filteredBuildings.reduce(
+  const vacantUnits = buildings.reduce(
     (sum, building) =>
       sum + building.units.filter((unit) => unit.status === "VACANT").length,
-    0
+    0,
   );
-  const activeBuildings = filteredBuildings.filter((building) => building.isActive).length;
+  const activeBuildings = buildings.filter((building) => building.isActive).length;
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,rgba(248,250,252,1)_0%,rgba(241,245,249,0.92)_100%)]">
@@ -133,7 +265,7 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
               </div>
 
               <Link
-                href="/properties"
+                href="/dashboard/org/properties"
                 className="inline-flex h-11 items-center justify-center rounded-2xl border border-border/70 bg-background px-4 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
               >
                 View Properties
@@ -174,7 +306,7 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
 
                   {query ? (
                     <Link
-                      href="/buildings"
+                      href="/dashboard/org/buildings"
                       className="inline-flex h-12 items-center justify-center rounded-2xl border border-border/70 bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted"
                     >
                       Clear
@@ -189,8 +321,8 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
 
               {query ? (
                 <p className="mt-2 text-xs font-medium text-foreground/80">
-                  Showing {filteredBuildings.length} result
-                  {filteredBuildings.length === 1 ? "" : "s"} for “{query}”
+                  Showing {buildings.length} result
+                  {buildings.length === 1 ? "" : "s"} for “{query}”
                 </p>
               ) : null}
             </form>
@@ -214,8 +346,12 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Units
             </p>
-            <p className="mt-2 text-2xl font-semibold text-foreground">{totalUnits}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Across visible buildings</p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">
+              {totalUnits}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Across visible buildings
+            </p>
           </div>
 
           <div className="rounded-[24px] border border-white/60 bg-background/90 p-4 shadow-sm backdrop-blur">
@@ -225,15 +361,21 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
             <p className="mt-2 text-2xl font-semibold text-foreground">
               {occupiedUnits}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">Currently occupied</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Currently occupied
+            </p>
           </div>
 
           <div className="rounded-[24px] border border-white/60 bg-background/90 p-4 shadow-sm backdrop-blur">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Vacant
             </p>
-            <p className="mt-2 text-2xl font-semibold text-foreground">{vacantUnits}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Ready for leasing</p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">
+              {vacantUnits}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Ready for leasing
+            </p>
           </div>
         </section>
 
@@ -249,26 +391,28 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
             </div>
 
             <span className="hidden rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground sm:inline-flex">
-              {filteredBuildings.length} records
+              {buildings.length} records
             </span>
           </div>
 
-          {filteredBuildings.length === 0 ? (
+          {buildings.length === 0 ? (
             <div className="rounded-[28px] border border-dashed border-border/70 bg-background/80 p-10 text-center shadow-sm">
-              <p className="text-base font-medium text-foreground">No buildings found</p>
+              <p className="text-base font-medium text-foreground">
+                No buildings found
+              </p>
               <p className="mt-2 text-sm text-muted-foreground">
                 Try another search term for the building, property, unit, or caretaker.
               </p>
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredBuildings.map((building) => {
+              {buildings.map((building) => {
                 const occupied = building.units.filter(
-                  (unit) => unit.status === "OCCUPIED"
+                  (unit) => unit.status === "OCCUPIED",
                 ).length;
 
                 const vacant = building.units.filter(
-                  (unit) => unit.status === "VACANT"
+                  (unit) => unit.status === "VACANT",
                 ).length;
 
                 const activeUnits = building.units.filter((unit) => unit.isActive).length;
@@ -279,8 +423,8 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
 
                 const primaryCaretaker =
                   building.caretakerAssignments.find(
-                    (assignment) => assignment.isPrimary
-                  ) || building.caretakerAssignments[0];
+                    (assignment) => assignment.isPrimary,
+                  ) ?? building.caretakerAssignments[0];
 
                 return (
                   <article
@@ -308,12 +452,9 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
                         <div className="space-y-2 text-sm text-muted-foreground">
                           <p>
                             <span className="font-medium text-foreground">Property:</span>{" "}
-                            <Link
-                              href={`/properties/${building.property.id}`}
-                              className="font-medium text-foreground underline underline-offset-4"
-                            >
+                            <span className="font-medium text-foreground">
                               {building.property.name}
-                            </Link>
+                            </span>
                           </p>
 
                           {(building.property.location || building.property.address) && (
@@ -383,7 +524,9 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
 
                     <div className="mt-5 rounded-[24px] border border-border/60 bg-muted/30 p-3 sm:p-4">
                       <div className="mb-3 flex items-center justify-between gap-3">
-                        <h4 className="text-sm font-medium text-foreground">Units Preview</h4>
+                        <h4 className="text-sm font-medium text-foreground">
+                          Units Preview
+                        </h4>
                         <span className="text-xs text-muted-foreground">
                           {building.units.length} total
                         </span>

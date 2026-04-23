@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   ClipboardCheck,
   Clock3,
+  FileText,
   Home,
   XCircle,
 } from "lucide-react";
@@ -65,6 +66,7 @@ type PreparedNotice = {
   noticeDateLabel: string;
   noticeStatus: NoticeStatus;
   noticeStatusLabel: string;
+  inspectionId: string | null;
   inspectionScheduledAtLabel: string;
   inspectionCompletedAtLabel: string;
   inspectionStatus: InspectionStatus | null;
@@ -151,6 +153,7 @@ function prepareNotice(
     noticeDateLabel: formatDate(notice.noticeDate),
     noticeStatus: notice.status,
     noticeStatusLabel: notice.status.replaceAll("_", " "),
+    inspectionId: notice.inspection?.id ?? null,
     inspectionScheduledAtLabel: formatDateTime(notice.inspection?.scheduledAt),
     inspectionCompletedAtLabel: formatDateTime(notice.inspection?.completedAt),
     inspectionStatus: notice.inspection?.status ?? null,
@@ -256,6 +259,35 @@ function PaginationLink({
       className={`inline-flex items-center rounded-xl border px-3 py-2 text-sm font-medium ${active}`}
     >
       {children}
+    </Link>
+  );
+}
+
+function ReportButton({
+  inspectionId,
+  completed = false,
+  disabled = false,
+}: {
+  inspectionId: string;
+  completed?: boolean;
+  disabled?: boolean;
+}) {
+  if (disabled) {
+    return (
+      <span className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-200 px-4 py-2 text-sm font-medium text-slate-500">
+        <FileText className="mr-2 h-4 w-4" />
+        View report
+      </span>
+    );
+  }
+
+  return (
+    <Link
+      href={`/dashboard/tenant/inspections/${inspectionId}`}
+      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+    >
+      <FileText className="mr-2 h-4 w-4" />
+      {completed ? "View submitted report" : "View report"}
     </Link>
   );
 }
@@ -507,7 +539,8 @@ export default async function TenantInspectionsPage({
                       Inspection
                     </p>
                     <p className="mt-1 text-sm text-neutral-700">
-                      This move-out notice has not been scheduled for inspection yet.
+                      This move-out notice has not been scheduled for inspection
+                      yet.
                     </p>
                   </div>
                 )}
@@ -528,6 +561,15 @@ export default async function TenantInspectionsPage({
                     <Home className="mr-2 h-4 w-4" />
                     Move-out inspection flow
                   </span>
+
+                  {notice.inspectionId ? (
+                    <ReportButton
+                      inspectionId={notice.inspectionId}
+                      completed={notice.inspectionStatus === "COMPLETED"}
+                    />
+                  ) : (
+                    <ReportButton inspectionId="" disabled />
+                  )}
                 </div>
               </div>
             ))}
@@ -544,6 +586,7 @@ export default async function TenantInspectionsPage({
                   <th className="px-5 py-4 font-medium">Inspection Status</th>
                   <th className="px-5 py-4 font-medium">Inspector</th>
                   <th className="px-5 py-4 font-medium">Completed</th>
+                  <th className="px-5 py-4 font-medium">Report</th>
                 </tr>
               </thead>
               <tbody>
@@ -588,6 +631,16 @@ export default async function TenantInspectionsPage({
                     </td>
                     <td className="px-5 py-4 text-neutral-600">
                       {notice.inspectionCompletedAtLabel}
+                    </td>
+                    <td className="px-5 py-4">
+                      {notice.inspectionId ? (
+                        <ReportButton
+                          inspectionId={notice.inspectionId}
+                          completed={notice.inspectionStatus === "COMPLETED"}
+                        />
+                      ) : (
+                        <ReportButton inspectionId="" disabled />
+                      )}
                     </td>
                   </tr>
                 ))}

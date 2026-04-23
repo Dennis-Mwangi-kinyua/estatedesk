@@ -18,6 +18,7 @@ import {
   Wrench,
   X,
 } from "lucide-react";
+import { logoutAction } from "@/features/auth/actions/logout-action";
 
 export type OrgRole =
   | "ADMIN"
@@ -262,7 +263,7 @@ const LogoutButton = memo(function LogoutButton({
   onClick?: () => void;
 }) {
   return (
-    <form action="/logout" method="post" onSubmit={onClick}>
+    <form action={logoutAction} onSubmit={onClick}>
       <button
         type="submit"
         className={[

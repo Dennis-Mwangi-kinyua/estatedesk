@@ -1,112 +1,133 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 
-type PageProps = {
+export const dynamic = "force-dynamic";
+
+type UnitDetailsPageProps = {
   params: Promise<{
     unitId: string;
   }>;
 };
 
-function formatCurrency(value: unknown) {
+function formatCurrency(value: unknown, currencyCode = "KES") {
   const amount =
     typeof value === "object" && value !== null && "toNumber" in value
-      ? (value as { toNumber(): number }).toNumber()
+      ? (value as { toNumber: () => number }).toNumber()
       : Number(value ?? 0);
+
+  if (Number.isNaN(amount)) return "—";
 
   return new Intl.NumberFormat("en-KE", {
     style: "currency",
-    currency: "KES",
+    currency: currencyCode,
     maximumFractionDigits: 2,
   }).format(amount);
 }
 
 function formatDate(value: Date | string | null | undefined) {
   if (!value) return "—";
+
   const date = value instanceof Date ? value : new Date(value);
 
+  if (Number.isNaN(date.getTime())) return "—";
+
   return new Intl.DateTimeFormat("en-KE", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+    dateStyle: "medium",
   }).format(date);
 }
 
-function formatLabel(value: string | null | undefined) {
+function formatDateTime(value: Date | string | null | undefined) {
+  if (!value) return "—";
+
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return new Intl.DateTimeFormat("en-KE", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function formatEnumLabel(value: string | null | undefined) {
   if (!value) return "Unknown";
-  return value.replaceAll("_", " ");
+
+  return value
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatUnitTypeLabel(
+  type: string | null | undefined,
+  bedrooms: number | null | undefined,
+) {
+  if (!type) return "Unknown";
+
+  if (type === "APARTMENT") {
+    if (bedrooms && bedrooms > 0) {
+      return `${bedrooms} Bedroom Apartment`;
+    }
+
+    return "Apartment";
+  }
+
+  if (type === "SINGLE_ROOM") {
+    return "Single Room";
+  }
+
+  return formatEnumLabel(type);
 }
 
 function statusClasses(status: string | null | undefined) {
   switch (status) {
     case "OCCUPIED":
     case "ACTIVE":
-    case "PAID_VERIFIED":
-    case "VERIFIED":
-    case "RESOLVED":
-    case "COMPLETED":
       return "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200";
     case "VACANT":
-    case "PENDING":
-    case "ISSUED":
-    case "SUBMITTED":
-    case "IN_PROGRESS":
-    case "PAYMENT_PENDING":
       return "bg-amber-50 text-amber-700 ring-1 ring-amber-200";
-    case "OVERDUE":
-    case "FAILED":
-    case "REJECTED":
-    case "CANCELLED":
-    case "TERMINATED":
-    case "CLOSED":
-      return "bg-rose-50 text-rose-700 ring-1 ring-rose-200";
+    case "RESERVED":
+    case "PENDING":
+      return "bg-blue-50 text-blue-700 ring-1 ring-blue-200";
     case "UNDER_MAINTENANCE":
-      return "bg-violet-50 text-violet-700 ring-1 ring-violet-200";
+      return "bg-rose-50 text-rose-700 ring-1 ring-rose-200";
+    case "INACTIVE":
+    case "DISABLED":
+      return "bg-slate-100 text-slate-700 ring-1 ring-slate-200";
     default:
       return "bg-slate-100 text-slate-700 ring-1 ring-slate-200";
   }
 }
 
-function StatusBadge({ status }: { status: string | null | undefined }) {
-  return (
-    <span
-      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClasses(
-        status,
-      )}`}
-    >
-      {formatLabel(status)}
-    </span>
-  );
-}
-
 function StatCard({
-  label,
+  title,
   value,
-  helper,
+  subtitle,
 }: {
-  label: string;
-  value: ReactNode;
-  helper?: string;
+  title: string;
+  value: string | number;
+  subtitle?: string;
 }) {
   return (
     <div className="rounded-[24px] border border-slate-200/80 bg-white p-5 shadow-sm">
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+      <p className="text-sm font-medium text-slate-500">{title}</p>
+      <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
         {value}
-      </div>
-      {helper ? <p className="mt-1 text-xs text-slate-400">{helper}</p> : null}
+      </p>
+      {subtitle ? <p className="mt-1 text-xs text-slate-400">{subtitle}</p> : null}
     </div>
   );
 }
 
-function DetailCard({
+function DetailItem({
   label,
   value,
 }: {
   label: string;
-  value: ReactNode;
+  value: React.ReactNode;
 }) {
   return (
     <div className="rounded-2xl bg-slate-50 px-4 py-3">
@@ -118,51 +139,24 @@ function DetailCard({
   );
 }
 
-function SectionCard({
-  title,
-  subtitle,
-  action,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  action?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section className="rounded-[28px] border border-slate-200/80 bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight text-slate-900">
-            {title}
-          </h2>
-          {subtitle ? <p className="mt-1 text-sm text-slate-500">{subtitle}</p> : null}
-        </div>
-        {action ? <div>{action}</div> : null}
-      </div>
-      <div className="p-5 sm:p-6">{children}</div>
-    </section>
-  );
-}
-
-function EmptyState({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-center">
-      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-      <p className="mt-2 text-sm text-slate-500">{description}</p>
-    </div>
-  );
-}
-
-export default async function UnitDetailsPage({ params }: PageProps) {
+export default async function UnitDetailsPage({
+  params,
+}: UnitDetailsPageProps) {
   const session = await requireManagementAccess();
   const { unitId } = await params;
+
+  const organization = await prisma.organization.findFirst({
+    where: {
+      id: session.activeOrgId!,
+      deletedAt: null,
+    },
+    select: {
+      currencyCode: true,
+      name: true,
+    },
+  });
+
+  const currencyCode = organization?.currencyCode ?? "KES";
 
   const unit = await prisma.unit.findFirst({
     where: {
@@ -173,14 +167,30 @@ export default async function UnitDetailsPage({ params }: PageProps) {
         deletedAt: null,
       },
     },
-    include: {
+    select: {
+      id: true,
+      houseNo: true,
+      type: true,
+      bedrooms: true,
+      bathrooms: true,
+      floorArea: true,
+      rentAmount: true,
+      depositAmount: true,
+      status: true,
+      vacantSince: true,
+      notes: true,
+      isActive: true,
+      sequenceNo: true,
+      createdAt: true,
+      updatedAt: true,
       property: {
         select: {
           id: true,
           name: true,
           location: true,
           address: true,
-          type: true,
+          waterRatePerUnit: true,
+          waterFixedCharge: true,
         },
       },
       building: {
@@ -189,13 +199,39 @@ export default async function UnitDetailsPage({ params }: PageProps) {
           name: true,
         },
       },
+      sourcePlan: {
+        select: {
+          id: true,
+          unitType: true,
+          bedrooms: true,
+          bathrooms: true,
+          quantity: true,
+          defaultRentAmount: true,
+          defaultDepositAmount: true,
+          houseNoPrefix: true,
+          startNumber: true,
+          label: true,
+          notes: true,
+          sortOrder: true,
+        },
+      },
       leases: {
         where: {
           deletedAt: null,
         },
-        orderBy: [{ status: "asc" }, { startDate: "desc" }, { createdAt: "desc" }],
+        orderBy: [
+          { startDate: "desc" },
+          { createdAt: "desc" },
+        ],
         take: 5,
-        include: {
+        select: {
+          id: true,
+          status: true,
+          startDate: true,
+          endDate: true,
+          monthlyRent: true,
+          deposit: true,
+          dueDay: true,
           tenant: {
             select: {
               id: true,
@@ -208,9 +244,7 @@ export default async function UnitDetailsPage({ params }: PageProps) {
         },
       },
       issues: {
-        orderBy: {
-          createdAt: "desc",
-        },
+        orderBy: [{ createdAt: "desc" }],
         take: 5,
         select: {
           id: true,
@@ -220,10 +254,25 @@ export default async function UnitDetailsPage({ params }: PageProps) {
           createdAt: true,
         },
       },
-      meterReadings: {
-        orderBy: {
-          createdAt: "desc",
+      waterBills: {
+        orderBy: [{ createdAt: "desc" }],
+        take: 5,
+        select: {
+          id: true,
+          period: true,
+          total: true,
+          dueDate: true,
+          status: true,
+          tenant: {
+            select: {
+              id: true,
+              fullName: true,
+            },
+          },
         },
+      },
+      meterReadings: {
+        orderBy: [{ createdAt: "desc" }],
         take: 5,
         select: {
           id: true,
@@ -235,19 +284,12 @@ export default async function UnitDetailsPage({ params }: PageProps) {
           createdAt: true,
         },
       },
-      waterBills: {
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 5,
+      _count: {
         select: {
-          id: true,
-          period: true,
-          unitsUsed: true,
-          total: true,
-          dueDate: true,
-          status: true,
-          createdAt: true,
+          leases: true,
+          issues: true,
+          waterBills: true,
+          meterReadings: true,
         },
       },
     },
@@ -257,316 +299,567 @@ export default async function UnitDetailsPage({ params }: PageProps) {
     notFound();
   }
 
-  const activeLease =
-    unit.leases.find((lease) => lease.status === "ACTIVE") ?? unit.leases[0] ?? null;
+  const currentLease =
+    unit.leases.find((lease) => lease.status === "ACTIVE") ??
+    unit.leases.find((lease) => lease.status === "PENDING") ??
+    null;
 
-  const latestReading = unit.meterReadings[0] ?? null;
+  const totalOpenIssues = unit.issues.filter(
+    (issue) => issue.status === "OPEN" || issue.status === "IN_PROGRESS",
+  ).length;
+
   const latestWaterBill = unit.waterBills[0] ?? null;
+  const latestMeterReading = unit.meterReadings[0] ?? null;
 
   return (
     <div className="min-h-screen bg-[#f2f2f7]">
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
         <div className="space-y-8">
-          <section className="flex flex-col gap-4 rounded-[30px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  href="/dashboard/org/units"
-                  className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
-                >
-                  Units
-                </Link>
-                <span className="text-slate-300">/</span>
-                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                  Details
-                </span>
-              </div>
-
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-                  Unit {unit.houseNo}
-                </h1>
-                <StatusBadge status={unit.status} />
-                <span
-                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                    unit.isActive
-                      ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-                      : "bg-slate-100 text-slate-700 ring-1 ring-slate-200"
-                  }`}
-                >
-                  {unit.isActive ? "Active" : "Inactive"}
-                </span>
-              </div>
-
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
-                {formatLabel(unit.type)} in <span className="font-semibold text-slate-900">{unit.property.name}</span>
-                {unit.building ? (
-                  <>
-                    {" "}• Building <span className="font-semibold text-slate-900">{unit.building.name}</span>
-                  </>
-                ) : null}
-                {unit.property.location || unit.property.address ? (
-                  <>
-                    {" "}• {unit.property.location || unit.property.address}
-                  </>
-                ) : null}
+          <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-sm font-semibold tracking-wide text-slate-500">
+                Dashboard
+              </p>
+              <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+                Unit {unit.houseNo}
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Review unit details, leasing activity, billing records, meter
+                readings, and maintenance status from one place.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/dashboard/org/units"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
               >
                 Back to Units
               </Link>
               <Link
                 href={`/dashboard/org/properties/${unit.property.id}`}
-                className="inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               >
                 View Property
               </Link>
             </div>
           </section>
 
-          <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-            <StatCard label="Monthly Rent" value={formatCurrency(unit.rentAmount)} />
-            <StatCard label="Deposit" value={formatCurrency(unit.depositAmount)} />
-            <StatCard label="Occupancy" value={activeLease ? activeLease.tenant.fullName : "Vacant"} helper={activeLease ? `Lease ${formatLabel(activeLease.status)}` : "No active lease"} />
-            <StatCard label="Latest Water Bill" value={latestWaterBill ? formatCurrency(latestWaterBill.total) : "—"} helper={latestWaterBill ? `Due ${formatDate(latestWaterBill.dueDate)}` : "No recent bill"} />
-          </section>
+          <section className="rounded-[30px] border border-slate-200/80 bg-white shadow-sm">
+            <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h2 className="truncate text-2xl font-semibold tracking-tight text-slate-900">
+                      {formatUnitTypeLabel(unit.type, unit.bedrooms)}
+                    </h2>
 
-          <section className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
-            <div className="space-y-6">
-              <SectionCard
-                title="Unit overview"
-                subtitle="Core details and operational status for this unit."
-              >
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  <DetailCard label="House Number" value={unit.houseNo} />
-                  <DetailCard label="Unit Type" value={formatLabel(unit.type)} />
-                  <DetailCard label="Status" value={<StatusBadge status={unit.status} />} />
-                  <DetailCard label="Bedrooms" value={unit.bedrooms ?? "—"} />
-                  <DetailCard label="Bathrooms" value={unit.bathrooms ?? "—"} />
-                  <DetailCard label="Floor Area" value={unit.floorArea ? `${unit.floorArea} sqm` : "—"} />
-                  <DetailCard label="Vacant Since" value={formatDate(unit.vacantSince)} />
-                  <DetailCard label="Property Type" value={formatLabel(unit.property.type)} />
-                  <DetailCard label="Building" value={unit.building?.name || "No building assigned"} />
-                </div>
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClasses(
+                        unit.status,
+                      )}`}
+                    >
+                      {formatEnumLabel(unit.status)}
+                    </span>
 
-                <div className="mt-5 rounded-2xl bg-slate-50 p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                    Notes
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                        unit.isActive
+                          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                          : "bg-slate-100 text-slate-700 ring-1 ring-slate-200"
+                      }`}
+                    >
+                      {unit.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+
+                  <p className="mt-2 text-sm text-slate-500">
+                    {unit.property.name}
+                    {unit.building ? ` • ${unit.building.name}` : ""}
+                    {unit.property.location ? ` • ${unit.property.location}` : ""}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-700">
-                    {unit.notes?.trim() || "No notes added for this unit yet."}
-                  </p>
                 </div>
-              </SectionCard>
 
-              <SectionCard
-                title="Lease history"
-                subtitle="Most recent lease records associated with this unit."
-              >
-                {unit.leases.length === 0 ? (
-                  <EmptyState
-                    title="No leases found"
-                    description="Lease activity for this unit will appear here once a tenant is assigned."
-                  />
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200">
-                      <thead>
-                        <tr className="text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                          <th className="pb-3 pr-4">Tenant</th>
-                          <th className="pb-3 pr-4">Status</th>
-                          <th className="pb-3 pr-4">Start</th>
-                          <th className="pb-3 pr-4">End</th>
-                          <th className="pb-3 pr-0 text-right">Monthly Rent</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {unit.leases.map((lease) => (
-                          <tr key={lease.id} className="align-top">
-                            <td className="py-4 pr-4">
-                              <div className="font-medium text-slate-900">{lease.tenant.fullName}</div>
-                              <div className="mt-1 text-sm text-slate-500">{lease.tenant.phone}</div>
-                              <div className="text-sm text-slate-500">{lease.tenant.email || "No email"}</div>
-                            </td>
-                            <td className="py-4 pr-4"><StatusBadge status={lease.status} /></td>
-                            <td className="py-4 pr-4 text-sm text-slate-600">{formatDate(lease.startDate)}</td>
-                            <td className="py-4 pr-4 text-sm text-slate-600">{formatDate(lease.endDate)}</td>
-                            <td className="py-4 pr-0 text-right text-sm font-semibold text-slate-900">{formatCurrency(lease.monthlyRent)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </SectionCard>
-
-              <SectionCard
-                title="Operations"
-                subtitle="Recent issues, meter readings, and billing activity."
-              >
-                <div className="grid gap-6 xl:grid-cols-3">
-                  <div className="space-y-3">
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-900">Recent issues</h3>
-                      <p className="mt-1 text-sm text-slate-500">Latest maintenance or operational tickets.</p>
-                    </div>
-                    {unit.issues.length === 0 ? (
-                      <EmptyState
-                        title="No issues logged"
-                        description="Open tickets connected to this unit will appear here."
-                      />
-                    ) : (
-                      <div className="space-y-3">
-                        {unit.issues.map((issue) => (
-                          <div key={issue.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <div className="flex flex-wrap items-start justify-between gap-2">
-                              <p className="font-medium text-slate-900">{issue.title}</p>
-                              <StatusBadge status={issue.status} />
-                            </div>
-                            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                              <span className="rounded-full bg-white px-2.5 py-1 ring-1 ring-slate-200">
-                                Priority: {formatLabel(issue.priority)}
-                              </span>
-                              <span>Created {formatDate(issue.createdAt)}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                <div className="flex flex-wrap gap-3">
+                  <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      Monthly rent
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-slate-900">
+                      {formatCurrency(unit.rentAmount, currencyCode)}
+                    </p>
                   </div>
 
-                  <div className="space-y-3">
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-900">Meter readings</h3>
-                      <p className="mt-1 text-sm text-slate-500">Most recent water consumption snapshots.</p>
-                    </div>
-                    {unit.meterReadings.length === 0 ? (
-                      <EmptyState
-                        title="No readings submitted"
-                        description="Water meter readings for this unit will appear here."
-                      />
-                    ) : (
-                      <div className="space-y-3">
-                        {unit.meterReadings.map((reading) => (
-                          <div key={reading.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <div className="flex flex-wrap items-start justify-between gap-2">
-                              <p className="font-medium text-slate-900">Period {reading.period}</p>
-                              <StatusBadge status={reading.status} />
-                            </div>
-                            <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
-                              <div>
-                                <p className="text-slate-400">Previous</p>
-                                <p className="mt-1 font-medium text-slate-700">{reading.prevReading}</p>
-                              </div>
-                              <div>
-                                <p className="text-slate-400">Current</p>
-                                <p className="mt-1 font-medium text-slate-700">{reading.currentReading}</p>
-                              </div>
-                              <div>
-                                <p className="text-slate-400">Used</p>
-                                <p className="mt-1 font-medium text-slate-700">{reading.unitsUsed}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-3">
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-900">Water bills</h3>
-                      <p className="mt-1 text-sm text-slate-500">Recent billing records generated for this unit.</p>
-                    </div>
-                    {unit.waterBills.length === 0 ? (
-                      <EmptyState
-                        title="No bills generated"
-                        description="Water bills for this unit will appear once billing is recorded."
-                      />
-                    ) : (
-                      <div className="space-y-3">
-                        {unit.waterBills.map((bill) => (
-                          <div key={bill.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <div className="flex flex-wrap items-start justify-between gap-2">
-                              <p className="font-medium text-slate-900">Period {bill.period}</p>
-                              <StatusBadge status={bill.status} />
-                            </div>
-                            <div className="mt-3 flex items-end justify-between gap-3">
-                              <div>
-                                <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Units Used</p>
-                                <p className="mt-1 text-sm font-medium text-slate-700">{bill.unitsUsed}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Amount</p>
-                                <p className="mt-1 text-sm font-semibold text-slate-900">{formatCurrency(bill.total)}</p>
-                                <p className="mt-1 text-xs text-slate-500">Due {formatDate(bill.dueDate)}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                  <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      Deposit
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-slate-900">
+                      {unit.depositAmount
+                        ? formatCurrency(unit.depositAmount, currencyCode)
+                        : "—"}
+                    </p>
                   </div>
                 </div>
-              </SectionCard>
+              </div>
             </div>
 
-            <div className="space-y-6">
-              <SectionCard
-                title="Current occupancy"
-                subtitle="Snapshot of the current tenant and lease status."
-              >
-                {activeLease ? (
-                  <div className="rounded-[24px] bg-slate-50 p-5">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm text-slate-500">Current tenant</p>
-                        <p className="mt-1 text-xl font-semibold tracking-tight text-slate-900">
-                          {activeLease.tenant.fullName}
+            <div className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4 sm:p-6">
+              <StatCard
+                title="Lease Records"
+                value={unit._count.leases}
+                subtitle="Historical and current"
+              />
+              <StatCard
+                title="Open Issues"
+                value={totalOpenIssues}
+                subtitle="Open or in progress"
+              />
+              <StatCard
+                title="Water Bills"
+                value={unit._count.waterBills}
+                subtitle="Issued for this unit"
+              />
+              <StatCard
+                title="Meter Readings"
+                value={unit._count.meterReadings}
+                subtitle="Captured over time"
+              />
+            </div>
+          </section>
+
+          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <div className="space-y-8">
+              <section className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+                <div className="mb-5">
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    Unit profile
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Core information, pricing, classification, and generated plan details.
+                  </p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  <DetailItem label="Unit Number" value={unit.houseNo} />
+                  <DetailItem
+                    label="Unit Type"
+                    value={formatUnitTypeLabel(unit.type, unit.bedrooms)}
+                  />
+                  <DetailItem label="Bedrooms" value={unit.bedrooms ?? "—"} />
+                  <DetailItem label="Bathrooms" value={unit.bathrooms ?? "—"} />
+                  <DetailItem
+                    label="Floor Area"
+                    value={unit.floorArea ? `${unit.floorArea} sqm` : "—"}
+                  />
+                  <DetailItem
+                    label="Sequence Number"
+                    value={unit.sequenceNo ?? "—"}
+                  />
+                  <DetailItem
+                    label="Rent Amount"
+                    value={formatCurrency(unit.rentAmount, currencyCode)}
+                  />
+                  <DetailItem
+                    label="Deposit Amount"
+                    value={
+                      unit.depositAmount
+                        ? formatCurrency(unit.depositAmount, currencyCode)
+                        : "—"
+                    }
+                  />
+                  <DetailItem
+                    label="Vacant Since"
+                    value={formatDate(unit.vacantSince)}
+                  />
+                </div>
+
+                {unit.notes ? (
+                  <div className="mt-5 rounded-2xl bg-slate-50 px-4 py-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      Notes
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-700">
+                      {unit.notes}
+                    </p>
+                  </div>
+                ) : null}
+              </section>
+
+              <section className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+                <div className="mb-5">
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    Property & building context
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    See how this unit fits into the wider property structure.
+                  </p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <DetailItem
+                    label="Property"
+                    value={
+                      <Link
+                        href={`/dashboard/org/properties/${unit.property.id}`}
+                        className="text-slate-900 hover:text-slate-700"
+                      >
+                        {unit.property.name}
+                      </Link>
+                    }
+                  />
+                  <DetailItem
+                    label="Building"
+                    value={
+                      unit.building ? (
+                        unit.building.name
+                      ) : (
+                        <span className="text-slate-500">No building assigned</span>
+                      )
+                    }
+                  />
+                  <DetailItem
+                    label="Location"
+                    value={unit.property.location || "—"}
+                  />
+                  <DetailItem
+                    label="Address"
+                    value={unit.property.address || "—"}
+                  />
+                  <DetailItem
+                    label="Water Rate"
+                    value={
+                      unit.property.waterRatePerUnit
+                        ? formatCurrency(unit.property.waterRatePerUnit, currencyCode)
+                        : "—"
+                    }
+                  />
+                  <DetailItem
+                    label="Water Fixed Charge"
+                    value={
+                      unit.property.waterFixedCharge
+                        ? formatCurrency(unit.property.waterFixedCharge, currencyCode)
+                        : "—"
+                    }
+                  />
+                </div>
+              </section>
+
+              <section className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+                <div className="mb-5">
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    Leasing overview
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Current and recent lease records linked to this unit.
+                  </p>
+                </div>
+
+                {unit.leases.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-10 text-center">
+                    <p className="text-sm font-medium text-slate-900">
+                      No lease records found
+                    </p>
+                    <p className="mt-2 text-sm text-slate-500">
+                      This unit has not been linked to a lease yet.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {unit.leases.map((lease) => (
+                      <div
+                        key={lease.id}
+                        className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                      >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="text-sm font-semibold text-slate-900">
+                                {lease.tenant.fullName}
+                              </p>
+                              <span
+                                className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ${statusClasses(
+                                  lease.status,
+                                )}`}
+                              >
+                                {formatEnumLabel(lease.status)}
+                              </span>
+                            </div>
+                            <p className="mt-1 text-sm text-slate-500">
+                              {lease.tenant.phone || "No phone"}{" "}
+                              {lease.tenant.email ? `• ${lease.tenant.email}` : ""}
+                            </p>
+                          </div>
+
+                          <div className="text-sm text-slate-500">
+                            Start: {formatDate(lease.startDate)}
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                          <DetailItem
+                            label="Monthly Rent"
+                            value={formatCurrency(lease.monthlyRent, currencyCode)}
+                          />
+                          <DetailItem
+                            label="Deposit"
+                            value={
+                              lease.deposit
+                                ? formatCurrency(lease.deposit, currencyCode)
+                                : "—"
+                            }
+                          />
+                          <DetailItem
+                            label="Due Day"
+                            value={lease.dueDay}
+                          />
+                          <DetailItem
+                            label="Lease End"
+                            value={formatDate(lease.endDate)}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+                <div className="mb-5">
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    Maintenance & utility activity
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Recent issues, water bills, and meter readings for this unit.
+                  </p>
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-3">
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-900">Recent issues</h4>
+                    {unit.issues.length === 0 ? (
+                      <p className="mt-3 text-sm text-slate-500">No issues recorded.</p>
+                    ) : (
+                      <div className="mt-3 space-y-3">
+                        {unit.issues.map((issue) => (
+                          <div
+                            key={issue.id}
+                            className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClasses(
+                                  issue.status,
+                                )}`}
+                              >
+                                {formatEnumLabel(issue.status)}
+                              </span>
+                              <span className="text-xs font-medium text-slate-500">
+                                {formatEnumLabel(issue.priority)}
+                              </span>
+                            </div>
+                            <p className="mt-2 text-sm font-medium text-slate-900">
+                              {issue.title}
+                            </p>
+                            <p className="mt-1 text-xs text-slate-500">
+                              {formatDateTime(issue.createdAt)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-900">Recent water bills</h4>
+                    {unit.waterBills.length === 0 ? (
+                      <p className="mt-3 text-sm text-slate-500">No water bills recorded.</p>
+                    ) : (
+                      <div className="mt-3 space-y-3">
+                        {unit.waterBills.map((bill) => (
+                          <div
+                            key={bill.id}
+                            className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClasses(
+                                  bill.status,
+                                )}`}
+                              >
+                                {formatEnumLabel(bill.status)}
+                              </span>
+                            </div>
+                            <p className="mt-2 text-sm font-medium text-slate-900">
+                              {bill.period}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-600">
+                              {formatCurrency(bill.total, currencyCode)}
+                            </p>
+                            <p className="mt-1 text-xs text-slate-500">
+                              Due {formatDate(bill.dueDate)}
+                              {bill.tenant?.fullName ? ` • ${bill.tenant.fullName}` : ""}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-900">
+                      Recent meter readings
+                    </h4>
+                    {unit.meterReadings.length === 0 ? (
+                      <p className="mt-3 text-sm text-slate-500">
+                        No meter readings recorded.
+                      </p>
+                    ) : (
+                      <div className="mt-3 space-y-3">
+                        {unit.meterReadings.map((reading) => (
+                          <div
+                            key={reading.id}
+                            className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClasses(
+                                  reading.status,
+                                )}`}
+                              >
+                                {formatEnumLabel(reading.status)}
+                              </span>
+                            </div>
+                            <p className="mt-2 text-sm font-medium text-slate-900">
+                              {reading.period}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-600">
+                              {reading.prevReading} → {reading.currentReading}
+                            </p>
+                            <p className="mt-1 text-xs text-slate-500">
+                              Units used: {reading.unitsUsed}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <aside className="space-y-8">
+              <section className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-sm">
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Current snapshot
+                </h3>
+                <div className="mt-4 space-y-3">
+                  <DetailItem
+                    label="Current Lease"
+                    value={
+                      currentLease ? (
+                        `${currentLease.tenant.fullName} (${formatEnumLabel(
+                          currentLease.status,
+                        )})`
+                      ) : (
+                        "No current lease"
+                      )
+                    }
+                  />
+                  <DetailItem
+                    label="Latest Water Bill"
+                    value={
+                      latestWaterBill
+                        ? `${latestWaterBill.period} • ${formatCurrency(
+                            latestWaterBill.total,
+                            currencyCode,
+                          )}`
+                        : "No recent bill"
+                    }
+                  />
+                  <DetailItem
+                    label="Latest Meter Reading"
+                    value={
+                      latestMeterReading
+                        ? `${latestMeterReading.period} • ${latestMeterReading.unitsUsed} units`
+                        : "No recent reading"
+                    }
+                  />
+                  <DetailItem
+                    label="Updated"
+                    value={formatDateTime(unit.updatedAt)}
+                  />
+                </div>
+              </section>
+
+              <section className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-sm">
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Generation source
+                </h3>
+
+                {unit.sourcePlan ? (
+                  <div className="mt-4 space-y-3">
+                    <DetailItem
+                      label="Plan Label"
+                      value={unit.sourcePlan.label || "—"}
+                    />
+                    <DetailItem
+                      label="Plan Type"
+                      value={formatUnitTypeLabel(
+                        unit.sourcePlan.unitType,
+                        unit.sourcePlan.bedrooms,
+                      )}
+                    />
+                    <DetailItem
+                      label="Quantity in Plan"
+                      value={unit.sourcePlan.quantity}
+                    />
+                    <DetailItem
+                      label="House Prefix"
+                      value={unit.sourcePlan.houseNoPrefix || "—"}
+                    />
+                    <DetailItem
+                      label="Start Number"
+                      value={unit.sourcePlan.startNumber}
+                    />
+                    <DetailItem
+                      label="Default Rent"
+                      value={formatCurrency(
+                        unit.sourcePlan.defaultRentAmount,
+                        currencyCode,
+                      )}
+                    />
+                    <DetailItem
+                      label="Default Deposit"
+                      value={
+                        unit.sourcePlan.defaultDepositAmount
+                          ? formatCurrency(
+                              unit.sourcePlan.defaultDepositAmount,
+                              currencyCode,
+                            )
+                          : "—"
+                      }
+                    />
+
+                    {unit.sourcePlan.notes ? (
+                      <div className="rounded-2xl bg-slate-50 px-4 py-4">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                          Plan Notes
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-slate-700">
+                          {unit.sourcePlan.notes}
                         </p>
                       </div>
-                      <StatusBadge status={activeLease.status} />
-                    </div>
-
-                    <div className="mt-4 space-y-2 text-sm text-slate-600">
-                      <p>{activeLease.tenant.phone}</p>
-                      <p>{activeLease.tenant.email || "No email address"}</p>
-                    </div>
-
-                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                      <DetailCard label="Lease Start" value={formatDate(activeLease.startDate)} />
-                      <DetailCard label="Lease End" value={formatDate(activeLease.endDate)} />
-                      <DetailCard label="Due Day" value={activeLease.dueDay} />
-                      <DetailCard label="Monthly Rent" value={formatCurrency(activeLease.monthlyRent)} />
-                    </div>
+                    ) : null}
                   </div>
                 ) : (
-                  <EmptyState
-                    title="No active occupancy"
-                    description="This unit currently has no active lease or tenant assigned."
-                  />
+                  <div className="mt-4 rounded-2xl border border-dashed border-slate-200 px-4 py-6 text-sm text-slate-500">
+                    This unit was not linked to a stored property unit plan.
+                  </div>
                 )}
-              </SectionCard>
-
-              <SectionCard
-                title="Property context"
-                subtitle="Parent property and location information."
-              >
-                <div className="grid gap-4">
-                  <DetailCard label="Property" value={unit.property.name} />
-                  <DetailCard label="Property Type" value={formatLabel(unit.property.type)} />
-                  <DetailCard label="Location" value={unit.property.location || "—"} />
-                  <DetailCard label="Address" value={unit.property.address || "—"} />
-                  <DetailCard label="Building" value={unit.building?.name || "No building assigned"} />
-                </div>
-              </SectionCard>
-            </div>
-          </section>
+              </section>
+            </aside>
+          </div>
         </div>
       </div>
     </div>

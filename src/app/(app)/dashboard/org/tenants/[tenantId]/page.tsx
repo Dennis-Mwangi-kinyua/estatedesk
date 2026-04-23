@@ -496,6 +496,7 @@ export default async function TenantDetailsPage({ params }: PageProps) {
           },
           inspection: {
             select: {
+              id: true,
               scheduledAt: true,
               status: true,
               completedAt: true,
@@ -946,6 +947,17 @@ export default async function TenantDetailsPage({ params }: PageProps) {
                             <span className="font-semibold text-neutral-900">Completed:</span>{" "}
                             {formatDateTime(notice.inspection.completedAt)}
                           </p>
+
+                          {String(notice.inspection.status).toUpperCase() === "COMPLETED" ? (
+                            <div className="mt-3">
+                              <Link
+                                href={`/dashboard/org/inspections/${notice.inspection.id}`}
+                                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+                              >
+                                View inspection report
+                              </Link>
+                            </div>
+                          ) : null}
                         </div>
                       ) : null}
 
