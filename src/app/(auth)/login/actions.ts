@@ -122,6 +122,41 @@ export async function loginAction(
       };
     }
 
+    // Platform admins do not need org membership or tenant profile
+    if (
+      user.platformRole === "PLATFORM_ADMIN" ||
+      user.platformRole === "SUPER_ADMIN"
+    ) {
+      await timed(makeLabel("login-set-session", requestId), async () => {
+        await setUserSession({
+          userId: user.id,
+          activeMembershipId: null,
+        });
+      });
+
+      void prisma.user
+        .update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() },
+        })
+        .catch((error) => {
+          console.error("lastLoginAt update failed:", error);
+        });
+
+      const destination = await timed(
+        makeLabel("login-get-destination", requestId),
+        async () =>
+          getRedirectAfterLogin({
+            platformRole: user.platformRole,
+            activeOrgRole: null,
+            activeOrgId: null,
+            hasTenantProfile: false,
+          }),
+      );
+
+      redirect(destination);
+    }
+
     const primaryMembership = await timed(
       makeLabel("login-load-membership", requestId),
       async () => {

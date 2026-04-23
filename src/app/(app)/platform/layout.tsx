@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ReactNode } from "react";
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { logoutAction } from "@/features/auth/actions/logout-action";
 import PlatformMobileShell from "./platform-mobile-shell";
 
 const navItems = [
@@ -65,7 +66,7 @@ export default async function PlatformLayout({
               </p>
             </div>
 
-            <form action="/logout" method="post">
+            <form action={logoutAction}>
               <button
                 type="submit"
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"

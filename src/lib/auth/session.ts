@@ -2,20 +2,16 @@ import "server-only";
 
 import crypto from "node:crypto";
 import { Prisma } from "@prisma/client";
+import type {
+  OrgRole,
+  PlatformRole,
+  ScopeType,
+} from "@prisma/client";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
-export type PlatformRole = "USER" | "SUPER_ADMIN" | "PLATFORM_ADMIN";
-export type OrgRole =
-  | "ADMIN"
-  | "MANAGER"
-  | "OFFICE"
-  | "ACCOUNTANT"
-  | "CARETAKER"
-  | "TENANT";
-
-export type ScopeType = "ORG" | "PROPERTY" | "BUILDING" | "UNIT";
+export type { OrgRole, PlatformRole, ScopeType };
 
 export type AppSession = {
   userId: string;

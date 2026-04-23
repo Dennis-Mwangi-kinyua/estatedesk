@@ -14,6 +14,7 @@ import {
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { logoutAction } from "@/features/auth/actions/logout-action";
 
 const navItems = [
   { href: "/dashboard/caretaker", label: "Overview", icon: Home },
@@ -164,13 +165,15 @@ export function CaretakerMobileSidebar({
         </div>
 
         <div className="shrink-0 border-t border-neutral-200/80 px-3 py-4">
-          <Link
-            href="/logout"
-            className="flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Logout</span>
-          </Link>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Logout</span>
+            </button>
+          </form>
         </div>
       </aside>
     </div>

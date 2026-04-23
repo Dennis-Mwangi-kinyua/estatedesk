@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ReactNode, useEffect, useId, useState } from "react";
 import { usePathname } from "next/navigation";
+import { logoutAction } from "@/features/auth/actions/logout-action";
 
 type NavItem = {
   href: string;
@@ -132,7 +133,7 @@ export default function PlatformMobileShell({
           </nav>
 
           <div className="border-t border-neutral-200 p-4">
-            <form action="/logout" method="post">
+            <form action={logoutAction}>
               <button
                 type="submit"
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 active:scale-[0.99]"

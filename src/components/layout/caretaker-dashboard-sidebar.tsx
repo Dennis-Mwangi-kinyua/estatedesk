@@ -12,6 +12,7 @@ import {
   Droplets,
   LogOut,
 } from "lucide-react";
+import { logoutAction } from "@/features/auth/actions/logout-action";
 
 const navItems = [
   {
@@ -122,7 +123,7 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
           </div>
 
           <div className="shrink-0 border-t border-neutral-200/80 p-3">
-            <form action="/logout" method="post">
+            <form action={logoutAction}>
               <button
                 type="submit"
                 className="flex w-full items-center justify-center gap-2 rounded-[20px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"

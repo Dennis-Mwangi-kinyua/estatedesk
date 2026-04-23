@@ -10,6 +10,7 @@ import {
 } from "react-icons/hi2";
 import { tenantNavItems } from "./tenant-nav";
 import { isTenantRouteActive } from "./tenant-route";
+import { logoutAction } from "@/features/auth/actions/logout-action";
 
 type TenantHeaderProps = {
   fullName: string;
@@ -150,17 +151,18 @@ export function TenantHeader({ fullName, orgName }: TenantHeaderProps) {
                   );
                 })}
 
-                <Link
-                  href="/logout"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 rounded-[22px] px-4 py-4 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                >
-                  <span className="text-base">👋</span>
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600">
-                    <HiOutlineArrowLeftOnRectangle className="h-5 w-5 shrink-0" />
-                  </span>
-                  <span>Logout</span>
-                </Link>
+                <form action={logoutAction} onSubmit={() => setMenuOpen(false)}>
+                  <button
+                    type="submit"
+                    className="flex w-full items-center gap-3 rounded-[22px] px-4 py-4 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                  >
+                    <span className="text-base">👋</span>
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                      <HiOutlineArrowLeftOnRectangle className="h-5 w-5 shrink-0" />
+                    </span>
+                    <span>Logout</span>
+                  </button>
+                </form>
               </nav>
             </div>
           </div>

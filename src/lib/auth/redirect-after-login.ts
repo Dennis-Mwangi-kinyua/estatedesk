@@ -1,4 +1,4 @@
-import type { OrgRole, PlatformRole } from "@/lib/auth/session";
+import type { OrgRole, PlatformRole } from "@prisma/client";
 
 type RedirectInput = {
   platformRole: PlatformRole;
@@ -16,6 +16,10 @@ export function getRedirectAfterLogin(input: RedirectInput): string {
 
   if (activeOrgRole === "TENANT" || hasTenantProfile) {
     return "/dashboard/tenant";
+  }
+
+  if (activeOrgRole === "LANDLORD") {
+    return "/dashboard/landlord";
   }
 
   if (
