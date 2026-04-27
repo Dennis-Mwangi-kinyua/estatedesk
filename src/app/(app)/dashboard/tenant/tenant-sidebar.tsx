@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HiOutlineArrowLeftOnRectangle } from "react-icons/hi2";
 import { tenantNavItems } from "./tenant-nav";
 import { isTenantRouteActive } from "./tenant-route";
-import { logoutAction } from "@/app/(auth)/logout/actions";
 
 type TenantSidebarProps = {
   fullName: string;
@@ -35,13 +33,21 @@ export function TenantSidebar({ fullName }: TenantSidebarProps) {
 
           <div className="mt-4 grid grid-cols-3 gap-2">
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-2 py-2 text-center">
-              <p className="text-[10px] font-semibold text-emerald-700">🔐 Secure</p>
+              <p className="text-[10px] font-semibold text-emerald-700">
+                🔐 Secure
+              </p>
             </div>
+
             <div className="rounded-2xl border border-sky-200 bg-sky-50 px-2 py-2 text-center">
-              <p className="text-[10px] font-semibold text-sky-700">💳 Bills</p>
+              <p className="text-[10px] font-semibold text-sky-700">
+                💳 Bills
+              </p>
             </div>
+
             <div className="rounded-2xl border border-violet-200 bg-violet-50 px-2 py-2 text-center">
-              <p className="text-[10px] font-semibold text-violet-700">📄 Lease</p>
+              <p className="text-[10px] font-semibold text-violet-700">
+                📄 Lease
+              </p>
             </div>
           </div>
         </div>
@@ -82,20 +88,6 @@ export function TenantSidebar({ fullName }: TenantSidebarProps) {
             );
           })}
         </nav>
-
-        <div className="mt-3 border-t border-neutral-200/80 pt-3">
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="flex w-full items-center gap-3 rounded-2xl bg-white px-3 py-3 text-sm font-medium text-red-600 shadow-sm transition hover:bg-red-50"
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600">
-                <HiOutlineArrowLeftOnRectangle className="h-5 w-5 shrink-0" />
-              </span>
-              <span>Logout</span>
-            </button>
-          </form>
-        </div>
       </div>
     </aside>
   );

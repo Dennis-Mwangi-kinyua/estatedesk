@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { deleteMembership } from "@/features/staff/actions/delete-membership";
-import { endCaretakerAssignment } from "@/features/staff/actions/create-caretaker-assignment";
 import {
   ROLE_META,
   normalizeStaffRole,
@@ -161,6 +160,11 @@ export default async function MemberDetailPage({ params }: Props) {
           },
         })
       : [];
+
+  const caretakerAssignmentOptions =
+    normalizedRole === "CARETAKER"
+      ? await getCaretakerAssignmentOptions(orgId)
+      : null;
 
   const meta = ROLE_META[normalizedRole];
 
@@ -348,6 +352,29 @@ export default async function MemberDetailPage({ params }: Props) {
             </p>
           </div>
 
+          {caretakerAssignmentOptions ? (
+            <div className="border-b border-slate-100 p-5 sm:p-6">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                <h3 className="text-base font-semibold text-slate-950">
+                  Add caretaker mapping
+                </h3>
+                <p className="mt-1 text-sm text-slate-600">
+                  Choose whether this caretaker is responsible for one
+                  apartment, a building, or a whole property.
+                </p>
+
+                <div className="mt-4">
+                  <CaretakerAssignmentForm
+                    caretakerUserId={member.user.id}
+                    properties={caretakerAssignmentOptions.properties}
+                    buildings={caretakerAssignmentOptions.buildings}
+                    units={caretakerAssignmentOptions.units}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : null}
+
           {caretakerAssignments.length === 0 ? (
             <div className="p-5 sm:p-6">
               <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
@@ -511,6 +538,97 @@ export default async function MemberDetailPage({ params }: Props) {
       ) : null}
     </div>
   );
+}
+
+async function getCaretakerAssignmentOptions(orgId: string) {
+  const [properties, buildings, units] = await Promise.all([
+    prisma.property.findMany({
+      where: {
+        orgId,
+        deletedAt: null,
+        isActive: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+
+    prisma.building.findMany({
+      where: {
+        deletedAt: null,
+        isActive: true,
+        property: {
+          orgId,
+          deletedAt: null,
+          isActive: true,
+        },
+      },
+      orderBy: {
+        name: "asc",
+      },
+      select: {
+        id: true,
+        name: true,
+        property: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    }),
+
+    prisma.unit.findMany({
+      where: {
+        deletedAt: null,
+        isActive: true,
+        property: {
+          orgId,
+          deletedAt: null,
+          isActive: true,
+        },
+      },
+      orderBy: {
+        houseNo: "asc",
+      },
+      select: {
+        id: true,
+        houseNo: true,
+        property: {
+          select: {
+            name: true,
+          },
+        },
+        building: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    }),
+  ]);
+
+  return {
+    properties: properties.map((property) => ({
+      id: property.id,
+      label: property.name,
+    })),
+
+    buildings: buildings.map((building) => ({
+      id: building.id,
+      label: `${building.property.name} - ${building.name}`,
+    })),
+
+    units: units.map((unit) => ({
+      id: unit.id,
+      label: [unit.property.name, unit.building?.name, `Unit ${unit.houseNo}`]
+        .filter(Boolean)
+        .join(" - "),
+    })),
+  };
 }
 
 function InfoCard({ label, value }: { label: string; value: string }) {

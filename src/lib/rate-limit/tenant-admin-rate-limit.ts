@@ -14,7 +14,7 @@ const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 5;
 
 declare global {
-  // eslint-disable-next-line no-var
+   
   var __tenantAdminRateLimitStore: Map<string, Entry> | undefined;
 }
 

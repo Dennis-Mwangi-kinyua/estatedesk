@@ -26,6 +26,7 @@ function formatDate(value: Date | null | undefined) {
 const adminSelect = {
   id: true,
   fullName: true,
+  username: true,
   email: true,
   phone: true,
   createdAt: true,
@@ -33,6 +34,8 @@ const adminSelect = {
   platformRole: true,
   isRootSuperAdmin: true,
   canCreatePlatformAdmins: true,
+  emailVerified: true,
+  phoneVerified: true,
   platformPermissions: {
     orderBy: { permission: "asc" },
     select: {
@@ -67,17 +70,25 @@ async function getPlatformAdmins(): Promise<AdminRecord[]> {
   });
 }
 
+function normalizeUsername(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, "");
+}
+
 async function createPlatformAdmin(formData: FormData) {
   "use server";
 
   const fullName = String(formData.get("fullName") ?? "").trim();
+  const username = normalizeUsername(String(formData.get("username") ?? ""));
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const phoneRaw = String(formData.get("phone") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const platformRoleRaw = String(formData.get("platformRole") ?? "").trim();
   const statusRaw = String(formData.get("status") ?? "").trim();
+
   const canCreatePlatformAdmins =
     String(formData.get("canCreatePlatformAdmins") ?? "") === "on";
+
   const isRootSuperAdmin =
     String(formData.get("isRootSuperAdmin") ?? "") === "on";
 
@@ -102,6 +113,16 @@ async function createPlatformAdmin(formData: FormData) {
     throw new Error("Full name is required.");
   }
 
+  if (!username) {
+    throw new Error("Username is required.");
+  }
+
+  if (!/^[a-z0-9._-]{3,30}$/.test(username)) {
+    throw new Error(
+      "Username must be 3-30 characters and can only contain letters, numbers, dots, underscores, and hyphens.",
+    );
+  }
+
   if (!email) {
     throw new Error("Email is required.");
   }
@@ -110,31 +131,50 @@ async function createPlatformAdmin(formData: FormData) {
     throw new Error("Password must be at least 8 characters.");
   }
 
+  if (password !== confirmPassword) {
+    throw new Error("Passwords do not match.");
+  }
+
   if (isRootSuperAdmin && platformRole !== PlatformRole.SUPER_ADMIN) {
     throw new Error("Root super admin must have SUPER_ADMIN role.");
   }
 
   const existingUser = await prisma.user.findFirst({
     where: {
-      OR: [{ email }, ...(phoneRaw ? [{ phone: phoneRaw }] : [])],
+      OR: [
+        { username },
+        { email },
+        ...(phoneRaw ? [{ phone: phoneRaw }] : []),
+      ],
     },
     select: {
       id: true,
+      username: true,
       email: true,
       phone: true,
     },
   });
 
-  if (existingUser) {
-    throw new Error("A user with that email or phone already exists.");
+  if (existingUser?.username === username) {
+    throw new Error("A user with that username already exists.");
+  }
+
+  if (existingUser?.email === email) {
+    throw new Error("A user with that email already exists.");
+  }
+
+  if (phoneRaw && existingUser?.phone === phoneRaw) {
+    throw new Error("A user with that phone number already exists.");
   }
 
   const passwordHash = await hash(password, 12);
+  const verifiedAt = new Date();
 
   await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
         fullName,
+        username,
         email,
         phone: phoneRaw || null,
         passwordHash,
@@ -142,6 +182,8 @@ async function createPlatformAdmin(formData: FormData) {
         platformRole,
         canCreatePlatformAdmins,
         isRootSuperAdmin,
+        emailVerified: verifiedAt,
+        phoneVerified: phoneRaw ? verifiedAt : null,
       },
       select: {
         id: true,
@@ -181,7 +223,8 @@ function PageHeader() {
         Platform Admins
       </h1>
       <p className="text-sm text-muted-foreground">
-        Manage super admins, platform admins, login credentials, and platform permissions.
+        Manage verified admin usernames, secure login credentials, roles, and
+        platform permissions.
       </p>
     </div>
   );
@@ -197,7 +240,8 @@ function CreateAdminSection() {
               Add Platform Admin
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Create a new admin account and assign platform rights.
+              Create a verified admin account with username, password, role, and
+              permissions.
             </p>
           </div>
 
@@ -219,7 +263,19 @@ function CreateAdminSection() {
                 />
               </Field>
 
-              <Field label="Email (used as username)" htmlFor="email">
+              <Field label="Verified username" htmlFor="username">
+                <input
+                  id="username"
+                  name="username"
+                  required
+                  minLength={3}
+                  maxLength={30}
+                  placeholder="e.g. admin.jane"
+                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
+                />
+              </Field>
+
+              <Field label="Email" htmlFor="email">
                 <input
                   id="email"
                   name="email"
@@ -251,6 +307,18 @@ function CreateAdminSection() {
                 />
               </Field>
 
+              <Field label="Confirm password" htmlFor="confirmPassword">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  minLength={8}
+                  placeholder="Repeat password"
+                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
+                />
+              </Field>
+
               <Field label="Platform role" htmlFor="platformRole">
                 <select
                   id="platformRole"
@@ -258,8 +326,10 @@ function CreateAdminSection() {
                   defaultValue={PlatformRole.PLATFORM_ADMIN}
                   className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
                 >
-                  <option value={PlatformRole.PLATFORM_ADMIN}>PLATFORM_ADMIN</option>
-                  <option value={PlatformRole.SUPER_ADMIN}>SUPER_ADMIN</option>
+                  <option value={PlatformRole.PLATFORM_ADMIN}>
+                    PLATFORM ADMIN
+                  </option>
+                  <option value={PlatformRole.SUPER_ADMIN}>SUPER ADMIN</option>
                 </select>
               </Field>
 
@@ -305,7 +375,7 @@ function CreateAdminSection() {
                     Root super admin
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Highest-level admin. Use carefully.
+                    Highest-level admin. Must use the SUPER ADMIN role.
                   </p>
                 </div>
               </label>
@@ -343,12 +413,17 @@ function CreateAdminSection() {
               </div>
             </div>
 
+            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+              The admin username and email will be marked as verified
+              immediately. The password will be securely hashed before saving.
+            </div>
+
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 type="submit"
                 className="inline-flex min-h-11 items-center justify-center rounded-xl bg-foreground px-4 text-sm font-medium text-background transition hover:opacity-90"
               >
-                Create Admin
+                Create Verified Admin
               </button>
             </div>
           </form>
@@ -398,7 +473,9 @@ function AdminRow({ admin }: { admin: AdminRecord }) {
     <article className="space-y-4 p-4 sm:p-5">
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-lg font-semibold text-foreground">{displayName}</h3>
+          <h3 className="text-lg font-semibold text-foreground">
+            {displayName}
+          </h3>
 
           {admin.platformRole && (
             <Badge variant="default">{formatRole(admin.platformRole)}</Badge>
@@ -407,24 +484,45 @@ function AdminRow({ admin }: { admin: AdminRecord }) {
           {admin.isRootSuperAdmin && <Badge variant="danger">ROOT</Badge>}
 
           {admin.canCreatePlatformAdmins && (
-            <Badge variant="info">CAN_CREATE_ADMINS</Badge>
+            <Badge variant="info">CAN CREATE ADMINS</Badge>
           )}
+
+          {admin.emailVerified && <Badge variant="success">EMAIL VERIFIED</Badge>}
+
+          {admin.phoneVerified && <Badge variant="success">PHONE VERIFIED</Badge>}
 
           <StatusBadge status={admin.status} />
         </div>
 
         <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2 lg:grid-cols-3">
           <p>
+            <span className="font-medium text-foreground">Username:</span>{" "}
+            {admin.username ?? "—"}
+          </p>
+
+          <p>
             <span className="font-medium text-foreground">Email:</span>{" "}
             {admin.email ?? "—"}
           </p>
+
           <p>
             <span className="font-medium text-foreground">Phone:</span>{" "}
             {admin.phone ?? "—"}
           </p>
+
+          <p>
+            <span className="font-medium text-foreground">Role:</span>{" "}
+            {admin.platformRole ? formatRole(admin.platformRole) : "—"}
+          </p>
+
           <p>
             <span className="font-medium text-foreground">Created:</span>{" "}
             {formatDate(admin.createdAt)}
+          </p>
+
+          <p>
+            <span className="font-medium text-foreground">Status:</span>{" "}
+            {admin.status}
           </p>
         </div>
       </div>
@@ -480,7 +578,10 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-foreground">
+      <label
+        htmlFor={htmlFor}
+        className="block text-sm font-medium text-foreground"
+      >
         {label}
       </label>
       {children}
