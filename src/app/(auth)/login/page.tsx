@@ -13,7 +13,7 @@ import LoginForm from "./LoginForm";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-[#eef2f6] text-neutral-950">
+    <div className="h-[100dvh] overflow-hidden bg-[#eef2f6] text-neutral-950">
       <style>{`
         @keyframes dotGlow {
           0%,
@@ -32,14 +32,44 @@ export default function LoginPage() {
               0 0 16px currentColor;
           }
         }
+
+        @media (max-width: 1023px) {
+          .login-mobile-fit {
+            transform-origin: center center;
+          }
+        }
+
+        @media (max-width: 1023px) and (max-height: 820px) {
+          .login-mobile-fit {
+            transform: scale(0.96);
+          }
+        }
+
+        @media (max-width: 1023px) and (max-height: 760px) {
+          .login-mobile-fit {
+            transform: scale(0.9);
+          }
+        }
+
+        @media (max-width: 1023px) and (max-height: 700px) {
+          .login-mobile-fit {
+            transform: scale(0.84);
+          }
+        }
+
+        @media (max-width: 1023px) and (max-height: 640px) {
+          .login-mobile-fit {
+            transform: scale(0.78);
+          }
+        }
       `}</style>
 
-      <div className="lg:grid lg:min-h-screen lg:grid-cols-[1.08fr_0.92fr]">
-        <aside className="hidden lg:block lg:min-h-screen">
+      <div className="h-full lg:grid lg:grid-cols-[1.08fr_0.92fr]">
+        <aside className="hidden h-full overflow-hidden lg:block">
           <OperationsShowcase />
         </aside>
 
-        <main className="relative flex min-h-screen items-center justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-10">
+        <main className="relative flex h-full items-center justify-center overflow-hidden px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-10">
           <div className="absolute inset-0 lg:hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.12),transparent_26%),linear-gradient(180deg,#f9fafb_0%,#eef2f6_50%,#e8edf4_100%)]" />
             <div className="absolute left-1/2 top-[-88px] h-[220px] w-[220px] -translate-x-1/2 rounded-full bg-white/80 blur-3xl" />
@@ -51,7 +81,7 @@ export default function LoginPage() {
             <div className="absolute inset-[10%] rounded-[40px] border border-white/20" />
           </div>
 
-          <div className="relative z-10 mx-auto flex w-full max-w-md flex-col">
+          <div className="login-mobile-fit relative z-10 mx-auto flex w-full max-w-md flex-col">
             <div className="mb-3 px-1 lg:hidden">
               <div className="flex w-full items-center rounded-[22px] border border-white/80 bg-white/75 px-4 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.05)] backdrop-blur-2xl">
                 <Link

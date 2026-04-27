@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { memo } from "react";
+import { type ElementType, type ReactNode } from "react";
 import {
   ArrowRight,
   Building2,
@@ -8,7 +8,9 @@ import {
   ClipboardList,
   CreditCard,
   Droplets,
+  FileCheck2,
   Layers3,
+  LockKeyhole,
   ShieldCheck,
   Sparkles,
   WalletCards,
@@ -19,279 +21,335 @@ type OperationsShowcaseProps = {
   compact?: boolean;
 };
 
-const PLANS = [
+type IconType = ElementType<{ className?: string }>;
+
+type Plan = {
+  name: string;
+  price: string;
+  note: string;
+  points: readonly string[];
+  featured?: boolean;
+};
+
+type SnapshotItem = {
+  icon: IconType;
+  label: string;
+  value: string;
+};
+
+type ValueItem = {
+  icon: IconType;
+  eyebrow: string;
+  title: string;
+};
+
+const PLANS: readonly Plan[] = [
   {
     name: "Free",
     price: "KES 0",
-    note: "Start small",
-    points: ["Properties", "Tenants", "Basic access"],
-    featured: false,
+    note: "Start",
+    points: ["Properties", "Tenants", "Access"],
   },
   {
     name: "Pro",
     price: "KES 4,500",
-    note: "Most popular",
-    points: ["Rent & water billing", "Inspections", "Reports"],
+    note: "Popular",
+    points: ["Rent", "Inspections", "Reports"],
     featured: true,
   },
   {
     name: "Plus",
     price: "KES 9,500",
-    note: "Growing portfolios",
-    points: ["Staff workflows", "Advanced controls", "Priority support"],
-    featured: false,
+    note: "Growth",
+    points: ["Staff", "Controls", "Support"],
   },
   {
     name: "Enterprise",
     price: "Custom",
-    note: "Large organizations",
-    points: ["Custom rollout", "Dedicated support", "Enterprise setup"],
-    featured: false,
+    note: "Scale",
+    points: ["Rollout", "Support", "Setup"],
   },
 ] as const;
 
-const SNAPSHOT_ITEMS = [
-  { icon: Layers3, label: "Role routing", value: "Smart access" },
-  { icon: CreditCard, label: "Rent billing", value: "Automated cycles" },
-  { icon: Droplets, label: "Water billing", value: "Meter-ready" },
-  { icon: ClipboardList, label: "Inspections", value: "Track and verify" },
+const SNAPSHOT_ITEMS: readonly SnapshotItem[] = [
+  { icon: Layers3, label: "Roles", value: "Access" },
+  { icon: CreditCard, label: "Rent", value: "Billing" },
+  { icon: Droplets, label: "Water", value: "Meters" },
+  { icon: ClipboardList, label: "Inspections", value: "Status" },
 ] as const;
 
-const VALUE_ITEMS = [
-  {
-    eyebrow: "Access",
-    title: "Structured permissions",
-    body: "Support for administrators, managers, accountants, caretakers, office teams, and tenants.",
-  },
-  {
-    eyebrow: "Workflow",
-    title: "Operational control",
-    body: "Coordinate occupancy, leasing, billing, inspections, support, and reporting from one place.",
-  },
-  {
-    eyebrow: "Governance",
-    title: "Clear accountability",
-    body: "Keep dependable records, controlled actions, and full visibility across your daily operations.",
-  },
+const VALUE_ITEMS: readonly ValueItem[] = [
+  { icon: ShieldCheck, eyebrow: "Access", title: "Permissions" },
+  { icon: FileCheck2, eyebrow: "Workflow", title: "Operations" },
+  { icon: LockKeyhole, eyebrow: "Records", title: "Accountability" },
 ] as const;
+
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 function ShellCard({
   children,
-  className = "",
+  className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   return (
     <div
-      className={`rounded-[28px] border border-white/10 bg-white/[0.045] shadow-[0_12px_40px_rgba(0,0,0,0.22)] backdrop-blur-sm ${className}`}
+      className={cx(
+        "rounded-[26px] border border-white/10 bg-white/[0.045] shadow-[0_18px_60px_rgba(0,0,0,0.24)] ring-1 ring-white/[0.025] backdrop-blur-xl",
+        className,
+      )}
     >
       {children}
     </div>
   );
 }
 
-const SnapshotCard = memo(function SnapshotCard() {
+function SectionBadge({ children }: { children: ReactNode }) {
   return (
-    <ShellCard className="p-4 sm:p-5 h-full">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+    <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-200/75">
+      {children}
+    </div>
+  );
+}
+
+function SnapshotCard() {
+  return (
+    <ShellCard className="relative h-full overflow-hidden p-4">
+      <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-emerald-300/8 blur-3xl" />
+
+      <div className="relative flex items-start justify-between gap-3">
+        <div>
           <p className="text-sm font-semibold tracking-[-0.01em] text-white">
-            Workspace snapshot
+            Workspace
           </p>
-          <p className="mt-1 text-xs text-white/55">
-            Built for clean daily operations
-          </p>
+          <p className="mt-1 text-xs text-slate-300/55">Operations</p>
         </div>
 
-        <div className="shrink-0 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-emerald-300">
+        <div className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-emerald-200">
           Active
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2.5">
+      <div className="relative mt-4 grid grid-cols-2 gap-2.5">
         {SNAPSHOT_ITEMS.map(({ icon: Icon, label, value }) => (
           <div
             key={label}
-            className="rounded-2xl border border-white/8 bg-[#0a1528]/80 p-3"
+            className="rounded-2xl border border-white/8 bg-[#0b1422]/82 p-3 transition duration-200 hover:border-white/15 hover:bg-[#0d1828]"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5">
-              <Icon className="h-3.5 w-3.5 text-white/80" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05]">
+              <Icon className="h-3.5 w-3.5 text-slate-100/85" />
             </div>
-            <p className="mt-2.5 text-[13px] font-medium leading-5 text-white">{label}</p>
-            <p className="mt-0.5 text-[11px] text-white/50">{value}</p>
+            <p className="mt-2.5 text-[13px] font-semibold text-white">
+              {label}
+            </p>
+            <p className="mt-0.5 text-[11px] text-slate-300/48">{value}</p>
           </div>
         ))}
       </div>
+
+      <div className="relative mt-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+        <div className="flex items-center gap-2 text-[11px] font-medium text-slate-200/75">
+          <LockKeyhole className="h-3.5 w-3.5 text-emerald-200" />
+          Secure controls
+        </div>
+      </div>
     </ShellCard>
   );
-});
+}
 
-const ValueGrid = memo(function ValueGrid() {
+function ValueGrid() {
   return (
     <div className="grid gap-2.5 lg:grid-cols-3">
-      {VALUE_ITEMS.map((item) => (
-        <ShellCard key={item.title} className="p-3.5 sm:p-4">
-          <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-sky-200/75">
-            {item.eyebrow}
-          </p>
-          <p className="mt-2 text-[15px] font-semibold tracking-[-0.02em] text-white">
-            {item.title}</p>
-          <p className="mt-1.5 text-[12px] leading-5 text-white/62">{item.body}</p>
+      {VALUE_ITEMS.map(({ icon: Icon, eyebrow, title }) => (
+        <ShellCard key={title} className="p-3.5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05]">
+              <Icon className="h-3.5 w-3.5 text-slate-100/80" />
+            </div>
+            <div>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-emerald-100/65">
+                {eyebrow}
+              </p>
+              <p className="mt-1 text-[14px] font-semibold tracking-[-0.02em] text-white">
+                {title}
+              </p>
+            </div>
+          </div>
         </ShellCard>
       ))}
     </div>
   );
-});
+}
 
-const PlansSection = memo(function PlansSection() {
+function PlansSection() {
   return (
-    <ShellCard className="p-4 sm:p-5">
+    <ShellCard className="p-4">
       <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[9px] font-medium uppercase tracking-[0.16em] text-white/72">
+        <div>
+          <SectionBadge>
             <WalletCards className="h-3 w-3" />
             Pricing
-          </div>
+          </SectionBadge>
 
-          <h2 className="mt-2 text-lg font-semibold tracking-[-0.03em] text-white sm:text-xl">
-            Straightforward plans for every stage
+          <h2 className="mt-2 text-lg font-semibold tracking-[-0.03em] text-white">
+            Plans
           </h2>
         </div>
 
         <Link
           href="/pricing"
-          className="inline-flex items-center gap-2 text-xs font-medium text-white/78 transition hover:text-white"
+          aria-label="View pricing plans"
+          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-semibold text-slate-200/75 transition hover:bg-white/[0.09] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200/60"
         >
-          View pricing
+          View
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
-      <div className="mt-3.5 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
         {PLANS.map((plan) => (
-          <div
+          <article
             key={plan.name}
-            className={`relative overflow-hidden rounded-[20px] border p-3.5 ${
+            className={cx(
+              "relative overflow-hidden rounded-[20px] border p-3 transition duration-200",
               plan.featured
-                ? "border-sky-300/30 bg-[linear-gradient(180deg,rgba(56,189,248,0.16),rgba(14,22,38,0.9))] shadow-[0_18px_50px_rgba(14,165,233,0.12)]"
-                : "border-white/10 bg-[#0b1628]/88"
-            }`}
+                ? "border-emerald-200/30 bg-[linear-gradient(180deg,rgba(16,185,129,0.13),rgba(11,20,34,0.92))] shadow-[0_18px_50px_rgba(5,150,105,0.12)]"
+                : "border-white/10 bg-[#0b1422]/88",
+            )}
           >
             {plan.featured ? (
-              <div className="absolute right-3 top-3 rounded-full border border-sky-300/20 bg-sky-400/10 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-sky-100">
+              <div className="absolute right-3 top-3 rounded-full border border-emerald-200/25 bg-emerald-300/10 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-emerald-100">
                 Popular
               </div>
             ) : null}
 
-            <div className="min-h-[64px] pr-10">
-              <p className="text-[15px] font-semibold text-white">{plan.name}</p>
-              <p className="mt-0.5 text-[10px] text-white/50">{plan.note}</p>
-              <p className="mt-2.5 text-[1.55rem] font-semibold tracking-[-0.04em] text-white">
+            <div className="min-h-[58px] pr-10">
+              <h3 className="text-[14px] font-semibold text-white">{plan.name}</h3>
+              <p className="mt-0.5 text-[10px] text-slate-300/48">{plan.note}</p>
+              <p className="mt-2 text-[1.42rem] font-semibold tracking-[-0.04em] text-white">
                 {plan.price}
               </p>
             </div>
 
-            <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
+            <ul className="mt-2.5 space-y-1.5 border-t border-white/10 pt-2.5">
               {plan.points.map((point) => (
-                <div key={point} className="flex items-start gap-2 text-[12px] leading-4 text-white/72">
-                  <div className="mt-0.5 flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-400/12">
-                    <Check className="h-3 w-3 text-emerald-300" />
-                  </div>
+                <li
+                  key={point}
+                  className="flex items-start gap-2 text-[11px] leading-4 text-slate-200/68"
+                >
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-300/12">
+                    <Check className="h-2.5 w-2.5 text-emerald-200" />
+                  </span>
                   <span>{point}</span>
-                </div>
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </article>
         ))}
       </div>
     </ShellCard>
   );
-});
+}
 
 export default function OperationsShowcase({
   standalone = false,
   compact = false,
 }: OperationsShowcaseProps) {
+  const currentYear = new Date().getFullYear();
+
   return (
     <section
-      className={[
-        "relative h-screen w-full overflow-hidden bg-[#07111f] text-white",
-        standalone ? "min-h-screen" : "",
-      ].join(" ")}
+      aria-labelledby="operations-showcase-title"
+      className="relative h-[100dvh] w-full overflow-hidden bg-[#070d16] text-white"
     >
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.12),transparent_28%),radial-gradient(circle_at_top_right,rgba(255,255,255,0.07),transparent_18%),linear-gradient(180deg,#091223_0%,#07111f_48%,#050d18_100%)]" />
-        <div className="absolute inset-0 opacity-[0.045] [background-image:linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:30px_30px] sm:[background-size:38px_38px]" />
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.12),transparent_28%),radial-gradient(circle_at_82%_14%,rgba(148,163,184,0.08),transparent_22%),linear-gradient(180deg,#08111d_0%,#070d16_52%,#050912_100%)]" />
+        <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:38px_38px]" />
       </div>
 
-      <div className="relative z-10 mx-auto flex h-screen w-full max-w-7xl flex-col px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-4">
-        <div className="flex items-center justify-between gap-3">
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-col px-4 py-3 sm:px-6 lg:px-8">
+        <header className="flex items-center justify-between gap-3">
           <Link
             href="/"
-            className="inline-flex min-w-0 items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-white/92 sm:text-sm"
+            aria-label="Go to EstateDesk home"
+            className="inline-flex min-w-0 items-center gap-3 text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200/60 sm:text-sm"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.055] shadow-[0_10px_24px_rgba(0,0,0,0.22)]">
               <Building2 className="h-5 w-5" />
-            </div>
+            </span>
             <span className="truncate">EstateDesk</span>
           </Link>
 
           {standalone ? (
             <Link
               href="/login"
-              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white/80 transition hover:bg-white/10 sm:px-4"
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-2 text-xs font-semibold text-slate-200/78 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200/60"
             >
               <ChevronLeft className="h-4 w-4" />
               Back
             </Link>
           ) : null}
-        </div>
+        </header>
 
         <div className="mt-3 flex-1 overflow-hidden">
-          <div className="grid h-full grid-rows-[auto_1fr_auto_auto] gap-2.5 lg:gap-3">
-            <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-sky-300/15 bg-sky-300/8 px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.16em] text-sky-100/85 sm:px-4 sm:text-[10px]">
+          <div className="grid h-full grid-rows-[auto_1fr_auto_auto] gap-2.5">
+            <SectionBadge>
               <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">Trusted software for property operations</span>
-            </div>
+              <span className="truncate">Property operations software</span>
+            </SectionBadge>
 
-            <div className="grid min-h-0 gap-2.5 lg:grid-cols-[0.84fr_1.16fr] lg:gap-3">
-              <ShellCard className={`${compact ? "p-3.5 lg:p-4" : "p-4 sm:p-4.5 lg:p-4.5"} h-full`}>
-                <div className="flex flex-wrap items-center gap-2 text-[9px] font-medium uppercase tracking-[0.18em] text-white/45">
-                  <span>EstateDesk platform</span>
+            <div className="grid min-h-0 gap-2.5 lg:grid-cols-[0.86fr_1.14fr]">
+              <ShellCard
+                className={cx(
+                  "relative h-full overflow-hidden",
+                  compact ? "p-3.5" : "p-4",
+                )}
+              >
+                <div
+                  className="pointer-events-none absolute -bottom-24 -left-20 h-56 w-56 rounded-full bg-emerald-300/8 blur-3xl"
+                  aria-hidden="true"
+                />
+
+                <div className="relative flex flex-wrap items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-300/45">
+                  <span>EstateDesk</span>
                   <span className="text-white/20">•</span>
-                  <span className="inline-flex items-center gap-1 text-sky-200/80">
+                  <span className="inline-flex items-center gap-1 text-emerald-100/70">
                     <Sparkles className="h-3.5 w-3.5" />
-                    Modern operations
+                    Operations
                   </span>
                 </div>
 
-                <div className="mt-2.5 max-w-lg rounded-[22px] border border-white/10 bg-[#0b1628]/70 p-3.5 sm:p-4">
+                <div className="relative mt-2.5 max-w-xl rounded-[22px] border border-white/10 bg-[#0b1422]/70 p-4">
                   <h1
-                    className={`font-semibold tracking-[-0.035em] text-white ${
+                    id="operations-showcase-title"
+                    className={cx(
+                      "font-semibold tracking-[-0.045em] text-white",
                       compact
-                        ? "text-[1.8rem] leading-[1.1] sm:text-[1.95rem] lg:text-[2rem]"
-                        : "text-[1.8rem] leading-[1.08] sm:text-[1.95rem] lg:text-[2rem]"
-                    }`}
+                        ? "text-[1.8rem] leading-[1.08] lg:text-[2rem]"
+                        : "text-[1.85rem] leading-[1.06] lg:text-[2.15rem]",
+                    )}
                   >
-                    Property management, designed to feel clear, structured, and professional.
+                    Clear property operations.
                   </h1>
 
-                  <p className="mt-2.5 text-[13px] leading-5 text-white/64 sm:text-[14px]">
-                    Manage rent collection, water billing, inspections, tenant records, staff coordination, and reporting from one polished operational workspace.
+                  <p className="mt-2.5 max-w-lg text-[13px] leading-5 text-slate-300/62">
+                    Billing, tenants, inspections, teams, and records.
                   </p>
                 </div>
 
-                <div className="mt-3.5 flex flex-col gap-2.5 sm:flex-row">
+                <div className="relative mt-3.5 flex flex-col gap-2.5 sm:flex-row">
                   <Link
                     href="/register"
-                    className="inline-flex min-h-[42px] items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-medium text-slate-950 transition hover:bg-white/90"
+                    className="inline-flex min-h-[42px] items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200/60"
                   >
                     Create account
                   </Link>
                   <Link
                     href="/login"
-                    className="inline-flex min-h-[42px] items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/10"
+                    className="inline-flex min-h-[42px] items-center justify-center rounded-2xl border border-white/14 bg-white/[0.055] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200/60"
                   >
                     Sign in
                   </Link>
@@ -307,9 +365,10 @@ export default function OperationsShowcase({
           </div>
         </div>
 
-        <div className="mt-2 text-center text-[10px] text-white/35 sm:text-left">
-          © {new Date().getFullYear()} EstateDesk. All rights reserved.
-        </div>
+        <footer className="mt-2 flex items-center justify-between gap-3 text-[10px] text-slate-300/35">
+          <span>© {currentYear} EstateDesk.</span>
+          <span className="hidden sm:inline-flex">Professional workspace</span>
+        </footer>
       </div>
     </section>
   );
