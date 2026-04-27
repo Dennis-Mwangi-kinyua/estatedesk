@@ -1,7 +1,37 @@
 import type { ReactNode } from "react";
+
 import { OrgDashboardShell } from "@/components/layout/org-dashboard-shell";
 import { requireUserSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+
+type DashboardShellRole =
+  | "ADMIN"
+  | "MANAGER"
+  | "OFFICE"
+  | "ACCOUNTANT"
+  | "CARETAKER";
+
+function normalizeDashboardShellRole(
+  role: string | null | undefined,
+): DashboardShellRole {
+  if (
+    role === "ADMIN" ||
+    role === "MANAGER" ||
+    role === "OFFICE" ||
+    role === "ACCOUNTANT" ||
+    role === "CARETAKER"
+  ) {
+    return role;
+  }
+
+  // Prisma OrgRole may include LANDLORD or TENANT,
+  // but OrgDashboardShell only accepts staff dashboard roles.
+  if (role === "LANDLORD") {
+    return "ADMIN";
+  }
+
+  return "ADMIN";
+}
 
 export default async function StaffLayout({
   children,
@@ -26,7 +56,7 @@ export default async function StaffLayout({
   return (
     <OrgDashboardShell
       organizationName={organizationName}
-      role={session.activeOrgRole ?? "ADMIN"}
+      role={normalizeDashboardShellRole(session.activeOrgRole)}
     >
       {children}
     </OrgDashboardShell>

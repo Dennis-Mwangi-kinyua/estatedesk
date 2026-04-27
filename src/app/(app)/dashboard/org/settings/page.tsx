@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
-import { Prisma } from "@prisma/client";
+import { Prisma, type OrgRole, type UserStatus } from "@prisma/client";
 import {
   ArrowUpRight,
   BadgeCheck,
@@ -32,20 +32,12 @@ import {
 
 export const dynamic = "force-dynamic";
 
-type Role =
-  | "ADMIN"
-  | "MANAGER"
-  | "OFFICE"
-  | "ACCOUNTANT"
-  | "CARETAKER"
-  | "TENANT";
-
 type Member = {
   id: string;
   name: string;
   email: string;
-  role: Role;
-  status: "ACTIVE" | "SUSPENDED" | "DISABLED";
+  role: OrgRole;
+  status: UserStatus;
 };
 
 type ApiKeyItem = {
@@ -554,7 +546,7 @@ export default async function SettingsPage() {
                 defaultValue={data.organization.currency}
               />
 
-              <div className="md:col-span-2 flex justify-end">
+              <div className="flex justify-end md:col-span-2">
                 <button
                   type="submit"
                   className="inline-flex h-11 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800"
@@ -607,7 +599,7 @@ export default async function SettingsPage() {
                 defaultChecked={data.preferences.emailNotifications}
               />
 
-              <div className="pt-2 flex justify-end">
+              <div className="flex justify-end pt-2">
                 <button
                   type="submit"
                   className="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-200 px-5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
@@ -644,12 +636,12 @@ export default async function SettingsPage() {
                 defaultValue="MANAGER"
                 className="h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
               >
+                <option value="LANDLORD">Landlord</option>
                 <option value="ADMIN">Admin</option>
                 <option value="MANAGER">Manager</option>
                 <option value="OFFICE">Office</option>
                 <option value="ACCOUNTANT">Accountant</option>
                 <option value="CARETAKER">Caretaker</option>
-                <option value="TENANT">Tenant</option>
               </select>
 
               <button
@@ -826,7 +818,10 @@ export default async function SettingsPage() {
             description="A quick overview of your workspace profile and status."
           >
             <div className="space-y-1 divide-y divide-slate-100">
-              <InfoRow label="Organization Name" value={data.organization.name} />
+              <InfoRow
+                label="Organization Name"
+                value={data.organization.name}
+              />
               <InfoRow label="Slug" value={data.organization.slug} />
               <InfoRow
                 label="Status"
@@ -935,7 +930,9 @@ export default async function SettingsPage() {
               <div className="flex items-start gap-3 rounded-[18px] border border-slate-200 p-4">
                 <Globe2 className="mt-0.5 h-4 w-4 text-slate-500" />
                 <div>
-                  <p className="text-sm font-medium text-slate-900">Timezone</p>
+                  <p className="text-sm font-medium text-slate-900">
+                    Timezone
+                  </p>
                   <p className="text-sm text-slate-500">
                     {data.organization.timezone}
                   </p>
@@ -974,8 +971,8 @@ export default async function SettingsPage() {
                     </p>
                     <p className="mt-1 text-sm text-slate-500">
                       {activeApiKeys} active API key
-                      {activeApiKeys === 1 ? "" : "s"} available for integrations
-                      and external services.
+                      {activeApiKeys === 1 ? "" : "s"} available for
+                      integrations and external services.
                     </p>
                   </div>
                 </div>
@@ -1062,7 +1059,10 @@ export default async function SettingsPage() {
 
               <div className="flex items-start gap-3 rounded-[18px] border border-slate-200 p-4">
                 <KeyRound className="mt-0.5 h-4 w-4 text-slate-500" />
-                <p>API keys are created hashed in the database and can be revoked or reactivated.</p>
+                <p>
+                  API keys are created hashed in the database and can be revoked
+                  or reactivated.
+                </p>
               </div>
             </div>
           </SectionCard>

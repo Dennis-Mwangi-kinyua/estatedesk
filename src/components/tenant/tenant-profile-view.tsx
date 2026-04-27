@@ -20,8 +20,28 @@ import {
   X,
 } from "lucide-react";
 
-import type { TenantProfileViewModel } from "@/app/(app)/dashboard/tenant/profile/page";
 import { verifyTenantPassword } from "@/app/(app)/dashboard/tenant/profile/actions";
+
+export type TenantProfileViewModel = {
+  id?: string;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  nationalId?: string | null;
+  kraPin?: string | null;
+  type?: "INDIVIDUAL" | "COMPANY" | null;
+  status?: "ACTIVE" | "INACTIVE" | "BLACKLISTED" | null;
+  companyName?: string | null;
+  profileImageUrl?: string | null;
+  dataConsent: boolean;
+  marketingConsent: boolean;
+  nextOfKin?: {
+    name?: string | null;
+    relationship?: string | null;
+    phone?: string | null;
+    email?: string | null;
+  } | null;
+};
 
 type SensitiveFieldKey =
   | "phone"
@@ -159,7 +179,7 @@ function getMaskedValue(field: SensitiveFieldKey, value?: string | null) {
 function getVisibleValue(
   revealed: boolean,
   field: SensitiveFieldKey,
-  value?: string | null
+  value?: string | null,
 ) {
   return revealed ? displayValue(value) : getMaskedValue(field, value);
 }
@@ -216,7 +236,9 @@ const TopSummaryCard = memo(function TopSummaryCard({
 }) {
   return (
     <div className="rounded-2xl bg-neutral-50 p-4">
-      <p className="text-xs uppercase tracking-wide text-neutral-500">{label}</p>
+      <p className="text-xs uppercase tracking-wide text-neutral-500">
+        {label}
+      </p>
       <p className="mt-1 truncate text-sm font-semibold text-neutral-900">
         {value}
       </p>
@@ -295,7 +317,9 @@ const IOSRow = memo(function IOSRow({
         <div className="max-w-[180px] truncate text-right text-[15px] font-medium text-neutral-500 sm:max-w-none">
           {value}
         </div>
-        {href ? <ChevronRight className="h-4 w-4 shrink-0 text-neutral-400" /> : null}
+        {href ? (
+          <ChevronRight className="h-4 w-4 shrink-0 text-neutral-400" />
+        ) : null}
       </div>
     </div>
   );
@@ -466,51 +490,64 @@ const PasswordConfirmModal = memo(function PasswordConfirmModal({
 
 function TenantProfileView({ tenant }: { tenant: TenantProfileViewModel }) {
   const [revealed, setRevealed] = useState<RevealState>(INITIAL_REVEAL_STATE);
-  const [activeField, setActiveField] = useState<SensitiveFieldKey | null>(null);
+  const [activeField, setActiveField] = useState<SensitiveFieldKey | null>(
+    null,
+  );
   const [password, setPassword] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const initials = useMemo(() => initialsFromName(tenant.fullName), [tenant.fullName]);
-  const statusLabel = useMemo(() => humanizeStatus(tenant.status), [tenant.status]);
-  const tenantTypeLabel = useMemo(() => humanizeTenantType(tenant.type), [tenant.type]);
+  const initials = useMemo(
+    () => initialsFromName(tenant.fullName),
+    [tenant.fullName],
+  );
+  const statusLabel = useMemo(
+    () => humanizeStatus(tenant.status),
+    [tenant.status],
+  );
+  const tenantTypeLabel = useMemo(
+    () => humanizeTenantType(tenant.type),
+    [tenant.type],
+  );
 
   const phoneValue = useMemo(
     () => getVisibleValue(revealed.phone, "phone", tenant.phone),
-    [revealed.phone, tenant.phone]
+    [revealed.phone, tenant.phone],
   );
   const emailValue = useMemo(
     () => getVisibleValue(revealed.email, "email", tenant.email),
-    [revealed.email, tenant.email]
+    [revealed.email, tenant.email],
   );
   const nationalIdValue = useMemo(
     () => getVisibleValue(revealed.nationalId, "nationalId", tenant.nationalId),
-    [revealed.nationalId, tenant.nationalId]
+    [revealed.nationalId, tenant.nationalId],
   );
   const kraPinValue = useMemo(
     () => getVisibleValue(revealed.kraPin, "kraPin", tenant.kraPin),
-    [revealed.kraPin, tenant.kraPin]
+    [revealed.kraPin, tenant.kraPin],
   );
   const nextOfKinPhoneValue = useMemo(
     () =>
       getVisibleValue(
         revealed.nextOfKinPhone,
         "nextOfKinPhone",
-        tenant.nextOfKin?.phone
+        tenant.nextOfKin?.phone,
       ),
-    [revealed.nextOfKinPhone, tenant.nextOfKin?.phone]
+    [revealed.nextOfKinPhone, tenant.nextOfKin?.phone],
   );
   const nextOfKinEmailValue = useMemo(
     () =>
       getVisibleValue(
         revealed.nextOfKinEmail,
         "nextOfKinEmail",
-        tenant.nextOfKin?.email
+        tenant.nextOfKin?.email,
       ),
-    [revealed.nextOfKinEmail, tenant.nextOfKin?.email]
+    [revealed.nextOfKinEmail, tenant.nextOfKin?.email],
   );
 
-  const activeFieldLabel = activeField ? FIELD_LABELS[activeField] : "this field";
+  const activeFieldLabel = activeField
+    ? FIELD_LABELS[activeField]
+    : "this field";
 
   const closeModal = useCallback(() => {
     setActiveField(null);
@@ -579,7 +616,7 @@ function TenantProfileView({ tenant }: { tenant: TenantProfileViewModel }) {
                 <div className="px-5 pb-5 pt-6 sm:px-6 lg:px-8 lg:pt-8">
                   <div className="flex flex-col items-center text-center lg:flex-row lg:items-center lg:justify-between lg:text-left">
                     <div className="flex flex-col items-center lg:flex-row lg:items-center lg:gap-5">
-                      <div className="relative h-24 w-24 overflow-hidden rounded-[28px] bg-neutral-100 ring-4 ring-white shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+                      <div className="relative h-24 w-24 overflow-hidden rounded-[28px] bg-neutral-100 shadow-[0_10px_30px_rgba(0,0,0,0.08)] ring-4 ring-white">
                         {tenant.profileImageUrl ? (
                           <Image
                             src={tenant.profileImageUrl}
@@ -611,7 +648,7 @@ function TenantProfileView({ tenant }: { tenant: TenantProfileViewModel }) {
                         <div className="mt-3 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
                           <span
                             className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ${statusBadgeStyles(
-                              tenant.status
+                              tenant.status,
                             )}`}
                           >
                             {statusLabel}
@@ -639,7 +676,10 @@ function TenantProfileView({ tenant }: { tenant: TenantProfileViewModel }) {
                   <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <TopSummaryCard label="Phone" value={phoneValue} />
                     <TopSummaryCard label="Email" value={emailValue} />
-                    <TopSummaryCard label="National ID" value={nationalIdValue} />
+                    <TopSummaryCard
+                      label="National ID"
+                      value={nationalIdValue}
+                    />
                     <TopSummaryCard label="KRA PIN" value={kraPinValue} />
                   </div>
                 </div>
@@ -654,7 +694,11 @@ function TenantProfileView({ tenant }: { tenant: TenantProfileViewModel }) {
                     emoji="👤"
                   />
                   <IOSDivider />
-                  <IOSRow label="Tenant Type" value={tenantTypeLabel} emoji="🏠" />
+                  <IOSRow
+                    label="Tenant Type"
+                    value={tenantTypeLabel}
+                    emoji="🏠"
+                  />
                   <IOSDivider />
                   <SensitiveValueButton
                     label="Phone"
@@ -862,14 +906,18 @@ function TenantProfileView({ tenant }: { tenant: TenantProfileViewModel }) {
                           value={nextOfKinPhoneValue}
                           isSensitive
                           revealed={revealed.nextOfKinPhone}
-                          onReveal={() => handleRequestReveal("nextOfKinPhone")}
+                          onReveal={() =>
+                            handleRequestReveal("nextOfKinPhone")
+                          }
                         />
                         <DesktopField
                           label="Email"
                           value={nextOfKinEmailValue}
                           isSensitive
                           revealed={revealed.nextOfKinEmail}
-                          onReveal={() => handleRequestReveal("nextOfKinEmail")}
+                          onReveal={() =>
+                            handleRequestReveal("nextOfKinEmail")
+                          }
                         />
                       </>
                     ) : (

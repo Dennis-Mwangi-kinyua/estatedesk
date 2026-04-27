@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import {
@@ -46,6 +47,9 @@ export default async function StaffPage() {
     prisma.membership.groupBy({
       by: ["role"],
       where: membershipWhere,
+      orderBy: {
+        role: "asc",
+      },
       _count: {
         _all: true,
       },
@@ -61,12 +65,22 @@ export default async function StaffPage() {
   }, {} as Record<StaffRole, number>);
 
   for (const row of groupedRoles) {
-    counts[row.role as StaffRole] = row._count._all;
+    const role = row.role as StaffRole;
+
+    if (role in counts) {
+      const count =
+        typeof row._count === "object" && row._count !== null
+          ? row._count._all ?? 0
+          : 0;
+
+      counts[role] = count;
+    }
   }
 
   const activeRoles = STAFF_ROLES.filter(
-    (role) => (counts[role] ?? 0) > 0
+    (role) => (counts[role] ?? 0) > 0,
   ).length;
+
   const emptyRoles = STAFF_ROLES.length - activeRoles;
 
   const directoryRows = [
@@ -110,12 +124,14 @@ export default async function StaffPage() {
             <p className="text-sm font-medium text-slate-500">
               Organisation people
             </p>
+
             <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
               Staff Directory
             </h1>
+
             <p className="max-w-2xl text-sm leading-6 text-slate-600">
-              Manage staff directories, operational assignments, and organisation
-              access from a single place.
+              Manage staff directories, operational assignments, and
+              organisation access from a single place.
             </p>
           </div>
 
@@ -165,6 +181,7 @@ export default async function StaffPage() {
           <h2 className="text-base font-semibold text-slate-950 sm:text-lg">
             Directory overview
           </h2>
+
           <p className="mt-1 text-sm text-slate-600">
             Open the staff directory you want to manage.
           </p>
@@ -192,6 +209,7 @@ export default async function StaffPage() {
                         <h3 className="text-sm font-semibold text-slate-950 sm:text-base">
                           {item.label}
                         </h3>
+
                         <p className="mt-1 text-sm leading-6 text-slate-600">
                           {item.description}
                         </p>
@@ -215,6 +233,7 @@ export default async function StaffPage() {
                         <p className="text-xs uppercase tracking-[0.14em] text-slate-400">
                           Records
                         </p>
+
                         <p className="mt-1 text-lg font-semibold text-slate-950">
                           {item.count.toLocaleString()}
                         </p>

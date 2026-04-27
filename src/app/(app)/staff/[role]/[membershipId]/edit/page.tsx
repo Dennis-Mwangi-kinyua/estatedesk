@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { updateMembership } from "@/features/staff/actions/update-membership";
@@ -15,6 +16,7 @@ type Props = {
 
 export default async function EditMemberPage({ params }: Props) {
   const { role, membershipId } = await params;
+
   const orgId = await requireCurrentOrgId();
   const normalizedRole = normalizeStaffRole(role);
 
@@ -53,11 +55,12 @@ export default async function EditMemberPage({ params }: Props) {
     notFound();
   }
 
-  const meta = ROLE_META[normalizedRole];
   const safeMember = member;
+  const meta = ROLE_META[normalizedRole];
 
   async function submit(formData: FormData) {
     "use server";
+
     await updateMembership(safeMember.id, formData);
   }
 
@@ -89,7 +92,7 @@ export default async function EditMemberPage({ params }: Props) {
                   Edit {safeMember.user.fullName}
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                  Update this member’s profile and access role.
+                  Update this member&apos;s profile and access role.
                 </p>
               </div>
             </div>
@@ -110,7 +113,7 @@ export default async function EditMemberPage({ params }: Props) {
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
               <p className="text-sm text-slate-500">Role</p>
               <p className="mt-1 text-base font-semibold text-slate-950">
-                {safeMember.role}
+                {meta.label}
               </p>
             </div>
 
@@ -132,7 +135,7 @@ export default async function EditMemberPage({ params }: Props) {
             fullName: safeMember.user.fullName,
             email: safeMember.user.email ?? "",
             phone: safeMember.user.phone ?? "",
-            role: safeMember.role,
+            role: normalizedRole,
           }}
         />
       </section>

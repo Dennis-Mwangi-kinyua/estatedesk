@@ -1,8 +1,9 @@
 // src/features/settings/queries/get-settings-page-data.ts
-import { Prisma } from "@prisma/client";
+import { Prisma, type OrgRole, type UserStatus } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
 
-type SettingsPageData = {
+export type SettingsPageData = {
   organization: {
     id: string;
     name: string;
@@ -32,8 +33,8 @@ type SettingsPageData = {
     id: string;
     name: string;
     email: string;
-    role: "ADMIN" | "MANAGER" | "OFFICE" | "ACCOUNTANT" | "CARETAKER" | "TENANT";
-    status: "ACTIVE" | "SUSPENDED" | "DISABLED";
+    role: OrgRole;
+    status: UserStatus;
   }>;
   apiKeys: Array<{
     id: string;
