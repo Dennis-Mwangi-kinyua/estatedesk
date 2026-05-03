@@ -18,6 +18,17 @@ type PageProps = {
   }>;
 };
 
+const checklistRows = [
+  ["Cleanliness", "cleanlinessOk"],
+  ["Walls condition", "wallsOk"],
+  ["Doors & windows", "doorsWindowsOk"],
+  ["Plumbing", "plumbingOk"],
+  ["Electrical", "electricalOk"],
+  ["Keys returned", "keysReturned"],
+  ["Meter readings taken", "meterReadingsTaken"],
+  ["Damage observed", "damageObserved"],
+] as const;
+
 function formatDate(value: Date | string | null | undefined) {
   if (!value) return "—";
 
@@ -71,8 +82,9 @@ function readBool(
 function maskName(value: string | null | undefined) {
   if (!value || !value.trim()) return "—";
 
-  const parts = value.trim().split(/\s+/);
-  return parts
+  return value
+    .trim()
+    .split(/\s+/)
     .map((part) => {
       if (part.length <= 1) return "x";
       return `${part.slice(0, 1)}${"x".repeat(Math.max(2, part.length - 1))}`;
@@ -80,15 +92,10 @@ function maskName(value: string | null | undefined) {
     .join(" ");
 }
 
-function maskNumberTail(
-  value: string | null | undefined,
-  visibleTail = 3
-) {
+function maskNumberTail(value: string | null | undefined, visibleTail = 3) {
   if (!value || !value.trim()) return "—";
 
-  const trimmed = value.trim();
-  const tail = trimmed.slice(-visibleTail);
-  return `xxx xxxx ${tail}`;
+  return `xxx xxxx ${value.trim().slice(-visibleTail)}`;
 }
 
 function maskPhone(value: string | null | undefined) {
@@ -145,12 +152,95 @@ function SectionCard({
           {title}
         </h2>
       </div>
+
       <div className="p-5">{children}</div>
     </section>
   );
 }
 
-export default async function OrgInspectionPrintPage({ params }: PageProps) {
+async function getCaretakerInspectionFilters(args: {
+  orgId: string;
+  userId: string;
+}) {
+  const allocations = await prisma.caretakerAssignment.findMany({
+    where: {
+      orgId: args.orgId,
+      caretakerUserId: args.userId,
+      active: true,
+    },
+    select: {
+      propertyId: true,
+      buildingId: true,
+      unitId: true,
+    },
+  });
+
+  const propertyIds = allocations
+    .map((item) => item.propertyId)
+    .filter((value): value is string => Boolean(value));
+
+  const buildingIds = allocations
+    .map((item) => item.buildingId)
+    .filter((value): value is string => Boolean(value));
+
+  const unitIds = allocations
+    .map((item) => item.unitId)
+    .filter((value): value is string => Boolean(value));
+
+  const allocationFilters: Prisma.InspectionWhereInput[] = [
+    {
+      notice: {
+        lease: {
+          caretakerUserId: args.userId,
+        },
+      },
+    },
+  ];
+
+  if (unitIds.length > 0) {
+    allocationFilters.push({
+      notice: {
+        lease: {
+          unitId: {
+            in: unitIds,
+          },
+        },
+      },
+    });
+  }
+
+  if (buildingIds.length > 0) {
+    allocationFilters.push({
+      notice: {
+        lease: {
+          unit: {
+            buildingId: {
+              in: buildingIds,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  if (propertyIds.length > 0) {
+    allocationFilters.push({
+      notice: {
+        lease: {
+          unit: {
+            propertyId: {
+              in: propertyIds,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  return allocationFilters;
+}
+
+export default async function InspectionPrintPage({ params }: PageProps) {
   const session = await requireUserSession();
   const { inspectionId } = await params;
 
@@ -164,17 +254,34 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
     );
   }
 
+  const isCaretaker = session.activeOrgRole === "CARETAKER";
+
+  const inspectionWhere: Prisma.InspectionWhereInput = {
+    id: inspectionId,
+    notice: {
+      lease: {
+        orgId: session.activeOrgId,
+        deletedAt: null,
+      },
+    },
+  };
+
+  if (isCaretaker) {
+    const allocationFilters = await getCaretakerInspectionFilters({
+      orgId: session.activeOrgId,
+      userId: session.userId,
+    });
+
+    inspectionWhere.AND = [
+      {
+        OR: allocationFilters,
+      },
+    ];
+  }
+
   const [inspection, printedBy, organization] = await Promise.all([
     prisma.inspection.findFirst({
-      where: {
-        id: inspectionId,
-        notice: {
-          lease: {
-            orgId: session.activeOrgId,
-            deletedAt: null,
-          },
-        },
-      },
+      where: inspectionWhere,
       include: {
         inspector: {
           select: {
@@ -205,6 +312,7 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
         },
       },
     }),
+
     prisma.user.findUnique({
       where: {
         id: session.userId,
@@ -215,6 +323,7 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
         email: true,
       },
     }),
+
     prisma.organization.findUnique({
       where: {
         id: session.activeOrgId,
@@ -236,6 +345,14 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
   const report = (inspection.checklist ?? {}) as Record<string, unknown>;
   const printedAt = new Date();
   const isCompleted = inspection.status === "COMPLETED";
+
+  const backHref = isCaretaker
+    ? `/dashboard/caretaker/inspections/${inspection.id}`
+    : `/dashboard/org/inspections/${inspection.id}`;
+
+  const generatedFromLabel = isCaretaker
+    ? "Printed / saved from EstateDesk caretaker dashboard"
+    : "Printed / saved from EstateDesk office dashboard";
 
   return (
     <>
@@ -290,7 +407,7 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
         <div className="print-page mx-auto max-w-5xl px-4 py-6">
           <div className="screen-only mb-4 flex flex-wrap items-center justify-between gap-3">
             <Link
-              href={`/dashboard/org/inspections/${inspection.id}`}
+              href={backHref}
               className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
               Back to inspection
@@ -300,6 +417,7 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
               <span className="inline-flex min-h-10 items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-500">
                 Browser headers and footers must be turned off in the print dialog
               </span>
+
               <PrintReportButton />
             </div>
           </div>
@@ -311,9 +429,11 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                     Move-Out Inspection Report
                   </p>
+
                   <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
                     {organization?.name ?? "Organisation"}
                   </h1>
+
                   <div className="mt-3 space-y-1 text-sm text-slate-600">
                     <p>{organization?.address || "Address not provided"}</p>
                     <p>
@@ -572,14 +692,18 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
                   </div>
 
                   <div>
-                    <p className="text-sm text-slate-500">Inspection scheduled</p>
+                    <p className="text-sm text-slate-500">
+                      Inspection scheduled
+                    </p>
                     <p className="mt-1 text-sm font-semibold text-slate-950">
                       {formatDateTime(inspection.scheduledAt)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm text-slate-500">Inspection completed</p>
+                    <p className="text-sm text-slate-500">
+                      Inspection completed
+                    </p>
                     <p className="mt-1 text-sm font-semibold text-slate-950">
                       {formatDateTime(inspection.completedAt)}
                     </p>
@@ -613,25 +737,21 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
                     <table className="min-w-full text-sm">
                       <thead className="bg-slate-50 text-left text-slate-600">
                         <tr>
-                          <th className="px-4 py-3 font-medium">Checklist item</th>
+                          <th className="px-4 py-3 font-medium">
+                            Checklist item
+                          </th>
                           <th className="px-4 py-3 font-medium">Result</th>
                         </tr>
                       </thead>
+
                       <tbody>
-                        {[
-                          ["Cleanliness", readBool(report, "cleanlinessOk")],
-                          ["Walls condition", readBool(report, "wallsOk")],
-                          ["Doors & windows", readBool(report, "doorsWindowsOk")],
-                          ["Plumbing", readBool(report, "plumbingOk")],
-                          ["Electrical", readBool(report, "electricalOk")],
-                          ["Keys returned", readBool(report, "keysReturned")],
-                          ["Meter readings taken", readBool(report, "meterReadingsTaken")],
-                          ["Damage observed", readBool(report, "damageObserved")],
-                        ].map(([label, value]) => (
-                          <tr key={label} className="border-t border-slate-200">
-                            <td className="px-4 py-3 text-slate-800">{label}</td>
+                        {checklistRows.map(([label, key]) => (
+                          <tr key={key} className="border-t border-slate-200">
+                            <td className="px-4 py-3 text-slate-800">
+                              {label}
+                            </td>
                             <td className="px-4 py-3 font-semibold text-slate-950">
-                              {value}
+                              {readBool(report, key)}
                             </td>
                           </tr>
                         ))}
@@ -660,7 +780,9 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
               <section className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 print:break-inside-avoid">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <p className="text-sm text-slate-500">Report generated by</p>
+                    <p className="text-sm text-slate-500">
+                      Report generated by
+                    </p>
                     <p className="mt-1 text-sm font-semibold text-slate-950">
                       {maskName(printedBy?.fullName)}
                     </p>
@@ -675,7 +797,7 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
                       {formatDateTime(printedAt)}
                     </p>
                     <p className="text-sm text-slate-600">
-                      Printed / saved from EstateDesk office dashboard
+                      {generatedFromLabel}
                     </p>
                   </div>
                 </div>

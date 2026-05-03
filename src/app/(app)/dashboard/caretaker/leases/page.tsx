@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { requireUserSession } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,7 @@ function formatCurrency(value: unknown) {
 
 function formatDate(value: Date | string | null | undefined) {
   if (!value) return "—";
+
   const date = value instanceof Date ? value : new Date(value);
 
   if (Number.isNaN(date.getTime())) return "—";
@@ -32,46 +35,125 @@ function formatDate(value: Date | string | null | undefined) {
   }).format(date);
 }
 
-export default async function LeasesPage() {
-  const leases = await prisma.lease.findMany({
+async function getCaretakerAllowedUnitIds({
+  orgId,
+  caretakerUserId,
+  scopedUnitId,
+}: {
+  orgId: string;
+  caretakerUserId: string;
+  scopedUnitId: string | null;
+}) {
+  /*
+   * Best case:
+   * The caretaker membership is UNIT-scoped.
+   * Then this caretaker can only access that one apartment/unit.
+   */
+  if (scopedUnitId) {
+    return [scopedUnitId];
+  }
+
+  /*
+   * Fallback:
+   * If the membership is not UNIT-scoped, use active CaretakerAssignment rows.
+   * For one-apartment access, make sure the caretaker has only one active
+   * assignment with unitId set.
+   */
+  const assignments = await prisma.caretakerAssignment.findMany({
     where: {
-      deletedAt: null,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      tenant: {
-        select: {
-          id: true,
-          fullName: true,
-          phone: true,
-          email: true,
-          status: true,
-        },
+      orgId,
+      caretakerUserId,
+      active: true,
+      endedAt: null,
+      unitId: {
+        not: null,
       },
-      unit: {
-        select: {
-          id: true,
-          houseNo: true,
-          rentAmount: true,
-          status: true,
-          property: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          building: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      },
+    },
+    select: {
+      unitId: true,
     },
   });
+
+  return Array.from(
+    new Set(
+      assignments
+        .map((assignment) => assignment.unitId)
+        .filter((unitId): unitId is string => Boolean(unitId)),
+    ),
+  );
+}
+
+export default async function LeasesPage() {
+  const session = await requireUserSession();
+
+  if (!session.activeOrgId) {
+    redirect("/login");
+  }
+
+  if (session.activeOrgRole !== "CARETAKER") {
+    redirect("/dashboard");
+  }
+
+  const orgId = session.activeOrgId;
+  const caretakerUserId = session.userId;
+
+  const scopedUnitId =
+    session.membershipScope?.scopeType === "UNIT"
+      ? session.membershipScope.scopeId
+      : null;
+
+  const allowedUnitIds = await getCaretakerAllowedUnitIds({
+    orgId,
+    caretakerUserId,
+    scopedUnitId,
+  });
+
+  const leases =
+    allowedUnitIds.length === 0
+      ? []
+      : await prisma.lease.findMany({
+          where: {
+            orgId,
+            deletedAt: null,
+            unitId: {
+              in: allowedUnitIds,
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          include: {
+            tenant: {
+              select: {
+                id: true,
+                fullName: true,
+                phone: true,
+                email: true,
+                status: true,
+              },
+            },
+            unit: {
+              select: {
+                id: true,
+                houseNo: true,
+                rentAmount: true,
+                status: true,
+                property: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+                building: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        });
 
   const totalLeases = leases.length;
   const activeLeases = leases.filter((lease) => lease.status === "ACTIVE").length;
@@ -83,7 +165,7 @@ export default async function LeasesPage() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Leases</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            View and manage tenant leases.
+            View leases for your assigned apartment only.
           </p>
         </div>
 
@@ -114,12 +196,12 @@ export default async function LeasesPage() {
 
       <section className="overflow-hidden rounded-xl border bg-background shadow-sm">
         <div className="border-b px-4 py-3">
-          <h2 className="text-base font-semibold">All Leases</h2>
+          <h2 className="text-base font-semibold">Assigned Apartment Leases</h2>
         </div>
 
         {leases.length === 0 ? (
           <div className="p-8 text-center text-sm text-muted-foreground">
-            No leases found.
+            No leases found for your assigned apartment.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -137,13 +219,18 @@ export default async function LeasesPage() {
                   <th className="px-4 py-3 font-medium">End</th>
                 </tr>
               </thead>
+
               <tbody>
                 {leases.map((lease) => (
                   <tr key={lease.id} className="border-t">
                     <td className="px-4 py-3 font-medium">
                       {lease.tenant?.fullName ?? "—"}
                     </td>
-                    <td className="px-4 py-3">{lease.tenant?.phone ?? "—"}</td>
+
+                    <td className="px-4 py-3">
+                      {lease.tenant?.phone ?? "—"}
+                    </td>
+
                     <td className="px-4 py-3">
                       {lease.unit?.property ? (
                         <Link
@@ -156,25 +243,35 @@ export default async function LeasesPage() {
                         "—"
                       )}
                     </td>
-                    <td className="px-4 py-3">{lease.unit?.building?.name ?? "—"}</td>
-                    <td className="px-4 py-3">{lease.unit?.houseNo ?? "—"}</td>
+
+                    <td className="px-4 py-3">
+                      {lease.unit?.building?.name ?? "—"}
+                    </td>
+
+                    <td className="px-4 py-3">
+                      {lease.unit?.houseNo ?? "—"}
+                    </td>
+
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full border px-2.5 py-1 text-xs">
                         {lease.status}
                       </span>
                     </td>
+
                     <td className="px-4 py-3">
-                      {"monthlyRent" in lease && lease.monthlyRent != null
+                      {lease.monthlyRent != null
                         ? formatCurrency(lease.monthlyRent)
                         : lease.unit?.rentAmount != null
-                        ? formatCurrency(lease.unit.rentAmount)
-                        : "—"}
+                          ? formatCurrency(lease.unit.rentAmount)
+                          : "—"}
                     </td>
+
                     <td className="px-4 py-3">
-                      {"startDate" in lease ? formatDate(lease.startDate as Date | string | null) : "—"}
+                      {formatDate(lease.startDate)}
                     </td>
+
                     <td className="px-4 py-3">
-                      {"endDate" in lease ? formatDate(lease.endDate as Date | string | null) : "—"}
+                      {formatDate(lease.endDate)}
                     </td>
                   </tr>
                 ))}
