@@ -1,5 +1,7 @@
 import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
+
+const fallbackDatasourceUrl = "postgresql://user:password@localhost:5432/estatedesk";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -8,6 +10,9 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: env("DIRECT_URL"),
+    url:
+      process.env.DIRECT_URL ??
+      process.env.DATABASE_URL ??
+      fallbackDatasourceUrl,
   },
 });
