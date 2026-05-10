@@ -13,6 +13,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { requireCurrentOrgId } from "@/lib/auth/org";
+import { notifyRecipients } from "@/lib/notifications/notify";
 
 export async function completeInspectionAction(formData: FormData) {
   const session = await requireUserSession();
@@ -233,18 +234,17 @@ export async function completeInspectionAction(formData: FormData) {
       },
     });
 
-    if (officeRecipients.length > 0) {
-      await tx.notification.createMany({
-        data: officeRecipients.map((recipient) => ({
-          orgId,
-          userId: recipient.userId,
-          channel: NotificationChannel.IN_APP,
-          type: NotificationType.GENERAL,
-          title: "Inspection report submitted",
-          message: `Inspection report submitted for ${inspection.notice.tenant.fullName} at ${inspection.notice.lease.unit.property.name}, unit ${inspection.notice.lease.unit.houseNo}.`,
-        })),
-      });
-    }
+    await notifyRecipients({
+      db: tx,
+      orgId,
+      recipients: officeRecipients.map((recipient) => ({
+        userId: recipient.userId,
+      })),
+      channels: [NotificationChannel.IN_APP],
+      type: NotificationType.GENERAL,
+      title: "Inspection report submitted",
+      message: `Inspection report submitted for ${inspection.notice.tenant.fullName} at ${inspection.notice.lease.unit.property.name}, unit ${inspection.notice.lease.unit.houseNo}.`,
+    });
   });
 
   revalidatePath("/dashboard/caretaker/inspections");

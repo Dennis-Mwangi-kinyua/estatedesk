@@ -1,10 +1,12 @@
 "use server";
 
 import { Prisma, PropertyType, UnitType } from "@prisma/client";
+import { hash } from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
 
 const ALLOWED_PROPERTY_TYPES: PropertyType[] = [
   "RESIDENTIAL",
@@ -113,6 +115,18 @@ function toNullableNonNegativeInteger(
   }
 
   return parsed;
+}
+
+function normalizeUsername(value: string | null) {
+  return value?.trim().toLowerCase().replace(/\s+/g, "") ?? null;
+}
+
+function normalizeEmail(value: string | null) {
+  return value?.trim().toLowerCase() ?? null;
+}
+
+function normalizePhone(value: string | null) {
+  return value?.replace(/\s+/g, "").trim() ?? null;
 }
 
 function formatPlanLabel(unitType: UnitType, bedrooms: number | null) {
@@ -383,6 +397,19 @@ export async function createPropertyAction(formData: FormData) {
     "Water fixed charge",
   );
   const isActive = formData.get("isActive") === "on";
+  const landlordMode = String(formData.get("landlordMode") ?? "none");
+  const existingLandlordProfileId = toOptionalString(
+    formData.get("existingLandlordProfileId"),
+  );
+  const landlordFullName = toOptionalString(formData.get("landlordFullName"));
+  const landlordUsername = normalizeUsername(
+    toOptionalString(formData.get("landlordUsername")),
+  );
+  const landlordPassword = toOptionalString(formData.get("landlordPassword"));
+  const landlordEmail = normalizeEmail(toOptionalString(formData.get("landlordEmail")));
+  const landlordPhone = normalizePhone(toOptionalString(formData.get("landlordPhone")));
+  const landlordNationalId = toOptionalString(formData.get("landlordNationalId"));
+  const landlordNotes = toOptionalString(formData.get("landlordNotes"));
 
   if (!ALLOWED_PROPERTY_TYPES.includes(typeValue as PropertyType)) {
     redirectWithError("Please choose a valid property type.");
@@ -402,6 +429,28 @@ export async function createPropertyAction(formData: FormData) {
 
   if (notes && notes.length > 1500) {
     redirectWithError("Notes are too long.");
+  }
+
+  if (!["none", "existing", "new"].includes(landlordMode)) {
+    redirectWithError("Please choose a valid landlord option.");
+  }
+
+  if (landlordMode === "existing" && !existingLandlordProfileId) {
+    redirectWithError("Please choose an existing landlord.");
+  }
+
+  if (landlordMode === "new") {
+    if (!landlordFullName) {
+      redirectWithError("Landlord full name is required.");
+    }
+
+    if (!landlordUsername || landlordUsername.length < 3) {
+      redirectWithError("Landlord username must be at least 3 characters.");
+    }
+
+    if (!landlordPassword || landlordPassword.length < 8) {
+      redirectWithError("Landlord password must be at least 8 characters.");
+    }
   }
 
   if (taxpayerProfileId) {
@@ -426,6 +475,64 @@ export async function createPropertyAction(formData: FormData) {
 
   try {
     await prisma.$transaction(async (tx) => {
+      let landlordProfileId: string | null = null;
+
+      if (landlordMode === "existing" && existingLandlordProfileId) {
+        const landlordProfile = await tx.landlordProfile.findFirst({
+          where: {
+            id: existingLandlordProfileId,
+            orgId,
+            deletedAt: null,
+            isActive: true,
+          },
+          select: {
+            id: true,
+            userId: true,
+          },
+        });
+
+        if (!landlordProfile) {
+          redirectWithError("The selected landlord was not found.");
+        }
+
+        landlordProfileId = landlordProfile.id;
+      }
+
+      if (landlordMode === "new") {
+        const passwordHash = await hash(landlordPassword!, 12);
+        const user = await tx.user.create({
+          data: {
+            fullName: landlordFullName!,
+            username: landlordUsername,
+            email: landlordEmail,
+            phone: landlordPhone,
+            passwordHash,
+            mustChangePassword: true,
+            createdByUserId: session.userId,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        const profile = await tx.landlordProfile.create({
+          data: {
+            orgId,
+            userId: user.id,
+            displayName: landlordFullName!,
+            email: landlordEmail,
+            phone: landlordPhone,
+            nationalId: landlordNationalId,
+            notes: landlordNotes,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        landlordProfileId = profile.id;
+      }
+
       const property = await tx.property.create({
         data: {
           orgId,
@@ -440,6 +547,46 @@ export async function createPropertyAction(formData: FormData) {
           isActive,
         },
       });
+
+      if (landlordProfileId) {
+        const landlordProfile = await tx.landlordProfile.findUnique({
+          where: { id: landlordProfileId },
+          select: { userId: true },
+        });
+
+        if (landlordProfile) {
+          await tx.membership.upsert({
+            where: {
+              orgId_userId_role_scopeType_scopeId: {
+                orgId,
+                userId: landlordProfile.userId,
+                role: "LANDLORD",
+                scopeType: "PROPERTY",
+                scopeId: property.id,
+              },
+            },
+            update: {},
+            create: {
+              orgId,
+              userId: landlordProfile.userId,
+              role: "LANDLORD",
+              scopeType: "PROPERTY",
+              scopeId: property.id,
+            },
+          });
+        }
+
+        await tx.landlordAssignment.create({
+          data: {
+            orgId,
+            landlordProfileId,
+            propertyId: property.id,
+            isPrimary: true,
+            active: true,
+            notes: "Linked during property creation.",
+          },
+        });
+      }
 
       for (const plan of parsedUnitPlans) {
         const createdPlan = await tx.propertyUnitPlan.create({
@@ -501,6 +648,18 @@ export async function createPropertyAction(formData: FormData) {
   revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/properties");
   revalidatePath("/dashboard/org/units");
+
+  if (landlordMode === "new") {
+    await sendAccountCredentials({
+      fullName: landlordFullName!,
+      username: landlordUsername!,
+      password: landlordPassword!,
+      email: landlordEmail,
+      phone: landlordPhone,
+      role: "LANDLORD",
+      loginUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`,
+    });
+  }
 
   redirect("/dashboard/org/properties?created=1");
 }

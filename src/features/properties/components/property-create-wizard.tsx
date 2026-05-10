@@ -20,16 +20,21 @@ const STEPS = [
   },
   {
     id: 2,
+    title: "Landlord",
+    description: "Link ownership and login access.",
+  },
+  {
+    id: 3,
     title: "Billing & status",
     description: "Water billing defaults and availability settings.",
   },
   {
-    id: 3,
+    id: 4,
     title: "Unit mix",
     description: "Define the units that should be created automatically.",
   },
   {
-    id: 4,
+    id: 5,
     title: "Review",
     description: "Confirm details before creating the property.",
   },
@@ -42,10 +47,18 @@ type TaxpayerProfileOption = {
   kind: string;
 };
 
+type LandlordProfileOption = {
+  id: string;
+  displayName: string;
+  phone: string | null;
+  email: string | null;
+};
+
 type ReviewSummary = {
   name: string;
   type: string;
   taxpayerProfile: string;
+  landlord: string;
   location: string;
   address: string;
   notes: string;
@@ -94,16 +107,21 @@ export function PropertyCreateWizard({
   currencyCode,
   errorMessage,
   taxpayerProfiles,
+  landlordProfiles,
 }: {
   orgName: string;
   currencyCode: string;
   errorMessage: string | null;
   taxpayerProfiles: TaxpayerProfileOption[];
+  landlordProfiles: LandlordProfileOption[];
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [stepError, setStepError] = useState<string | null>(null);
   const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);
+  const [landlordMode, setLandlordMode] = useState<"none" | "existing" | "new">(
+    "none",
+  );
 
   const taxpayerProfileMap = useMemo(() => {
     return new Map(
@@ -113,6 +131,21 @@ export function PropertyCreateWizard({
       ]),
     );
   }, [taxpayerProfiles]);
+
+  const landlordProfileMap = useMemo(() => {
+    return new Map(
+      landlordProfiles.map((profile) => [
+        profile.id,
+        [
+          profile.displayName,
+          profile.phone,
+          profile.email,
+        ]
+          .filter(Boolean)
+          .join(" - "),
+      ]),
+    );
+  }, [landlordProfiles]);
 
   function validateCurrentStep() {
     const form = formRef.current;
@@ -136,6 +169,42 @@ export function PropertyCreateWizard({
     }
 
     if (currentStep === 2) {
+      const mode = String(data.get("landlordMode") ?? "none");
+
+      if (mode === "existing") {
+        const existingLandlordProfileId = String(
+          data.get("existingLandlordProfileId") ?? "",
+        ).trim();
+
+        if (!existingLandlordProfileId) {
+          setStepError("Choose an existing landlord before continuing.");
+          return false;
+        }
+      }
+
+      if (mode === "new") {
+        const fullName = String(data.get("landlordFullName") ?? "").trim();
+        const username = String(data.get("landlordUsername") ?? "").trim();
+        const password = String(data.get("landlordPassword") ?? "").trim();
+
+        if (!fullName) {
+          setStepError("Landlord full name is required.");
+          return false;
+        }
+
+        if (username.length < 3) {
+          setStepError("Landlord username must be at least 3 characters.");
+          return false;
+        }
+
+        if (password.length < 8) {
+          setStepError("Landlord password must be at least 8 characters.");
+          return false;
+        }
+      }
+    }
+
+    if (currentStep === 3) {
       const waterRate = String(data.get("waterRatePerUnit") ?? "").trim();
       const waterFixed = String(data.get("waterFixedCharge") ?? "").trim();
 
@@ -163,6 +232,12 @@ export function PropertyCreateWizard({
     const name = String(data.get("name") ?? "").trim();
     const type = String(data.get("type") ?? "").trim();
     const taxpayerProfileId = String(data.get("taxpayerProfileId") ?? "").trim();
+    const landlordModeValue = String(data.get("landlordMode") ?? "none");
+    const existingLandlordProfileId = String(
+      data.get("existingLandlordProfileId") ?? "",
+    ).trim();
+    const landlordFullName = String(data.get("landlordFullName") ?? "").trim();
+    const landlordUsername = String(data.get("landlordUsername") ?? "").trim();
     const location = String(data.get("location") ?? "").trim();
     const address = String(data.get("address") ?? "").trim();
     const notes = String(data.get("notes") ?? "").trim();
@@ -208,6 +283,12 @@ export function PropertyCreateWizard({
       taxpayerProfile: taxpayerProfileId
         ? taxpayerProfileMap.get(taxpayerProfileId) ?? "Selected profile"
         : "No linked taxpayer profile",
+      landlord:
+        landlordModeValue === "existing" && existingLandlordProfileId
+          ? landlordProfileMap.get(existingLandlordProfileId) ?? "Selected landlord"
+          : landlordModeValue === "new"
+            ? `${landlordFullName || "New landlord"} (${landlordUsername || "no username"})`
+            : "No landlord linked",
       location: location || "—",
       address: address || "—",
       notes: notes || "No notes added",
@@ -223,7 +304,7 @@ export function PropertyCreateWizard({
   function handleNext() {
     if (!validateCurrentStep()) return;
 
-    if (currentStep === 3) {
+    if (currentStep === 4) {
       buildReviewSummary();
     }
 
@@ -439,6 +520,196 @@ export function PropertyCreateWizard({
                 <div className="space-y-5">
                   <div>
                     <h2 className="text-base font-semibold text-neutral-950">
+                      Landlord ownership
+                    </h2>
+                    <p className="mt-1 text-sm text-neutral-500">
+                      Link this property to an existing landlord or create a new
+                      landlord account with exclusive property-scoped access.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {[
+                      {
+                        value: "none",
+                        title: "No landlord",
+                        description: "Create the property without owner access.",
+                      },
+                      {
+                        value: "existing",
+                        title: "Existing landlord",
+                        description: "Attach this property to a landlord profile.",
+                      },
+                      {
+                        value: "new",
+                        title: "New landlord",
+                        description: "Create login credentials and link ownership.",
+                      },
+                    ].map((option) => (
+                      <label
+                        key={option.value}
+                        className={`block rounded-2xl border p-4 transition ${
+                          landlordMode === option.value
+                            ? "border-neutral-950 bg-neutral-50"
+                            : "border-neutral-200 bg-white"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="landlordMode"
+                          value={option.value}
+                          checked={landlordMode === option.value}
+                          onChange={() =>
+                            setLandlordMode(option.value as typeof landlordMode)
+                          }
+                          className="sr-only"
+                        />
+                        <span className="block text-sm font-semibold text-neutral-950">
+                          {option.title}
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 text-neutral-500">
+                          {option.description}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {landlordMode === "existing" ? (
+                    <label className="block">
+                      <span className="mb-2 block text-sm font-medium text-neutral-700">
+                        Select landlord <span className="text-red-500">*</span>
+                      </span>
+                      <select
+                        name="existingLandlordProfileId"
+                        defaultValue=""
+                        className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-950 outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                      >
+                        <option value="">Choose landlord</option>
+                        {landlordProfiles.map((profile) => (
+                          <option key={profile.id} value={profile.id}>
+                            {[profile.displayName, profile.phone, profile.email]
+                              .filter(Boolean)
+                              .join(" - ")}
+                          </option>
+                        ))}
+                      </select>
+                      {landlordProfiles.length === 0 ? (
+                        <span className="mt-2 block text-xs text-amber-700">
+                          No landlord profiles found. Choose “New landlord” to
+                          create one.
+                        </span>
+                      ) : null}
+                    </label>
+                  ) : null}
+
+                  {landlordMode === "new" ? (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <label className="block md:col-span-2">
+                        <span className="mb-2 block text-sm font-medium text-neutral-700">
+                          Full name <span className="text-red-500">*</span>
+                        </span>
+                        <input
+                          name="landlordFullName"
+                          type="text"
+                          maxLength={120}
+                          placeholder="Jane Wanjiku"
+                          className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="mb-2 block text-sm font-medium text-neutral-700">
+                          Username <span className="text-red-500">*</span>
+                        </span>
+                        <input
+                          name="landlordUsername"
+                          type="text"
+                          minLength={3}
+                          maxLength={60}
+                          autoComplete="username"
+                          placeholder="jane-landlord"
+                          className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="mb-2 block text-sm font-medium text-neutral-700">
+                          Password <span className="text-red-500">*</span>
+                        </span>
+                        <input
+                          name="landlordPassword"
+                          type="password"
+                          minLength={8}
+                          autoComplete="new-password"
+                          placeholder="At least 8 characters"
+                          className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="mb-2 block text-sm font-medium text-neutral-700">
+                          Email
+                        </span>
+                        <input
+                          name="landlordEmail"
+                          type="email"
+                          autoComplete="email"
+                          placeholder="owner@example.com"
+                          className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="mb-2 block text-sm font-medium text-neutral-700">
+                          Mobile number
+                        </span>
+                        <input
+                          name="landlordPhone"
+                          type="tel"
+                          autoComplete="tel"
+                          placeholder="0712345678"
+                          className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="mb-2 block text-sm font-medium text-neutral-700">
+                          National ID
+                        </span>
+                        <input
+                          name="landlordNationalId"
+                          type="text"
+                          maxLength={80}
+                          className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                        />
+                      </label>
+
+                      <label className="block md:col-span-2">
+                        <span className="mb-2 block text-sm font-medium text-neutral-700">
+                          Notes
+                        </span>
+                        <textarea
+                          name="landlordNotes"
+                          rows={3}
+                          maxLength={1000}
+                          placeholder="Ownership notes or contact preferences."
+                          className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                        />
+                      </label>
+                    </div>
+                  ) : null}
+
+                  <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
+                    Landlord access is property-scoped. A landlord account created
+                    here will only see this linked apartment/property and its units.
+                  </div>
+                </div>
+              </section>
+
+              <section className={currentStep === 3 ? "block" : "hidden"}>
+                <div className="space-y-5">
+                  <div>
+                    <h2 className="text-base font-semibold text-neutral-950">
                       Billing & availability
                     </h2>
                     <p className="mt-1 text-sm text-neutral-500">
@@ -501,7 +772,7 @@ export function PropertyCreateWizard({
                 </div>
               </section>
 
-              <section className={currentStep === 3 ? "block" : "hidden"}>
+              <section className={currentStep === 4 ? "block" : "hidden"}>
                 <div className="space-y-5">
                   <div>
                     <h2 className="text-base font-semibold text-neutral-950">
@@ -517,7 +788,7 @@ export function PropertyCreateWizard({
                 </div>
               </section>
 
-              <section className={currentStep === 4 ? "block" : "hidden"}>
+              <section className={currentStep === 5 ? "block" : "hidden"}>
                 <div className="space-y-5">
                   <div>
                     <h2 className="text-base font-semibold text-neutral-950">
@@ -552,6 +823,12 @@ export function PropertyCreateWizard({
                           <dt className="text-neutral-500">Taxpayer profile</dt>
                           <dd className="max-w-[60%] text-right font-medium text-neutral-900">
                             {reviewSummary?.taxpayerProfile ?? "—"}
+                          </dd>
+                        </div>
+                        <div className="flex items-start justify-between gap-4">
+                          <dt className="text-neutral-500">Landlord</dt>
+                          <dd className="max-w-[60%] text-right font-medium text-neutral-900">
+                            {reviewSummary?.landlord ?? "—"}
                           </dd>
                         </div>
                         <div className="flex items-start justify-between gap-4">

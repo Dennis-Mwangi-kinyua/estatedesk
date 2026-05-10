@@ -10,6 +10,7 @@ import {
   Receipt,
   TrendingUp,
 } from "lucide-react";
+import { requirePlatformRole } from "@/lib/permissions/guards";
 
 export const dynamic = "force-dynamic";
 
@@ -52,7 +53,9 @@ const reportCards = [
   },
 ] as const;
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
+
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
       <div className="shrink-0 border-b border-neutral-200 px-4 py-4 sm:px-5 sm:py-5 lg:px-6">

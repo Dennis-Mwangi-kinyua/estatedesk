@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireUserSession, type OrgRole } from "@/lib/auth/session";
+import { requireManagementAccess } from "@/lib/permissions/guards";
 
 export const dynamic = "force-dynamic";
 
@@ -18,24 +18,13 @@ type BuildingsPageProps = {
   searchParams?: Promise<{ q?: string }> | { q?: string };
 };
 
-const ALLOWED_ROLES = new Set<OrgRole>([
-  "ADMIN",
-  "MANAGER",
-  "OFFICE",
-  "CARETAKER",
-]);
-
 export default async function BuildingsPage({
   searchParams,
 }: BuildingsPageProps) {
-  const session = await requireUserSession();
+  const session = await requireManagementAccess();
 
   if (!session.activeOrgId) {
     redirect("/dashboard");
-  }
-
-  if (!session.activeOrgRole || !ALLOWED_ROLES.has(session.activeOrgRole)) {
-    redirect("/dashboard/org");
   }
 
   const resolvedSearchParams =

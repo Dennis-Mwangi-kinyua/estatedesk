@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { requireManagementAccess } from "@/lib/permissions/guards";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,12 @@ function formatDate(value: Date | string | null | undefined) {
 }
 
 export default async function ChargesPage() {
+  const session = await requireManagementAccess();
+
   const charges = await prisma.rentCharge.findMany({
+    where: {
+      orgId: session.activeOrgId!,
+    },
     orderBy: {
       createdAt: "desc",
     },

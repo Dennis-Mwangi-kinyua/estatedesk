@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { TicketStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { notifyRecipients } from "@/lib/notifications/notify";
 import { getCurrentOrgContext } from "./_lib/queries";
 import {
   buildIssuesHref,
@@ -106,28 +107,22 @@ export async function assignCaretakerAction(formData: FormData) {
       },
     });
 
-    await tx.notification.create({
-      data: {
-        orgId: membership.orgId,
-        userId: caretakerMembership.user.id,
-        channel: "IN_APP",
-        type: "ISSUE_CREATED",
-        title: "Issue assigned to you",
-        message: `You have been assigned "${issue.title}" for ${issue.unit?.property.name ?? "a property"}${issue.unit?.houseNo ? ` / Unit ${issue.unit.houseNo}` : ""}.`,
-        status: "QUEUED",
-      },
+    await notifyRecipients({
+      db: tx,
+      orgId: membership.orgId,
+      recipients: [{ userId: caretakerMembership.user.id }],
+      type: "ISSUE_CREATED",
+      title: "Issue assigned to you",
+      message: `You have been assigned "${issue.title}" for ${issue.unit?.property.name ?? "a property"}${issue.unit?.houseNo ? ` / Unit ${issue.unit.houseNo}` : ""}.`,
     });
 
-    await tx.notification.create({
-      data: {
-        orgId: membership.orgId,
-        userId: issue.reportedByUserId,
-        channel: "IN_APP",
-        type: "GENERAL",
-        title: "Issue assigned",
-        message: `Your issue "${issue.title}" has been assigned to ${caretakerMembership.user.fullName ?? caretakerMembership.user.email ?? "a caretaker"}.`,
-        status: "QUEUED",
-      },
+    await notifyRecipients({
+      db: tx,
+      orgId: membership.orgId,
+      recipients: [{ userId: issue.reportedByUserId }],
+      type: "GENERAL",
+      title: "Issue assigned",
+      message: `Your issue "${issue.title}" has been assigned to ${caretakerMembership.user.fullName ?? caretakerMembership.user.email ?? "a caretaker"}.`,
     });
 
     await tx.auditLog.create({

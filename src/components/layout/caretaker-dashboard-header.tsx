@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Bell, Menu } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { CaretakerMobileSidebar } from "@/components/layout/caretaker-mobile-nav";
 
 type CaretakerDashboardHeaderProps = {
@@ -13,6 +13,7 @@ export function CaretakerDashboardHeader({
   fullName,
 }: CaretakerDashboardHeaderProps) {
   const [open, setOpen] = useState(false);
+  const closeMenu = useCallback(() => setOpen(false), []);
 
   return (
     <>
@@ -47,7 +48,7 @@ export function CaretakerDashboardHeader({
 
           <div className="flex items-center gap-2">
             <Link
-              href="/notifications"
+              href="/dashboard/caretaker/notifications"
               aria-label="View notifications"
               className="ios-button relative inline-flex h-11 w-11 shrink-0 items-center justify-center border border-neutral-200 bg-white/88 text-neutral-700 shadow-sm hover:bg-white"
             >
@@ -61,7 +62,7 @@ export function CaretakerDashboardHeader({
       <CaretakerMobileSidebar
         fullName={fullName}
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={closeMenu}
       />
     </>
   );

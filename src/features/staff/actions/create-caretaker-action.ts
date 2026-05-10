@@ -1,12 +1,14 @@
 "use server";
 
 import { Prisma, OrgRole, ScopeType, UserStatus } from "@prisma/client";
+import { hash } from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { requireCurrentOrgId } from "@/lib/auth/org";
+import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
 
 type CreateCaretakerState = {
   error: string | null;
@@ -131,9 +133,7 @@ export async function createCaretakerAction(
 
   try {
     await prisma.$transaction(async (tx) => {
-      // Replace this with your existing password hashing helper.
-      // It must match the same format used by your login verification flow.
-      const passwordHash = password;
+      const passwordHash = await hash(password, 12);
 
       const user = await tx.user.create({
         data: {
@@ -142,6 +142,7 @@ export async function createCaretakerAction(
           email,
           phone,
           passwordHash,
+          mustChangePassword: true,
           status: UserStatus.ACTIVE,
           createdByUserId: actorUserId,
         },
@@ -215,5 +216,16 @@ export async function createCaretakerAction(
 
   revalidatePath("/staff");
   revalidatePath("/staff/caretaker");
+
+  await sendAccountCredentials({
+    fullName,
+    username,
+    password,
+    email,
+    phone,
+    role: "CARETAKER",
+    loginUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`,
+  });
+
   redirect("/staff/caretaker");
 }

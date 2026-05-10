@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { requireManagementAccess } from "@/lib/permissions/guards";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +33,14 @@ function formatDateTime(value: Date | string | null | undefined) {
 }
 
 export default async function MoveOutsPage() {
+  const session = await requireManagementAccess();
+
   const notices = await prisma.moveOutNotice.findMany({
+    where: {
+      lease: {
+        orgId: session.activeOrgId!,
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },

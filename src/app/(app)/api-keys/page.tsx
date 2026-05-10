@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { requirePlatformRole } from "@/lib/permissions/guards";
 
 export const dynamic = "force-dynamic";
 
-export default function ApiKeysPage() {
+export default async function ApiKeysPage() {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
+
   return (
     <div className="space-y-8 p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">

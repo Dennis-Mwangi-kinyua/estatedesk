@@ -11,6 +11,7 @@ const navItems = [
   { href: "/platform/admins", label: "Platform Admins", emoji: "🛡️" },
   { href: "/platform/billing", label: "Billing", emoji: "💳" },
   { href: "/platform/audit-logs", label: "Audit Logs", emoji: "📜" },
+  { href: "/platform/messages", label: "Messages", emoji: "✉️" },
   { href: "/platform/reports", label: "Reports", emoji: "📈" },
 ] as const;
 

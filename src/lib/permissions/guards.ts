@@ -7,12 +7,13 @@ import {
   type OrgRole,
   type PlatformRole,
 } from "@/lib/auth/session";
+import { auditDeniedAccess } from "@/lib/audit/security";
 
 type GuardOptions = {
   redirectTo?: string;
 };
 
-function deny(redirectTo = "/login"): never {
+function deny(redirectTo = "/access-denied"): never {
   redirect(redirectTo);
 }
 
@@ -27,7 +28,14 @@ export async function requirePlatformRole(
   const session = await requireAuthenticated();
 
   if (!allowedRoles.includes(session.platformRole)) {
-    deny(options?.redirectTo ?? "/dashboard");
+    await auditDeniedAccess({
+      session,
+      reason: "Missing platform role",
+      required: allowedRoles,
+      entityType: "Platform",
+      entityId: "platform",
+    });
+    deny(options?.redirectTo ?? "/access-denied");
   }
 
   return session;
@@ -52,7 +60,14 @@ export async function requireOrgRole(
   const session = await requireOrgMembership(options);
 
   if (!session.activeOrgRole || !allowedRoles.includes(session.activeOrgRole)) {
-    deny(options?.redirectTo ?? "/dashboard");
+    await auditDeniedAccess({
+      session,
+      reason: "Missing organization role",
+      required: allowedRoles,
+      entityType: "Organization",
+      entityId: session.activeOrgId ?? "unknown",
+    });
+    deny(options?.redirectTo ?? "/access-denied");
   }
 
   return session;

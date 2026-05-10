@@ -10,6 +10,7 @@ import {
   FileText,
   Users,
   Droplets,
+  Bell,
   LogOut,
 } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
@@ -51,6 +52,12 @@ const navItems = [
     icon: Droplets,
     tone: "sky",
   },
+  {
+    href: "/dashboard/caretaker/notifications",
+    label: "Notifications",
+    icon: Bell,
+    tone: "rose",
+  },
 ] as const;
 
 type Props = {
@@ -64,6 +71,7 @@ const iconToneMap = {
   emerald: "bg-emerald-50 text-emerald-700",
   violet: "bg-violet-50 text-violet-700",
   sky: "bg-sky-50 text-sky-700",
+  rose: "bg-rose-50 text-rose-700",
 } as const;
 
 export function CaretakerDashboardSidebar({ fullName }: Props) {

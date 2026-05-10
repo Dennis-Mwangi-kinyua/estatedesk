@@ -9,6 +9,7 @@ import {
   FileText,
   Users,
   Droplets,
+  Bell,
   LogOut,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/dashboard/caretaker/leases", label: "Leases", icon: FileText },
   { href: "/dashboard/caretaker/tenants", label: "Tenants", icon: Users },
   { href: "/dashboard/caretaker/water-bills", label: "Water Bills", icon: Droplets },
+  { href: "/dashboard/caretaker/notifications", label: "Notifications", icon: Bell },
 ];
 
 type Props = {

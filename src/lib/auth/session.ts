@@ -20,6 +20,7 @@ export type AppSession = {
   platformRole: PlatformRole;
   activeOrgId: string | null;
   activeOrgRole: OrgRole | null;
+  mustChangePassword: boolean;
   membershipScope:
     | {
         scopeType: ScopeType;
@@ -212,6 +213,7 @@ export async function getUserSession(): Promise<AppSession | null> {
       email: user.email,
       fullName: user.fullName,
       platformRole: user.platformRole,
+      mustChangePassword: user.mustChangePassword,
       activeOrgId: activeMembership?.orgId ?? null,
       activeOrgRole: activeMembership?.role ?? null,
       membershipScope: activeMembership

@@ -31,6 +31,9 @@ const createOrganizationSchema = z
     plan: z.enum(["FREE", "PRO", "PLUS", "ENTERPRISE"], {
       message: "Select a valid plan",
     }),
+    accountType: z.enum(["PROPERTY_MANAGER", "LANDLORD"], {
+      message: "Select a valid account type",
+    }),
 
     adminFullName: z.string().trim().min(2, "Admin full name is required"),
     adminEmail: z.string().trim().email("Enter a valid admin email"),
@@ -85,6 +88,7 @@ export async function createOrganizationAction(
     timezone: formData.get("timezone"),
     dataRetentionDays: formData.get("dataRetentionDays"),
     plan: formData.get("plan"),
+    accountType: formData.get("accountType"),
 
     adminFullName: formData.get("adminFullName"),
     adminEmail: formData.get("adminEmail"),
@@ -177,11 +181,24 @@ export async function createOrganizationAction(
       data: {
         orgId: org.id,
         userId: adminUser.id,
-        role: "ADMIN",
+        role: data.accountType === "LANDLORD" ? "LANDLORD" : "ADMIN",
         scopeType: "ORG",
         scopeId: "ORG_SCOPE",
       },
     });
+
+    if (data.accountType === "LANDLORD") {
+      await tx.landlordProfile.create({
+        data: {
+          orgId: org.id,
+          userId: adminUser.id,
+          displayName: data.adminFullName,
+          email: data.adminEmail.toLowerCase(),
+          phone: data.adminPhone || null,
+          notes: "Created as landlord organization owner.",
+        },
+      });
+    }
 
     await tx.organizationSettings.create({
       data: {
@@ -207,6 +224,10 @@ export async function createOrganizationAction(
         trialStartsAt: now,
         trialEndsAt: trialEnd,
         billingEmail: data.organizationEmail || data.adminEmail,
+        metadata: {
+          accountType: data.accountType,
+          amountDue: data.plan === "FREE" ? 0 : undefined,
+        },
       },
     });
   });

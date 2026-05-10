@@ -45,6 +45,7 @@ export default function NewOrganizationPage() {
   const [timezone, setTimezone] = useState("Africa/Nairobi");
   const [dataRetentionDays, setDataRetentionDays] = useState("2555");
   const [plan, setPlan] = useState("FREE");
+  const [accountType, setAccountType] = useState("PROPERTY_MANAGER");
 
   const [adminFullName, setAdminFullName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
@@ -185,6 +186,7 @@ export default function NewOrganizationPage() {
             value={dataRetentionDays}
           />
           <input type="hidden" name="plan" value={plan} />
+          <input type="hidden" name="accountType" value={accountType} />
           <input type="hidden" name="adminFullName" value={adminFullName} />
           <input type="hidden" name="adminEmail" value={adminEmail} />
           <input type="hidden" name="adminPhone" value={adminPhone} />
@@ -328,6 +330,23 @@ export default function NewOrganizationPage() {
                     <option value="ENTERPRISE">Enterprise</option>
                   </select>
                 </Field>
+
+                <Field label="Account type" required>
+                  <select
+                    value={accountType}
+                    onChange={(e) => setAccountType(e.target.value)}
+                    className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"
+                  >
+                    <option value="PROPERTY_MANAGER">
+                      Property management organization
+                    </option>
+                    <option value="LANDLORD">Landlord organization</option>
+                  </select>
+                  <p className="mt-2 text-xs text-neutral-500">
+                    Landlord organizations create the first user as a landlord
+                    account instead of an admin account.
+                  </p>
+                </Field>
               </div>
             </section>
           ) : null}
@@ -457,6 +476,12 @@ export default function NewOrganizationPage() {
                     ["Currency", currencyCode || "—"],
                     ["Timezone", timezone || "—"],
                     ["Plan", plan || "—"],
+                    [
+                      "Account type",
+                      accountType === "LANDLORD"
+                        ? "Landlord organization"
+                        : "Property management organization",
+                    ],
                     ["Retention", `${dataRetentionDays || "—"} days`],
                   ]}
                 />

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/permissions/guards";
+import { notifyRecipients } from "@/lib/notifications/notify";
 
 type StartPaymentInput = {
   source: string;
@@ -159,29 +160,23 @@ export async function startTenantPayment(input: StartPaymentInput) {
         },
       });
 
-      await tx.notification.create({
-        data: {
-          orgId: session.activeOrgId!,
-          tenantId: tenant.id,
-          userId: session.userId,
-          channel: "IN_APP",
-          type: "PAYMENT_RECEIVED",
-          title: "Payment received",
-          message: `Your ${charge.chargeType.toLowerCase().replaceAll("_", " ")} payment for ${charge.period} has been received and verified.`,
-          status: "QUEUED",
-        },
+      await notifyRecipients({
+        db: tx,
+        orgId: session.activeOrgId!,
+        recipients: [{ tenantId: tenant.id, userId: session.userId }],
+        type: "PAYMENT_RECEIVED",
+        title: "Payment received",
+        message: `Your ${charge.chargeType.toLowerCase().replaceAll("_", " ")} payment for ${charge.period} has been received and verified. Receipt ${formatReceiptNo(payment.id)} is available in EstateDesk.`,
       });
 
-      await tx.notification.create({
-        data: {
-          orgId: session.activeOrgId!,
-          tenantId: tenant.id,
-          channel: "IN_APP",
-          type: "PAYMENT_VERIFIED",
-          title: "Tenant payment verified",
-          message: `${tenant.fullName} paid ${charge.period} for ${charge.lease.unit.property.name} / Unit ${charge.lease.unit.houseNo}.`,
-          status: "QUEUED",
-        },
+      await notifyRecipients({
+        db: tx,
+        orgId: session.activeOrgId!,
+        recipients: [{ tenantId: tenant.id }],
+        channels: ["IN_APP"],
+        type: "PAYMENT_VERIFIED",
+        title: "Tenant payment verified",
+        message: `${tenant.fullName} paid ${charge.period} for ${charge.lease.unit.property.name} / Unit ${charge.lease.unit.houseNo}.`,
       });
 
       return;
@@ -256,29 +251,23 @@ export async function startTenantPayment(input: StartPaymentInput) {
         },
       });
 
-      await tx.notification.create({
-        data: {
-          orgId: session.activeOrgId!,
-          tenantId: tenant.id,
-          userId: session.userId,
-          channel: "IN_APP",
-          type: "PAYMENT_RECEIVED",
-          title: "Water payment received",
-          message: `Your water bill payment for ${bill.period} has been received and verified.`,
-          status: "QUEUED",
-        },
+      await notifyRecipients({
+        db: tx,
+        orgId: session.activeOrgId!,
+        recipients: [{ tenantId: tenant.id, userId: session.userId }],
+        type: "PAYMENT_RECEIVED",
+        title: "Water payment received",
+        message: `Your water bill payment for ${bill.period} has been received and verified. Receipt ${formatReceiptNo(payment.id)} is available in EstateDesk.`,
       });
 
-      await tx.notification.create({
-        data: {
-          orgId: session.activeOrgId!,
-          tenantId: tenant.id,
-          channel: "IN_APP",
-          type: "PAYMENT_VERIFIED",
-          title: "Water bill cleared",
-          message: `${tenant.fullName} cleared water bill ${bill.period} for ${bill.unit.property.name} / Unit ${bill.unit.houseNo}.`,
-          status: "QUEUED",
-        },
+      await notifyRecipients({
+        db: tx,
+        orgId: session.activeOrgId!,
+        recipients: [{ tenantId: tenant.id }],
+        channels: ["IN_APP"],
+        type: "PAYMENT_VERIFIED",
+        title: "Water bill cleared",
+        message: `${tenant.fullName} cleared water bill ${bill.period} for ${bill.unit.property.name} / Unit ${bill.unit.houseNo}.`,
       });
 
       return;

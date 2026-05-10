@@ -12,6 +12,7 @@ import {
   Home,
   LogOut,
   Receipt,
+  Send,
   Settings,
   ShieldCheck,
   UserCheck,
@@ -142,6 +143,13 @@ const SIDEBAR_LINKS: readonly SidebarLink[] = [
     icon: Settings,
     emoji: "⚙️",
     roles: ["ADMIN"],
+  },
+  {
+    label: "Support",
+    href: "/dashboard/org/support",
+    icon: Send,
+    emoji: "✉️",
+    roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
   },
 ] as const;
 

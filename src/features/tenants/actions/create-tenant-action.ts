@@ -6,6 +6,7 @@ import { Prisma, TenantStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
 
 const ALLOWED_STATUSES: TenantStatus[] = ["ACTIVE", "INACTIVE", "BLACKLISTED"];
 
@@ -299,6 +300,7 @@ export async function createTenantAction(
           email,
           username,
           passwordHash,
+          mustChangePassword: true,
           status: "ACTIVE",
           platformRole: "USER",
         },
@@ -406,6 +408,16 @@ export async function createTenantAction(
     revalidatePath("/dashboard/org/units");
     revalidatePath("/dashboard/org/properties");
     revalidatePath("/dashboard/org");
+
+    await sendAccountCredentials({
+      fullName,
+      username: result.username,
+      password: generatedPassword,
+      email,
+      phone,
+      role: "TENANT",
+      loginUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`,
+    });
 
     return {
       status: "success",

@@ -12,8 +12,7 @@ const loginSchema = z.object({
   email: z
     .string()
     .trim()
-    .min(1, "Email is required")
-    .email("Enter a valid email address")
+    .min(1, "Email or username is required")
     .transform((value) => value.toLowerCase()),
   password: z.string().min(1, "Password is required"),
   remember: z.boolean().optional(),
@@ -63,7 +62,7 @@ export async function loginAction(
     };
   }
 
-  const { email, password } = parsed.data;
+  const { email: identifier, password } = parsed.data;
   const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   const totalLabel = makeLabel("loginAction-total", requestId);
@@ -74,7 +73,9 @@ export async function loginAction(
       makeLabel("login-find-user", requestId),
       async () => {
         return prisma.user.findUnique({
-          where: { email },
+          where: identifier.includes("@")
+            ? { email: identifier }
+            : { username: identifier },
           select: {
             id: true,
             email: true,
@@ -82,6 +83,7 @@ export async function loginAction(
             platformRole: true,
             status: true,
             passwordHash: true,
+            mustChangePassword: true,
             deletedAt: true,
           },
         });
@@ -146,12 +148,14 @@ export async function loginAction(
       const destination = await timed(
         makeLabel("login-get-destination", requestId),
         async () =>
-          getRedirectAfterLogin({
-            platformRole: user.platformRole,
-            activeOrgRole: null,
-            activeOrgId: null,
-            hasTenantProfile: false,
-          }),
+          user.mustChangePassword
+            ? "/change-password"
+            : getRedirectAfterLogin({
+                platformRole: user.platformRole,
+                activeOrgRole: null,
+                activeOrgId: null,
+                hasTenantProfile: false,
+              }),
       );
 
       redirect(destination);
@@ -222,12 +226,14 @@ export async function loginAction(
     const destination = await timed(
       makeLabel("login-get-destination", requestId),
       async () =>
-        getRedirectAfterLogin({
-          platformRole: user.platformRole,
-          activeOrgRole: primaryMembership?.role ?? null,
-          activeOrgId: primaryMembership?.orgId ?? null,
-          hasTenantProfile: Boolean(tenant),
-        }),
+        user.mustChangePassword
+          ? "/change-password"
+          : getRedirectAfterLogin({
+              platformRole: user.platformRole,
+              activeOrgRole: primaryMembership?.role ?? null,
+              activeOrgId: primaryMembership?.orgId ?? null,
+              hasTenantProfile: Boolean(tenant),
+            }),
     );
 
     redirect(destination);

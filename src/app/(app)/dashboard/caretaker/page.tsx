@@ -1,4 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import {
+  BillStatus,
+  InspectionStatus,
+  LeaseStatus,
+  TicketPriority,
+  TicketStatus,
+} from "@prisma/client";
 import {
   AlertCircle,
   ArrowRight,
@@ -11,6 +19,9 @@ import {
   Wrench,
   Droplets,
 } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { requireUserSession } from "@/lib/auth/session";
+import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
 
 function SoftBadge({
   label,
@@ -188,7 +199,265 @@ function MiniMetric({
   );
 }
 
-export default function CaretakerDashboardPage() {
+function startOfToday() {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+
+  return date;
+}
+
+function formatDateTime(value: Date | null | undefined) {
+  if (!value) return "—";
+
+  return new Intl.DateTimeFormat("en-KE", {
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(value);
+}
+
+function getUnitLabel(item: {
+  unit?: {
+    houseNo: string;
+    building?: { name: string | null } | null;
+    property?: { name: string | null } | null;
+  } | null;
+}) {
+  const unit = item.unit;
+
+  if (!unit) return "No unit assigned";
+
+  return [
+    unit.property?.name,
+    unit.building?.name,
+    unit.houseNo ? `Unit ${unit.houseNo}` : null,
+  ]
+    .filter(Boolean)
+    .join(" / ");
+}
+
+export default async function CaretakerDashboardPage() {
+  const session = await requireUserSession();
+
+  if (!session.activeOrgId) {
+    redirect("/login");
+  }
+
+  if (session.activeOrgRole !== "CARETAKER") {
+    redirect("/dashboard");
+  }
+
+  const orgId = session.activeOrgId;
+  const allowedUnitIds = await getCaretakerAllowedUnitIds({
+    orgId,
+    caretakerUserId: session.userId,
+    membershipScope: session.membershipScope,
+  });
+
+  const today = startOfToday();
+  const issueScope = {
+    orgId,
+    OR: [
+      { assignedToUserId: session.userId },
+      ...(allowedUnitIds.length > 0
+        ? [{ unitId: { in: allowedUnitIds } }]
+        : []),
+    ],
+  };
+  const unitScope =
+    allowedUnitIds.length > 0 ? { id: { in: allowedUnitIds } } : { id: "__none__" };
+
+  const [
+    assignedUnits,
+    activeLeases,
+    activeTenants,
+    openIssues,
+    resolvedToday,
+    urgentIssues,
+    scheduledInspections,
+    completedInspectionsToday,
+    pendingWaterBills,
+    recentIssues,
+    upcomingInspections,
+  ] = await Promise.all([
+    prisma.unit.count({ where: unitScope }),
+    prisma.lease.count({
+      where: {
+        orgId,
+        deletedAt: null,
+        status: LeaseStatus.ACTIVE,
+        unitId: {
+          in: allowedUnitIds,
+        },
+      },
+    }),
+    prisma.tenant.count({
+      where: {
+        orgId,
+        deletedAt: null,
+        leases: {
+          some: {
+            deletedAt: null,
+            status: LeaseStatus.ACTIVE,
+            unitId: {
+              in: allowedUnitIds,
+            },
+          },
+        },
+      },
+    }),
+    prisma.issueTicket.count({
+      where: {
+        ...issueScope,
+        status: {
+          in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS],
+        },
+      },
+    }),
+    prisma.issueTicket.count({
+      where: {
+        ...issueScope,
+        status: {
+          in: [TicketStatus.RESOLVED, TicketStatus.CLOSED],
+        },
+        resolvedAt: {
+          gte: today,
+        },
+      },
+    }),
+    prisma.issueTicket.count({
+      where: {
+        ...issueScope,
+        priority: TicketPriority.URGENT,
+        status: {
+          notIn: [
+            TicketStatus.RESOLVED,
+            TicketStatus.CLOSED,
+            TicketStatus.CANCELLED,
+          ],
+        },
+      },
+    }),
+    prisma.inspection.count({
+      where: {
+        status: InspectionStatus.SCHEDULED,
+        OR: [
+          { inspectorUserId: session.userId },
+          {
+            notice: {
+              lease: {
+                orgId,
+                unitId: {
+                  in: allowedUnitIds,
+                },
+              },
+            },
+          },
+        ],
+      },
+    }),
+    prisma.inspection.count({
+      where: {
+        status: InspectionStatus.COMPLETED,
+        completedAt: {
+          gte: today,
+        },
+        OR: [
+          { inspectorUserId: session.userId },
+          {
+            notice: {
+              lease: {
+                orgId,
+                unitId: {
+                  in: allowedUnitIds,
+                },
+              },
+            },
+          },
+        ],
+      },
+    }),
+    prisma.waterBill.count({
+      where: {
+        orgId,
+        unitId: {
+          in: allowedUnitIds,
+        },
+        status: {
+          in: [
+            BillStatus.ISSUED,
+            BillStatus.PAYMENT_PENDING,
+            BillStatus.PAID_PENDING_VERIFICATION,
+            BillStatus.DISPUTED,
+          ],
+        },
+      },
+    }),
+    prisma.issueTicket.findMany({
+      where: issueScope,
+      orderBy: {
+        updatedAt: "desc",
+      },
+      take: 4,
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        updatedAt: true,
+        unit: {
+          select: {
+            houseNo: true,
+            property: { select: { name: true } },
+            building: { select: { name: true } },
+          },
+        },
+      },
+    }),
+    prisma.inspection.findMany({
+      where: {
+        status: InspectionStatus.SCHEDULED,
+        OR: [
+          { inspectorUserId: session.userId },
+          {
+            notice: {
+              lease: {
+                orgId,
+                unitId: {
+                  in: allowedUnitIds,
+                },
+              },
+            },
+          },
+        ],
+      },
+      orderBy: {
+        scheduledAt: "asc",
+      },
+      take: 3,
+      select: {
+        id: true,
+        scheduledAt: true,
+        notice: {
+          select: {
+            tenant: { select: { fullName: true } },
+            lease: {
+              select: {
+                unit: {
+                  select: {
+                    houseNo: true,
+                    property: { select: { name: true } },
+                    building: { select: { name: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
   return (
     <div className="space-y-5 sm:space-y-6">
       <SectionCard className="p-5 sm:p-6">
@@ -206,8 +475,8 @@ export default function CaretakerDashboardPage() {
             Caretaker dashboard
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-500 sm:text-base">
-            Monitor issues, inspections, leases, tenants, and water billing in
-            one calm, well-organized workspace.
+            Monitor assigned units, active leases, tenants, inspections, issues,
+            and water billing in one calm workspace.
           </p>
         </div>
 
@@ -230,29 +499,29 @@ export default function CaretakerDashboardPage() {
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Assigned Buildings"
-          value="12"
-          hint="Buildings currently under your supervision."
+          label="Assigned Units"
+          value={assignedUnits.toLocaleString()}
+          hint="Apartments currently under your care."
           icon={Building2}
           tone="blue"
         />
         <StatCard
           label="Open Issues"
-          value="08"
-          hint="Maintenance requests awaiting attention."
+          value={openIssues.toLocaleString()}
+          hint={`${urgentIssues.toLocaleString()} urgent issue${urgentIssues === 1 ? "" : "s"} need attention.`}
           icon={AlertCircle}
           tone="amber"
         />
         <StatCard
           label="Completed Today"
-          value="03"
-          hint="Tasks marked complete during today’s workflow."
+          value={resolvedToday.toLocaleString()}
+          hint={`${completedInspectionsToday.toLocaleString()} inspection${completedInspectionsToday === 1 ? "" : "s"} completed today.`}
           icon={CheckCircle2}
           tone="green"
         />
         <StatCard
           label="Water Bills"
-          value="11"
+          value={pendingWaterBills.toLocaleString()}
           hint="Bills currently pending verification or follow-up."
           icon={Droplets}
           tone="rose"
@@ -276,32 +545,33 @@ export default function CaretakerDashboardPage() {
             </span>
           </div>
 
-          <div className="mt-4 space-y-3">
-            <ActivityItem
-              icon={AlertCircle}
-              title="Leakage issue reported in Block A"
-              subtitle="Unit A-12 · 2 hours ago"
-              tone="amber"
-            />
-            <ActivityItem
-              icon={CheckCircle2}
-              title="Inspection completed for Sunrise Apartments"
-              subtitle="Today at 10:30 AM"
-              tone="green"
-            />
-            <ActivityItem
-              icon={ClipboardList}
-              title="New inspection request submitted"
-              subtitle="Block C · This morning"
-              tone="blue"
-            />
-            <ActivityItem
-              icon={Wrench}
-              title="Maintenance follow-up scheduled"
-              subtitle="Block B · Yesterday"
-              tone="neutral"
-            />
-          </div>
+          {recentIssues.length === 0 ? (
+            <div className="mt-4 rounded-2xl border border-neutral-200/80 bg-neutral-50 p-5 text-sm text-neutral-500">
+              No recent issue activity for your assigned apartments.
+            </div>
+          ) : (
+            <div className="mt-4 space-y-3">
+              {recentIssues.map((issue) => (
+                <ActivityItem
+                  key={issue.id}
+                  icon={
+                    issue.status === TicketStatus.RESOLVED ||
+                    issue.status === TicketStatus.CLOSED
+                      ? CheckCircle2
+                      : AlertCircle
+                  }
+                  title={issue.title}
+                  subtitle={`${getUnitLabel(issue)} · ${formatDateTime(issue.updatedAt)}`}
+                  tone={
+                    issue.status === TicketStatus.RESOLVED ||
+                    issue.status === TicketStatus.CLOSED
+                      ? "green"
+                      : "amber"
+                  }
+                />
+              ))}
+            </div>
+          )}
         </SectionCard>
 
         <SectionCard className="p-4 sm:p-5">
@@ -366,7 +636,7 @@ export default function CaretakerDashboardPage() {
                 Review urgent maintenance tickets
               </p>
               <p className="mt-1 text-xs leading-5 text-neutral-500">
-                Confirm status for plumbing, power, and water issues.
+                {urgentIssues.toLocaleString()} urgent ticket{urgentIssues === 1 ? "" : "s"} currently need a status update.
               </p>
             </div>
 
@@ -375,16 +645,16 @@ export default function CaretakerDashboardPage() {
                 Complete scheduled inspections
               </p>
               <p className="mt-1 text-xs leading-5 text-neutral-500">
-                Capture notes, photos, and recommended follow-up work.
+                {scheduledInspections.toLocaleString()} inspection{scheduledInspections === 1 ? "" : "s"} scheduled for your assigned apartments.
               </p>
             </div>
 
             <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50 p-4">
               <p className="text-sm font-semibold text-neutral-900">
-                Follow up on tenant requests
+                Follow up on active tenants
               </p>
               <p className="mt-1 text-xs leading-5 text-neutral-500">
-                Make sure unresolved reports have updates or assignments.
+                {activeTenants.toLocaleString()} active tenant{activeTenants === 1 ? "" : "s"} across {activeLeases.toLocaleString()} active lease{activeLeases === 1 ? "" : "s"}.
               </p>
             </div>
           </div>
@@ -401,11 +671,35 @@ export default function CaretakerDashboardPage() {
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <MiniMetric label="Resolved Issues" value="14" />
-            <MiniMetric label="Inspections Done" value="09" />
-            <MiniMetric label="Pending Reviews" value="04" />
-            <MiniMetric label="Tenant Requests" value="11" />
+            <MiniMetric label="Active Leases" value={activeLeases.toLocaleString()} />
+            <MiniMetric label="Active Tenants" value={activeTenants.toLocaleString()} />
+            <MiniMetric label="Scheduled Inspections" value={scheduledInspections.toLocaleString()} />
+            <MiniMetric label="Urgent Issues" value={urgentIssues.toLocaleString()} />
           </div>
+
+          {upcomingInspections.length > 0 ? (
+            <div className="mt-4 space-y-2">
+              {upcomingInspections.map((inspection) => (
+                <Link
+                  key={inspection.id}
+                  href={`/dashboard/caretaker/inspections/${inspection.id}`}
+                  className="flex items-start justify-between gap-3 rounded-2xl border border-neutral-200/80 bg-white p-3 text-sm transition hover:bg-neutral-50"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-neutral-900">
+                      {inspection.notice.tenant.fullName}
+                    </p>
+                    <p className="mt-1 truncate text-xs text-neutral-500">
+                      {getUnitLabel({ unit: inspection.notice.lease.unit })}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-xs font-medium text-neutral-500">
+                    {formatDateTime(inspection.scheduledAt)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : null}
         </SectionCard>
       </section>
     </div>

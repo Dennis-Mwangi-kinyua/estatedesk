@@ -6,6 +6,7 @@ import { hash } from "bcryptjs";
 import { OrgRole as PrismaOrgRole, Prisma, UserStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
+import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
 import {
   STAFF_ROLES,
   type StaffRole,
@@ -206,6 +207,7 @@ export async function createMembership(
           phone: phone || null,
           status: UserStatus.ACTIVE,
           passwordHash,
+          mustChangePassword: true,
           emailVerified: verifiedAt,
           phoneVerified: phone ? verifiedAt : null,
         },
@@ -257,6 +259,16 @@ export async function createMembership(
 
   revalidatePath("/staff");
   revalidatePath(`/staff/${role.toLowerCase()}`);
+
+  await sendAccountCredentials({
+    fullName,
+    username,
+    password,
+    email,
+    phone,
+    role,
+    loginUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`,
+  });
 
   redirect(`/staff/${role.toLowerCase()}`);
 }

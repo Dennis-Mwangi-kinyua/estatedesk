@@ -24,6 +24,26 @@ function formatLabel(value: string | null | undefined) {
   return value.replaceAll("_", " ");
 }
 
+function formatAuditGeo(metadata: unknown) {
+  if (!metadata || typeof metadata !== "object" || !("geo" in metadata)) {
+    return "Location unknown";
+  }
+
+  const geo = (metadata as { geo?: Record<string, unknown> }).geo;
+  if (!geo) return "Location unknown";
+
+  const parts = [geo.city, geo.region, geo.country]
+    .map((value) => (typeof value === "string" ? value : null))
+    .filter(Boolean);
+
+  const provider =
+    typeof geo.serviceProvider === "string" ? geo.serviceProvider : null;
+
+  return [parts.join(", ") || "Location unknown", provider]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 function getPageNumber(value?: string) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
@@ -50,6 +70,8 @@ const auditLogSelect = {
   entityId: true,
   requestId: true,
   ip: true,
+  userAgent: true,
+  metadata: true,
   actor: {
     select: {
       id: true,
@@ -267,7 +289,7 @@ function FiltersCard({
             id="q"
             name="q"
             defaultValue={q}
-            placeholder="Actor, org, action, request ID, entity, IP..."
+            placeholder="Actor, org, action, request ID, entity, IP, location..."
             className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
           />
         </div>
@@ -408,9 +430,14 @@ function MobileLogList({ logs }: { logs: AuditLogItem[] }) {
                 <InfoBlock
                   label="IP"
                   value={
-                    <span className="font-mono text-xs text-muted-foreground">
-                      {log.ip ?? "—"}
-                    </span>
+                    <div className="space-y-1">
+                      <p className="font-mono text-xs text-muted-foreground">
+                        {log.ip ?? "—"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatAuditGeo(log.metadata)}
+                      </p>
+                    </div>
                   }
                 />
                 <InfoBlock
@@ -442,7 +469,7 @@ function DesktopTable({ logs }: { logs: AuditLogItem[] }) {
             <TableHead>Action</TableHead>
             <TableHead>Entity</TableHead>
             <TableHead>Request</TableHead>
-            <TableHead>IP</TableHead>
+            <TableHead>IP / Location</TableHead>
           </tr>
         </thead>
         <tbody>
@@ -497,8 +524,14 @@ function DesktopTable({ logs }: { logs: AuditLogItem[] }) {
                   <span className="break-all">{log.requestId ?? "—"}</span>
                 </TableCell>
 
-                <TableCell className="font-mono text-xs text-muted-foreground">
-                  {log.ip ?? "—"}
+                <TableCell className="text-xs text-muted-foreground">
+                  <div className="space-y-1">
+                    <p className="font-mono">{log.ip ?? "—"}</p>
+                    <p>{formatAuditGeo(log.metadata)}</p>
+                    <p className="max-w-[220px] truncate">
+                      {log.userAgent ?? "—"}
+                    </p>
+                  </div>
                 </TableCell>
               </tr>
             );

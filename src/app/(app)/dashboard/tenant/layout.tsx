@@ -3,6 +3,8 @@ import { getCurrentTenantShell } from "@/lib/tenant/get-current-tenant";
 import { TenantHeader } from "./tenant-header";
 import { TenantSidebar } from "./tenant-sidebar";
 import { TenantFooter } from "./tenant-footer";
+import { requireActiveSubscription } from "@/lib/billing/subscription-access";
+import { SubscriptionWarning } from "@/components/billing/subscription-warning";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +27,8 @@ export default async function TenantLayout({
     );
   }
 
+  const access = await requireActiveSubscription(tenant.org.id);
+
   return (
     <div className="app-mobile-canvas min-h-screen">
       <TenantSidebar fullName={tenant.fullName} />
@@ -33,7 +37,10 @@ export default async function TenantLayout({
 
       <div className="min-h-screen lg:pl-[300px] xl:pl-[320px]">
         <main className="px-3 pb-32 pt-[104px] sm:px-5 lg:px-8 lg:pb-24 lg:pt-24">
-          <div className="app-content-shell">{children}</div>
+          <div className="app-content-shell">
+            <SubscriptionWarning access={access} />
+            {children}
+          </div>
         </main>
       </div>
     </div>

@@ -22,6 +22,9 @@ export default async function DashboardPage() {
     case "CARETAKER":
       redirect("/dashboard/caretaker");
 
+    case "LANDLORD":
+      redirect("/dashboard/landlord");
+
     case "ADMIN":
     case "MANAGER":
     case "OFFICE":

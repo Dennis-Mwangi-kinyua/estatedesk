@@ -105,12 +105,28 @@ export default async function NewOrgPropertyPage({
     },
   });
 
+  const landlordProfiles = await prisma.landlordProfile.findMany({
+    where: {
+      orgId: membership.orgId,
+      deletedAt: null,
+      isActive: true,
+    },
+    orderBy: [{ displayName: "asc" }],
+    select: {
+      id: true,
+      displayName: true,
+      phone: true,
+      email: true,
+    },
+  });
+
   return (
     <PropertyCreateWizard
       orgName={membership.org.name}
       currencyCode={membership.org.currencyCode}
       errorMessage={errorMessage}
       taxpayerProfiles={taxpayerProfiles}
+      landlordProfiles={landlordProfiles}
     />
   );
 }

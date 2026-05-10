@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 
 import { OrgDashboardShell } from "@/components/layout/org-dashboard-shell";
-import { requireUserSession } from "@/lib/auth/session";
+import { requireOrgRole } from "@/lib/permissions/guards";
+import { requireActiveSubscription } from "@/lib/billing/subscription-access";
+import { SubscriptionWarning } from "@/components/billing/subscription-warning";
 import { prisma } from "@/lib/prisma";
 
 type DashboardShellRole =
@@ -38,7 +40,8 @@ export default async function StaffLayout({
 }: {
   children: ReactNode;
 }) {
-  const session = await requireUserSession();
+  const session = await requireOrgRole(["ADMIN", "MANAGER"]);
+  const access = await requireActiveSubscription(session.activeOrgId!);
 
   let organizationName = "Organisation";
 
@@ -58,6 +61,7 @@ export default async function StaffLayout({
       organizationName={organizationName}
       role={normalizeDashboardShellRole(session.activeOrgRole)}
     >
+      <SubscriptionWarning access={access} />
       {children}
     </OrgDashboardShell>
   );

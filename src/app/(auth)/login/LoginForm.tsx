@@ -165,7 +165,7 @@ export default function LoginForm() {
               htmlFor="email"
               className="login-form-label text-sm font-medium text-slate-800"
             >
-              Email address
+              Email or username
             </label>
 
             <InputShell>
@@ -174,10 +174,9 @@ export default function LoginForm() {
               <input
                 id="email"
                 name="email"
-                type="email"
-                autoComplete="email"
-                inputMode="email"
-                placeholder="you@company.com"
+                type="text"
+                autoComplete="username"
+                placeholder="you@company.com or landlord01"
                 disabled={isPending}
                 aria-invalid={Boolean(state.fieldErrors?.email?.length)}
                 className="h-full w-full bg-transparent text-[16px] text-slate-950 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed sm:text-[15px]"

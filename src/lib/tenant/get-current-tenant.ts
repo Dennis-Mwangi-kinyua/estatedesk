@@ -14,6 +14,7 @@ export async function getCurrentTenantShell() {
       fullName: true,
       org: {
         select: {
+          id: true,
           name: true,
         },
       },
