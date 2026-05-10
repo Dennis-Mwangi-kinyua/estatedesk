@@ -13,9 +13,9 @@ export function TenantSidebar({ fullName }: TenantSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden border-r border-neutral-200/70 bg-gradient-to-b from-[#fcfcfd] to-[#f6f7fb] lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex lg:h-screen lg:w-[300px] lg:flex-col xl:w-[320px]">
+    <aside className="hidden border-r border-white/60 bg-white/70 shadow-[12px_0_40px_rgba(15,23,42,0.06)] backdrop-blur-2xl lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex lg:h-screen lg:w-[300px] lg:flex-col xl:w-[320px]">
       <div className="border-b border-neutral-200/70 px-4 py-4 xl:px-5 xl:py-5">
-        <div className="rounded-[26px] border border-neutral-200/80 bg-white/95 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)] backdrop-blur">
+        <div className="ios-panel rounded-[26px] p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-950 text-lg text-white shadow-sm">
               🏡
@@ -63,10 +63,10 @@ export function TenantSidebar({ fullName }: TenantSidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200 ${
+                  className={`group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200 active:scale-[0.99] ${
                   isActive
                     ? "bg-neutral-950 text-white shadow-[0_10px_20px_rgba(15,23,42,0.14)]"
-                    : "text-neutral-600 hover:bg-white hover:text-neutral-950 hover:shadow-sm"
+                    : "text-neutral-600 hover:bg-white/86 hover:text-neutral-950 hover:shadow-sm"
                 }`}
               >
                 <span

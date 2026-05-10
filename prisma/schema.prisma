@@ -1,3 +1,6 @@
+// Hardened Prisma schema for EstateDesk.
+// Focus: production-safe indexing, clear documentation, and preserved app structure/functionality.
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,49 +9,55 @@ datasource db {
   provider = "postgresql"
 }
 
+/// Application user account. May belong to many organizations through Membership.
 model User {
-  id                      String                @id @default(cuid())
-  fullName                String
-  phone                   String?               @unique
-  email                   String?               @unique
-  passwordHash            String
-  status                  UserStatus            @default(ACTIVE)
-  platformRole            PlatformRole          @default(USER)
-  canCreatePlatformAdmins Boolean               @default(false)
-  isRootSuperAdmin        Boolean               @default(false)
-  emailVerified           DateTime?
-  phoneVerified           DateTime?
-  twoFactorEnabled        Boolean               @default(false)
-  lastLoginAt             DateTime?
-  deletedAt               DateTime?
-  createdByUserId         String?
-  createdAt               DateTime              @default(now())
-  updatedAt               DateTime              @updatedAt
-  username                String?               @unique
-  slug                    String?               @unique
-  createdApiKeys          ApiKey[]              @relation("CreatedBy")
-  uploadedAssets          Asset[]               @relation("AssetUploader")
-  auditLogs               AuditLog[]            @relation("AuditActor")
-  caretakerAssignments    CaretakerAssignment[] @relation("CaretakerUser")
-  inspections             Inspection[]          @relation("InspectionInspector")
-  invitedUsers            Invitation[]          @relation("InvitedBy")
-  issuesAssignedBy        IssueTicket[]         @relation("IssueAssignedBy")
-  issuesAssigned          IssueTicket[]         @relation("IssueAssignedTo")
-  issuesReported          IssueTicket[]         @relation("IssueReportedBy")
-  landlordProfiles        LandlordProfile[]
-  caretakerLeases         Lease[]               @relation("LeaseCaretaker")
-  memberships             Membership[]
-  meterReadingsApproved   MeterReading[]        @relation("MeterReadingApprovedBy")
-  meterReadingsSubmitted  MeterReading[]        @relation("MeterReadingSubmittedBy")
-  notifications           Notification[]        @relation("NotificationUser")
-  paymentsMade            Payment[]             @relation("PaymentPayerUser")
-  platformPermissions     PlatformPermission[]
-  submittedRentalReturns  RentalIncomeReturn[]  @relation("RentalReturnSubmittedBy")
-  tenant                  Tenant?
-  tenantActionLogs        TenantActionLog[]     @relation("TenantActionActor")
-  createdBy               User?                 @relation("UserCreatedBy", fields: [createdByUserId], references: [id])
-  createdUsers            User[]                @relation("UserCreatedBy")
-  activeSession           UserSession?
+  id                       String                  @id @default(cuid())
+  fullName                 String
+  phone                    String?                 @unique
+  email                    String?                 @unique
+  passwordHash             String
+  status                   UserStatus              @default(ACTIVE)
+  platformRole             PlatformRole            @default(USER)
+  canCreatePlatformAdmins  Boolean                 @default(false)
+  isRootSuperAdmin         Boolean                 @default(false)
+  emailVerified            DateTime?
+  phoneVerified            DateTime?
+  twoFactorEnabled         Boolean                 @default(false)
+  lastLoginAt              DateTime?
+  deletedAt                DateTime?
+  createdByUserId          String?
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  username                 String?                 @unique
+  slug                     String?                 @unique
+  createdApiKeys           ApiKey[]                @relation("CreatedBy")
+  uploadedAssets           Asset[]                 @relation("AssetUploader")
+  auditLogs                AuditLog[]              @relation("AuditActor")
+  caretakerAssignments     CaretakerAssignment[]   @relation("CaretakerUser")
+  inspections              Inspection[]            @relation("InspectionInspector")
+  invitedUsers             Invitation[]            @relation("InvitedBy")
+  issuesAssignedBy         IssueTicket[]           @relation("IssueAssignedBy")
+  issuesAssigned           IssueTicket[]           @relation("IssueAssignedTo")
+  issuesReported           IssueTicket[]           @relation("IssueReportedBy")
+  issueResolutionReports   IssueResolutionReport[] @relation("IssueResolutionReportCaretaker")
+  issueReportsReviewed     IssueResolutionReport[] @relation("IssueResolutionReportOfficeReviewer")
+  issueReportsConfirmed    IssueResolutionReport[] @relation("IssueResolutionReportTenantConfirmer")
+  landlordProfiles         LandlordProfile[]
+  caretakerLeases          Lease[]                 @relation("LeaseCaretaker")
+  memberships              Membership[]
+  meterReadingsApproved    MeterReading[]          @relation("MeterReadingApprovedBy")
+  meterReadingsSubmitted   MeterReading[]          @relation("MeterReadingSubmittedBy")
+  notifications            Notification[]          @relation("NotificationUser")
+  paymentsMade             Payment[]               @relation("PaymentPayerUser")
+  platformPermissions      PlatformPermission[]
+  submittedRentalReturns   RentalIncomeReturn[]    @relation("RentalReturnSubmittedBy")
+  tenant                   Tenant?
+  tenantActionLogs         TenantActionLog[]       @relation("TenantActionActor")
+  tenantTransfersApproved  TenantTransferRequest[] @relation("TenantTransferReviewedBy")
+  tenantTransfersRequested TenantTransferRequest[] @relation("TenantTransferRequestedBy")
+  createdBy                User?                   @relation("UserCreatedBy", fields: [createdByUserId], references: [id])
+  createdUsers             User[]                  @relation("UserCreatedBy")
+  activeSession            UserSession?
 
   @@index([username])
   @@index([email])
@@ -58,8 +67,12 @@ model User {
   @@index([deletedAt])
   @@index([createdByUserId])
   @@index([isRootSuperAdmin])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([lastLoginAt])
 }
 
+/// Server-side user session with active organization membership context.
 model UserSession {
   id                 String      @id @default(cuid())
   userId             String      @unique
@@ -76,8 +89,11 @@ model UserSession {
   @@index([tokenHash])
   @@index([expiresAt])
   @@index([activeMembershipId])
+  @@index([userId, expiresAt])
+  @@index([activeMembershipId, expiresAt])
 }
 
+/// Platform-level permission override for super-admin capabilities.
 model PlatformPermission {
   id         String                 @id @default(cuid())
   userId     String
@@ -92,50 +108,57 @@ model PlatformPermission {
   @@index([permission])
 }
 
+/// Tenant organization / property management company boundary.
 model Organization {
-  id                   String                @id @default(cuid())
-  name                 String
-  slug                 String                @unique
-  phone                String?
-  email                String?
-  address              String?
-  status               OrganizationStatus    @default(ACTIVE)
-  currencyCode         String                @default("KES")
-  timezone             String                @default("Africa/Nairobi")
-  dataRetentionDays    Int                   @default(2555)
-  deletedAt            DateTime?
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  apiKeys              ApiKey[]
-  assets               Asset[]
-  auditLogs            AuditLog[]
-  caretakerAssignments CaretakerAssignment[]
-  invitations          Invitation[]
-  issues               IssueTicket[]
-  kraIntegration       KraIntegration?
-  landlordAssignments  LandlordAssignment[]
-  landlordProfiles     LandlordProfile[]
-  leases               Lease[]
-  memberships          Membership[]
-  notifications        Notification[]
-  settings             OrganizationSettings?
-  payments             Payment[]
-  properties           Property[]
-  rentCharges          RentCharge[]
-  rentalReturns        RentalIncomeReturn[]
-  subscription         Subscription?
-  taxCharges           TaxCharge[]
-  taxpayerProfiles     TaxpayerProfile[]
-  tenants              Tenant[]
-  tenantActionLogs     TenantActionLog[]
-  waterBills           WaterBill[]
+  id                     String                  @id @default(cuid())
+  name                   String
+  slug                   String                  @unique
+  phone                  String?
+  email                  String?
+  address                String?
+  status                 OrganizationStatus      @default(ACTIVE)
+  currencyCode           String                  @default("KES")
+  timezone               String                  @default("Africa/Nairobi")
+  dataRetentionDays      Int                     @default(2555)
+  deletedAt              DateTime?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  apiKeys                ApiKey[]
+  assets                 Asset[]
+  auditLogs              AuditLog[]
+  caretakerAssignments   CaretakerAssignment[]
+  invitations            Invitation[]
+  issues                 IssueTicket[]
+  issueResolutionReports IssueResolutionReport[]
+  kraIntegration         KraIntegration?
+  landlordAssignments    LandlordAssignment[]
+  landlordProfiles       LandlordProfile[]
+  leases                 Lease[]
+  memberships            Membership[]
+  notifications          Notification[]
+  settings               OrganizationSettings?
+  payments               Payment[]
+  properties             Property[]
+  rentCharges            RentCharge[]
+  rentalReturns          RentalIncomeReturn[]
+  subscription           Subscription?
+  taxCharges             TaxCharge[]
+  taxpayerProfiles       TaxpayerProfile[]
+  tenants                Tenant[]
+  tenantActionLogs       TenantActionLog[]
+  tenantTransfersIn      TenantTransferRequest[] @relation("TenantTransferTargetOrg")
+  tenantTransfersOut     TenantTransferRequest[] @relation("TenantTransferSourceOrg")
+  waterBills             WaterBill[]
 
   @@index([slug])
   @@index([status])
   @@index([name])
   @@index([deletedAt])
+  @@index([createdAt])
+  @@index([updatedAt])
 }
 
+/// Organization-specific configurable settings and feature flags.
 model OrganizationSettings {
   id                   String       @id @default(cuid())
   orgId                String       @unique
@@ -148,6 +171,7 @@ model OrganizationSettings {
   org                  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 }
 
+/// Billing subscription for an organization.
 model Subscription {
   id                   String                   @id @default(cuid())
   orgId                String                   @unique
@@ -171,8 +195,10 @@ model Subscription {
   @@index([plan])
   @@index([status])
   @@index([currentPeriodEnd])
+  @@index([orgId, status])
 }
 
+/// Historical subscription plan transition record.
 model SubscriptionPlanChange {
   id             String       @id @default(cuid())
   subscriptionId String
@@ -191,6 +217,7 @@ model SubscriptionPlanChange {
   @@index([effectiveFrom])
 }
 
+/// Uploaded file or media asset owned by an organization.
 model Asset {
   id               String         @id @default(cuid())
   orgId            String
@@ -216,8 +243,11 @@ model Asset {
   @@index([assetType])
   @@index([key])
   @@index([deletedAt])
+  @@index([orgId, createdAt])
+  @@index([orgId, assetType, createdAt])
 }
 
+/// Organization role assignment with optional scoped access.
 model Membership {
   id        String        @id @default(cuid())
   orgId     String
@@ -238,8 +268,10 @@ model Membership {
   @@index([scopeType, scopeId])
   @@index([userId, orgId, role])
   @@index([userId, role, createdAt])
+  @@index([orgId, role, scopeType, scopeId])
 }
 
+/// KRA taxpayer identity used for rental income tax workflows.
 model TaxpayerProfile {
   id            String               @id @default(cuid())
   orgId         String
@@ -267,8 +299,10 @@ model TaxpayerProfile {
   @@index([isResident])
   @@index([isActive])
   @@index([deletedAt])
+  @@index([orgId, isActive, deletedAt])
 }
 
+/// KRA integration credentials and synchronization state.
 model KraIntegration {
   id                      String            @id @default(cuid())
   orgId                   String            @unique
@@ -293,6 +327,7 @@ model KraIntegration {
   @@index([environment])
 }
 
+/// Real estate property owned or managed by an organization.
 model Property {
   id                      String                   @id @default(cuid())
   orgId                   String
@@ -327,8 +362,10 @@ model Property {
   @@index([isActive])
   @@index([deletedAt])
   @@index([orgId, deletedAt])
+  @@index([orgId, isActive, deletedAt, name])
 }
 
+/// Template used to generate multiple property units.
 model PropertyUnitPlan {
   id                   String   @id @default(cuid())
   propertyId           String
@@ -353,6 +390,7 @@ model PropertyUnitPlan {
   @@index([propertyId, sortOrder])
 }
 
+/// Building/block inside a property.
 model Building {
   id                   String                @id @default(cuid())
   propertyId           String
@@ -370,8 +408,10 @@ model Building {
   @@index([propertyId])
   @@index([isActive])
   @@index([deletedAt])
+  @@index([propertyId, isActive, deletedAt])
 }
 
+/// Rentable unit inside a property or building.
 model Unit {
   id                   String                   @id @default(cuid())
   propertyId           String
@@ -412,41 +452,47 @@ model Unit {
   @@index([deletedAt])
   @@index([propertyId, isActive, deletedAt, status])
   @@index([propertyId, type, bedrooms, status])
+  @@index([propertyId, houseNo])
+  @@index([propertyId, createdAt])
+  @@index([buildingId, status])
 }
 
+/// Tenant profile; may optionally link to a user login account.
 model Tenant {
-  id               String            @id @default(cuid())
+  id               String                  @id @default(cuid())
   orgId            String
-  userId           String?           @unique
-  type             TenantType        @default(INDIVIDUAL)
+  userId           String?                 @unique
+  type             TenantType              @default(INDIVIDUAL)
   fullName         String
   companyName      String?
   kraPin           String?
   phone            String
   email            String?
   nationalId       String?
-  status           TenantStatus      @default(ACTIVE)
+  status           TenantStatus            @default(ACTIVE)
   notes            String?
-  dataConsent      Boolean           @default(false)
+  dataConsent      Boolean                 @default(false)
   consentUpdatedAt DateTime?
-  marketingConsent Boolean           @default(false)
+  marketingConsent Boolean                 @default(false)
   deletedAt        DateTime?
-  profileImageId   String?           @unique
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  profileImageId   String?                 @unique
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
   archivedAt       DateTime?
   blacklistReason  String?
   blacklistedAt    DateTime?
   leases           Lease[]
   moveOutNotices   MoveOutNotice[]
   nextOfKin        NextOfKin?
-  notifications    Notification[]    @relation("NotificationTenant")
-  payments         Payment[]         @relation("PaymentPayerTenant")
+  notifications    Notification[]          @relation("NotificationTenant")
+  payments         Payment[]               @relation("PaymentPayerTenant")
   taxCharges       TaxCharge[]
-  org              Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  profileImage     Asset?            @relation("TenantProfileImage", fields: [profileImageId], references: [id])
-  user             User?             @relation(fields: [userId], references: [id])
+  org              Organization            @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  profileImage     Asset?                  @relation("TenantProfileImage", fields: [profileImageId], references: [id])
+  user             User?                   @relation(fields: [userId], references: [id])
   actionLogs       TenantActionLog[]
+  transferCopies   TenantTransferRequest[] @relation("TenantTransferCreatedTenant")
+  transferRequests TenantTransferRequest[] @relation("TenantTransferSourceTenant")
   waterBills       WaterBill[]
 
   @@unique([orgId, phone])
@@ -459,8 +505,45 @@ model Tenant {
   @@index([blacklistedAt])
   @@index([deletedAt])
   @@index([orgId, deletedAt, status])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, status, fullName])
+  @@index([orgId, phone])
+  @@index([orgId, email])
 }
 
+/// Admin-to-admin request to transfer a moved-out tenant record between organisations.
+model TenantTransferRequest {
+  id                String               @id @default(cuid())
+  sourceOrgId       String
+  targetOrgId       String
+  sourceTenantId    String
+  createdTenantId   String?              @unique
+  requestedByUserId String
+  reviewedByUserId  String?
+  status            TenantTransferStatus @default(PENDING)
+  message           String?
+  reviewNotes       String?
+  requestedAt       DateTime             @default(now())
+  reviewedAt        DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  createdTenant     Tenant?              @relation("TenantTransferCreatedTenant", fields: [createdTenantId], references: [id])
+  requestedBy       User                 @relation("TenantTransferRequestedBy", fields: [requestedByUserId], references: [id])
+  reviewedBy        User?                @relation("TenantTransferReviewedBy", fields: [reviewedByUserId], references: [id])
+  sourceOrg         Organization         @relation("TenantTransferSourceOrg", fields: [sourceOrgId], references: [id], onDelete: Cascade)
+  sourceTenant      Tenant               @relation("TenantTransferSourceTenant", fields: [sourceTenantId], references: [id], onDelete: Cascade)
+  targetOrg         Organization         @relation("TenantTransferTargetOrg", fields: [targetOrgId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceTenantId, targetOrgId, status])
+  @@index([sourceOrgId, status, requestedAt])
+  @@index([targetOrgId, status, requestedAt])
+  @@index([requestedByUserId])
+  @@index([reviewedByUserId])
+  @@index([createdTenantId])
+}
+
+/// Emergency or next-of-kin contact for a tenant.
 model NextOfKin {
   id           String  @id @default(cuid())
   tenantId     String  @unique
@@ -471,6 +554,7 @@ model NextOfKin {
   tenant       Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
+/// Tenancy agreement between a tenant and a unit.
 model Lease {
   id                 String                   @id @default(cuid())
   orgId              String
@@ -509,8 +593,14 @@ model Lease {
   @@index([endDate])
   @@index([deletedAt])
   @@index([orgId, status, deletedAt])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, tenantId, status])
+  @@index([orgId, unitId, status])
+  @@index([orgId, dueDay, status])
 }
 
+/// Caretaker scope assignment for property, building, or unit operations.
 model CaretakerAssignment {
   id              String       @id @default(cuid())
   orgId           String
@@ -541,8 +631,11 @@ model CaretakerAssignment {
   @@index([caretakerUserId, active, buildingId])
   @@index([caretakerUserId, active, unitId])
   @@index([orgId, active, unitId])
+  @@index([orgId, active, propertyId])
+  @@index([orgId, active, buildingId])
 }
 
+/// Landlord profile linked to a user and optional taxpayer profile.
 model LandlordProfile {
   id                String               @id @default(cuid())
   orgId             String
@@ -568,8 +661,10 @@ model LandlordProfile {
   @@index([taxpayerProfileId])
   @@index([isActive])
   @@index([deletedAt])
+  @@index([orgId, isActive, deletedAt])
 }
 
+/// Landlord ownership/management assignment for property or unit.
 model LandlordAssignment {
   id                String          @id @default(cuid())
   orgId             String
@@ -597,8 +692,10 @@ model LandlordAssignment {
   @@index([landlordProfileId, active, unitId])
   @@index([orgId, active, propertyId])
   @@index([orgId, active, unitId])
+  @@index([orgId, active, landlordProfileId])
 }
 
+/// Periodic rent/deposit/service charge generated from a lease.
 model RentCharge {
   id                String                   @id @default(cuid())
   orgId             String
@@ -625,8 +722,13 @@ model RentCharge {
   @@index([dueDate])
   @@index([chargeType])
   @@index([orgId, status, dueDate])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, period, status])
+  @@index([orgId, leaseId, period])
 }
 
+/// KRA rental income return aggregate for a filing period.
 model RentalIncomeReturn {
   id                String                   @id @default(cuid())
   orgId             String
@@ -677,8 +779,13 @@ model RentalIncomeReturn {
   @@index([filingChannel])
   @@index([taxpayerPin])
   @@index([submittedAt])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, period, status])
+  @@index([orgId, taxpayerPin, period])
 }
 
+/// Line item contributing to a rental income return.
 model RentalIncomeReturnItem {
   id             String             @id @default(cuid())
   rentalReturnId String
@@ -701,8 +808,11 @@ model RentalIncomeReturnItem {
   @@index([unitId])
   @@index([leaseId])
   @@index([rentChargeId])
+  @@index([rentalReturnId, propertyId])
+  @@index([propertyId, unitId])
 }
 
+/// Audit trail for attempts to submit or sync with KRA.
 model KraSubmissionAttempt {
   id              String             @id @default(cuid())
   rentalReturnId  String
@@ -720,6 +830,7 @@ model KraSubmissionAttempt {
   @@index([channel])
 }
 
+/// Water meter reading submitted and optionally approved.
 model MeterReading {
   id                String        @id @default(cuid())
   unitId            String
@@ -746,8 +857,11 @@ model MeterReading {
   @@index([period, status])
   @@index([submittedByUserId, createdAt])
   @@index([status, createdAt])
+  @@index([unitId, period, status])
+  @@index([approvedByUserId, approvedAt])
 }
 
+/// Water bill generated from meter usage for a tenant/unit.
 model WaterBill {
   id          String       @id @default(cuid())
   orgId       String
@@ -775,8 +889,13 @@ model WaterBill {
   @@index([status])
   @@index([dueDate])
   @@index([orgId, status])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, period, status])
+  @@index([orgId, dueDate, status])
 }
 
+/// Tax obligation or KRA-linked charge.
 model TaxCharge {
   id               String              @id @default(cuid())
   orgId            String
@@ -822,8 +941,13 @@ model TaxCharge {
   @@index([filingStatus])
   @@index([dueDate])
   @@index([period])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, period, status])
+  @@index([orgId, taxType, period])
 }
 
+/// Incoming payment record allocated to rent, water, tax, or other target.
 model Payment {
   id                 String              @id @default(cuid())
   orgId              String
@@ -876,8 +1000,13 @@ model Payment {
   @@index([paidAt])
   @@index([remittedToKra, remittedAt])
   @@index([orgId, gatewayStatus, verificationStatus])
+  @@index([orgId, updatedAt])
+  @@index([orgId, paidAt])
+  @@index([orgId, targetType, createdAt])
+  @@index([orgId, method, createdAt])
 }
 
+/// Receipt generated from a verified payment.
 model Receipt {
   id        String   @id @default(cuid())
   paymentId String   @unique
@@ -887,6 +1016,7 @@ model Receipt {
   payment   Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 }
 
+/// User or tenant notification queued/sent through a delivery channel.
 model Notification {
   id               String              @id @default(cuid())
   orgId            String
@@ -911,8 +1041,12 @@ model Notification {
   @@index([status, channel])
   @@index([type, createdAt])
   @@index([orgId, readAt])
+  @@index([orgId, status, createdAt])
+  @@index([orgId, channel, status])
+  @@index([tenantId, readAt])
 }
 
+/// Tenant move-out notice and inspection lifecycle trigger.
 model MoveOutNotice {
   id          String       @id @default(cuid())
   leaseId     String
@@ -930,8 +1064,11 @@ model MoveOutNotice {
   @@index([leaseId, status])
   @@index([tenantId, status])
   @@index([moveOutDate])
+  @@index([tenantId, moveOutDate])
+  @@index([leaseId, moveOutDate])
 }
 
+/// Move-out or property inspection record.
 model Inspection {
   id              String           @id @default(cuid())
   noticeId        String           @unique
@@ -948,32 +1085,36 @@ model Inspection {
 
   @@index([scheduledAt])
   @@index([status])
+  @@index([inspectorUserId, scheduledAt])
+  @@index([status, scheduledAt])
 }
 
+/// Maintenance or operational issue ticket.
 model IssueTicket {
-  id               String         @id @default(cuid())
-  orgId            String
-  propertyId       String?
-  unitId           String?
-  reportedByUserId String
-  assignedToUserId String?
-  title            String
-  description      String
-  priority         TicketPriority @default(MEDIUM)
-  status           TicketStatus   @default(OPEN)
-  resolutionNotes  String?
-  resolvedAt       DateTime?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  photoAssetId     String?
-  assignedByUserId String?
-  assignedBy       User?          @relation("IssueAssignedBy", fields: [assignedByUserId], references: [id])
-  assignedTo       User?          @relation("IssueAssignedTo", fields: [assignedToUserId], references: [id])
-  org              Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  photoAsset       Asset?         @relation("IssuePhoto", fields: [photoAssetId], references: [id])
-  property         Property?      @relation(fields: [propertyId], references: [id])
-  reportedBy       User           @relation("IssueReportedBy", fields: [reportedByUserId], references: [id])
-  unit             Unit?          @relation(fields: [unitId], references: [id])
+  id                String                  @id @default(cuid())
+  orgId             String
+  propertyId        String?
+  unitId            String?
+  reportedByUserId  String
+  assignedToUserId  String?
+  title             String
+  description       String
+  priority          TicketPriority          @default(MEDIUM)
+  status            TicketStatus            @default(OPEN)
+  resolutionNotes   String?
+  resolvedAt        DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  photoAssetId      String?
+  assignedByUserId  String?
+  assignedBy        User?                   @relation("IssueAssignedBy", fields: [assignedByUserId], references: [id])
+  assignedTo        User?                   @relation("IssueAssignedTo", fields: [assignedToUserId], references: [id])
+  org               Organization            @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  photoAsset        Asset?                  @relation("IssuePhoto", fields: [photoAssetId], references: [id])
+  property          Property?               @relation(fields: [propertyId], references: [id])
+  reportedBy        User                    @relation("IssueReportedBy", fields: [reportedByUserId], references: [id])
+  resolutionReports IssueResolutionReport[]
+  unit              Unit?                   @relation(fields: [unitId], references: [id])
 
   @@index([orgId, status, priority])
   @@index([propertyId])
@@ -982,8 +1123,45 @@ model IssueTicket {
   @@index([assignedToUserId])
   @@index([assignedByUserId])
   @@index([resolvedAt])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, assignedToUserId, status])
+  @@index([orgId, propertyId, status])
+  @@index([orgId, unitId, status])
 }
 
+/// Caretaker completion report that must be reviewed by office and confirmed by tenant before closure.
+model IssueResolutionReport {
+  id                      String                      @id @default(cuid())
+  issueId                 String
+  orgId                   String
+  caretakerUserId         String
+  officeReviewedByUserId  String?
+  tenantConfirmedByUserId String?
+  status                  IssueResolutionReportStatus @default(SUBMITTED)
+  workSummary             String
+  materialsUsed           String?
+  tenantInstructions      String?
+  officeNotes             String?
+  tenantFeedback          String?
+  submittedAt             DateTime                    @default(now())
+  officeReviewedAt        DateTime?
+  tenantConfirmedAt       DateTime?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  caretaker               User                        @relation("IssueResolutionReportCaretaker", fields: [caretakerUserId], references: [id])
+  issue                   IssueTicket                 @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  officeReviewedBy        User?                       @relation("IssueResolutionReportOfficeReviewer", fields: [officeReviewedByUserId], references: [id])
+  org                     Organization                @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenantConfirmedBy       User?                       @relation("IssueResolutionReportTenantConfirmer", fields: [tenantConfirmedByUserId], references: [id])
+
+  @@index([issueId, status])
+  @@index([orgId, status, submittedAt])
+  @@index([caretakerUserId, submittedAt])
+  @@index([tenantConfirmedByUserId, tenantConfirmedAt])
+}
+
+/// Immutable audit trail for organization actions.
 model AuditLog {
   id          String       @id @default(cuid())
   orgId       String
@@ -1005,8 +1183,12 @@ model AuditLog {
   @@index([actorUserId, createdAt])
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@index([orgId, action, createdAt])
+  @@index([orgId, entityType, createdAt])
+  @@index([requestId])
 }
 
+/// Tenant lifecycle action history.
 model TenantActionLog {
   id          String           @id @default(cuid())
   orgId       String
@@ -1031,8 +1213,11 @@ model TenantActionLog {
   @@index([unitId])
   @@index([actorUserId, createdAt])
   @@index([action, createdAt])
+  @@index([orgId, action, createdAt])
+  @@index([orgId, actorUserId, createdAt])
 }
 
+/// Organization invite token for staff or tenant onboarding.
 model Invitation {
   id             String       @id @default(cuid())
   orgId          String
@@ -1058,8 +1243,11 @@ model Invitation {
   @@index([phone])
   @@index([token])
   @@index([expiresAt])
+  @@index([orgId, status])
+  @@index([orgId, role, status])
 }
 
+/// Password reset token with expiry and usage tracking.
 model PasswordResetToken {
   id        String    @id @default(cuid())
   email     String
@@ -1074,6 +1262,7 @@ model PasswordResetToken {
   @@index([usedAt])
 }
 
+/// Email verification token with expiry and usage tracking.
 model EmailVerificationToken {
   id        String    @id @default(cuid())
   email     String
@@ -1088,6 +1277,7 @@ model EmailVerificationToken {
   @@index([usedAt])
 }
 
+/// Organization API key metadata; stores only a key hash.
 model ApiKey {
   id          String       @id @default(cuid())
   orgId       String
@@ -1105,6 +1295,7 @@ model ApiKey {
 
   @@index([orgId])
   @@index([isActive])
+  @@index([orgId, isActive, createdAt])
 }
 
 enum UserStatus {
@@ -1193,6 +1384,13 @@ enum TenantStatus {
   ACTIVE
   INACTIVE
   BLACKLISTED
+}
+
+enum TenantTransferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
 }
 
 enum TenantActionType {
@@ -1317,6 +1515,13 @@ enum TicketStatus {
   RESOLVED
   CLOSED
   CANCELLED
+}
+
+enum IssueResolutionReportStatus {
+  SUBMITTED
+  OFFICE_APPROVED
+  TENANT_CONFIRMED
+  REJECTED
 }
 
 enum NotificationChannel {

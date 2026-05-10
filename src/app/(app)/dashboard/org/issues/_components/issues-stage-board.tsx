@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { OrgIssue } from "../_lib/types";
+import type { IssueStatusFilter, OrgIssue } from "../_lib/types";
 import {
   buildIssuesHref,
   formatDate,
@@ -12,12 +12,14 @@ export function IssuesStageBoard({
   issues,
   selectedIssueId,
   currentPage,
+  activeFilter,
 }: {
   issues: OrgIssue[];
   selectedIssueId?: string;
   currentPage: number;
+  activeFilter: IssueStatusFilter;
 }) {
-  const columns = [
+  const allColumns = [
     {
       key: "new",
       title: "New",
@@ -48,8 +50,18 @@ export function IssuesStageBoard({
     },
   ] as const;
 
+  const columns =
+    activeFilter === "all"
+      ? allColumns
+      : allColumns.filter((column) => column.key === activeFilter);
+
   return (
-    <section className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 xl:grid xl:grid-cols-4 xl:overflow-visible">
+    <section
+      className={[
+        "flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 xl:grid xl:overflow-visible",
+        activeFilter === "all" ? "xl:grid-cols-4" : "xl:grid-cols-1",
+      ].join(" ")}
+    >
       {columns.map((column) => (
         <div
           key={column.key}
@@ -79,7 +91,7 @@ export function IssuesStageBoard({
                 return (
                   <Link
                     key={issue.id}
-                    href={buildIssuesHref(currentPage, issue.id)}
+                    href={buildIssuesHref(currentPage, issue.id, activeFilter)}
                     className={[
                       "block rounded-[22px] border p-4 transition",
                       selected

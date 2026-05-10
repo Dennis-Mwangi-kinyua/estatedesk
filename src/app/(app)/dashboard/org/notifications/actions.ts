@@ -279,3 +279,46 @@ export async function rejectMeterReading(formData: FormData) {
   revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/notifications");
 }
+
+export async function markNotificationReadAction(formData: FormData) {
+  const { session, membership } = await requireOrgReviewer();
+  const notificationId = String(formData.get("notificationId") ?? "");
+
+  if (!notificationId) {
+    throw new Error("Missing notification id");
+  }
+
+  await prisma.notification.updateMany({
+    where: {
+      id: notificationId,
+      orgId: membership.orgId,
+      OR: [{ userId: session.userId }, { userId: null }],
+    },
+    data: {
+      readAt: new Date(),
+      status: "SENT",
+      sentAt: new Date(),
+    },
+  });
+
+  revalidatePath("/dashboard/org/notifications");
+}
+
+export async function markAllOrgNotificationsReadAction() {
+  const { session, membership } = await requireOrgReviewer();
+
+  await prisma.notification.updateMany({
+    where: {
+      orgId: membership.orgId,
+      readAt: null,
+      OR: [{ userId: session.userId }, { userId: null }],
+    },
+    data: {
+      readAt: new Date(),
+      status: "SENT",
+      sentAt: new Date(),
+    },
+  });
+
+  revalidatePath("/dashboard/org/notifications");
+}

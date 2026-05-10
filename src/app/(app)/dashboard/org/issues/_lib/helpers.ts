@@ -2,6 +2,7 @@ import { TicketPriority, TicketStatus } from "@prisma/client";
 import {
   ISSUE_PAGE_PATH,
   ORG_ASSIGNMENT_ROLES,
+  type IssueStatusFilter,
   type OrgIssue,
 } from "./types";
 
@@ -53,9 +54,66 @@ export function clampPage(page: number, totalPages: number) {
   return page;
 }
 
-export function buildIssuesHref(page: number, issueId?: string) {
+export function normalizeIssueStatusFilter(value?: string): IssueStatusFilter {
+  const filters: IssueStatusFilter[] = [
+    "all",
+    "new",
+    "progress",
+    "resolved",
+    "cancelled",
+  ];
+
+  return filters.includes(value as IssueStatusFilter)
+    ? (value as IssueStatusFilter)
+    : "all";
+}
+
+export function getIssueFilterLabel(filter: IssueStatusFilter) {
+  switch (filter) {
+    case "new":
+      return "New";
+    case "progress":
+      return "In Progress";
+    case "resolved":
+      return "Resolved";
+    case "cancelled":
+      return "Cancelled";
+    default:
+      return "All Issues";
+  }
+}
+
+export function filterIssuesByStatus(
+  issues: OrgIssue[],
+  filter: IssueStatusFilter,
+) {
+  switch (filter) {
+    case "new":
+      return issues.filter((issue) => issue.status === "OPEN" && !issue.assignedTo);
+    case "progress":
+      return issues.filter((issue) => issue.status === "IN_PROGRESS");
+    case "resolved":
+      return issues.filter(
+        (issue) => issue.status === "RESOLVED" || issue.status === "CLOSED",
+      );
+    case "cancelled":
+      return issues.filter((issue) => issue.status === "CANCELLED");
+    default:
+      return issues;
+  }
+}
+
+export function buildIssuesHref(
+  page: number,
+  issueId?: string,
+  status: IssueStatusFilter = "all",
+) {
   const params = new URLSearchParams();
   params.set("page", String(page));
+
+  if (status !== "all") {
+    params.set("status", status);
+  }
 
   if (issueId) {
     params.set("issueId", issueId);

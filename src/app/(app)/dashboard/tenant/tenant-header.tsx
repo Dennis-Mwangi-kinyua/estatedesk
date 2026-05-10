@@ -30,14 +30,14 @@ export function TenantHeader({ fullName, orgName }: TenantHeaderProps) {
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-30 border-b border-neutral-200/80 bg-white/80 backdrop-blur-xl lg:left-[300px] xl:left-[320px]">
-        <div className="px-4 py-4 sm:px-6 lg:px-8">
+      <header className="fixed left-0 right-0 top-0 z-30 border-b border-white/60 bg-white/78 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-2xl lg:left-[300px] xl:left-[320px]">
+        <div className="px-3 py-3 sm:px-6 lg:px-8 lg:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-[18px] border border-neutral-200 bg-white text-neutral-800 shadow-sm transition active:scale-95 lg:hidden"
+                className="ios-button inline-flex h-11 w-11 items-center justify-center border border-neutral-200 bg-white/88 text-neutral-800 shadow-sm lg:hidden"
                 aria-label="Open menu"
               >
                 <HiBars3 className="h-5 w-5" />
@@ -56,7 +56,7 @@ export function TenantHeader({ fullName, orgName }: TenantHeaderProps) {
               </div>
             </div>
 
-            <div className="hidden rounded-[22px] border border-neutral-200 bg-white/90 px-4 py-3 text-right shadow-sm sm:block">
+            <div className="hidden rounded-[22px] border border-neutral-200 bg-white/88 px-4 py-3 text-right shadow-sm sm:block">
               <p className="max-w-[200px] truncate text-sm font-semibold text-neutral-950">
                 {fullName}
               </p>
@@ -64,7 +64,7 @@ export function TenantHeader({ fullName, orgName }: TenantHeaderProps) {
             </div>
           </div>
 
-          <div className="mt-3 rounded-[22px] border border-neutral-200 bg-white/90 p-3 shadow-sm sm:hidden">
+          <div className="ios-card mt-3 rounded-[22px] p-3 sm:hidden">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-neutral-50 text-base ring-1 ring-neutral-200">
                 👋
@@ -91,7 +91,7 @@ export function TenantHeader({ fullName, orgName }: TenantHeaderProps) {
             aria-label="Close menu overlay"
           />
 
-          <div className="absolute inset-x-0 top-0 max-h-[100vh] overflow-y-auto rounded-b-[32px] border-b border-neutral-200 bg-white shadow-2xl">
+          <div className="absolute inset-x-0 top-0 max-h-[100vh] overflow-y-auto rounded-b-[32px] border-b border-white/60 bg-white/88 shadow-2xl backdrop-blur-2xl">
             <div className="px-4 pb-6 pt-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -106,14 +106,14 @@ export function TenantHeader({ fullName, orgName }: TenantHeaderProps) {
                 <button
                   type="button"
                   onClick={() => setMenuOpen(false)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-[18px] border border-neutral-200 bg-white text-neutral-800 shadow-sm active:scale-95"
+                  className="ios-button inline-flex h-11 w-11 items-center justify-center border border-neutral-200 bg-white/88 text-neutral-800 shadow-sm"
                   aria-label="Close menu"
                 >
                   <HiXMark className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="mt-4 rounded-[24px] border border-neutral-200 bg-neutral-50 p-4">
+              <div className="ios-card mt-4 rounded-[24px] p-4">
                 <p className="truncate text-sm font-semibold text-neutral-950">
                   {fullName}
                 </p>
@@ -133,7 +133,7 @@ export function TenantHeader({ fullName, orgName }: TenantHeaderProps) {
                       className={`flex items-center gap-3 rounded-[22px] px-4 py-4 text-sm font-medium transition active:scale-[0.99] ${
                         isActive
                           ? "bg-neutral-950 text-white shadow-sm"
-                          : "bg-white text-neutral-700 hover:bg-neutral-100"
+                          : "bg-white/78 text-neutral-700 hover:bg-white"
                       }`}
                     >
                       <span className="text-base">{item.emoji}</span>
@@ -154,7 +154,7 @@ export function TenantHeader({ fullName, orgName }: TenantHeaderProps) {
                 <form action={logoutAction} onSubmit={() => setMenuOpen(false)}>
                   <button
                     type="submit"
-                    className="flex w-full items-center gap-3 rounded-[22px] px-4 py-4 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                    className="flex w-full items-center gap-3 rounded-[22px] px-4 py-4 text-sm font-medium text-red-600 transition hover:bg-red-50 active:scale-[0.99]"
                   >
                     <span className="text-base">👋</span>
                     <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600">

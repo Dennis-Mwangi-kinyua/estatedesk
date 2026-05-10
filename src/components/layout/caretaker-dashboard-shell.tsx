@@ -13,15 +13,15 @@ export function CaretakerDashboardShell({
   children,
 }: CaretakerDashboardShellProps) {
   return (
-    <div className="h-dvh w-full overflow-hidden bg-neutral-100">
+    <div className="app-mobile-canvas h-dvh w-full overflow-hidden">
       <div className="flex h-full w-full overflow-hidden">
         <CaretakerDashboardSidebar fullName={fullName} />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <CaretakerDashboardHeader fullName={fullName} />
 
-          <main className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5 sm:py-5 md:px-6 lg:px-8">
-            <div className="mx-auto w-full max-w-7xl">{children}</div>
+          <main className="ios-scroll min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:px-5 sm:py-5 md:px-6 lg:px-8">
+            <div className="app-content-shell">{children}</div>
           </main>
 
           <CaretakerDashboardFooter />

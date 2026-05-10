@@ -26,14 +26,14 @@ export default async function TenantLayout({
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="app-mobile-canvas min-h-screen">
       <TenantSidebar fullName={tenant.fullName} />
       <TenantHeader fullName={tenant.fullName} orgName={tenant.org.name} />
       <TenantFooter />
 
       <div className="min-h-screen lg:pl-[300px] xl:pl-[320px]">
-        <main className="px-4 pb-36 pt-24 sm:px-6 lg:px-8 lg:pb-24 lg:pt-28">
-          {children}
+        <main className="px-3 pb-32 pt-[104px] sm:px-5 lg:px-8 lg:pb-24 lg:pt-24">
+          <div className="app-content-shell">{children}</div>
         </main>
       </div>
     </div>

@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
+import { requireUserSession } from "@/lib/auth/session";
+import { submitIssueResolutionReportAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +66,17 @@ type IssueWithRelations = Prisma.IssueTicketGetPayload<{
         fullName: true;
         email: true;
         phone: true;
+      };
+    };
+    resolutionReports: {
+      select: {
+        id: true;
+        status: true;
+        workSummary: true;
+        materialsUsed: true;
+        tenantInstructions: true;
+        officeNotes: true;
+        submittedAt: true;
       };
     };
   };
@@ -362,6 +375,21 @@ async function getIssueData({
               phone: true,
             },
           },
+          resolutionReports: {
+            orderBy: {
+              submittedAt: "desc",
+            },
+            take: 1,
+            select: {
+              id: true,
+              status: true,
+              workSummary: true,
+              materialsUsed: true,
+              tenantInstructions: true,
+              officeNotes: true,
+              submittedAt: true,
+            },
+          },
         },
       }),
     ]);
@@ -528,10 +556,21 @@ function EmptyStateCard({
   );
 }
 
-function IssueCard({ issue }: { issue: IssueWithRelations }) {
+function IssueCard({
+  issue,
+  currentUserId,
+}: {
+  issue: IssueWithRelations;
+  currentUserId: string;
+}) {
   const propertyName = issue.unit?.property.name ?? issue.property?.name ?? "—";
   const buildingName = issue.unit?.building?.name ?? "—";
   const unitName = issue.unit?.houseNo ?? "—";
+  const latestReport = issue.resolutionReports[0] ?? null;
+  const canSubmitReport =
+    issue.status === TicketStatus.IN_PROGRESS &&
+    issue.assignedTo?.id === currentUserId &&
+    (!latestReport || latestReport.status === "REJECTED");
 
   return (
     <article className="rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-neutral-300 hover:shadow-sm">
@@ -622,6 +661,70 @@ function IssueCard({ issue }: { issue: IssueWithRelations }) {
           Last updated {formatDateTime(issue.updatedAt)}
         </span>
       </div>
+
+      {latestReport ? (
+        <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-neutral-950">
+              Completion report
+            </p>
+            <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-neutral-600">
+              {latestReport.status.replaceAll("_", " ")}
+            </span>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-neutral-700">
+            {latestReport.workSummary}
+          </p>
+          {latestReport.officeNotes ? (
+            <p className="mt-2 text-xs leading-5 text-neutral-500">
+              Office notes: {latestReport.officeNotes}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {canSubmitReport ? (
+        <form
+          action={submitIssueResolutionReportAction}
+          className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4"
+        >
+          <input type="hidden" name="issueId" value={issue.id} />
+          <p className="text-sm font-semibold text-neutral-950">
+            Submit completion report
+          </p>
+          <p className="mt-1 text-xs leading-5 text-neutral-500">
+            This goes to the office first. The ticket closes only after the
+            tenant confirms the work.
+          </p>
+          <div className="mt-3 grid gap-3">
+            <textarea
+              name="workSummary"
+              rows={3}
+              required
+              minLength={10}
+              placeholder="What was done?"
+              className="w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
+            />
+            <input
+              name="materialsUsed"
+              placeholder="Materials used (optional)"
+              className="w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
+            />
+            <textarea
+              name="tenantInstructions"
+              rows={2}
+              placeholder="Tenant instructions or follow-up notes (optional)"
+              className="w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
+            />
+            <button
+              type="submit"
+              className="inline-flex w-fit items-center justify-center rounded-xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
+            >
+              Submit report to office
+            </button>
+          </div>
+        </form>
+      ) : null}
     </article>
   );
 }
@@ -654,6 +757,7 @@ function WorkflowStep({
 }
 
 export default async function IssuesPage({ searchParams }: PageProps) {
+  const session = await requireUserSession();
   const orgId = await requireCurrentOrgId();
   const resolvedSearchParams = await searchParams;
 
@@ -827,7 +931,11 @@ export default async function IssuesPage({ searchParams }: PageProps) {
                   />
                 ) : (
                   issueData.issues.map((issue) => (
-                    <IssueCard key={issue.id} issue={issue} />
+                    <IssueCard
+                      key={issue.id}
+                      issue={issue}
+                      currentUserId={session.userId}
+                    />
                   ))
                 )}
               </div>

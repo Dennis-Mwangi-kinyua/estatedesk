@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { OrgIssue } from "../_lib/types";
+import type { IssueStatusFilter, OrgIssue } from "../_lib/types";
 import {
   buildIssuesHref,
   formatDate,
@@ -12,10 +12,12 @@ export function IssuesHistory({
   issues,
   selectedIssueId,
   currentPage,
+  activeFilter,
 }: {
   issues: OrgIssue[];
   selectedIssueId?: string;
   currentPage: number;
+  activeFilter: IssueStatusFilter;
 }) {
   return (
     <>
@@ -26,7 +28,7 @@ export function IssuesHistory({
           return (
             <Link
               key={issue.id}
-              href={buildIssuesHref(currentPage, issue.id)}
+              href={buildIssuesHref(currentPage, issue.id, activeFilter)}
               className={[
                 "block rounded-[24px] border p-4 transition",
                 selected
@@ -118,7 +120,7 @@ export function IssuesHistory({
                 >
                   <td className="px-5 py-4">
                     <Link
-                      href={buildIssuesHref(currentPage, issue.id)}
+                      href={buildIssuesHref(currentPage, issue.id, activeFilter)}
                       className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
                     >
                       {issue.title}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getOrgIssuesPageData } from "./_lib/queries";
 import type { IssuesPageProps } from "./_lib/types";
 import { PageShell, SurfaceCard } from "./_components/issues-page-shell";
@@ -8,11 +9,12 @@ import { IssuesStageBoard } from "./_components/issues-stage-board";
 import { IssueDetailsCard } from "./_components/issue-details-card";
 import { IssuesHistory } from "./_components/issues-history";
 import { IssuesPagination } from "./_components/issues-pagination";
+import { getIssueFilterLabel } from "./_lib/helpers";
 
 export default async function IssuesPage({ searchParams }: IssuesPageProps) {
   const data = await getOrgIssuesPageData(searchParams);
 
-  if (data.issues.length === 0) {
+  if (data.stats.totalIssues === 0) {
     return (
       <PageShell>
         <IssuesEmptyState organizationName={data.membership.org.name} />
@@ -24,31 +26,48 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
     <PageShell>
       <div className="space-y-4 sm:space-y-6">
         <IssuesHeader membership={data.membership} stats={data.stats} />
-        <IssuesStats stats={data.stats} />
+        <IssuesStats stats={data.stats} activeFilter={data.activeFilter} />
 
         <SurfaceCard className="p-4 sm:p-6">
-          <div className="mb-4">
-            <h2 className="text-[22px] font-semibold tracking-tight text-neutral-950">
-              Workflow Board
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-neutral-500">
-              Swipe on mobile like an iOS board. New tickets disappear from the
-              first lane immediately after caretaker allocation because they are
-              moved to progress.
-            </p>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-[22px] font-semibold tracking-tight text-neutral-950">
+                {getIssueFilterLabel(data.activeFilter)}
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-neutral-500">
+                Use the status buttons above to focus one issue stage at a time.
+                The list and pagination below follow the selected stage.
+              </p>
+            </div>
+            {data.activeFilter !== "all" ? (
+              <Link
+                href="/dashboard/org/issues"
+                className="inline-flex h-10 items-center justify-center rounded-2xl border border-black/10 bg-white px-4 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50"
+              >
+                Show all
+              </Link>
+            ) : null}
           </div>
 
-          <IssuesStageBoard
-            issues={data.issues}
-            selectedIssueId={data.selectedIssue?.id}
-            currentPage={data.currentPage}
-          />
+          {data.issues.length === 0 ? (
+            <div className="rounded-[24px] border border-dashed border-black/10 bg-neutral-50 p-8 text-center text-sm text-neutral-500">
+              No issues in {getIssueFilterLabel(data.activeFilter).toLowerCase()}.
+            </div>
+          ) : (
+            <IssuesStageBoard
+              issues={data.issues}
+              selectedIssueId={data.selectedIssue?.id}
+              currentPage={data.currentPage}
+              activeFilter={data.activeFilter}
+            />
+          )}
         </SurfaceCard>
 
         <IssueDetailsCard
           issue={data.selectedIssue}
           caretakers={data.caretakers}
           currentPage={data.currentPage}
+          activeFilter={data.activeFilter}
           canAssignCaretaker={data.canAssignCaretaker}
         />
 
@@ -72,6 +91,7 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
             issues={data.paginatedIssues}
             selectedIssueId={data.selectedIssue?.id}
             currentPage={data.currentPage}
+            activeFilter={data.activeFilter}
           />
 
           <IssuesPagination
@@ -81,6 +101,7 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
             historyStart={data.historyStart}
             historyEnd={data.historyEnd}
             selectedIssueId={data.selectedIssue?.id}
+            activeFilter={data.activeFilter}
           />
         </SurfaceCard>
       </div>

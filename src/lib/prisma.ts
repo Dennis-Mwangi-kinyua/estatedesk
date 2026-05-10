@@ -8,7 +8,10 @@ neonConfig.webSocketConstructor = ws;
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
+  prismaSchemaVersion?: string;
 };
+
+const PRISMA_SCHEMA_VERSION = "issue-resolution-reports";
 
 function createPrismaClient() {
   const adapter = new PrismaNeon({
@@ -18,8 +21,13 @@ function createPrismaClient() {
   return new PrismaClient({ adapter });
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+export const prisma =
+  globalForPrisma.prismaSchemaVersion === PRISMA_SCHEMA_VERSION &&
+  globalForPrisma.prisma
+    ? globalForPrisma.prisma
+    : createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
+  globalForPrisma.prismaSchemaVersion = PRISMA_SCHEMA_VERSION;
 }

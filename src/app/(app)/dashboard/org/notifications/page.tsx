@@ -6,14 +6,21 @@ import {
   Clock3,
   CreditCard,
   Droplets,
+  Megaphone,
   Send,
   ShieldCheck,
   XCircle,
 } from "lucide-react";
 import { redirect } from "next/navigation";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
-import { approveMeterReading, rejectMeterReading } from "./actions";
+import {
+  approveMeterReading,
+  markAllOrgNotificationsReadAction,
+  markNotificationReadAction,
+  rejectMeterReading,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -54,6 +61,49 @@ type ApprovalQueueItem = {
       waterFixedCharge: unknown;
     };
   };
+};
+
+type MoveOutQueueItem = {
+  id: string;
+  noticeDate: Date;
+  moveOutDate: Date;
+  status: string;
+  notes: string | null;
+  tenant: {
+    id: string;
+    fullName: string;
+    phone: string;
+    email: string | null;
+    waterBills: Array<{
+      id: string;
+      total: unknown;
+      status: string;
+    }>;
+  };
+  lease: {
+    id: string;
+    rentCharges: Array<{
+      id: string;
+      amountDue: unknown;
+      amountPaid: unknown;
+      balance: unknown;
+      status: string;
+    }>;
+    unit: {
+      houseNo: string;
+      property: {
+        name: string;
+      };
+      building: {
+        name: string | null;
+      } | null;
+    };
+  };
+  inspection: {
+    id: string;
+    scheduledAt: Date;
+    status: string;
+  } | null;
 };
 
 type NotificationItem = {
@@ -110,6 +160,7 @@ type PaymentItem = {
 type PageData = {
   membership: OrgContext;
   approvalQueue: ApprovalQueueItem[];
+  moveOutQueue: MoveOutQueueItem[];
   notifications: NotificationItem[];
   recentPayments: PaymentItem[];
   metrics: {
@@ -119,6 +170,14 @@ type PageData = {
     sentCount: number;
     failedCount: number;
   };
+};
+
+type NotificationFilter = "all" | "unread" | "payments" | "issues" | "moveouts" | "water";
+
+type PageProps = {
+  searchParams?: Promise<{
+    filter?: string;
+  }>;
 };
 
 function cn(...parts: Array<string | false | null | undefined>) {
@@ -267,7 +326,72 @@ async function getCurrentOrgContext(): Promise<OrgContext> {
   return fallbackMembership as OrgContext;
 }
 
-async function loadNotificationsPageData(): Promise<PageData> {
+function normalizeNotificationFilter(value?: string): NotificationFilter {
+  const allowed: NotificationFilter[] = [
+    "all",
+    "unread",
+    "payments",
+    "issues",
+    "moveouts",
+    "water",
+  ];
+
+  return allowed.includes(value as NotificationFilter)
+    ? (value as NotificationFilter)
+    : "all";
+}
+
+function getNotificationWhereForFilter(
+  filter: NotificationFilter,
+  membership: OrgContext,
+): Prisma.NotificationWhereInput {
+  const base = {
+    orgId: membership.orgId,
+  };
+
+  if (filter === "unread") return { ...base, readAt: null };
+  if (filter === "payments") {
+    return {
+      ...base,
+      type: { in: ["PAYMENT_RECEIVED", "PAYMENT_VERIFIED"] as const },
+    };
+  }
+  if (filter === "issues") {
+    return {
+      ...base,
+      type: { in: ["ISSUE_CREATED", "ISSUE_RESOLVED", "GENERAL"] as const },
+      OR: [
+        { title: { contains: "issue", mode: "insensitive" as const } },
+        { message: { contains: "issue", mode: "insensitive" as const } },
+      ],
+    };
+  }
+  if (filter === "moveouts") {
+    return {
+      ...base,
+      OR: [
+        { title: { contains: "move-out", mode: "insensitive" as const } },
+        { message: { contains: "move-out", mode: "insensitive" as const } },
+      ],
+    };
+  }
+  if (filter === "water") {
+    return {
+      ...base,
+      OR: [
+        { type: "WATER_BILL_ISSUED" },
+        { title: { contains: "water", mode: "insensitive" as const } },
+        { message: { contains: "water", mode: "insensitive" as const } },
+      ],
+    };
+  }
+
+  return base;
+}
+
+async function loadNotificationsPageData(
+  filter: NotificationFilter,
+): Promise<PageData> {
   const membership = await getCurrentOrgContext();
 
   const approvalQueue = await prisma.meterReading.findMany({
@@ -312,10 +436,92 @@ async function loadNotificationsPageData(): Promise<PageData> {
     },
   });
 
-  const notifications = await prisma.notification.findMany({
+  const moveOutQueue = await prisma.moveOutNotice.findMany({
     where: {
-      orgId: membership.orgId,
+      status: {
+        in: ["SUBMITTED", "INSPECTION_SCHEDULED", "INSPECTION_COMPLETED"],
+      },
+      lease: {
+        orgId: membership.orgId,
+        deletedAt: null,
+      },
     },
+    orderBy: {
+      createdAt: "asc",
+    },
+    take: 8,
+    select: {
+      id: true,
+      noticeDate: true,
+      moveOutDate: true,
+      status: true,
+      notes: true,
+      tenant: {
+        select: {
+          id: true,
+          fullName: true,
+          phone: true,
+          email: true,
+          waterBills: {
+            where: {
+              status: {
+                in: ["ISSUED", "PAYMENT_PENDING", "PAID_PENDING_VERIFICATION", "DISPUTED"],
+              },
+            },
+            select: {
+              id: true,
+              total: true,
+              status: true,
+            },
+          },
+        },
+      },
+      lease: {
+        select: {
+          id: true,
+          rentCharges: {
+            where: {
+              status: {
+                in: ["UNPAID", "PARTIAL", "OVERDUE"],
+              },
+            },
+            select: {
+              id: true,
+              amountDue: true,
+              amountPaid: true,
+              balance: true,
+              status: true,
+            },
+          },
+          unit: {
+            select: {
+              houseNo: true,
+              property: {
+                select: {
+                  name: true,
+                },
+              },
+              building: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      inspection: {
+        select: {
+          id: true,
+          scheduledAt: true,
+          status: true,
+        },
+      },
+    },
+  });
+
+  const notifications = await prisma.notification.findMany({
+    where: getNotificationWhereForFilter(filter, membership),
     orderBy: { createdAt: "desc" },
     take: 18,
     select: {
@@ -392,6 +598,7 @@ async function loadNotificationsPageData(): Promise<PageData> {
   return {
     membership,
     approvalQueue: approvalQueue as ApprovalQueueItem[],
+    moveOutQueue: moveOutQueue as MoveOutQueueItem[],
     notifications: notifications as NotificationItem[],
     recentPayments: recentPayments as PaymentItem[],
     metrics: {
@@ -488,14 +695,46 @@ function PaymentStatusBadge({
   );
 }
 
-export default async function OrganizationNotificationsPage() {
+function NotificationFilterLink({
+  filter,
+  activeFilter,
+  label,
+}: {
+  filter: NotificationFilter;
+  activeFilter: NotificationFilter;
+  label: string;
+}) {
+  const active = filter === activeFilter;
+
+  return (
+    <Link
+      href={`/dashboard/org/notifications?filter=${filter}`}
+      className={cn(
+        "inline-flex h-10 shrink-0 items-center justify-center rounded-full border px-4 text-sm font-medium transition",
+        active
+          ? "border-neutral-950 bg-neutral-950 text-white"
+          : "border-black/10 bg-white text-neutral-700 hover:bg-neutral-50",
+      )}
+    >
+      {label}
+    </Link>
+  );
+}
+
+export default async function OrganizationNotificationsPage({
+  searchParams,
+}: PageProps) {
+  const activeFilter = normalizeNotificationFilter(
+    (await searchParams)?.filter,
+  );
   const {
     membership,
     approvalQueue,
+    moveOutQueue,
     notifications,
     recentPayments,
     metrics: { totalNotifications, unreadCount, queuedCount, sentCount, failedCount },
-  } = await loadNotificationsPageData();
+  } = await loadNotificationsPageData(activeFilter);
 
   return (
     <div className="space-y-4 bg-neutral-50/70 sm:space-y-6">
@@ -538,16 +777,146 @@ export default async function OrganizationNotificationsPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 sm:p-6 xl:grid-cols-5">
-          <KpiTile label="Pending" value={approvalQueue.length} icon={Droplets} tone="warn" />
+          <KpiTile label="Water Review" value={approvalQueue.length} icon={Droplets} tone="warn" />
+          <KpiTile label="Move-outs" value={moveOutQueue.length} icon={Megaphone} tone="warn" />
           <KpiTile label="Unread" value={unreadCount} icon={Bell} />
           <KpiTile label="Queued" value={queuedCount} icon={Clock3} />
           <KpiTile label="Sent" value={sentCount} icon={Send} tone="success" />
-          <KpiTile label="Failed" value={failedCount} icon={XCircle} tone="danger" />
         </div>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         <div className="space-y-4 xl:col-span-8">
+          <div className="rounded-[28px] border border-black/10 bg-white p-4 shadow-sm sm:p-6">
+            <PanelHeader
+              eyebrow="Move-out desk"
+              title="Notice review queue"
+              description="Tenant move-out notices submitted from the tenant portal."
+            />
+
+            <div className="mt-5 space-y-4">
+              {moveOutQueue.length === 0 ? (
+                <EmptyState
+                  title="No move-outs waiting"
+                  message="New tenant notices will appear here immediately after submission."
+                />
+              ) : (
+                moveOutQueue.map((notice) => {
+                    const rentBalance = notice.lease.rentCharges.reduce(
+                      (sum, charge) => sum + toNumber(charge.balance),
+                      0,
+                    );
+                    const waterBalance = notice.tenant.waterBills.reduce(
+                      (sum, bill) => sum + toNumber(bill.total),
+                      0,
+                    );
+                    const clearanceBalance = rentBalance + waterBalance;
+
+                    return (
+                      <article
+                        key={notice.id}
+                        className="rounded-[28px] border border-black/10 bg-neutral-50 p-4"
+                      >
+                        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-medium text-neutral-700 ring-1 ring-black/5">
+                                {notice.lease.unit.property.name}
+                              </span>
+                              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-medium text-neutral-700 ring-1 ring-black/5">
+                                Unit {notice.lease.unit.houseNo}
+                              </span>
+                              <span className="rounded-full bg-amber-50 px-3 py-1 text-[11px] font-medium text-amber-700 ring-1 ring-amber-200">
+                                {formatEnumLabel(notice.status)}
+                              </span>
+                              <span
+                                className={cn(
+                                  "rounded-full px-3 py-1 text-[11px] font-medium ring-1",
+                                  clearanceBalance <= 0
+                                    ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                                    : "bg-red-50 text-red-700 ring-red-200",
+                                )}
+                              >
+                                {clearanceBalance <= 0 ? "Clearance ready" : "Balance pending"}
+                              </span>
+                            </div>
+
+                            <h3 className="mt-4 text-base font-semibold text-neutral-950 sm:text-lg">
+                              {notice.tenant.fullName}
+                            </h3>
+                            <p className="mt-1 text-sm text-neutral-500">
+                              Move-out date {formatDateTime(notice.moveOutDate, membership.org.timezone)}
+                            </p>
+                            <p className="mt-1 text-sm text-neutral-500">
+                              {notice.tenant.phone}
+                              {notice.tenant.email ? ` / ${notice.tenant.email}` : ""}
+                            </p>
+
+                            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                              <div className="rounded-2xl bg-white p-3 ring-1 ring-black/5">
+                                <p className="text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+                                  Rent Balance
+                                </p>
+                                <p className="mt-2 text-sm font-semibold text-neutral-950">
+                                  {formatMoney(rentBalance, membership.org.currencyCode)}
+                                </p>
+                              </div>
+                              <div className="rounded-2xl bg-white p-3 ring-1 ring-black/5">
+                                <p className="text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+                                  Water Balance
+                                </p>
+                                <p className="mt-2 text-sm font-semibold text-neutral-950">
+                                  {formatMoney(waterBalance, membership.org.currencyCode)}
+                                </p>
+                              </div>
+                              <div className="rounded-2xl bg-white p-3 ring-1 ring-black/5">
+                                <p className="text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+                                  Clearance
+                                </p>
+                                <p className="mt-2 text-sm font-semibold text-neutral-950">
+                                  {formatMoney(clearanceBalance, membership.org.currencyCode)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {notice.notes ? (
+                              <div className="mt-4 rounded-2xl bg-white p-3 text-sm text-neutral-700 ring-1 ring-black/5">
+                                {notice.notes}
+                              </div>
+                            ) : null}
+                          </div>
+
+                          <div className="w-full space-y-2 xl:max-w-xs">
+                            <Link
+                              href={`/dashboard/org/tenants/${notice.tenant.id}`}
+                              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
+                            >
+                              Review tenant
+                            </Link>
+                            {notice.inspection ? (
+                              <Link
+                                href={`/dashboard/org/inspections/${notice.inspection.id}`}
+                                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50"
+                              >
+                                View inspection
+                              </Link>
+                            ) : (
+                              <Link
+                                href="/move-outs"
+                                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50"
+                              >
+                                Schedule inspection
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                      </article>
+                    );
+                })
+              )}
+            </div>
+          </div>
+
           <div className="rounded-[28px] border border-black/10 bg-white p-4 shadow-sm sm:p-6">
             <PanelHeader
               eyebrow="Review queue"
@@ -674,11 +1043,31 @@ export default async function OrganizationNotificationsPage() {
           </div>
 
           <div className="rounded-[28px] border border-black/10 bg-white p-4 shadow-sm sm:p-6">
-            <PanelHeader
-              eyebrow="Activity log"
-              title="Communication feed"
-              description="Recent notifications sent to tenants, staff, and caretakers."
-            />
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <PanelHeader
+                eyebrow="Activity log"
+                title="Communication feed"
+                description="Recent notifications sent to tenants, staff, and caretakers."
+              />
+
+              <form action={markAllOrgNotificationsReadAction}>
+                <button
+                  type="submit"
+                  className="inline-flex h-10 items-center justify-center rounded-2xl border border-black/10 bg-white px-4 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50"
+                >
+                  Mark all read
+                </button>
+              </form>
+            </div>
+
+            <div className="no-scrollbar -mx-1 mt-5 flex gap-2 overflow-x-auto px-1 pb-1">
+              <NotificationFilterLink filter="all" activeFilter={activeFilter} label="All" />
+              <NotificationFilterLink filter="unread" activeFilter={activeFilter} label="Unread" />
+              <NotificationFilterLink filter="payments" activeFilter={activeFilter} label="Payments" />
+              <NotificationFilterLink filter="issues" activeFilter={activeFilter} label="Issues" />
+              <NotificationFilterLink filter="moveouts" activeFilter={activeFilter} label="Move-outs" />
+              <NotificationFilterLink filter="water" activeFilter={activeFilter} label="Water" />
+            </div>
 
             <div className="mt-5 space-y-3">
               {notifications.length === 0 ? (
@@ -748,6 +1137,22 @@ export default async function OrganizationNotificationsPage() {
                                 "—"}
                             </p>
                           )}
+
+                          {!notification.readAt ? (
+                            <form action={markNotificationReadAction} className="mt-3">
+                              <input
+                                type="hidden"
+                                name="notificationId"
+                                value={notification.id}
+                              />
+                              <button
+                                type="submit"
+                                className="inline-flex h-9 items-center justify-center rounded-xl border border-black/10 bg-white px-3 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50"
+                              >
+                                Mark read
+                              </button>
+                            </form>
+                          ) : null}
                         </div>
                       </div>
                     </article>

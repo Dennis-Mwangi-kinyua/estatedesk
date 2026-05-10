@@ -79,7 +79,7 @@ export function CaretakerMobileSidebar({
 
       <aside
         className={clsx(
-          "absolute left-0 top-0 flex h-full w-[86%] max-w-xs flex-col border-r border-neutral-200/80 bg-white/95 shadow-2xl backdrop-blur supports-[backdrop-filter]:bg-white/90 transition-transform duration-300",
+          "absolute left-0 top-0 flex h-full w-[88%] max-w-[360px] flex-col border-r border-white/60 bg-white/86 shadow-2xl backdrop-blur-2xl transition-transform duration-300",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -109,7 +109,7 @@ export function CaretakerMobileSidebar({
               type="button"
               onClick={onClose}
               aria-label="Close menu"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700 shadow-sm transition hover:bg-neutral-50 active:scale-[0.98]"
+              className="ios-button inline-flex h-11 w-11 shrink-0 items-center justify-center border border-neutral-200 bg-white/88 text-neutral-700 shadow-sm hover:bg-white"
             >
               <X className="h-5 w-5" />
             </button>
@@ -140,7 +140,7 @@ export function CaretakerMobileSidebar({
                   key={item.href}
                   href={item.href}
                   className={clsx(
-                    "group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition",
+                    "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition active:scale-[0.99]",
                     active
                       ? "bg-neutral-900 text-white shadow-sm"
                       : "text-neutral-700 hover:bg-neutral-100"
@@ -168,7 +168,7 @@ export function CaretakerMobileSidebar({
           <form action={logoutAction}>
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+              className="ios-button flex w-full items-center justify-center gap-2 border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-100"
             >
               <LogOut className="h-4 w-4" />
               <span>Logout</span>

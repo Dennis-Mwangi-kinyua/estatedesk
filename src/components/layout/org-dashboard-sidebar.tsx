@@ -14,6 +14,7 @@ import {
   Receipt,
   Settings,
   ShieldCheck,
+  UserCheck,
   Users,
   Wrench,
   X,
@@ -71,6 +72,13 @@ const SIDEBAR_LINKS: readonly SidebarLink[] = [
     icon: Users,
     emoji: "🧑‍🤝‍🧑",
     roles: ["ADMIN", "MANAGER", "OFFICE"],
+  },
+  {
+    label: "Verify Tenant",
+    href: "/dashboard/org/verify-tenant",
+    icon: UserCheck,
+    emoji: "✅",
+    roles: ["ADMIN"],
   },
   {
     label: "Leases",
@@ -307,7 +315,7 @@ export function OrgDashboardSidebar({
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r border-black/10 bg-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r border-white/60 bg-white/82 shadow-[12px_0_40px_rgba(15,23,42,0.06)] backdrop-blur-2xl lg:flex">
         <div className="border-b border-black/10 px-6 py-6">
           <SidebarBrand organizationName={organizationName} />
         </div>
@@ -345,7 +353,7 @@ export function OrgDashboardSidebar({
 
         <div
           className={[
-            "absolute inset-y-0 left-0 flex w-[88%] max-w-[340px] flex-col rounded-r-[32px] border-r border-white/40 bg-white/95 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out",
+            "absolute inset-y-0 left-0 flex w-[88%] max-w-[360px] flex-col rounded-r-[32px] border-r border-white/60 bg-white/86 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out",
             mobileOpen ? "translate-x-0" : "-translate-x-full",
           ].join(" ")}
         >

@@ -14,7 +14,9 @@ import {
 import {
   canAssignCaretakerRole,
   clampPage,
+  filterIssuesByStatus,
   getNewIssueCount,
+  normalizeIssueStatusFilter,
 } from "./helpers";
 
 export const getCurrentOrgContext = cache(async function getCurrentOrgContext() {
@@ -76,6 +78,7 @@ export async function getOrgIssuesPageData(
   const resolvedSearchParams = (await searchParamsPromise) ?? {};
   const requestedPage = Number(resolvedSearchParams.page ?? "1");
   const canAssignCaretaker = canAssignCaretakerRole(membership.role);
+  const activeFilter = normalizeIssueStatusFilter(resolvedSearchParams.status);
 
   const [issues, caretakerMemberships] = await Promise.all([
     prisma.issueTicket.findMany({
@@ -127,20 +130,24 @@ export async function getOrgIssuesPageData(
     ).values(),
   );
 
-  const totalPages = Math.max(1, Math.ceil(issues.length / HISTORY_PAGE_SIZE));
+  const filteredIssues = filterIssuesByStatus(issues, activeFilter);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredIssues.length / HISTORY_PAGE_SIZE),
+  );
   const currentPage = clampPage(requestedPage, totalPages);
   const historyStart = (currentPage - 1) * HISTORY_PAGE_SIZE;
   const historyEnd = historyStart + HISTORY_PAGE_SIZE;
-  const paginatedIssues = issues.slice(historyStart, historyEnd);
+  const paginatedIssues = filteredIssues.slice(historyStart, historyEnd);
 
-  const latestIssue = issues[0] ?? null;
+  const latestIssue = filteredIssues[0] ?? null;
   const selectedIssue =
-    issues.find((issue) => issue.id === resolvedSearchParams.issueId) ??
+    filteredIssues.find((issue) => issue.id === resolvedSearchParams.issueId) ??
     latestIssue;
 
   return {
     membership,
-    issues,
+    issues: filteredIssues,
     caretakers,
     canAssignCaretaker,
     selectedIssue,
@@ -162,5 +169,6 @@ export async function getOrgIssuesPageData(
         (issue) => issue.status === "CANCELLED",
       ).length,
     },
+    activeFilter,
   };
 }

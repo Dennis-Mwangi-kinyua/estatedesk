@@ -1,15 +1,17 @@
 import { UserCheck } from "lucide-react";
 import { assignCaretakerAction } from "../actions";
-import type { CaretakerOption } from "../_lib/types";
+import type { CaretakerOption, IssueStatusFilter } from "../_lib/types";
 
 export function IssueAssignmentCard({
   issueId,
   currentPage,
+  activeFilter,
   selectedCaretakerId,
   caretakers,
 }: {
   issueId: string;
   currentPage: number;
+  activeFilter: IssueStatusFilter;
   selectedCaretakerId?: string;
   caretakers: CaretakerOption[];
 }) {
@@ -33,6 +35,7 @@ export function IssueAssignmentCard({
         <form action={assignCaretakerAction} className="mt-4 space-y-3">
           <input type="hidden" name="issueId" value={issueId} />
           <input type="hidden" name="page" value={String(currentPage)} />
+          <input type="hidden" name="filter" value={activeFilter} />
 
           <label className="block">
             <span className="mb-2 block text-xs font-medium uppercase tracking-wide text-neutral-500">

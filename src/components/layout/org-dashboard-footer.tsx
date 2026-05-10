@@ -8,7 +8,7 @@ export function OrgDashboardFooter({
   organizationName,
 }: OrgDashboardFooterProps) {
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-[85] border-t border-black/10 bg-white/95 backdrop-blur-md lg:left-72">
+    <footer className="fixed bottom-0 left-0 right-0 z-[85] border-t border-white/60 bg-white/78 backdrop-blur-2xl lg:left-72">
       <div className="flex h-10 items-center justify-between px-4 sm:px-6 lg:px-8">
         <p className="truncate text-[11px] text-neutral-500">
           © {new Date().getFullYear()} {organizationName}

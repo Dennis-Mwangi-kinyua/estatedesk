@@ -22,5 +22,6 @@ export const tenantNavItems = [
   { label: "Maintenance", href: "/dashboard/tenant/maintenance", icon: HiOutlineWrenchScrewdriver, emoji: "🔧" },
   { label: "Inspections", href: "/dashboard/tenant/inspections", icon: HiOutlineCalendarDays, emoji: "🗓️" },
   { label: "Notices", href: "/dashboard/tenant/notices", icon: HiOutlineBell, emoji: "🔔" },
+  { label: "Notifications", href: "/tenants/notifications", icon: HiOutlineBell, emoji: "📬" },
   { label: "Documents", href: "/dashboard/tenant/documents", icon: HiOutlineFolder, emoji: "📁" },
 ] as const;

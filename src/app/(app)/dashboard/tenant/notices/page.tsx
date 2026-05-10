@@ -323,17 +323,96 @@ export default async function TenantNoticesPage({
       redirect("/dashboard/tenant/notices?error=duplicate_open_notice");
     }
 
-    await prisma.moveOutNotice.create({
-      data: {
-        leaseId: activeLease.id,
-        tenantId: tenant.id,
-        moveOutDate,
-        notes: notes || null,
+    const leaseDetails = await prisma.lease.findUnique({
+      where: {
+        id: activeLease.id,
       },
+      select: {
+        unit: {
+          select: {
+            houseNo: true,
+            property: {
+              select: {
+                name: true,
+              },
+            },
+            building: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const orgReviewers = await prisma.membership.findMany({
+      where: {
+        orgId: session.activeOrgId,
+        role: {
+          in: ["ADMIN", "MANAGER", "OFFICE"],
+        },
+        user: {
+          deletedAt: null,
+          status: "ACTIVE",
+        },
+      },
+      select: {
+        userId: true,
+      },
+    });
+
+    const unitLabel = [
+      leaseDetails?.unit.property.name,
+      leaseDetails?.unit.building?.name,
+      leaseDetails?.unit.houseNo ? `Unit ${leaseDetails.unit.houseNo}` : null,
+    ]
+      .filter(Boolean)
+      .join(" / ");
+
+    await prisma.$transaction(async (tx) => {
+      await tx.moveOutNotice.create({
+        data: {
+          leaseId: activeLease.id,
+          tenantId: tenant.id,
+          moveOutDate,
+          notes: notes || null,
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          orgId: session.activeOrgId!,
+          tenantId: tenant.id,
+          userId: tenant.userId ?? undefined,
+          channel: "IN_APP",
+          type: "GENERAL",
+          title: "Move-out notice submitted",
+          message: `Your move-out notice for ${unitLabel || "your unit"} has been submitted for ${formatDate(moveOutDate)}.`,
+          status: "QUEUED",
+        },
+      });
+
+      if (orgReviewers.length > 0) {
+        await tx.notification.createMany({
+          data: orgReviewers.map((reviewer) => ({
+            orgId: session.activeOrgId!,
+            userId: reviewer.userId,
+            tenantId: tenant.id,
+            channel: "IN_APP" as const,
+            type: "GENERAL" as const,
+            title: "New move-out notice",
+            message: `${tenant.fullName} submitted a move-out notice for ${unitLabel || "their unit"} on ${formatDate(moveOutDate)}.`,
+            status: "QUEUED" as const,
+          })),
+        });
+      }
     });
 
     revalidatePath("/dashboard/tenant/notices");
     revalidatePath("/dashboard/tenant/inspections");
+    revalidatePath("/dashboard/org/notifications");
+    revalidatePath("/move-outs");
     redirect("/dashboard/tenant/notices?success=notice_submitted");
   }
 
@@ -521,8 +600,8 @@ export default async function TenantNoticesPage({
                   Give Notice
                 </h2>
                 <p className="mt-1 text-sm text-neutral-500">
-                  Submit a move-out notice. In your schema, giving notice means
-                  creating a MoveOutNotice for your active lease.
+                  Submit a move-out notice and alert your organisation for
+                  review.
                 </p>
               </div>
 

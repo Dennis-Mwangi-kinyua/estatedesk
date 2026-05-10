@@ -152,20 +152,113 @@ export default async function TenantReportIssuePage({
       redirect("/dashboard/tenant/issues/report?error=invalid_unit");
     }
 
-    await prisma.issueTicket.create({
-      data: {
+    const orgReviewers = await prisma.membership.findMany({
+      where: {
         orgId: session.activeOrgId,
-        propertyId: allowedUnit.propertyId,
-        unitId: allowedUnit.id,
-        reportedByUserId: session.userId,
-        title,
-        description,
-        priority,
-        status: "OPEN",
+        role: {
+          in: ["ADMIN", "MANAGER", "OFFICE"],
+        },
+        user: {
+          deletedAt: null,
+          status: "ACTIVE",
+        },
+      },
+      select: {
+        userId: true,
       },
     });
 
+    const unitDetails = await prisma.unit.findUnique({
+      where: {
+        id: allowedUnit.id,
+      },
+      select: {
+        houseNo: true,
+        property: {
+          select: {
+            name: true,
+          },
+        },
+        building: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    const unitText = [
+      unitDetails?.property.name,
+      unitDetails?.building?.name,
+      unitDetails?.houseNo ? `Unit ${unitDetails.houseNo}` : null,
+    ]
+      .filter(Boolean)
+      .join(" / ");
+
+    await prisma.$transaction(async (tx) => {
+      const issue = await tx.issueTicket.create({
+        data: {
+          orgId: session.activeOrgId!,
+          propertyId: allowedUnit.propertyId,
+          unitId: allowedUnit.id,
+          reportedByUserId: session.userId,
+          title,
+          description,
+          priority,
+          status: "OPEN",
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          orgId: session.activeOrgId!,
+          tenantId: tenant.id,
+          userId: session.userId,
+          channel: "IN_APP",
+          type: "ISSUE_CREATED",
+          title: "Issue submitted",
+          message: `Your issue "${title}" for ${unitText || "your unit"} has been submitted.`,
+          status: "QUEUED",
+        },
+      });
+
+      if (orgReviewers.length > 0) {
+        await tx.notification.createMany({
+          data: orgReviewers.map((reviewer) => ({
+            orgId: session.activeOrgId!,
+            tenantId: tenant.id,
+            userId: reviewer.userId,
+            channel: "IN_APP" as const,
+            type: "ISSUE_CREATED" as const,
+            title: "New tenant issue",
+            message: `${tenant.fullName} reported "${title}" for ${unitText || "a unit"}. Priority: ${priority}.`,
+            status: "QUEUED" as const,
+          })),
+        });
+      }
+
+      await tx.auditLog.create({
+        data: {
+          orgId: session.activeOrgId!,
+          actorUserId: session.userId,
+          action: "ISSUE_CREATED",
+          entityType: "IssueTicket",
+          entityId: issue.id,
+          metadata: {
+            priority,
+            unitId: allowedUnit.id,
+            tenantId: tenant.id,
+          },
+        },
+      });
+    });
+
     revalidatePath("/dashboard/tenant/issues");
+    revalidatePath("/dashboard/org/issues");
+    revalidatePath("/dashboard/org/notifications");
     redirect("/dashboard/tenant/issues");
   }
 

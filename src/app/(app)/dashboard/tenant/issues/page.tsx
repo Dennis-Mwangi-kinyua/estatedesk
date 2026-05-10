@@ -11,6 +11,7 @@ import {
   Plus,
   Wrench,
 } from "lucide-react";
+import { confirmIssueResolutionAction } from "./actions";
 
 const tenantIssuesArgs = Prisma.validator<Prisma.TenantDefaultArgs>()({
   include: {
@@ -255,6 +256,22 @@ export default async function TenantIssuesPage({
           phone: true,
         },
       },
+      resolutionReports: {
+        orderBy: {
+          submittedAt: "desc",
+        },
+        take: 1,
+        select: {
+          id: true,
+          status: true,
+          workSummary: true,
+          materialsUsed: true,
+          tenantInstructions: true,
+          officeNotes: true,
+          submittedAt: true,
+          officeReviewedAt: true,
+        },
+      },
       photoAsset: true,
     },
     take: 100,
@@ -408,6 +425,7 @@ export default async function TenantIssuesPage({
               const unitLabel = issue.unit
                 ? `${issue.unit.property.name} • Unit ${issue.unit.houseNo}`
                 : issue.property?.name ?? "Property issue";
+              const latestReport = issue.resolutionReports[0] ?? null;
 
               return (
                 <div
@@ -502,6 +520,39 @@ export default async function TenantIssuesPage({
                     </div>
                   ) : null}
 
+                  {latestReport?.status === "OFFICE_APPROVED" ? (
+                    <form
+                      action={confirmIssueResolutionAction}
+                      className="mt-3 rounded-[16px] border border-emerald-100 bg-emerald-50/60 px-3 py-3"
+                    >
+                      <input type="hidden" name="reportId" value={latestReport.id} />
+                      <input type="hidden" name="issueId" value={issue.id} />
+                      <p className="text-sm font-semibold text-neutral-950">
+                        Confirm caretaker report
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-neutral-700">
+                        {latestReport.workSummary}
+                      </p>
+                      {latestReport.officeNotes ? (
+                        <p className="mt-2 text-xs leading-5 text-neutral-500">
+                          Office note: {latestReport.officeNotes}
+                        </p>
+                      ) : null}
+                      <textarea
+                        name="tenantFeedback"
+                        rows={2}
+                        placeholder="Feedback before closing (optional)"
+                        className="mt-3 w-full rounded-[14px] border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
+                      />
+                      <button
+                        type="submit"
+                        className="mt-2 inline-flex items-center justify-center rounded-[14px] bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white"
+                      >
+                        Confirm work and close ticket
+                      </button>
+                    </form>
+                  ) : null}
+
                   {issue.photoAsset ? (
                     <div className="mt-3 rounded-[16px] bg-white px-3 py-3">
                       <p className="text-[11px] uppercase tracking-wide text-neutral-500">
@@ -542,6 +593,7 @@ export default async function TenantIssuesPage({
                   const unitLabel = issue.unit
                     ? `${issue.unit.property.name} • Unit ${issue.unit.houseNo}`
                     : issue.property?.name ?? "Property issue";
+                  const latestReport = issue.resolutionReports[0] ?? null;
 
                   return (
                     <tr
@@ -586,7 +638,41 @@ export default async function TenantIssuesPage({
                         {formatDate(issue.createdAt)}
                       </td>
                       <td className="px-5 py-4 text-neutral-600">
-                        {formatDate(issue.resolvedAt)}
+                        <div className="space-y-2">
+                          <p>{formatDate(issue.resolvedAt)}</p>
+                          {latestReport?.status === "OFFICE_APPROVED" ? (
+                            <form
+                              action={confirmIssueResolutionAction}
+                              className="min-w-[220px] rounded-[16px] border border-emerald-100 bg-emerald-50/60 p-3"
+                            >
+                              <input
+                                type="hidden"
+                                name="reportId"
+                                value={latestReport.id}
+                              />
+                              <input
+                                type="hidden"
+                                name="issueId"
+                                value={issue.id}
+                              />
+                              <p className="text-xs font-semibold text-neutral-950">
+                                Confirm report
+                              </p>
+                              <textarea
+                                name="tenantFeedback"
+                                rows={2}
+                                placeholder="Feedback (optional)"
+                                className="mt-2 w-full rounded-[12px] border border-neutral-200 bg-white px-2 py-2 text-xs text-neutral-900 outline-none transition focus:border-neutral-400"
+                              />
+                              <button
+                                type="submit"
+                                className="mt-2 inline-flex w-full items-center justify-center rounded-[12px] bg-emerald-600 px-3 py-2 text-xs font-medium text-white"
+                              >
+                                Confirm and close
+                              </button>
+                            </form>
+                          ) : null}
+                        </div>
                       </td>
                     </tr>
                   );

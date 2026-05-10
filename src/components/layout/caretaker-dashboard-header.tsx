@@ -16,14 +16,14 @@ export function CaretakerDashboardHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-40 shrink-0 border-b border-neutral-200/80 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-        <div className="flex h-16 items-center justify-between gap-3 px-4 sm:h-[68px] sm:px-6 xl:px-8">
+      <header className="sticky top-0 z-40 shrink-0 border-b border-white/60 bg-white/78 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-2xl">
+        <div className="flex h-[72px] items-center justify-between gap-3 px-3 sm:h-[68px] sm:px-6 xl:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={() => setOpen(true)}
               aria-label="Open navigation menu"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700 shadow-sm transition hover:bg-neutral-50 active:scale-[0.98] xl:hidden"
+              className="ios-button inline-flex h-11 w-11 shrink-0 items-center justify-center border border-neutral-200 bg-white/88 text-neutral-700 shadow-sm hover:bg-white xl:hidden"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -49,7 +49,7 @@ export function CaretakerDashboardHeader({
             <Link
               href="/notifications"
               aria-label="View notifications"
-              className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700 shadow-sm transition hover:bg-neutral-50 active:scale-[0.98]"
+              className="ios-button relative inline-flex h-11 w-11 shrink-0 items-center justify-center border border-neutral-200 bg-white/88 text-neutral-700 shadow-sm hover:bg-white"
             >
               <Bell className="h-5 w-5" />
               <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-neutral-900" />

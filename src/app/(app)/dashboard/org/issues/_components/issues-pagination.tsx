@@ -1,16 +1,19 @@
 import Link from "next/link";
+import type { IssueStatusFilter } from "../_lib/types";
 import { buildIssuesHref } from "../_lib/helpers";
 
 function PaginationLink({
   page,
   currentPage,
   selectedIssueId,
+  activeFilter,
   children,
   disabled = false,
 }: {
   page: number;
   currentPage: number;
   selectedIssueId?: string;
+  activeFilter: IssueStatusFilter;
   children: React.ReactNode;
   disabled?: boolean;
 }) {
@@ -29,7 +32,7 @@ function PaginationLink({
 
   return (
     <Link
-      href={buildIssuesHref(page, selectedIssueId)}
+      href={buildIssuesHref(page, selectedIssueId, activeFilter)}
       className={`inline-flex items-center rounded-[16px] border px-3 py-2 text-sm font-medium ${active}`}
     >
       {children}
@@ -44,6 +47,7 @@ export function IssuesPagination({
   historyStart,
   historyEnd,
   selectedIssueId,
+  activeFilter,
 }: {
   currentPage: number;
   totalPages: number;
@@ -51,11 +55,14 @@ export function IssuesPagination({
   historyStart: number;
   historyEnd: number;
   selectedIssueId?: string;
+  activeFilter: IssueStatusFilter;
 }) {
+  const hasItems = totalItems > 0;
+
   return (
     <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4">
       <p className="text-sm text-neutral-500">
-        Showing {historyStart + 1}–{Math.min(historyEnd, totalItems)} of{" "}
+        Showing {hasItems ? historyStart + 1 : 0}–{Math.min(historyEnd, totalItems)} of{" "}
         {totalItems}
       </p>
 
@@ -64,6 +71,7 @@ export function IssuesPagination({
           page={currentPage - 1}
           currentPage={currentPage}
           selectedIssueId={selectedIssueId}
+          activeFilter={activeFilter}
           disabled={currentPage === 1}
         >
           Previous
@@ -88,6 +96,7 @@ export function IssuesPagination({
                   page={page}
                   currentPage={currentPage}
                   selectedIssueId={selectedIssueId}
+                  activeFilter={activeFilter}
                 >
                   {page}
                 </PaginationLink>
@@ -99,6 +108,7 @@ export function IssuesPagination({
           page={currentPage + 1}
           currentPage={currentPage}
           selectedIssueId={selectedIssueId}
+          activeFilter={activeFilter}
           disabled={currentPage === totalPages}
         >
           Next

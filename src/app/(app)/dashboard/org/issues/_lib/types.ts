@@ -15,6 +15,7 @@ export const ORG_ASSIGNMENT_ROLES = ["ADMIN", "MANAGER", "OFFICE"] as const;
 export type IssuesSearchParams = {
   page?: string;
   issueId?: string;
+  status?: string;
 };
 
 export type IssuesPageProps = {
@@ -68,6 +69,35 @@ export const orgIssueArgs =
           phone: true,
         },
       },
+      resolutionReports: {
+        orderBy: {
+          submittedAt: "desc",
+        },
+        take: 3,
+        include: {
+          caretaker: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+            },
+          },
+          officeReviewedBy: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+            },
+          },
+          tenantConfirmedBy: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+            },
+          },
+        },
+      },
       photoAsset: true,
     },
   });
@@ -88,6 +118,8 @@ export type IssuesStats = {
   cancelledIssues: number;
 };
 
+export type IssueStatusFilter = "all" | "new" | "progress" | "resolved" | "cancelled";
+
 export type OrgIssuesPageData = {
   membership: OrgMembershipContext;
   issues: OrgIssue[];
@@ -100,4 +132,5 @@ export type OrgIssuesPageData = {
   historyStart: number;
   historyEnd: number;
   stats: IssuesStats;
+  activeFilter: IssueStatusFilter;
 };

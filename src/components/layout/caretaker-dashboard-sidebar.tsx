@@ -72,7 +72,7 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
   return (
     <aside className="hidden xl:block xl:w-72 xl:shrink-0 2xl:w-80">
       <div className="sticky top-0 h-dvh p-3 xl:p-4">
-        <div className="flex h-full flex-col rounded-[28px] border border-neutral-200/80 bg-white/90 shadow-[0_8px_30px_rgba(0,0,0,0.04)] backdrop-blur-xl">
+        <div className="ios-panel flex h-full flex-col rounded-[28px]">
           <div className="shrink-0 border-b border-neutral-200/80 px-5 py-5">
             <Link href="/dashboard/caretaker" className="block">
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
@@ -100,7 +100,7 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
                     key={item.href}
                     href={item.href}
                     className={clsx(
-                      "group flex items-center gap-3 rounded-[20px] px-3.5 py-3 text-sm font-medium transition-all duration-200",
+                      "group flex items-center gap-3 rounded-[20px] px-3.5 py-3 text-sm font-medium transition-all duration-200 active:scale-[0.99]",
                       active
                         ? "bg-neutral-900 text-white shadow-sm"
                         : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"

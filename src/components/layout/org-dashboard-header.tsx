@@ -19,14 +19,14 @@ export function OrgDashboardHeader({
   onMenuClick,
 }: OrgDashboardHeaderProps) {
   return (
-    <header className="fixed left-0 right-0 top-0 z-[90] border-b border-black/10 bg-white/95 backdrop-blur-md lg:left-72">
-      <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+    <header className="fixed left-0 right-0 top-0 z-[90] border-b border-white/60 bg-white/78 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-2xl lg:left-72">
+      <div className="flex h-[72px] items-center justify-between gap-3 px-3 sm:px-6 lg:h-16 lg:px-8">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             onClick={onMenuClick}
             aria-label="Open navigation"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-black/10 bg-white text-neutral-900 shadow-sm transition active:scale-[0.96] lg:hidden"
+            className="ios-button flex h-11 w-11 shrink-0 items-center justify-center border border-black/10 bg-white/88 text-neutral-900 shadow-sm lg:hidden"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -43,14 +43,14 @@ export function OrgDashboardHeader({
 
         <div className="ml-2 flex shrink-0 items-center gap-2">
           <Link
-            href="/notifications"
+            href="/dashboard/org/notifications"
             aria-label="Notifications"
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-black/10 bg-white text-neutral-900 shadow-sm transition hover:bg-neutral-50"
+            className="ios-button flex h-11 w-11 items-center justify-center border border-black/10 bg-white/88 text-neutral-900 shadow-sm hover:bg-white lg:h-10 lg:w-10"
           >
             <Bell className="h-4 w-4" />
           </Link>
 
-          <div className="hidden rounded-2xl border border-black/10 bg-white px-3 py-2 shadow-sm sm:block">
+          <div className="hidden rounded-2xl border border-black/10 bg-white/88 px-3 py-2 shadow-sm sm:block">
             <p className="text-sm font-medium leading-none text-neutral-950">
               {userName}
             </p>

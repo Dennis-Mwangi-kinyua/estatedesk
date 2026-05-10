@@ -8,5 +8,5 @@ export default async function AppLayout({
 }) {
   await requireAuthenticated();
 
-  return <div className="min-h-screen">{children}</div>;
+  return <div className="app-mobile-canvas min-h-screen">{children}</div>;
 }

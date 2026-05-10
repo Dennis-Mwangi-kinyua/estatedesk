@@ -35,7 +35,7 @@ export function TenantFooter() {
             : "pointer-events-none translate-y-6 opacity-0"
         }`}
       >
-        <div className="mx-auto max-w-sm rounded-[24px] border border-white/60 bg-white/78 px-3 py-2.5 shadow-[0_10px_30px_rgba(15,23,42,0.14)] backdrop-blur-2xl ring-1 ring-black/5">
+        <div className="ios-panel mx-auto max-w-sm rounded-[24px] px-3 py-2.5">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -62,7 +62,7 @@ export function TenantFooter() {
         </div>
       </div>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-30 hidden border-t border-neutral-200/80 bg-white/95 backdrop-blur-xl lg:block lg:left-[300px] xl:left-[320px]">
+      <footer className="fixed bottom-0 left-0 right-0 z-30 hidden border-t border-white/60 bg-white/78 backdrop-blur-2xl lg:block lg:left-[300px] xl:left-[320px]">
         <div className="px-4 py-2 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">

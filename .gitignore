@@ -19,6 +19,8 @@
 
 # production
 /build
+backup-*.sql
+*.dump
 
 # misc
 .DS_Store

@@ -25,7 +25,7 @@ export function OrgDashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="app-mobile-canvas min-h-screen">
       <OrgDashboardSidebar
         organizationName={organizationName}
         mobileOpen={mobileOpen}
@@ -40,15 +40,15 @@ export function OrgDashboardShell({
       />
 
       <div className="lg:pl-72">
-        <div className="flex min-h-screen flex-col pt-16">
-          <main className="flex-1 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
-            <div className="mx-auto w-full max-w-[1440px]">
+        <div className="flex min-h-screen flex-col pt-[72px] lg:pt-16">
+          <main className="flex-1 px-3 py-3 sm:px-5 sm:py-4 lg:px-8">
+            <div className="app-content-shell">
               {children}
             </div>
           </main>
 
-          <div className="px-4 pb-4 sm:px-6 lg:px-8">
-            <div className="mx-auto w-full max-w-[1440px]">
+          <div className="hidden px-4 pb-4 sm:px-6 lg:block lg:px-8">
+            <div className="app-content-shell">
               <OrgDashboardFooter organizationName={organizationName} />
             </div>
           </div>
