@@ -1,21 +1,21 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { neonConfig } from "@neondatabase/serverless";
-import ws from "ws";
-
-neonConfig.webSocketConstructor = ws;
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
   prismaSchemaVersion?: string;
 };
 
-const PRISMA_SCHEMA_VERSION = "onboarding-requests";
+const PRISMA_SCHEMA_VERSION = "pg-adapter-onboarding-requests";
+const fallbackDatasourceUrl = "postgresql://user:password@localhost:5432/estatedesk";
+const DATABASE_URL =
+  process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? fallbackDatasourceUrl;
 
 function createPrismaClient() {
-  const adapter = new PrismaNeon({
-    connectionString: process.env.DATABASE_URL!,
+  const adapter = new PrismaPg({
+    connectionString: DATABASE_URL,
+    connectionTimeoutMillis: 10_000,
   });
 
   return new PrismaClient({ adapter });
