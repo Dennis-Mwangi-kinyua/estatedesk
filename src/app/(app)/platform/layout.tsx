@@ -6,13 +6,28 @@ import PlatformMobileShell from "./platform-mobile-shell";
 
 const navItems = [
   { href: "/platform", label: "Dashboard", emoji: "📊" },
+  { href: "/platform/system-health", label: "System Health", emoji: "🟢" },
+  { href: "/platform/search", label: "Global Search", emoji: "🔎" },
   { href: "/platform/organizations", label: "Organizations", emoji: "🏢" },
   { href: "/platform/users", label: "Platform Users", emoji: "👥" },
   { href: "/platform/admins", label: "Platform Admins", emoji: "🛡️" },
+  { href: "/platform/permissions", label: "Permissions", emoji: "🔐" },
+  { href: "/platform/security", label: "Security", emoji: "🚨" },
+  { href: "/platform/support-access", label: "Support Access", emoji: "🧰" },
   { href: "/platform/billing", label: "Billing", emoji: "💳" },
+  { href: "/platform/subscriptions", label: "Subscriptions", emoji: "📦" },
+  { href: "/platform/api-keys", label: "API Keys", emoji: "🔑" },
+  { href: "/platform/payments", label: "Payments", emoji: "🧾" },
+  { href: "/platform/payment-ops", label: "Payment Ops", emoji: "🔁" },
+  { href: "/platform/feature-flags", label: "Feature Flags", emoji: "🎚️" },
+  { href: "/platform/onboarding", label: "Onboarding", emoji: "🧭" },
+  { href: "/platform/broadcasts", label: "Broadcasts", emoji: "📣" },
+  { href: "/platform/jobs", label: "Jobs", emoji: "⚙️" },
+  { href: "/platform/data-management", label: "Data", emoji: "🗄️" },
   { href: "/platform/audit-logs", label: "Audit Logs", emoji: "📜" },
   { href: "/platform/messages", label: "Messages", emoji: "✉️" },
   { href: "/platform/reports", label: "Reports", emoji: "📈" },
+  { href: "/platform/settings", label: "Settings", emoji: "⚙️" },
 ] as const;
 
 export default async function PlatformLayout({

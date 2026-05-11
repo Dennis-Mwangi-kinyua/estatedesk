@@ -1,361 +1,365 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { PlatformRole, Prisma, UserStatus } from "@prisma/client";
 import {
   ArrowUpRight,
-  Building2,
-  CalendarDays,
-  CheckCircle2,
-  KeyRound,
-  LogIn,
+  Crown,
   Mail,
   Phone,
+  Search,
   Shield,
   User2,
-  Users,
-  XCircle,
-  Crown,
 } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { requirePlatformRole } from "@/lib/permissions/guards";
+import { getPagination } from "@/lib/db/pagination";
+import {
+  Badge,
+  PageHeader,
+  PaginationControls,
+  StatCard,
+  formatDateTime,
+  formatNumber,
+  toneForStatus,
+} from "../_components/control-plane";
 
 export const dynamic = "force-dynamic";
 
-function formatDate(value: Date | null | undefined) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat("en-KE", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  }).format(value);
-}
+type SearchParams = Promise<{
+  page?: string;
+  pageSize?: string;
+  q?: string;
+  role?: string;
+  status?: string;
+}>;
+
+const ROLE_VALUES = Object.values(PlatformRole);
+const STATUS_VALUES = Object.values(UserStatus);
 
 function getInitials(name: string | null | undefined) {
   if (!name) return "U";
   const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
-  return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+  if (parts.length === 1) return parts[0]?.slice(0, 1).toUpperCase() ?? "U";
+  return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
 }
 
-export default async function PlatformUsersPage() {
-  const users = await prisma.user.findMany({
-    where: { deletedAt: null },
-    orderBy: { createdAt: "desc" },
-    include: {
-      platformPermissions: {
-        orderBy: { permission: "asc" },
-      },
-      memberships: {
-        include: {
-          org: {
+function parseRole(value?: string) {
+  if (!value) return null;
+  const normalized = value.trim().toUpperCase();
+  return ROLE_VALUES.find((role) => role === normalized) ?? null;
+}
+
+function parseStatus(value?: string) {
+  if (!value) return null;
+  const normalized = value.trim().toUpperCase();
+  return STATUS_VALUES.find((status) => status === normalized) ?? null;
+}
+
+function buildWhere({
+  q,
+  role,
+  status,
+}: {
+  q: string;
+  role: PlatformRole | null;
+  status: UserStatus | null;
+}): Prisma.UserWhereInput {
+  const where: Prisma.UserWhereInput = { deletedAt: null };
+
+  if (role) where.platformRole = role;
+  if (status) where.status = status;
+
+  if (q) {
+    where.OR = [
+      { fullName: { contains: q, mode: "insensitive" } },
+      { email: { contains: q, mode: "insensitive" } },
+      { phone: { contains: q, mode: "insensitive" } },
+      { username: { contains: q, mode: "insensitive" } },
+    ];
+  }
+
+  return where;
+}
+
+export default async function PlatformUsersPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
+  });
+
+  const params = await searchParams;
+  const q = (params.q ?? "").trim();
+  const role = parseRole(params.role);
+  const status = parseStatus(params.status);
+  const { page, pageSize, skip, take } = getPagination({
+    page: Number(params.page ?? 1),
+    pageSize: Number(params.pageSize ?? 24),
+  });
+  const where = buildWhere({ q, role, status });
+
+  const [users, totalFiltered, totalUsers, totalAdmins, activeUsers] =
+    await Promise.all([
+      prisma.user.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phone: true,
+          username: true,
+          status: true,
+          platformRole: true,
+          canCreatePlatformAdmins: true,
+          isRootSuperAdmin: true,
+          createdAt: true,
+          lastLoginAt: true,
+          platformPermissions: {
+            orderBy: { permission: "asc" },
+            take: 6,
+          },
+          memberships: {
+            orderBy: { createdAt: "desc" },
+            take: 4,
             select: {
               id: true,
-              name: true,
-              slug: true,
+              role: true,
+              scopeType: true,
+              org: { select: { id: true, name: true, slug: true } },
+            },
+          },
+          _count: {
+            select: {
+              memberships: true,
+              platformPermissions: true,
             },
           },
         },
-        orderBy: { createdAt: "desc" },
-      },
-    },
-  });
-
-  const totalAdmins = users.filter(
-    (user) =>
-      user.platformRole === "SUPER_ADMIN" ||
-      user.platformRole === "PLATFORM_ADMIN"
-  ).length;
-
-  const activeUsers = users.filter((user) => user.status === "ACTIVE").length;
+      }),
+      prisma.user.count({ where }),
+      prisma.user.count({ where: { deletedAt: null } }),
+      prisma.user.count({
+        where: {
+          deletedAt: null,
+          platformRole: { in: ["SUPER_ADMIN", "PLATFORM_ADMIN"] },
+        },
+      }),
+      prisma.user.count({ where: { deletedAt: null, status: "ACTIVE" } }),
+    ]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
-      <div className="shrink-0 border-b border-neutral-200 px-4 py-4 sm:px-5 sm:py-5 lg:px-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500">
-              Platform
-            </p>
-            <h1 className="mt-1 text-xl font-semibold tracking-tight text-neutral-950 sm:text-2xl">
-              Platform Users
-            </h1>
-            <p className="mt-1 max-w-2xl text-sm text-neutral-500">
-              View all users, platform roles, permissions, and organization memberships.
-            </p>
+    <div className="space-y-5">
+      <PageHeader
+        eyebrow="Identity directory"
+        title="Platform users"
+        description="Search and review users with server-side pagination, compact membership previews, and permission summaries."
+      />
+
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Users" value={formatNumber(totalUsers)} />
+        <StatCard label="Admins" value={formatNumber(totalAdmins)} />
+        <StatCard label="Active" value={formatNumber(activeUsers)} />
+        <StatCard label="Matching" value={formatNumber(totalFiltered)} />
+      </section>
+
+      <section className="overflow-hidden rounded-[26px] border border-neutral-200 bg-white shadow-sm">
+        <form className="grid gap-3 border-b border-neutral-200 p-4 lg:grid-cols-[1fr_180px_180px_auto]">
+          <div className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+            <Search className="h-4 w-4 text-neutral-400" />
+            <input
+              name="q"
+              defaultValue={q}
+              placeholder="Search name, email, username, or phone"
+              className="min-w-0 flex-1 bg-transparent text-sm text-neutral-800 outline-none placeholder:text-neutral-400"
+            />
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <MetricCard
-              label="Total Users"
-              value={users.length}
-              icon={<Users className="h-4 w-4" />}
-            />
-            <MetricCard
-              label="Admins"
-              value={totalAdmins}
-              icon={<Shield className="h-4 w-4" />}
-            />
-            <MetricCard
-              label="Active"
-              value={activeUsers}
-              icon={<CheckCircle2 className="h-4 w-4" />}
-            />
-          </div>
-        </div>
-      </div>
+          <select
+            name="role"
+            defaultValue={role ?? ""}
+            className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-medium text-neutral-700 outline-none"
+          >
+            <option value="">All roles</option>
+            {ROLE_VALUES.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
 
-      <div className="min-h-0 flex-1 overflow-hidden px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
+          <select
+            name="status"
+            defaultValue={status ?? ""}
+            className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-medium text-neutral-700 outline-none"
+          >
+            <option value="">All statuses</option>
+            {STATUS_VALUES.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+
+          <button className="rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800">
+            Apply
+          </button>
+        </form>
+
         {users.length === 0 ? (
-          <div className="flex h-full items-center justify-center rounded-3xl border border-dashed border-neutral-300 bg-neutral-50">
-            <div className="px-6 py-10 text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-neutral-200 bg-white">
-                <Users className="h-6 w-6 text-neutral-700" />
-              </div>
-              <h2 className="text-lg font-semibold text-neutral-900">No users found</h2>
-              <p className="mt-1 text-sm text-neutral-500">
-                There are currently no active platform users to display.
-              </p>
-            </div>
+          <div className="p-10 text-center text-sm text-neutral-500">
+            No users match the current filters.
           </div>
         ) : (
-          <div className="grid h-full min-h-0 grid-cols-1 gap-4 overflow-auto pr-1 xl:grid-cols-2 2xl:grid-cols-3">
+          <div className="grid gap-3 p-3 sm:p-4 xl:grid-cols-2">
             {users.map((user) => (
               <Link
                 key={user.id}
                 href={`/platform/users/${user.id}`}
-                className="group flex min-h-[440px] flex-col rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-neutral-300 sm:p-5"
+                className="group rounded-[24px] border border-neutral-200 bg-white p-4 shadow-sm transition hover:border-neutral-300 hover:shadow-md"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 text-sm font-semibold text-neutral-900 sm:h-14 sm:w-14">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-50 text-sm font-semibold text-neutral-950">
                       {getInitials(user.fullName)}
                     </div>
-
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="break-words text-base font-semibold text-neutral-950 sm:text-lg">
+                        <h2 className="truncate text-base font-semibold text-neutral-950">
                           {user.fullName}
                         </h2>
-                        {user.isRootSuperAdmin && (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-700">
-                            <Crown className="h-3.5 w-3.5" />
-                            ROOT
-                          </span>
-                        )}
+                        {user.isRootSuperAdmin ? (
+                          <Badge>
+                            <span className="inline-flex items-center gap-1">
+                              <Crown className="h-3.5 w-3.5" />
+                              Root
+                            </span>
+                          </Badge>
+                        ) : null}
                       </div>
-                      <p className="mt-1 break-all text-sm text-neutral-500">
-                        {user.email ?? "No email provided"}
+                      <p className="mt-1 truncate text-sm text-neutral-500">
+                        {user.email ?? user.username ?? "No email"}
                       </p>
                     </div>
                   </div>
-
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-700 transition group-hover:bg-neutral-100">
-                    <ArrowUpRight className="h-4 w-4" />
-                  </div>
+                  <ArrowUpRight className="h-4 w-4 shrink-0 text-neutral-400 transition group-hover:text-neutral-700" />
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Tag icon={<Shield className="h-3.5 w-3.5" />}>
-                    {String(user.platformRole)}
-                  </Tag>
-                  <Tag icon={<User2 className="h-3.5 w-3.5" />}>
-                    {String(user.status)}
-                  </Tag>
-                  {user.canCreatePlatformAdmins && (
-                    <Tag icon={<KeyRound className="h-3.5 w-3.5" />}>
-                      CAN_CREATE_ADMINS
-                    </Tag>
-                  )}
+                  <Badge tone={toneForStatus(user.platformRole)}>
+                    <span className="inline-flex items-center gap-1">
+                      <Shield className="h-3.5 w-3.5" />
+                      {user.platformRole}
+                    </span>
+                  </Badge>
+                  <Badge tone={toneForStatus(user.status)}>
+                    <span className="inline-flex items-center gap-1">
+                      <User2 className="h-3.5 w-3.5" />
+                      {user.status}
+                    </span>
+                  </Badge>
+                  {user.canCreatePlatformAdmins ? <Badge>Can create admins</Badge> : null}
                 </div>
 
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <InfoRow
-                    icon={<Mail className="h-4 w-4" />}
-                    label="Email"
-                    value={user.email ?? "—"}
-                    breakValue
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  <InfoPill icon={<Mail className="h-4 w-4" />} label="Email" value={user.email ?? "-"} />
+                  <InfoPill icon={<Phone className="h-4 w-4" />} label="Phone" value={user.phone ?? "-"} />
+                </div>
+
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <PreviewBlock
+                    title="Memberships"
+                    count={user._count.memberships}
+                    items={user.memberships.map((membership) => ({
+                      id: membership.id,
+                      title: membership.org.name,
+                      detail: `${membership.role} • ${membership.scopeType}`,
+                    }))}
                   />
-                  <InfoRow
-                    icon={<Phone className="h-4 w-4" />}
-                    label="Phone"
-                    value={user.phone ?? "—"}
-                  />
-                  <InfoRow
-                    icon={<CalendarDays className="h-4 w-4" />}
-                    label="Created"
-                    value={formatDate(user.createdAt)}
-                  />
-                  <InfoRow
-                    icon={<LogIn className="h-4 w-4" />}
-                    label="Last login"
-                    value={formatDate(user.lastLoginAt)}
+                  <PreviewBlock
+                    title="Permissions"
+                    count={user._count.platformPermissions}
+                    items={user.platformPermissions.map((permission) => ({
+                      id: permission.id,
+                      title: permission.permission,
+                      detail: permission.granted ? "Granted" : "Revoked",
+                    }))}
                   />
                 </div>
 
-                <section className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
-                  <div className="mb-3 flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-neutral-700" />
-                    <h3 className="text-sm font-semibold text-neutral-900">Memberships</h3>
-                    <span className="rounded-full border border-neutral-200 bg-white px-2 py-0.5 text-[11px] text-neutral-600">
-                      {user.memberships.length}
-                    </span>
-                  </div>
-
-                  {user.memberships.length === 0 ? (
-                    <p className="text-sm text-neutral-500">No memberships.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {user.memberships.slice(0, 4).map((membership) => (
-                        <div
-                          key={membership.id}
-                          className="rounded-2xl border border-neutral-200 bg-white p-3"
-                        >
-                          <p className="break-words text-sm font-medium text-neutral-900">
-                            {membership.org.name}
-                          </p>
-                          <div className="mt-1 flex flex-wrap gap-2 text-xs text-neutral-500">
-                            <span>Role: {membership.role}</span>
-                            <span>•</span>
-                            <span>Scope: {membership.scopeType}</span>
-                            <span>•</span>
-                            <span>Slug: {membership.org.slug}</span>
-                          </div>
-                        </div>
-                      ))}
-                      {user.memberships.length > 4 && (
-                        <p className="text-xs font-medium text-neutral-500">
-                          +{user.memberships.length - 4} more memberships
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </section>
-
-                <section className="mt-4 flex-1 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
-                  <div className="mb-3 flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-neutral-700" />
-                    <h3 className="text-sm font-semibold text-neutral-900">
-                      Platform Permissions
-                    </h3>
-                    <span className="rounded-full border border-neutral-200 bg-white px-2 py-0.5 text-[11px] text-neutral-600">
-                      {user.platformPermissions.length}
-                    </span>
-                  </div>
-
-                  {user.platformPermissions.length === 0 ? (
-                    <p className="text-sm text-neutral-500">
-                      No explicit platform permissions.
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {user.platformPermissions.slice(0, 4).map((permission) => (
-                        <div
-                          key={permission.id}
-                          className="flex items-start justify-between gap-3 rounded-2xl border border-neutral-200 bg-white p-3"
-                        >
-                          <div className="min-w-0">
-                            <p className="break-words text-sm font-medium text-neutral-900">
-                              {permission.permission}
-                            </p>
-                            <p className="mt-1 text-xs text-neutral-500">
-                              Explicit platform permission
-                            </p>
-                          </div>
-
-                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-700">
-                            {permission.granted ? (
-                              <>
-                                <CheckCircle2 className="h-3.5 w-3.5" />
-                                Granted
-                              </>
-                            ) : (
-                              <>
-                                <XCircle className="h-3.5 w-3.5" />
-                                Revoked
-                              </>
-                            )}
-                          </span>
-                        </div>
-                      ))}
-                      {user.platformPermissions.length > 4 && (
-                        <p className="text-xs font-medium text-neutral-500">
-                          +{user.platformPermissions.length - 4} more permissions
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </section>
+                <div className="mt-4 flex flex-wrap justify-between gap-2 text-xs text-neutral-500">
+                  <span>Created {formatDateTime(user.createdAt)}</span>
+                  <span>Last login {formatDateTime(user.lastLoginAt)}</span>
+                </div>
               </Link>
             ))}
           </div>
         )}
-      </div>
+
+        <PaginationControls
+          page={page}
+          pageSize={pageSize}
+          total={totalFiltered}
+          basePath="/platform/users"
+          query={{ q, role, status }}
+        />
+      </section>
     </div>
   );
 }
 
-function MetricCard({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: number;
-  icon: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700">
-        {icon}
-      </div>
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-neutral-500">
-          {label}
-        </p>
-        <p className="text-base font-semibold text-neutral-950">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function InfoRow({
+function InfoPill({
   icon,
   label,
   value,
-  breakValue = false,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
-  breakValue?: boolean;
 }) {
   return (
     <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3">
-      <div className="mb-2 flex items-center gap-2 text-neutral-500">
+      <div className="flex items-center gap-2 text-neutral-500">
         {icon}
-        <span className="text-[11px] font-medium uppercase tracking-[0.12em]">
-          {label}
-        </span>
+        <span className="text-xs font-medium uppercase tracking-[0.12em]">{label}</span>
       </div>
-      <p
-        className={`text-sm font-medium text-neutral-900 ${
-          breakValue ? "break-all" : "break-words"
-        }`}
-      >
-        {value}
-      </p>
+      <p className="mt-2 break-all text-sm font-semibold text-neutral-950">{value}</p>
     </div>
   );
 }
 
-function Tag({
-  children,
-  icon,
+function PreviewBlock({
+  title,
+  count,
+  items,
 }: {
-  children: React.ReactNode;
-  icon: React.ReactNode;
+  title: string;
+  count: number;
+  items: Array<{ id: string; title: string; detail: string }>;
 }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-700">
-      {icon}
-      {children}
-    </span>
+    <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-neutral-950">{title}</p>
+        <span className="rounded-full border border-neutral-200 bg-white px-2 py-0.5 text-xs text-neutral-600">
+          {count}
+        </span>
+      </div>
+      <div className="mt-3 space-y-2">
+        {items.length === 0 ? (
+          <p className="text-sm text-neutral-500">None</p>
+        ) : (
+          items.map((item) => (
+            <div key={item.id} className="rounded-xl border border-neutral-200 bg-white p-2">
+              <p className="truncate text-sm font-medium text-neutral-900">{item.title}</p>
+              <p className="mt-1 truncate text-xs text-neutral-500">{item.detail}</p>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
   );
 }

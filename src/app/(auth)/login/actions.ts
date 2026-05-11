@@ -2,11 +2,13 @@
 
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { prisma } from "@/lib/prisma";
 import { setUserSession } from "@/lib/auth/session";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const loginSchema = z.object({
   email: z
@@ -35,7 +37,17 @@ function makeLabel(prefix: string, requestId: string) {
   return `${prefix}-${requestId}`;
 }
 
+function getClientIp(headerStore: Awaited<ReturnType<typeof headers>>) {
+  const forwardedFor = headerStore.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0]?.trim() ?? "unknown";
+  return headerStore.get("x-real-ip") ?? "unknown";
+}
+
 async function timed<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  if (process.env.NODE_ENV === "production") {
+    return fn();
+  }
+
   console.time(label);
   try {
     return await fn();
@@ -63,10 +75,27 @@ export async function loginAction(
   }
 
   const { email: identifier, password } = parsed.data;
+  const headerStore = await headers();
+  const ipAddress = getClientIp(headerStore);
+  const limiter = await checkRateLimit({
+    key: `login:${ipAddress}:${identifier}`,
+    limit: 8,
+    windowMs: 60_000,
+  });
+
+  if (!limiter.allowed) {
+    return {
+      success: false,
+      error: `Too many sign-in attempts. Please wait ${limiter.retryAfterSeconds} seconds and try again.`,
+    };
+  }
+
   const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   const totalLabel = makeLabel("loginAction-total", requestId);
-  console.time(totalLabel);
+  if (process.env.NODE_ENV !== "production") {
+    console.time(totalLabel);
+  }
 
   try {
     const user = await timed(
@@ -236,7 +265,7 @@ export async function loginAction(
             }),
     );
 
-    redirect(destination);
+    return redirect(destination);
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
@@ -249,6 +278,8 @@ export async function loginAction(
       error: GENERIC_LOGIN_ERROR_MESSAGE,
     };
   } finally {
-    console.timeEnd(totalLabel);
+    if (process.env.NODE_ENV !== "production") {
+      console.timeEnd(totalLabel);
+    }
   }
 }

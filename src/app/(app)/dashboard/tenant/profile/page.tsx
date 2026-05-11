@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { RevealValue } from "@/components/tenant/reveal-value";
+import {
+  formatLedgerCurrency,
+  formatLedgerDate,
+  getTenantLedger,
+} from "@/lib/ledger";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +36,21 @@ function statusTone(status: string | null | undefined) {
       return "border-amber-200 bg-amber-50 text-amber-700";
     case "BLACKLISTED":
       return "border-red-200 bg-red-50 text-red-700";
+    default:
+      return "border-neutral-200 bg-neutral-50 text-neutral-700";
+  }
+}
+
+function paymentHealthTone(tone: string | null | undefined) {
+  switch (tone) {
+    case "settled":
+      return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    case "default":
+      return "border-red-200 bg-red-50 text-red-700";
+    case "overdue":
+      return "border-amber-200 bg-amber-50 text-amber-700";
+    case "due":
+      return "border-sky-200 bg-sky-50 text-sky-700";
     default:
       return "border-neutral-200 bg-neutral-50 text-neutral-700";
   }
@@ -105,6 +125,11 @@ export default async function TenantProfilePage() {
     );
   }
 
+  const paymentLedger = session.activeOrgId
+    ? await getTenantLedger(session.userId, session.activeOrgId)
+    : null;
+  const paymentHealth = paymentLedger?.row ?? null;
+
   const initials = tenant.fullName
     .split(" ")
     .filter(Boolean)
@@ -145,10 +170,48 @@ export default async function TenantProfilePage() {
               <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-medium text-sky-700">
                 Verified profile
               </span>
+
+              {paymentHealth ? (
+                <span
+                  className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${paymentHealthTone(
+                    paymentHealth.tone,
+                  )}`}
+                >
+                  {paymentHealth.paymentStatus}
+                </span>
+              ) : null}
             </div>
           </div>
         </div>
       </section>
+
+      {paymentHealth ? (
+        <section
+          className={`rounded-[26px] border p-4 shadow-sm sm:rounded-[28px] sm:p-5 ${paymentHealthTone(
+            paymentHealth.tone,
+          )}`}
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-[0.18em] opacity-75">
+                Payment health
+              </p>
+              <h2 className="mt-1 text-lg font-semibold tracking-tight">
+                {paymentHealth.paymentStatus}
+              </h2>
+              <p className="mt-1 text-sm opacity-80">
+                Balance {formatLedgerCurrency(paymentHealth.deficit)}
+                {paymentHealth.oldestDueDate
+                  ? ` • oldest due ${formatLedgerDate(paymentHealth.oldestDueDate)}`
+                  : ""}
+                {paymentHealth.daysPastDue > 0
+                  ? ` • ${paymentHealth.daysPastDue} days overdue`
+                  : ""}
+              </p>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <InfoRow

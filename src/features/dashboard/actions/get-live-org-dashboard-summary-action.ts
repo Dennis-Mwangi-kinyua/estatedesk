@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import {
-  getOrgDashboardSummary,
+  getCachedOrgDashboardSummary,
   type OrgDashboardSummary,
 } from "@/features/dashboard/server/get-org-dashboard-summary";
 
@@ -58,5 +58,5 @@ export async function getLiveOrgDashboardSummaryAction(): Promise<OrgDashboardSu
     throw new Error("No active organization found");
   }
 
-  return getOrgDashboardSummary(fallbackMembership.orgId);
+  return getCachedOrgDashboardSummary(fallbackMembership.orgId);
 }

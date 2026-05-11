@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 export type OrgDashboardSummary = {
@@ -264,4 +265,15 @@ export async function getOrgDashboardSummary(
     issuePressure,
     apartmentMix,
   };
+}
+
+export function getCachedOrgDashboardSummary(orgId: string) {
+  return unstable_cache(
+    () => getOrgDashboardSummary(orgId),
+    ["org-dashboard-summary", orgId],
+    {
+      revalidate: 15,
+      tags: [`org-dashboard-summary:${orgId}`],
+    },
+  )();
 }

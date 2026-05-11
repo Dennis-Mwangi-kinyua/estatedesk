@@ -11,7 +11,7 @@ const globalForPrisma = globalThis as unknown as {
   prismaSchemaVersion?: string;
 };
 
-const PRISMA_SCHEMA_VERSION = "issue-resolution-reports";
+const PRISMA_SCHEMA_VERSION = "onboarding-requests";
 
 function createPrismaClient() {
   const adapter = new PrismaNeon({

@@ -2,7 +2,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
-import { getOrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
+import { getCachedOrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { OrgDashboardLive } from "@/features/dashboard/components/org-dashboard-live";
 
 const getCurrentOrgContext = cache(async function getCurrentOrgContext() {
@@ -79,13 +79,13 @@ const getCurrentOrgContext = cache(async function getCurrentOrgContext() {
 
 export default async function OrganizationDashboardPage() {
   const membership = await getCurrentOrgContext();
-  const data = await getOrgDashboardSummary(membership.orgId);
+  const data = await getCachedOrgDashboardSummary(membership.orgId);
 
   return (
     <OrgDashboardLive
       initialData={data}
       membership={membership}
-      interval={5000}
+      interval={30_000}
     />
   );
 }

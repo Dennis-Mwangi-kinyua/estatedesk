@@ -55,10 +55,16 @@ type Membership = {
   };
 };
 
+type NavigatorWithConnection = Navigator & {
+  connection?: {
+    saveData?: boolean;
+  };
+};
+
 export function OrgDashboardLive({
   initialData,
   membership,
-  interval = 5000,
+  interval = 30_000,
 }: {
   initialData: OrgDashboardSummary;
   membership: Membership;
@@ -66,6 +72,7 @@ export function OrgDashboardLive({
 }) {
   const [data, setData] = useState(initialData);
   const refreshingRef = useRef(false);
+  const lastRefreshAtRef = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,6 +80,15 @@ export function OrgDashboardLive({
     const refreshData = async () => {
       if (refreshingRef.current) return;
       if (document.visibilityState !== "visible") return;
+      if (!window.navigator.onLine) return;
+
+      const now = Date.now();
+      const effectiveInterval = (window.navigator as NavigatorWithConnection)
+        .connection?.saveData
+        ? Math.max(interval, 60_000)
+        : interval;
+
+      if (now - lastRefreshAtRef.current < effectiveInterval) return;
 
       refreshingRef.current = true;
 
@@ -81,6 +97,7 @@ export function OrgDashboardLive({
 
         if (!cancelled) {
           setData(nextData);
+          lastRefreshAtRef.current = Date.now();
         }
       } catch (error) {
         console.error("Failed to silently refresh dashboard", error);
@@ -100,11 +117,13 @@ export function OrgDashboardLive({
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("online", handleVisibilityChange);
 
     return () => {
       cancelled = true;
       window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("online", handleVisibilityChange);
     };
   }, [interval]);
 

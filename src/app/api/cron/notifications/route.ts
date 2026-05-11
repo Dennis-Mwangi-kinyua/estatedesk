@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { dispatchQueuedNotifications } from "@/lib/notifications/dispatch";
+import { queueDuePaymentNotifications } from "@/lib/ledger";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const reminders = await queueDuePaymentNotifications();
   const result = await dispatchQueuedNotifications();
 
-  return NextResponse.json(result);
+  return NextResponse.json({
+    remindersQueued: reminders.queued,
+    ...result,
+  });
 }

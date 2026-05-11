@@ -3,6 +3,11 @@ import type { ReactNode } from "react";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import {
+  formatLedgerCurrency,
+  formatLedgerDate,
+  getTenantLedger,
+} from "@/lib/ledger";
+import {
   Prisma,
   GatewayStatus,
   VerificationStatus,
@@ -286,9 +291,10 @@ export default async function TenantPaymentsPage() {
     ...tenantPaymentsArgs,
   });
 
+  const tenantLedger = await getTenantLedger(session.userId, session.activeOrgId);
   const payments = tenant?.payments ?? [];
 
-  if (!tenant || payments.length === 0) {
+  if (!tenant) {
     return (
       <PageShell>
         <EmptyState />
@@ -424,6 +430,64 @@ export default async function TenantPaymentsPage() {
             value={formatMoney(totalGarbagePaid)}
           />
         </section>
+
+        {tenantLedger.row ? (
+          <SurfaceCard className="p-4 sm:p-6 xl:p-7">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-500">
+                  Current month ledger
+                </p>
+                <h2 className="mt-2 text-[22px] font-semibold tracking-tight text-neutral-950">
+                  Balance for {tenantLedger.period}
+                </h2>
+                <p className="mt-1 text-sm text-neutral-500">
+                  {tenantLedger.row.paymentStatus}
+                  {tenantLedger.row.daysPastDue > 0
+                    ? ` • ${tenantLedger.row.daysPastDue} days overdue`
+                    : ""}
+                </p>
+              </div>
+
+              <span
+                className={`inline-flex w-fit rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                  tenantLedger.row.tone === "default"
+                    ? "border-red-200 bg-red-50 text-red-700"
+                    : tenantLedger.row.tone === "overdue"
+                      ? "border-amber-200 bg-amber-50 text-amber-700"
+                      : tenantLedger.row.tone === "settled"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        : "border-sky-200 bg-sky-50 text-sky-700"
+                }`}
+              >
+                {tenantLedger.row.paymentStatus}
+              </span>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <StatCard
+                icon={<ReceiptText className="h-4 w-4" />}
+                label="Amount due"
+                value={formatLedgerCurrency(tenantLedger.row.amountDue)}
+              />
+              <StatCard
+                icon={<Wallet className="h-4 w-4" />}
+                label="Paid"
+                value={formatLedgerCurrency(tenantLedger.row.amountPaid)}
+              />
+              <StatCard
+                icon={<Clock3 className="h-4 w-4" />}
+                label="Balance"
+                value={formatLedgerCurrency(tenantLedger.row.deficit)}
+              />
+              <StatCard
+                icon={<ReceiptText className="h-4 w-4" />}
+                label="Oldest due"
+                value={formatLedgerDate(tenantLedger.row.oldestDueDate)}
+              />
+            </div>
+          </SurfaceCard>
+        ) : null}
 
         <SurfaceCard className="p-4 sm:p-6 xl:p-7">
           <div className="flex items-center justify-between gap-3">

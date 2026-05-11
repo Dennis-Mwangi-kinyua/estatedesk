@@ -100,7 +100,9 @@ async function sendEmail({
   body: string;
 }) {
   // Replace this with Resend, SendGrid, SES, or your provider of choice.
-  console.log("sendNotificationEmail", { to, subject, body });
+  if (process.env.NODE_ENV !== "production") {
+    console.log("sendNotificationEmail", { to, subject, body });
+  }
 
   return {
     provider: "console",

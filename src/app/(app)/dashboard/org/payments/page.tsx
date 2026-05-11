@@ -1,386 +1,243 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { requireOrgRole } from "@/lib/permissions/guards";
+import {
+  formatLedgerCurrency,
+  formatLedgerDate,
+  getOrgLedger,
+} from "@/lib/ledger";
 
 export const dynamic = "force-dynamic";
 
-function toNumber(value: unknown): number {
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "toNumber" in value &&
-    typeof (value as { toNumber: unknown }).toNumber === "function"
-  ) {
-    return (value as { toNumber: () => number }).toNumber();
-  }
-
-  return Number(value ?? 0);
-}
-
-function formatCurrency(value: unknown) {
-  return new Intl.NumberFormat("en-KE", {
-    style: "currency",
-    currency: "KES",
-    maximumFractionDigits: 2,
-  }).format(toNumber(value));
-}
-
-function formatDate(value: Date | string | null | undefined) {
-  if (!value) return "—";
-
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-
-  return new Intl.DateTimeFormat("en-KE", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  }).format(date);
-}
-
-function getTargetLabel(targetType: string) {
-  switch (targetType) {
-    case "RENT":
-      return "Rent";
-    case "WATER":
-      return "Water";
-    case "DEPOSIT":
-      return "Deposit";
-    case "TAX":
-      return "Tax";
+function statusClasses(tone: string) {
+  switch (tone) {
+    case "settled":
+      return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    case "default":
+      return "border-red-200 bg-red-50 text-red-700";
+    case "overdue":
+      return "border-amber-200 bg-amber-50 text-amber-700";
+    case "due":
+      return "border-sky-200 bg-sky-50 text-sky-700";
     default:
-      return targetType;
+      return "border-neutral-200 bg-neutral-50 text-neutral-700";
   }
 }
 
-function getPayerDisplay(payment: {
-  payerTenant: { fullName: string } | null;
-  payerUser: { fullName: string | null } | null;
-  payerName: string | null;
-  payerType: string;
+function StatCard({
+  label,
+  value,
+  note,
+}: {
+  label: string;
+  value: string | number;
+  note?: string;
 }) {
-  if (payment.payerTenant?.fullName) return payment.payerTenant.fullName;
-  if (payment.payerUser?.fullName) return payment.payerUser.fullName;
-  if (payment.payerName) return payment.payerName;
-
-  switch (payment.payerType) {
-    case "ORGANIZATION":
-      return "Organization";
-    case "USER":
-      return "Staff User";
-    case "EXTERNAL":
-      return "External Payer";
-    case "TENANT":
-      return "Tenant";
-    default:
-      return "—";
-  }
+  return (
+    <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+      <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500">
+        {label}
+      </p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-neutral-950">
+        {value}
+      </p>
+      {note ? <p className="mt-1 text-xs text-neutral-500">{note}</p> : null}
+    </div>
+  );
 }
 
 export default async function PaymentsPage() {
-  const payments = await prisma.payment.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      org: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      payerTenant: {
-        select: {
-          id: true,
-          fullName: true,
-          phone: true,
-          email: true,
-          status: true,
-        },
-      },
-      payerUser: {
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-        },
-      },
-      rentCharge: {
-        select: {
-          id: true,
-          period: true,
-          chargeType: true,
-          status: true,
-          amountDue: true,
-          amountPaid: true,
-          balance: true,
-          dueDate: true,
-          lease: {
-            select: {
-              id: true,
-              unit: {
-                select: {
-                  id: true,
-                  houseNo: true,
-                  property: {
-                    select: {
-                      id: true,
-                      name: true,
-                    },
-                  },
-                  building: {
-                    select: {
-                      id: true,
-                      name: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      waterBill: {
-        select: {
-          id: true,
-          period: true,
-          unitsUsed: true,
-          total: true,
-          dueDate: true,
-          status: true,
-          unit: {
-            select: {
-              id: true,
-              houseNo: true,
-              property: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
-              building: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      taxCharge: {
-        select: {
-          id: true,
-          period: true,
-          taxType: true,
-          status: true,
-          amountDue: true,
-          amountPaid: true,
-          balance: true,
-          dueDate: true,
-          property: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      },
-      receipt: {
-        select: {
-          id: true,
-          receiptNo: true,
-          issuedAt: true,
-          pdfUrl: true,
-        },
-      },
-    },
-  });
+  const session = await requireOrgRole(["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"]);
 
-  const totalPayments = payments.length;
+  if (!session.activeOrgId) {
+    throw new Error("Missing active organization id in session");
+  }
 
-  const totalAmount = payments.reduce(
-    (sum: number, payment) => sum + toNumber(payment.amount),
-    0
-  );
-
-  const successfulPayments = payments.filter(
-    (payment) => payment.gatewayStatus === "SUCCESS"
-  ).length;
-
-  const pendingPayments = payments.filter(
-    (payment) =>
-      payment.gatewayStatus === "PENDING" ||
-      payment.gatewayStatus === "INITIATED"
-  ).length;
-
-  const verifiedPayments = payments.filter(
-    (payment) => payment.verificationStatus === "VERIFIED"
-  ).length;
+  const ledger = await getOrgLedger(session.activeOrgId);
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Payments</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            View and track all recorded payments across tenants, staff users,
-            organization remittances, and external payers.
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">
+            Tenant ledger
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-neutral-950">
+            Payments and balances
+          </h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">
+            Monthly rent and bill collection for {ledger.period}, including paid
+            tenants, partial payments, unpaid accounts, defaults, and total deficit.
           </p>
         </div>
 
         <Link
           href="/dashboard/org/charges"
-          className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
+          className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-800 shadow-sm transition hover:bg-neutral-50"
         >
           View Charges
         </Link>
       </div>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-xl border bg-background p-4 shadow-sm">
-          <p className="text-sm text-muted-foreground">Total Payments</p>
-          <p className="mt-2 text-2xl font-semibold">{totalPayments}</p>
-        </div>
-
-        <div className="rounded-xl border bg-background p-4 shadow-sm">
-          <p className="text-sm text-muted-foreground">Total Amount</p>
-          <p className="mt-2 text-2xl font-semibold">
-            {formatCurrency(totalAmount)}
-          </p>
-        </div>
-
-        <div className="rounded-xl border bg-background p-4 shadow-sm">
-          <p className="text-sm text-muted-foreground">Successful</p>
-          <p className="mt-2 text-2xl font-semibold">{successfulPayments}</p>
-        </div>
-
-        <div className="rounded-xl border bg-background p-4 shadow-sm">
-          <p className="text-sm text-muted-foreground">Verified</p>
-          <p className="mt-2 text-2xl font-semibold">{verifiedPayments}</p>
-        </div>
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="Expected this month"
+          value={formatLedgerCurrency(ledger.totals.expected)}
+          note="Rent plus issued bills"
+        />
+        <StatCard
+          label="Paid this month"
+          value={formatLedgerCurrency(ledger.totals.paid)}
+          note={`${ledger.totals.paidInFull} tenants paid in full`}
+        />
+        <StatCard
+          label="Deficit"
+          value={formatLedgerCurrency(ledger.totals.deficit)}
+          note={`${ledger.totals.partial} partial, ${ledger.totals.unpaid} unpaid`}
+        />
+        <StatCard
+          label="Defaults"
+          value={ledger.totals.defaulted}
+          note="Balances over 5 days overdue"
+        />
       </section>
 
-      <section className="rounded-xl border bg-background p-4 shadow-sm">
-        <p className="text-sm text-muted-foreground">Pending Gateway Payments</p>
-        <p className="mt-2 text-2xl font-semibold">{pendingPayments}</p>
-      </section>
-
-      <section className="overflow-hidden rounded-xl border bg-background shadow-sm">
-        <div className="border-b px-4 py-3">
-          <h2 className="text-base font-semibold">All Payments</h2>
+      <section className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+        <div className="border-b border-neutral-200 px-4 py-3">
+          <h2 className="text-base font-semibold text-neutral-950">
+            Tenant payment ledger
+          </h2>
         </div>
 
-        {payments.length === 0 ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">
-            No payments found.
+        {ledger.rows.length === 0 ? (
+          <div className="p-8 text-center text-sm text-neutral-500">
+            No tenant balances found for this month.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-muted/40">
-                <tr className="text-left">
-                  <th className="px-4 py-3 font-medium">Payer</th>
-                  <th className="px-4 py-3 font-medium">Payer Type</th>
-                  <th className="px-4 py-3 font-medium">Target</th>
-                  <th className="px-4 py-3 font-medium">Property</th>
-                  <th className="px-4 py-3 font-medium">Building</th>
+              <thead className="bg-neutral-50 text-left text-neutral-500">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Tenant</th>
                   <th className="px-4 py-3 font-medium">Unit</th>
-                  <th className="px-4 py-3 font-medium">Amount</th>
-                  <th className="px-4 py-3 font-medium">Method</th>
-                  <th className="px-4 py-3 font-medium">Gateway</th>
-                  <th className="px-4 py-3 font-medium">Verification</th>
-                  <th className="px-4 py-3 font-medium">Reference</th>
-                  <th className="px-4 py-3 font-medium">Paid At</th>
-                  <th className="px-4 py-3 font-medium">Receipt</th>
+                  <th className="px-4 py-3 font-medium">Due</th>
+                  <th className="px-4 py-3 font-medium">Paid</th>
+                  <th className="px-4 py-3 font-medium">Deficit</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Oldest due</th>
+                  <th className="px-4 py-3 font-medium">Last payment</th>
                 </tr>
               </thead>
               <tbody>
-                {payments.map((payment) => {
-                  const linkedProperty =
-                    payment.rentCharge?.lease.unit.property ??
-                    payment.waterBill?.unit.property ??
-                    payment.taxCharge?.property ??
-                    null;
-
-                  const linkedBuilding =
-                    payment.rentCharge?.lease.unit.building ??
-                    payment.waterBill?.unit.building ??
-                    null;
-
-                  const linkedUnit =
-                    payment.rentCharge?.lease.unit ??
-                    payment.waterBill?.unit ??
-                    null;
-
-                  return (
-                    <tr key={payment.id} className="border-t">
-                      <td className="px-4 py-3 font-medium">
-                        {getPayerDisplay(payment)}
-                      </td>
-
-                      <td className="px-4 py-3">
-                        {payment.payerType ?? "—"}
-                      </td>
-
-                      <td className="px-4 py-3">
-                        {getTargetLabel(payment.targetType)}
-                      </td>
-
-                      <td className="px-4 py-3">
-                        {linkedProperty ? (
-                          <Link
-                            href={`/properties/${linkedProperty.id}`}
-                            className="underline underline-offset-4"
-                          >
-                            {linkedProperty.name}
-                          </Link>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-
-                      <td className="px-4 py-3">{linkedBuilding?.name ?? "—"}</td>
-
-                      <td className="px-4 py-3">{linkedUnit?.houseNo ?? "—"}</td>
-
-                      <td className="px-4 py-3">
-                        {formatCurrency(payment.amount)}
-                      </td>
-
-                      <td className="px-4 py-3">{payment.method}</td>
-
-                      <td className="px-4 py-3">
-                        <span className="inline-flex rounded-full border px-2.5 py-1 text-xs">
-                          {payment.gatewayStatus}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3">
-                        <span className="inline-flex rounded-full border px-2.5 py-1 text-xs">
-                          {payment.verificationStatus}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3">
-                        {payment.reference ??
-                          payment.externalReference ??
-                          payment.checkoutRequestId ??
-                          payment.kraReference ??
-                          "—"}
-                      </td>
-
-                      <td className="px-4 py-3">{formatDate(payment.paidAt)}</td>
-
-                      <td className="px-4 py-3">
-                        {payment.receipt?.receiptNo ?? payment.kraReceiptNo ?? "—"}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {ledger.rows.map((row) => (
+                  <tr key={row.tenantId} className="border-t border-neutral-100">
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/dashboard/org/tenants/${row.tenantId}`}
+                        className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
+                      >
+                        {row.tenantName}
+                      </Link>
+                      <p className="mt-1 text-xs text-neutral-500">
+                        {row.phone || row.email || "-"}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600">{row.unitLabel}</td>
+                    <td className="px-4 py-3 font-medium">
+                      {formatLedgerCurrency(row.amountDue)}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-emerald-700">
+                      {formatLedgerCurrency(row.amountPaid)}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-red-700">
+                      {formatLedgerCurrency(row.deficit)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClasses(
+                          row.tone,
+                        )}`}
+                      >
+                        {row.paymentStatus}
+                      </span>
+                      {row.daysPastDue > 0 ? (
+                        <p className="mt-1 text-xs text-neutral-500">
+                          {row.daysPastDue} days overdue
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600">
+                      {formatLedgerDate(row.oldestDueDate)}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600">
+                      {formatLedgerDate(row.lastPaymentAt)}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         )}
+      </section>
+
+      <section className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+        <div className="border-b border-neutral-200 px-4 py-3">
+          <h2 className="text-base font-semibold text-neutral-950">
+            Recorded payments this month
+          </h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="bg-neutral-50 text-left text-neutral-500">
+              <tr>
+                <th className="px-4 py-3 font-medium">Payer</th>
+                <th className="px-4 py-3 font-medium">Target</th>
+                <th className="px-4 py-3 font-medium">Amount</th>
+                <th className="px-4 py-3 font-medium">Gateway</th>
+                <th className="px-4 py-3 font-medium">Verification</th>
+                <th className="px-4 py-3 font-medium">Reference</th>
+                <th className="px-4 py-3 font-medium">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ledger.recentPayments.map((payment) => (
+                <tr key={payment.id} className="border-t border-neutral-100">
+                  <td className="px-4 py-3 font-medium text-neutral-950">
+                    {payment.payerTenant?.fullName ??
+                      payment.payerUser?.fullName ??
+                      payment.payerName ??
+                      payment.payerType}
+                  </td>
+                  <td className="px-4 py-3 text-neutral-600">{payment.targetType}</td>
+                  <td className="px-4 py-3 font-semibold">
+                    {formatLedgerCurrency(payment.amount)}
+                  </td>
+                  <td className="px-4 py-3 text-neutral-600">
+                    {payment.gatewayStatus}
+                  </td>
+                  <td className="px-4 py-3 text-neutral-600">
+                    {payment.verificationStatus}
+                  </td>
+                  <td className="px-4 py-3 text-neutral-600">
+                    {payment.reference ??
+                      payment.externalReference ??
+                      payment.checkoutRequestId ??
+                      "-"}
+                  </td>
+                  <td className="px-4 py-3 text-neutral-600">
+                    {formatLedgerDate(payment.paidAt ?? payment.createdAt)}
+                  </td>
+                </tr>
+              ))}
+              {ledger.recentPayments.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-neutral-500">
+                    No payments recorded this month.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   );

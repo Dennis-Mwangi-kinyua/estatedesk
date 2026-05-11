@@ -53,6 +53,7 @@ model User {
   paymentsMade             Payment[]               @relation("PaymentPayerUser")
   platformPermissions      PlatformPermission[]
   platformMessagesSent     PlatformMessage[]
+  onboardingRequestsHandled OnboardingRequest[]    @relation("OnboardingRequestHandledBy")
   submittedRentalReturns   RentalIncomeReturn[]    @relation("RentalReturnSubmittedBy")
   tenant                   Tenant?
   tenantActionLogs         TenantActionLog[]       @relation("TenantActionActor")
@@ -109,6 +110,17 @@ model PlatformPermission {
   @@unique([userId, permission])
   @@index([userId])
   @@index([permission])
+}
+
+/// Shared rate-limit bucket for short-lived security and workflow throttles.
+model RateLimitBucket {
+  key       String   @id
+  count     Int      @default(0)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
 }
 
 /// Tenant organization / property management company boundary.
@@ -178,6 +190,32 @@ model PlatformMessage {
   @@index([orgId, createdAt])
   @@index([senderUserId, createdAt])
   @@index([status, createdAt])
+}
+
+/// Public onboarding request submitted from the registration/access page.
+model OnboardingRequest {
+  id                  String   @id @default(cuid())
+  fullName            String
+  companyName         String
+  workEmail           String
+  phone               String?
+  managedPropertyType String
+  message             String?
+  status              String   @default("NEW")
+  internalNotes       String?
+  handledAt           DateTime?
+  handledByUserId     String?
+  source              String   @default("REGISTER_PAGE")
+  ipAddress           String?
+  userAgent           String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  handledBy           User?    @relation("OnboardingRequestHandledBy", fields: [handledByUserId], references: [id])
+
+  @@index([status, createdAt])
+  @@index([workEmail, createdAt])
+  @@index([handledByUserId, handledAt])
+  @@index([createdAt])
 }
 
 /// Organization-specific configurable settings and feature flags.

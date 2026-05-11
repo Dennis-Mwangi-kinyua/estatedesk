@@ -20,7 +20,9 @@ export async function sendPasswordResetEmail({
   resetUrl,
 }: PasswordResetEmailInput) {
   // Replace with your actual mail provider.
-  console.log("sendPasswordResetEmail", { to, resetUrl });
+  if (process.env.NODE_ENV !== "production") {
+    console.log("sendPasswordResetEmail", { to, resetUrl });
+  }
 }
 
 export async function sendVerificationEmail({
@@ -28,7 +30,9 @@ export async function sendVerificationEmail({
   verifyUrl,
 }: VerificationEmailInput) {
   // Replace with your actual mail provider.
-  console.log("sendVerificationEmail", { to, verifyUrl });
+  if (process.env.NODE_ENV !== "production") {
+    console.log("sendVerificationEmail", { to, verifyUrl });
+  }
 }
 
 export async function sendInviteEmail({
@@ -38,5 +42,7 @@ export async function sendInviteEmail({
   inviteUrl,
 }: InviteEmailInput) {
   // Replace with your actual mail provider.
-  console.log("sendInviteEmail", { to, orgName, role, inviteUrl });
+  if (process.env.NODE_ENV !== "production") {
+    console.log("sendInviteEmail", { to, orgName, role, inviteUrl });
+  }
 }

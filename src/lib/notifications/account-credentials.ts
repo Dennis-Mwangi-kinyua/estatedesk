@@ -55,7 +55,9 @@ async function sendWhatsapp(phone: string, body: string) {
 
 async function sendEmail(email: string, subject: string, body: string) {
   // Replace this with Resend, SendGrid, SES, or your preferred provider.
-  console.log("sendAccountCredentialsEmail", { to: email, subject, body });
+  if (process.env.NODE_ENV !== "production") {
+    console.log("sendAccountCredentialsEmail", { to: email, subject, body });
+  }
 }
 
 export async function sendAccountCredentials(input: SendAccountCredentialsInput) {
