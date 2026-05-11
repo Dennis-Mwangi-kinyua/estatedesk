@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
   Building2,
@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{
-    orgId: string;
+    slug: string;
   }>;
 };
 
@@ -53,11 +53,11 @@ export default async function PlatformOrganizationDetailPage({
     redirectTo: "/dashboard",
   });
 
-  const { orgId } = await params;
+  const { slug } = await params;
 
   const org = await prisma.organization.findFirst({
     where: {
-      id: orgId,
+      OR: [{ slug }, { id: slug }],
       deletedAt: null,
     },
     include: {
@@ -92,6 +92,10 @@ export default async function PlatformOrganizationDetailPage({
 
   if (!org) {
     notFound();
+  }
+
+  if (slug !== org.slug) {
+    redirect(`/platform/organizations/${org.slug}`);
   }
 
   const [

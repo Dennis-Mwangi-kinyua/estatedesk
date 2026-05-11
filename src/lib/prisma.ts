@@ -1,21 +1,26 @@
 import "dotenv/config";
+import dns from "node:dns";
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { neonConfig } from "@neondatabase/serverless";
-import ws from "ws";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-neonConfig.webSocketConstructor = ws;
+dns.setDefaultResultOrder("ipv4first");
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
   prismaSchemaVersion?: string;
 };
 
-const PRISMA_SCHEMA_VERSION = "onboarding-requests";
+const PRISMA_SCHEMA_VERSION = "presence-and-pg-timeouts";
 
 function createPrismaClient() {
-  const adapter = new PrismaNeon({
+  const adapter = new PrismaPg({
     connectionString: process.env.DATABASE_URL!,
+    connectionTimeoutMillis: 3_000,
+    idleTimeoutMillis: 30_000,
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10_000,
+    max: 10,
+    query_timeout: 8_000,
   });
 
   return new PrismaClient({ adapter });

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { countOnlineUsers } from "@/lib/auth/presence";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 
 export const dynamic = "force-dynamic";
@@ -126,6 +128,14 @@ function buildBars(values: number[]) {
   }));
 }
 
+function platformQuery<T>(label: string, operation: () => Promise<T>) {
+  return retryTransientDatabaseOperation(operation, {
+    attempts: 3,
+    delayMs: 400,
+    label,
+  });
+}
+
 async function getOrganizationSeries(months = 6): Promise<TrendPoint[]> {
   const now = new Date();
   const monthStarts = Array.from({ length: months }, (_, i) =>
@@ -136,15 +146,17 @@ async function getOrganizationSeries(months = 6): Promise<TrendPoint[]> {
     monthStarts.map(async (monthStart) => {
       const nextMonth = addMonths(monthStart, 1);
 
-      const value = await prisma.organization.count({
-        where: {
-          deletedAt: null,
-          createdAt: {
-            gte: monthStart,
-            lt: nextMonth,
+      const value = await platformQuery("platform-org-series", () =>
+        prisma.organization.count({
+          where: {
+            deletedAt: null,
+            createdAt: {
+              gte: monthStart,
+              lt: nextMonth,
+            },
           },
-        },
-      });
+        }),
+      );
 
       return {
         label: monthLabel(monthStart),
@@ -166,16 +178,18 @@ async function getRevenueSeries(months = 6): Promise<TrendPoint[]> {
     monthStarts.map(async (monthStart) => {
       const nextMonth = addMonths(monthStart, 1);
 
-      const agg = await prisma.payment.aggregate({
-        _sum: { amount: true },
-        where: {
-          paidAt: {
-            gte: monthStart,
-            lt: nextMonth,
+      const agg = await platformQuery("platform-revenue-series", () =>
+        prisma.payment.aggregate({
+          _sum: { amount: true },
+          where: {
+            paidAt: {
+              gte: monthStart,
+              lt: nextMonth,
+            },
+            verificationStatus: "VERIFIED",
           },
-          verificationStatus: "VERIFIED",
-        },
-      });
+        }),
+      );
 
       return {
         label: monthLabel(monthStart),
@@ -199,6 +213,7 @@ export default async function PlatformPage() {
 
   const [
     totalUsers,
+    onlineUsers,
     totalRootAdmins,
     totalPlatformAdmins,
     totalOrganizations,
@@ -224,29 +239,42 @@ export default async function PlatformPage() {
     organizationSeries,
     revenueSeries,
   ] = await Promise.all([
-    prisma.user.count({ where: { deletedAt: null } }),
-    prisma.user.count({
+    platformQuery("platform-total-users", () =>
+      prisma.user.count({ where: { deletedAt: null } }),
+    ),
+    platformQuery("platform-online-users", () => countOnlineUsers(now)),
+    platformQuery("platform-root-admins", () => prisma.user.count({
       where: {
         deletedAt: null,
         isRootSuperAdmin: true,
       },
-    }),
-    prisma.user.count({
+    })),
+    platformQuery("platform-admins", () => prisma.user.count({
       where: {
         deletedAt: null,
         OR: [{ platformRole: "SUPER_ADMIN" }, { platformRole: "PLATFORM_ADMIN" }],
       },
-    }),
-    prisma.organization.count({ where: { deletedAt: null } }),
-    prisma.property.count({ where: { deletedAt: null } }),
-    prisma.unit.count({ where: { deletedAt: null } }),
-    prisma.tenant.count({ where: { deletedAt: null } }),
-    prisma.lease.count({ where: { deletedAt: null } }),
-    prisma.subscription.count(),
-    prisma.payment.count(),
-    prisma.auditLog.count(),
+    })),
+    platformQuery("platform-total-organizations", () =>
+      prisma.organization.count({ where: { deletedAt: null } }),
+    ),
+    platformQuery("platform-total-properties", () =>
+      prisma.property.count({ where: { deletedAt: null } }),
+    ),
+    platformQuery("platform-total-units", () =>
+      prisma.unit.count({ where: { deletedAt: null } }),
+    ),
+    platformQuery("platform-total-tenants", () =>
+      prisma.tenant.count({ where: { deletedAt: null } }),
+    ),
+    platformQuery("platform-total-leases", () =>
+      prisma.lease.count({ where: { deletedAt: null } }),
+    ),
+    platformQuery("platform-total-subscriptions", () => prisma.subscription.count()),
+    platformQuery("platform-total-payments", () => prisma.payment.count()),
+    platformQuery("platform-total-audit-logs", () => prisma.auditLog.count()),
 
-    prisma.organization.count({
+    platformQuery("platform-current-month-orgs", () => prisma.organization.count({
       where: {
         deletedAt: null,
         createdAt: {
@@ -254,8 +282,8 @@ export default async function PlatformPage() {
           lt: nextMonthStart,
         },
       },
-    }),
-    prisma.organization.count({
+    })),
+    platformQuery("platform-previous-month-orgs", () => prisma.organization.count({
       where: {
         deletedAt: null,
         createdAt: {
@@ -263,9 +291,9 @@ export default async function PlatformPage() {
           lt: currentMonthStart,
         },
       },
-    }),
+    })),
 
-    prisma.payment.aggregate({
+    platformQuery("platform-current-revenue", () => prisma.payment.aggregate({
       _sum: { amount: true },
       where: {
         paidAt: {
@@ -274,8 +302,8 @@ export default async function PlatformPage() {
         },
         verificationStatus: "VERIFIED",
       },
-    }),
-    prisma.payment.aggregate({
+    })),
+    platformQuery("platform-previous-revenue", () => prisma.payment.aggregate({
       _sum: { amount: true },
       where: {
         paidAt: {
@@ -284,31 +312,31 @@ export default async function PlatformPage() {
         },
         verificationStatus: "VERIFIED",
       },
-    }),
+    })),
 
-    prisma.payment.count({
+    platformQuery("platform-verified-payments", () => prisma.payment.count({
       where: { verificationStatus: "VERIFIED" },
-    }),
-    prisma.payment.count({
+    })),
+    platformQuery("platform-pending-payments", () => prisma.payment.count({
       where: { verificationStatus: "PENDING" },
-    }),
-    prisma.payment.count({
+    })),
+    platformQuery("platform-failed-payments", () => prisma.payment.count({
       where: { gatewayStatus: "FAILED" },
-    }),
+    })),
 
-    prisma.subscription.count({
+    platformQuery("platform-active-subscriptions", () => prisma.subscription.count({
       where: { status: "ACTIVE" },
-    }),
-    prisma.subscription.count({
+    })),
+    platformQuery("platform-trial-subscriptions", () => prisma.subscription.count({
       where: { status: "TRIALING" },
-    }),
-    prisma.subscription.count({
+    })),
+    platformQuery("platform-at-risk-subscriptions", () => prisma.subscription.count({
       where: {
         status: { in: ["EXPIRED", "CANCELLED", "PAST_DUE"] },
       },
-    }),
+    })),
 
-    prisma.organization.findMany({
+    platformQuery("platform-recent-organizations", () => prisma.organization.findMany({
       where: { deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: 6,
@@ -330,16 +358,16 @@ export default async function PlatformPage() {
           },
         },
       },
-    }),
+    })),
 
-    prisma.payment.findMany({
+    platformQuery("platform-recent-payments", () => prisma.payment.findMany({
       orderBy: { createdAt: "desc" },
       take: 6,
       include: {
         org: { select: { name: true } },
         payerTenant: { select: { fullName: true } },
       },
-    }),
+    })),
 
     getOrganizationSeries(6),
     getRevenueSeries(6),
@@ -370,20 +398,25 @@ export default async function PlatformPage() {
                 metaTone={trendTone(currentRevenue, previousRevenue)}
               />
               <MetricCard
+                label="Online now"
+                value={formatNumber(onlineUsers)}
+                meta={`${formatNumber(totalUsers)} total users`}
+                metaTone="text-emerald-600"
+              />
+              <MetricCard
                 label="Users"
                 value={formatNumber(totalUsers)}
                 meta={`${formatNumber(totalPlatformAdmins)} admins`}
                 metaTone="text-stone-500"
               />
-              <MetricCard
-                label="Payments"
-                value={formatNumber(totalPayments)}
-                meta={`${formatNumber(verifiedPayments)} verified`}
-                metaTone="text-stone-500"
-              />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
+              <CompactInfoCard
+                label="Payments"
+                value={formatNumber(totalPayments)}
+                helper={`${formatNumber(verifiedPayments)} verified`}
+              />
               <CompactInfoCard
                 label="Subscriptions"
                 value={formatNumber(totalSubscriptions)}
@@ -492,7 +525,7 @@ export default async function PlatformPage() {
                   {recentOrganizations.map((org) => (
                     <Link
                       key={org.id}
-                      href={`/platform/organizations/${org.id}`}
+                      href={`/platform/organizations/${org.slug}`}
                       className="group relative flex flex-col overflow-hidden rounded-[28px] border border-stone-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8f7f4_100%)] p-4 shadow-[0_8px_22px_rgba(28,25,23,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_32px_rgba(28,25,23,0.08)] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-white/80"
                     >
                       <div className="flex items-start justify-between gap-3">

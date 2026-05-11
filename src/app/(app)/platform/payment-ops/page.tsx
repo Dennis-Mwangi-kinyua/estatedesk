@@ -82,7 +82,7 @@ export default async function PaymentOpsPage() {
               {payments.map((payment) => (
                 <tr key={payment.id} className="border-t border-neutral-100">
                   <td className="px-4 py-3">
-                    <AdminLink href={`/platform/organizations/${payment.org.id}`}>
+                    <AdminLink href={`/platform/organizations/${payment.org.slug}`}>
                       {payment.org.name}
                     </AdminLink>
                     <p className="mt-1 text-xs text-neutral-500">/{payment.org.slug}</p>

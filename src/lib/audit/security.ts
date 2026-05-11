@@ -1,5 +1,6 @@
 import "server-only";
 
+import { Prisma } from "@prisma/client";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import type { AppSession } from "@/lib/auth/session";
@@ -81,5 +82,41 @@ export async function auditDeniedAccess(input: {
     });
   } catch (error) {
     console.error("Failed to write denied access audit log:", error);
+  }
+}
+
+export async function writeAuditLog(input: {
+  orgId: string;
+  actorUserId: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  metadata?: Prisma.InputJsonObject;
+  beforeState?: Prisma.InputJsonObject | null;
+  afterState?: Prisma.InputJsonObject | null;
+}) {
+  try {
+    const request = await getRequestAuditMetadata();
+
+    await prisma.auditLog.create({
+      data: {
+        orgId: input.orgId,
+        actorUserId: input.actorUserId,
+        action: input.action,
+        entityType: input.entityType,
+        entityId: input.entityId,
+        ip: request.ip,
+        userAgent: request.userAgent,
+        requestId: request.requestId,
+        metadata: {
+          ...(input.metadata ?? {}),
+          geo: request.geo,
+        },
+        beforeState: input.beforeState ?? undefined,
+        afterState: input.afterState ?? undefined,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to write audit log:", error);
   }
 }

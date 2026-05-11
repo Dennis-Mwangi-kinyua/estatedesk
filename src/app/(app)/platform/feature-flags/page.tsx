@@ -77,7 +77,7 @@ export default async function FeatureFlagsPage() {
               {organizations.map((org) => (
                 <tr key={org.id} className="border-t border-neutral-100">
                   <td className="px-4 py-3">
-                    <AdminLink href={`/platform/organizations/${org.id}`}>{org.name}</AdminLink>
+                    <AdminLink href={`/platform/organizations/${org.slug}`}>{org.name}</AdminLink>
                     <p className="mt-1 text-xs text-neutral-500">/{org.slug}</p>
                   </td>
                   {featureKeys.map((key) => (

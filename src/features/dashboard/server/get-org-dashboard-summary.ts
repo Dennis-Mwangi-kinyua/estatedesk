@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { countOnlineUsersForOrg } from "@/lib/auth/presence";
 
 export type OrgDashboardSummary = {
   totalProperties: number;
@@ -12,6 +13,7 @@ export type OrgDashboardSummary = {
   totalTenants: number;
   activeLeases: number;
   totalEmployees: number;
+  onlineUsers: number;
   totalCaretakers: number;
   activeCaretakerAssignments: number;
   openIssues: number;
@@ -37,6 +39,7 @@ export async function getOrgDashboardSummary(
     unitGroups,
     tenantGroups,
     activeLeases,
+    onlineUsers,
     membershipGroups,
     activeCaretakerAssignments,
     issueGroups,
@@ -97,6 +100,8 @@ export async function getOrgDashboardSummary(
         status: "ACTIVE",
       },
     }),
+
+    countOnlineUsersForOrg(orgId),
 
     prisma.membership.groupBy({
       by: ["role"],
@@ -250,6 +255,7 @@ export async function getOrgDashboardSummary(
     totalTenants,
     activeLeases,
     totalEmployees,
+    onlineUsers,
     totalCaretakers,
     activeCaretakerAssignments,
     openIssues,

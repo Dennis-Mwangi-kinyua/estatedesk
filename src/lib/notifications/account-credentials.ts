@@ -56,7 +56,11 @@ async function sendWhatsapp(phone: string, body: string) {
 async function sendEmail(email: string, subject: string, body: string) {
   // Replace this with Resend, SendGrid, SES, or your preferred provider.
   if (process.env.NODE_ENV !== "production") {
-    console.log("sendAccountCredentialsEmail", { to: email, subject, body });
+    console.log("sendAccountCredentialsEmail", {
+      to: email,
+      subject,
+      body: body.replace(/Temporary password: .+/g, "Temporary password: [redacted]"),
+    });
   }
 }
 

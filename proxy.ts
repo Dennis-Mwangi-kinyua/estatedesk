@@ -22,6 +22,8 @@ const PROTECTED_PREFIXES = [
 
 const PUBLIC_PREFIXES = [
   "/api/cron/notifications",
+  "/api/auth/accept-invite",
+  "/api/public/vacant-houses",
   "/login",
   "/register",
   "/forgot-password",
