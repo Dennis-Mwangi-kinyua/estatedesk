@@ -33,6 +33,33 @@ const INVALID_CREDENTIALS_MESSAGE = "Invalid email or password.";
 const GENERIC_LOGIN_ERROR_MESSAGE =
   "Unable to sign in right now. Please try again.";
 
+async function getLoginRateLimitError({
+  identifier,
+  ipAddress,
+}: {
+  identifier: string;
+  ipAddress: string;
+}): Promise<LoginActionState | null> {
+  try {
+    const limiter = await checkRateLimit({
+      key: `login:${ipAddress}:${identifier}`,
+      limit: 8,
+      windowMs: 60_000,
+    });
+
+    if (!limiter.allowed) {
+      return {
+        success: false,
+        error: `Too many sign-in attempts. Please wait ${limiter.retryAfterSeconds} seconds and try again.`,
+      };
+    }
+  } catch (error) {
+    console.error("login rate limit check failed:", error);
+  }
+
+  return null;
+}
+
 function makeLabel(prefix: string, requestId: string) {
   return `${prefix}-${requestId}`;
 }
@@ -77,19 +104,6 @@ export async function loginAction(
   const { email: identifier, password } = parsed.data;
   const headerStore = await headers();
   const ipAddress = getClientIp(headerStore);
-  const limiter = await checkRateLimit({
-    key: `login:${ipAddress}:${identifier}`,
-    limit: 8,
-    windowMs: 60_000,
-  });
-
-  if (!limiter.allowed) {
-    return {
-      success: false,
-      error: `Too many sign-in attempts. Please wait ${limiter.retryAfterSeconds} seconds and try again.`,
-    };
-  }
-
   const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   const totalLabel = makeLabel("loginAction-total", requestId);
@@ -98,6 +112,15 @@ export async function loginAction(
   }
 
   try {
+    const rateLimitError = await timed(
+      makeLabel("login-rate-limit", requestId),
+      async () => getLoginRateLimitError({ identifier, ipAddress }),
+    );
+
+    if (rateLimitError) {
+      return rateLimitError;
+    }
+
     const user = await timed(
       makeLabel("login-find-user", requestId),
       async () => {
