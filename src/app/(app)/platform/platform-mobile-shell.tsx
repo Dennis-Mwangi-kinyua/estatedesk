@@ -3,13 +3,66 @@
 import Link from "next/link";
 import { ReactNode, useEffect, useId, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Building2, LogOut, Menu, X } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Bell,
+  BriefcaseBusiness,
+  Building2,
+  CreditCard,
+  Database,
+  FileChartColumn,
+  Flag,
+  Gauge,
+  KeyRound,
+  LifeBuoy,
+  LockKeyhole,
+  LogOut,
+  Mail,
+  Menu,
+  ReceiptText,
+  RefreshCcw,
+  Search,
+  Settings,
+  ShieldAlert,
+  ShieldCheck,
+  SlidersHorizontal,
+  UserCog,
+  Users,
+  X,
+} from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
+
+const iconMap = {
+  Gauge,
+  Activity,
+  Search,
+  Building2,
+  Users,
+  ShieldCheck,
+  LockKeyhole,
+  ShieldAlert,
+  LifeBuoy,
+  CreditCard,
+  BriefcaseBusiness,
+  KeyRound,
+  ReceiptText,
+  RefreshCcw,
+  Flag,
+  SlidersHorizontal,
+  Bell,
+  Settings,
+  Database,
+  FileChartColumn,
+  Mail,
+  BarChart3,
+  UserCog,
+};
 
 type NavItem = {
   href: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: keyof typeof iconMap;
 };
 
 export default function PlatformMobileShell({
@@ -53,10 +106,12 @@ export default function PlatformMobileShell({
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Building2 className="h-4 w-4" />
             </span>
+
             <div className="min-w-0">
               <h1 className="truncate text-base font-semibold tracking-tight text-slate-950">
                 EstateDesk
               </h1>
+
               <p className="truncate text-xs text-slate-500">
                 Platform administration
               </p>
@@ -100,7 +155,10 @@ export default function PlatformMobileShell({
               <h2 className="truncate text-base font-semibold tracking-tight text-slate-950">
                 Menu
               </h2>
-              <p className="truncate text-xs text-slate-500">{fullName}</p>
+
+              <p className="truncate text-xs text-slate-500">
+                {fullName}
+              </p>
             </div>
 
             <button
@@ -116,8 +174,10 @@ export default function PlatformMobileShell({
           <nav className="flex-1 space-y-1 overflow-auto p-3">
             {navItems.map((item) => {
               const active =
-                pathname === item.href || pathname.startsWith(`${item.href}/`);
-              const Icon = item.icon;
+                pathname === item.href ||
+                pathname.startsWith(`${item.href}/`);
+
+              const Icon = iconMap[item.icon];
 
               return (
                 <Link
@@ -132,11 +192,14 @@ export default function PlatformMobileShell({
                 >
                   <span
                     className={`flex h-9 w-9 items-center justify-center rounded-md ${
-                      active ? "bg-white/12 text-white" : "bg-slate-100 text-slate-600"
+                      active
+                        ? "bg-white/12 text-white"
+                        : "bg-slate-100 text-slate-600"
                     }`}
                   >
                     <Icon className="h-4 w-4" />
                   </span>
+
                   <span className="truncate">{item.label}</span>
                 </Link>
               );

@@ -31,31 +31,59 @@ import { requirePlatformRole } from "@/lib/permissions/guards";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import PlatformMobileShell from "./platform-mobile-shell";
 
+const iconMap = {
+  Gauge,
+  Activity,
+  Search,
+  Building2,
+  Users,
+  ShieldCheck,
+  LockKeyhole,
+  ShieldAlert,
+  LifeBuoy,
+  CreditCard,
+  BriefcaseBusiness,
+  KeyRound,
+  ReceiptText,
+  RefreshCcw,
+  Flag,
+  SlidersHorizontal,
+  Bell,
+  Settings,
+  Database,
+  FileChartColumn,
+  Mail,
+  BarChart3,
+  UserCog,
+};
+
 const navItems = [
-  { href: "/platform", label: "Dashboard", icon: Gauge },
-  { href: "/platform/system-health", label: "System Health", icon: Activity },
-  { href: "/platform/search", label: "Global Search", icon: Search },
-  { href: "/platform/organizations", label: "Organizations", icon: Building2 },
-  { href: "/platform/users", label: "Platform Users", icon: Users },
-  { href: "/platform/admins", label: "Platform Admins", icon: ShieldCheck },
-  { href: "/platform/permissions", label: "Permissions", icon: LockKeyhole },
-  { href: "/platform/security", label: "Security", icon: ShieldAlert },
-  { href: "/platform/support-access", label: "Support Access", icon: LifeBuoy },
-  { href: "/platform/billing", label: "Billing", icon: CreditCard },
-  { href: "/platform/subscriptions", label: "Subscriptions", icon: BriefcaseBusiness },
-  { href: "/platform/api-keys", label: "API Keys", icon: KeyRound },
-  { href: "/platform/payments", label: "Payments", icon: ReceiptText },
-  { href: "/platform/payment-ops", label: "Payment Ops", icon: RefreshCcw },
-  { href: "/platform/feature-flags", label: "Feature Flags", icon: Flag },
-  { href: "/platform/onboarding", label: "Onboarding", icon: SlidersHorizontal },
-  { href: "/platform/broadcasts", label: "Broadcasts", icon: Bell },
-  { href: "/platform/jobs", label: "Jobs", icon: Settings },
-  { href: "/platform/data-management", label: "Data", icon: Database },
-  { href: "/platform/audit-logs", label: "Audit Logs", icon: FileChartColumn },
-  { href: "/platform/messages", label: "Messages", icon: Mail },
-  { href: "/platform/reports", label: "Reports", icon: BarChart3 },
-  { href: "/platform/settings", label: "Settings", icon: UserCog },
+  { href: "/platform", label: "Dashboard", icon: "Gauge" },
+  { href: "/platform/system-health", label: "System Health", icon: "Activity" },
+  { href: "/platform/search", label: "Global Search", icon: "Search" },
+  { href: "/platform/organizations", label: "Organizations", icon: "Building2" },
+  { href: "/platform/users", label: "Platform Users", icon: "Users" },
+  { href: "/platform/admins", label: "Platform Admins", icon: "ShieldCheck" },
+  { href: "/platform/permissions", label: "Permissions", icon: "LockKeyhole" },
+  { href: "/platform/security", label: "Security", icon: "ShieldAlert" },
+  { href: "/platform/support-access", label: "Support Access", icon: "LifeBuoy" },
+  { href: "/platform/billing", label: "Billing", icon: "CreditCard" },
+  { href: "/platform/subscriptions", label: "Subscriptions", icon: "BriefcaseBusiness" },
+  { href: "/platform/api-keys", label: "API Keys", icon: "KeyRound" },
+  { href: "/platform/payments", label: "Payments", icon: "ReceiptText" },
+  { href: "/platform/payment-ops", label: "Payment Ops", icon: "RefreshCcw" },
+  { href: "/platform/feature-flags", label: "Feature Flags", icon: "Flag" },
+  { href: "/platform/onboarding", label: "Onboarding", icon: "SlidersHorizontal" },
+  { href: "/platform/broadcasts", label: "Broadcasts", icon: "Bell" },
+  { href: "/platform/jobs", label: "Jobs", icon: "Settings" },
+  { href: "/platform/data-management", label: "Data", icon: "Database" },
+  { href: "/platform/audit-logs", label: "Audit Logs", icon: "FileChartColumn" },
+  { href: "/platform/messages", label: "Messages", icon: "Mail" },
+  { href: "/platform/reports", label: "Reports", icon: "BarChart3" },
+  { href: "/platform/settings", label: "Settings", icon: "UserCog" },
 ] as const;
+
+export type PlatformNavItem = (typeof navItems)[number];
 
 export default async function PlatformLayout({
   children,
@@ -86,7 +114,7 @@ export default async function PlatformLayout({
 
           <nav className="flex-1 space-y-1 overflow-auto px-3 py-4">
             {navItems.map((item) => {
-              const Icon = item.icon;
+              const Icon = iconMap[item.icon];
 
               return (
                 <Link
@@ -149,7 +177,9 @@ export default async function PlatformLayout({
 
             <section className="min-h-0 flex-1 overflow-hidden p-3 sm:p-4 lg:p-6">
               <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                <div className="h-full overflow-auto p-4 sm:p-5 lg:p-6">{children}</div>
+                <div className="h-full overflow-auto p-4 sm:p-5 lg:p-6">
+                  {children}
+                </div>
               </div>
             </section>
           </main>
