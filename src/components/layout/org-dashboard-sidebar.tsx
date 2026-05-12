@@ -35,7 +35,6 @@ type SidebarLink = {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   roles: readonly OrgRole[];
-  emoji: string;
 };
 
 const SIDEBAR_LINKS: readonly SidebarLink[] = [
@@ -43,112 +42,96 @@ const SIDEBAR_LINKS: readonly SidebarLink[] = [
     label: "Overview",
     href: "/dashboard/org",
     icon: Home,
-    emoji: "🏠",
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER"],
   },
   {
     label: "Properties",
     href: "/dashboard/org/properties",
     icon: Building,
-    emoji: "🏘️",
     roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
   },
   {
     label: "Buildings",
     href: "/dashboard/org/buildings",
     icon: Building2,
-    emoji: "🏢",
     roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
   },
   {
     label: "Units",
     href: "/dashboard/org/units",
     icon: Building2,
-    emoji: "🚪",
     roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
   },
   {
     label: "Tenants",
     href: "/dashboard/org/tenants",
     icon: Users,
-    emoji: "🧑‍🤝‍🧑",
     roles: ["ADMIN", "MANAGER", "OFFICE"],
   },
   {
     label: "Verify Tenant",
     href: "/dashboard/org/verify-tenant",
     icon: UserCheck,
-    emoji: "✅",
     roles: ["ADMIN"],
   },
   {
     label: "Leases",
     href: "/dashboard/org/leases",
     icon: FileText,
-    emoji: "📄",
     roles: ["ADMIN", "MANAGER", "OFFICE"],
   },
   {
     label: "Payments",
     href: "/dashboard/org/payments",
     icon: CreditCard,
-    emoji: "💳",
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
   },
   {
     label: "Charges",
     href: "/dashboard/org/charges",
     icon: Receipt,
-    emoji: "🧾",
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
   },
   {
     label: "Issues",
     href: "/dashboard/org/issues",
     icon: Wrench,
-    emoji: "🛠️",
     roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
   },
   {
     label: "Staff",
     href: "/dashboard/org/staff",
     icon: Users,
-    emoji: "👷",
     roles: ["ADMIN", "MANAGER"],
   },
   {
     label: "Notifications",
     href: "/dashboard/org/notifications",
     icon: Bell,
-    emoji: "🔔",
     roles: ["ADMIN", "MANAGER", "OFFICE"],
   },
   {
     label: "Reports",
     href: "/dashboard/org/reports",
     icon: ShieldCheck,
-    emoji: "📊",
     roles: ["ADMIN", "MANAGER", "ACCOUNTANT"],
   },
   {
     label: "Taxes",
     href: "/dashboard/org/taxes",
     icon: Receipt,
-    emoji: "🏛️",
     roles: ["ADMIN", "ACCOUNTANT"],
   },
   {
     label: "Settings",
     href: "/dashboard/org/settings",
     icon: Settings,
-    emoji: "⚙️",
     roles: ["ADMIN"],
   },
   {
     label: "Support",
     href: "/dashboard/org/support",
     icon: Send,
-    emoji: "✉️",
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
   },
 ] as const;
@@ -190,28 +173,28 @@ const SidebarNavItem = memo(function SidebarNavItem({
         href={item.href}
         onClick={onNavigate}
         className={[
-          "flex items-center gap-3 rounded-[22px] px-4 py-3.5 text-sm font-medium transition-all duration-200",
+          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150",
           active
-            ? "bg-neutral-950 text-white shadow-sm"
-            : "bg-white/80 text-neutral-800 hover:bg-neutral-50",
+            ? "bg-primary text-primary-foreground shadow-sm"
+            : "text-slate-700 hover:bg-slate-100 hover:text-slate-950",
         ].join(" ")}
       >
         <span
           className={[
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl",
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
             active
-              ? "bg-white/10 text-white"
-              : "bg-neutral-100 text-neutral-700",
+              ? "bg-white/12 text-white"
+              : "bg-slate-100 text-slate-600",
           ].join(" ")}
         >
-          <span className="text-lg">{item.emoji}</span>
+          <Icon className="h-4 w-4" />
         </span>
 
         <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
           <span className="truncate">{item.label}</span>
           <Icon
             className={
-              active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-neutral-400"
+            active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-slate-400"
             }
           />
         </div>
@@ -223,27 +206,27 @@ const SidebarNavItem = memo(function SidebarNavItem({
     <Link
       href={item.href}
       className={[
-        "group flex items-center gap-3 rounded-[22px] px-4 py-3 text-sm font-medium transition",
+        "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
         active
-          ? "bg-neutral-950 text-white shadow-sm"
-          : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-950",
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-slate-700 hover:bg-slate-100 hover:text-slate-950",
       ].join(" ")}
     >
       <span
         className={[
-          "flex h-10 w-10 items-center justify-center rounded-2xl",
+          "flex h-9 w-9 items-center justify-center rounded-md",
           active
-            ? "bg-white/10 text-white"
-            : "bg-neutral-100 text-neutral-700",
+            ? "bg-white/12 text-white"
+            : "bg-slate-100 text-slate-600",
         ].join(" ")}
       >
-        <span className="text-base">{item.emoji}</span>
+        <Icon className="h-4 w-4" />
       </span>
 
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
         <span className="truncate">{item.label}</span>
         <Icon
-          className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-neutral-400"}
+          className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-slate-400"}
         />
       </div>
     </Link>
@@ -257,15 +240,15 @@ const SidebarBrand = memo(function SidebarBrand({
 }) {
   return (
     <Link href="/dashboard/org" className="flex items-center gap-3">
-      <div className="flex h-12 w-12 items-center justify-center rounded-[22px] bg-neutral-950 text-white shadow-sm">
-        <span className="text-xl">🏢</span>
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+        <Building2 className="h-5 w-5" />
       </div>
 
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-neutral-950">
+        <p className="truncate text-sm font-semibold text-slate-950">
           {organizationName}
         </p>
-        <p className="text-xs text-neutral-500">Organization Workspace</p>
+        <p className="text-xs text-slate-500">Organization workspace</p>
       </div>
     </Link>
   );
@@ -283,7 +266,7 @@ const LogoutButton = memo(function LogoutButton({
       <button
         type="submit"
         className={[
-          "flex w-full items-center gap-3 rounded-[22px] text-sm font-medium transition",
+          "flex w-full items-center gap-3 rounded-lg text-sm font-medium transition-colors",
           mobile
             ? "px-4 py-3.5 text-red-600 hover:bg-red-50 hover:text-red-700"
             : "px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700",
@@ -291,15 +274,14 @@ const LogoutButton = memo(function LogoutButton({
       >
         <span
           className={[
-            "flex items-center justify-center rounded-2xl bg-red-50 text-red-600",
-            mobile ? "h-11 w-11 shrink-0" : "h-10 w-10",
+            "flex items-center justify-center rounded-md bg-red-50 text-red-600",
+            mobile ? "h-9 w-9 shrink-0" : "h-9 w-9",
           ].join(" ")}
         >
-          <span className={mobile ? "text-lg" : "text-base"}>👋</span>
+          <LogOut className="h-4 w-4" />
         </span>
 
         <span className="truncate">Logout</span>
-        <LogOut className="ml-auto h-4 w-4 text-red-500" />
       </button>
     </form>
   );
@@ -323,12 +305,12 @@ export function OrgDashboardSidebar({
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r border-white/60 bg-white/82 shadow-[12px_0_40px_rgba(15,23,42,0.06)] backdrop-blur-2xl lg:flex">
-        <div className="border-b border-black/10 px-6 py-6">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r border-slate-200 bg-white shadow-[10px_0_28px_rgba(15,23,42,0.04)] lg:flex">
+        <div className="border-b border-slate-200 px-5 py-5">
           <SidebarBrand organizationName={organizationName} />
         </div>
 
-        <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {visibleLinks.map((item) => (
             <SidebarNavItem
               key={item.href}
@@ -354,20 +336,20 @@ export function OrgDashboardSidebar({
           aria-label="Close navigation overlay"
           onClick={closeMobile}
           className={[
-            "absolute inset-0 bg-black/30 backdrop-blur-md transition-opacity duration-300 ease-out",
+            "absolute inset-0 bg-slate-950/35 backdrop-blur-sm transition-opacity duration-300 ease-out",
             mobileOpen ? "opacity-100" : "opacity-0",
           ].join(" ")}
         />
 
         <div
           className={[
-            "absolute inset-y-0 left-0 flex w-[88%] max-w-[360px] flex-col rounded-r-[32px] border-r border-white/60 bg-white/86 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out",
+            "absolute inset-y-0 left-0 flex w-[88%] max-w-[360px] flex-col border-r border-slate-200 bg-white shadow-2xl transition-transform duration-300 ease-out",
             mobileOpen ? "translate-x-0" : "-translate-x-full",
           ].join(" ")}
         >
           <div className="flex h-full flex-col justify-between">
             <div className="min-h-0">
-              <div className="flex items-center justify-between border-b border-black/5 px-4 pb-4 pt-5">
+              <div className="flex items-center justify-between border-b border-slate-200 px-4 pb-4 pt-5">
                 <div className="min-w-0">
                   <SidebarBrand organizationName={organizationName} />
                 </div>
@@ -376,7 +358,7 @@ export function OrgDashboardSidebar({
                   type="button"
                   onClick={closeMobile}
                   aria-label="Close navigation"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-black/10 bg-white text-neutral-900 shadow-sm"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-900 shadow-sm"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -398,7 +380,7 @@ export function OrgDashboardSidebar({
             </div>
 
             <div className="px-3 pb-4 pt-3 [padding-bottom:max(1rem,env(safe-area-inset-bottom))]">
-              <div className="rounded-[28px] bg-neutral-50 p-2 shadow-sm">
+              <div className="rounded-lg bg-slate-50 p-2">
                 <LogoutButton mobile onClick={closeMobile} />
               </div>
             </div>

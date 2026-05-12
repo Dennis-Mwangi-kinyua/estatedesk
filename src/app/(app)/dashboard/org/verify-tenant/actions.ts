@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import type { AppSession } from "@/lib/auth/session";
+import { ensureTenantIdentity } from "@/lib/tenants/identity";
 
 const VERIFY_TENANT_PATH = "/dashboard/org/verify-tenant";
 
@@ -143,6 +144,15 @@ export async function approveTenantTransferAction(formData: FormData) {
       select: { id: true },
     });
 
+    const identity = await ensureTenantIdentity(tx, {
+      tenantId: transfer.sourceTenant.id,
+      fullName: transfer.sourceTenant.fullName,
+      phone: transfer.sourceTenant.phone,
+      email: transfer.sourceTenant.email,
+      nationalId: transfer.sourceTenant.nationalId,
+      kraPin: transfer.sourceTenant.kraPin,
+    });
+
     const transferredTenantData = {
       type: transfer.sourceTenant.type,
       fullName: transfer.sourceTenant.fullName,
@@ -166,6 +176,7 @@ export async function approveTenantTransferAction(formData: FormData) {
       marketingConsent: transfer.sourceTenant.marketingConsent,
       blacklistReason: transfer.sourceTenant.blacklistReason,
       blacklistedAt: transfer.sourceTenant.blacklistedAt,
+      identityId: identity.id,
       deletedAt: null,
       archivedAt: null,
     };
@@ -195,6 +206,39 @@ export async function approveTenantTransferAction(formData: FormData) {
         createdTenantId: targetTenant.id,
       },
     });
+
+    const existingTransferHistory = await tx.tenantHistoryRecord.findFirst({
+      where: {
+        tenantId: targetTenant.id,
+        status: "TRANSFERRED",
+      },
+      select: { id: true },
+    });
+
+    const transferHistoryData = {
+      orgId: transfer.targetOrgId,
+      tenantId: targetTenant.id,
+      identityId: identity.id,
+      status: "TRANSFERRED" as const,
+      notes: `Tenant profile transferred from ${transfer.sourceOrgId}.`,
+      snapshot: {
+        transferRequestId: transfer.id,
+        sourceOrgId: transfer.sourceOrgId,
+        sourceTenantId: transfer.sourceTenantId,
+        approvedAt: new Date().toISOString(),
+      },
+    };
+
+    if (existingTransferHistory) {
+      await tx.tenantHistoryRecord.update({
+        where: { id: existingTransferHistory.id },
+        data: transferHistoryData,
+      });
+    } else {
+      await tx.tenantHistoryRecord.create({
+        data: transferHistoryData,
+      });
+    }
   });
 
   revalidatePath(VERIFY_TENANT_PATH);

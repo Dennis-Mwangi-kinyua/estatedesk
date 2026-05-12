@@ -19,23 +19,23 @@ export function OrgDashboardHeader({
   onMenuClick,
 }: OrgDashboardHeaderProps) {
   return (
-    <header className="fixed left-0 right-0 top-0 z-[90] border-b border-white/60 bg-white/78 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-2xl lg:left-72">
+    <header className="fixed left-0 right-0 top-0 z-[90] border-b border-slate-200 bg-white/95 shadow-[0_6px_18px_rgba(15,23,42,0.04)] backdrop-blur lg:left-72">
       <div className="flex h-[72px] items-center justify-between gap-3 px-3 sm:px-6 lg:h-16 lg:px-8">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             onClick={onMenuClick}
             aria-label="Open navigation"
-            className="ios-button flex h-11 w-11 shrink-0 items-center justify-center border border-black/10 bg-white/88 text-neutral-900 shadow-sm lg:hidden"
+            className="ios-button flex h-11 w-11 shrink-0 items-center justify-center border border-slate-200 bg-white text-slate-900 shadow-sm lg:hidden"
           >
             <Menu className="h-5 w-5" />
           </button>
 
           <div className="min-w-0">
-            <h1 className="truncate text-base font-semibold tracking-tight text-neutral-950 sm:text-lg">
+            <h1 className="truncate text-base font-semibold tracking-tight text-slate-950 sm:text-lg">
               {title}
             </h1>
-            <p className="truncate text-xs text-neutral-500 sm:text-sm">
+            <p className="truncate text-xs text-slate-500 sm:text-sm">
               {subtitle}
             </p>
           </div>
@@ -45,16 +45,16 @@ export function OrgDashboardHeader({
           <Link
             href="/dashboard/org/notifications"
             aria-label="Notifications"
-            className="ios-button flex h-11 w-11 items-center justify-center border border-black/10 bg-white/88 text-neutral-900 shadow-sm hover:bg-white lg:h-10 lg:w-10"
+            className="ios-button flex h-11 w-11 items-center justify-center border border-slate-200 bg-white text-slate-900 shadow-sm hover:bg-slate-50 lg:h-10 lg:w-10"
           >
             <Bell className="h-4 w-4" />
           </Link>
 
-          <div className="hidden rounded-2xl border border-black/10 bg-white/88 px-3 py-2 shadow-sm sm:block">
-            <p className="text-sm font-medium leading-none text-neutral-950">
+          <div className="hidden rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm sm:block">
+            <p className="text-sm font-medium leading-none text-slate-950">
               {userName}
             </p>
-            <p className="mt-1 text-[11px] text-neutral-500">
+            <p className="mt-1 text-[11px] text-slate-500">
               {userRole}
             </p>
           </div>

@@ -28,6 +28,20 @@ import {
 
 const tenantPaymentsArgs = Prisma.validator<Prisma.TenantDefaultArgs>()({
   include: {
+    leases: {
+      where: {
+        status: "ACTIVE",
+        deletedAt: null,
+      },
+      orderBy: {
+        startDate: "desc",
+      },
+      take: 1,
+      select: {
+        id: true,
+        monthlyRent: true,
+      },
+    },
     payments: {
       orderBy: {
         createdAt: "desc",
@@ -350,6 +364,7 @@ export default async function TenantPaymentsPage() {
     .reduce((sum, payment) => sum + Number(payment.amount), 0);
 
   const latestPayment = filteredPayments[0] ?? null;
+  const activeLease = tenant.leases[0] ?? null;
 
   return (
     <PageShell>
@@ -383,6 +398,26 @@ export default async function TenantPaymentsPage() {
               </div>
             ) : null}
           </div>
+
+          {activeLease ? (
+            <div className="mt-5 flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-emerald-950">
+                  Pay rent in advance
+                </p>
+                <p className="mt-1 text-sm text-emerald-800">
+                  Cover several future rent months in one payment. The ledger
+                  will allocate it period by period.
+                </p>
+              </div>
+              <Link
+                href={`/dashboard/tenant/payments/checkout?source=advance_rent&id=${activeLease.id}&method=mpesa&months=12&amount=${Number(activeLease.monthlyRent) * 12}`}
+                className="inline-flex h-10 shrink-0 items-center justify-center rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800"
+              >
+                Pay 12 months
+              </Link>
+            </div>
+          ) : null}
         </SurfaceCard>
 
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:gap-4">

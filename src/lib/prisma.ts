@@ -12,9 +12,14 @@ const globalForPrisma = globalThis as unknown as {
 
 const PRISMA_SCHEMA_VERSION = "presence-and-pg-timeouts";
 
+const fallbackDatasourceUrl = "postgresql://user:password@localhost:5432/estatedesk";
+
+const DATABASE_URL =
+  process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? fallbackDatasourceUrl;
+
 function createPrismaClient() {
   const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL!,
+    connectionString: DATABASE_URL,
     connectionTimeoutMillis: 3_000,
     idleTimeoutMillis: 30_000,
     keepAlive: true,

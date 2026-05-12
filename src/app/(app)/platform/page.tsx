@@ -1,4 +1,6 @@
 import Link from "next/link";
+import type { ComponentType } from "react";
+import { CreditCard, FileClock, Plus, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { countOnlineUsers } from "@/lib/auth/presence";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
@@ -435,10 +437,10 @@ export default async function PlatformPage() {
           <aside className="flex flex-col gap-5">
             <Panel title="Quick actions" subtitle="High-priority shortcuts">
               <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-1">
-                <ActionLink href="/platform/organizations/new" label="New organization" icon="＋" />
-                <ActionLink href="/platform/users" label="Platform users" icon="👤" />
-                <ActionLink href="/platform/billing" label="Billing center" icon="💳" />
-                <ActionLink href="/platform/audit-logs" label="Audit logs" icon="🕘" />
+                <ActionLink href="/platform/organizations/new" label="New organization" icon={Plus} />
+                <ActionLink href="/platform/users" label="Platform users" icon={Users} />
+                <ActionLink href="/platform/billing" label="Billing center" icon={CreditCard} />
+                <ActionLink href="/platform/audit-logs" label="Audit logs" icon={FileClock} />
               </div>
             </Panel>
 
@@ -693,21 +695,21 @@ function CompactInfoCard({
 function ActionLink({
   href,
   label,
-  icon,
+  icon: Icon,
 }: {
   href: string;
   label: string;
-  icon: string;
+  icon: ComponentType<{ className?: string }>;
 }) {
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-[24px] border border-stone-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8f7f4_100%)] px-3.5 py-3.5 shadow-[0_6px_16px_rgba(28,25,23,0.03)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_24px_rgba(28,25,23,0.07)]"
+      className="group flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3.5 py-3.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] bg-stone-100 text-sm text-stone-800 transition-all duration-300 group-hover:scale-105 group-hover:bg-stone-900 group-hover:text-white">
-        {icon}
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600 transition-colors group-hover:bg-white group-hover:text-primary">
+        <Icon className="h-4 w-4" />
       </div>
-      <p className="truncate text-sm font-semibold text-stone-800 transition-colors duration-300 group-hover:text-stone-950">
+      <p className="truncate text-sm font-semibold text-slate-800 transition-colors group-hover:text-slate-950">
         {label}
       </p>
     </Link>

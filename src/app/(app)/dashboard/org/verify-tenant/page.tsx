@@ -24,6 +24,7 @@ type TenantVerificationResult = {
   nationalId: string | null;
   kraPin: string | null;
   status: string;
+  identityId: string | null;
   blacklistReason: string | null;
   blacklistedAt: Date | null;
   createdAt: Date;
@@ -65,6 +66,38 @@ type TenantVerificationResult = {
     requestedAt: Date;
     reviewedAt: Date | null;
   }>;
+  identity: {
+    id: string;
+    historyRecords: Array<{
+      id: string;
+      orgId: string;
+      status: string;
+      propertyName: string | null;
+      buildingName: string | null;
+      unitHouseNo: string | null;
+      leaseStartDate: Date | null;
+      leaseEndDate: Date | null;
+      moveOutDate: Date | null;
+      monthlyRent: unknown;
+      paymentCount: number;
+      totalPaid: unknown;
+      notes: string | null;
+      createdAt: Date;
+      org: {
+        name: string;
+      };
+    }>;
+    tenants: Array<{
+      id: string;
+      orgId: string;
+      fullName: string;
+      status: string;
+      archivedAt: Date | null;
+      org: {
+        name: string;
+      };
+    }>;
+  } | null;
 };
 
 function normalizeSearch(rawSearch?: string) {
@@ -255,6 +288,7 @@ export default async function VerifyTenantPage({ searchParams }: PageProps) {
         nationalId: true,
         kraPin: true,
         status: true,
+        identityId: true,
         blacklistReason: true,
         blacklistedAt: true,
         createdAt: true,
@@ -336,6 +370,54 @@ export default async function VerifyTenantPage({ searchParams }: PageProps) {
             createdTenantId: true,
             requestedAt: true,
             reviewedAt: true,
+          },
+        },
+        identity: {
+          select: {
+            id: true,
+            historyRecords: {
+              orderBy: [{ moveOutDate: "desc" }, { createdAt: "desc" }],
+              take: 10,
+              select: {
+                id: true,
+                orgId: true,
+                status: true,
+                propertyName: true,
+                buildingName: true,
+                unitHouseNo: true,
+                leaseStartDate: true,
+                leaseEndDate: true,
+                moveOutDate: true,
+                monthlyRent: true,
+                paymentCount: true,
+                totalPaid: true,
+                notes: true,
+                createdAt: true,
+                org: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+            tenants: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              take: 10,
+              select: {
+                id: true,
+                orgId: true,
+                fullName: true,
+                status: true,
+                archivedAt: true,
+                org: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -552,6 +634,11 @@ export default async function VerifyTenantPage({ searchParams }: PageProps) {
               const totalPaid = getTotalPaid(tenant);
               const movedOut = tenantHasMovedOut(tenant);
               const transferRequest = tenant.transferRequests[0] ?? null;
+              const linkedOrgRecords =
+                tenant.identity?.tenants.filter(
+                  (record) => record.id !== tenant.id,
+                ) ?? [];
+              const identityHistory = tenant.identity?.historyRecords ?? [];
 
               return (
                 <section
@@ -748,8 +835,116 @@ export default async function VerifyTenantPage({ searchParams }: PageProps) {
                           </div>
                         )}
                       </div>
+
+                      <div className="rounded-2xl bg-[#f7f7f8] p-4">
+                        <p className="text-xs font-medium uppercase text-neutral-400">
+                          Previous organisations
+                        </p>
+                        {linkedOrgRecords.length === 0 ? (
+                          <p className="mt-2 text-sm text-neutral-600">
+                            No linked organisation records yet.
+                          </p>
+                        ) : (
+                          <div className="mt-2 space-y-2">
+                            {linkedOrgRecords.map((record) => (
+                              <div
+                                key={record.id}
+                                className="flex items-center justify-between gap-3 text-sm"
+                              >
+                                <span className="min-w-0 truncate text-neutral-700">
+                                  {record.org.name}
+                                </span>
+                                <span className="shrink-0 font-medium text-neutral-950">
+                                  {formatStatus(record.status)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
+
+                  {identityHistory.length > 0 ? (
+                    <div className="border-t border-black/5 p-4">
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <h4 className="text-sm font-semibold text-neutral-950">
+                          Retained tenancy records
+                        </h4>
+                        <span className="text-xs text-neutral-500">
+                          {identityHistory.length} shown
+                        </span>
+                      </div>
+
+                      <div className="grid gap-2 md:grid-cols-2">
+                        {identityHistory.map((record) => (
+                          <div
+                            key={record.id}
+                            className="rounded-2xl border border-black/5 bg-[#fafafa] p-3"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-medium text-neutral-950">
+                                  {record.org.name}
+                                </p>
+                                <p className="mt-1 text-xs text-neutral-500">
+                                  {[
+                                    record.propertyName,
+                                    record.buildingName,
+                                    record.unitHouseNo
+                                      ? `Unit ${record.unitHouseNo}`
+                                      : null,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" / ") || "Unit not recorded"}
+                                </p>
+                              </div>
+                              <span className="shrink-0 rounded-full border border-neutral-200 bg-white px-2 py-1 text-[11px] font-medium text-neutral-700">
+                                {formatStatus(record.status)}
+                              </span>
+                            </div>
+
+                            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                              <div>
+                                <p className="text-neutral-400">Lease</p>
+                                <p className="mt-0.5 font-medium text-neutral-800">
+                                  {formatDate(record.leaseStartDate)} to{" "}
+                                  {formatDate(record.leaseEndDate)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-neutral-400">Move-out</p>
+                                <p className="mt-0.5 font-medium text-neutral-800">
+                                  {formatDate(record.moveOutDate)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-neutral-400">Rent</p>
+                                <p className="mt-0.5 font-medium text-neutral-800">
+                                  {record.monthlyRent
+                                    ? formatCurrency(record.monthlyRent)
+                                    : "—"}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-neutral-400">Paid</p>
+                                <p className="mt-0.5 font-medium text-neutral-800">
+                                  {formatCurrency(record.totalPaid)} ·{" "}
+                                  {record.paymentCount} records
+                                </p>
+                              </div>
+                            </div>
+
+                            {record.notes ? (
+                              <p className="mt-3 line-clamp-2 text-xs leading-5 text-neutral-600">
+                                {record.notes}
+                              </p>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                 </section>
               );
             })}

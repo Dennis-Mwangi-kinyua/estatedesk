@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { notifyRecipients } from "@/lib/notifications/notify";
+import { allocateRentPayment, getCurrentPeriod } from "@/lib/ledger";
 
 type StartPaymentInput = {
   source: string;
@@ -12,6 +13,8 @@ type StartPaymentInput = {
   method: string;
   phoneNumber?: string;
   accountName?: string;
+  amount?: number;
+  months?: number;
 };
 
 function mapPaymentMethod(method: string) {
@@ -23,6 +26,7 @@ function mapPaymentMethod(method: string) {
 function getReferencePrefix(source: string) {
   if (source === "water_bill") return "WB";
   if (source === "rent_charge") return "RC";
+  if (source === "advance_rent") return "AR";
   return "PMT";
 }
 
@@ -97,6 +101,7 @@ export async function startTenantPayment(input: StartPaymentInput) {
           balance: true,
           lease: {
             select: {
+              id: true,
               unit: {
                 select: {
                   houseNo: true,
@@ -141,22 +146,20 @@ export async function startTenantPayment(input: StartPaymentInput) {
         select: { id: true },
       });
 
+      await allocateRentPayment({
+        db: tx,
+        orgId: session.activeOrgId!,
+        paymentId: payment.id,
+        leaseId: charge.lease.id,
+        amount,
+        startPeriod: charge.period,
+        months: 1,
+      });
+
       await tx.receipt.create({
         data: {
           paymentId: payment.id,
           receiptNo: formatReceiptNo(payment.id),
-        },
-      });
-
-      const nextPaid = Number(charge.amountPaid ?? 0) + amount;
-      const nextBalance = Math.max(Number(charge.amountDue ?? 0) - nextPaid, 0);
-
-      await tx.rentCharge.update({
-        where: { id: charge.id },
-        data: {
-          amountPaid: nextPaid,
-          balance: nextBalance,
-          status: nextBalance <= 0 ? "PAID" : "PARTIAL",
         },
       });
 
@@ -177,6 +180,99 @@ export async function startTenantPayment(input: StartPaymentInput) {
         type: "PAYMENT_VERIFIED",
         title: "Tenant payment verified",
         message: `${tenant.fullName} paid ${charge.period} for ${charge.lease.unit.property.name} / Unit ${charge.lease.unit.houseNo}.`,
+      });
+
+      return;
+    }
+
+    if (source === "advance_rent") {
+      const months = Math.min(Math.max(Number(input.months ?? 1), 1), 36);
+      const amount = Number(input.amount ?? 0);
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        throw new Error("Advance rent amount must be greater than zero.");
+      }
+
+      const lease = await tx.lease.findFirst({
+        where: {
+          id,
+          orgId: session.activeOrgId!,
+          tenantId: tenant.id,
+          status: "ACTIVE",
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          unit: {
+            select: {
+              houseNo: true,
+              property: {
+                select: { name: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (!lease) {
+        throw new Error("Active lease not found.");
+      }
+
+      const payment = await tx.payment.create({
+        data: {
+          orgId: session.activeOrgId!,
+          payerTenantId: tenant.id,
+          payerUserId: session.userId,
+          payerType: "TENANT",
+          payerName: tenant.fullName,
+          method: paymentMethod,
+          amount,
+          targetType: "RENT",
+          gatewayStatus: "SUCCESS",
+          verificationStatus: "VERIFIED",
+          phoneUsed: phoneNumber || null,
+          reference: `${getReferencePrefix(source)}-${getCurrentPeriod()}-${Date.now()}`,
+          externalReference: accountName || null,
+          paidAt,
+          notes: `Advance rent payment for up to ${months} month${months === 1 ? "" : "s"}.`,
+        },
+        select: { id: true },
+      });
+
+      const allocation = await allocateRentPayment({
+        db: tx,
+        orgId: session.activeOrgId!,
+        paymentId: payment.id,
+        leaseId: lease.id,
+        amount,
+        startPeriod: getCurrentPeriod(),
+        months,
+      });
+
+      await tx.receipt.create({
+        data: {
+          paymentId: payment.id,
+          receiptNo: formatReceiptNo(payment.id),
+        },
+      });
+
+      await notifyRecipients({
+        db: tx,
+        orgId: session.activeOrgId!,
+        recipients: [{ tenantId: tenant.id, userId: session.userId }],
+        type: "PAYMENT_RECEIVED",
+        title: "Advance rent received",
+        message: `Your advance rent payment covering ${allocation.coveredPeriods.join(", ")} has been received and verified. Receipt ${formatReceiptNo(payment.id)} is available in EstateDesk.`,
+      });
+
+      await notifyRecipients({
+        db: tx,
+        orgId: session.activeOrgId!,
+        recipients: [{ tenantId: tenant.id }],
+        channels: ["IN_APP"],
+        type: "PAYMENT_VERIFIED",
+        title: "Advance rent verified",
+        message: `${tenant.fullName} paid advance rent for ${lease.unit.property.name} / Unit ${lease.unit.houseNo}.`,
       });
 
       return;

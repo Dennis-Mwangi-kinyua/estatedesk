@@ -28,7 +28,7 @@ const InputShell = memo(function InputShell({
   children: ReactNode;
 }) {
   return (
-    <div className="group flex min-h-[46px] items-center gap-3 rounded-[17px] border border-slate-200/90 bg-[#F8FAFC]/95 px-3.5 transition duration-200 focus-within:border-[#007AFF] focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(0,122,255,0.10)] sm:min-h-[54px] sm:rounded-[18px] sm:px-4">
+    <div className="group flex min-h-11 items-center gap-3 rounded-lg border border-slate-300 bg-white px-3 transition duration-150 focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(37,99,235,0.12)] sm:min-h-12 sm:px-3.5">
       {children}
     </div>
   );
@@ -129,13 +129,13 @@ export default function LoginForm() {
       `}</style>
 
       {isPending ? (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/35 px-6 backdrop-blur-xl">
-          <div className="w-full max-w-[280px] rounded-[32px] border border-white/85 bg-white/88 px-6 py-7 text-center shadow-[0_30px_90px_rgba(15,23,42,0.22)] backdrop-blur-2xl">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#007AFF] shadow-[0_18px_35px_rgba(0,122,255,0.30)]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/20 px-6 backdrop-blur-sm">
+          <div className="w-full max-w-[280px] rounded-xl border border-slate-200 bg-white px-6 py-7 text-center shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-primary shadow-[0_14px_30px_rgba(37,99,235,0.24)]">
               <div className="login-loading-ring h-8 w-8 rounded-full border-[3px] border-white/30 border-t-white" />
             </div>
 
-            <h3 className="mt-5 text-lg font-semibold tracking-[-0.03em] text-slate-950">
+            <h3 className="mt-5 text-lg font-semibold tracking-tight text-slate-950">
               Verifying details
             </h3>
 
@@ -144,29 +144,23 @@ export default function LoginForm() {
             </p>
 
             <div className="mt-5 flex items-center justify-center gap-2">
-              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-[#007AFF]" />
-              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-[#007AFF] [animation-delay:0.16s]" />
-              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-[#007AFF] [animation-delay:0.32s]" />
+              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-primary" />
+              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-primary [animation-delay:0.16s]" />
+              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-primary [animation-delay:0.32s]" />
             </div>
           </div>
         </div>
       ) : null}
 
-      <div className="login-form-compact px-4 py-3 sm:px-6 sm:py-5">
-        <form
-          action={formAction}
-          className="login-form-stack flex flex-col gap-3 sm:gap-4"
-        >
-          <div className="login-field-stack flex flex-col gap-2">
-            <label
-              htmlFor="email"
-              className="login-form-label text-sm font-medium text-slate-800"
-            >
+      <div className="px-5 py-6 sm:px-7">
+        <form action={formAction} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="email" className="text-sm font-medium text-slate-800">
               Email or username
             </label>
 
             <InputShell>
-              <Mail className="h-4 w-4 shrink-0 text-slate-400 transition group-focus-within:text-[#007AFF]" />
+              <Mail className="h-4 w-4 shrink-0 text-slate-400 transition group-focus-within:text-primary" />
 
               <input
                 id="email"
@@ -187,25 +181,25 @@ export default function LoginForm() {
             ) : null}
           </div>
 
-          <div className="login-field-stack flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3">
               <label
                 htmlFor="password"
-                className="login-form-label text-sm font-medium text-slate-800"
+                className="text-sm font-medium text-slate-800"
               >
                 Password
               </label>
 
               <Link
                 href="/forgot-password"
-                className="text-xs font-semibold text-[#007AFF] transition hover:text-[#0057D9] sm:text-sm"
+                className="text-xs font-semibold text-primary transition hover:text-primary/80 sm:text-sm"
               >
                 Forgot password?
               </Link>
             </div>
 
             <InputShell>
-              <LockKeyhole className="h-4 w-4 shrink-0 text-slate-400 transition group-focus-within:text-[#007AFF]" />
+              <LockKeyhole className="h-4 w-4 shrink-0 text-slate-400 transition group-focus-within:text-primary" />
 
               <input
                 id="password"
@@ -222,7 +216,7 @@ export default function LoginForm() {
                 type="button"
                 onClick={togglePassword}
                 disabled={isPending}
-                className="shrink-0 rounded-full p-2 text-slate-400 transition active:scale-95 hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="shrink-0 rounded-md p-2 text-slate-400 transition active:scale-95 hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -255,9 +249,10 @@ export default function LoginForm() {
                 disabled={isPending}
                 className="peer sr-only"
               />
+
               <span
-                className={`flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition peer-focus-visible:ring-4 peer-focus-visible:ring-[#007AFF]/20 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 ${
-                  rememberMe ? "bg-[#007AFF]" : "bg-slate-200"
+                className={`flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition peer-focus-visible:ring-4 peer-focus-visible:ring-primary/20 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 ${
+                  rememberMe ? "bg-primary" : "bg-slate-200"
                 }`}
               >
                 <span
@@ -266,12 +261,13 @@ export default function LoginForm() {
                   }`}
                 />
               </span>
+
               <span>Remember me</span>
             </label>
           </div>
 
           {globalError ? (
-            <div className="rounded-[17px] border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-medium leading-5 text-red-700 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-medium leading-5 text-red-700 sm:px-4 sm:py-3 sm:text-sm">
               {globalError}
             </div>
           ) : null}
@@ -279,27 +275,27 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-[17px] bg-[#007AFF] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_35px_rgba(0,122,255,0.28)] transition duration-200 active:scale-[0.99] hover:bg-[#0057D9] disabled:cursor-not-allowed disabled:opacity-70 sm:min-h-[54px] sm:rounded-[18px] sm:py-4"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[0_12px_24px_rgba(37,99,235,0.22)] transition duration-150 active:scale-[0.99] hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70 sm:min-h-12"
           >
             <span>{isPending ? "Verifying..." : "Log in"}</span>
             {!isPending ? <ArrowRight className="h-4 w-4" /> : null}
           </button>
         </form>
 
-        <div className="login-form-meta mt-4 border-t border-slate-100/90 pt-4 sm:mt-5">
+        <div className="mt-5 border-t border-slate-200 pt-5">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-slate-600">
               Need an account?
               <Link
                 href="/register"
-                className="ml-1.5 font-semibold text-[#007AFF] transition hover:text-[#0057D9]"
+                className="ml-1.5 font-semibold text-primary transition hover:text-primary/80"
               >
                 Create one
               </Link>
             </p>
 
             <div className="hidden items-center gap-1.5 text-xs text-slate-500 sm:inline-flex">
-              <ShieldCheck className="h-4 w-4 text-[#007AFF]" />
+              <ShieldCheck className="h-4 w-4 text-primary" />
               Protected
             </div>
           </div>

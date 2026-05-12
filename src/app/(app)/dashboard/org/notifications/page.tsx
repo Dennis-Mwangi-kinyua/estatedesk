@@ -20,6 +20,7 @@ import {
   markAllOrgNotificationsReadAction,
   markNotificationReadAction,
   rejectMeterReading,
+  sendPaymentRemindersAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -772,6 +773,15 @@ export default async function OrganizationNotificationsPage({
                 <ArrowLeft className="h-4 w-4" />
                 Back to Dashboard
               </Link>
+              <form action={sendPaymentRemindersAction}>
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
+                >
+                  <Send className="h-4 w-4" />
+                  Send reminders
+                </button>
+              </form>
             </div>
           </div>
         </div>

@@ -157,6 +157,7 @@ model Organization {
   platformMessages       PlatformMessage[]
   settings               OrganizationSettings?
   payments               Payment[]
+  paymentAllocations     PaymentAllocation[]
   properties             Property[]
   rentCharges            RentCharge[]
   rentalReturns          RentalIncomeReturn[]
@@ -165,6 +166,7 @@ model Organization {
   taxpayerProfiles       TaxpayerProfile[]
   tenants                Tenant[]
   tenantActionLogs       TenantActionLog[]
+  tenantHistoryRecords   TenantHistoryRecord[]
   tenantTransfersIn      TenantTransferRequest[] @relation("TenantTransferTargetOrg")
   tenantTransfersOut     TenantTransferRequest[] @relation("TenantTransferSourceOrg")
   waterBills             WaterBill[]
@@ -575,10 +577,13 @@ model Tenant {
   notifications    Notification[]          @relation("NotificationTenant")
   payments         Payment[]               @relation("PaymentPayerTenant")
   taxCharges       TaxCharge[]
+  identityId       String?
+  identity         TenantIdentity?         @relation(fields: [identityId], references: [id])
   org              Organization            @relation(fields: [orgId], references: [id], onDelete: Cascade)
   profileImage     Asset?                  @relation("TenantProfileImage", fields: [profileImageId], references: [id])
   user             User?                   @relation(fields: [userId], references: [id])
   actionLogs       TenantActionLog[]
+  historyRecords   TenantHistoryRecord[]
   transferCopies   TenantTransferRequest[] @relation("TenantTransferCreatedTenant")
   transferRequests TenantTransferRequest[] @relation("TenantTransferSourceTenant")
   waterBills       WaterBill[]
@@ -592,12 +597,71 @@ model Tenant {
   @@index([archivedAt])
   @@index([blacklistedAt])
   @@index([deletedAt])
+  @@index([identityId])
   @@index([orgId, deletedAt, status])
   @@index([orgId, createdAt])
   @@index([orgId, updatedAt])
   @@index([orgId, status, fullName])
   @@index([orgId, phone])
   @@index([orgId, email])
+}
+
+/// Cross-organization identity used to connect tenant profiles that represent the same person/company.
+model TenantIdentity {
+  id             String                @id @default(cuid())
+  displayName    String
+  primaryPhone   String?
+  primaryEmail   String?
+  nationalId     String?
+  kraPin         String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  historyRecords TenantHistoryRecord[]
+  tenants        Tenant[]
+
+  @@index([displayName])
+  @@index([primaryPhone])
+  @@index([primaryEmail])
+  @@index([nationalId])
+  @@index([kraPin])
+  @@index([createdAt])
+  @@index([updatedAt])
+}
+
+/// Durable tenancy history retained after move-out and available during future tenant verification/transfer.
+model TenantHistoryRecord {
+  id              String              @id @default(cuid())
+  orgId           String
+  tenantId        String
+  identityId      String?
+  leaseId         String?
+  moveOutNoticeId String?
+  status          TenantHistoryStatus @default(VACATED)
+  propertyName    String?
+  buildingName    String?
+  unitHouseNo     String?
+  leaseStartDate  DateTime?
+  leaseEndDate    DateTime?
+  moveOutDate     DateTime?
+  monthlyRent     Decimal?            @db.Decimal(12, 2)
+  deposit         Decimal?            @db.Decimal(12, 2)
+  paymentCount    Int                 @default(0)
+  totalPaid       Decimal             @default(0) @db.Decimal(12, 2)
+  notes           String?
+  snapshot        Json?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  identity        TenantIdentity?     @relation(fields: [identityId], references: [id])
+  org             Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenant          Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([identityId, createdAt])
+  @@index([leaseId])
+  @@index([moveOutNoticeId])
+  @@index([status, createdAt])
+  @@index([moveOutDate])
 }
 
 /// Admin-to-admin request to transfer a moved-out tenant record between organisations.
@@ -799,6 +863,7 @@ model RentCharge {
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
   payments          Payment[]                @relation("PaymentToRentCharge")
+  paymentAllocations PaymentAllocation[]
   lease             Lease                    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
   org               Organization             @relation(fields: [orgId], references: [id], onDelete: Cascade)
   rentalReturnItems RentalIncomeReturnItem[]
@@ -1060,6 +1125,8 @@ model Payment {
   remittedAt         DateTime?
   kraReference       String?
   kraReceiptNo       String?
+  unappliedAmount    Decimal             @default(0) @db.Decimal(12, 2)
+  coveredPeriods     String[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   payerName          String?
@@ -1073,6 +1140,7 @@ model Payment {
   rentalReturn       RentalIncomeReturn? @relation("PaymentToRentalReturn", fields: [rentalReturnId], references: [id])
   taxCharge          TaxCharge?          @relation("PaymentToTaxCharge", fields: [taxChargeId], references: [id])
   waterBill          WaterBill?          @relation("PaymentToWaterBill", fields: [waterBillId], references: [id])
+  allocations        PaymentAllocation[]
   receipt            Receipt?
 
   @@index([orgId, createdAt])
@@ -1092,6 +1160,26 @@ model Payment {
   @@index([orgId, paidAt])
   @@index([orgId, targetType, createdAt])
   @@index([orgId, method, createdAt])
+  @@index([orgId, unappliedAmount])
+}
+
+/// Allocation of a single payment across one or many rent charge periods.
+model PaymentAllocation {
+  id           String     @id @default(cuid())
+  orgId        String
+  paymentId    String
+  rentChargeId String
+  amount       Decimal    @db.Decimal(12, 2)
+  period       String
+  createdAt    DateTime   @default(now())
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  payment      Payment    @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  rentCharge   RentCharge @relation(fields: [rentChargeId], references: [id], onDelete: Cascade)
+
+  @@unique([paymentId, rentChargeId])
+  @@index([orgId, period])
+  @@index([paymentId])
+  @@index([rentChargeId])
 }
 
 /// Receipt generated from a verified payment.
@@ -1491,6 +1579,13 @@ enum TenantTransferStatus {
   APPROVED
   REJECTED
   CANCELLED
+}
+
+enum TenantHistoryStatus {
+  VACATED
+  TRANSFERRED
+  ACTIVE_RECORD
+  ARCHIVED
 }
 
 enum TenantActionType {

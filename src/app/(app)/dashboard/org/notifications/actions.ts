@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { queueDuePaymentNotifications } from "@/lib/ledger";
 
 async function requireOrgReviewer() {
   const session = await requireUserSession();
@@ -318,6 +319,16 @@ export async function markAllOrgNotificationsReadAction() {
       status: "SENT",
       sentAt: new Date(),
     },
+  });
+
+  revalidatePath("/dashboard/org/notifications");
+}
+
+export async function sendPaymentRemindersAction() {
+  const { membership } = await requireOrgReviewer();
+
+  await queueDuePaymentNotifications(prisma, {
+    orgId: membership.orgId,
   });
 
   revalidatePath("/dashboard/org/notifications");
