@@ -1,13 +1,16 @@
 import "dotenv/config";
+import dns from "node:dns";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+
+dns.setDefaultResultOrder("ipv4first");
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
   prismaSchemaVersion?: string;
 };
 
-const PRISMA_SCHEMA_VERSION = "pg-adapter-onboarding-requests";
+const PRISMA_SCHEMA_VERSION = "presence-and-pg-timeouts";
 const fallbackDatasourceUrl = "postgresql://user:password@localhost:5432/estatedesk";
 const DATABASE_URL =
   process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? fallbackDatasourceUrl;
@@ -15,7 +18,12 @@ const DATABASE_URL =
 function createPrismaClient() {
   const adapter = new PrismaPg({
     connectionString: DATABASE_URL,
-    connectionTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 3_000,
+    idleTimeoutMillis: 30_000,
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10_000,
+    max: 10,
+    query_timeout: 8_000,
   });
 
   return new PrismaClient({ adapter });

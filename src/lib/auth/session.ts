@@ -10,6 +10,8 @@ import type {
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getSessionHeartbeatBefore } from "@/lib/auth/presence";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 export type { OrgRole, PlatformRole, ScopeType };
 
@@ -32,10 +34,12 @@ export type AppSession = {
 type SetUserSessionInput = {
   userId: string;
   activeMembershipId?: string | null;
+  remember?: boolean;
 };
 
 const SESSION_COOKIE_NAME = "estatedesk_session";
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 12;
+const REMEMBERED_SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 const ENFORCE_USER_AGENT_MATCH = false;
 const ENFORCE_IP_MATCH = false;
@@ -48,8 +52,12 @@ function hashSessionToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-function getSessionExpiryDate(): Date {
-  return new Date(Date.now() + SESSION_MAX_AGE_SECONDS * 1000);
+function getSessionMaxAgeSeconds(remember?: boolean): number {
+  return remember ? REMEMBERED_SESSION_MAX_AGE_SECONDS : SESSION_MAX_AGE_SECONDS;
+}
+
+function getSessionExpiryDate(remember?: boolean): Date {
+  return new Date(Date.now() + getSessionMaxAgeSeconds(remember) * 1000);
 }
 
 function getIpFromHeaderValue(forwardedFor: string | null): string | null {
@@ -86,11 +94,12 @@ function getCookieOptions(
 function setSessionCookie(
   cookieStore: Awaited<ReturnType<typeof cookies>>,
   token: string,
+  remember?: boolean,
 ) {
   cookieStore.set(
     SESSION_COOKIE_NAME,
     token,
-    getCookieOptions({ maxAge: SESSION_MAX_AGE_SECONDS }),
+    getCookieOptions({ maxAge: getSessionMaxAgeSeconds(remember) }),
   );
 }
 
@@ -106,6 +115,10 @@ async function resolveMembershipForSession(
   userId: string,
   activeMembershipId?: string | null,
 ) {
+  if (activeMembershipId === null) {
+    return null;
+  }
+
   if (activeMembershipId) {
     const membership = await prisma.membership.findFirst({
       where: {
@@ -129,14 +142,15 @@ async function resolveMembershipForSession(
 
 export async function setUserSession({
   userId,
-  activeMembershipId = null,
+  activeMembershipId,
+  remember = false,
 }: SetUserSessionInput): Promise<void> {
   const cookieStore = await cookies();
   const { ipAddress, userAgent } = await getRequestMeta();
 
   const token = generateSessionToken();
   const tokenHash = hashSessionToken(token);
-  const expiresAt = getSessionExpiryDate();
+  const expiresAt = getSessionExpiryDate(remember);
 
   const membership = await resolveMembershipForSession(userId, activeMembershipId);
 
@@ -157,7 +171,7 @@ export async function setUserSession({
     });
   });
 
-  setSessionCookie(cookieStore, token);
+  setSessionCookie(cookieStore, token, remember);
 }
 
 export async function getUserSession(): Promise<AppSession | null> {
@@ -169,13 +183,17 @@ export async function getUserSession(): Promise<AppSession | null> {
   const tokenHash = hashSessionToken(token);
 
   try {
-    const dbSession = await prisma.userSession.findUnique({
-      where: { tokenHash },
-      include: {
-        user: true,
-        activeMembership: true,
-      },
-    });
+    const dbSession = await retryTransientDatabaseOperation(
+      () =>
+        prisma.userSession.findUnique({
+          where: { tokenHash },
+          include: {
+            user: true,
+            activeMembership: true,
+          },
+        }),
+      { label: "getUserSession-find-session" },
+    );
 
     if (!dbSession) return null;
     if (dbSession.expiresAt <= new Date()) return null;
@@ -184,6 +202,26 @@ export async function getUserSession(): Promise<AppSession | null> {
 
     if (user.status !== "ACTIVE" || user.deletedAt !== null) {
       return null;
+    }
+
+    const now = new Date();
+
+    if (dbSession.lastSeenAt < getSessionHeartbeatBefore(now)) {
+      await retryTransientDatabaseOperation(
+        () =>
+          prisma.userSession.updateMany({
+            where: {
+              tokenHash,
+              lastSeenAt: {
+                lt: getSessionHeartbeatBefore(now),
+              },
+            },
+            data: {
+              lastSeenAt: now,
+            },
+          }),
+        { label: "getUserSession-heartbeat" },
+      );
     }
 
     const { ipAddress, userAgent } = await getRequestMeta();
@@ -288,16 +326,25 @@ export async function switchActiveMembership(
     throw new Error("Membership not found for this user.");
   }
 
+  const now = new Date();
+  const remainingSeconds = Math.max(
+    1,
+    Math.floor((dbSession.expiresAt.getTime() - now.getTime()) / 1000),
+  );
+
   await prisma.userSession.update({
     where: { tokenHash },
     data: {
       activeMembershipId: membership.id,
-      lastSeenAt: new Date(),
-      expiresAt: getSessionExpiryDate(),
+      lastSeenAt: now,
     },
   });
 
-  setSessionCookie(cookieStore, token);
+  cookieStore.set(
+    SESSION_COOKIE_NAME,
+    token,
+    getCookieOptions({ maxAge: remainingSeconds }),
+  );
 }
 
 export async function requireUserSession(): Promise<AppSession> {

@@ -124,7 +124,7 @@ export default async function PlatformPaymentsPage({
                 <tr key={row.orgId} className="border-t border-neutral-100">
                   <td className="px-4 py-3">
                     <Link
-                      href={`/platform/organizations/${row.orgId}`}
+                      href={`/platform/organizations/${row.slug}`}
                       className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
                     >
                       {row.name}

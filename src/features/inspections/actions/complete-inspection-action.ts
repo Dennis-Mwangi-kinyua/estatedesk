@@ -14,6 +14,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { notifyRecipients } from "@/lib/notifications/notify";
+import { recordVacatedTenancy } from "@/lib/tenants/identity";
 
 export async function completeInspectionAction(formData: FormData) {
   const session = await requireUserSession();
@@ -127,11 +128,13 @@ export async function completeInspectionAction(formData: FormData) {
           id: true,
           tenant: {
             select: {
+              id: true,
               fullName: true,
             },
           },
           lease: {
             select: {
+              id: true,
               unit: {
                 select: {
                   houseNo: true,
@@ -217,6 +220,14 @@ export async function completeInspectionAction(formData: FormData) {
       data: {
         status: NoticeStatus.INSPECTION_COMPLETED,
       },
+    });
+
+    await recordVacatedTenancy(tx, {
+      tenantId: inspection.notice.tenant.id,
+      leaseId: inspection.notice.lease.id,
+      moveOutNoticeId: inspection.notice.id,
+      actorUserId: session.userId,
+      notes: summary,
     });
 
     await tx.auditLog.create({

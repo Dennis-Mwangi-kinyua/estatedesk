@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
+import { ensureTenantIdentity } from "@/lib/tenants/identity";
 
 const ALLOWED_STATUSES: TenantStatus[] = ["ACTIVE", "INACTIVE", "BLACKLISTED"];
 
@@ -344,6 +345,15 @@ export async function createTenantAction(
           id: true,
           fullName: true,
         },
+      });
+
+      await ensureTenantIdentity(tx, {
+        tenantId: tenant.id,
+        fullName,
+        phone,
+        email,
+        nationalId,
+        kraPin,
       });
 
       if (unitId) {

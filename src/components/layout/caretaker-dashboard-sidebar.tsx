@@ -79,24 +79,24 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
 
   return (
     <aside className="hidden xl:block xl:w-72 xl:shrink-0 2xl:w-80">
-      <div className="sticky top-0 h-dvh p-3 xl:p-4">
-        <div className="ios-panel flex h-full flex-col rounded-[28px]">
-          <div className="shrink-0 border-b border-neutral-200/80 px-5 py-5">
+      <div className="sticky top-0 h-dvh border-r border-slate-200 bg-white">
+        <div className="flex h-full flex-col">
+          <div className="shrink-0 border-b border-slate-200 px-5 py-5">
             <Link href="/dashboard/caretaker" className="block">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                 EstateDesk
               </p>
 
-              <h2 className="mt-2 text-lg font-semibold tracking-tight text-neutral-900 2xl:text-xl">
+              <h2 className="mt-2 text-lg font-semibold tracking-tight text-slate-950 2xl:text-xl">
                 Caretaker Dashboard
               </h2>
 
-              <p className="mt-1 text-sm text-neutral-500">{fullName}</p>
+              <p className="mt-1 text-sm text-slate-500">{fullName}</p>
             </Link>
           </div>
 
           <div className="flex-1 px-3 py-4">
-            <nav className="space-y-2">
+            <nav className="space-y-1">
               {navItems.map((item) => {
                 const active =
                   pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -108,15 +108,15 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
                     key={item.href}
                     href={item.href}
                     className={clsx(
-                      "group flex items-center gap-3 rounded-[20px] px-3.5 py-3 text-sm font-medium transition-all duration-200 active:scale-[0.99]",
+                      "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150 active:scale-[0.99]",
                       active
-                        ? "bg-neutral-900 text-white shadow-sm"
-                        : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
                     )}
                   >
                     <span
                       className={clsx(
-                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition",
+                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition",
                         active ? "bg-white/10 text-white" : iconToneMap[item.tone]
                       )}
                     >
@@ -130,11 +130,11 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
             </nav>
           </div>
 
-          <div className="shrink-0 border-t border-neutral-200/80 p-3">
+          <div className="shrink-0 border-t border-slate-200 p-3">
             <form action={logoutAction}>
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-[20px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>

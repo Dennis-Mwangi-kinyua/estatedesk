@@ -38,6 +38,7 @@ function formatSource(source: string | null) {
   if (!source) return "Tenant Bill";
   if (source === "water_bill") return "Water Bill";
   if (source === "rent_charge") return "Rent / Charge";
+  if (source === "advance_rent") return "Advance Rent";
   return source.replaceAll("_", " ");
 }
 
@@ -48,9 +49,13 @@ export default function TenantPaymentCheckoutPage() {
   const source = searchParams.get("source");
   const id = searchParams.get("id");
   const method = searchParams.get("method");
+  const amountParam = searchParams.get("amount");
+  const monthsParam = searchParams.get("months");
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [accountName, setAccountName] = useState("");
+  const [amount, setAmount] = useState(amountParam ?? "");
+  const [months, setMonths] = useState(monthsParam ?? "1");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -80,6 +85,21 @@ export default function TenantPaymentCheckoutPage() {
       return;
     }
 
+    if (source === "advance_rent") {
+      const parsedAmount = Number(amount);
+      const parsedMonths = Number.parseInt(months, 10);
+
+      if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+        setError("Enter a valid advance rent amount.");
+        return;
+      }
+
+      if (!Number.isFinite(parsedMonths) || parsedMonths < 1 || parsedMonths > 36) {
+        setError("Advance rent months must be between 1 and 36.");
+        return;
+      }
+    }
+
     startTransition(async () => {
       try {
         await startTenantPayment({
@@ -88,6 +108,8 @@ export default function TenantPaymentCheckoutPage() {
           method,
           phoneNumber: isMobileMoney ? phoneNumber.trim() : undefined,
           accountName: isBank ? accountName.trim() : undefined,
+          amount: source === "advance_rent" ? Number(amount) : undefined,
+          months: source === "advance_rent" ? Number.parseInt(months, 10) : undefined,
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to start payment.");
@@ -133,6 +155,38 @@ export default function TenantPaymentCheckoutPage() {
                   {methodLabel}
                 </p>
               </div>
+
+              {source === "advance_rent" && (
+                <div className="grid gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-medium text-emerald-900">
+                      Amount
+                    </span>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      className="h-12 w-full rounded-lg border border-emerald-200 bg-white px-4 text-sm outline-none transition focus:border-emerald-600"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-medium text-emerald-900">
+                      Months to cover
+                    </span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="36"
+                      step="1"
+                      value={months}
+                      onChange={(e) => setMonths(e.target.value)}
+                      className="h-12 w-full rounded-lg border border-emerald-200 bg-white px-4 text-sm outline-none transition focus:border-emerald-600"
+                    />
+                  </label>
+                </div>
+              )}
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">

@@ -4,6 +4,7 @@ import {
   Briefcase,
   UserCog,
   Users,
+  Wifi,
   FileText,
 } from "lucide-react";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
@@ -30,10 +31,10 @@ export function OrgDashboardMetrics({
       tint: "neutral" as const,
     },
     {
-      title: "Employees",
-      value: data.totalEmployees,
-      subtitle: "Admin, manager, office, and accountant staff",
-      icon: Briefcase,
+      title: "Online Now",
+      value: data.onlineUsers,
+      subtitle: "Active users in this organization",
+      icon: Wifi,
       tint: "green" as const,
     },
     {
@@ -49,6 +50,13 @@ export function OrgDashboardMetrics({
       subtitle: `${data.totalTenants} total tenant records`,
       icon: Users,
       tint: "green" as const,
+    },
+    {
+      title: "Employees",
+      value: data.totalEmployees,
+      subtitle: "Admin, manager, office, and accountant staff",
+      icon: Briefcase,
+      tint: "neutral" as const,
     },
     {
       title: "Active Leases",

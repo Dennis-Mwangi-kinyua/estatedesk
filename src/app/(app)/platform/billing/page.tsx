@@ -164,7 +164,7 @@ export default async function PlatformBillingPage({
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <Link
-                      href={`/platform/organizations/${subscription.org.id}`}
+                      href={`/platform/organizations/${subscription.org.slug}`}
                       className="text-base font-semibold text-neutral-950 underline-offset-4 hover:underline"
                     >
                       {subscription.org.name}

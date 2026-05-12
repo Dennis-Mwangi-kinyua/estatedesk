@@ -3,7 +3,7 @@ import "server-only";
 import {
   NotificationChannel,
   NotificationType,
-  type Prisma,
+  Prisma,
   type PrismaClient,
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -56,6 +56,18 @@ export function getCurrentPeriod(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
+export function addMonthsToPeriod(period: string, offset: number) {
+  const [yearValue, monthValue] = period.split("-").map(Number);
+  const start = new Date(
+    Number.isFinite(yearValue) ? yearValue : new Date().getFullYear(),
+    Number.isFinite(monthValue) ? monthValue - 1 : new Date().getMonth(),
+    1,
+  );
+  start.setMonth(start.getMonth() + offset);
+
+  return getCurrentPeriod(start);
+}
+
 export function daysPastDue(dueDate: Date, now = new Date()) {
   const startOfToday = new Date(now);
   startOfToday.setHours(0, 0, 0, 0);
@@ -64,6 +76,148 @@ export function daysPastDue(dueDate: Date, now = new Date()) {
   due.setHours(0, 0, 0, 0);
 
   return Math.floor((startOfToday.getTime() - due.getTime()) / DAY_MS);
+}
+
+function dueDateForPeriod(period: string, dueDay: number) {
+  const [yearValue, monthValue] = period.split("-").map(Number);
+  const year = Number.isFinite(yearValue) ? yearValue : new Date().getFullYear();
+  const month = Number.isFinite(monthValue) ? monthValue - 1 : new Date().getMonth();
+  const lastDay = new Date(year, month + 1, 0).getDate();
+
+  return new Date(year, month, Math.min(Math.max(dueDay, 1), lastDay));
+}
+
+export async function allocateRentPayment({
+  db,
+  orgId,
+  paymentId,
+  leaseId,
+  amount,
+  startPeriod = getCurrentPeriod(),
+  months = 1,
+}: {
+  db: LedgerDb;
+  orgId: string;
+  paymentId: string;
+  leaseId: string;
+  amount: Prisma.Decimal | number | string;
+  startPeriod?: string;
+  months?: number;
+}) {
+  const paymentAmount = new Prisma.Decimal(amount);
+  if (paymentAmount.lte(0)) {
+    throw new Error("Payment amount must be greater than zero.");
+  }
+
+  const lease = await db.lease.findFirst({
+    where: {
+      id: leaseId,
+      orgId,
+      status: "ACTIVE",
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      dueDay: true,
+      monthlyRent: true,
+    },
+  });
+
+  if (!lease) {
+    throw new Error("Active lease not found for rent allocation.");
+  }
+
+  let remaining = paymentAmount;
+  const coveredPeriods: string[] = [];
+  const safeMonths = Math.min(Math.max(months, 1), 36);
+
+  for (let index = 0; index < safeMonths && remaining.gt(0); index += 1) {
+    const period = addMonthsToPeriod(startPeriod, index);
+    const charge = await db.rentCharge.upsert({
+      where: {
+        leaseId_period_chargeType: {
+          leaseId: lease.id,
+          period,
+          chargeType: "RENT",
+        },
+      },
+      update: {},
+      create: {
+        orgId,
+        leaseId: lease.id,
+        period,
+        amountDue: lease.monthlyRent,
+        amountPaid: 0,
+        balance: lease.monthlyRent,
+        dueDate: dueDateForPeriod(period, lease.dueDay),
+        chargeType: "RENT",
+        status: "UNPAID",
+      },
+      select: {
+        id: true,
+        period: true,
+        amountDue: true,
+        amountPaid: true,
+        balance: true,
+      },
+    });
+
+    const balance = new Prisma.Decimal(charge.balance);
+    if (balance.lte(0)) {
+      coveredPeriods.push(period);
+      continue;
+    }
+
+    const allocationAmount = remaining.lt(balance) ? remaining : balance;
+    const nextPaid = new Prisma.Decimal(charge.amountPaid).add(allocationAmount);
+    const nextBalance = balance.sub(allocationAmount);
+
+    await db.paymentAllocation.upsert({
+      where: {
+        paymentId_rentChargeId: {
+          paymentId,
+          rentChargeId: charge.id,
+        },
+      },
+      update: {
+        amount: {
+          increment: allocationAmount,
+        },
+      },
+      create: {
+        orgId,
+        paymentId,
+        rentChargeId: charge.id,
+        period,
+        amount: allocationAmount,
+      },
+    });
+
+    await db.rentCharge.update({
+      where: { id: charge.id },
+      data: {
+        amountPaid: nextPaid,
+        balance: nextBalance,
+        status: nextBalance.lte(0) ? "PAID" : "PARTIAL",
+      },
+    });
+
+    remaining = remaining.sub(allocationAmount);
+    coveredPeriods.push(period);
+  }
+
+  await db.payment.update({
+    where: { id: paymentId },
+    data: {
+      unappliedAmount: remaining,
+      coveredPeriods,
+    },
+  });
+
+  return {
+    coveredPeriods,
+    unappliedAmount: remaining,
+  };
 }
 
 function isRecognizedPayment(payment: {
@@ -524,12 +678,16 @@ async function recentlyQueuedReminder({
   return Boolean(existing);
 }
 
-export async function queueDuePaymentNotifications(db: LedgerDb = prisma) {
+export async function queueDuePaymentNotifications(
+  db: LedgerDb = prisma,
+  options: { orgId?: string } = {},
+) {
   const now = new Date();
 
   const [rentCharges, waterBills] = await Promise.all([
     db.rentCharge.findMany({
       where: {
+        orgId: options.orgId,
         status: { in: ["UNPAID", "PARTIAL", "OVERDUE"] },
         balance: { gt: 0 },
         dueDate: {
@@ -560,6 +718,7 @@ export async function queueDuePaymentNotifications(db: LedgerDb = prisma) {
     }),
     db.waterBill.findMany({
       where: {
+        orgId: options.orgId,
         status: { in: ["ISSUED", "PAYMENT_PENDING"] },
         dueDate: {
           lte: now,
@@ -612,6 +771,7 @@ export async function queueDuePaymentNotifications(db: LedgerDb = prisma) {
         NotificationChannel.IN_APP,
         NotificationChannel.SMS,
         NotificationChannel.WHATSAPP,
+        NotificationChannel.EMAIL,
       ],
       type,
       title,
@@ -661,6 +821,7 @@ export async function queueDuePaymentNotifications(db: LedgerDb = prisma) {
         NotificationChannel.IN_APP,
         NotificationChannel.SMS,
         NotificationChannel.WHATSAPP,
+        NotificationChannel.EMAIL,
       ],
       type,
       title,

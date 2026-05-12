@@ -8,6 +8,7 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { prisma } from "@/lib/prisma";
 import { setUserSession } from "@/lib/auth/session";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 const loginSchema = z.object({
@@ -32,6 +33,37 @@ export type LoginActionState = {
 const INVALID_CREDENTIALS_MESSAGE = "Invalid email or password.";
 const GENERIC_LOGIN_ERROR_MESSAGE =
   "Unable to sign in right now. Please try again.";
+const LOGIN_RATE_LIMIT_TIMEOUT_MS = 1_200;
+
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  label: string,
+): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
+}
+
+async function retryTransientLoginDbOperation<T>(
+  label: string,
+  operation: () => Promise<T>,
+): Promise<T> {
+  return retryTransientDatabaseOperation(operation, { label });
+}
 
 async function getLoginRateLimitError({
   identifier,
@@ -41,11 +73,15 @@ async function getLoginRateLimitError({
   ipAddress: string;
 }): Promise<LoginActionState | null> {
   try {
-    const limiter = await checkRateLimit({
-      key: `login:${ipAddress}:${identifier}`,
-      limit: 8,
-      windowMs: 60_000,
-    });
+    const limiter = await withTimeout(
+      checkRateLimit({
+        key: `login:${ipAddress}:${identifier}`,
+        limit: 8,
+        windowMs: 60_000,
+      }),
+      LOGIN_RATE_LIMIT_TIMEOUT_MS,
+      "login rate limit check",
+    );
 
     if (!limiter.allowed) {
       return {
@@ -101,7 +137,7 @@ export async function loginAction(
     };
   }
 
-  const { email: identifier, password } = parsed.data;
+  const { email: identifier, password, remember } = parsed.data;
   const headerStore = await headers();
   const ipAddress = getClientIp(headerStore);
   const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -124,21 +160,23 @@ export async function loginAction(
     const user = await timed(
       makeLabel("login-find-user", requestId),
       async () => {
-        return prisma.user.findUnique({
-          where: identifier.includes("@")
-            ? { email: identifier }
-            : { username: identifier },
-          select: {
-            id: true,
-            email: true,
-            fullName: true,
-            platformRole: true,
-            status: true,
-            passwordHash: true,
-            mustChangePassword: true,
-            deletedAt: true,
-          },
-        });
+        return retryTransientLoginDbOperation("login-find-user", () =>
+          prisma.user.findUnique({
+            where: identifier.includes("@")
+              ? { email: identifier }
+              : { username: identifier },
+            select: {
+              id: true,
+              email: true,
+              fullName: true,
+              platformRole: true,
+              status: true,
+              passwordHash: true,
+              mustChangePassword: true,
+              deletedAt: true,
+            },
+          }),
+        );
       },
     );
 
@@ -182,10 +220,13 @@ export async function loginAction(
       user.platformRole === "SUPER_ADMIN"
     ) {
       await timed(makeLabel("login-set-session", requestId), async () => {
-        await setUserSession({
-          userId: user.id,
-          activeMembershipId: null,
-        });
+        await retryTransientLoginDbOperation("login-set-session", () =>
+          setUserSession({
+            userId: user.id,
+            activeMembershipId: null,
+            remember,
+          }),
+        );
       });
 
       void prisma.user
@@ -216,21 +257,23 @@ export async function loginAction(
     const primaryMembership = await timed(
       makeLabel("login-load-membership", requestId),
       async () => {
-        return prisma.membership.findFirst({
-          where: {
-            userId: user.id,
-          },
-          select: {
-            id: true,
-            orgId: true,
-            role: true,
-            scopeType: true,
-            scopeId: true,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        });
+        return retryTransientLoginDbOperation("login-load-membership", () =>
+          prisma.membership.findFirst({
+            where: {
+              userId: user.id,
+            },
+            select: {
+              id: true,
+              orgId: true,
+              role: true,
+              scopeType: true,
+              scopeId: true,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+        );
       },
     );
 
@@ -240,14 +283,16 @@ export async function loginAction(
       tenant = await timed(
         makeLabel("login-load-tenant", requestId),
         async () => {
-          return prisma.tenant.findFirst({
-            where: {
-              userId: user.id,
-            },
-            select: {
-              id: true,
-            },
-          });
+          return retryTransientLoginDbOperation("login-load-tenant", () =>
+            prisma.tenant.findFirst({
+              where: {
+                userId: user.id,
+              },
+              select: {
+                id: true,
+              },
+            }),
+          );
         },
       );
     }
@@ -260,10 +305,13 @@ export async function loginAction(
     }
 
     await timed(makeLabel("login-set-session", requestId), async () => {
-      await setUserSession({
-        userId: user.id,
-        activeMembershipId: primaryMembership?.id ?? null,
-      });
+      await retryTransientLoginDbOperation("login-set-session", () =>
+        setUserSession({
+          userId: user.id,
+          activeMembershipId: primaryMembership?.id ?? null,
+          remember,
+        }),
+      );
     });
 
     void prisma.user

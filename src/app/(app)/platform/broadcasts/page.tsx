@@ -79,7 +79,7 @@ export default async function BroadcastsPage() {
               {notifications.map((item) => (
                 <tr key={item.id} className="border-t border-neutral-100">
                   <td className="px-4 py-3">
-                    <AdminLink href={`/platform/organizations/${item.org.id}`}>{item.org.name}</AdminLink>
+                    <AdminLink href={`/platform/organizations/${item.org.slug}`}>{item.org.name}</AdminLink>
                   </td>
                   <td className="px-4 py-3 text-neutral-600">
                     {item.user?.fullName ?? item.tenant?.fullName ?? "Organization"}
@@ -127,7 +127,7 @@ export default async function BroadcastsPage() {
           {messages.map((message) => (
             <div key={message.id} className="p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <AdminLink href={`/platform/organizations/${message.org.id}`}>{message.org.name}</AdminLink>
+                <AdminLink href={`/platform/organizations/${message.org.slug}`}>{message.org.name}</AdminLink>
                 <Badge tone={toneForStatus(message.status)}>{message.status}</Badge>
                 <span className="text-xs text-neutral-500">{formatDateTime(message.createdAt)}</span>
               </div>

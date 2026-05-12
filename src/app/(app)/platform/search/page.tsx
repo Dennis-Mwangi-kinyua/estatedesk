@@ -142,7 +142,7 @@ export default async function GlobalSearchPage({
           houseNo: true,
           status: true,
           updatedAt: true,
-          property: { select: { name: true, org: { select: { id: true, name: true } } } },
+          property: { select: { name: true, org: { select: { id: true, name: true, slug: true } } } },
         },
       })
     : [];
@@ -186,7 +186,7 @@ export default async function GlobalSearchPage({
             primary: org.name,
             secondary: `/${org.slug}`,
             status: org.status,
-            href: `/platform/organizations/${org.id}`,
+            href: `/platform/organizations/${org.slug}`,
             date: org.updatedAt,
           }))}
         />
@@ -212,7 +212,7 @@ export default async function GlobalSearchPage({
             primary: tenant.fullName,
             secondary: `${tenant.org.name} • ${tenant.phone}`,
             status: tenant.status,
-            href: `/platform/organizations/${tenant.org.id}`,
+            href: `/platform/organizations/${tenant.org.slug}`,
             date: tenant.updatedAt,
           }))}
         />
@@ -225,7 +225,7 @@ export default async function GlobalSearchPage({
             primary: payment.reference ?? payment.externalReference ?? payment.checkoutRequestId ?? payment.id,
             secondary: `${payment.org.name} • ${payment.targetType} • KES ${Number(payment.amount).toLocaleString("en-KE")}`,
             status: payment.gatewayStatus,
-            href: `/platform/organizations/${payment.org.id}`,
+            href: `/platform/organizations/${payment.org.slug}`,
             date: payment.createdAt,
           }))}
         />
@@ -238,7 +238,7 @@ export default async function GlobalSearchPage({
             primary: `Unit ${unit.houseNo}`,
             secondary: `${unit.property.org.name} • ${unit.property.name}`,
             status: unit.status,
-            href: `/platform/organizations/${unit.property.org.id}`,
+            href: `/platform/organizations/${unit.property.org.slug}`,
             date: unit.updatedAt,
           }))}
         />

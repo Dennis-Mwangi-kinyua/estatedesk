@@ -7,6 +7,8 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId, requireOrgAccess } from "@/lib/auth/org";
 import { requireUserSession } from "@/lib/auth/session";
+import { createInvitation } from "@/lib/invitations/create-invitation";
+import { writeAuditLog } from "@/lib/audit/security";
 
 const SETTINGS_PATH = "/dashboard/org/settings";
 
@@ -27,12 +29,6 @@ function readBoolean(formData: FormData, key: string) {
 function addMonths(date: Date, months: number) {
   const next = new Date(date);
   next.setMonth(next.getMonth() + months);
-  return next;
-}
-
-function addDays(date: Date, days: number) {
-  const next = new Date(date);
-  next.setDate(next.getDate() + days);
   return next;
 }
 
@@ -183,16 +179,23 @@ export async function inviteMemberAction(formData: FormData) {
     | "OFFICE"
     | "ACCOUNTANT"
     | "CARETAKER"
-    | "TENANT";
+    | "TENANT"
+    | "LANDLORD";
 
   if (!email) {
     throw new Error("Email is required.");
   }
 
   if (
-    !["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "TENANT"].includes(
-      role,
-    )
+    ![
+      "ADMIN",
+      "MANAGER",
+      "OFFICE",
+      "ACCOUNTANT",
+      "CARETAKER",
+      "TENANT",
+      "LANDLORD",
+    ].includes(role)
   ) {
     throw new Error("Invalid role.");
   }
@@ -215,16 +218,29 @@ export async function inviteMemberAction(formData: FormData) {
     throw new Error("A pending invitation already exists for this email.");
   }
 
-  const token = randomBytes(24).toString("hex");
+  const org = await prisma.organization.findUnique({
+    where: { id: orgId },
+    select: { name: true },
+  });
 
-  await prisma.invitation.create({
-    data: {
-      orgId,
+  const invitation = await createInvitation({
+    orgId,
+    invitedById: session.userId,
+    email,
+    role,
+    orgName: org?.name ?? "EstateDesk workspace",
+  });
+
+  await writeAuditLog({
+    orgId,
+    actorUserId: session.userId,
+    action: "INVITATION_CREATED",
+    entityType: "Invitation",
+    entityId: invitation.invitationId,
+    metadata: {
       email,
       role,
-      token,
-      expiresAt: addDays(new Date(), 7),
-      invitedById: session.userId,
+      inviteUrl: invitation.inviteUrl,
     },
   });
 
@@ -289,4 +305,47 @@ export async function toggleApiKeyStatusAction(formData: FormData) {
   });
 
   revalidatePath(SETTINGS_PATH);
+}
+
+export async function requestDataExportAction(formData: FormData) {
+  const { orgId } = await ensureSettingsWriteAccess();
+  const session = await requireUserSession();
+  const reason = readOptionalString(formData, "reason");
+
+  const existingPendingRequest = await prisma.dataExportRequest.findFirst({
+    where: {
+      orgId,
+      status: "PENDING",
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (existingPendingRequest) {
+    throw new Error("A data export request is already pending review.");
+  }
+
+  const exportRequest = await prisma.dataExportRequest.create({
+    data: {
+      orgId,
+      requestedByUserId: session.userId,
+      reason,
+      status: "PENDING",
+    },
+  });
+
+  await writeAuditLog({
+    orgId,
+    actorUserId: session.userId,
+    action: "DATA_EXPORT_REQUESTED",
+    entityType: "DataExportRequest",
+    entityId: exportRequest.id,
+    metadata: {
+      reasonProvided: Boolean(reason),
+    },
+  });
+
+  revalidatePath(SETTINGS_PATH);
+  revalidatePath("/platform/data-management");
 }

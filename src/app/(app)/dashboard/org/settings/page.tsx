@@ -7,6 +7,8 @@ import {
   Building2,
   CalendarDays,
   CreditCard,
+  Download,
+  FileArchive,
   Globe2,
   KeyRound,
   Mail,
@@ -24,6 +26,7 @@ import { requireCurrentOrgId } from "@/lib/auth/org";
 import {
   createApiKeyAction,
   inviteMemberAction,
+  requestDataExportAction,
   toggleApiKeyStatusAction,
   updateBillingAction,
   updateOrganizationAction,
@@ -45,6 +48,18 @@ type ApiKeyItem = {
   name: string;
   lastUsed: string;
   status: "ACTIVE" | "REVOKED";
+};
+
+type DataExportRequestItem = {
+  id: string;
+  status: string;
+  reason: string;
+  reviewerNotes: string;
+  requestedAt: string;
+  reviewedAt: string;
+  expiresAt: string;
+  requestedBy: string;
+  reviewedBy: string;
 };
 
 type SettingsPageData = {
@@ -75,6 +90,7 @@ type SettingsPageData = {
   };
   members: Member[];
   apiKeys: ApiKeyItem[];
+  dataExportRequests: DataExportRequestItem[];
 };
 
 function formatLabel(value: string) {
@@ -153,6 +169,26 @@ async function getSettingsPageData(orgId: string): Promise<SettingsPageData> {
           createdAt: "desc",
         },
       },
+      dataExportRequests: {
+        orderBy: {
+          requestedAt: "desc",
+        },
+        take: 8,
+        include: {
+          requestedBy: {
+            select: {
+              fullName: true,
+              email: true,
+            },
+          },
+          reviewedBy: {
+            select: {
+              fullName: true,
+              email: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -197,6 +233,23 @@ async function getSettingsPageData(orgId: string): Promise<SettingsPageData> {
       name: key.name,
       lastUsed: formatDateTime(key.lastUsedAt),
       status: key.isActive ? "ACTIVE" : "REVOKED",
+    })),
+    dataExportRequests: org.dataExportRequests.map((request) => ({
+      id: request.id,
+      status: request.status,
+      reason: request.reason ?? "",
+      reviewerNotes: request.reviewerNotes ?? "",
+      requestedAt: formatDateTime(request.requestedAt),
+      reviewedAt: formatDateTime(request.reviewedAt),
+      expiresAt: formatDateTime(request.expiresAt),
+      requestedBy:
+        request.requestedBy.fullName ??
+        request.requestedBy.email ??
+        "Workspace user",
+      reviewedBy:
+        request.reviewedBy?.fullName ??
+        request.reviewedBy?.email ??
+        "Not reviewed",
     })),
   };
 }
@@ -995,6 +1048,96 @@ export default async function SettingsPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            title="Data Export"
+            description="Request a platform-reviewed CSV archive of your organization data."
+          >
+            <form action={requestDataExportAction} className="space-y-3">
+              <label className="space-y-2">
+                <span className="text-sm font-medium text-slate-700">
+                  Request reason
+                </span>
+                <textarea
+                  name="reason"
+                  rows={3}
+                  placeholder="Audit, migration, compliance review..."
+                  className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                />
+              </label>
+
+              <button
+                type="submit"
+                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                <FileArchive className="h-4 w-4" />
+                Request CSV Export
+              </button>
+            </form>
+
+            <div className="mt-5 space-y-3">
+              {data.dataExportRequests.length === 0 ? (
+                <EmptyState
+                  title="No export requests"
+                  description="Approved requests will appear here with a download link."
+                />
+              ) : (
+                data.dataExportRequests.map((request) => {
+                  const isApproved = request.status === "APPROVED";
+                  const variant =
+                    request.status === "APPROVED"
+                      ? "success"
+                      : request.status === "REJECTED"
+                        ? "danger"
+                        : "warning";
+
+                  return (
+                    <div
+                      key={request.id}
+                      className="rounded-[18px] border border-slate-200 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-slate-950">
+                            Requested {request.requestedAt}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500">
+                            By {request.requestedBy}
+                          </p>
+                        </div>
+                        <StatusBadge
+                          label={formatLabel(request.status)}
+                          variant={variant}
+                        />
+                      </div>
+
+                      {request.reason ? (
+                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                          {request.reason}
+                        </p>
+                      ) : null}
+
+                      {request.reviewerNotes ? (
+                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                          Platform note: {request.reviewerNotes}
+                        </p>
+                      ) : null}
+
+                      {isApproved ? (
+                        <Link
+                          href={`/api/data-exports/${request.id}/download`}
+                          className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                        >
+                          <Download className="h-4 w-4" />
+                          Download ZIP
+                        </Link>
+                      ) : null}
+                    </div>
+                  );
+                })
+              )}
             </div>
           </SectionCard>
 

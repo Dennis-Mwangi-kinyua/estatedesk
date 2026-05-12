@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { countOnlineUsers } from "@/lib/auth/presence";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import {
   AdminLink,
@@ -31,8 +32,16 @@ export default async function SecurityCenterPage() {
     redirectTo: "/dashboard",
   });
 
-  const [activeSessions, platformAdmins, forcedChanges, resetTokens, logs] = await Promise.all([
+  const [
+    activeSessions,
+    onlineUsers,
+    platformAdmins,
+    forcedChanges,
+    resetTokens,
+    logs,
+  ] = await Promise.all([
     prisma.userSession.count({ where: { expiresAt: { gt: new Date() } } }),
+    countOnlineUsers(),
     prisma.user.count({
       where: { deletedAt: null, platformRole: { in: ["SUPER_ADMIN", "PLATFORM_ADMIN"] } },
     }),
@@ -62,10 +71,11 @@ export default async function SecurityCenterPage() {
       />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Online now" value={onlineUsers} />
         <StatCard label="Active sessions" value={activeSessions} />
         <StatCard label="Platform admins" value={platformAdmins} />
         <StatCard label="Must change password" value={forcedChanges} />
-        <StatCard label="Active reset tokens" value={resetTokens} />
+        <StatCard label="Reset tokens" value={resetTokens} />
       </section>
 
       <Surface title="Security audit stream">
@@ -90,7 +100,7 @@ export default async function SecurityCenterPage() {
                     <p className="mt-1 text-xs text-neutral-500">{log.actor.email ?? log.actor.platformRole}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <AdminLink href={`/platform/organizations/${log.org.id}`}>{log.org.name}</AdminLink>
+                    <AdminLink href={`/platform/organizations/${log.org.slug}`}>{log.org.name}</AdminLink>
                   </td>
                   <td className="px-4 py-3">
                     <Badge tone={toneForStatus(log.action)}>{labelize(log.action)}</Badge>

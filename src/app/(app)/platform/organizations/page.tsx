@@ -255,7 +255,7 @@ export default async function PlatformOrganizationsPage({
               return (
                 <Link
                   key={org.id}
-                  href={`/platform/organizations/${org.id}`}
+                  href={`/platform/organizations/${org.slug}`}
                   className="group flex min-h-[260px] flex-col rounded-[24px] border border-neutral-200 bg-white p-4 shadow-sm transition hover:border-neutral-300 hover:shadow-md"
                 >
                   <div className="flex items-start justify-between gap-3">

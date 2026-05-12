@@ -8,7 +8,14 @@ type CreateInvitationInput = {
   invitedById: string;
   email: string;
   phone?: string;
-  role: "ADMIN" | "MANAGER" | "OFFICE" | "ACCOUNTANT" | "CARETAKER" | "TENANT";
+  role:
+    | "ADMIN"
+    | "MANAGER"
+    | "OFFICE"
+    | "ACCOUNTANT"
+    | "CARETAKER"
+    | "TENANT"
+    | "LANDLORD";
   scopeType?: "ORG" | "PROPERTY" | "BUILDING" | "UNIT";
   scopeId?: string;
   orgName: string;
@@ -38,7 +45,7 @@ export async function createInvitation(input: CreateInvitationInput) {
 
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? "";
-  const inviteUrl = `${appUrl}/accept-invite?token=${token}`;
+  const inviteUrl = `${appUrl}/accept-invite/${token}`;
 
   const emailResult = await Promise.allSettled([
     sendInviteEmail({

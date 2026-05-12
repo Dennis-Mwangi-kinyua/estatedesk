@@ -65,7 +65,7 @@ export default async function SubscriptionToolsPage() {
               {subscriptions.map((sub) => (
                 <tr key={sub.id} className="border-t border-neutral-100">
                   <td className="px-4 py-3">
-                    <AdminLink href={`/platform/organizations/${sub.org.id}`}>{sub.org.name}</AdminLink>
+                    <AdminLink href={`/platform/organizations/${sub.org.slug}`}>{sub.org.name}</AdminLink>
                     <p className="mt-1 text-xs text-neutral-500">/{sub.org.slug}</p>
                   </td>
                   <td className="px-4 py-3 text-neutral-600">{sub.plan}</td>

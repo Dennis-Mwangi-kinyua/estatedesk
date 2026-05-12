@@ -30,6 +30,7 @@ const DEFAULT_CHANNELS = [
   NotificationChannel.IN_APP,
   NotificationChannel.SMS,
   NotificationChannel.WHATSAPP,
+  NotificationChannel.EMAIL,
 ] as const;
 
 function recipientKey(recipient: NotificationRecipient, channel: NotificationChannel) {
