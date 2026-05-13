@@ -86,13 +86,13 @@ export function TenantHeader({ fullName, orgName }: TenantHeaderProps) {
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-neutral-950/35 backdrop-blur-md"
             onClick={() => setMenuOpen(false)}
             aria-label="Close menu overlay"
           />
 
-          <div className="absolute inset-x-0 top-0 max-h-[100vh] overflow-y-auto rounded-b-[32px] border-b border-white/60 bg-white/88 shadow-2xl backdrop-blur-2xl">
-            <div className="px-4 pb-6 pt-4">
+          <div className="absolute inset-x-3 top-4 mx-auto max-h-[calc(100vh-2rem)] max-w-[430px] overflow-y-auto rounded-[32px] border border-white/70 bg-white/90 shadow-[0_24px_80px_rgba(15,23,42,0.28)] backdrop-blur-2xl sm:inset-x-6">
+            <div className="px-4 pb-5 pt-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">

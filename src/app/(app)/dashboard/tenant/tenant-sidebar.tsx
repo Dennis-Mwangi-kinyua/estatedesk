@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { HiOutlineArrowLeftOnRectangle } from "react-icons/hi2";
 import { tenantNavItems } from "./tenant-nav";
 import { isTenantRouteActive } from "./tenant-route";
+import { logoutAction } from "@/features/auth/actions/logout-action";
 
 type TenantSidebarProps = {
   fullName: string;
@@ -88,6 +90,20 @@ export function TenantSidebar({ fullName }: TenantSidebarProps) {
             );
           })}
         </nav>
+
+        <div className="mt-4 border-t border-neutral-200/70 pt-4">
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-50 active:scale-[0.99]"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition group-hover:bg-red-100">
+                <HiOutlineArrowLeftOnRectangle className="h-5 w-5" />
+              </span>
+              <span>Logout</span>
+            </button>
+          </form>
+        </div>
       </div>
     </aside>
   );

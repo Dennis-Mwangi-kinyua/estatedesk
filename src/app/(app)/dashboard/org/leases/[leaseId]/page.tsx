@@ -373,7 +373,7 @@ export default async function LeaseDetailPage({ params }: LeasePageProps) {
               <dt className="text-muted-foreground">Name</dt>
               <dd className="text-right font-medium">
                 <Link
-                  href={`/tenants/${lease.tenant.id}`}
+                  href={`/dashboard/org/tenants/${lease.tenant.id}`}
                   className="underline underline-offset-4"
                 >
                   {lease.tenant.fullName}

@@ -259,7 +259,7 @@ export default async function LeasesPage() {
 
                     <td className="px-4 py-3">
                       <Link
-                        href={`/tenants/${lease.tenant.id}`}
+                        href={`/dashboard/org/tenants/${lease.tenant.id}`}
                         className="underline underline-offset-4"
                       >
                         {lease.tenant.fullName}

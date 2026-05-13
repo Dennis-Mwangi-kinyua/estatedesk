@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import type { PaymentInstructions } from "@/lib/payments/instructions";
 import {
+  type TenantPaymentCheckoutSummary,
+  getTenantPaymentCheckoutSummary,
   getTenantPaymentInstructions,
   startTenantPayment,
 } from "./actions";
@@ -63,6 +65,8 @@ export default function TenantPaymentCheckoutPage() {
   const [error, setError] = useState("");
   const [paymentInstructions, setPaymentInstructions] =
     useState<PaymentInstructions | null>(null);
+  const [checkoutSummary, setCheckoutSummary] =
+    useState<TenantPaymentCheckoutSummary | null>(null);
   const [instructionsError, setInstructionsError] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -85,10 +89,14 @@ export default function TenantPaymentCheckoutPage() {
   useEffect(() => {
     let active = true;
 
-    getTenantPaymentInstructions()
-      .then((instructions) => {
+    Promise.all([
+      getTenantPaymentInstructions(),
+      getTenantPaymentCheckoutSummary({ source, id }),
+    ])
+      .then(([instructions, summary]) => {
         if (active) {
           setPaymentInstructions(instructions);
+          setCheckoutSummary(summary);
           setInstructionsError("");
         }
       })
@@ -101,7 +109,7 @@ export default function TenantPaymentCheckoutPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [source, id]);
 
   const handleSubmit = () => {
     setError("");
@@ -245,11 +253,17 @@ export default function TenantPaymentCheckoutPage() {
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Reference ID
+                  Payment Reference
                 </p>
-                <p className="mt-1 break-all text-sm font-medium text-slate-900">
-                  {id ?? "Missing bill id"}
+                <p className="mt-1 text-base font-semibold text-slate-900">
+                  {checkoutSummary?.friendlyReference ?? "Preparing reference"}
                 </p>
+                {checkoutSummary ? (
+                  <p className="mt-1 text-sm text-slate-500">
+                    {checkoutSummary.description} · {checkoutSummary.propertyName}{" "}
+                    / Unit {checkoutSummary.unitLabel}
+                  </p>
+                ) : null}
               </div>
 
               {isMobileMoney && (
