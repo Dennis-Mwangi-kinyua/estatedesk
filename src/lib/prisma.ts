@@ -20,12 +20,12 @@ const DATABASE_URL =
 function createPrismaClient() {
   const adapter = new PrismaPg({
     connectionString: DATABASE_URL,
-    connectionTimeoutMillis: 3_000,
+    connectionTimeoutMillis: 10_000,
     idleTimeoutMillis: 30_000,
     keepAlive: true,
     keepAliveInitialDelayMillis: 10_000,
-    max: 10,
-    query_timeout: 8_000,
+    max: 5,
+    query_timeout: 15_000,
   });
 
   return new PrismaClient({ adapter });

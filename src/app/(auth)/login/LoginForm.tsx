@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowRight,
   Eye,
@@ -78,6 +79,21 @@ export default function LoginForm() {
           animation: loadingDot 1.1s ease-in-out infinite;
         }
 
+        .login-auth-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          display: grid;
+          min-height: 100vh;
+          min-height: 100dvh;
+          place-items: center;
+          background:
+            radial-gradient(circle at center, rgba(255, 255, 255, 0.18), transparent 34%),
+            rgba(15, 23, 42, 0.38);
+          -webkit-backdrop-filter: blur(14px) saturate(1.08);
+          backdrop-filter: blur(14px) saturate(1.08);
+        }
+
         @media (max-height: 740px) {
           .login-form-compact {
             padding-top: 12px;
@@ -128,11 +144,12 @@ export default function LoginForm() {
         }
       `}</style>
 
-      {isPending ? (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/20 px-6 backdrop-blur-sm">
-          <div className="w-full max-w-[280px] rounded-xl border border-slate-200 bg-white px-6 py-7 text-center shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-primary shadow-[0_14px_30px_rgba(37,99,235,0.24)]">
-              <div className="login-loading-ring h-8 w-8 rounded-full border-[3px] border-white/30 border-t-white" />
+      {isPending && typeof document !== "undefined"
+        ? createPortal(
+        <div className="login-auth-overlay px-5">
+          <div className="w-full max-w-[300px] rounded-2xl border border-white/80 bg-white/92 px-6 py-7 text-center shadow-[0_28px_90px_rgba(15,23,42,0.28)] ring-1 ring-slate-950/5 backdrop-blur-xl">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-[0_16px_36px_rgba(37,99,235,0.28)]">
+              <div className="login-loading-ring h-9 w-9 rounded-full border-[3px] border-white/30 border-t-white" />
             </div>
 
             <h3 className="mt-5 text-lg font-semibold tracking-tight text-slate-950">
@@ -149,8 +166,10 @@ export default function LoginForm() {
               <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-primary [animation-delay:0.32s]" />
             </div>
           </div>
-        </div>
-      ) : null}
+        </div>,
+          document.body,
+        )
+        : null}
 
       <div className="px-5 py-6 sm:px-7">
         <form action={formAction} className="flex flex-col gap-4">

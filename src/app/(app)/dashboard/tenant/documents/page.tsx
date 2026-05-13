@@ -63,19 +63,32 @@ function getDocumentIcon(mimeType: string | null) {
   return <FileText className="h-5 w-5" />;
 }
 
-function getDocumentUrl(asset: {
-  fileUrl?: string | null;
-  url?: string | null;
-  storagePath?: string | null;
-  id: string;
-}) {
-  return asset.fileUrl ?? asset.url ?? asset.storagePath ?? null;
+function getDocumentUrl(asset: { key?: string | null }) {
+  if (!asset.key) return null;
+
+  if (asset.key.startsWith("http://") || asset.key.startsWith("https://")) {
+    return asset.key;
+  }
+
+  const publicBaseUrl = process.env.S3_PUBLIC_BASE_URL;
+  const bucket = process.env.S3_BUCKET;
+  const region = process.env.S3_REGION;
+
+  if (publicBaseUrl) {
+    return `${publicBaseUrl.replace(/\/$/, "")}/${asset.key}`;
+  }
+
+  if (bucket && region) {
+    return `https://${bucket}.s3.${region}.amazonaws.com/${asset.key}`;
+  }
+
+  return null;
 }
 
 function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#f5f5f7]">
-      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 xl:px-8">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f8fbff_0%,#eef4f8_46%,#f7f7f5_100%)]">
+      <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-6 sm:py-6 xl:px-8">
         {children}
       </div>
     </div>
@@ -91,7 +104,7 @@ function SurfaceCard({
 }) {
   return (
     <section
-      className={`rounded-[28px] border border-black/5 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] ${className}`}
+      className={`rounded-[30px] border border-white/75 bg-white/78 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl sm:rounded-[34px] ${className}`}
     >
       {children}
     </section>
@@ -108,9 +121,9 @@ function StatCard({
   value: string | number;
 }) {
   return (
-    <div className="rounded-[24px] border border-black/5 bg-[#fafafa] p-4">
+    <div className="rounded-[24px] border border-white/70 bg-white/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] backdrop-blur-xl">
       <div className="flex items-center gap-2 text-neutral-500">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm">
+        <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white shadow-sm">
           {icon}
         </div>
         <p className="text-[11px] font-medium uppercase tracking-[0.14em]">
@@ -209,7 +222,7 @@ export default async function TenantDocumentsPage() {
   return (
     <PageShell>
       <div className="space-y-4 sm:space-y-6">
-        <SurfaceCard className="p-5 sm:p-6 lg:p-7">
+        <SurfaceCard className="p-4 sm:p-6 lg:p-7">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
               <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-500">
@@ -225,7 +238,7 @@ export default async function TenantDocumentsPage() {
             </div>
 
             {latestDocument ? (
-              <div className="rounded-[24px] bg-[#f7f7fa] px-4 py-4 sm:px-5">
+              <div className="rounded-[24px] bg-white/62 px-4 py-4 shadow-sm ring-1 ring-white/70 backdrop-blur-xl sm:px-5">
                 <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500">
                   Latest Document
                 </p>
@@ -276,10 +289,10 @@ export default async function TenantDocumentsPage() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {documents.map((doc) => {
               const cardContent = (
-                <div className="rounded-[24px] border border-black/5 bg-[#fafafa] p-4 transition hover:bg-white hover:shadow-sm">
+                <div className="rounded-[26px] border border-white/80 bg-white/68 p-4 shadow-[0_10px_36px_rgba(15,23,42,0.06)] backdrop-blur-xl transition hover:bg-white/85 hover:shadow-[0_16px_44px_rgba(15,23,42,0.08)]">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-start gap-3">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-neutral-700 shadow-sm">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[20px] bg-white text-neutral-700 shadow-sm">
                         {getDocumentIcon(doc.mimeType)}
                       </div>
 
@@ -294,14 +307,14 @@ export default async function TenantDocumentsPage() {
                     </div>
 
                     {doc.url ? (
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-neutral-700 shadow-sm">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-neutral-700 shadow-sm">
                         <Download className="h-4 w-4" />
                       </div>
                     ) : null}
                   </div>
 
                   <div className="mt-4 space-y-3">
-                    <div className="rounded-[18px] bg-white px-3 py-3">
+                    <div className="rounded-[20px] bg-white/78 px-3 py-3 ring-1 ring-white/70">
                       <p className="text-[11px] uppercase tracking-wide text-neutral-500">
                         Related To
                       </p>
@@ -311,7 +324,7 @@ export default async function TenantDocumentsPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="rounded-[18px] bg-white px-3 py-3">
+                      <div className="rounded-[20px] bg-white/78 px-3 py-3 ring-1 ring-white/70">
                         <p className="text-[11px] uppercase tracking-wide text-neutral-500">
                           Type
                         </p>
@@ -320,7 +333,7 @@ export default async function TenantDocumentsPage() {
                         </p>
                       </div>
 
-                      <div className="rounded-[18px] bg-white px-3 py-3">
+                      <div className="rounded-[20px] bg-white/78 px-3 py-3 ring-1 ring-white/70">
                         <p className="text-[11px] uppercase tracking-wide text-neutral-500">
                           Added
                         </p>
@@ -330,7 +343,7 @@ export default async function TenantDocumentsPage() {
                       </div>
                     </div>
 
-                    <div className="rounded-[18px] bg-white px-3 py-3">
+                    <div className="rounded-[20px] bg-white/78 px-3 py-3 ring-1 ring-white/70">
                       <p className="text-[11px] uppercase tracking-wide text-neutral-500">
                         File Format
                       </p>

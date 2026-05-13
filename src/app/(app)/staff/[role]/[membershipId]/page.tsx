@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { deleteMembership } from "@/features/staff/actions/delete-membership";
 import { endCaretakerAssignment } from "@/features/staff/actions/create-caretaker-assignment";
+import { DeleteCaretakerForm } from "@/features/staff/components/delete-caretaker-form";
 import {
   ROLE_META,
   normalizeStaffRole,
@@ -322,17 +323,26 @@ export default async function MemberDetailPage({ params }: Props) {
               Edit details
             </Link>
 
-            <form
-              action={async () => {
-                "use server";
-                await deleteMembership(member.id);
-              }}
-            >
-              <button className="inline-flex min-h-11 items-center justify-center rounded-xl bg-red-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-red-700">
-                Delete membership
-              </button>
-            </form>
+            {normalizedRole !== "CARETAKER" ? (
+              <form
+                action={async () => {
+                  "use server";
+                  await deleteMembership(member.id);
+                }}
+              >
+                <button className="inline-flex min-h-11 items-center justify-center rounded-xl bg-red-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-red-700">
+                  Delete membership
+                </button>
+              </form>
+            ) : null}
           </div>
+
+          {normalizedRole === "CARETAKER" ? (
+            <DeleteCaretakerForm
+              caretakerName={member.user.fullName}
+              membershipId={member.id}
+            />
+          ) : null}
         </div>
       </section>
 

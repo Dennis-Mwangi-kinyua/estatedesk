@@ -3,6 +3,7 @@
 
 import { OrgRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
@@ -29,6 +30,7 @@ export async function removeCaretakerMembershipAction(formData: FormData) {
 
   const membershipId = String(formData.get("membershipId") ?? "");
   const reason = String(formData.get("reason") ?? "").trim();
+  const confirmation = String(formData.get("confirmation") ?? "").trim();
 
   if (!membershipId) {
     throw new Error("Membership id is required.");
@@ -55,6 +57,12 @@ export async function removeCaretakerMembershipAction(formData: FormData) {
 
   if (!membership) {
     throw new Error("Caretaker membership not found.");
+  }
+
+  const expectedConfirmation = membership.user.fullName.trim() || "DELETE";
+
+  if (confirmation !== expectedConfirmation) {
+    throw new Error("Caretaker deletion confirmation did not match.");
   }
 
   const now = new Date();
@@ -109,4 +117,5 @@ export async function removeCaretakerMembershipAction(formData: FormData) {
 
   revalidatePath("/staff");
   revalidatePath("/staff/caretaker");
+  redirect("/staff/caretaker");
 }
