@@ -24,12 +24,17 @@ import {
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import {
+  type PaymentInstructions,
+  parsePaymentInstructions,
+} from "@/lib/payments/instructions";
+import {
   createApiKeyAction,
   inviteMemberAction,
   requestDataExportAction,
   toggleApiKeyStatusAction,
   updateBillingAction,
   updateOrganizationAction,
+  updatePaymentInstructionsAction,
   updatePreferencesAction,
 } from "@/features/settings/actions/settings-actions";
 
@@ -88,6 +93,7 @@ type SettingsPageData = {
     smsNotifications: boolean;
     emailNotifications: boolean;
   };
+  paymentInstructions: PaymentInstructions;
   members: Member[];
   apiKeys: ApiKeyItem[];
   dataExportRequests: DataExportRequestItem[];
@@ -194,6 +200,9 @@ async function getSettingsPageData(orgId: string): Promise<SettingsPageData> {
 
   const features = org.settings?.features;
   const notificationDefaults = org.settings?.notificationDefaults;
+  const paymentInstructions = parsePaymentInstructions(
+    org.settings?.customFields,
+  );
 
   return {
     organization: {
@@ -221,6 +230,7 @@ async function getSettingsPageData(orgId: string): Promise<SettingsPageData> {
       smsNotifications: getBoolean(notificationDefaults, "smsNotifications"),
       emailNotifications: getBoolean(notificationDefaults, "emailNotifications"),
     },
+    paymentInstructions,
     members: org.memberships.map((membership) => ({
       id: membership.id,
       name: membership.user.fullName,
@@ -341,6 +351,33 @@ function InputField({
         defaultValue={defaultValue}
         placeholder={placeholder}
         className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+      />
+    </label>
+  );
+}
+
+function TextAreaField({
+  label,
+  name,
+  defaultValue,
+  placeholder,
+  rows = 3,
+}: {
+  label: string;
+  name: string;
+  defaultValue?: string;
+  placeholder?: string;
+  rows?: number;
+}) {
+  return (
+    <label className="space-y-2">
+      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <textarea
+        name={name}
+        defaultValue={defaultValue}
+        placeholder={placeholder}
+        rows={rows}
+        className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
       />
     </label>
   );
@@ -658,6 +695,126 @@ export default async function SettingsPage() {
                   className="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-200 px-5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                 >
                   Update Preferences
+                </button>
+              </div>
+            </form>
+          </SectionCard>
+
+          <SectionCard
+            title="Payment Instructions"
+            description="Set the M-Pesa and bank details tenants should use for this organization. These details are shown during checkout."
+            action={
+              <StatusBadge
+                label={
+                  data.paymentInstructions.mpesaEnabled ||
+                  data.paymentInstructions.bankEnabled
+                    ? "Configured"
+                    : "Not configured"
+                }
+                variant={
+                  data.paymentInstructions.mpesaEnabled ||
+                  data.paymentInstructions.bankEnabled
+                    ? "success"
+                    : "warning"
+                }
+              />
+            }
+          >
+            <form action={updatePaymentInstructionsAction} className="space-y-5">
+              <div className="rounded-[20px] border border-slate-200 p-4">
+                <ToggleField
+                  label="Enable M-Pesa Instructions"
+                  description="Show this organization's Paybill or Till details to tenants during checkout."
+                  name="mpesaEnabled"
+                  defaultChecked={data.paymentInstructions.mpesaEnabled}
+                />
+
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <InputField
+                    label="Business Name"
+                    name="mpesaBusinessName"
+                    defaultValue={data.paymentInstructions.mpesaBusinessName}
+                    placeholder="EstateDesk Properties Ltd"
+                  />
+                  <InputField
+                    label="Paybill Number"
+                    name="mpesaPaybill"
+                    defaultValue={data.paymentInstructions.mpesaPaybill}
+                    placeholder="123456"
+                  />
+                  <InputField
+                    label="Till Number"
+                    name="mpesaTillNumber"
+                    defaultValue={data.paymentInstructions.mpesaTillNumber}
+                    placeholder="987654"
+                  />
+                  <InputField
+                    label="Default Account Reference"
+                    name="mpesaAccountNumber"
+                    defaultValue={data.paymentInstructions.mpesaAccountNumber}
+                    placeholder="Use your house number or tenant code"
+                  />
+                  <div className="md:col-span-2">
+                    <TextAreaField
+                      label="Tenant Instructions"
+                      name="mpesaInstructions"
+                      defaultValue={data.paymentInstructions.mpesaInstructions}
+                      placeholder="Example: Go to M-Pesa, Lipa na M-Pesa, Paybill, enter account as your unit number, then submit the confirmation code in EstateDesk."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[20px] border border-slate-200 p-4">
+                <ToggleField
+                  label="Enable Bank Instructions"
+                  description="Show this organization's bank account details to tenants during checkout."
+                  name="bankEnabled"
+                  defaultChecked={data.paymentInstructions.bankEnabled}
+                />
+
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <InputField
+                    label="Bank Name"
+                    name="bankName"
+                    defaultValue={data.paymentInstructions.bankName}
+                    placeholder="KCB Bank Kenya"
+                  />
+                  <InputField
+                    label="Account Name"
+                    name="bankAccountName"
+                    defaultValue={data.paymentInstructions.bankAccountName}
+                    placeholder="EstateDesk Properties Ltd"
+                  />
+                  <InputField
+                    label="Account Number"
+                    name="bankAccountNumber"
+                    defaultValue={data.paymentInstructions.bankAccountNumber}
+                    placeholder="1234567890"
+                  />
+                  <InputField
+                    label="Branch"
+                    name="bankBranch"
+                    defaultValue={data.paymentInstructions.bankBranch}
+                    placeholder="Westlands"
+                  />
+                  <div className="md:col-span-2">
+                    <TextAreaField
+                      label="Tenant Instructions"
+                      name="bankInstructions"
+                      defaultValue={data.paymentInstructions.bankInstructions}
+                      placeholder="Example: Transfer exact amount, use your unit number as reference, then submit the bank confirmation reference in EstateDesk."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="inline-flex h-11 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Save Payment Instructions
                 </button>
               </div>
             </form>

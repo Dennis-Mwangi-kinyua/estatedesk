@@ -9,6 +9,10 @@ import { requireCurrentOrgId, requireOrgAccess } from "@/lib/auth/org";
 import { requireUserSession } from "@/lib/auth/session";
 import { createInvitation } from "@/lib/invitations/create-invitation";
 import { writeAuditLog } from "@/lib/audit/security";
+import {
+  type PaymentInstructions,
+  mergePaymentInstructions,
+} from "@/lib/payments/instructions";
 
 const SETTINGS_PATH = "/dashboard/org/settings";
 
@@ -123,6 +127,69 @@ export async function updatePreferencesAction(formData: FormData) {
   });
 
   revalidatePath(SETTINGS_PATH);
+}
+
+export async function updatePaymentInstructionsAction(formData: FormData) {
+  const { orgId } = await ensureSettingsWriteAccess();
+
+  const existing = await prisma.organizationSettings.findUnique({
+    where: { orgId },
+    select: {
+      customFields: true,
+    },
+  });
+
+  const paymentInstructions: PaymentInstructions = {
+    mpesaEnabled: readBoolean(formData, "mpesaEnabled"),
+    mpesaBusinessName: readString(formData, "mpesaBusinessName"),
+    mpesaPaybill: readString(formData, "mpesaPaybill"),
+    mpesaTillNumber: readString(formData, "mpesaTillNumber"),
+    mpesaAccountNumber: readString(formData, "mpesaAccountNumber"),
+    mpesaInstructions: readString(formData, "mpesaInstructions"),
+    bankEnabled: readBoolean(formData, "bankEnabled"),
+    bankName: readString(formData, "bankName"),
+    bankAccountName: readString(formData, "bankAccountName"),
+    bankAccountNumber: readString(formData, "bankAccountNumber"),
+    bankBranch: readString(formData, "bankBranch"),
+    bankInstructions: readString(formData, "bankInstructions"),
+  };
+
+  if (
+    paymentInstructions.mpesaEnabled &&
+    !paymentInstructions.mpesaPaybill &&
+    !paymentInstructions.mpesaTillNumber
+  ) {
+    throw new Error("Enter an M-Pesa Paybill or Till number before enabling M-Pesa.");
+  }
+
+  if (
+    paymentInstructions.bankEnabled &&
+    (!paymentInstructions.bankName ||
+      !paymentInstructions.bankAccountName ||
+      !paymentInstructions.bankAccountNumber)
+  ) {
+    throw new Error(
+      "Bank name, account name, and account number are required before enabling bank payments.",
+    );
+  }
+
+  await prisma.organizationSettings.upsert({
+    where: { orgId },
+    update: {
+      customFields: mergePaymentInstructions(
+        existing?.customFields,
+        paymentInstructions,
+      ),
+    },
+    create: {
+      orgId,
+      customFields: mergePaymentInstructions(null, paymentInstructions),
+    },
+  });
+
+  revalidatePath(SETTINGS_PATH);
+  revalidatePath("/dashboard/tenant/payments");
+  revalidatePath("/dashboard/tenant/payments/checkout");
 }
 
 export async function updateBillingAction(formData: FormData) {

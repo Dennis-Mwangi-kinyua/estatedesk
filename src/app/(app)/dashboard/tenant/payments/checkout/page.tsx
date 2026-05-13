@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -9,7 +9,11 @@ import {
   Landmark,
   ShieldCheck,
 } from "lucide-react";
-import { startTenantPayment } from "./actions";
+import type { PaymentInstructions } from "@/lib/payments/instructions";
+import {
+  getTenantPaymentInstructions,
+  startTenantPayment,
+} from "./actions";
 
 const METHOD_LABELS: Record<string, string> = {
   mpesa: "M-Pesa",
@@ -57,6 +61,9 @@ export default function TenantPaymentCheckoutPage() {
   const [amount, setAmount] = useState(amountParam ?? "");
   const [months, setMonths] = useState(monthsParam ?? "1");
   const [error, setError] = useState("");
+  const [paymentInstructions, setPaymentInstructions] =
+    useState<PaymentInstructions | null>(null);
+  const [instructionsError, setInstructionsError] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const methodLabel = useMemo(() => {
@@ -66,6 +73,35 @@ export default function TenantPaymentCheckoutPage() {
 
   const isMobileMoney = method === "mpesa" || method === "airtel-money";
   const isBank = Boolean(method) && !isMobileMoney;
+  const mpesaUnavailable =
+    method === "mpesa" &&
+    paymentInstructions !== null &&
+    !paymentInstructions.mpesaEnabled;
+  const bankUnavailable =
+    isBank &&
+    paymentInstructions !== null &&
+    !paymentInstructions.bankEnabled;
+
+  useEffect(() => {
+    let active = true;
+
+    getTenantPaymentInstructions()
+      .then((instructions) => {
+        if (active) {
+          setPaymentInstructions(instructions);
+          setInstructionsError("");
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setInstructionsError("Payment instructions could not be loaded.");
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleSubmit = () => {
     setError("");
@@ -77,6 +113,16 @@ export default function TenantPaymentCheckoutPage() {
 
     if (isMobileMoney && !phoneNumber.trim()) {
       setError("Phone number is required for mobile money.");
+      return;
+    }
+
+    if (mpesaUnavailable) {
+      setError("M-Pesa is not configured for this organization yet.");
+      return;
+    }
+
+    if (bankUnavailable) {
+      setError("Bank payments are not configured for this organization yet.");
       return;
     }
 
@@ -227,6 +273,51 @@ export default function TenantPaymentCheckoutPage() {
                       className="h-12 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
                     />
                   </label>
+
+                  {method === "mpesa" && paymentInstructions?.mpesaEnabled ? (
+                    <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                      <p className="font-semibold">M-Pesa details</p>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {paymentInstructions.mpesaBusinessName ? (
+                          <p>
+                            Business:{" "}
+                            <span className="font-semibold">
+                              {paymentInstructions.mpesaBusinessName}
+                            </span>
+                          </p>
+                        ) : null}
+                        {paymentInstructions.mpesaPaybill ? (
+                          <p>
+                            Paybill:{" "}
+                            <span className="font-semibold">
+                              {paymentInstructions.mpesaPaybill}
+                            </span>
+                          </p>
+                        ) : null}
+                        {paymentInstructions.mpesaTillNumber ? (
+                          <p>
+                            Till:{" "}
+                            <span className="font-semibold">
+                              {paymentInstructions.mpesaTillNumber}
+                            </span>
+                          </p>
+                        ) : null}
+                        {paymentInstructions.mpesaAccountNumber ? (
+                          <p>
+                            Account:{" "}
+                            <span className="font-semibold">
+                              {paymentInstructions.mpesaAccountNumber}
+                            </span>
+                          </p>
+                        ) : null}
+                      </div>
+                      {paymentInstructions.mpesaInstructions ? (
+                        <p className="mt-3 leading-6">
+                          {paymentInstructions.mpesaInstructions}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               )}
 
@@ -251,8 +342,60 @@ export default function TenantPaymentCheckoutPage() {
                       className="h-12 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
                     />
                   </label>
+
+                  {paymentInstructions?.bankEnabled ? (
+                    <div className="mt-4 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+                      <p className="font-semibold">Bank details</p>
+                      <div className="mt-3 grid gap-2">
+                        <p>
+                          Bank:{" "}
+                          <span className="font-semibold">
+                            {paymentInstructions.bankName}
+                          </span>
+                        </p>
+                        <p>
+                          Account name:{" "}
+                          <span className="font-semibold">
+                            {paymentInstructions.bankAccountName}
+                          </span>
+                        </p>
+                        <p>
+                          Account number:{" "}
+                          <span className="font-semibold">
+                            {paymentInstructions.bankAccountNumber}
+                          </span>
+                        </p>
+                        {paymentInstructions.bankBranch ? (
+                          <p>
+                            Branch:{" "}
+                            <span className="font-semibold">
+                              {paymentInstructions.bankBranch}
+                            </span>
+                          </p>
+                        ) : null}
+                      </div>
+                      {paymentInstructions.bankInstructions ? (
+                        <p className="mt-3 leading-6">
+                          {paymentInstructions.bankInstructions}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               )}
+
+              {instructionsError ? (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                  {instructionsError}
+                </div>
+              ) : null}
+
+              {mpesaUnavailable || bankUnavailable ? (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                  This payment method is not configured for your organization
+                  yet. Please contact your property manager.
+                </div>
+              ) : null}
 
               {error ? (
                 <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -263,7 +406,14 @@ export default function TenantPaymentCheckoutPage() {
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={!source || !id || !method || isPending}
+                disabled={
+                  !source ||
+                  !id ||
+                  !method ||
+                  isPending ||
+                  mpesaUnavailable ||
+                  bankUnavailable
+                }
                 className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isPending ? "Processing..." : "Continue to payment"}
@@ -292,10 +442,22 @@ export default function TenantPaymentCheckoutPage() {
 
               <div className="rounded-2xl bg-slate-50 p-4">
                 <p className="font-medium text-slate-900">How it works</p>
-                <p className="mt-1">
-                  After confirmation, the system starts a secure payment flow for
-                  the selected method.
-                </p>
+                {method === "mpesa" && paymentInstructions?.mpesaEnabled ? (
+                  <p className="mt-1">
+                    Pay using this organization&apos;s M-Pesa details, then
+                    continue so EstateDesk can record the payment for review.
+                  </p>
+                ) : isBank && paymentInstructions?.bankEnabled ? (
+                  <p className="mt-1">
+                    Transfer to this organization&apos;s bank account and enter
+                    the account name or reference used for the payment.
+                  </p>
+                ) : (
+                  <p className="mt-1">
+                    After confirmation, the system starts the selected payment
+                    flow for this organization.
+                  </p>
+                )}
               </div>
             </div>
           </aside>

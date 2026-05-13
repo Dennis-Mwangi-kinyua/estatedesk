@@ -2,10 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { notifyRecipients } from "@/lib/notifications/notify";
-import { allocateRentPayment, getCurrentPeriod } from "@/lib/ledger";
+import { getCurrentPeriod } from "@/lib/ledger";
+import { parsePaymentInstructions } from "@/lib/payments/instructions";
 
 type StartPaymentInput = {
   source: string;
@@ -16,6 +18,23 @@ type StartPaymentInput = {
   amount?: number;
   months?: number;
 };
+
+export async function getTenantPaymentInstructions() {
+  const session = await requireTenantAccess();
+
+  if (!session.activeOrgId) {
+    throw new Error("Missing tenant session context.");
+  }
+
+  const settings = await prisma.organizationSettings.findUnique({
+    where: { orgId: session.activeOrgId },
+    select: {
+      customFields: true,
+    },
+  });
+
+  return parsePaymentInstructions(settings?.customFields);
+}
 
 function mapPaymentMethod(method: string) {
   if (method === "mpesa") return "MPESA_STK" as const;
@@ -30,8 +49,27 @@ function getReferencePrefix(source: string) {
   return "PMT";
 }
 
-function formatReceiptNo(paymentId: string) {
-  return `RCT-${new Date().getFullYear()}-${paymentId.slice(-8).toUpperCase()}`;
+async function getPaymentReviewRecipients(
+  tx: Prisma.TransactionClient,
+  orgId: string,
+) {
+  const memberships = await tx.membership.findMany({
+    where: {
+      orgId,
+      role: {
+        in: ["ADMIN", "MANAGER", "ACCOUNTANT"],
+      },
+      user: {
+        deletedAt: null,
+        status: "ACTIVE",
+      },
+    },
+    select: {
+      userId: true,
+    },
+  });
+
+  return memberships.map((membership) => ({ userId: membership.userId }));
 }
 
 export async function startTenantPayment(input: StartPaymentInput) {
@@ -135,51 +173,39 @@ export async function startTenantPayment(input: StartPaymentInput) {
           amount,
           targetType: charge.chargeType === "DEPOSIT" ? "DEPOSIT" : "RENT",
           rentChargeId: charge.id,
-          gatewayStatus: "SUCCESS",
-          verificationStatus: "VERIFIED",
+          gatewayStatus: "PENDING",
+          verificationStatus: "PENDING",
           phoneUsed: phoneNumber || null,
           reference: `${getReferencePrefix(source)}-${charge.period}-${Date.now()}`,
           externalReference: accountName || null,
-          paidAt,
-          notes: "Tenant self-service payment.",
+          paidAt: null,
+          notes: "Tenant submitted payment awaiting organization verification.",
+          callbackRaw: {
+            source,
+            sourceId: id,
+            submittedAt: paidAt.toISOString(),
+          },
         },
         select: { id: true },
-      });
-
-      await allocateRentPayment({
-        db: tx,
-        orgId: session.activeOrgId!,
-        paymentId: payment.id,
-        leaseId: charge.lease.id,
-        amount,
-        startPeriod: charge.period,
-        months: 1,
-      });
-
-      await tx.receipt.create({
-        data: {
-          paymentId: payment.id,
-          receiptNo: formatReceiptNo(payment.id),
-        },
       });
 
       await notifyRecipients({
         db: tx,
         orgId: session.activeOrgId!,
         recipients: [{ tenantId: tenant.id, userId: session.userId }],
-        type: "PAYMENT_RECEIVED",
-        title: "Payment received",
-        message: `Your ${charge.chargeType.toLowerCase().replaceAll("_", " ")} payment for ${charge.period} has been received and verified. Receipt ${formatReceiptNo(payment.id)} is available in EstateDesk.`,
+        type: "GENERAL",
+        title: "Payment submitted",
+        message: `Your ${charge.chargeType.toLowerCase().replaceAll("_", " ")} payment for ${charge.period} has been submitted and is awaiting verification.`,
       });
 
       await notifyRecipients({
         db: tx,
         orgId: session.activeOrgId!,
-        recipients: [{ tenantId: tenant.id }],
+        recipients: await getPaymentReviewRecipients(tx, session.activeOrgId!),
         channels: ["IN_APP"],
-        type: "PAYMENT_VERIFIED",
-        title: "Tenant payment verified",
-        message: `${tenant.fullName} paid ${charge.period} for ${charge.lease.unit.property.name} / Unit ${charge.lease.unit.houseNo}.`,
+        type: "GENERAL",
+        title: "Payment needs verification",
+        message: `${tenant.fullName} submitted ${charge.period} payment for ${charge.lease.unit.property.name} / Unit ${charge.lease.unit.houseNo}.`,
       });
 
       return;
@@ -228,51 +254,42 @@ export async function startTenantPayment(input: StartPaymentInput) {
           method: paymentMethod,
           amount,
           targetType: "RENT",
-          gatewayStatus: "SUCCESS",
-          verificationStatus: "VERIFIED",
+          gatewayStatus: "PENDING",
+          verificationStatus: "PENDING",
           phoneUsed: phoneNumber || null,
           reference: `${getReferencePrefix(source)}-${getCurrentPeriod()}-${Date.now()}`,
           externalReference: accountName || null,
-          paidAt,
-          notes: `Advance rent payment for up to ${months} month${months === 1 ? "" : "s"}.`,
+          paidAt: null,
+          notes: `Tenant submitted advance rent for up to ${months} month${months === 1 ? "" : "s"} awaiting organization verification.`,
+          callbackRaw: {
+            source,
+            sourceId: id,
+            leaseId: lease.id,
+            months,
+            startPeriod: getCurrentPeriod(),
+            submittedAt: paidAt.toISOString(),
+          },
         },
         select: { id: true },
-      });
-
-      const allocation = await allocateRentPayment({
-        db: tx,
-        orgId: session.activeOrgId!,
-        paymentId: payment.id,
-        leaseId: lease.id,
-        amount,
-        startPeriod: getCurrentPeriod(),
-        months,
-      });
-
-      await tx.receipt.create({
-        data: {
-          paymentId: payment.id,
-          receiptNo: formatReceiptNo(payment.id),
-        },
       });
 
       await notifyRecipients({
         db: tx,
         orgId: session.activeOrgId!,
         recipients: [{ tenantId: tenant.id, userId: session.userId }],
-        type: "PAYMENT_RECEIVED",
-        title: "Advance rent received",
-        message: `Your advance rent payment covering ${allocation.coveredPeriods.join(", ")} has been received and verified. Receipt ${formatReceiptNo(payment.id)} is available in EstateDesk.`,
+        type: "GENERAL",
+        title: "Advance rent submitted",
+        message: `Your advance rent payment has been submitted and is awaiting verification.`,
       });
 
       await notifyRecipients({
         db: tx,
         orgId: session.activeOrgId!,
-        recipients: [{ tenantId: tenant.id }],
+        recipients: await getPaymentReviewRecipients(tx, session.activeOrgId!),
         channels: ["IN_APP"],
-        type: "PAYMENT_VERIFIED",
-        title: "Advance rent verified",
-        message: `${tenant.fullName} paid advance rent for ${lease.unit.property.name} / Unit ${lease.unit.houseNo}.`,
+        type: "GENERAL",
+        title: "Advance rent needs verification",
+        message: `${tenant.fullName} submitted advance rent for ${lease.unit.property.name} / Unit ${lease.unit.houseNo}.`,
       });
 
       return;
@@ -322,28 +339,26 @@ export async function startTenantPayment(input: StartPaymentInput) {
           amount,
           targetType: "WATER",
           waterBillId: bill.id,
-          gatewayStatus: "SUCCESS",
-          verificationStatus: "VERIFIED",
+          gatewayStatus: "PENDING",
+          verificationStatus: "PENDING",
           phoneUsed: phoneNumber || null,
           reference: `${getReferencePrefix(source)}-${bill.period}-${Date.now()}`,
           externalReference: accountName || null,
-          paidAt,
-          notes: "Tenant self-service payment.",
+          paidAt: null,
+          notes: "Tenant submitted water bill payment awaiting organization verification.",
+          callbackRaw: {
+            source,
+            sourceId: id,
+            submittedAt: paidAt.toISOString(),
+          },
         },
         select: { id: true },
-      });
-
-      await tx.receipt.create({
-        data: {
-          paymentId: payment.id,
-          receiptNo: formatReceiptNo(payment.id),
-        },
       });
 
       await tx.waterBill.update({
         where: { id: bill.id },
         data: {
-          status: "PAID_VERIFIED",
+          status: "PAID_PENDING_VERIFICATION",
         },
       });
 
@@ -351,19 +366,19 @@ export async function startTenantPayment(input: StartPaymentInput) {
         db: tx,
         orgId: session.activeOrgId!,
         recipients: [{ tenantId: tenant.id, userId: session.userId }],
-        type: "PAYMENT_RECEIVED",
-        title: "Water payment received",
-        message: `Your water bill payment for ${bill.period} has been received and verified. Receipt ${formatReceiptNo(payment.id)} is available in EstateDesk.`,
+        type: "GENERAL",
+        title: "Water payment submitted",
+        message: `Your water bill payment for ${bill.period} has been submitted and is awaiting verification.`,
       });
 
       await notifyRecipients({
         db: tx,
         orgId: session.activeOrgId!,
-        recipients: [{ tenantId: tenant.id }],
+        recipients: await getPaymentReviewRecipients(tx, session.activeOrgId!),
         channels: ["IN_APP"],
-        type: "PAYMENT_VERIFIED",
-        title: "Water bill cleared",
-        message: `${tenant.fullName} cleared water bill ${bill.period} for ${bill.unit.property.name} / Unit ${bill.unit.houseNo}.`,
+        type: "GENERAL",
+        title: "Water payment needs verification",
+        message: `${tenant.fullName} submitted water bill ${bill.period} for ${bill.unit.property.name} / Unit ${bill.unit.houseNo}.`,
       });
 
       return;
@@ -379,5 +394,5 @@ export async function startTenantPayment(input: StartPaymentInput) {
   revalidatePath("/dashboard/org/charges");
   revalidatePath("/dashboard/org/notifications");
 
-  redirect(`/dashboard/tenant/payments?${params.toString()}&status=verified`);
+  redirect(`/dashboard/tenant/payments?${params.toString()}&status=pending`);
 }

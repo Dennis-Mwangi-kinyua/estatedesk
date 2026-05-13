@@ -5,6 +5,10 @@ import {
   formatLedgerDate,
   getOrgLedger,
 } from "@/lib/ledger";
+import {
+  rejectTenantPaymentAction,
+  verifyTenantPaymentAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +49,14 @@ function StatCard({
   );
 }
 
+function formatStatus(value: string) {
+  return value
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export default async function PaymentsPage() {
   const session = await requireOrgRole(["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"]);
 
@@ -53,6 +65,9 @@ export default async function PaymentsPage() {
   }
 
   const ledger = await getOrgLedger(session.activeOrgId);
+  const pendingPayments = ledger.recentPayments.filter(
+    (payment) => payment.verificationStatus === "PENDING",
+  );
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -87,7 +102,7 @@ export default async function PaymentsPage() {
         <StatCard
           label="Paid this month"
           value={formatLedgerCurrency(ledger.totals.paid)}
-          note={`${ledger.totals.paidInFull} tenants paid in full`}
+          note={`${pendingPayments.length} payment${pendingPayments.length === 1 ? "" : "s"} awaiting verification`}
         />
         <StatCard
           label="Deficit"
@@ -100,6 +115,106 @@ export default async function PaymentsPage() {
           note="Balances over 5 days overdue"
         />
       </section>
+
+      {pendingPayments.length > 0 ? (
+        <section className="overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-sm">
+          <div className="border-b border-amber-100 bg-amber-50 px-4 py-3">
+            <h2 className="text-base font-semibold text-amber-950">
+              Payments awaiting verification
+            </h2>
+            <p className="mt-1 text-sm text-amber-700">
+              Verify only after confirming the M-Pesa message, Paybill statement,
+              bank statement, or cash receipt.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-white text-left text-neutral-500">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Payer</th>
+                  <th className="px-4 py-3 font-medium">Method</th>
+                  <th className="px-4 py-3 font-medium">Target</th>
+                  <th className="px-4 py-3 font-medium">Amount</th>
+                  <th className="px-4 py-3 font-medium">Reference</th>
+                  <th className="px-4 py-3 font-medium">Submitted</th>
+                  <th className="px-4 py-3 font-medium">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingPayments.map((payment) => (
+                  <tr key={payment.id} className="border-t border-neutral-100">
+                    <td className="px-4 py-3 font-medium text-neutral-950">
+                      {payment.payerTenant?.fullName ??
+                        payment.payerUser?.fullName ??
+                        payment.payerName ??
+                        payment.payerType}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600">
+                      {formatStatus(payment.method)}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600">
+                      {formatStatus(payment.targetType)}
+                    </td>
+                    <td className="px-4 py-3 font-semibold">
+                      {formatLedgerCurrency(payment.amount)}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600">
+                      {payment.externalReference ??
+                        payment.reference ??
+                        payment.checkoutRequestId ??
+                        "-"}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600">
+                      {formatLedgerDate(payment.createdAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex min-w-64 flex-col gap-2">
+                        <form action={verifyTenantPaymentAction}>
+                          <input
+                            type="hidden"
+                            name="paymentId"
+                            value={payment.id}
+                          />
+                          <button
+                            type="submit"
+                            className="inline-flex h-9 w-full items-center justify-center rounded-xl bg-emerald-700 px-3 text-xs font-semibold text-white transition hover:bg-emerald-800"
+                          >
+                            Verify & Allocate
+                          </button>
+                        </form>
+
+                        <form
+                          action={rejectTenantPaymentAction}
+                          className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]"
+                        >
+                          <input
+                            type="hidden"
+                            name="paymentId"
+                            value={payment.id}
+                          />
+                          <input
+                            type="text"
+                            name="reason"
+                            placeholder="Optional rejection reason"
+                            className="h-9 rounded-xl border border-neutral-200 px-3 text-xs outline-none transition focus:border-neutral-400"
+                          />
+                          <button
+                            type="submit"
+                            className="inline-flex h-9 items-center justify-center rounded-xl border border-red-200 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                          >
+                            Reject
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
 
       <section className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
         <div className="border-b border-neutral-200 px-4 py-3">
@@ -212,10 +327,10 @@ export default async function PaymentsPage() {
                     {formatLedgerCurrency(payment.amount)}
                   </td>
                   <td className="px-4 py-3 text-neutral-600">
-                    {payment.gatewayStatus}
+                    {formatStatus(payment.gatewayStatus)}
                   </td>
                   <td className="px-4 py-3 text-neutral-600">
-                    {payment.verificationStatus}
+                    {formatStatus(payment.verificationStatus)}
                   </td>
                   <td className="px-4 py-3 text-neutral-600">
                     {payment.reference ??

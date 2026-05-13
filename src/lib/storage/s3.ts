@@ -8,59 +8,63 @@ import type {
   UploadFileInput,
   UploadedFileResult,
 } from "@/lib/storage/types";
+import { getStorageConfig } from "@/lib/config/env";
 
-const bucket = process.env.S3_BUCKET!;
-const region = process.env.S3_REGION!;
-const endpoint = process.env.S3_ENDPOINT || undefined;
-const publicBaseUrl = process.env.S3_PUBLIC_BASE_URL || "";
+let s3Client: S3Client | null = null;
 
-export const s3 = new S3Client({
-  region,
-  endpoint,
-  forcePathStyle: !!endpoint,
-  credentials:
-    process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY
-      ? {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID,
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-        }
-      : undefined,
-});
+function getS3Client() {
+  const config = getStorageConfig();
+
+  s3Client ??= new S3Client({
+    region: config.region,
+    endpoint: config.endpoint,
+    forcePathStyle: !!config.endpoint,
+    credentials: config.credentials,
+  });
+
+  return { client: s3Client, config };
+}
 
 export class S3StorageProvider implements StorageProvider {
   async uploadFile(input: UploadFileInput): Promise<UploadedFileResult> {
-    await s3.send(
+    const { client, config } = getS3Client();
+
+    await client.send(
       new PutObjectCommand({
-        Bucket: bucket,
+        Bucket: config.bucket,
         Key: input.key,
         Body: input.body,
         ContentType: input.contentType,
-      })
+      }),
     );
 
     return {
       key: input.key,
       url: this.getPublicUrl(input.key),
-      bucket,
+      bucket: config.bucket,
       contentType: input.contentType,
     };
   }
 
   async deleteFile(key: string): Promise<void> {
-    await s3.send(
+    const { client, config } = getS3Client();
+
+    await client.send(
       new DeleteObjectCommand({
-        Bucket: bucket,
+        Bucket: config.bucket,
         Key: key,
-      })
+      }),
     );
   }
 
   getPublicUrl(key: string): string {
-    if (publicBaseUrl) {
-      return `${publicBaseUrl.replace(/\/$/, "")}/${key}`;
+    const config = getStorageConfig();
+
+    if (config.publicBaseUrl) {
+      return `${config.publicBaseUrl.replace(/\/$/, "")}/${key}`;
     }
 
-    return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+    return `https://${config.bucket}.s3.${config.region}.amazonaws.com/${key}`;
   }
 }
 

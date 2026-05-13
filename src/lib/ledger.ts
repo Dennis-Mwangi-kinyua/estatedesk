@@ -358,6 +358,7 @@ export async function getOrgLedger(
           select: {
             id: true,
             amount: true,
+            method: true,
             payerName: true,
             payerType: true,
             targetType: true,

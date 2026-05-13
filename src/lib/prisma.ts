@@ -2,6 +2,7 @@ import "dotenv/config";
 import dns from "node:dns";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { getDatabaseUrl } from "@/lib/config/env";
 
 dns.setDefaultResultOrder("ipv4first");
 
@@ -12,10 +13,7 @@ const globalForPrisma = globalThis as unknown as {
 
 const PRISMA_SCHEMA_VERSION = "presence-and-pg-timeouts";
 
-const fallbackDatasourceUrl = "postgresql://user:password@localhost:5432/estatedesk";
-
-const DATABASE_URL =
-  process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? fallbackDatasourceUrl;
+const DATABASE_URL = getDatabaseUrl();
 
 function createPrismaClient() {
   const adapter = new PrismaPg({
