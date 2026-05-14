@@ -1,5 +1,6 @@
 "use client";
 
+import { Plus, Save } from "lucide-react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import {
@@ -40,15 +41,23 @@ type AttributionFormProps = {
   commissionNotes: string | null;
 };
 
-function SubmitButton({ label = "Save" }: { label?: string }) {
+function SubmitButton({
+  label = "Save",
+  icon = "save",
+}: {
+  label?: string;
+  icon?: "plus" | "save";
+}) {
   const { pending } = useFormStatus();
+  const Icon = icon === "plus" ? Plus : Save;
 
   return (
     <button
       type="submit"
       disabled={pending}
-      className="rounded-xl bg-neutral-950 px-3 py-2 font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-400"
+      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-3 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-400 sm:w-auto"
     >
+      <Icon className="h-4 w-4" />
       {pending ? "Saving..." : label}
     </button>
   );
@@ -77,7 +86,7 @@ export function CreateMarketerForm() {
   return (
     <form
       action={action}
-      className="grid gap-3 p-4 lg:grid-cols-[1fr_1fr_160px_140px] xl:grid-cols-[1fr_1fr_160px_140px_1fr_auto]"
+      className="grid gap-3 p-3 sm:p-4 md:grid-cols-2 lg:grid-cols-[1fr_1fr_160px_140px] xl:grid-cols-[1fr_1fr_160px_140px_1fr_auto]"
     >
       <input
         name="fullName"
@@ -112,8 +121,8 @@ export function CreateMarketerForm() {
         placeholder="Notes"
         className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none"
       />
-      <SubmitButton label="Add" />
-      <div className="lg:col-span-4 xl:col-span-6">
+      <SubmitButton label="Add" icon="plus" />
+      <div className="md:col-span-2 lg:col-span-4 xl:col-span-6">
         <FormMessage state={state} />
       </div>
     </form>
@@ -132,8 +141,8 @@ export function MarketerUpdateForm({
   );
 
   return (
-    <form action={action} className="flex min-w-[360px] flex-col gap-2">
-      <div className="flex gap-2">
+    <form action={action} className="flex w-full flex-col gap-2 lg:min-w-[360px]">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-[96px_130px_1fr_auto]">
         <input type="hidden" name="marketerId" value={marketerId} />
         <input
           name="defaultCommissionRate"
@@ -143,12 +152,12 @@ export function MarketerUpdateForm({
           step="0.01"
           defaultValue={defaultCommissionRate}
           aria-label="Default commission rate percentage"
-          className="w-24 rounded-xl border border-neutral-200 bg-white px-3 py-2 outline-none"
+          className="h-11 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none"
         />
         <select
           name="status"
           defaultValue={status}
-          className="rounded-xl border border-neutral-200 bg-white px-3 py-2 outline-none"
+          className="h-11 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none"
         >
           <option value="ACTIVE">ACTIVE</option>
           <option value="INACTIVE">INACTIVE</option>
@@ -157,7 +166,7 @@ export function MarketerUpdateForm({
           name="notes"
           defaultValue={notes}
           placeholder="Notes"
-          className="min-w-0 flex-1 rounded-xl border border-neutral-200 bg-white px-3 py-2 outline-none"
+          className="col-span-2 h-11 min-w-0 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none sm:col-span-1"
         />
         <SubmitButton />
       </div>
@@ -186,13 +195,13 @@ export function AttributionForm({
   );
 
   return (
-    <form action={action} className="flex min-w-[520px] flex-col gap-2">
-      <div className="flex gap-2">
+    <form action={action} className="flex w-full flex-col gap-2 lg:min-w-[520px]">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-[minmax(150px,1fr)_96px_145px_minmax(150px,1fr)_auto]">
         <input type="hidden" name={hiddenName} value={hiddenValue} />
         <select
           name="marketerId"
           defaultValue={selectedMarketerId ?? "none"}
-          className="rounded-xl border border-neutral-200 bg-white px-3 py-2 outline-none"
+          className="col-span-2 h-11 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none sm:col-span-1"
         >
           <option value="none">Unassigned</option>
           {marketers.map((marketer) => (
@@ -210,12 +219,12 @@ export function AttributionForm({
           defaultValue={commissionRate ?? ""}
           placeholder="Rate %"
           aria-label="Commission rate percentage"
-          className="w-24 rounded-xl border border-neutral-200 bg-white px-3 py-2 outline-none"
+          className="h-11 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none"
         />
         <select
           name="commissionStatus"
           defaultValue={commissionStatus}
-          className="rounded-xl border border-neutral-200 bg-white px-3 py-2 outline-none"
+          className="h-11 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none"
         >
           {commissionStatuses.map((status) => (
             <option key={status} value={status}>
@@ -227,7 +236,7 @@ export function AttributionForm({
           name="commissionNotes"
           defaultValue={commissionNotes ?? ""}
           placeholder="Commission notes"
-          className="min-w-0 flex-1 rounded-xl border border-neutral-200 bg-white px-3 py-2 outline-none"
+          className="col-span-2 h-11 min-w-0 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none sm:col-span-1"
         />
         <SubmitButton />
       </div>
