@@ -344,7 +344,7 @@ export async function startTenantPayment(input: StartPaymentInput) {
         throw new Error("This charge is already cleared.");
       }
 
-      const payment = await tx.payment.create({
+      await tx.payment.create({
         data: {
           orgId: session.activeOrgId!,
           payerTenantId: tenant.id,
@@ -430,7 +430,7 @@ export async function startTenantPayment(input: StartPaymentInput) {
         throw new Error("Active lease not found.");
       }
 
-      const payment = await tx.payment.create({
+      await tx.payment.create({
         data: {
           orgId: session.activeOrgId!,
           payerTenantId: tenant.id,
@@ -518,7 +518,7 @@ export async function startTenantPayment(input: StartPaymentInput) {
 
       const amount = Number(bill.total ?? 0);
 
-      const payment = await tx.payment.create({
+      await tx.payment.create({
         data: {
           orgId: session.activeOrgId!,
           payerTenantId: tenant.id,

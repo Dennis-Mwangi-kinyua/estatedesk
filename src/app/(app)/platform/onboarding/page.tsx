@@ -43,8 +43,10 @@ function buildWhere({
       { workEmail: { contains: q, mode: "insensitive" } },
       { phone: { contains: q, mode: "insensitive" } },
       { managedPropertyType: { contains: q, mode: "insensitive" } },
+      { referralCode: { contains: q, mode: "insensitive" } },
       { message: { contains: q, mode: "insensitive" } },
       { internalNotes: { contains: q, mode: "insensitive" } },
+      { marketer: { fullName: { contains: q, mode: "insensitive" } } },
     ];
   }
 
@@ -74,6 +76,7 @@ export default async function PlatformOnboardingPage({
         take,
         include: {
           handledBy: { select: { fullName: true, email: true } },
+          marketer: { select: { fullName: true, referralCode: true } },
         },
       }),
       prisma.onboardingRequest.count({ where }),
@@ -143,6 +146,17 @@ export default async function PlatformOnboardingPage({
                     <p className="mt-2 text-sm text-neutral-600">
                       {request.workEmail}
                       {request.phone ? ` • ${request.phone}` : ""}
+                    </p>
+                    <p className="mt-2 text-xs font-medium text-neutral-500">
+                      Marketer:{" "}
+                      {request.marketer
+                        ? `${request.marketer.fullName} (${request.marketer.referralCode})`
+                        : request.referralCode
+                          ? `Unmatched referral ${request.referralCode}`
+                          : "Unassigned"}
+                      {request.commissionRate
+                        ? ` • ${request.commissionRate.toString()}%`
+                        : ""}
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">

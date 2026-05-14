@@ -5,6 +5,7 @@ import {
   Star,
   TrendingUp,
 } from "lucide-react";
+import Link from "next/link";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import {
   formatLedgerCurrency,
@@ -15,6 +16,25 @@ import {
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+
+type ReportsSearchParams = {
+  apartment?: string;
+  payment?: string;
+};
+
+type OrgReportsPageProps = {
+  searchParams?: Promise<ReportsSearchParams> | ReportsSearchParams;
+};
+
+const paymentFilters = [
+  { value: "all", label: "All occupants" },
+  { value: "paid", label: "Paid" },
+  { value: "not-paid", label: "Not fully paid" },
+  { value: "partial", label: "Partial" },
+  { value: "unpaid", label: "Unpaid" },
+  { value: "default", label: "Default risk" },
+  { value: "early", label: "Early payers" },
+] as const;
 
 function formatPercent(value: number) {
   return `${Math.round(value)}%`;
@@ -125,8 +145,56 @@ function Stars({ score }: { score: number }) {
   );
 }
 
-export default async function OrgReportsPage() {
+function reportFilterHref({
+  apartment,
+  payment,
+}: {
+  apartment: string;
+  payment: string;
+}) {
+  const params = new URLSearchParams();
+
+  if (apartment !== "all") params.set("apartment", apartment);
+  if (payment !== "all") params.set("payment", payment);
+
+  const query = params.toString();
+  return query ? `/dashboard/org/reports?${query}` : "/dashboard/org/reports";
+}
+
+function filterRowsByPayment<
+  T extends {
+    amountDue: number;
+    amountPaid: number;
+    balance: number;
+    daysPastDue: number;
+    rating: { score: number };
+  },
+>(rows: T[], paymentFilter: string) {
+  switch (paymentFilter) {
+    case "paid":
+      return rows.filter((row) => row.amountDue > 0 && row.balance <= 0);
+    case "not-paid":
+      return rows.filter((row) => row.amountDue > 0 && row.balance > 0);
+    case "partial":
+      return rows.filter((row) => row.amountPaid > 0 && row.balance > 0);
+    case "unpaid":
+      return rows.filter((row) => row.amountDue > 0 && row.amountPaid <= 0);
+    case "default":
+      return rows.filter((row) => row.balance > 0 && row.daysPastDue > 5);
+    case "early":
+      return rows.filter((row) => row.rating.score >= 5);
+    default:
+      return rows;
+  }
+}
+
+export default async function OrgReportsPage({
+  searchParams,
+}: OrgReportsPageProps) {
   const session = await requireManagementAccess();
+  const resolvedSearchParams = await searchParams;
+  const selectedApartment = resolvedSearchParams?.apartment ?? "all";
+  const selectedPayment = resolvedSearchParams?.payment ?? "all";
   const period = getCurrentPeriod();
   const ledger = await getOrgLedger(session.activeOrgId!, period, {
     recentPaymentsTake: 10,
@@ -162,12 +230,26 @@ export default async function OrgReportsPage() {
     };
   });
 
-  const paidRows = rows.filter((row) => row.amountDue > 0 && row.balance <= 0);
-  const notPaidRows = rows.filter((row) => row.amountDue > 0 && row.balance > 0);
-  const earlyPayers = rows.filter((row) => row.rating.score >= 5);
-  const collectionRate = ledger.totals.expected
-    ? (ledger.totals.paid / ledger.totals.expected) * 100
+  const apartmentOptions = Array.from(
+    new Set(rows.map((row) => row.propertyName).filter((name) => name && name !== "-")),
+  ).sort((a, b) => a.localeCompare(b));
+  const apartmentRows =
+    selectedApartment === "all"
+      ? rows
+      : rows.filter((row) => row.propertyName === selectedApartment);
+  const filteredRows = filterRowsByPayment(apartmentRows, selectedPayment);
+  const paidRows = filteredRows.filter((row) => row.amountDue > 0 && row.balance <= 0);
+  const notPaidRows = filteredRows.filter((row) => row.amountDue > 0 && row.balance > 0);
+  const scopedTotals = {
+    expected: filteredRows.reduce((sum, row) => sum + row.amountDue, 0),
+    paid: filteredRows.reduce((sum, row) => sum + row.amountPaid, 0),
+    deficit: filteredRows.reduce((sum, row) => sum + row.deficit, 0),
+  };
+  const collectionRate = scopedTotals.expected
+    ? (scopedTotals.paid / scopedTotals.expected) * 100
     : 0;
+  const activePaymentFilter =
+    paymentFilters.find((filter) => filter.value === selectedPayment) ?? paymentFilters[0];
 
   return (
     <div className="space-y-5">
@@ -183,6 +265,10 @@ export default async function OrgReportsPage() {
             <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">
               Current period: {period}. See who has paid, who has not, who is
               partial, and which tenants consistently pay early.
+            </p>
+            <p className="mt-2 text-xs font-medium text-neutral-500">
+              Showing {activePaymentFilter.label.toLowerCase()} for{" "}
+              {selectedApartment === "all" ? "all apartments" : selectedApartment}.
             </p>
           </div>
 
@@ -201,12 +287,55 @@ export default async function OrgReportsPage() {
         </div>
       </section>
 
+      <section className="ios-panel rounded-[28px] p-4 sm:p-5">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(280px,0.5fr)]">
+          <div>
+            <p className="text-sm font-semibold text-neutral-950">Apartment</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <ReportFilterLink
+                href={reportFilterHref({ apartment: "all", payment: selectedPayment })}
+                active={selectedApartment === "all"}
+              >
+                All apartments
+              </ReportFilterLink>
+              {apartmentOptions.map((apartment) => (
+                <ReportFilterLink
+                  key={apartment}
+                  href={reportFilterHref({ apartment, payment: selectedPayment })}
+                  active={selectedApartment === apartment}
+                >
+                  {apartment}
+                </ReportFilterLink>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold text-neutral-950">Occupants</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {paymentFilters.map((filter) => (
+                <ReportFilterLink
+                  key={filter.value}
+                  href={reportFilterHref({
+                    apartment: selectedApartment,
+                    payment: filter.value,
+                  })}
+                  active={selectedPayment === filter.value}
+                >
+                  {filter.label}
+                </ReportFilterLink>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <ReportStat icon={Receipt} label="Expected" value={formatLedgerCurrency(ledger.totals.expected)} />
-        <ReportStat icon={TrendingUp} label="Paid" value={formatLedgerCurrency(ledger.totals.paid)} />
-        <ReportStat icon={AlertTriangle} label="Outstanding" value={formatLedgerCurrency(ledger.totals.deficit)} />
+        <ReportStat icon={Receipt} label="Expected" value={formatLedgerCurrency(scopedTotals.expected)} />
+        <ReportStat icon={TrendingUp} label="Paid" value={formatLedgerCurrency(scopedTotals.paid)} />
+        <ReportStat icon={AlertTriangle} label="Outstanding" value={formatLedgerCurrency(scopedTotals.deficit)} />
         <ReportStat icon={BadgeCheck} label="Paid tenants" value={paidRows.length.toLocaleString()} />
-        <ReportStat icon={Star} label="Early payers" value={earlyPayers.length.toLocaleString()} />
+        <ReportStat icon={Star} label="Occupants in scope" value={filteredRows.length.toLocaleString()} />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
@@ -235,7 +364,7 @@ export default async function OrgReportsPage() {
             </p>
           </div>
           <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">
-            {rows.length} tenant{rows.length === 1 ? "" : "s"}
+            {filteredRows.length} tenant{filteredRows.length === 1 ? "" : "s"}
           </span>
         </div>
 
@@ -253,7 +382,7 @@ export default async function OrgReportsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
-              {rows.map((row) => (
+              {filteredRows.map((row) => (
                 <tr key={row.tenantId}>
                   <td className="py-3 pr-4">
                     <p className="font-semibold text-neutral-950">{row.tenantName}</p>
@@ -286,9 +415,37 @@ export default async function OrgReportsPage() {
               ))}
             </tbody>
           </table>
+          {filteredRows.length === 0 ? (
+            <div className="border-t border-neutral-100 py-8 text-center text-sm text-neutral-500">
+              No occupants match this report filter.
+            </div>
+          ) : null}
         </div>
       </section>
     </div>
+  );
+}
+
+function ReportFilterLink({
+  href,
+  active,
+  children,
+}: {
+  href: string;
+  active: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex min-h-9 items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+        active
+          ? "border-neutral-950 bg-neutral-950 text-white"
+          : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50"
+      }`}
+    >
+      {children}
+    </Link>
   );
 }
 

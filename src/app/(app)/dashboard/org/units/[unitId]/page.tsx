@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { getUnitSlug } from "@/lib/units/url";
 
 export const dynamic = "force-dynamic";
 
@@ -144,6 +145,77 @@ export default async function UnitDetailsPage({
 }: UnitDetailsPageProps) {
   const session = await requireManagementAccess();
   const { unitId } = await params;
+  const requestedUnitRef = decodeURIComponent(unitId);
+
+  const directUnit = await prisma.unit.findFirst({
+    where: {
+      id: requestedUnitRef,
+      deletedAt: null,
+      property: {
+        orgId: session.activeOrgId!,
+        deletedAt: null,
+      },
+    },
+    select: {
+      id: true,
+      houseNo: true,
+      property: {
+        select: {
+          name: true,
+        },
+      },
+      building: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  let resolvedUnitId = directUnit?.id ?? null;
+
+  if (!resolvedUnitId) {
+    const candidateUnits = await prisma.unit.findMany({
+      where: {
+        deletedAt: null,
+        property: {
+          orgId: session.activeOrgId!,
+          deletedAt: null,
+        },
+      },
+      select: {
+        id: true,
+        houseNo: true,
+        property: {
+          select: {
+            name: true,
+          },
+        },
+        building: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    const slugMatch = candidateUnits.find((unit) => {
+      return (
+        getUnitSlug({
+          id: unit.id,
+          houseNo: unit.houseNo,
+          buildingName: unit.building?.name,
+          propertyName: unit.property.name,
+        }) === requestedUnitRef
+      );
+    });
+
+    resolvedUnitId = slugMatch?.id ?? null;
+  }
+
+  if (!resolvedUnitId) {
+    notFound();
+  }
 
   const organization = await prisma.organization.findFirst({
     where: {
@@ -160,7 +232,7 @@ export default async function UnitDetailsPage({
 
   const unit = await prisma.unit.findFirst({
     where: {
-      id: unitId,
+      id: resolvedUnitId,
       deletedAt: null,
       property: {
         orgId: session.activeOrgId!,
@@ -297,6 +369,17 @@ export default async function UnitDetailsPage({
 
   if (!unit) {
     notFound();
+  }
+
+  const canonicalUnitSlug = getUnitSlug({
+    id: unit.id,
+    houseNo: unit.houseNo,
+    buildingName: unit.building?.name,
+    propertyName: unit.property.name,
+  });
+
+  if (requestedUnitRef !== canonicalUnitSlug) {
+    redirect(`/dashboard/org/units/${canonicalUnitSlug}`);
   }
 
   const currentLease =

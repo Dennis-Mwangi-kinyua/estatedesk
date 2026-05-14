@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { getOrgUnitHref } from "@/lib/units/url";
 
 export const dynamic = "force-dynamic";
 
@@ -639,7 +640,12 @@ export default async function UnitsPage({ searchParams }: UnitsPageProps) {
                               <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0">
                                   <Link
-                                    href={`/dashboard/org/units/${unit.id}`}
+                                    href={getOrgUnitHref({
+                                      id: unit.id,
+                                      houseNo: unit.houseNo,
+                                      buildingName: unit.building?.name,
+                                      propertyName: property.name,
+                                    })}
                                     className="block truncate text-lg font-semibold text-slate-900 hover:text-slate-700"
                                   >
                                     Unit {unit.houseNo}
@@ -696,7 +702,12 @@ export default async function UnitsPage({ searchParams }: UnitsPageProps) {
 
                               <div className="mt-4 flex gap-3">
                                 <Link
-                                  href={`/dashboard/org/units/${unit.id}`}
+                                  href={getOrgUnitHref({
+                                    id: unit.id,
+                                    houseNo: unit.houseNo,
+                                    buildingName: unit.building?.name,
+                                    propertyName: property.name,
+                                  })}
                                   className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
                                 >
                                   View Unit

@@ -74,6 +74,7 @@ const navItems = [
   { href: "/platform/payment-ops", label: "Payment Ops", icon: "RefreshCcw" },
   { href: "/platform/feature-flags", label: "Feature Flags", icon: "Flag" },
   { href: "/platform/onboarding", label: "Onboarding", icon: "SlidersHorizontal" },
+  { href: "/platform/marketing", label: "Marketing", icon: "BriefcaseBusiness" },
   { href: "/platform/broadcasts", label: "Broadcasts", icon: "Bell" },
   { href: "/platform/jobs", label: "Jobs", icon: "Settings" },
   { href: "/platform/data-management", label: "Data", icon: "Database" },

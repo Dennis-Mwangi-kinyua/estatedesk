@@ -97,6 +97,8 @@ const workflow = [
 
 type SearchParams = Promise<{
   request?: string;
+  ref?: string;
+  referral?: string;
 }>;
 
 type RequestMessage = {
@@ -140,6 +142,7 @@ export default async function RegisterPage({
 }) {
   const params = await searchParams;
   const message = requestMessage(params.request);
+  const referralCode = (params.ref ?? params.referral ?? "").trim();
 
   return (
     <main className="min-h-screen bg-[#f6f7f9] text-neutral-950">
@@ -257,6 +260,7 @@ export default async function RegisterPage({
             </div>
 
             <form action={createOnboardingRequestAction} className="space-y-3">
+              <input type="hidden" name="referralCode" value={referralCode} />
               <div className="hidden" aria-hidden="true">
                 <label>
                   Website

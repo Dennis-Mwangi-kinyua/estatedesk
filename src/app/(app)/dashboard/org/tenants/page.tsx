@@ -148,64 +148,65 @@ export default async function OrgTenantsPage({ searchParams }: PageProps) {
   }> = [];
 
   try {
-    organization = await prisma.organization.findFirst({
-      where: {
-        id: orgId,
-        deletedAt: null,
-      },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
-
-    tenants = await prisma.tenant.findMany({
-      where: {
-        orgId,
-        deletedAt: null,
-        ...(search
-          ? {
-              OR: [
-                { fullName: { contains: search, mode: "insensitive" } },
-                { email: { contains: search, mode: "insensitive" } },
-                { phone: { contains: search, mode: "insensitive" } },
-              ],
-            }
-          : {}),
-        ...(status !== "ALL" ? { status } : {}),
-      },
-      orderBy: { fullName: "asc" },
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        phone: true,
-        status: true,
-        leases: {
-          where: {
-            deletedAt: null,
-            status: "ACTIVE",
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-          take: 1,
-          select: {
-            unit: {
-              select: {
-                houseNo: true,
-                building: {
-                  select: { name: true },
-                },
-                property: {
-                  select: { name: true },
+    [organization, tenants] = await Promise.all([
+      prisma.organization.findFirst({
+        where: {
+          id: orgId,
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      }),
+      prisma.tenant.findMany({
+        where: {
+          orgId,
+          deletedAt: null,
+          ...(search
+            ? {
+                OR: [
+                  { fullName: { contains: search, mode: "insensitive" } },
+                  { email: { contains: search, mode: "insensitive" } },
+                  { phone: { contains: search, mode: "insensitive" } },
+                ],
+              }
+            : {}),
+          ...(status !== "ALL" ? { status } : {}),
+        },
+        orderBy: { fullName: "asc" },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phone: true,
+          status: true,
+          leases: {
+            where: {
+              deletedAt: null,
+              status: "ACTIVE",
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+            select: {
+              unit: {
+                select: {
+                  houseNo: true,
+                  building: {
+                    select: { name: true },
+                  },
+                  property: {
+                    select: { name: true },
+                  },
                 },
               },
             },
           },
         },
-      },
-    });
+      }),
+    ]);
   } catch (error) {
     console.error("Failed to load organisation tenants:", error);
 

@@ -11,7 +11,7 @@ const globalForPrisma = globalThis as unknown as {
   prismaSchemaVersion?: string;
 };
 
-const PRISMA_SCHEMA_VERSION = "presence-and-pg-timeouts";
+const PRISMA_SCHEMA_VERSION = "marketing-attribution-v2";
 
 const DATABASE_URL = getDatabaseUrl();
 

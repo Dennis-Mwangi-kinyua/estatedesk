@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getOrgUnitHref } from "@/lib/units/url";
 
 export const dynamic = "force-dynamic";
 
@@ -418,7 +419,12 @@ export default async function LeaseDetailPage({ params }: LeasePageProps) {
               <dt className="text-muted-foreground">Unit</dt>
               <dd className="text-right font-medium">
                 <Link
-                  href={`/units/${lease.unit.id}`}
+                  href={getOrgUnitHref({
+                    id: lease.unit.id,
+                    houseNo: lease.unit.houseNo,
+                    buildingName: lease.unit.building?.name,
+                    propertyName: lease.unit.property.name,
+                  })}
                   className="underline underline-offset-4"
                 >
                   {lease.unit.houseNo}

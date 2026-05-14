@@ -446,6 +446,8 @@ export async function getOrgLedger(
       tone: dueTone(days, balance),
       paymentStatus,
       lastPaymentAt: tenantPayments[0]?.paidAt ?? tenantPayments[0]?.createdAt ?? null,
+      propertyName: obligations[0]?.unit.property.name ?? "-",
+      unitHouseNo: obligations[0]?.unit.houseNo ?? "-",
       unitLabel:
         obligations[0]?.unit
           ? `${obligations[0].unit.property.name} / Unit ${obligations[0].unit.houseNo}`

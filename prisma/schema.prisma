@@ -140,6 +140,11 @@ model Organization {
   deletedAt              DateTime?
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
+  marketerId             String?
+  referralCode           String?
+  commissionRate         Decimal?                @db.Decimal(5, 2)
+  commissionStatus       MarketingCommissionStatus @default(PENDING)
+  commissionNotes        String?
   apiKeys                ApiKey[]
   assets                 Asset[]
   auditLogs              AuditLog[]
@@ -151,6 +156,7 @@ model Organization {
   kraIntegration         KraIntegration?
   landlordAssignments    LandlordAssignment[]
   landlordProfiles       LandlordProfile[]
+  marketer               PlatformMarketer?       @relation(fields: [marketerId], references: [id])
   leases                 Lease[]
   memberships            Membership[]
   notifications          Notification[]
@@ -177,6 +183,9 @@ model Organization {
   @@index([deletedAt])
   @@index([createdAt])
   @@index([updatedAt])
+  @@index([marketerId])
+  @@index([referralCode])
+  @@index([commissionStatus])
 }
 
 /// Message sent by an organization to platform administrators.
@@ -210,16 +219,46 @@ model OnboardingRequest {
   internalNotes       String?
   handledAt           DateTime?
   handledByUserId     String?
+  marketerId          String?
+  referralCode        String?
+  commissionRate      Decimal? @db.Decimal(5, 2)
+  commissionStatus    MarketingCommissionStatus @default(PENDING)
+  commissionNotes     String?
   source              String   @default("REGISTER_PAGE")
   ipAddress           String?
   userAgent           String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   handledBy           User?    @relation("OnboardingRequestHandledBy", fields: [handledByUserId], references: [id])
+  marketer            PlatformMarketer? @relation(fields: [marketerId], references: [id])
 
   @@index([status, createdAt])
   @@index([workEmail, createdAt])
   @@index([handledByUserId, handledAt])
+  @@index([marketerId])
+  @@index([referralCode])
+  @@index([commissionStatus])
+  @@index([createdAt])
+}
+
+/// Platform-side marketer/referral partner used to attribute leads and customers.
+model PlatformMarketer {
+  id                    String              @id @default(cuid())
+  fullName              String
+  email                 String?
+  phone                 String?
+  referralCode          String              @unique
+  defaultCommissionRate Decimal             @default(0) @db.Decimal(5, 2)
+  status                MarketerStatus      @default(ACTIVE)
+  notes                 String?
+  deletedAt             DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  onboardingRequests    OnboardingRequest[]
+  organizations         Organization[]
+
+  @@index([status])
+  @@index([deletedAt])
   @@index([createdAt])
 }
 
@@ -1520,6 +1559,18 @@ enum OrganizationStatus {
   ACTIVE
   SUSPENDED
   DISABLED
+}
+
+enum MarketerStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum MarketingCommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  CANCELLED
 }
 
 enum OrgRole {

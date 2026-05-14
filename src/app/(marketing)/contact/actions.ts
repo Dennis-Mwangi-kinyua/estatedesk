@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { resolveMarketerReferral } from "@/lib/marketing/referrals";
 
 const salesContactSchema = z.object({
   fullName: z.string().trim().min(2).max(120),
@@ -19,6 +20,7 @@ const salesContactSchema = z.object({
   phone: z.string().trim().max(40).optional(),
   managedPropertyType: z.string().trim().min(2).max(80),
   message: z.string().trim().max(1200).optional(),
+  referralCode: z.string().trim().max(40).optional(),
 });
 
 function getClientIp(headerStore: Awaited<ReturnType<typeof headers>>) {
@@ -43,6 +45,7 @@ export async function contactSalesAction(formData: FormData) {
     phone: formData.get("phone") || undefined,
     managedPropertyType: formData.get("managedPropertyType"),
     message: formData.get("message") || undefined,
+    referralCode: formData.get("referralCode") || undefined,
   });
 
   if (!parsed.success) {
@@ -59,13 +62,28 @@ export async function contactSalesAction(formData: FormData) {
     redirect("/contact?request=limited#contact-sales");
   }
 
-  await prisma.onboardingRequest.create({
-    data: {
-      ...parsed.data,
-      source: "CONTACT_SALES_PAGE",
-      ipAddress,
-      userAgent: headerStore.get("user-agent"),
-    },
+  await prisma.$transaction(async (tx) => {
+    const attribution = await resolveMarketerReferral(
+      tx,
+      parsed.data.referralCode ?? "",
+    );
+
+    await tx.onboardingRequest.create({
+      data: {
+        fullName: parsed.data.fullName,
+        companyName: parsed.data.companyName,
+        workEmail: parsed.data.workEmail,
+        phone: parsed.data.phone,
+        managedPropertyType: parsed.data.managedPropertyType,
+        message: parsed.data.message,
+        marketerId: attribution.marketerId,
+        referralCode: attribution.referralCode,
+        commissionRate: attribution.commissionRate,
+        source: "CONTACT_SALES_PAGE",
+        ipAddress,
+        userAgent: headerStore.get("user-agent"),
+      },
+    });
   });
 
   revalidatePath("/platform/onboarding");

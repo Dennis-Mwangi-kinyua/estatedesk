@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PropertyDetails } from "@/features/properties/queries/get-property-details";
+import { getOrgUnitHref } from "@/lib/units/url";
 
 function formatCurrency(value: number) {
   return `KES ${value.toLocaleString()}`;
@@ -357,7 +358,11 @@ export function PropertyDetailsView({
 
                   <div className="mt-4 flex justify-end">
                     <Link
-                      href={`/units/${unit.id}`}
+                      href={getOrgUnitHref({
+                        id: unit.id,
+                        houseNo: unit.houseNo,
+                        propertyName: property.name,
+                      })}
                       className="text-sm font-medium text-gray-500 transition hover:text-black"
                     >
                       View unit →

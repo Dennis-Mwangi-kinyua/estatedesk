@@ -7,6 +7,7 @@ import type {
   PlatformRole,
   ScopeType,
 } from "@prisma/client";
+import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -174,7 +175,7 @@ export async function setUserSession({
   setSessionCookie(cookieStore, token, remember);
 }
 
-export async function getUserSession(): Promise<AppSession | null> {
+export const getUserSession = cache(async function getUserSession(): Promise<AppSession | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
@@ -274,7 +275,7 @@ export async function getUserSession(): Promise<AppSession | null> {
     console.error("getUserSession unexpected error:", error);
     return null;
   }
-}
+});
 
 export async function clearUserSession(): Promise<void> {
   const cookieStore = await cookies();
