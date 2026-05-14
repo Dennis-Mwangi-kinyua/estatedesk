@@ -9,10 +9,14 @@ import { logoutAction } from "@/features/auth/actions/logout-action";
 
 type TenantSidebarProps = {
   fullName: string;
+  hasActiveLease: boolean;
 };
 
-export function TenantSidebar({ fullName }: TenantSidebarProps) {
+export function TenantSidebar({ fullName, hasActiveLease }: TenantSidebarProps) {
   const pathname = usePathname();
+  const navItems = tenantNavItems.filter(
+    (item) => hasActiveLease || !item.requiresActiveLease,
+  );
 
   return (
     <aside className="hidden border-r border-white/60 bg-white/70 shadow-[12px_0_40px_rgba(15,23,42,0.06)] backdrop-blur-2xl lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex lg:h-screen lg:w-[300px] lg:flex-col xl:w-[320px]">
@@ -57,7 +61,7 @@ export function TenantSidebar({ fullName }: TenantSidebarProps) {
 
       <div className="flex min-h-0 flex-1 flex-col px-3 py-4 xl:px-4">
         <nav className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
-          {tenantNavItems.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = isTenantRouteActive(pathname, item.href);
 

@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { OrgRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { recordVacatedTenancy } from "@/lib/tenants/identity";
 
 export const dynamic = "force-dynamic";
 
@@ -169,6 +170,14 @@ async function closeMoveOutAction(formData: FormData) {
       },
     });
 
+    await recordVacatedTenancy(tx, {
+      tenantId: notice.tenantId,
+      leaseId: notice.leaseId,
+      moveOutNoticeId: notice.id,
+      actorUserId: session.userId,
+      notes: notes || "Move-out confirmed by organization.",
+    });
+
     await tx.tenantHistoryRecord.updateMany({
       where: {
         tenantId: notice.tenantId,
@@ -211,6 +220,10 @@ async function closeMoveOutAction(formData: FormData) {
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/notifications");
   revalidatePath("/dashboard/org/verify-tenant");
+  revalidatePath("/dashboard/org/units");
+  revalidatePath("/dashboard/org/properties");
+  revalidatePath("/dashboard/org/tenants");
+  revalidatePath("/dashboard/tenant");
 }
 
 export default async function MoveOutsPage() {

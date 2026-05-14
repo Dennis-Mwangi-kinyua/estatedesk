@@ -16,10 +16,16 @@ export type RuntimeEnvKey =
   | "S3_PUBLIC_BASE_URL"
   | "S3_ACCESS_KEY_ID"
   | "S3_SECRET_ACCESS_KEY"
-  | "TWILIO_ACCOUNT_SID"
-  | "TWILIO_AUTH_TOKEN"
-  | "TWILIO_SMS_FROM"
-  | "TWILIO_WHATSAPP_FROM";
+  | "WHATSAPP_PROVIDER"
+  | "WHATSAPP_BUSINESS_ACCOUNT_ID"
+  | "WHATSAPP_PHONE_NUMBER_ID"
+  | "WHATSAPP_ACCESS_TOKEN"
+  | "WHATSAPP_VERIFY_TOKEN"
+  | "WHATSAPP_DISPLAY_NAME"
+  | "WHATSAPP_GRAPH_VERSION"
+  | "WHATSAPP_TEMPLATE_LANGUAGE"
+  | "WHATSAPP_INVITE_TEMPLATE_NAME"
+  | "WHATSAPP_CREDENTIALS_TEMPLATE_NAME";
 
 type EnvCheck = {
   key: RuntimeEnvKey;
@@ -90,28 +96,64 @@ export const runtimeEnvChecks = [
     importance: "optional",
   },
   {
-    key: "TWILIO_ACCOUNT_SID",
-    label: "Twilio account",
+    key: "WHATSAPP_PROVIDER",
+    label: "WhatsApp provider",
     group: "Messaging",
     importance: "recommended",
   },
   {
-    key: "TWILIO_AUTH_TOKEN",
-    label: "Twilio auth token",
+    key: "WHATSAPP_PHONE_NUMBER_ID",
+    label: "Meta WhatsApp phone number",
     group: "Messaging",
     importance: "recommended",
   },
   {
-    key: "TWILIO_SMS_FROM",
-    label: "SMS sender",
+    key: "WHATSAPP_ACCESS_TOKEN",
+    label: "Meta WhatsApp access token",
     group: "Messaging",
     importance: "recommended",
   },
   {
-    key: "TWILIO_WHATSAPP_FROM",
-    label: "WhatsApp sender",
+    key: "WHATSAPP_VERIFY_TOKEN",
+    label: "Meta webhook verify token",
     group: "Messaging",
-    importance: "recommended",
+    importance: "optional",
+  },
+  {
+    key: "WHATSAPP_BUSINESS_ACCOUNT_ID",
+    label: "Meta business account",
+    group: "Messaging",
+    importance: "optional",
+  },
+  {
+    key: "WHATSAPP_DISPLAY_NAME",
+    label: "WhatsApp display name",
+    group: "Messaging",
+    importance: "optional",
+  },
+  {
+    key: "WHATSAPP_GRAPH_VERSION",
+    label: "Meta Graph version",
+    group: "Messaging",
+    importance: "optional",
+  },
+  {
+    key: "WHATSAPP_TEMPLATE_LANGUAGE",
+    label: "WhatsApp template language",
+    group: "Messaging",
+    importance: "optional",
+  },
+  {
+    key: "WHATSAPP_INVITE_TEMPLATE_NAME",
+    label: "Invite template",
+    group: "Messaging",
+    importance: "optional",
+  },
+  {
+    key: "WHATSAPP_CREDENTIALS_TEMPLATE_NAME",
+    label: "Credentials template",
+    group: "Messaging",
+    importance: "optional",
   },
 ] satisfies EnvCheck[];
 

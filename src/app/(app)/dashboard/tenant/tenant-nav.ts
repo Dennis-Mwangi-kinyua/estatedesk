@@ -12,16 +12,16 @@ import {
 } from "react-icons/hi2";
 
 export const tenantNavItems = [
-  { label: "Dashboard", href: "/dashboard/tenant", icon: HiOutlineHome, emoji: "🏠" },
-  { label: "Profile", href: "/dashboard/tenant/profile", icon: HiOutlineUser, emoji: "👤" },
-  { label: "Lease", href: "/dashboard/tenant/lease", icon: HiOutlineDocumentText, emoji: "📄" },
-  { label: "Payments", href: "/dashboard/tenant/payments", icon: HiOutlineCreditCard, emoji: "💳" },
-  { label: "Invoices", href: "/dashboard/tenant/invoice", icon: HiOutlineReceiptRefund, emoji: "🧾" },
-  { label: "Water Bills", href: "/dashboard/tenant/water-bills", icon: HiOutlineClipboardDocumentList, emoji: "💧" },
-  { label: "Issues", href: "/dashboard/tenant/issues", icon: HiOutlineWrenchScrewdriver, emoji: "🛠️" },
-  { label: "Maintenance", href: "/dashboard/tenant/maintenance", icon: HiOutlineWrenchScrewdriver, emoji: "🔧" },
-  { label: "Inspections", href: "/dashboard/tenant/inspections", icon: HiOutlineCalendarDays, emoji: "🗓️" },
-  { label: "Notices", href: "/dashboard/tenant/notices", icon: HiOutlineBell, emoji: "🔔" },
-  { label: "Notifications", href: "/tenants/notifications", icon: HiOutlineBell, emoji: "📬" },
-  { label: "Documents", href: "/dashboard/tenant/documents", icon: HiOutlineFolder, emoji: "📁" },
+  { label: "Dashboard", href: "/dashboard/tenant", icon: HiOutlineHome, emoji: "🏠", requiresActiveLease: false },
+  { label: "Profile", href: "/dashboard/tenant/profile", icon: HiOutlineUser, emoji: "👤", requiresActiveLease: false },
+  { label: "Lease", href: "/dashboard/tenant/lease", icon: HiOutlineDocumentText, emoji: "📄", requiresActiveLease: true },
+  { label: "Payments", href: "/dashboard/tenant/payments", icon: HiOutlineCreditCard, emoji: "💳", requiresActiveLease: true },
+  { label: "Invoices", href: "/dashboard/tenant/invoice", icon: HiOutlineReceiptRefund, emoji: "🧾", requiresActiveLease: true },
+  { label: "Water Bills", href: "/dashboard/tenant/water-bills", icon: HiOutlineClipboardDocumentList, emoji: "💧", requiresActiveLease: true },
+  { label: "Issues", href: "/dashboard/tenant/issues", icon: HiOutlineWrenchScrewdriver, emoji: "🛠️", requiresActiveLease: true },
+  { label: "Maintenance", href: "/dashboard/tenant/maintenance", icon: HiOutlineWrenchScrewdriver, emoji: "🔧", requiresActiveLease: true },
+  { label: "Inspections", href: "/dashboard/tenant/inspections", icon: HiOutlineCalendarDays, emoji: "🗓️", requiresActiveLease: true },
+  { label: "Notices", href: "/dashboard/tenant/notices", icon: HiOutlineBell, emoji: "🔔", requiresActiveLease: true },
+  { label: "Notifications", href: "/tenants/notifications", icon: HiOutlineBell, emoji: "📬", requiresActiveLease: true },
+  { label: "Documents", href: "/dashboard/tenant/documents", icon: HiOutlineFolder, emoji: "📁", requiresActiveLease: true },
 ] as const;

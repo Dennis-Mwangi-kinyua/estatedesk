@@ -1,6 +1,9 @@
 import "server-only";
 
-import twilio from "twilio";
+import {
+  sendMetaWhatsappTemplate,
+  sendMetaWhatsappText,
+} from "@/lib/whatsapp/meta";
 
 type SendAccountCredentialsInput = {
   fullName: string;
@@ -11,14 +14,6 @@ type SendAccountCredentialsInput = {
   role: string;
   loginUrl?: string;
 };
-
-function toE164(phone: string) {
-  const normalized = phone.replace(/[^\d+]/g, "");
-
-  if (normalized.startsWith("+")) return normalized;
-  if (normalized.startsWith("0")) return `+254${normalized.slice(1)}`;
-  return `+${normalized}`;
-}
 
 function buildMessage(input: SendAccountCredentialsInput) {
   return [
@@ -34,23 +29,33 @@ function buildMessage(input: SendAccountCredentialsInput) {
     .join("\n");
 }
 
-async function sendWhatsapp(phone: string, body: string) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_WHATSAPP_FROM;
-
-  if (!accountSid || !authToken || !from) {
-    console.warn("Skipping WhatsApp credentials delivery: missing Twilio env.");
+async function sendWhatsapp(phone: string, body: string, input: SendAccountCredentialsInput) {
+  if (
+    !process.env.WHATSAPP_PHONE_NUMBER_ID?.trim() ||
+    !process.env.WHATSAPP_ACCESS_TOKEN?.trim()
+  ) {
+    console.warn("Skipping WhatsApp credentials delivery: missing Meta WhatsApp env.");
     return;
   }
 
-  const client = twilio(accountSid, authToken);
+  const templateName = process.env.WHATSAPP_CREDENTIALS_TEMPLATE_NAME?.trim();
 
-  await client.messages.create({
-    from: `whatsapp:${from.startsWith("+") ? from : `+${from}`}`,
-    to: `whatsapp:${toE164(phone)}`,
-    body,
-  });
+  if (templateName) {
+    await sendMetaWhatsappTemplate({
+      to: phone,
+      templateName,
+      bodyParameters: [
+        input.fullName,
+        input.role,
+        input.username,
+        input.password,
+        input.loginUrl ?? "",
+      ],
+    });
+    return;
+  }
+
+  await sendMetaWhatsappText({ to: phone, body });
 }
 
 async function sendEmail(email: string, subject: string, body: string) {
@@ -71,7 +76,7 @@ export async function sendAccountCredentials(input: SendAccountCredentialsInput)
   const tasks: Promise<void>[] = [];
 
   if (input.phone) {
-    tasks.push(sendWhatsapp(input.phone, body));
+    tasks.push(sendWhatsapp(input.phone, body, input));
   }
 
   if (input.email) {

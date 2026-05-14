@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ThemeProvider } from "@/components/theme/theme-provider";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,9 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="antialiased">
+    <html lang="en" className="antialiased" suppressHydrationWarning>
       <body className="min-h-screen bg-background">
-        <div className="min-h-screen w-full">{children}</div>
+        <ThemeProvider>
+          <div className="min-h-screen w-full">{children}</div>
+          <ThemeToggle />
+        </ThemeProvider>
       </body>
     </html>
   );

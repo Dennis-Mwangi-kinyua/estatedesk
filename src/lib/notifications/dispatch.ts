@@ -1,28 +1,14 @@
 import "server-only";
 
 import { NotificationChannel, NotificationStatus } from "@prisma/client";
-import twilio from "twilio";
 import { prisma } from "@/lib/prisma";
+import { sendMetaWhatsappText } from "@/lib/whatsapp/meta";
 
 type DispatchResult = {
   processed: number;
   sent: number;
   failed: number;
 };
-
-function toE164(phone: string) {
-  const normalized = phone.replace(/[^\d+]/g, "");
-
-  if (normalized.startsWith("+")) {
-    return normalized;
-  }
-
-  if (normalized.startsWith("0")) {
-    return `+254${normalized.slice(1)}`;
-  }
-
-  return `+${normalized}`;
-}
 
 function getRecipientContact(notification: {
   user: { phone: string | null; email: string | null } | null;
@@ -41,25 +27,9 @@ async function sendSms({
   to: string;
   body: string;
 }) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_SMS_FROM;
-
-  if (!accountSid || !authToken || !from) {
-    throw new Error("Missing Twilio SMS environment variables.");
-  }
-
-  const client = twilio(accountSid, authToken);
-  const message = await client.messages.create({
-    from,
-    to: toE164(to),
-    body,
-  });
-
-  return {
-    sid: message.sid,
-    status: message.status,
-  };
+  void to;
+  void body;
+  throw new Error("SMS delivery is disabled. EstateDesk is configured for Meta WhatsApp, email, and in-app notifications.");
 }
 
 async function sendWhatsapp({
@@ -69,25 +39,7 @@ async function sendWhatsapp({
   to: string;
   body: string;
 }) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_WHATSAPP_FROM;
-
-  if (!accountSid || !authToken || !from) {
-    throw new Error("Missing WhatsApp environment variables.");
-  }
-
-  const client = twilio(accountSid, authToken);
-  const message = await client.messages.create({
-    from: `whatsapp:${from.startsWith("+") ? from : `+${from}`}`,
-    to: `whatsapp:${toE164(to)}`,
-    body,
-  });
-
-  return {
-    sid: message.sid,
-    status: message.status,
-  };
+  return sendMetaWhatsappText({ to, body });
 }
 
 async function sendEmail({

@@ -10,85 +10,36 @@ import {
   Droplets,
   FileBarChart2,
   WalletCards,
+  X,
 } from "lucide-react";
+import { APP_PLAN_ORDER, APP_PLANS } from "@/lib/billing/plans";
 
-const plans = [
-  {
-    name: "Free",
-    key: "FREE",
-    price: "KES 0",
-    period: "/month",
-    description:
-      "For small landlords getting started with structured property records.",
-    cta: "Start free",
-    href: "/register",
-    featured: false,
-    features: [
-      "Organization workspace",
-      "Property and unit records",
-      "Tenant profiles",
-      "Basic lease tracking",
-      "Standard access control",
-    ],
-  },
-  {
-    name: "Pro",
-    key: "PRO",
-    price: "KES 4,500",
-    period: "/month",
-    description:
-      "For active teams managing rent, water billing, and day-to-day operations.",
-    cta: "Choose Pro",
-    href: "/register?plan=pro",
-    featured: true,
-    features: [
-      "Everything in Free",
-      "Rent charge management",
-      "Water billing workflows",
-      "Payment tracking",
-      "Notifications and reminders",
-      "Issue ticket handling",
-    ],
-  },
-  {
-    name: "Plus",
-    key: "PLUS",
-    price: "KES 9,500",
-    period: "/month",
-    description:
-      "For growing portfolios that need stronger coordination and reporting.",
-    cta: "Choose Plus",
-    href: "/register?plan=plus",
-    featured: false,
-    features: [
-      "Everything in Pro",
-      "Caretaker assignments",
-      "Inspection workflows",
-      "Move-out notices",
-      "Audit visibility",
-      "Operational reporting",
-    ],
-  },
-  {
-    name: "Enterprise",
-    key: "ENTERPRISE",
-    price: "Custom",
-    period: "",
-    description:
-      "For large organizations that need tailored rollout, governance, and support.",
-    cta: "Contact sales",
-    href: "/contact",
-    featured: false,
-    features: [
-      "Everything in Plus",
-      "Custom onboarding",
-      "Advanced implementation support",
-      "Enterprise billing setup",
-      "Priority support",
-      "Custom configuration guidance",
-    ],
-  },
-];
+function formatPlanPrice(amount: number) {
+  if (amount === 0) return "KES 0";
+
+  return new Intl.NumberFormat("en-KE", {
+    style: "currency",
+    currency: "KES",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function formatLimit(limit: number, label: string) {
+  if (limit === Number.MAX_SAFE_INTEGER) return `Unlimited ${label}`;
+
+  return `${limit.toLocaleString()} ${label}`;
+}
+
+const plans = APP_PLAN_ORDER.map((key) => ({
+  key,
+  ...APP_PLANS[key],
+  featured: key === "PRO",
+  price:
+    key === "ENTERPRISE"
+      ? "Custom"
+      : formatPlanPrice(APP_PLANS[key].monthlyAmount),
+  period: key === "ENTERPRISE" ? "" : "/month",
+}));
 
 const highlights = [
   {
@@ -167,13 +118,13 @@ export default function PricingPage() {
             </div>
 
             <h1 className="mt-6 text-4xl font-semibold tracking-[-0.04em] text-neutral-950 sm:text-5xl">
-              Clear pricing for property operations teams
+              Clear tiers for property operations teams
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-neutral-600">
-              Choose a plan that matches the way your organization manages
-              properties, tenants, leases, billing, inspections, and internal
-              operations.
+              Choose what your organization needs today, then scale from
+              records and tenant tracking into reports, inspections, move-outs,
+              exports, and custom rollout support.
             </p>
           </div>
         </div>
@@ -198,9 +149,14 @@ export default function PricingPage() {
                 ) : null}
 
                 <div className="flex min-h-[88px] flex-col">
-                  <p className="text-lg font-semibold text-neutral-950">
-                    {plan.name}
-                  </p>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-lg font-semibold text-neutral-950">
+                      {plan.name}
+                    </p>
+                    <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-600">
+                      {plan.badge}
+                    </span>
+                  </div>
                   <p className="mt-2 text-sm leading-6 text-neutral-600">
                     {plan.description}
                   </p>
@@ -230,11 +186,27 @@ export default function PricingPage() {
 
                 <div className="mt-6 border-t border-neutral-100 pt-5">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
-                    Included
+                    Limits
+                  </p>
+
+                  <div className="mt-4 grid gap-2 text-sm text-neutral-700">
+                    <PlanLimit
+                      label={formatLimit(plan.propertiesLimit, "properties")}
+                    />
+                    <PlanLimit label={formatLimit(plan.unitsLimit, "units")} />
+                    <PlanLimit
+                      label={formatLimit(plan.usersLimit, "internal users")}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 border-t border-neutral-100 pt-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
+                    What this tier enjoys
                   </p>
 
                   <div className="mt-4 space-y-3">
-                    {plan.features.map((feature) => (
+                    {plan.included.map((feature) => (
                       <div
                         key={feature}
                         className="flex items-start gap-3 text-sm text-neutral-700"
@@ -246,6 +218,22 @@ export default function PricingPage() {
                       </div>
                     ))}
                   </div>
+
+                  {plan.excluded.length > 0 ? (
+                    <div className="mt-5 space-y-3 border-t border-neutral-100 pt-5">
+                      {plan.excluded.map((feature) => (
+                        <div
+                          key={feature}
+                          className="flex items-start gap-3 text-sm text-neutral-400"
+                        >
+                          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-400">
+                            <X className="h-3.5 w-3.5" />
+                          </div>
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ))}
@@ -266,7 +254,7 @@ export default function PricingPage() {
 
               <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-xs font-medium uppercase tracking-[0.14em] text-neutral-600">
                 <WalletCards className="h-4 w-4" />
-                FREE · PRO · PLUS · ENTERPRISE
+                FREE · PRO · PLUS · CUSTOM
               </div>
             </div>
           </div>
@@ -338,5 +326,14 @@ export default function PricingPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+function PlanLimit({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2 rounded-2xl bg-neutral-50 px-3 py-2 ring-1 ring-neutral-200">
+      <Check className="h-4 w-4 shrink-0 text-emerald-600" />
+      <span>{label}</span>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   requireUserSession,
@@ -8,10 +9,16 @@ import {
   type PlatformRole,
 } from "@/lib/auth/session";
 import { auditDeniedAccess } from "@/lib/audit/security";
+import { prisma } from "@/lib/prisma";
 
 type GuardOptions = {
   redirectTo?: string;
 };
+
+const TENANT_HISTORY_ONLY_PATHS = new Set([
+  "/dashboard/tenant",
+  "/dashboard/tenant/profile",
+]);
 
 function deny(redirectTo = "/access-denied"): never {
   redirect(redirectTo);
@@ -91,5 +98,33 @@ export async function requireCaretakerAccess(options?: GuardOptions) {
 }
 
 export async function requireTenantAccess(options?: GuardOptions) {
-  return requireOrgRole(["TENANT"], options);
+  const session = await requireOrgRole(["TENANT"], options);
+  const headerStore = await headers();
+  const pathname = headerStore.get("x-estatedesk-pathname") ?? "";
+
+  if (
+    pathname.startsWith("/dashboard/tenant") &&
+    !TENANT_HISTORY_ONLY_PATHS.has(pathname)
+  ) {
+    const activeLease = await prisma.lease.findFirst({
+      where: {
+        orgId: session.activeOrgId!,
+        tenant: {
+          userId: session.userId,
+          deletedAt: null,
+        },
+        status: "ACTIVE",
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!activeLease) {
+      redirect("/dashboard/tenant");
+    }
+  }
+
+  return session;
 }

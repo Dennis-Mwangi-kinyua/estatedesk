@@ -1,4 +1,7 @@
-import twilio from "twilio";
+import {
+  sendMetaWhatsappTemplate,
+  sendMetaWhatsappText,
+} from "@/lib/whatsapp/meta";
 
 type SendInviteWhatsappInput = {
   phone: string;
@@ -7,48 +10,28 @@ type SendInviteWhatsappInput = {
   role: string;
 };
 
-function toE164(phone: string) {
-  const normalized = phone.replace(/[^\d+]/g, "");
-
-  if (normalized.startsWith("+")) {
-    return normalized;
-  }
-
-  if (normalized.startsWith("0")) {
-    return `+254${normalized.slice(1)}`;
-  }
-
-  return `+${normalized}`;
-}
-
 export async function sendInviteWhatsapp({
   phone,
   inviteUrl,
   orgName,
   role,
 }: SendInviteWhatsappInput) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_WHATSAPP_FROM;
+  const templateName = process.env.WHATSAPP_INVITE_TEMPLATE_NAME?.trim();
 
-  if (!accountSid || !authToken || !from) {
-    throw new Error("Missing WhatsApp environment variables.");
+  if (templateName) {
+    return sendMetaWhatsappTemplate({
+      to: phone,
+      templateName,
+      bodyParameters: [orgName, role, inviteUrl],
+    });
   }
 
-  const client = twilio(accountSid, authToken);
-
-  const message = await client.messages.create({
-    from: `whatsapp:${from.startsWith("+") ? from : `+${from}`}`,
-    to: `whatsapp:${toE164(phone)}`,
+  return sendMetaWhatsappText({
+    to: phone,
     body: [
       `You have been invited to join ${orgName} on EstateDesk as ${role}.`,
       "",
       `Accept invite: ${inviteUrl}`,
     ].join("\n"),
   });
-
-  return {
-    sid: message.sid,
-    status: message.status,
-  };
 }

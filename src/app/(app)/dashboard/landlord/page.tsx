@@ -1,11 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   BarChart3,
   Building2,
   ClipboardList,
   Home,
-  LogOut,
   Receipt,
   TrendingUp,
   UserRoundCheck,
@@ -13,9 +11,6 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
-import { logoutAction } from "@/features/auth/actions/logout-action";
-import { requireActiveSubscription } from "@/lib/billing/subscription-access";
-import { SubscriptionWarning } from "@/components/billing/subscription-warning";
 import { getCurrentPeriod } from "@/lib/ledger";
 
 export const dynamic = "force-dynamic";
@@ -78,7 +73,6 @@ export default async function LandlordDashboardPage() {
     redirect("/dashboard");
   }
 
-  const access = await requireActiveSubscription(session.activeOrgId);
   const currentPeriod = getCurrentPeriod();
 
   const profile = await prisma.landlordProfile.findFirst({
@@ -307,6 +301,9 @@ export default async function LandlordDashboardPage() {
     (total, unit) => total + (unit.tenantName ? Number(unit.balance ?? 0) : 0),
     0,
   );
+  const collectionRate = monthlyAmountDue
+    ? (monthlyAmountPaid / monthlyAmountDue) * 100
+    : 0;
   const paidUnits = units.filter(
     (unit) => unit.tenantName && Number(unit.balance ?? 0) <= 0,
   );
@@ -365,10 +362,9 @@ export default async function LandlordDashboardPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] px-3 py-3 sm:px-5 sm:py-5">
-      <div className="mx-auto max-w-7xl space-y-5">
-        <header className="ios-panel rounded-[28px] p-4 sm:p-5">
-          <div className="flex items-start justify-between gap-4">
+    <div className="space-y-5">
+        <section id="overview" className="ios-panel rounded-[28px] p-4 sm:p-5">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center">
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
                 Landlord workspace
@@ -377,24 +373,39 @@ export default async function LandlordDashboardPage() {
                 {profile.displayName}
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
-                View only the apartments and units linked exclusively to your
-                landlord account.
+                Monitor only the properties and units mapped to your landlord
+                account, including occupancy, tenants, expected rent, received
+                rent, and open balances for the current period.
               </p>
             </div>
 
-            <form action={logoutAction}>
-              <button
-                type="submit"
-                className="ios-button inline-flex h-11 w-11 items-center justify-center border border-red-200 bg-red-50 text-red-700"
-                aria-label="Logout"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </form>
+            <div className="rounded-[24px] border border-neutral-200 bg-neutral-50 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-medium text-neutral-500">
+                    Collection rate
+                  </p>
+                  <p className="mt-1 text-3xl font-bold text-neutral-950">
+                    {formatPercent(collectionRate)}
+                  </p>
+                </div>
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-950 text-white">
+                  <BarChart3 className="h-5 w-5" />
+                </span>
+              </div>
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-white ring-1 ring-neutral-200">
+                <div
+                  className="h-full rounded-full bg-emerald-500"
+                  style={{ width: `${Math.min(collectionRate, 100)}%` }}
+                />
+              </div>
+              <p className="mt-2 text-xs text-neutral-500">
+                {formatCurrency(monthlyAmountPaid)} received from{" "}
+                {formatCurrency(monthlyAmountDue)} expected.
+              </p>
+            </div>
           </div>
-        </header>
-
-        <SubscriptionWarning access={access} />
+        </section>
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
@@ -441,7 +452,7 @@ export default async function LandlordDashboardPage() {
           })}
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-[1.35fr_0.9fr]">
+        <section id="reports" className="grid gap-4 lg:grid-cols-[1.35fr_0.9fr]">
           <div className="ios-panel overflow-hidden rounded-[28px] p-4 sm:p-5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
@@ -465,7 +476,7 @@ export default async function LandlordDashboardPage() {
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <ReportTile
-                label="Monthly Income"
+                label="Mapped Rent"
                 value={formatCurrency(monthlyRent)}
                 detail={`${formatPercent(occupancyRate)} occupied · ${vacantUnits} vacant`}
                 icon={TrendingUp}
@@ -493,6 +504,31 @@ export default async function LandlordDashboardPage() {
                   unpaidUnits.length === 1 ? "" : "s"
                 } not fully paid`}
                 icon={Home}
+              />
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <ReportTile
+                label="Collection Rate"
+                value={formatPercent(collectionRate)}
+                detail={`${formatCurrency(monthlyAmountPaid)} collected this period`}
+                icon={BarChart3}
+              />
+              <ReportTile
+                label="Occupied Rent"
+                value={formatCurrency(occupiedRent)}
+                detail={`${occupiedUnits} occupied unit${
+                  occupiedUnits === 1 ? "" : "s"
+                }`}
+                icon={Users}
+              />
+              <ReportTile
+                label="Vacancy Exposure"
+                value={formatCurrency(vacantRent)}
+                detail={`${vacantUnits} vacant unit${
+                  vacantUnits === 1 ? "" : "s"
+                }`}
+                icon={Building2}
               />
             </div>
 
@@ -584,7 +620,7 @@ export default async function LandlordDashboardPage() {
             </div>
           </div>
 
-          <aside className="ios-panel rounded-[28px] p-4 sm:p-5">
+          <aside id="tenants" className="ios-panel rounded-[28px] p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
@@ -629,7 +665,7 @@ export default async function LandlordDashboardPage() {
           </aside>
         </section>
 
-        <section className="space-y-4">
+        <section id="properties" className="space-y-4">
           {properties.length === 0 ? (
             <div className="ios-card rounded-[28px] p-8 text-center text-sm text-neutral-500">
               No properties have been linked to this landlord account yet.
@@ -755,12 +791,6 @@ export default async function LandlordDashboardPage() {
           )}
         </section>
 
-        <div className="pb-8 text-center text-xs text-neutral-500">
-          <Link href="/dashboard" className="font-medium text-neutral-700 underline">
-            Refresh workspace
-          </Link>
-        </div>
-      </div>
     </div>
   );
 }

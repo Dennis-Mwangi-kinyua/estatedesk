@@ -185,9 +185,13 @@ function applyTenantRateLimit(req: NextRequest, response: NextResponse) {
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const hasSession = Boolean(req.cookies.get(SESSION_COOKIE_NAME)?.value);
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-estatedesk-pathname", pathname);
 
   if (isPublicPath(pathname)) {
-    return applySecurityHeaders(NextResponse.next());
+    return applySecurityHeaders(
+      NextResponse.next({ request: { headers: requestHeaders } }),
+    );
   }
 
   if (isProtectedPath(pathname) && !hasSession) {
@@ -203,7 +207,9 @@ export function proxy(req: NextRequest) {
     return applySecurityHeaders(NextResponse.redirect(url));
   }
 
-  const response = applySecurityHeaders(NextResponse.next());
+  const response = applySecurityHeaders(
+    NextResponse.next({ request: { headers: requestHeaders } }),
+  );
 
   if (RATE_LIMITED_PATHS.has(pathname)) {
     return applyTenantRateLimit(req, response);

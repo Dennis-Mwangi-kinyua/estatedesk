@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { getCurrentTenantShell } from "@/lib/tenant/get-current-tenant";
+import { prisma } from "@/lib/prisma";
 import { TenantHeader } from "./tenant-header";
 import { TenantSidebar } from "./tenant-sidebar";
 import { TenantFooter } from "./tenant-footer";
@@ -27,12 +28,28 @@ export default async function TenantLayout({
     );
   }
 
+  const activeLease = await prisma.lease.findFirst({
+    where: {
+      orgId: tenant.org.id,
+      tenantId: tenant.id,
+      status: "ACTIVE",
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+    },
+  });
   const access = await requireActiveSubscription(tenant.org.id);
+  const hasActiveLease = Boolean(activeLease);
 
   return (
     <div className="app-mobile-canvas min-h-screen">
-      <TenantSidebar fullName={tenant.fullName} />
-      <TenantHeader fullName={tenant.fullName} orgName={tenant.org.name} />
+      <TenantSidebar fullName={tenant.fullName} hasActiveLease={hasActiveLease} />
+      <TenantHeader
+        fullName={tenant.fullName}
+        orgName={tenant.org.name}
+        hasActiveLease={hasActiveLease}
+      />
       <TenantFooter />
 
       <div className="min-h-screen lg:pl-[300px] xl:pl-[320px]">

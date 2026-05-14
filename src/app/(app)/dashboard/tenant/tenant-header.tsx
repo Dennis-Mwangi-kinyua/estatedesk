@@ -15,18 +15,30 @@ import { logoutAction } from "@/features/auth/actions/logout-action";
 type TenantHeaderProps = {
   fullName: string;
   orgName: string;
+  hasActiveLease: boolean;
 };
 
-export function TenantHeader({ fullName, orgName }: TenantHeaderProps) {
+export function TenantHeader({
+  fullName,
+  orgName,
+  hasActiveLease,
+}: TenantHeaderProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const navItems = useMemo(
+    () =>
+      tenantNavItems.filter(
+        (item) => hasActiveLease || !item.requiresActiveLease,
+      ),
+    [hasActiveLease],
+  );
 
   const activeItem = useMemo(() => {
     return (
-      tenantNavItems.find((item) => isTenantRouteActive(pathname, item.href)) ??
-      tenantNavItems[0]
+      navItems.find((item) => isTenantRouteActive(pathname, item.href)) ??
+      navItems[0]
     );
-  }, [pathname]);
+  }, [navItems, pathname]);
 
   return (
     <>
@@ -121,7 +133,7 @@ export function TenantHeader({ fullName, orgName }: TenantHeaderProps) {
               </div>
 
               <nav className="mt-4 space-y-2">
-                {tenantNavItems.map((item) => {
+                {navItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = isTenantRouteActive(pathname, item.href);
 

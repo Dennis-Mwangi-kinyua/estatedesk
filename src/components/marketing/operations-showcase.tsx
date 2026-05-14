@@ -15,6 +15,7 @@ import {
   UsersRound,
   WalletCards,
 } from "lucide-react";
+import { APP_PLAN_ORDER, APP_PLANS } from "@/lib/billing/plans";
 
 type OperationsShowcaseProps = {
   standalone?: boolean;
@@ -54,33 +55,36 @@ type ControlItem = {
   iconClassName: string;
 };
 
-const PLANS: readonly Plan[] = [
-  {
-    name: "Free",
-    price: "KES 0",
-    note: "Start",
-    points: ["Properties", "Tenants"],
-  },
-  {
-    name: "Pro",
-    price: "KES 4,500",
-    note: "Popular",
-    points: ["Rent", "Reports"],
-    featured: true,
-  },
-  {
-    name: "Plus",
-    price: "KES 9,500",
-    note: "Growth",
-    points: ["Staff", "Controls"],
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    note: "Scale",
-    points: ["Rollout", "Support"],
-  },
-] as const;
+function formatPlanPrice(amount: number) {
+  if (amount === 0) return "KES 0";
+
+  return new Intl.NumberFormat("en-KE", {
+    style: "currency",
+    currency: "KES",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function formatPlanLimit(limit: number, label: string) {
+  if (limit === Number.MAX_SAFE_INTEGER) return `Unlimited ${label}`;
+
+  return `${limit.toLocaleString()} ${label}`;
+}
+
+const PLANS: readonly Plan[] = APP_PLAN_ORDER.map((key) => {
+  const plan = APP_PLANS[key];
+
+  return {
+    name: plan.name,
+    price: key === "ENTERPRISE" ? "Custom" : formatPlanPrice(plan.monthlyAmount),
+    note: plan.badge,
+    points: [
+      formatPlanLimit(plan.propertiesLimit, "properties"),
+      formatPlanLimit(plan.unitsLimit, "units"),
+    ],
+    featured: key === "PRO",
+  };
+});
 
 const OPERATIONS: readonly OperationCard[] = [
   {
