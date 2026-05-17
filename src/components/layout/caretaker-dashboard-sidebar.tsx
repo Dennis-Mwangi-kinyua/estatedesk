@@ -12,6 +12,7 @@ import {
   Droplets,
   Bell,
   LogOut,
+  UserRound,
 } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 
@@ -57,6 +58,12 @@ const navItems = [
     label: "Notifications",
     icon: Bell,
     tone: "rose",
+  },
+  {
+    href: "/dashboard/caretaker/profile",
+    label: "My Profile",
+    icon: UserRound,
+    tone: "blue",
   },
 ] as const;
 

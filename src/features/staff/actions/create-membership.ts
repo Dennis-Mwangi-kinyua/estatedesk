@@ -42,6 +42,20 @@ function normalizePhone(value: string) {
   return value.trim().replace(/\s+/g, "");
 }
 
+function normalizeOptional(value: FormDataEntryValue | null) {
+  const text = String(value ?? "").trim();
+  return text || null;
+}
+
+function parseSalary(value: FormDataEntryValue | null) {
+  const text = String(value ?? "").trim().replace(/,/g, "");
+
+  if (!text) return null;
+
+  const amount = Number(text);
+  return Number.isFinite(amount) && amount >= 0 ? amount : Number.NaN;
+}
+
 function isStaffRole(value: string): value is StaffRole {
   return (STAFF_ROLES as readonly string[]).includes(value);
 }
@@ -71,6 +85,14 @@ export async function createMembership(
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const roleRaw = String(formData.get("role") ?? "").trim().toUpperCase();
+  const salaryAmount = parseSalary(formData.get("salaryAmount"));
+  const salaryCurrency =
+    String(formData.get("salaryCurrency") ?? "").trim().toUpperCase() || "KES";
+  const educationLevel = normalizeOptional(formData.get("educationLevel"));
+  const jobTitle = normalizeOptional(formData.get("jobTitle"));
+  const nationalId = normalizeOptional(formData.get("nationalId"));
+  const emergencyContact = normalizeOptional(formData.get("emergencyContact"));
+  const staffProfileNotes = normalizeOptional(formData.get("staffProfileNotes"));
 
   const assignmentTargetType = normalizeAssignmentTargetType(
     String(formData.get("assignmentTargetType") ?? ""),
@@ -121,6 +143,10 @@ export async function createMembership(
 
   if (password !== confirmPassword) {
     return fail("Passwords do not match.", 1, "confirmPassword");
+  }
+
+  if (Number.isNaN(salaryAmount)) {
+    return fail("Salary must be a valid positive number.", 0, "salaryAmount");
   }
 
   if (role === "CARETAKER" && !assignmentTargetType) {
@@ -209,14 +235,39 @@ export async function createMembership(
         },
       });
 
-      await tx.membership.create({
+      const membership = await tx.membership.create({
         data: {
           userId: user.id,
           orgId,
           role: role as PrismaOrgRole,
           scopeType: "ORG",
         },
+        select: {
+          id: true,
+        },
       });
+
+      if (
+        salaryAmount !== null ||
+        educationLevel ||
+        jobTitle ||
+        nationalId ||
+        emergencyContact ||
+        staffProfileNotes
+      ) {
+        await tx.staffProfile.create({
+          data: {
+            membershipId: membership.id,
+            salaryAmount,
+            salaryCurrency,
+            educationLevel,
+            jobTitle,
+            nationalId,
+            emergencyContact,
+            notes: staffProfileNotes,
+          },
+        });
+      }
 
       if (role === "CARETAKER" && assignmentTarget?.ok) {
         await tx.caretakerAssignment.create({

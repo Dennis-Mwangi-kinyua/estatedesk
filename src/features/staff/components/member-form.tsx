@@ -42,6 +42,13 @@ type MemberFormProps = {
     email?: string;
     phone?: string;
     role?: StaffRole;
+    salaryAmount?: string;
+    salaryCurrency?: string;
+    educationLevel?: string;
+    jobTitle?: string;
+    nationalId?: string;
+    emergencyContact?: string;
+    staffProfileNotes?: string;
   };
   submitLabel?: string;
   lockedRole?: StaffRole;
@@ -53,6 +60,13 @@ type FormValues = {
   username: string;
   email: string;
   phone: string;
+  salaryAmount: string;
+  salaryCurrency: string;
+  educationLevel: string;
+  jobTitle: string;
+  nationalId: string;
+  emergencyContact: string;
+  staffProfileNotes: string;
   password: string;
   confirmPassword: string;
   assignmentNotes: string;
@@ -73,6 +87,13 @@ function getInitialValues(
     username: defaultValues?.username ?? "",
     email: defaultValues?.email ?? "",
     phone: defaultValues?.phone ?? "",
+    salaryAmount: defaultValues?.salaryAmount ?? "",
+    salaryCurrency: defaultValues?.salaryCurrency ?? "KES",
+    educationLevel: defaultValues?.educationLevel ?? "",
+    jobTitle: defaultValues?.jobTitle ?? "",
+    nationalId: defaultValues?.nationalId ?? "",
+    emergencyContact: defaultValues?.emergencyContact ?? "",
+    staffProfileNotes: defaultValues?.staffProfileNotes ?? "",
     password: "",
     confirmPassword: "",
     assignmentNotes: "",
@@ -258,6 +279,8 @@ export function MemberForm({
           onChange={updateValue}
         />
 
+        <StaffProfileFields values={values} onChange={updateValue} />
+
         {lockedRole ? (
           <>
             <input type="hidden" name="role" value={lockedRole} />
@@ -283,6 +306,8 @@ export function MemberForm({
           onChange={updateValue}
         />
 
+        <StaffProfileFields values={values} onChange={updateValue} />
+
         <LoginFields values={values} onChange={updateValue} />
 
         {lockedRole ? (
@@ -307,6 +332,13 @@ export function MemberForm({
       <input type="hidden" name="username" value={values.username} />
       <input type="hidden" name="email" value={values.email} />
       <input type="hidden" name="phone" value={values.phone} />
+      <input type="hidden" name="salaryAmount" value={values.salaryAmount} />
+      <input type="hidden" name="salaryCurrency" value={values.salaryCurrency} />
+      <input type="hidden" name="educationLevel" value={values.educationLevel} />
+      <input type="hidden" name="jobTitle" value={values.jobTitle} />
+      <input type="hidden" name="nationalId" value={values.nationalId} />
+      <input type="hidden" name="emergencyContact" value={values.emergencyContact} />
+      <input type="hidden" name="staffProfileNotes" value={values.staffProfileNotes} />
       <input type="hidden" name="password" value={values.password} />
       <input type="hidden" name="confirmPassword" value={values.confirmPassword} />
       <input type="hidden" name="role" value={selectedRole} />
@@ -354,6 +386,8 @@ export function MemberForm({
             isEditing={isEditing}
             onChange={updateValue}
           />
+
+          <StaffProfileFields values={values} onChange={updateValue} />
 
           <RoleDisplay role={selectedRole} />
 
@@ -414,6 +448,19 @@ export function MemberForm({
             <ReviewCard label="Username" value={values.username || "—"} />
             <ReviewCard label="Email" value={values.email || "—"} />
             <ReviewCard label="Phone" value={values.phone || "No phone"} />
+            <ReviewCard label="Job title" value={values.jobTitle || "—"} />
+            <ReviewCard
+              label="Salary"
+              value={
+                values.salaryAmount
+                  ? `${values.salaryCurrency || "KES"} ${values.salaryAmount}`
+                  : "Not captured"
+              }
+            />
+            <ReviewCard
+              label="Education"
+              value={values.educationLevel || "Not captured"}
+            />
             <ReviewCard label="Role" value={selectedRole} />
             <ReviewCard
               label="Mapping"
@@ -577,6 +624,143 @@ const BasicDetailsFields = memo(function BasicDetailsFields({
         </p>
       </div>
     </>
+  );
+});
+
+const StaffProfileFields = memo(function StaffProfileFields({
+  values,
+  onChange,
+}: {
+  values: FormValues;
+  onChange: <K extends keyof FormValues>(
+    key: K,
+    value: FormValues[K],
+  ) => void;
+}) {
+  return (
+    <section className="rounded-3xl border border-neutral-200 bg-neutral-50/70 p-4 dark:border-white/10 dark:bg-slate-900/70">
+      <div className="mb-4">
+        <h2 className="text-sm font-semibold text-neutral-950 dark:text-white">
+          Staff profile
+        </h2>
+        <p className="mt-1 text-xs leading-5 text-neutral-500 dark:text-slate-400">
+          Optional HR details for the employee register and the staff member&apos;s
+          own profile.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-slate-200">
+            Job title
+          </label>
+          <input
+            name="jobTitle"
+            value={values.jobTitle}
+            onChange={(event) => onChange("jobTitle", event.target.value)}
+            placeholder="e.g. Senior caretaker"
+            className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-neutral-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-slate-200">
+            Education level
+          </label>
+          <select
+            name="educationLevel"
+            value={values.educationLevel}
+            onChange={(event) => onChange("educationLevel", event.target.value)}
+            className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-neutral-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
+          >
+            <option value="">Not captured</option>
+            <option value="Primary">Primary</option>
+            <option value="Secondary">Secondary</option>
+            <option value="Certificate">Certificate</option>
+            <option value="Diploma">Diploma</option>
+            <option value="Bachelor's degree">Bachelor&apos;s degree</option>
+            <option value="Postgraduate">Postgraduate</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-slate-200">
+            Salary
+          </label>
+          <input
+            name="salaryAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            value={values.salaryAmount}
+            onChange={(event) => onChange("salaryAmount", event.target.value)}
+            placeholder="0.00"
+            className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-neutral-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-slate-200">
+            Currency
+          </label>
+          <input
+            name="salaryCurrency"
+            value={values.salaryCurrency}
+            onChange={(event) =>
+              onChange("salaryCurrency", event.target.value.toUpperCase())
+            }
+            maxLength={3}
+            placeholder="KES"
+            className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 uppercase outline-none transition focus:border-neutral-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-slate-200">
+            National ID / employee ID
+          </label>
+          <input
+            name="nationalId"
+            value={values.nationalId}
+            onChange={(event) => onChange("nationalId", event.target.value)}
+            placeholder="Optional"
+            className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-neutral-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-slate-200">
+            Emergency contact
+          </label>
+          <input
+            name="emergencyContact"
+            value={values.emergencyContact}
+            onChange={(event) =>
+              onChange("emergencyContact", event.target.value)
+            }
+            placeholder="Name and phone"
+            className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-neutral-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
+          />
+        </div>
+
+        <div className="sm:col-span-2">
+          <label className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-slate-200">
+            Staff profile notes
+          </label>
+          <textarea
+            name="staffProfileNotes"
+            rows={3}
+            value={values.staffProfileNotes}
+            onChange={(event) =>
+              onChange("staffProfileNotes", event.target.value)
+            }
+            placeholder="Optional HR notes"
+            className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-neutral-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
+          />
+        </div>
+      </div>
+    </section>
   );
 });
 

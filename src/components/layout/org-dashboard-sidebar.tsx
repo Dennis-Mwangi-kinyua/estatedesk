@@ -16,6 +16,7 @@ import {
   Send,
   Settings,
   ShieldCheck,
+  UserRound,
   UserCheck,
   Users,
   Wrench,
@@ -44,6 +45,12 @@ const SIDEBAR_LINKS: readonly SidebarLink[] = [
     href: "/dashboard/org",
     icon: Home,
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER"],
+  },
+  {
+    label: "My Profile",
+    href: "/dashboard/org/profile",
+    icon: UserRound,
+    roles: ["MANAGER", "OFFICE", "ACCOUNTANT"],
   },
   {
     label: "Properties",
@@ -326,7 +333,7 @@ export function OrgDashboardSidebar({
 
       <div
         className={[
-          "fixed inset-0 z-40 lg:hidden transition-all duration-300 ease-out",
+          "fixed inset-0 z-[120] lg:hidden transition-all duration-300 ease-out",
           mobileOpen ? "pointer-events-auto" : "pointer-events-none",
         ].join(" ")}
       >
@@ -346,8 +353,8 @@ export function OrgDashboardSidebar({
             mobileOpen ? "translate-x-0" : "-translate-x-full",
           ].join(" ")}
         >
-          <div className="flex h-full flex-col justify-between">
-            <div className="min-h-0">
+          <div className="flex h-full min-h-0 flex-col">
+            <div className="shrink-0">
               <div className="flex items-center justify-between border-b border-slate-200 px-4 pb-4 pt-safe dark:border-white/10">
                 <div className="min-w-0">
                   <SidebarBrand organizationName={organizationName} />
@@ -362,23 +369,23 @@ export function OrgDashboardSidebar({
                   <X className="h-4 w-4" />
                 </button>
               </div>
-
-              <nav className="overflow-y-auto px-3 py-4">
-                <div className="space-y-2">
-                  {visibleLinks.map((item) => (
-                    <SidebarNavItem
-                      key={item.href}
-                      item={item}
-                      pathname={pathname}
-                      mobile
-                      onNavigate={closeMobile}
-                    />
-                  ))}
-                </div>
-              </nav>
             </div>
 
-            <div className="px-3 pb-4 pt-3 [padding-bottom:max(1rem,env(safe-area-inset-bottom))]">
+            <nav className="ios-scroll min-h-0 flex-1 overflow-y-auto px-3 py-4 overscroll-contain">
+              <div className="space-y-2 pb-2">
+                {visibleLinks.map((item) => (
+                  <SidebarNavItem
+                    key={item.href}
+                    item={item}
+                    pathname={pathname}
+                    mobile
+                    onNavigate={closeMobile}
+                  />
+                ))}
+              </div>
+            </nav>
+
+            <div className="shrink-0 border-t border-slate-200/80 px-3 pb-4 pt-3 [padding-bottom:max(1rem,env(safe-area-inset-bottom))] dark:border-white/10">
               <div className="rounded-2xl bg-slate-50 p-2 dark:bg-slate-900">
                 <LogoutButton mobile onClick={closeMobile} />
               </div>

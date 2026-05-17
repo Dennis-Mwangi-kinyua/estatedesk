@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,8 +17,8 @@ export default function RootLayout({
     <html lang="en" className="antialiased" suppressHydrationWarning>
       <body className="min-h-screen bg-background">
         <ThemeProvider>
+          <MobileSwipeBack />
           <div className="min-h-screen w-full">{children}</div>
-          <ThemeToggle />
         </ThemeProvider>
       </body>
     </html>

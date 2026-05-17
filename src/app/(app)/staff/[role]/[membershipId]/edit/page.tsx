@@ -39,6 +39,17 @@ export default async function EditMemberPage({ params }: Props) {
     select: {
       id: true,
       role: true,
+      staffProfile: {
+        select: {
+          salaryAmount: true,
+          salaryCurrency: true,
+          educationLevel: true,
+          jobTitle: true,
+          nationalId: true,
+          emergencyContact: true,
+          notes: true,
+        },
+      },
       user: {
         select: {
           id: true,
@@ -137,6 +148,15 @@ export default async function EditMemberPage({ params }: Props) {
             email: safeMember.user.email ?? "",
             phone: safeMember.user.phone ?? "",
             role: normalizedRole,
+            salaryAmount:
+              safeMember.staffProfile?.salaryAmount?.toString() ?? "",
+            salaryCurrency: safeMember.staffProfile?.salaryCurrency ?? "KES",
+            educationLevel: safeMember.staffProfile?.educationLevel ?? "",
+            jobTitle: safeMember.staffProfile?.jobTitle ?? "",
+            nationalId: safeMember.staffProfile?.nationalId ?? "",
+            emergencyContact:
+              safeMember.staffProfile?.emergencyContact ?? "",
+            staffProfileNotes: safeMember.staffProfile?.notes ?? "",
           }}
         />
       </section>

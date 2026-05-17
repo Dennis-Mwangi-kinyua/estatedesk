@@ -60,6 +60,17 @@ export default async function MemberDetailPage({ params }: Props) {
       scopeType: true,
       createdAt: true,
       employmentStartedAt: true,
+      staffProfile: {
+        select: {
+          salaryAmount: true,
+          salaryCurrency: true,
+          educationLevel: true,
+          jobTitle: true,
+          nationalId: true,
+          emergencyContact: true,
+          notes: true,
+        },
+      },
       user: {
         select: {
           id: true,
@@ -315,6 +326,47 @@ export default async function MemberDetailPage({ params }: Props) {
               value={member.user.twoFactorEnabled ? "Enabled" : "Disabled"}
             />
           </div>
+
+          <section className="rounded-3xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-900">
+            <h2 className="text-sm font-semibold text-slate-950 dark:text-white">
+              Staff profile details
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              HR details visible to management and to the employee from their
+              own profile page.
+            </p>
+
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <DetailCard
+                label="Job title"
+                value={member.staffProfile?.jobTitle ?? "Not captured"}
+              />
+              <DetailCard
+                label="Education level"
+                value={member.staffProfile?.educationLevel ?? "Not captured"}
+              />
+              <DetailCard
+                label="Salary"
+                value={
+                  member.staffProfile?.salaryAmount
+                    ? `${member.staffProfile.salaryCurrency} ${member.staffProfile.salaryAmount.toNumber().toLocaleString()}`
+                    : "Not captured"
+                }
+              />
+              <DetailCard
+                label="National / employee ID"
+                value={member.staffProfile?.nationalId ?? "Not captured"}
+              />
+              <DetailCard
+                label="Emergency contact"
+                value={member.staffProfile?.emergencyContact ?? "Not captured"}
+              />
+              <DetailCard
+                label="Profile notes"
+                value={member.staffProfile?.notes ?? "Not captured"}
+              />
+            </div>
+          </section>
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link

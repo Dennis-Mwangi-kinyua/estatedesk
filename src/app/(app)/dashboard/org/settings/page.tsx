@@ -21,6 +21,7 @@ import {
   Wallet,
 } from "lucide-react";
 
+import { AppearanceSettings } from "@/components/theme/appearance-settings";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import {
@@ -651,6 +652,8 @@ export default async function SettingsPage() {
             title="Workspace Preferences"
             description="Control modules and default notification behavior for your organization."
           >
+            <AppearanceSettings />
+
             <form action={updatePreferencesAction} className="space-y-3">
               <ToggleField
                 label="Tenant Portal"

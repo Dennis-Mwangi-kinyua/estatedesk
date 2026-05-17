@@ -212,6 +212,9 @@
 
   html {
     font-family: var(--font-system-sans);
+    scroll-behavior: smooth;
+    overscroll-behavior-x: auto;
+    overscroll-behavior-y: auto;
   }
 
   body {
@@ -219,9 +222,10 @@
     margin: 0;
     padding: 0;
     min-width: 320px;
-    min-height: 100dvh;
-    overscroll-behavior-y: none;
-    touch-action: manipulation;
+    min-height: 100svh;
+    overscroll-behavior-x: auto;
+    overscroll-behavior-y: auto;
+    touch-action: pan-x pan-y pinch-zoom;
     background: var(--background);
     color: var(--foreground);
     text-rendering: optimizeLegibility;
@@ -236,8 +240,9 @@
 
 @layer components {
   .app-mobile-canvas {
-    min-height: 100dvh;
+    min-height: 100svh;
     overflow-x: hidden;
+    overflow-y: visible;
     background:
       radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.92), transparent 28rem),
       linear-gradient(180deg, rgba(248, 250, 252, 0.96), var(--background));
@@ -288,6 +293,8 @@
     scrollbar-width: thin;
     scrollbar-color: rgba(15, 23, 42, 0.18) transparent;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
   }
 
   .ios-scroll::-webkit-scrollbar {

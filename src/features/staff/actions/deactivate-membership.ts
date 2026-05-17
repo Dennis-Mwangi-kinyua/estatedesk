@@ -158,3 +158,88 @@ export async function deactivateMembershipAction(formData: FormData) {
   revalidatePath(`/staff/${membership.role.toLowerCase()}`);
   redirect("/staff/previous");
 }
+
+export async function reactivateMembershipAction(formData: FormData) {
+  const session = await requireUserSession();
+
+  if (!session.activeOrgId) {
+    throw new Error("No active organisation found.");
+  }
+
+  const membershipId = String(formData.get("membershipId") ?? "").trim();
+
+  if (!membershipId) {
+    throw new Error("Membership id is required.");
+  }
+
+  const membership = await prisma.membership.findFirst({
+    where: {
+      id: membershipId,
+      orgId: session.activeOrgId,
+      role: {
+        in: [...STAFF_ROLES],
+      },
+      employmentEndedAt: {
+        not: null,
+      },
+      user: {
+        deletedAt: null,
+      },
+    },
+    select: {
+      id: true,
+      orgId: true,
+      userId: true,
+      role: true,
+      user: {
+        select: {
+          fullName: true,
+        },
+      },
+    },
+  });
+
+  if (!membership) {
+    throw new Error("Previous employee record not found.");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.membership.update({
+      where: { id: membership.id },
+      data: {
+        employmentEndedAt: null,
+        employmentExitReason: null,
+        deactivatedAt: null,
+        deactivatedByUserId: null,
+        deactivationNotes: null,
+      },
+    });
+
+    await tx.user.update({
+      where: { id: membership.userId },
+      data: {
+        status: "ACTIVE",
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        orgId: membership.orgId,
+        actorUserId: session.userId,
+        action: "STAFF_MEMBERSHIP_REACTIVATED",
+        entityType: "Membership",
+        entityId: membership.id,
+        metadata: {
+          staffUserId: membership.userId,
+          staffName: membership.user.fullName,
+          role: membership.role,
+        },
+      },
+    });
+  });
+
+  revalidatePath("/staff");
+  revalidatePath("/staff/previous");
+  revalidatePath(`/staff/${membership.role.toLowerCase()}`);
+  redirect(`/staff/${membership.role.toLowerCase()}/${membership.id}`);
+}

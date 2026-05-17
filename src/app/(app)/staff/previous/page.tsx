@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { prisma } from "@/lib/prisma";
+import { reactivateMembershipAction } from "@/features/staff/actions/deactivate-membership";
 import { ROLE_META, STAFF_ROLES, type StaffRole } from "@/features/staff/constants/role-meta";
 
 export const dynamic = "force-dynamic";
@@ -151,6 +152,16 @@ export default async function PreviousEmployeesPage() {
                       {employee.deactivationNotes}
                     </p>
                   ) : null}
+
+                  <form action={reactivateMembershipAction} className="mt-4">
+                    <input type="hidden" name="membershipId" value={employee.id} />
+                    <button
+                      type="submit"
+                      className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                    >
+                      Reactivate employee
+                    </button>
+                  </form>
                 </article>
               );
             })}
