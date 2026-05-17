@@ -16,6 +16,7 @@ export async function updateMembership(memberId: string, formData: FormData) {
     where: {
       id: memberId,
       orgId,
+      employmentEndedAt: null,
     },
     select: {
       id: true,

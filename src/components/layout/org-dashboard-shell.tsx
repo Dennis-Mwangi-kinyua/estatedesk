@@ -40,8 +40,8 @@ export function OrgDashboardShell({
       />
 
       <div className="lg:pl-72">
-        <div className="flex min-h-screen flex-col pt-[72px] lg:pt-16">
-          <main className="flex-1 px-3 py-3 sm:px-5 sm:py-4 lg:px-8">
+        <div className="flex min-h-screen flex-col pt-[76px] lg:pt-16">
+          <main className="mobile-bottom-safe flex-1 px-3 py-3 sm:px-5 sm:py-4 lg:px-8 lg:pb-16">
             <div className="app-content-shell">
               {children}
             </div>

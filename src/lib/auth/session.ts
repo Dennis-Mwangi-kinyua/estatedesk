@@ -125,6 +125,7 @@ async function resolveMembershipForSession(
       where: {
         id: activeMembershipId,
         userId,
+        employmentEndedAt: null,
       },
     });
 
@@ -136,7 +137,7 @@ async function resolveMembershipForSession(
   }
 
   return prisma.membership.findFirst({
-    where: { userId },
+    where: { userId, employmentEndedAt: null },
     orderBy: { createdAt: "asc" },
   });
 }
@@ -188,9 +189,13 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       () =>
         prisma.userSession.findUnique({
           where: { tokenHash },
-          include: {
-            user: true,
-            activeMembership: true,
+          select: {
+            id: true,
+            userId: true,
+            ipAddress: true,
+            userAgent: true,
+            expiresAt: true,
+            lastSeenAt: true,
           },
         }),
       { label: "getUserSession-find-session" },
@@ -199,7 +204,34 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
     if (!dbSession) return null;
     if (dbSession.expiresAt <= new Date()) return null;
 
-    const user = dbSession.user;
+    const activeMembershipRows = await retryTransientDatabaseOperation(
+      () =>
+        prisma.$queryRaw<Array<{ activeMembershipId: string | null }>>(
+          Prisma.sql`select "activeMembershipId" from "UserSession" where "id" = ${dbSession.id} limit 1`,
+        ),
+      { label: "getUserSession-active-membership-id" },
+    );
+    const activeMembershipId =
+      activeMembershipRows[0]?.activeMembershipId ?? null;
+
+    const user = await retryTransientDatabaseOperation(
+      () =>
+        prisma.user.findUnique({
+          where: { id: dbSession.userId },
+          select: {
+            id: true,
+            email: true,
+            fullName: true,
+            platformRole: true,
+            mustChangePassword: true,
+            status: true,
+            deletedAt: true,
+          },
+        }),
+      { label: "getUserSession-find-user" },
+    );
+
+    if (!user) return null;
 
     if (user.status !== "ACTIVE" || user.deletedAt !== null) {
       return null;
@@ -245,7 +277,25 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       return null;
     }
 
-    const activeMembership = dbSession.activeMembership;
+    const activeMembership = activeMembershipId
+      ? await retryTransientDatabaseOperation(
+          () =>
+            prisma.membership.findFirst({
+              where: {
+                id: activeMembershipId,
+                userId: user.id,
+                employmentEndedAt: null,
+              },
+              select: {
+                orgId: true,
+                role: true,
+                scopeType: true,
+                scopeId: true,
+              },
+            }),
+          { label: "getUserSession-find-membership" },
+        )
+      : null;
 
     return {
       userId: user.id,
@@ -320,6 +370,7 @@ export async function switchActiveMembership(
     where: {
       id: membershipId,
       userId: dbSession.userId,
+      employmentEndedAt: null,
     },
   });
 

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
+import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import {
   AlertCircle,
   ArrowRight,
@@ -302,9 +304,19 @@ type UnitWithLease = {
 };
 
 export default async function WaterBillsPage() {
+  const session = await requireCaretakerAccess();
+  const allowedUnitIds = await getCaretakerManagedBuildingUnitIds({
+    orgId: session.activeOrgId!,
+    caretakerUserId: session.userId,
+    membershipScope: session.membershipScope,
+  });
+
   const [units, meterReadings, waterBills] = await Promise.all([
     prisma.unit.findMany({
       where: {
+        id: {
+          in: allowedUnitIds,
+        },
         isActive: true,
         status: "OCCUPIED",
         leases: {
@@ -348,6 +360,9 @@ export default async function WaterBillsPage() {
     prisma.meterReading.findMany({
       where: {
         period: CURRENT_PERIOD,
+        unitId: {
+          in: allowedUnitIds,
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -390,6 +405,9 @@ export default async function WaterBillsPage() {
     prisma.waterBill.findMany({
       where: {
         period: CURRENT_PERIOD,
+        unitId: {
+          in: allowedUnitIds,
+        },
       },
       orderBy: {
         createdAt: "desc",

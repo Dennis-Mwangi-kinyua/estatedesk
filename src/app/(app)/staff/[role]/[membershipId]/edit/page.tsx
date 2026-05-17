@@ -29,6 +29,7 @@ export default async function EditMemberPage({ params }: Props) {
       id: membershipId,
       orgId,
       role: normalizedRole,
+      employmentEndedAt: null,
       user: {
         is: {
           deletedAt: null,

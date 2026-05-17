@@ -151,7 +151,7 @@ export default async function PlatformMarketingPage() {
 
       <Surface
         title="Add marketer"
-        description="Create a marketer and give them a referral code. Public forms accept ?ref=CODE or ?referral=CODE."
+        description="Create a marketer and give them a referral code. Public onboarding and sales forms accept ?ref=CODE, ?referral=CODE, and now let clients type the code manually before submitting."
       >
         <CreateMarketerForm />
       </Surface>
@@ -177,8 +177,12 @@ export default async function PlatformMarketingPage() {
                 </Badge>
               </div>
 
-              <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
                 <InfoTile label="Code" value={marketer.referralCode} />
+                <InfoTile
+                  label="Onboarding"
+                  value={`/register?ref=${marketer.referralCode}`}
+                />
                 <InfoTile
                   label="Rate"
                   value={formatPercent(marketer.defaultCommissionRate)}
@@ -210,6 +214,7 @@ export default async function PlatformMarketingPage() {
               <tr>
                 <th className="px-4 py-3 font-medium">Marketer</th>
                 <th className="px-4 py-3 font-medium">Referral code</th>
+                <th className="px-4 py-3 font-medium">Onboarding link</th>
                 <th className="px-4 py-3 font-medium">Default rate</th>
                 <th className="px-4 py-3 font-medium">Leads</th>
                 <th className="px-4 py-3 font-medium">Organizations</th>
@@ -228,6 +233,9 @@ export default async function PlatformMarketingPage() {
                   </td>
                   <td className="px-4 py-3 font-semibold text-neutral-700">
                     {marketer.referralCode}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs text-neutral-600">
+                    /register?ref={marketer.referralCode}
                   </td>
                   <td className="px-4 py-3 text-neutral-600">
                     {formatPercent(marketer.defaultCommissionRate)}
@@ -254,7 +262,7 @@ export default async function PlatformMarketingPage() {
                 </tr>
               ))}
               {marketers.length === 0 ? (
-                <EmptyRow colSpan={7} label="No marketers created yet." />
+                <EmptyRow colSpan={8} label="No marketers created yet." />
               ) : null}
             </tbody>
           </table>

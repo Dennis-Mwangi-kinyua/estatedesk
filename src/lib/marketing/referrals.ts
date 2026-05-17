@@ -49,3 +49,26 @@ export async function resolveMarketerReferral(db: MarketingDb, referralCode: str
     commissionRate: marketer.defaultCommissionRate,
   };
 }
+
+export async function findActiveMarketerByReferralCode(
+  db: MarketingDb,
+  referralCode: string,
+) {
+  const normalized = normalizeReferralCode(referralCode);
+
+  if (!normalized) {
+    return null;
+  }
+
+  return db.platformMarketer.findFirst({
+    where: {
+      referralCode: normalized,
+      status: "ACTIVE",
+      deletedAt: null,
+    },
+    select: {
+      fullName: true,
+      referralCode: true,
+    },
+  });
+}

@@ -19,23 +19,23 @@ export function OrgDashboardHeader({
   onMenuClick,
 }: OrgDashboardHeaderProps) {
   return (
-    <header className="fixed left-0 right-0 top-0 z-[90] border-b border-slate-200 bg-white/95 shadow-[0_6px_18px_rgba(15,23,42,0.04)] backdrop-blur lg:left-72">
-      <div className="flex h-[72px] items-center justify-between gap-3 px-3 sm:px-6 lg:h-16 lg:px-8">
+    <header className="fixed left-0 right-0 top-0 z-[90] border-b border-slate-200/80 bg-white/78 shadow-[0_10px_34px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/72 lg:left-72">
+      <div className="flex h-[76px] items-center justify-between gap-3 px-3 pt-safe sm:px-6 lg:h-16 lg:px-8 lg:pt-0">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             onClick={onMenuClick}
             aria-label="Open navigation"
-            className="ios-button flex h-11 w-11 shrink-0 items-center justify-center border border-slate-200 bg-white text-slate-900 shadow-sm lg:hidden"
+            className="ios-button touch-target flex shrink-0 items-center justify-center border border-slate-200 bg-white/86 text-slate-900 shadow-sm dark:border-white/10 dark:bg-slate-900/86 dark:text-white lg:hidden"
           >
             <Menu className="h-5 w-5" />
           </button>
 
           <div className="min-w-0">
-            <h1 className="truncate text-base font-semibold tracking-tight text-slate-950 sm:text-lg">
+            <h1 className="truncate text-base font-semibold tracking-tight text-slate-950 dark:text-white sm:text-lg">
               {title}
             </h1>
-            <p className="truncate text-xs text-slate-500 sm:text-sm">
+            <p className="truncate text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
               {subtitle}
             </p>
           </div>
@@ -45,16 +45,16 @@ export function OrgDashboardHeader({
           <Link
             href="/dashboard/org/notifications"
             aria-label="Notifications"
-            className="ios-button flex h-11 w-11 items-center justify-center border border-slate-200 bg-white text-slate-900 shadow-sm hover:bg-slate-50 lg:h-10 lg:w-10"
+            className="ios-button touch-target flex items-center justify-center border border-slate-200 bg-white/86 text-slate-900 shadow-sm hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900/86 dark:text-white dark:hover:bg-slate-800 lg:h-10 lg:w-10"
           >
             <Bell className="h-4 w-4" />
           </Link>
 
-          <div className="hidden rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm sm:block">
-            <p className="text-sm font-medium leading-none text-slate-950">
+          <div className="hidden rounded-2xl border border-slate-200 bg-white/76 px-3 py-2 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/76 sm:block">
+            <p className="text-sm font-medium leading-none text-slate-950 dark:text-white">
               {userName}
             </p>
-            <p className="mt-1 text-[11px] text-slate-500">
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
               {userRole}
             </p>
           </div>

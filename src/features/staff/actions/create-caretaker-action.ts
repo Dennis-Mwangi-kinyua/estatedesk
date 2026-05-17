@@ -56,7 +56,17 @@ export async function createCaretakerAction(
     return { error: "Provide at least an email or phone number." };
   }
 
-  const [property, building, unit] = await Promise.all([
+  if (!buildingId) {
+    return { error: "Select the apartment/block this caretaker manages." };
+  }
+
+  if (unitId) {
+    return {
+      error: "Caretakers must be mapped to apartments/blocks, not individual units.",
+    };
+  }
+
+  const [property, building] = await Promise.all([
     propertyId
       ? prisma.property.findFirst({
           where: {
@@ -87,24 +97,6 @@ export async function createCaretakerAction(
           },
         })
       : Promise.resolve(null),
-    unitId
-      ? prisma.unit.findFirst({
-          where: {
-            id: unitId,
-            deletedAt: null,
-            isActive: true,
-            property: {
-              orgId,
-              deletedAt: null,
-            },
-          },
-          select: {
-            id: true,
-            propertyId: true,
-            buildingId: true,
-          },
-        })
-      : Promise.resolve(null),
   ]);
 
   if (propertyId && !property) {
@@ -115,20 +107,8 @@ export async function createCaretakerAction(
     return { error: "Selected building was not found." };
   }
 
-  if (unitId && !unit) {
-    return { error: "Selected apartment / unit was not found." };
-  }
-
   if (propertyId && building && building.propertyId !== propertyId) {
     return { error: "Selected building does not belong to the chosen property." };
-  }
-
-  if (propertyId && unit && unit.propertyId !== propertyId) {
-    return { error: "Selected apartment / unit does not belong to the chosen property." };
-  }
-
-  if (buildingId && unit && unit.buildingId !== buildingId) {
-    return { error: "Selected apartment / unit does not belong to the chosen building." };
   }
 
   try {
@@ -164,14 +144,14 @@ export async function createCaretakerAction(
         },
       });
 
-      if (propertyId || buildingId || unitId) {
+      if (buildingId) {
         await tx.caretakerAssignment.create({
           data: {
             orgId,
             caretakerUserId: user.id,
-            propertyId,
+            propertyId: building?.propertyId ?? propertyId,
             buildingId,
-            unitId,
+            unitId: null,
             isPrimary,
             active: true,
             notes,

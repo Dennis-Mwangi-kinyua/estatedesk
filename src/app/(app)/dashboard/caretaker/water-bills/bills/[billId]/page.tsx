@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
+import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -92,6 +94,12 @@ function PaymentBadge({
 
 export default async function BillDetailPage({ params }: PageProps) {
   const { billId } = await params;
+  const session = await requireCaretakerAccess();
+  const allowedUnitIds = await getCaretakerManagedBuildingUnitIds({
+    orgId: session.activeOrgId!,
+    caretakerUserId: session.userId,
+    membershipScope: session.membershipScope,
+  });
 
   const bill = await prisma.waterBill.findUnique({
     where: {
@@ -144,6 +152,7 @@ export default async function BillDetailPage({ params }: PageProps) {
   });
 
   if (!bill) notFound();
+  if (!allowedUnitIds.includes(bill.unitId)) notFound();
 
   const totalPaid = bill.payments.reduce(
     (sum, payment) => sum + toNumber(payment.amount),

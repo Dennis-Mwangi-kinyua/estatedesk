@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   UsersRound,
 } from "lucide-react";
+import { ReferralCodeField } from "@/components/marketing/referral-code-field";
 import { contactSalesAction } from "./actions";
 
 type SearchParams = Promise<{
@@ -224,7 +225,6 @@ export default async function ContactPage({
             </div>
 
             <form action={contactSalesAction} className="space-y-3">
-              <input type="hidden" name="referralCode" value={referralCode} />
               <div className="hidden" aria-hidden="true">
                 <label>
                   Website
@@ -287,6 +287,8 @@ export default async function ContactPage({
                   placeholder="+254 700 000 000"
                 />
               </Field>
+
+              <ReferralCodeField defaultCode={referralCode} />
 
               <Field label="What do you manage?">
                 <select

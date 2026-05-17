@@ -72,8 +72,8 @@ const stepItems: Array<{
   },
   {
     id: 3,
-    title: "Unit mapping",
-    description: "Assign vacant unit",
+    title: "Unit and lease",
+    description: "Assign house and terms",
   },
   {
     id: 4,
@@ -498,10 +498,10 @@ export function NewTenantForm({
               </h1>
 
               <p className="mt-3 text-sm leading-6 text-neutral-600 sm:text-base">
-                Create a tenant profile for{" "}
-                <span className="font-medium text-neutral-900">{orgName}</span>.
-                Add next of kin details, create a login account, and optionally map
-                a vacant unit during creation.
+                Create a tenant for{" "}
+                <span className="font-medium text-neutral-900">{orgName}</span>{" "}
+                through one guided flow: identity, next of kin, unit and lease,
+                then final review.
               </p>
             </div>
 

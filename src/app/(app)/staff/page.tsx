@@ -1,276 +1,499 @@
 import Link from "next/link";
 
-import { prisma } from "@/lib/prisma";
+import { getOnlineSince } from "@/lib/auth/presence";
 import { requireUserSession } from "@/lib/auth/session";
+import { getPagination } from "@/lib/db/pagination";
+import { prisma } from "@/lib/prisma";
 import {
   ROLE_META,
   STAFF_ROLES,
+  type StaffRole,
 } from "@/features/staff/constants/role-meta";
 
 export const dynamic = "force-dynamic";
 
-type StaffRole = (typeof STAFF_ROLES)[number];
+type SearchParams = Promise<{
+  page?: string;
+  pageSize?: string;
+}>;
 
-function getInitials(label: string) {
-  return label
-    .split(/\s+/)
-    .map((part) => part[0] ?? "")
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+function formatDateTime(value: Date | null | undefined) {
+  if (!value) return "Never";
+
+  return new Intl.DateTimeFormat("en-KE", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(value);
 }
 
-export default async function StaffPage() {
+function formatRelative(value: Date | null | undefined, now: Date) {
+  if (!value) return "Never seen";
+
+  const diffMs = Math.max(now.getTime() - value.getTime(), 0);
+  const minutes = Math.floor(diffMs / 60000);
+
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} min ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+
+  return formatDateTime(value);
+}
+
+function RolePill({ role }: { role: StaffRole }) {
+  const meta = ROLE_META[role];
+
+  return (
+    <span
+      className={`inline-flex w-fit rounded-full border px-2.5 py-1 text-xs font-semibold dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 ${meta.badgeClass}`}
+    >
+      {meta.label}
+    </span>
+  );
+}
+
+function PresencePill({ online }: { online: boolean }) {
+  return (
+    <span
+      className={`inline-flex w-fit items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-semibold ${
+        online
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-200"
+          : "border-slate-200 bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300"
+      }`}
+    >
+      <span
+        className={`h-2 w-2 rounded-full ${
+          online ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-500"
+        }`}
+      />
+      {online ? "Online" : "Offline"}
+    </span>
+  );
+}
+
+export default async function StaffPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const session = await requireUserSession();
 
   if (!session.activeOrgId) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900 shadow-sm">
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900 shadow-sm dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-100">
         No active organisation found for your account.
       </div>
     );
   }
+
+  const params = await searchParams;
+  const { page, pageSize, skip, take } = getPagination({
+    page: Number(params.page ?? 1),
+    pageSize: Number(params.pageSize ?? 20),
+  });
+  const now = new Date();
+  const onlineSince = getOnlineSince(now);
 
   const membershipWhere = {
     orgId: session.activeOrgId,
     role: {
       in: [...STAFF_ROLES],
     },
+    employmentEndedAt: null,
+    org: {
+      deletedAt: null,
+    },
     user: {
-      is: {
-        deletedAt: null,
-      },
+      deletedAt: null,
     },
   };
 
-  const [groupedRoles, totalStaff] = await prisma.$transaction([
-    prisma.membership.groupBy({
-      by: ["role"],
-      where: membershipWhere,
-      orderBy: {
-        role: "asc",
-      },
-      _count: {
-        _all: true,
-      },
-    }),
-    prisma.membership.count({
-      where: membershipWhere,
-    }),
-  ]);
+  const [staff, totalStaff, groupedRoles, onlineStaffUsers] =
+    await prisma.$transaction([
+      prisma.membership.findMany({
+        where: membershipWhere,
+        orderBy: [{ role: "asc" }, { user: { fullName: "asc" } }],
+        skip,
+        take,
+        select: {
+          id: true,
+          role: true,
+          scopeType: true,
+          createdAt: true,
+          user: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              phone: true,
+              status: true,
+              lastLoginAt: true,
+              activeSession: {
+                select: {
+                  lastSeenAt: true,
+                  expiresAt: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.membership.count({ where: membershipWhere }),
+      prisma.membership.groupBy({
+        by: ["role"],
+        where: membershipWhere,
+        orderBy: {
+          role: "asc",
+        },
+        _count: {
+          _all: true,
+        },
+      }),
+      prisma.userSession.count({
+        where: {
+          expiresAt: {
+            gt: now,
+          },
+          lastSeenAt: {
+            gte: onlineSince,
+          },
+          user: {
+            status: "ACTIVE",
+            deletedAt: null,
+            memberships: {
+              some: membershipWhere,
+            },
+          },
+        },
+      }),
+    ]);
 
-  const counts = STAFF_ROLES.reduce<Record<StaffRole, number>>((acc, role) => {
+  const roleCounts = STAFF_ROLES.reduce<Record<StaffRole, number>>((acc, role) => {
     acc[role] = 0;
     return acc;
   }, {} as Record<StaffRole, number>);
 
   for (const row of groupedRoles) {
     const role = row.role as StaffRole;
-
-    if (role in counts) {
-      const count =
-        typeof row._count === "object" && row._count !== null
-          ? row._count._all ?? 0
-          : 0;
-
-      counts[role] = count;
-    }
+    roleCounts[role] =
+      typeof row._count === "object" && row._count !== null
+        ? row._count._all ?? 0
+        : 0;
   }
 
-  const activeRoles = STAFF_ROLES.filter(
-    (role) => (counts[role] ?? 0) > 0,
-  ).length;
+  const rows = staff.map((membership) => {
+    const role = membership.role as StaffRole;
+    const lastSeenAt =
+      membership.user.activeSession?.lastSeenAt ?? membership.user.lastLoginAt;
+    const isOnline = Boolean(
+      membership.user.activeSession &&
+        membership.user.activeSession.expiresAt > now &&
+        membership.user.activeSession.lastSeenAt >= onlineSince,
+    );
 
-  const emptyRoles = STAFF_ROLES.length - activeRoles;
-
-  const directoryRows = [
-    {
-      key: "staff",
-      label: "Staff Directory",
-      code: "ST",
-      description:
-        "View and manage all staff members across organisation roles.",
-      count: totalStaff,
-      href: "/staff",
-      statusLabel: totalStaff > 0 ? "Active" : "No members",
-    },
-    {
-      key: "caretaker",
-      label: "Caretaker Directory",
-      code: getInitials(ROLE_META.CARETAKER.label),
-      description:
-        "Manage caretakers assigned to operational and on-site responsibilities.",
-      count: counts.CARETAKER ?? 0,
-      href: "/staff/caretaker",
-      statusLabel: (counts.CARETAKER ?? 0) > 0 ? "Active" : "No members",
-    },
-    {
-      key: "admin",
-      label: "Admin Directory",
-      code: getInitials(ROLE_META.ADMIN.label),
-      description:
-        "Manage administrators with organisation-wide oversight and access.",
-      count: counts.ADMIN ?? 0,
-      href: "/staff/admin",
-      statusLabel: (counts.ADMIN ?? 0) > 0 ? "Active" : "No members",
-    },
-  ];
+    return {
+      ...membership,
+      role,
+      isOnline,
+      lastSeenAt,
+    };
+  });
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
+    <div className="space-y-5 text-slate-950 dark:text-slate-100">
+      <section className="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950">
         <div className="space-y-5 p-5 sm:p-6">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-slate-500">
-              Organisation people
-            </p>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                Organisation people
+              </p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+                Staff Directory
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                View every staff member, their role, online status, and most
+                recent activity from one place.
+              </p>
+            </div>
 
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              Staff Directory
-            </h1>
-
-            <p className="max-w-2xl text-sm leading-6 text-slate-600">
-              Manage staff directories, operational assignments, and
-              organisation access from a single place.
-            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Link
+                href="/staff/previous"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              >
+                Previous employees
+              </Link>
+              <Link
+                href="/staff/new"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 dark:bg-emerald-400 dark:text-slate-950 dark:hover:bg-emerald-300"
+              >
+                Add new staff
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm text-slate-500">Total staff</p>
-              <p className="mt-1 text-2xl font-semibold text-slate-950">
-                {totalStaff.toLocaleString()}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm text-slate-500">Active role groups</p>
-              <p className="mt-1 text-2xl font-semibold text-slate-950">
-                {activeRoles.toLocaleString()}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm text-slate-500">Inactive role groups</p>
-              <p className="mt-1 text-2xl font-semibold text-slate-950">
-                {emptyRoles.toLocaleString()}
-              </p>
-            </div>
+            <StatCard label="Total staff" value={totalStaff} />
+            <StatCard label="Online now" value={onlineStaffUsers} />
+            <StatCard label="Offline" value={Math.max(totalStaff - onlineStaffUsers, 0)} />
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Link
-              href="/staff/caretaker"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
-            >
-              Map a Caretaker
-            </Link>
-
-            <Link
-              href="/staff"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
-            >
-              Map a Staff
-            </Link>
+          <div className="flex flex-wrap gap-2">
+            {STAFF_ROLES.map((role) => (
+              <span
+                key={role}
+                className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
+              >
+                {ROLE_META[role].label}: {roleCounts[role]}
+              </span>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
-          <h2 className="text-base font-semibold text-slate-950 sm:text-lg">
-            Directory overview
+      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950">
+        <div className="border-b border-slate-100 px-5 py-4 dark:border-white/10 sm:px-6">
+          <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">
+            All staff
           </h2>
-
-          <p className="mt-1 text-sm text-slate-600">
-            Open the staff directory you want to manage.
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            Open a staff member to manage details or caretaker assignments.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 p-5 sm:p-6 lg:grid-cols-2">
-          {directoryRows.map((item) => {
-            const isActive = item.count > 0;
-
-            return (
+        {rows.length === 0 ? (
+          <div className="p-5 sm:p-6">
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center dark:border-white/15 dark:bg-slate-900">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                No staff members found
+              </p>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                Add your first staff member and choose their role during setup.
+              </p>
               <Link
-                key={item.key}
-                href={item.href}
-                className="group rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm"
-                aria-label={`Open ${item.label}`}
+                href="/staff/new"
+                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 dark:bg-emerald-400 dark:text-slate-950 dark:hover:bg-emerald-300"
               >
-                <div className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
-                    {item.code}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <h3 className="text-sm font-semibold text-slate-950 sm:text-base">
-                          {item.label}
-                        </h3>
-
-                        <p className="mt-1 text-sm leading-6 text-slate-600">
-                          {item.description}
-                        </p>
-                      </div>
-
-                      <div className="shrink-0">
-                        <span
-                          className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${
-                            isActive
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                              : "border-slate-200 bg-slate-50 text-slate-600"
-                          }`}
-                        >
-                          {item.statusLabel}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.14em] text-slate-400">
-                          Records
-                        </p>
-
-                        <p className="mt-1 text-lg font-semibold text-slate-950">
-                          {item.count.toLocaleString()}
-                        </p>
-                      </div>
-
-                      <span className="inline-flex items-center text-sm font-medium text-slate-700 transition group-hover:text-slate-950">
-                        Open directory
-                        <span className="ml-2 transition group-hover:translate-x-1">
-                          →
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                Add new staff
               </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 sm:p-6">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-            <p className="text-sm text-slate-500">Available roles</p>
-            <p className="mt-1 text-2xl font-semibold text-slate-950">
-              {STAFF_ROLES.length.toLocaleString()}
-            </p>
+            </div>
           </div>
+        ) : (
+          <>
+            <div className="grid gap-3 p-4 lg:hidden">
+              {rows.map((member) => (
+                <StaffCard
+                  key={member.id}
+                  href={`/staff/${member.role.toLowerCase()}/${member.id}`}
+                  name={member.user.fullName}
+                  email={member.user.email}
+                  phone={member.user.phone}
+                  role={member.role}
+                  online={member.isOnline}
+                  lastSeen={formatRelative(member.lastSeenAt, now)}
+                  status={member.user.status}
+                />
+              ))}
+            </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-            <p className="text-sm text-slate-500">Unassigned roles</p>
-            <p className="mt-1 text-2xl font-semibold text-slate-950">
-              {emptyRoles.toLocaleString()}
-            </p>
-          </div>
-        </div>
+            <div className="hidden overflow-x-auto lg:block">
+              <table className="min-w-full text-sm">
+                <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
+                  <tr>
+                    <th className="px-5 py-3 font-medium">Staff member</th>
+                    <th className="px-5 py-3 font-medium">Role</th>
+                    <th className="px-5 py-3 font-medium">Presence</th>
+                    <th className="px-5 py-3 font-medium">Last seen</th>
+                    <th className="px-5 py-3 font-medium">Account</th>
+                    <th className="px-5 py-3 font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((member) => (
+                    <tr
+                      key={member.id}
+                      className="border-t border-slate-100 dark:border-white/10"
+                    >
+                      <td className="px-5 py-4">
+                        <p className="font-semibold text-slate-950 dark:text-white">
+                          {member.user.fullName}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                          {member.user.email ?? member.user.phone ?? "No contact"}
+                        </p>
+                      </td>
+                      <td className="px-5 py-4">
+                        <RolePill role={member.role} />
+                      </td>
+                      <td className="px-5 py-4">
+                        <PresencePill online={member.isOnline} />
+                      </td>
+                      <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
+                        <p className="font-medium">
+                          {formatRelative(member.lastSeenAt, now)}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                          {formatDateTime(member.lastSeenAt)}
+                        </p>
+                      </td>
+                      <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
+                        {member.user.status}
+                      </td>
+                      <td className="px-5 py-4">
+                        <Link
+                          href={`/staff/${member.role.toLowerCase()}/${member.id}`}
+                          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                        >
+                          Open
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        <StaffPagination
+          page={page}
+          pageSize={pageSize}
+          total={totalStaff}
+          basePath="/staff"
+        />
       </section>
     </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-slate-900">
+      <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-slate-950 dark:text-white">
+        {value.toLocaleString()}
+      </p>
+    </div>
+  );
+}
+
+function StaffPagination({
+  page,
+  pageSize,
+  total,
+  basePath,
+}: {
+  page: number;
+  pageSize: number;
+  total: number;
+  basePath: string;
+}) {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(total, page * pageSize);
+
+  function href(nextPage: number) {
+    const params = new URLSearchParams();
+    params.set("page", String(nextPage));
+    params.set("pageSize", String(pageSize));
+    return `${basePath}?${params.toString()}`;
+  }
+
+  return (
+    <div className="flex flex-col gap-3 border-t border-slate-100 px-4 py-3 text-sm text-slate-600 dark:border-white/10 dark:text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+      <p>
+        Showing {from}-{to} of {total.toLocaleString()}
+      </p>
+      <div className="flex items-center gap-2">
+        <Link
+          href={href(Math.max(1, page - 1))}
+          aria-disabled={page <= 1}
+          className={`rounded-xl border px-3 py-2 font-medium ${
+            page <= 1
+              ? "pointer-events-none border-slate-200 bg-slate-50 text-slate-300 dark:border-white/10 dark:bg-slate-900 dark:text-slate-600"
+              : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          Previous
+        </Link>
+        <span className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200">
+          {page} / {totalPages}
+        </span>
+        <Link
+          href={href(Math.min(totalPages, page + 1))}
+          aria-disabled={page >= totalPages}
+          className={`rounded-xl border px-3 py-2 font-medium ${
+            page >= totalPages
+              ? "pointer-events-none border-slate-200 bg-slate-50 text-slate-300 dark:border-white/10 dark:bg-slate-900 dark:text-slate-600"
+              : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          Next
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function StaffCard({
+  href,
+  name,
+  email,
+  phone,
+  role,
+  online,
+  lastSeen,
+  status,
+}: {
+  href: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  role: StaffRole;
+  online: boolean;
+  lastSeen: string;
+  status: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm dark:border-white/10 dark:bg-slate-900 dark:hover:border-white/20"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+            {name}
+          </p>
+          <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+            {email ?? phone ?? "No contact"}
+          </p>
+        </div>
+        <PresencePill online={online} />
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <RolePill role={role} />
+        <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:border-white/10 dark:bg-slate-950 dark:text-slate-300">
+          {status}
+        </span>
+      </div>
+
+      <div className="mt-4 border-t border-slate-100 pt-3 dark:border-white/10">
+        <p className="text-xs uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
+          Last seen
+        </p>
+        <p className="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">
+          {lastSeen}
+        </p>
+      </div>
+    </Link>
   );
 }

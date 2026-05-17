@@ -119,3 +119,63 @@ export async function getCaretakerAllowedUnitIds({
 
   return units.map((unit) => unit.id);
 }
+
+export async function getCaretakerManagedBuildingUnitIds({
+  orgId,
+  caretakerUserId,
+  membershipScope,
+}: GetCaretakerAllowedUnitIdsInput) {
+  const buildingIds = new Set<string>();
+
+  if (
+    membershipScope &&
+    membershipScope.scopeType === "BUILDING" &&
+    membershipScope.scopeId !== "ORG_SCOPE"
+  ) {
+    buildingIds.add(membershipScope.scopeId);
+  }
+
+  const assignments = await prisma.caretakerAssignment.findMany({
+    where: {
+      orgId,
+      caretakerUserId,
+      active: true,
+      endedAt: null,
+      buildingId: {
+        not: null,
+      },
+    },
+    select: {
+      buildingId: true,
+    },
+  });
+
+  for (const assignment of assignments) {
+    if (assignment.buildingId) {
+      buildingIds.add(assignment.buildingId);
+    }
+  }
+
+  if (buildingIds.size === 0) {
+    return [];
+  }
+
+  const units = await prisma.unit.findMany({
+    where: {
+      deletedAt: null,
+      isActive: true,
+      buildingId: {
+        in: Array.from(buildingIds),
+      },
+      property: {
+        orgId,
+        deletedAt: null,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  return units.map((unit) => unit.id);
+}

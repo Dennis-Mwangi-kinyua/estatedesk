@@ -9,6 +9,7 @@ export async function getRoleMembers(role: StaffRole) {
     where: {
       orgId,
       role,
+      employmentEndedAt: null,
       org: { deletedAt: null },
       user: { deletedAt: null },
     },

@@ -1,11 +1,21 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { useSyncExternalStore } from "react";
 import { useTheme } from "@/components/theme/theme-provider";
+
+const subscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+  const isHydrated = useSyncExternalStore(
+    subscribe,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
+  const isDark = isHydrated && resolvedTheme === "dark";
 
   return (
     <button

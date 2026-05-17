@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
+import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { MeterReadingForm } from "./meter-reading-form";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +23,16 @@ export default async function ReadSingleWaterBillPage({
   const { unitId } = await params;
   const { period } = await searchParams;
   const currentPeriod = period ?? CURRENT_PERIOD;
+  const session = await requireCaretakerAccess();
+  const allowedUnitIds = await getCaretakerManagedBuildingUnitIds({
+    orgId: session.activeOrgId!,
+    caretakerUserId: session.userId,
+    membershipScope: session.membershipScope,
+  });
+
+  if (!allowedUnitIds.includes(unitId)) {
+    notFound();
+  }
 
   const [unit, existingReading] = await Promise.all([
     prisma.unit.findUnique({

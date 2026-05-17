@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
+import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +41,12 @@ function StatusBadge({ status }: { status: string }) {
 
 export default async function ReadingDetailPage({ params }: PageProps) {
   const { readingId } = await params;
+  const session = await requireCaretakerAccess();
+  const allowedUnitIds = await getCaretakerManagedBuildingUnitIds({
+    orgId: session.activeOrgId!,
+    caretakerUserId: session.userId,
+    membershipScope: session.membershipScope,
+  });
 
   const reading = await prisma.meterReading.findUnique({
     where: {
@@ -77,6 +85,7 @@ export default async function ReadingDetailPage({ params }: PageProps) {
   });
 
   if (!reading) notFound();
+  if (!allowedUnitIds.includes(reading.unitId)) notFound();
 
   return (
     <div className="space-y-5 sm:space-y-6">

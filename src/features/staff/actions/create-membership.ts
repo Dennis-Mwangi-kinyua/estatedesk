@@ -12,7 +12,7 @@ import {
   type StaffRole,
 } from "@/features/staff/constants/role-meta";
 
-type AssignmentTargetType = "PROPERTY" | "BUILDING" | "UNIT";
+type AssignmentTargetType = "BUILDING";
 
 export type CreateMembershipState = {
   ok: boolean;
@@ -51,8 +51,8 @@ function normalizeAssignmentTargetType(
 ): AssignmentTargetType | null {
   const upper = value.trim().toUpperCase();
 
-  if (upper === "PROPERTY" || upper === "BUILDING" || upper === "UNIT") {
-    return upper;
+  if (upper === "BUILDING") {
+    return "BUILDING";
   }
 
   return null;
@@ -76,15 +76,10 @@ export async function createMembership(
     String(formData.get("assignmentTargetType") ?? ""),
   );
 
-  const assignmentPropertyId = String(
-    formData.get("assignmentPropertyId") ?? "",
-  ).trim();
-
   const assignmentBuildingId = String(
     formData.get("assignmentBuildingId") ?? "",
   ).trim();
 
-  const assignmentUnitId = String(formData.get("assignmentUnitId") ?? "").trim();
   const assignmentNotes = String(formData.get("assignmentNotes") ?? "").trim();
 
   const assignmentIsPrimary =
@@ -130,14 +125,14 @@ export async function createMembership(
 
   if (role === "CARETAKER" && !assignmentTargetType) {
     return fail(
-      "Please search and select a property, building, or apartment/unit for this caretaker.",
+      "Please search and select an apartment/block for this caretaker.",
       2,
       "assignmentTargetType",
     );
   }
 
   if (role !== "CARETAKER" && assignmentTargetType) {
-    return fail("Only caretakers can be mapped to properties or units.", 2);
+    return fail("Only caretakers can be mapped to apartments/blocks.", 2);
   }
 
   const existingUser = await prisma.user.findFirst({
@@ -180,9 +175,7 @@ export async function createMembership(
       ? await resolveCaretakerAssignmentTarget({
           orgId,
           targetType: assignmentTargetType,
-          propertyId: assignmentPropertyId,
           buildingId: assignmentBuildingId,
-          unitId: assignmentUnitId,
         })
       : null;
 
@@ -276,15 +269,11 @@ export async function createMembership(
 async function resolveCaretakerAssignmentTarget({
   orgId,
   targetType,
-  propertyId,
   buildingId,
-  unitId,
 }: {
   orgId: string;
   targetType: AssignmentTargetType;
-  propertyId: string;
   buildingId: string;
-  unitId: string;
 }): Promise<
   | {
       ok: true;
@@ -298,96 +287,17 @@ async function resolveCaretakerAssignmentTarget({
       field: string;
     }
 > {
-  if (targetType === "PROPERTY") {
-    if (!propertyId) {
-      return {
-        ok: false,
-        message: "Property is required for caretaker mapping.",
-        field: "assignmentPropertyId",
-      };
-    }
-
-    const property = await prisma.property.findFirst({
-      where: {
-        id: propertyId,
-        orgId,
-        deletedAt: null,
-        isActive: true,
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    if (!property) {
-      return {
-        ok: false,
-        message: "Selected property was not found.",
-        field: "assignmentPropertyId",
-      };
-    }
-
-    return {
-      ok: true,
-      propertyId: property.id,
-      buildingId: null,
-      unitId: null,
-    };
-  }
-
-  if (targetType === "BUILDING") {
-    if (!buildingId) {
-      return {
-        ok: false,
-        message: "Building is required for caretaker mapping.",
-        field: "assignmentBuildingId",
-      };
-    }
-
-    const building = await prisma.building.findFirst({
-      where: {
-        id: buildingId,
-        deletedAt: null,
-        isActive: true,
-        property: {
-          orgId,
-          deletedAt: null,
-          isActive: true,
-        },
-      },
-      select: {
-        id: true,
-        propertyId: true,
-      },
-    });
-
-    if (!building) {
-      return {
-        ok: false,
-        message: "Selected building was not found.",
-        field: "assignmentBuildingId",
-      };
-    }
-
-    return {
-      ok: true,
-      propertyId: building.propertyId,
-      buildingId: building.id,
-      unitId: null,
-    };
-  }
-
-  if (!unitId) {
+  if (targetType !== "BUILDING" || !buildingId) {
     return {
       ok: false,
-      message: "Apartment/unit is required for caretaker mapping.",
-      field: "assignmentUnitId",
+      message: "Apartment/block is required for caretaker mapping.",
+      field: "assignmentBuildingId",
     };
   }
 
-  const unit = await prisma.unit.findFirst({
+  const building = await prisma.building.findFirst({
     where: {
-      id: unitId,
+      id: buildingId,
       deletedAt: null,
       isActive: true,
       property: {
@@ -399,22 +309,21 @@ async function resolveCaretakerAssignmentTarget({
     select: {
       id: true,
       propertyId: true,
-      buildingId: true,
     },
   });
 
-  if (!unit) {
+  if (!building) {
     return {
       ok: false,
-      message: "Selected apartment/unit was not found.",
-      field: "assignmentUnitId",
+      message: "Selected apartment/block was not found.",
+      field: "assignmentBuildingId",
     };
   }
 
   return {
     ok: true,
-    propertyId: unit.propertyId,
-    buildingId: unit.buildingId,
-    unitId: unit.id,
+    propertyId: building.propertyId,
+    buildingId: building.id,
+    unitId: null,
   };
 }

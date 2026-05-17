@@ -378,17 +378,23 @@ model Asset {
 
 /// Organization role assignment with optional scoped access.
 model Membership {
-  id        String        @id @default(cuid())
-  orgId     String
-  userId    String
-  role      OrgRole
-  scopeType ScopeType     @default(ORG)
-  scopeId   String        @default("ORG_SCOPE")
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  org       Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sessions  UserSession[]
+  id                     String        @id @default(cuid())
+  orgId                  String
+  userId                 String
+  role                   OrgRole
+  scopeType              ScopeType     @default(ORG)
+  scopeId                String        @default("ORG_SCOPE")
+  employmentStartedAt    DateTime      @default(now())
+  employmentEndedAt      DateTime?
+  employmentExitReason   String?
+  deactivatedAt          DateTime?
+  deactivatedByUserId    String?
+  deactivationNotes      String?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  org                    Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user                   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions               UserSession[]
 
   @@unique([orgId, userId, role, scopeType, scopeId])
   @@index([orgId])
@@ -398,6 +404,8 @@ model Membership {
   @@index([userId, orgId, role])
   @@index([userId, role, createdAt])
   @@index([orgId, role, scopeType, scopeId])
+  @@index([orgId, employmentEndedAt])
+  @@index([userId, employmentEndedAt])
 }
 
 /// KRA taxpayer identity used for rental income tax workflows.

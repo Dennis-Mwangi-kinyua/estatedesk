@@ -11,7 +11,7 @@ import {
 } from "react";
 import { STAFF_ROLES, type StaffRole } from "@/features/staff/constants/role-meta";
 
-type AssignmentTargetType = "PROPERTY" | "BUILDING" | "UNIT";
+type AssignmentTargetType = "BUILDING";
 
 type AssignmentTarget = {
   id: string;
@@ -138,20 +138,14 @@ export function MemberForm({
       .slice(0, 12);
   }, [assignmentTargets, targetSearch]);
 
-  const assignmentPropertyId = useMemo(
-    () => (selectedTarget?.type === "PROPERTY" ? selectedTarget.id : ""),
-    [selectedTarget],
-  );
+  const assignmentPropertyId = "";
 
   const assignmentBuildingId = useMemo(
     () => (selectedTarget?.type === "BUILDING" ? selectedTarget.id : ""),
     [selectedTarget],
   );
 
-  const assignmentUnitId = useMemo(
-    () => (selectedTarget?.type === "UNIT" ? selectedTarget.id : ""),
-    [selectedTarget],
-  );
+  const assignmentUnitId = "";
 
   const displayedError = localError ?? actionState.message;
 
@@ -230,7 +224,7 @@ export function MemberForm({
       }
 
       if (step === 2 && !selectedTarget) {
-        return "Please search and select a property, building, or apartment/unit for this caretaker.";
+        return "Please search and select an apartment/block for this caretaker.";
       }
 
       return null;
@@ -721,21 +715,21 @@ const CaretakerMappingStep = memo(function CaretakerMappingStep({
 }) {
   return (
     <section className="space-y-5">
-      <SectionHeader
-        title="Caretaker mapping"
-        description="Search and select the property, building, or apartment/unit assigned to this caretaker."
-      />
+        <SectionHeader
+          title="Caretaker mapping"
+          description="Search and select the apartment/block assigned to this caretaker. Individual houses are kept under that apartment."
+        />
 
       <div className="space-y-4 rounded-3xl border border-sky-200 bg-sky-50 p-4">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-sky-950">
-            Search property, building, or apartment/unit
+            Search apartment/block
           </label>
           <input
             type="search"
             value={targetSearch}
             onChange={onTargetSearchChange}
-            placeholder="Search e.g. Block A, Unit 12, Westlands..."
+            placeholder="Search e.g. Block A, Westlands..."
             className="w-full rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-sky-400"
           />
         </div>
@@ -803,10 +797,10 @@ const CaretakerMappingStep = memo(function CaretakerMappingStep({
           ) : (
             <div className="rounded-xl border border-dashed border-sky-200 bg-sky-50 px-4 py-6 text-center">
               <p className="text-sm font-medium text-sky-950">
-                No matching property, building, or unit found.
+                No matching apartment/block found.
               </p>
               <p className="mt-1 text-sm text-sky-700">
-                Try a different search term or create the property/unit first.
+                Try a different search term or create the apartment/block first.
               </p>
             </div>
           )}

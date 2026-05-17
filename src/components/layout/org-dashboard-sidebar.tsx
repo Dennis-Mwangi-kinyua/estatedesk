@@ -10,6 +10,7 @@ import {
   CreditCard,
   FileText,
   Home,
+  LayoutGrid,
   LogOut,
   Receipt,
   Send,
@@ -173,10 +174,10 @@ const SidebarNavItem = memo(function SidebarNavItem({
         href={item.href}
         onClick={onNavigate}
         className={[
-          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150",
+          "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors duration-150",
           active
             ? "bg-primary text-primary-foreground shadow-sm"
-            : "text-slate-700 hover:bg-slate-100 hover:text-slate-950",
+            : "text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white",
         ].join(" ")}
       >
         <span
@@ -184,7 +185,7 @@ const SidebarNavItem = memo(function SidebarNavItem({
             "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
             active
               ? "bg-white/12 text-white"
-              : "bg-slate-100 text-slate-600",
+              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
           ].join(" ")}
         >
           <Icon className="h-4 w-4" />
@@ -194,7 +195,7 @@ const SidebarNavItem = memo(function SidebarNavItem({
           <span className="truncate">{item.label}</span>
           <Icon
             className={
-            active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-slate-400"
+            active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-slate-400 dark:text-slate-500"
             }
           />
         </div>
@@ -206,10 +207,10 @@ const SidebarNavItem = memo(function SidebarNavItem({
     <Link
       href={item.href}
       className={[
-        "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+        "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors",
         active
           ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-slate-700 hover:bg-slate-100 hover:text-slate-950",
+          : "text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white",
       ].join(" ")}
     >
       <span
@@ -217,7 +218,7 @@ const SidebarNavItem = memo(function SidebarNavItem({
           "flex h-9 w-9 items-center justify-center rounded-md",
           active
             ? "bg-white/12 text-white"
-            : "bg-slate-100 text-slate-600",
+            : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
         ].join(" ")}
       >
         <Icon className="h-4 w-4" />
@@ -225,9 +226,7 @@ const SidebarNavItem = memo(function SidebarNavItem({
 
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
         <span className="truncate">{item.label}</span>
-        <Icon
-          className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-slate-400"}
-        />
+        <Icon className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-slate-400 dark:text-slate-500"} />
       </div>
     </Link>
   );
@@ -245,10 +244,10 @@ const SidebarBrand = memo(function SidebarBrand({
       </div>
 
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-slate-950">
+        <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
           {organizationName}
         </p>
-        <p className="text-xs text-slate-500">Organization workspace</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Organization workspace</p>
       </div>
     </Link>
   );
@@ -268,13 +267,13 @@ const LogoutButton = memo(function LogoutButton({
         className={[
           "flex w-full items-center gap-3 rounded-lg text-sm font-medium transition-colors",
           mobile
-            ? "px-4 py-3.5 text-red-600 hover:bg-red-50 hover:text-red-700"
-            : "px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700",
+            ? "px-4 py-3.5 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:bg-red-500/10"
+            : "px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:bg-red-500/10",
         ].join(" ")}
       >
         <span
           className={[
-            "flex items-center justify-center rounded-md bg-red-50 text-red-600",
+            "flex items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300",
             mobile ? "h-9 w-9 shrink-0" : "h-9 w-9",
           ].join(" ")}
         >
@@ -305,8 +304,8 @@ export function OrgDashboardSidebar({
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r border-slate-200 bg-white shadow-[10px_0_28px_rgba(15,23,42,0.04)] lg:flex">
-        <div className="border-b border-slate-200 px-5 py-5">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r border-slate-200 bg-white/92 shadow-[10px_0_28px_rgba(15,23,42,0.04)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/88 lg:flex">
+        <div className="border-b border-slate-200 px-5 py-5 dark:border-white/10">
           <SidebarBrand organizationName={organizationName} />
         </div>
 
@@ -336,20 +335,20 @@ export function OrgDashboardSidebar({
           aria-label="Close navigation overlay"
           onClick={closeMobile}
           className={[
-            "absolute inset-0 bg-slate-950/35 backdrop-blur-sm transition-opacity duration-300 ease-out",
+            "absolute inset-0 bg-slate-950/42 backdrop-blur-md transition-opacity duration-300 ease-out",
             mobileOpen ? "opacity-100" : "opacity-0",
           ].join(" ")}
         />
 
         <div
           className={[
-            "absolute inset-y-0 left-0 flex w-[88%] max-w-[360px] flex-col border-r border-slate-200 bg-white shadow-2xl transition-transform duration-300 ease-out",
+            "absolute inset-y-0 left-0 flex w-[90%] max-w-[390px] flex-col border-r border-slate-200 bg-white/86 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out dark:border-white/10 dark:bg-slate-950/86",
             mobileOpen ? "translate-x-0" : "-translate-x-full",
           ].join(" ")}
         >
           <div className="flex h-full flex-col justify-between">
             <div className="min-h-0">
-              <div className="flex items-center justify-between border-b border-slate-200 px-4 pb-4 pt-5">
+              <div className="flex items-center justify-between border-b border-slate-200 px-4 pb-4 pt-safe dark:border-white/10">
                 <div className="min-w-0">
                   <SidebarBrand organizationName={organizationName} />
                 </div>
@@ -358,7 +357,7 @@ export function OrgDashboardSidebar({
                   type="button"
                   onClick={closeMobile}
                   aria-label="Close navigation"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-900 shadow-sm"
+                  className="ios-button touch-target inline-flex items-center justify-center border border-slate-200 bg-white/86 text-slate-900 shadow-sm dark:border-white/10 dark:bg-slate-900/86 dark:text-white"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -380,13 +379,61 @@ export function OrgDashboardSidebar({
             </div>
 
             <div className="px-3 pb-4 pt-3 [padding-bottom:max(1rem,env(safe-area-inset-bottom))]">
-              <div className="rounded-lg bg-slate-50 p-2">
+              <div className="rounded-2xl bg-slate-50 p-2 dark:bg-slate-900">
                 <LogoutButton mobile onClick={closeMobile} />
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <nav className="fixed bottom-3 left-3 right-3 z-[88] rounded-[28px] border border-slate-200/75 bg-white/82 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_18px_44px_rgba(15,23,42,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/82 lg:hidden">
+        <div className="grid grid-cols-5 gap-1">
+          {[
+            ...visibleLinks.slice(0, 4),
+            {
+              label: "More",
+              href: "#menu",
+              icon: LayoutGrid,
+              roles: [] as const,
+            },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isMore = item.href === "#menu";
+            const active = !isMore && isActivePath(pathname, item.href);
+
+            if (isMore) {
+              return (
+                <button
+                  key="more"
+                  type="button"
+                  onClick={() => setMobileOpen(true)}
+                  className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[11px] font-semibold text-slate-500 transition active:scale-95 dark:text-slate-400"
+                >
+                  <Icon className="h-5 w-5" />
+                  <span>More</span>
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={[
+                  "flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[11px] font-semibold transition active:scale-95",
+                  active
+                    ? "bg-slate-950 text-white dark:bg-white dark:text-slate-950"
+                    : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900",
+                ].join(" ")}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="max-w-full truncate px-1">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </>
   );
 }

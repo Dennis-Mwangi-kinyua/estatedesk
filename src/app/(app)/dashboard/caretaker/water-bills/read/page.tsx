@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
+import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { ArrowRight, Droplets } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -38,10 +40,19 @@ export default async function ReadWaterBillsPage({
 }) {
   const params = await searchParams;
   const period = params.period ?? CURRENT_PERIOD;
+  const session = await requireCaretakerAccess();
+  const allowedUnitIds = await getCaretakerManagedBuildingUnitIds({
+    orgId: session.activeOrgId!,
+    caretakerUserId: session.userId,
+    membershipScope: session.membershipScope,
+  });
 
   const [units, meterReadings] = await Promise.all([
     prisma.unit.findMany({
       where: {
+        id: {
+          in: allowedUnitIds,
+        },
         isActive: true,
         status: "OCCUPIED",
         leases: {
@@ -82,6 +93,9 @@ export default async function ReadWaterBillsPage({
     prisma.meterReading.findMany({
       where: {
         period,
+        unitId: {
+          in: allowedUnitIds,
+        },
       },
       select: {
         id: true,

@@ -4,13 +4,13 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 
-type AssignmentTargetType = "PROPERTY" | "BUILDING" | "UNIT";
+type AssignmentTargetType = "BUILDING";
 
 function normalizeTargetType(value: string): AssignmentTargetType | null {
   const upper = value.trim().toUpperCase();
 
-  if (upper === "PROPERTY" || upper === "BUILDING" || upper === "UNIT") {
-    return upper;
+  if (upper === "BUILDING") {
+    return "BUILDING";
   }
 
   return null;
@@ -24,9 +24,7 @@ export async function createCaretakerAssignment(formData: FormData) {
     String(formData.get("targetType") ?? ""),
   );
 
-  const propertyId = String(formData.get("propertyId") ?? "").trim();
   const buildingId = String(formData.get("buildingId") ?? "").trim();
-  const unitId = String(formData.get("unitId") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
   const isPrimary = String(formData.get("isPrimary") ?? "") === "on";
 
@@ -35,7 +33,7 @@ export async function createCaretakerAssignment(formData: FormData) {
   }
 
   if (!targetType) {
-    throw new Error("Assignment target type is required.");
+    throw new Error("Select the apartment/block this caretaker manages.");
   }
 
   const caretakerMembership = await prisma.membership.findFirst({
@@ -43,6 +41,7 @@ export async function createCaretakerAssignment(formData: FormData) {
       orgId,
       userId: caretakerUserId,
       role: "CARETAKER",
+      employmentEndedAt: null,
       user: {
         is: {
           deletedAt: null,
@@ -61,9 +60,7 @@ export async function createCaretakerAssignment(formData: FormData) {
   const target = await resolveAssignmentTarget({
     orgId,
     targetType,
-    propertyId,
     buildingId,
-    unitId,
   });
 
   const existingAssignment = await prisma.caretakerAssignment.findFirst({
@@ -133,84 +130,19 @@ export async function endCaretakerAssignment(formData: FormData) {
 async function resolveAssignmentTarget({
   orgId,
   targetType,
-  propertyId,
   buildingId,
-  unitId,
 }: {
   orgId: string;
   targetType: AssignmentTargetType;
-  propertyId: string;
   buildingId: string;
-  unitId: string;
 }) {
-  if (targetType === "PROPERTY") {
-    if (!propertyId) {
-      throw new Error("Property is required.");
-    }
-
-    const property = await prisma.property.findFirst({
-      where: {
-        id: propertyId,
-        orgId,
-        deletedAt: null,
-        isActive: true,
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    if (!property) {
-      throw new Error("Property was not found.");
-    }
-
-    return {
-      propertyId: property.id,
-      buildingId: null,
-      unitId: null,
-    };
+  if (targetType !== "BUILDING" || !buildingId) {
+    throw new Error("Apartment/block is required.");
   }
 
-  if (targetType === "BUILDING") {
-    if (!buildingId) {
-      throw new Error("Building is required.");
-    }
-
-    const building = await prisma.building.findFirst({
-      where: {
-        id: buildingId,
-        deletedAt: null,
-        isActive: true,
-        property: {
-          orgId,
-          deletedAt: null,
-          isActive: true,
-        },
-      },
-      select: {
-        id: true,
-        propertyId: true,
-      },
-    });
-
-    if (!building) {
-      throw new Error("Building was not found.");
-    }
-
-    return {
-      propertyId: building.propertyId,
-      buildingId: building.id,
-      unitId: null,
-    };
-  }
-
-  if (!unitId) {
-    throw new Error("Apartment/unit is required.");
-  }
-
-  const unit = await prisma.unit.findFirst({
+  const building = await prisma.building.findFirst({
     where: {
-      id: unitId,
+      id: buildingId,
       deletedAt: null,
       isActive: true,
       property: {
@@ -222,17 +154,16 @@ async function resolveAssignmentTarget({
     select: {
       id: true,
       propertyId: true,
-      buildingId: true,
     },
   });
 
-  if (!unit) {
-    throw new Error("Apartment/unit was not found.");
+  if (!building) {
+    throw new Error("Apartment/block was not found.");
   }
 
   return {
-    propertyId: unit.propertyId,
-    buildingId: unit.buildingId,
-    unitId: unit.id,
+    propertyId: building.propertyId,
+    buildingId: building.id,
+    unitId: null,
   };
 }

@@ -2,9 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
-import { deleteMembership } from "@/features/staff/actions/delete-membership";
+import { deactivateMembershipAction } from "@/features/staff/actions/deactivate-membership";
 import { endCaretakerAssignment } from "@/features/staff/actions/create-caretaker-assignment";
-import { DeleteCaretakerForm } from "@/features/staff/components/delete-caretaker-form";
 import {
   ROLE_META,
   normalizeStaffRole,
@@ -48,6 +47,7 @@ export default async function MemberDetailPage({ params }: Props) {
       id: membershipId,
       orgId,
       role: normalizedRole,
+      employmentEndedAt: null,
       user: {
         is: {
           deletedAt: null,
@@ -59,6 +59,7 @@ export default async function MemberDetailPage({ params }: Props) {
       role: true,
       scopeType: true,
       createdAt: true,
+      employmentStartedAt: true,
       user: {
         select: {
           id: true,
@@ -323,26 +324,80 @@ export default async function MemberDetailPage({ params }: Props) {
               Edit details
             </Link>
 
-            {normalizedRole !== "CARETAKER" ? (
-              <form
-                action={async () => {
-                  "use server";
-                  await deleteMembership(member.id);
-                }}
-              >
-                <button className="inline-flex min-h-11 items-center justify-center rounded-xl bg-red-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-red-700">
-                  Delete membership
-                </button>
-              </form>
-            ) : null}
+            <Link
+              href="/staff/previous"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+            >
+              Previous employees
+            </Link>
           </div>
 
-          {normalizedRole === "CARETAKER" ? (
-            <DeleteCaretakerForm
-              caretakerName={member.user.fullName}
-              membershipId={member.id}
-            />
-          ) : null}
+          <section className="rounded-3xl border border-red-200 bg-red-50 p-4 dark:border-red-400/30 dark:bg-red-500/10">
+            <h2 className="text-sm font-semibold text-red-900 dark:text-red-100">
+              End employment / deactivate account
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-red-800 dark:text-red-200">
+              Use this when a staff member leaves or is fired. Their staff
+              access is ended, the account can be disabled, and the record moves
+              to the previous employees register.
+            </p>
+
+            <form action={deactivateMembershipAction} className="mt-4 grid gap-3">
+              <input type="hidden" name="membershipId" value={member.id} />
+              <label className="grid gap-1.5">
+                <span className="text-sm font-medium text-red-900 dark:text-red-100">
+                  End date
+                </span>
+                <input
+                  type="date"
+                  name="employmentEndedAt"
+                  className="h-11 rounded-xl border border-red-200 bg-white px-3 text-sm text-slate-900 outline-none dark:border-red-400/30 dark:bg-slate-950 dark:text-white"
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-sm font-medium text-red-900 dark:text-red-100">
+                  Reason
+                </span>
+                <input
+                  name="exitReason"
+                  placeholder="Resigned, fired, contract ended..."
+                  className="h-11 rounded-xl border border-red-200 bg-white px-3 text-sm text-slate-900 outline-none dark:border-red-400/30 dark:bg-slate-950 dark:text-white"
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-sm font-medium text-red-900 dark:text-red-100">
+                  Notes
+                </span>
+                <textarea
+                  name="deactivationNotes"
+                  rows={3}
+                  placeholder="Optional register notes"
+                  className="rounded-xl border border-red-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none dark:border-red-400/30 dark:bg-slate-950 dark:text-white"
+                />
+              </label>
+              <label className="flex items-start gap-3 rounded-xl border border-red-200 bg-white/70 p-3 text-sm text-red-900 dark:border-red-400/30 dark:bg-slate-950/70 dark:text-red-100">
+                <input
+                  type="checkbox"
+                  name="disableLogin"
+                  defaultChecked
+                  className="mt-1 h-4 w-4"
+                />
+                Disable this user account login too.
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-sm font-medium text-red-900 dark:text-red-100">
+                  Type {member.user.fullName} to confirm
+                </span>
+                <input
+                  name="confirmation"
+                  className="h-11 rounded-xl border border-red-200 bg-white px-3 text-sm text-slate-900 outline-none dark:border-red-400/30 dark:bg-slate-950 dark:text-white"
+                />
+              </label>
+              <button className="inline-flex min-h-11 items-center justify-center rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700">
+                Deactivate and move to previous employees
+              </button>
+            </form>
+          </section>
         </div>
       </section>
 
@@ -353,8 +408,8 @@ export default async function MemberDetailPage({ params }: Props) {
               Caretaker allocations
             </h2>
             <p className="mt-1 text-sm text-slate-600">
-              Map this caretaker to a property, building, or specific
-              apartment/unit.
+              Caretakers are mapped to apartments/blocks. The houses under
+              those apartments define their operating scope.
             </p>
           </div>
 
@@ -366,7 +421,7 @@ export default async function MemberDetailPage({ params }: Props) {
                 </p>
                 <p className="mt-2 text-sm text-slate-500">
                   This caretaker has not been allocated to any property,
-                  building, or apartment yet.
+                  apartment/block yet.
                 </p>
               </div>
             </div>
@@ -391,13 +446,13 @@ export default async function MemberDetailPage({ params }: Props) {
                     ? `${assignment.building.property?.name ?? "Property"} · ${
                         assignment.building.name
                       }`
-                    : assignment.property?.name ?? "Property allocation";
+                    : assignment.property?.name ?? "Legacy property allocation";
 
                 const allocationType = assignment.unit
-                  ? "Apartment/unit allocation"
+                  ? "Legacy unit allocation"
                   : assignment.building
-                    ? "Building allocation"
-                    : "Property allocation";
+                    ? "Apartment/block allocation"
+                    : "Legacy property allocation";
 
                 return (
                   <div

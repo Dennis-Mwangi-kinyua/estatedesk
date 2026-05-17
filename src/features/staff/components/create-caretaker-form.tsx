@@ -18,23 +18,9 @@ type BuildingOption = {
   };
 };
 
-type UnitOption = {
-  id: string;
-  houseNo: string;
-  propertyId: string;
-  buildingId: string | null;
-  property: {
-    name: string;
-  };
-  building: {
-    name: string;
-  } | null;
-};
-
 type CreateCaretakerFormProps = {
   properties: PropertyOption[];
   buildings: BuildingOption[];
-  units: UnitOption[];
 };
 
 const initialCreateCaretakerState = {
@@ -44,7 +30,6 @@ const initialCreateCaretakerState = {
 export function CreateCaretakerForm({
   properties,
   buildings,
-  units,
 }: CreateCaretakerFormProps) {
   const [state, formAction, pending] = useActionState(
     createCaretakerAction,
@@ -53,7 +38,6 @@ export function CreateCaretakerForm({
 
   const [selectedPropertyId, setSelectedPropertyId] = useState("");
   const [selectedBuildingId, setSelectedBuildingId] = useState("");
-  const [selectedUnitId, setSelectedUnitId] = useState("");
 
   const filteredBuildings = useMemo(() => {
     if (!selectedPropertyId) return buildings;
@@ -63,29 +47,9 @@ export function CreateCaretakerForm({
     );
   }, [buildings, selectedPropertyId]);
 
-  const filteredUnits = useMemo(() => {
-    return units.filter((unit) => {
-      const propertyMatches = selectedPropertyId
-        ? unit.propertyId === selectedPropertyId
-        : true;
-
-      const buildingMatches = selectedBuildingId
-        ? unit.buildingId === selectedBuildingId
-        : true;
-
-      return propertyMatches && buildingMatches;
-    });
-  }, [units, selectedPropertyId, selectedBuildingId]);
-
   function handlePropertyChange(value: string) {
     setSelectedPropertyId(value);
     setSelectedBuildingId("");
-    setSelectedUnitId("");
-  }
-
-  function handleBuildingChange(value: string) {
-    setSelectedBuildingId(value);
-    setSelectedUnitId("");
   }
 
   return (
@@ -195,8 +159,8 @@ export function CreateCaretakerForm({
             Assignment mapping
           </h3>
           <p className="mt-1 text-sm text-slate-600">
-            Choose the property, building, or apartment this caretaker should
-            manage.
+            Choose the apartment/block this caretaker should manage. Individual
+            houses are included through that apartment.
           </p>
         </div>
 
@@ -215,7 +179,7 @@ export function CreateCaretakerForm({
               onChange={(event) => handlePropertyChange(event.target.value)}
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
             >
-              <option value="">Select property</option>
+              <option value="">Filter by property</option>
               {properties.map((property) => (
                 <option key={property.id} value={property.id}>
                   {property.name}
@@ -225,49 +189,25 @@ export function CreateCaretakerForm({
             </select>
           </div>
 
-          <div>
+          <div className="sm:col-span-2">
             <label
               htmlFor="buildingId"
               className="mb-2 block text-sm font-medium text-slate-700"
             >
-              Building
+              Apartment / block
             </label>
             <select
               id="buildingId"
               name="buildingId"
               value={selectedBuildingId}
-              onChange={(event) => handleBuildingChange(event.target.value)}
+              onChange={(event) => setSelectedBuildingId(event.target.value)}
+              required
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
             >
-              <option value="">Select building</option>
+              <option value="">Select apartment / block</option>
               {filteredBuildings.map((building) => (
                 <option key={building.id} value={building.id}>
                   {building.property.name} — {building.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="unitId"
-              className="mb-2 block text-sm font-medium text-slate-700"
-            >
-              Apartment / unit
-            </label>
-            <select
-              id="unitId"
-              name="unitId"
-              value={selectedUnitId}
-              onChange={(event) => setSelectedUnitId(event.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
-            >
-              <option value="">Select apartment / unit</option>
-              {filteredUnits.map((unit) => (
-                <option key={unit.id} value={unit.id}>
-                  {unit.property.name}
-                  {unit.building?.name ? ` — ${unit.building.name}` : ""}
-                  {` — Unit ${unit.houseNo}`}
                 </option>
               ))}
             </select>

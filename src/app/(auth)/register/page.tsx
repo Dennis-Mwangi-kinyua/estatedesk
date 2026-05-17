@@ -17,6 +17,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { createOnboardingRequestAction } from "./actions";
+import { ReferralCodeField } from "@/components/marketing/referral-code-field";
 import { RegisterStatusToast } from "./register-status-toast";
 
 const features = [
@@ -260,7 +261,6 @@ export default async function RegisterPage({
             </div>
 
             <form action={createOnboardingRequestAction} className="space-y-3">
-              <input type="hidden" name="referralCode" value={referralCode} />
               <div className="hidden" aria-hidden="true">
                 <label>
                   Website
@@ -323,6 +323,8 @@ export default async function RegisterPage({
                   placeholder="+254 700 000 000"
                 />
               </Field>
+
+              <ReferralCodeField defaultCode={referralCode} />
 
               <Field label="What do you manage?">
                 <select
