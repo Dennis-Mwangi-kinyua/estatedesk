@@ -14,6 +14,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { notifyRecipients } from "@/lib/notifications/notify";
+import { encodePublicId } from "@/lib/public-id";
 import { recordVacatedTenancy } from "@/lib/tenants/identity";
 
 export async function completeInspectionAction(formData: FormData) {
@@ -157,7 +158,12 @@ export async function completeInspectionAction(formData: FormData) {
   }
 
   if (inspection.status === "COMPLETED") {
-    redirect(`/dashboard/caretaker/inspections/${inspectionId}`);
+    redirect(
+      `/dashboard/caretaker/inspections/${encodePublicId(
+        inspectionId,
+        "inspection",
+      )}`,
+    );
   }
 
   const summary = String(formData.get("summary") ?? "").trim();
@@ -259,9 +265,19 @@ export async function completeInspectionAction(formData: FormData) {
   });
 
   revalidatePath("/dashboard/caretaker/inspections");
-  revalidatePath(`/dashboard/caretaker/inspections/${inspectionId}`);
+  revalidatePath(
+    `/dashboard/caretaker/inspections/${encodePublicId(
+      inspectionId,
+      "inspection",
+    )}`,
+  );
   revalidatePath("/dashboard/org/notifications");
   revalidatePath("/move-outs");
 
-  redirect(`/dashboard/caretaker/inspections/${inspectionId}`);
+  redirect(
+    `/dashboard/caretaker/inspections/${encodePublicId(
+      inspectionId,
+      "inspection",
+    )}`,
+  );
 }

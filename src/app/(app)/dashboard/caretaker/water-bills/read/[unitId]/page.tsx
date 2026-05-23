@@ -1,7 +1,12 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
+import {
+  decodePublicId,
+  encodePublicId,
+  isEncodedPublicId,
+} from "@/lib/public-id";
 import { MeterReadingForm } from "./meter-reading-form";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +25,8 @@ export default async function ReadSingleWaterBillPage({
   params,
   searchParams,
 }: PageProps) {
-  const { unitId } = await params;
+  const { unitId: publicUnitId } = await params;
+  const unitId = decodePublicId(publicUnitId, "unit");
   const { period } = await searchParams;
   const currentPeriod = period ?? CURRENT_PERIOD;
   const session = await requireCaretakerAccess();
@@ -32,6 +38,15 @@ export default async function ReadSingleWaterBillPage({
 
   if (!allowedUnitIds.includes(unitId)) {
     notFound();
+  }
+
+  if (!isEncodedPublicId(publicUnitId)) {
+    redirect(
+      `/dashboard/caretaker/water-bills/read/${encodePublicId(
+        unitId,
+        "unit",
+      )}?period=${currentPeriod}`,
+    );
   }
 
   const [unit, existingReading] = await Promise.all([

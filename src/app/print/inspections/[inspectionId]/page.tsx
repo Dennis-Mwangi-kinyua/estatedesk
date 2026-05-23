@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { decodePublicId, encodePublicId } from "@/lib/public-id";
 import AutoPrint from "./AutoPrint";
 import PrintReportButton from "./PrintReportButton";
 
@@ -242,7 +243,8 @@ async function getCaretakerInspectionFilters(args: {
 
 export default async function InspectionPrintPage({ params }: PageProps) {
   const session = await requireUserSession();
-  const { inspectionId } = await params;
+  const { inspectionId: publicInspectionId } = await params;
+  const inspectionId = decodePublicId(publicInspectionId, "inspection");
 
   if (!session.activeOrgId) {
     return (
@@ -347,8 +349,14 @@ export default async function InspectionPrintPage({ params }: PageProps) {
   const isCompleted = inspection.status === "COMPLETED";
 
   const backHref = isCaretaker
-    ? `/dashboard/caretaker/inspections/${inspection.id}`
-    : `/dashboard/org/inspections/${inspection.id}`;
+    ? `/dashboard/caretaker/inspections/${encodePublicId(
+        inspection.id,
+        "inspection",
+      )}`
+    : `/dashboard/org/inspections/${encodePublicId(
+        inspection.id,
+        "inspection",
+      )}`;
 
   const generatedFromLabel = isCaretaker
     ? "Printed / saved from EstateDesk caretaker dashboard"

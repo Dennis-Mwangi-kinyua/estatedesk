@@ -23,6 +23,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
+import { encodePublicId } from "@/lib/public-id";
 
 function SoftBadge({
   label,
@@ -687,7 +688,10 @@ export default async function CaretakerDashboardPage() {
               {upcomingInspections.map((inspection) => (
                 <Link
                   key={inspection.id}
-                  href={`/dashboard/caretaker/inspections/${inspection.id}`}
+                  href={`/dashboard/caretaker/inspections/${encodePublicId(
+                    inspection.id,
+                    "inspection",
+                  )}`}
                   className="flex items-start justify-between gap-3 rounded-2xl border border-neutral-200/80 bg-white p-3 text-sm transition hover:bg-neutral-50"
                 >
                   <div className="min-w-0">

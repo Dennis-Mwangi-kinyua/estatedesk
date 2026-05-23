@@ -4,6 +4,11 @@ import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import {
+  decodePublicId,
+  encodePublicId,
+  isEncodedPublicId,
+} from "@/lib/public-id";
 import { completeInspectionAction } from "@/features/inspections/actions/complete-inspection-action";
 
 export const dynamic = "force-dynamic";
@@ -222,7 +227,8 @@ export default async function CaretakerInspectionDetailPage({
   params,
 }: PageProps) {
   const session = await requireUserSession();
-  const { inspectionId } = await params;
+  const { inspectionId: publicInspectionId } = await params;
+  const inspectionId = decodePublicId(publicInspectionId, "inspection");
 
   if (!session.activeOrgId) {
     return (
@@ -343,6 +349,15 @@ export default async function CaretakerInspectionDetailPage({
     notFound();
   }
 
+  if (!isEncodedPublicId(publicInspectionId)) {
+    redirect(
+      `/dashboard/caretaker/inspections/${encodePublicId(
+        inspection.id,
+        "inspection",
+      )}`,
+    );
+  }
+
   const report = (inspection.checklist ?? {}) as ReportData;
   const isCompleted = inspection.status === "COMPLETED";
 
@@ -406,7 +421,10 @@ export default async function CaretakerInspectionDetailPage({
                   </Link>
 
                   <Link
-                    href={`/print/inspections/${inspection.id}`}
+                    href={`/print/inspections/${encodePublicId(
+                      inspection.id,
+                      "inspection",
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"

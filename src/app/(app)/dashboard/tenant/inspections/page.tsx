@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
+import { encodePublicId } from "@/lib/public-id";
 import { Prisma, InspectionStatus, NoticeStatus } from "@prisma/client";
 import {
   CalendarDays,
@@ -283,7 +284,10 @@ function ReportButton({
 
   return (
     <Link
-      href={`/dashboard/tenant/inspections/${inspectionId}`}
+      href={`/dashboard/tenant/inspections/${encodePublicId(
+        inspectionId,
+        "inspection",
+      )}`}
       className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
     >
       <FileText className="mr-2 h-4 w-4" />

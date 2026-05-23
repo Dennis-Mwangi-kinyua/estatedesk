@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
+import { encodePublicId } from "@/lib/public-id";
 import {
   AlertCircle,
   ArrowRight,
@@ -558,7 +559,10 @@ export default async function WaterBillsPage() {
             {pendingUnits.map((unit) => (
               <MeterReadingCard
                 key={unit.id}
-                href={`/dashboard/caretaker/water-bills/read/${unit.id}?period=${CURRENT_PERIOD}`}
+                href={`/dashboard/caretaker/water-bills/read/${encodePublicId(
+                  unit.id,
+                  "unit",
+                )}?period=${CURRENT_PERIOD}`}
                 property={unit.property}
                 building={unit.building}
                 houseNo={unit.houseNo}
@@ -597,7 +601,10 @@ export default async function WaterBillsPage() {
               submittedReadings.map((reading) => (
                 <MeterReadingCard
                   key={reading.id}
-                  href={`/dashboard/caretaker/water-bills/readings/${reading.id}`}
+                  href={`/dashboard/caretaker/water-bills/readings/${encodePublicId(
+                    reading.id,
+                    "meter-reading",
+                  )}`}
                   property={reading.property}
                   building={reading.building}
                   houseNo={reading.houseNo}
@@ -636,7 +643,10 @@ export default async function WaterBillsPage() {
               approvedReadings.map((reading) => (
                 <MeterReadingCard
                   key={reading.id}
-                  href={`/dashboard/caretaker/water-bills/readings/${reading.id}`}
+                  href={`/dashboard/caretaker/water-bills/readings/${encodePublicId(
+                    reading.id,
+                    "meter-reading",
+                  )}`}
                   property={reading.property}
                   building={reading.building}
                   houseNo={reading.houseNo}
@@ -717,7 +727,10 @@ export default async function WaterBillsPage() {
                   <p className="text-xs text-neutral-500">Due: {bill.dueDate}</p>
 
                   <Link
-                    href={`/dashboard/caretaker/water-bills/bills/${bill.id}`}
+                    href={`/dashboard/caretaker/water-bills/bills/${encodePublicId(
+                      bill.id,
+                      "water-bill",
+                    )}`}
                     className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-900"
                   >
                     Open bill

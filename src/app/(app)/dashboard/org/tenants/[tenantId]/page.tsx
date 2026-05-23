@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { memo } from "react";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { encodePublicId } from "@/lib/public-id";
 import { TenantAdminActions } from "./TenantAdminActions";
 
 export const dynamic = "force-dynamic";
@@ -951,7 +952,10 @@ export default async function TenantDetailsPage({ params }: PageProps) {
                           {String(notice.inspection.status).toUpperCase() === "COMPLETED" ? (
                             <div className="mt-3">
                               <Link
-                                href={`/dashboard/org/inspections/${notice.inspection.id}`}
+                                href={`/dashboard/org/inspections/${encodePublicId(
+                                  notice.inspection.id,
+                                  "inspection",
+                                )}`}
                                 className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
                               >
                                 View inspection report

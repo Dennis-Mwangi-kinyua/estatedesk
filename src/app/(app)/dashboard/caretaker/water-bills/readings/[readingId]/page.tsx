@@ -1,8 +1,13 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
+import {
+  decodePublicId,
+  encodePublicId,
+  isEncodedPublicId,
+} from "@/lib/public-id";
 import { ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +45,8 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default async function ReadingDetailPage({ params }: PageProps) {
-  const { readingId } = await params;
+  const { readingId: publicReadingId } = await params;
+  const readingId = decodePublicId(publicReadingId, "meter-reading");
   const session = await requireCaretakerAccess();
   const allowedUnitIds = await getCaretakerManagedBuildingUnitIds({
     orgId: session.activeOrgId!,
@@ -86,6 +92,15 @@ export default async function ReadingDetailPage({ params }: PageProps) {
 
   if (!reading) notFound();
   if (!allowedUnitIds.includes(reading.unitId)) notFound();
+
+  if (!isEncodedPublicId(publicReadingId)) {
+    redirect(
+      `/dashboard/caretaker/water-bills/readings/${encodePublicId(
+        reading.id,
+        "meter-reading",
+      )}`,
+    );
+  }
 
   return (
     <div className="space-y-5 sm:space-y-6">

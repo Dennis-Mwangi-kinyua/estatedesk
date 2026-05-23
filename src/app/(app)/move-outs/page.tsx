@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { OrgRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { encodePublicId } from "@/lib/public-id";
 import { recordVacatedTenancy } from "@/lib/tenants/identity";
 
 export const dynamic = "force-dynamic";
@@ -498,7 +499,10 @@ export default async function MoveOutsPage() {
                       ) : notice.inspection ? (
                         <div className="flex flex-col gap-2">
                           <Link
-                            href={`/dashboard/org/inspections/${notice.inspection.id}`}
+                            href={`/dashboard/org/inspections/${encodePublicId(
+                              notice.inspection.id,
+                              "inspection",
+                            )}`}
                             className="text-xs font-semibold text-primary hover:text-primary/80"
                           >
                             Open report

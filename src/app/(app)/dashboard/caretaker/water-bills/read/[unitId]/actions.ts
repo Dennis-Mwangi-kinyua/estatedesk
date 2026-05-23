@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
+import { encodePublicId } from "@/lib/public-id";
 
 export type SubmitMeterReadingState = {
   error?: string;
@@ -180,5 +181,10 @@ export async function submitMeterReading(
     },
   });
 
-  redirect(`/dashboard/caretaker/water-bills/readings/${reading.id}`);
+  redirect(
+    `/dashboard/caretaker/water-bills/readings/${encodePublicId(
+      reading.id,
+      "meter-reading",
+    )}`,
+  );
 }

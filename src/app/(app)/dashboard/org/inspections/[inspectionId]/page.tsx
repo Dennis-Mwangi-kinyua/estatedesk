@@ -1,10 +1,15 @@
 // src/app/(app)/dashboard/org/inspections/[inspectionId]/page.tsx
 
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import {
+  decodePublicId,
+  encodePublicId,
+  isEncodedPublicId,
+} from "@/lib/public-id";
 
 export const dynamic = "force-dynamic";
 
@@ -64,7 +69,8 @@ function badgeClass(status: string) {
 
 export default async function OrgInspectionDetailPage({ params }: PageProps) {
   const session = await requireManagementAccess();
-  const { inspectionId } = await params;
+  const { inspectionId: publicInspectionId } = await params;
+  const inspectionId = decodePublicId(publicInspectionId, "inspection");
   const orgId = session.activeOrgId!;
 
   const inspection = await prisma.inspection.findFirst({
@@ -136,6 +142,12 @@ export default async function OrgInspectionDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  if (!isEncodedPublicId(publicInspectionId)) {
+    redirect(
+      `/dashboard/org/inspections/${encodePublicId(inspection.id, "inspection")}`,
+    );
+  }
+
   const report = (inspection.checklist ?? {}) as Record<string, unknown>;
   const isCompleted = inspection.status === "COMPLETED";
 
@@ -155,7 +167,10 @@ export default async function OrgInspectionDetailPage({ params }: PageProps) {
             </Link>
 
             <Link
-              href={`/print/inspections/${inspection.id}`}
+              href={`/print/inspections/${encodePublicId(
+                inspection.id,
+                "inspection",
+              )}`}
               className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
             >
               Print report

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
+import { encodePublicId } from "@/lib/public-id";
 import { ArrowRight, Droplets } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -151,7 +152,10 @@ export default async function ReadWaterBillsPage({
             {pendingUnits.map((unit) => (
               <Link
                 key={unit.id}
-                href={`/dashboard/caretaker/water-bills/read/${unit.id}?period=${period}`}
+                href={`/dashboard/caretaker/water-bills/read/${encodePublicId(
+                  unit.id,
+                  "unit",
+                )}?period=${period}`}
                 className="block rounded-[22px] border border-neutral-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div className="flex items-start justify-between gap-3">

@@ -1,11 +1,16 @@
 // src/app/(app)/dashboard/tenant/inspections/[inspectionId]/page.tsx
 
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { ArrowLeft, CalendarDays, CheckCircle2, ClipboardCheck, Home, User2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/permissions/guards";
+import {
+  decodePublicId,
+  encodePublicId,
+  isEncodedPublicId,
+} from "@/lib/public-id";
 
 const tenantInspectionArgs = Prisma.validator<Prisma.InspectionDefaultArgs>()({
   include: {
@@ -109,7 +114,8 @@ export default async function TenantInspectionReportPage({
     throw new Error("Missing active organization id in session");
   }
 
-  const { inspectionId } = await params;
+  const { inspectionId: publicInspectionId } = await params;
+  const inspectionId = decodePublicId(publicInspectionId, "inspection");
 
   const inspection = await prisma.inspection.findFirst({
     where: {
@@ -127,6 +133,15 @@ export default async function TenantInspectionReportPage({
 
   if (!inspection) {
     notFound();
+  }
+
+  if (!isEncodedPublicId(publicInspectionId)) {
+    redirect(
+      `/dashboard/tenant/inspections/${encodePublicId(
+        inspection.id,
+        "inspection",
+      )}`,
+    );
   }
 
   const checklistItems = Array.isArray(inspection.checklist)

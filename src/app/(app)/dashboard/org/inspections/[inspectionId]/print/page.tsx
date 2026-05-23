@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { decodePublicId, encodePublicId } from "@/lib/public-id";
 import PrintReportButton from "../PrintReportButton";
 
 export const dynamic = "force-dynamic";
@@ -124,7 +125,8 @@ function sectionCard(title: string, children: React.ReactNode) {
 
 export default async function OrgInspectionPrintPage({ params }: PageProps) {
   const session = await requireManagementAccess();
-  const { inspectionId } = await params;
+  const { inspectionId: publicInspectionId } = await params;
+  const inspectionId = decodePublicId(publicInspectionId, "inspection");
   const orgId = session.activeOrgId!;
 
   const [inspection, printedBy, organization] = await Promise.all([
@@ -215,7 +217,10 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
         <div className="mx-auto max-w-5xl px-4 py-6 print:max-w-none print:px-0 print:py-0">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 print:hidden">
             <Link
-              href={`/dashboard/org/inspections/${inspection.id}`}
+              href={`/dashboard/org/inspections/${encodePublicId(
+                inspection.id,
+                "inspection",
+              )}`}
               className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
               Back to inspection

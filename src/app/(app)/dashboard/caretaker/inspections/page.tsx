@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { encodePublicId } from "@/lib/public-id";
 
 export const dynamic = "force-dynamic";
 
@@ -354,7 +355,10 @@ export default async function CaretakerInspectionsPage() {
 
                   <div className="mt-4">
                     <Link
-                      href={`/dashboard/caretaker/inspections/${inspection.id}`}
+                      href={`/dashboard/caretaker/inspections/${encodePublicId(
+                        inspection.id,
+                        "inspection",
+                      )}`}
                       className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                     >
                       {inspection.status === "COMPLETED"

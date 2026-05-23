@@ -15,6 +15,7 @@ import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { encodePublicId } from "@/lib/public-id";
 import {
   approveMeterReading,
   markAllOrgNotificationsReadAction,
@@ -905,7 +906,10 @@ export default async function OrganizationNotificationsPage({
                             </Link>
                             {notice.inspection ? (
                               <Link
-                                href={`/dashboard/org/inspections/${notice.inspection.id}`}
+                                href={`/dashboard/org/inspections/${encodePublicId(
+                                  notice.inspection.id,
+                                  "inspection",
+                                )}`}
                                 className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50"
                               >
                                 View inspection
