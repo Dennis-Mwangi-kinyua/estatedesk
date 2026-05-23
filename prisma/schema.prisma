@@ -1,0 +1,1918 @@
+// Hardened Prisma schema for EstateDesk.
+// Focus: production-safe indexing, clear documentation, and preserved app structure/functionality.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Application user account. May belong to many organizations through Membership.
+model User {
+  id                       String                  @id @default(cuid())
+  fullName                 String
+  phone                    String?                 @unique
+  email                    String?                 @unique
+  passwordHash             String
+  status                   UserStatus              @default(ACTIVE)
+  platformRole             PlatformRole            @default(USER)
+  canCreatePlatformAdmins  Boolean                 @default(false)
+  isRootSuperAdmin         Boolean                 @default(false)
+  emailVerified            DateTime?
+  phoneVerified            DateTime?
+  mustChangePassword       Boolean                 @default(false)
+  passwordChangedAt        DateTime?
+  twoFactorEnabled         Boolean                 @default(false)
+  lastLoginAt              DateTime?
+  deletedAt                DateTime?
+  createdByUserId          String?
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  username                 String?                 @unique
+  slug                     String?                 @unique
+  createdApiKeys           ApiKey[]                @relation("CreatedBy")
+  dataExportRequests       DataExportRequest[]     @relation("DataExportRequestedBy")
+  dataExportReviews        DataExportRequest[]     @relation("DataExportReviewedBy")
+  uploadedAssets           Asset[]                 @relation("AssetUploader")
+  auditLogs                AuditLog[]              @relation("AuditActor")
+  caretakerAssignments     CaretakerAssignment[]   @relation("CaretakerUser")
+  inspections              Inspection[]            @relation("InspectionInspector")
+  invitedUsers             Invitation[]            @relation("InvitedBy")
+  issuesAssignedBy         IssueTicket[]           @relation("IssueAssignedBy")
+  issuesAssigned           IssueTicket[]           @relation("IssueAssignedTo")
+  issuesReported           IssueTicket[]           @relation("IssueReportedBy")
+  issueResolutionReports   IssueResolutionReport[] @relation("IssueResolutionReportCaretaker")
+  issueReportsReviewed     IssueResolutionReport[] @relation("IssueResolutionReportOfficeReviewer")
+  issueReportsConfirmed    IssueResolutionReport[] @relation("IssueResolutionReportTenantConfirmer")
+  landlordProfiles         LandlordProfile[]
+  caretakerLeases          Lease[]                 @relation("LeaseCaretaker")
+  memberships              Membership[]
+  meterReadingsApproved    MeterReading[]          @relation("MeterReadingApprovedBy")
+  meterReadingsSubmitted   MeterReading[]          @relation("MeterReadingSubmittedBy")
+  notifications            Notification[]          @relation("NotificationUser")
+  paymentsMade             Payment[]               @relation("PaymentPayerUser")
+  platformPermissions      PlatformPermission[]
+  platformMessagesSent     PlatformMessage[]
+  onboardingRequestsHandled OnboardingRequest[]    @relation("OnboardingRequestHandledBy")
+  submittedRentalReturns   RentalIncomeReturn[]    @relation("RentalReturnSubmittedBy")
+  tenant                   Tenant?
+  tenantActionLogs         TenantActionLog[]       @relation("TenantActionActor")
+  tenantTransfersApproved  TenantTransferRequest[] @relation("TenantTransferReviewedBy")
+  tenantTransfersRequested TenantTransferRequest[] @relation("TenantTransferRequestedBy")
+  createdBy                User?                   @relation("UserCreatedBy", fields: [createdByUserId], references: [id])
+  createdUsers             User[]                  @relation("UserCreatedBy")
+  activeSession            UserSession?
+
+  @@index([username])
+  @@index([email])
+  @@index([phone])
+  @@index([status])
+  @@index([platformRole])
+  @@index([deletedAt])
+  @@index([createdByUserId])
+  @@index([isRootSuperAdmin])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([lastLoginAt])
+}
+
+/// Server-side user session with active organization membership context.
+model UserSession {
+  id                 String      @id @default(cuid())
+  userId             String      @unique
+  userAgent          String?
+  ipAddress          String?
+  createdAt          DateTime    @default(now())
+  lastSeenAt         DateTime    @default(now())
+  expiresAt          DateTime
+  activeMembershipId String?
+  tokenHash          String      @unique
+  activeMembership   Membership? @relation(fields: [activeMembershipId], references: [id])
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@index([activeMembershipId])
+  @@index([userId, expiresAt])
+  @@index([activeMembershipId, expiresAt])
+}
+
+/// Platform-level permission override for super-admin capabilities.
+model PlatformPermission {
+  id         String                 @id @default(cuid())
+  userId     String
+  permission PlatformPermissionType
+  granted    Boolean                @default(true)
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+  user       User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permission])
+  @@index([userId])
+  @@index([permission])
+}
+
+/// Shared rate-limit bucket for short-lived security and workflow throttles.
+model RateLimitBucket {
+  key       String   @id
+  count     Int      @default(0)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
+}
+
+/// Tenant organization / property management company boundary.
+model Organization {
+  id                     String                  @id @default(cuid())
+  name                   String
+  slug                   String                  @unique
+  phone                  String?
+  email                  String?
+  address                String?
+  status                 OrganizationStatus      @default(ACTIVE)
+  currencyCode           String                  @default("KES")
+  timezone               String                  @default("Africa/Nairobi")
+  dataRetentionDays      Int                     @default(2555)
+  deletedAt              DateTime?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  marketerId             String?
+  referralCode           String?
+  commissionRate         Decimal?                @db.Decimal(5, 2)
+  commissionStatus       MarketingCommissionStatus @default(PENDING)
+  commissionNotes        String?
+  apiKeys                ApiKey[]
+  assets                 Asset[]
+  auditLogs              AuditLog[]
+  caretakerAssignments   CaretakerAssignment[]
+  dataExportRequests     DataExportRequest[]
+  invitations            Invitation[]
+  issues                 IssueTicket[]
+  issueResolutionReports IssueResolutionReport[]
+  kraIntegration         KraIntegration?
+  landlordAssignments    LandlordAssignment[]
+  landlordProfiles       LandlordProfile[]
+  marketer               PlatformMarketer?       @relation(fields: [marketerId], references: [id])
+  leases                 Lease[]
+  memberships            Membership[]
+  notifications          Notification[]
+  platformMessages       PlatformMessage[]
+  settings               OrganizationSettings?
+  payments               Payment[]
+  paymentAllocations     PaymentAllocation[]
+  properties             Property[]
+  rentCharges            RentCharge[]
+  rentalReturns          RentalIncomeReturn[]
+  subscription           Subscription?
+  taxCharges             TaxCharge[]
+  taxpayerProfiles       TaxpayerProfile[]
+  tenants                Tenant[]
+  tenantActionLogs       TenantActionLog[]
+  tenantHistoryRecords   TenantHistoryRecord[]
+  tenantTransfersIn      TenantTransferRequest[] @relation("TenantTransferTargetOrg")
+  tenantTransfersOut     TenantTransferRequest[] @relation("TenantTransferSourceOrg")
+  waterBills             WaterBill[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([name])
+  @@index([deletedAt])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([marketerId])
+  @@index([referralCode])
+  @@index([commissionStatus])
+}
+
+/// Message sent by an organization to platform administrators.
+model PlatformMessage {
+  id          String       @id @default(cuid())
+  orgId       String
+  senderUserId String
+  subject     String
+  message     String
+  status      String       @default("OPEN")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  sender      User         @relation(fields: [senderUserId], references: [id])
+
+  @@index([orgId, createdAt])
+  @@index([senderUserId, createdAt])
+  @@index([status, createdAt])
+}
+
+/// Public onboarding request submitted from the registration/access page.
+model OnboardingRequest {
+  id                  String   @id @default(cuid())
+  fullName            String
+  companyName         String
+  workEmail           String
+  phone               String?
+  managedPropertyType String
+  message             String?
+  status              String   @default("NEW")
+  internalNotes       String?
+  handledAt           DateTime?
+  handledByUserId     String?
+  marketerId          String?
+  referralCode        String?
+  commissionRate      Decimal? @db.Decimal(5, 2)
+  commissionStatus    MarketingCommissionStatus @default(PENDING)
+  commissionNotes     String?
+  source              String   @default("REGISTER_PAGE")
+  ipAddress           String?
+  userAgent           String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  handledBy           User?    @relation("OnboardingRequestHandledBy", fields: [handledByUserId], references: [id])
+  marketer            PlatformMarketer? @relation(fields: [marketerId], references: [id])
+
+  @@index([status, createdAt])
+  @@index([workEmail, createdAt])
+  @@index([handledByUserId, handledAt])
+  @@index([marketerId])
+  @@index([referralCode])
+  @@index([commissionStatus])
+  @@index([createdAt])
+}
+
+/// Platform-side marketer/referral partner used to attribute leads and customers.
+model PlatformMarketer {
+  id                    String              @id @default(cuid())
+  fullName              String
+  email                 String?
+  phone                 String?
+  referralCode          String              @unique
+  defaultCommissionRate Decimal             @default(0) @db.Decimal(5, 2)
+  status                MarketerStatus      @default(ACTIVE)
+  notes                 String?
+  deletedAt             DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  onboardingRequests    OnboardingRequest[]
+  organizations         Organization[]
+
+  @@index([status])
+  @@index([deletedAt])
+  @@index([createdAt])
+}
+
+/// Auditable request for an organization-scoped CSV data export.
+model DataExportRequest {
+  id                String       @id @default(cuid())
+  orgId             String
+  requestedByUserId String
+  reviewedByUserId  String?
+  status            DataExportRequestStatus @default(PENDING)
+  reason            String?
+  reviewerNotes     String?
+  requestedAt       DateTime     @default(now())
+  reviewedAt        DateTime?
+  expiresAt         DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  org               Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  requestedBy       User         @relation("DataExportRequestedBy", fields: [requestedByUserId], references: [id])
+  reviewedBy        User?        @relation("DataExportReviewedBy", fields: [reviewedByUserId], references: [id])
+
+  @@index([orgId, status, requestedAt])
+  @@index([requestedByUserId, requestedAt])
+  @@index([reviewedByUserId, reviewedAt])
+  @@index([status, requestedAt])
+  @@index([expiresAt])
+}
+
+/// Organization-specific configurable settings and feature flags.
+model OrganizationSettings {
+  id                   String       @id @default(cuid())
+  orgId                String       @unique
+  branding             Json?
+  features             Json?
+  customFields         Json?
+  notificationDefaults Json?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  org                  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
+/// Billing subscription for an organization.
+model Subscription {
+  id                   String                   @id @default(cuid())
+  orgId                String                   @unique
+  plan                 BillingPlan              @default(FREE)
+  status               SubscriptionStatus       @default(ACTIVE)
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAt             DateTime?
+  cancelledAt          DateTime?
+  trialStartsAt        DateTime?
+  trialEndsAt          DateTime?
+  mpesaPaybill         String?
+  stripeSubscriptionId String?                  @unique
+  billingEmail         String?
+  metadata             Json?
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  org                  Organization             @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  planChanges          SubscriptionPlanChange[]
+
+  @@index([plan])
+  @@index([status])
+  @@index([currentPeriodEnd])
+  @@index([orgId, status])
+}
+
+/// Historical subscription plan transition record.
+model SubscriptionPlanChange {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  fromPlan       BillingPlan?
+  toPlan         BillingPlan
+  effectiveFrom  DateTime
+  effectiveTo    DateTime?
+  reason         String?
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([toPlan])
+  @@index([effectiveFrom])
+}
+
+/// Uploaded file or media asset owned by an organization.
+model Asset {
+  id               String         @id @default(cuid())
+  orgId            String
+  fileName         String
+  fileType         String
+  mimeType         String?
+  key              String
+  size             Int
+  metadata         Json?
+  assetType        AssetType      @default(GENERIC)
+  uploadedByUserId String
+  deletedAt        DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  org              Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  uploadedBy       User           @relation("AssetUploader", fields: [uploadedByUserId], references: [id])
+  issuePhotos      IssueTicket[]  @relation("IssuePhoto")
+  lease            Lease?         @relation("LeaseContract")
+  meterReadings    MeterReading[] @relation("MeterPhoto")
+  tenant           Tenant?        @relation("TenantProfileImage")
+
+  @@index([orgId])
+  @@index([assetType])
+  @@index([key])
+  @@index([deletedAt])
+  @@index([orgId, createdAt])
+  @@index([orgId, assetType, createdAt])
+}
+
+/// Organization role assignment with optional scoped access.
+model Membership {
+  id                     String        @id @default(cuid())
+  orgId                  String
+  userId                 String
+  role                   OrgRole
+  scopeType              ScopeType     @default(ORG)
+  scopeId                String        @default("ORG_SCOPE")
+  employmentStartedAt    DateTime      @default(now())
+  employmentEndedAt      DateTime?
+  employmentExitReason   String?
+  deactivatedAt          DateTime?
+  deactivatedByUserId    String?
+  deactivationNotes      String?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  org                    Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user                   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  staffProfile           StaffProfile?
+  sessions               UserSession[]
+
+  @@unique([orgId, userId, role, scopeType, scopeId])
+  @@index([orgId])
+  @@index([userId])
+  @@index([role])
+  @@index([scopeType, scopeId])
+  @@index([userId, orgId, role])
+  @@index([userId, role, createdAt])
+  @@index([orgId, role, scopeType, scopeId])
+  @@index([orgId, employmentEndedAt])
+  @@index([userId, employmentEndedAt])
+}
+
+/// HR profile details tied to a staff membership.
+model StaffProfile {
+  id               String      @id @default(cuid())
+  membershipId     String      @unique
+  salaryAmount     Decimal?    @db.Decimal(12, 2)
+  salaryCurrency   String      @default("KES")
+  educationLevel   String?
+  jobTitle         String?
+  nationalId       String?
+  emergencyContact String?
+  notes            String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  membership       Membership  @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@index([salaryCurrency])
+  @@index([educationLevel])
+}
+
+/// KRA taxpayer identity used for rental income tax workflows.
+model TaxpayerProfile {
+  id            String               @id @default(cuid())
+  orgId         String
+  displayName   String
+  kraPin        String
+  kind          TaxpayerKind         @default(INDIVIDUAL)
+  email         String?
+  phone         String?
+  nationalId    String?
+  companyRegNo  String?
+  isResident    Boolean              @default(true)
+  isActive      Boolean              @default(true)
+  notes         String?
+  deletedAt     DateTime?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  landlords     LandlordProfile[]
+  properties    Property[]
+  rentalReturns RentalIncomeReturn[]
+  org           Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, kraPin])
+  @@index([orgId])
+  @@index([kraPin])
+  @@index([isResident])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@index([orgId, isActive, deletedAt])
+}
+
+/// KRA integration credentials and synchronization state.
+model KraIntegration {
+  id                      String            @id @default(cuid())
+  orgId                   String            @unique
+  filingMode              KraFilingMode     @default(HYBRID)
+  environment             KraEnvironment    @default(SANDBOX)
+  clientId                String?
+  clientSecretCiphertext  String?
+  accessTokenCiphertext   String?
+  refreshTokenCiphertext  String?
+  tokenExpiresAt          DateTime?
+  apiBaseUrl              String?
+  eritsBaseUrl            String?
+  webhookSecretCiphertext String?
+  status                  IntegrationStatus @default(ACTIVE)
+  lastSyncAt              DateTime?
+  lastError               String?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  org                     Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([environment])
+}
+
+/// Real estate property owned or managed by an organization.
+model Property {
+  id                      String                   @id @default(cuid())
+  orgId                   String
+  name                    String
+  location                String?
+  address                 String?
+  notes                   String?
+  type                    PropertyType             @default(RESIDENTIAL)
+  waterRatePerUnit        Decimal?                 @db.Decimal(10, 2)
+  waterFixedCharge        Decimal?                 @db.Decimal(10, 2)
+  isActive                Boolean                  @default(true)
+  deletedAt               DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  taxpayerProfileId       String?
+  buildings               Building[]
+  caretakerAssignments    CaretakerAssignment[]
+  issues                  IssueTicket[]
+  landlordAssignments     LandlordAssignment[]
+  org                     Organization             @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  taxpayerProfile         TaxpayerProfile?         @relation(fields: [taxpayerProfileId], references: [id])
+  unitPlans               PropertyUnitPlan[]
+  rentalReturns           RentalIncomeReturn[]
+  rentalIncomeReturnItems RentalIncomeReturnItem[]
+  taxCharges              TaxCharge[]
+  units                   Unit[]
+
+  @@unique([orgId, name])
+  @@index([orgId])
+  @@index([taxpayerProfileId])
+  @@index([type])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@index([orgId, deletedAt])
+  @@index([orgId, isActive, deletedAt, name])
+}
+
+/// Template used to generate multiple property units.
+model PropertyUnitPlan {
+  id                   String   @id @default(cuid())
+  propertyId           String
+  unitType             UnitType
+  bedrooms             Int?
+  bathrooms            Int?
+  quantity             Int      @default(1)
+  defaultRentAmount    Decimal  @db.Decimal(12, 2)
+  defaultDepositAmount Decimal? @db.Decimal(12, 2)
+  houseNoPrefix        String?
+  startNumber          Int      @default(1)
+  label                String?
+  notes                String?
+  sortOrder            Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  property             Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  units                Unit[]   @relation("PlanGeneratedUnits")
+
+  @@index([propertyId])
+  @@index([propertyId, unitType, bedrooms])
+  @@index([propertyId, sortOrder])
+}
+
+/// Building/block inside a property.
+model Building {
+  id                   String                @id @default(cuid())
+  propertyId           String
+  name                 String
+  notes                String?
+  isActive             Boolean               @default(true)
+  deletedAt            DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  property             Property              @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  caretakerAssignments CaretakerAssignment[]
+  units                Unit[]
+
+  @@unique([propertyId, name])
+  @@index([propertyId])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@index([propertyId, isActive, deletedAt])
+}
+
+/// Rentable unit inside a property or building.
+model Unit {
+  id                   String                   @id @default(cuid())
+  propertyId           String
+  buildingId           String?
+  houseNo              String
+  type                 UnitType                 @default(APARTMENT)
+  bedrooms             Int?
+  bathrooms            Int?
+  floorArea            Float?
+  rentAmount           Decimal                  @db.Decimal(12, 2)
+  depositAmount        Decimal?                 @db.Decimal(12, 2)
+  status               UnitStatus               @default(VACANT)
+  vacantSince          DateTime?
+  notes                String?
+  isActive             Boolean                  @default(true)
+  deletedAt            DateTime?
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  sequenceNo           Int?
+  sourcePlanId         String?
+  caretakerAssignments CaretakerAssignment[]
+  issues               IssueTicket[]
+  landlordAssignments  LandlordAssignment[]
+  leases               Lease[]
+  meterReadings        MeterReading[]
+  rentalReturnItems    RentalIncomeReturnItem[]
+  tenantActionLogs     TenantActionLog[]
+  building             Building?                @relation(fields: [buildingId], references: [id])
+  property             Property                 @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  sourcePlan           PropertyUnitPlan?        @relation("PlanGeneratedUnits", fields: [sourcePlanId], references: [id])
+  waterBills           WaterBill[]
+
+  @@index([propertyId])
+  @@index([buildingId])
+  @@index([sourcePlanId])
+  @@index([status])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@index([propertyId, isActive, deletedAt, status])
+  @@index([propertyId, type, bedrooms, status])
+  @@index([propertyId, houseNo])
+  @@index([propertyId, createdAt])
+  @@index([buildingId, status])
+}
+
+/// Tenant profile; may optionally link to a user login account.
+model Tenant {
+  id               String                  @id @default(cuid())
+  orgId            String
+  userId           String?                 @unique
+  type             TenantType              @default(INDIVIDUAL)
+  fullName         String
+  companyName      String?
+  kraPin           String?
+  phone            String
+  email            String?
+  nationalId       String?
+  status           TenantStatus            @default(ACTIVE)
+  notes            String?
+  dataConsent      Boolean                 @default(false)
+  consentUpdatedAt DateTime?
+  marketingConsent Boolean                 @default(false)
+  deletedAt        DateTime?
+  profileImageId   String?                 @unique
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  archivedAt       DateTime?
+  blacklistReason  String?
+  blacklistedAt    DateTime?
+  leases           Lease[]
+  moveOutNotices   MoveOutNotice[]
+  nextOfKin        NextOfKin?
+  notifications    Notification[]          @relation("NotificationTenant")
+  payments         Payment[]               @relation("PaymentPayerTenant")
+  taxCharges       TaxCharge[]
+  identityId       String?
+  identity         TenantIdentity?         @relation(fields: [identityId], references: [id])
+  org              Organization            @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  profileImage     Asset?                  @relation("TenantProfileImage", fields: [profileImageId], references: [id])
+  user             User?                   @relation(fields: [userId], references: [id])
+  actionLogs       TenantActionLog[]
+  historyRecords   TenantHistoryRecord[]
+  transferCopies   TenantTransferRequest[] @relation("TenantTransferCreatedTenant")
+  transferRequests TenantTransferRequest[] @relation("TenantTransferSourceTenant")
+  waterBills       WaterBill[]
+
+  @@unique([orgId, phone])
+  @@unique([orgId, email])
+  @@index([orgId])
+  @@index([status])
+  @@index([fullName])
+  @@index([nationalId])
+  @@index([archivedAt])
+  @@index([blacklistedAt])
+  @@index([deletedAt])
+  @@index([identityId])
+  @@index([orgId, deletedAt, status])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, status, fullName])
+  @@index([orgId, phone])
+  @@index([orgId, email])
+}
+
+/// Cross-organization identity used to connect tenant profiles that represent the same person/company.
+model TenantIdentity {
+  id             String                @id @default(cuid())
+  displayName    String
+  primaryPhone   String?
+  primaryEmail   String?
+  nationalId     String?
+  kraPin         String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  historyRecords TenantHistoryRecord[]
+  tenants        Tenant[]
+
+  @@index([displayName])
+  @@index([primaryPhone])
+  @@index([primaryEmail])
+  @@index([nationalId])
+  @@index([kraPin])
+  @@index([createdAt])
+  @@index([updatedAt])
+}
+
+/// Durable tenancy history retained after move-out and available during future tenant verification/transfer.
+model TenantHistoryRecord {
+  id              String              @id @default(cuid())
+  orgId           String
+  tenantId        String
+  identityId      String?
+  leaseId         String?
+  moveOutNoticeId String?
+  status          TenantHistoryStatus @default(VACATED)
+  propertyName    String?
+  buildingName    String?
+  unitHouseNo     String?
+  leaseStartDate  DateTime?
+  leaseEndDate    DateTime?
+  moveOutDate     DateTime?
+  monthlyRent     Decimal?            @db.Decimal(12, 2)
+  deposit         Decimal?            @db.Decimal(12, 2)
+  paymentCount    Int                 @default(0)
+  totalPaid       Decimal             @default(0) @db.Decimal(12, 2)
+  notes           String?
+  snapshot        Json?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  identity        TenantIdentity?     @relation(fields: [identityId], references: [id])
+  org             Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenant          Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([identityId, createdAt])
+  @@index([leaseId])
+  @@index([moveOutNoticeId])
+  @@index([status, createdAt])
+  @@index([moveOutDate])
+}
+
+/// Admin-to-admin request to transfer a moved-out tenant record between organisations.
+model TenantTransferRequest {
+  id                String               @id @default(cuid())
+  sourceOrgId       String
+  targetOrgId       String
+  sourceTenantId    String
+  createdTenantId   String?              @unique
+  requestedByUserId String
+  reviewedByUserId  String?
+  status            TenantTransferStatus @default(PENDING)
+  message           String?
+  reviewNotes       String?
+  requestedAt       DateTime             @default(now())
+  reviewedAt        DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  createdTenant     Tenant?              @relation("TenantTransferCreatedTenant", fields: [createdTenantId], references: [id])
+  requestedBy       User                 @relation("TenantTransferRequestedBy", fields: [requestedByUserId], references: [id])
+  reviewedBy        User?                @relation("TenantTransferReviewedBy", fields: [reviewedByUserId], references: [id])
+  sourceOrg         Organization         @relation("TenantTransferSourceOrg", fields: [sourceOrgId], references: [id], onDelete: Cascade)
+  sourceTenant      Tenant               @relation("TenantTransferSourceTenant", fields: [sourceTenantId], references: [id], onDelete: Cascade)
+  targetOrg         Organization         @relation("TenantTransferTargetOrg", fields: [targetOrgId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceTenantId, targetOrgId, status])
+  @@index([sourceOrgId, status, requestedAt])
+  @@index([targetOrgId, status, requestedAt])
+  @@index([requestedByUserId])
+  @@index([reviewedByUserId])
+  @@index([createdTenantId])
+}
+
+/// Emergency or next-of-kin contact for a tenant.
+model NextOfKin {
+  id           String  @id @default(cuid())
+  tenantId     String  @unique
+  name         String
+  relationship String
+  phone        String
+  email        String?
+  tenant       Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+/// Tenancy agreement between a tenant and a unit.
+model Lease {
+  id                 String                   @id @default(cuid())
+  orgId              String
+  unitId             String
+  tenantId           String
+  caretakerUserId    String?
+  startDate          DateTime
+  endDate            DateTime?
+  dueDay             Int                      @default(5)
+  monthlyRent        Decimal                  @db.Decimal(12, 2)
+  deposit            Decimal?                 @db.Decimal(12, 2)
+  status             LeaseStatus              @default(ACTIVE)
+  notes              String?
+  deletedAt          DateTime?
+  contractDocumentId String?                  @unique
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  caretaker          User?                    @relation("LeaseCaretaker", fields: [caretakerUserId], references: [id])
+  contractDocument   Asset?                   @relation("LeaseContract", fields: [contractDocumentId], references: [id])
+  org                Organization             @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenant             Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unit               Unit                     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  moveOutNotices     MoveOutNotice[]
+  rentCharges        RentCharge[]
+  rentalReturnItems  RentalIncomeReturnItem[]
+  taxCharges         TaxCharge[]
+  tenantActionLogs   TenantActionLog[]
+
+  @@index([orgId])
+  @@index([unitId])
+  @@index([tenantId])
+  @@index([caretakerUserId])
+  @@index([status, unitId])
+  @@index([status, tenantId])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([deletedAt])
+  @@index([orgId, status, deletedAt])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, tenantId, status])
+  @@index([orgId, unitId, status])
+  @@index([orgId, dueDay, status])
+}
+
+/// Caretaker scope assignment for property, building, or unit operations.
+model CaretakerAssignment {
+  id              String       @id @default(cuid())
+  orgId           String
+  caretakerUserId String
+  propertyId      String?
+  buildingId      String?
+  isPrimary       Boolean      @default(true)
+  active          Boolean      @default(true)
+  assignedAt      DateTime     @default(now())
+  endedAt         DateTime?
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  unitId          String?
+  building        Building?    @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  caretaker       User         @relation("CaretakerUser", fields: [caretakerUserId], references: [id], onDelete: Cascade)
+  org             Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  property        Property?    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  unit            Unit?        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([caretakerUserId])
+  @@index([propertyId])
+  @@index([buildingId])
+  @@index([unitId])
+  @@index([active])
+  @@index([caretakerUserId, active, propertyId])
+  @@index([caretakerUserId, active, buildingId])
+  @@index([caretakerUserId, active, unitId])
+  @@index([orgId, active, unitId])
+  @@index([orgId, active, propertyId])
+  @@index([orgId, active, buildingId])
+}
+
+/// Landlord profile linked to a user and optional taxpayer profile.
+model LandlordProfile {
+  id                String               @id @default(cuid())
+  orgId             String
+  userId            String
+  taxpayerProfileId String?
+  displayName       String
+  phone             String?
+  email             String?
+  nationalId        String?
+  notes             String?
+  isActive          Boolean              @default(true)
+  deletedAt         DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  assignments       LandlordAssignment[]
+  org               Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  taxpayerProfile   TaxpayerProfile?     @relation(fields: [taxpayerProfileId], references: [id])
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId])
+  @@index([orgId])
+  @@index([userId])
+  @@index([taxpayerProfileId])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@index([orgId, isActive, deletedAt])
+}
+
+/// Landlord ownership/management assignment for property or unit.
+model LandlordAssignment {
+  id                String          @id @default(cuid())
+  orgId             String
+  landlordProfileId String
+  propertyId        String?
+  unitId            String?
+  isPrimary         Boolean         @default(true)
+  active            Boolean         @default(true)
+  assignedAt        DateTime        @default(now())
+  endedAt           DateTime?
+  notes             String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  landlord          LandlordProfile @relation(fields: [landlordProfileId], references: [id], onDelete: Cascade)
+  org               Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  property          Property?       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  unit              Unit?           @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([landlordProfileId])
+  @@index([propertyId])
+  @@index([unitId])
+  @@index([active])
+  @@index([landlordProfileId, active, propertyId])
+  @@index([landlordProfileId, active, unitId])
+  @@index([orgId, active, propertyId])
+  @@index([orgId, active, unitId])
+  @@index([orgId, active, landlordProfileId])
+}
+
+/// Periodic rent/deposit/service charge generated from a lease.
+model RentCharge {
+  id                String                   @id @default(cuid())
+  orgId             String
+  leaseId           String
+  period            String
+  amountDue         Decimal                  @db.Decimal(12, 2)
+  dueDate           DateTime
+  amountPaid        Decimal                  @default(0) @db.Decimal(12, 2)
+  balance           Decimal                  @db.Decimal(12, 2)
+  status            ChargeStatus             @default(UNPAID)
+  chargeType        ChargeType               @default(RENT)
+  description       String?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  payments          Payment[]                @relation("PaymentToRentCharge")
+  paymentAllocations PaymentAllocation[]
+  lease             Lease                    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  org               Organization             @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  rentalReturnItems RentalIncomeReturnItem[]
+
+  @@unique([leaseId, period, chargeType])
+  @@index([orgId])
+  @@index([leaseId, status])
+  @@index([period, status])
+  @@index([dueDate])
+  @@index([chargeType])
+  @@index([orgId, status, dueDate])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, period, status])
+  @@index([orgId, leaseId, period])
+}
+
+/// KRA rental income return aggregate for a filing period.
+model RentalIncomeReturn {
+  id                String                   @id @default(cuid())
+  orgId             String
+  taxpayerProfileId String?
+  propertyId        String?
+  filingKey         String                   @unique
+  period            String
+  regime            RentalTaxRegime          @default(MRI)
+  basis             RentalAssessmentBasis    @default(GROSS_RENT_BILLED)
+  filingChannel     KraFilingChannel         @default(ERITS_MANUAL)
+  status            KraFilingStatus          @default(DRAFT)
+  isNilReturn       Boolean                  @default(false)
+  grossRent         Decimal                  @db.Decimal(14, 2)
+  taxableGrossRent  Decimal                  @db.Decimal(14, 2)
+  taxRate           Decimal                  @db.Decimal(7, 4)
+  taxDue            Decimal                  @db.Decimal(14, 2)
+  currencyCode      String                   @default("KES")
+  taxpayerPin       String
+  taxpayerName      String?
+  eligibilityNotes  String?
+  assessmentRef     String?
+  kraReturnRef      String?
+  kraPaymentRef     String?
+  kraReceiptNo      String?
+  preparedAt        DateTime?
+  submittedAt       DateTime?
+  acknowledgedAt    DateTime?
+  paidAt            DateTime?
+  submittedByUserId String?
+  lastError         String?
+  rawRequest        Json?
+  rawResponse       Json?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  attempts          KraSubmissionAttempt[]
+  linkedPayments    Payment[]                @relation("PaymentToRentalReturn")
+  org               Organization             @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  property          Property?                @relation(fields: [propertyId], references: [id])
+  submittedBy       User?                    @relation("RentalReturnSubmittedBy", fields: [submittedByUserId], references: [id])
+  taxpayerProfile   TaxpayerProfile?         @relation(fields: [taxpayerProfileId], references: [id])
+  items             RentalIncomeReturnItem[]
+  linkedTaxCharges  TaxCharge[]
+
+  @@index([orgId, period])
+  @@index([taxpayerProfileId])
+  @@index([propertyId])
+  @@index([status])
+  @@index([filingChannel])
+  @@index([taxpayerPin])
+  @@index([submittedAt])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, period, status])
+  @@index([orgId, taxpayerPin, period])
+}
+
+/// Line item contributing to a rental income return.
+model RentalIncomeReturnItem {
+  id             String             @id @default(cuid())
+  rentalReturnId String
+  propertyId     String
+  unitId         String?
+  leaseId        String?
+  rentChargeId   String?
+  description    String?
+  grossRent      Decimal            @db.Decimal(14, 2)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  lease          Lease?             @relation(fields: [leaseId], references: [id])
+  property       Property           @relation(fields: [propertyId], references: [id])
+  rentCharge     RentCharge?        @relation(fields: [rentChargeId], references: [id])
+  rentalReturn   RentalIncomeReturn @relation(fields: [rentalReturnId], references: [id], onDelete: Cascade)
+  unit           Unit?              @relation(fields: [unitId], references: [id])
+
+  @@index([rentalReturnId])
+  @@index([propertyId])
+  @@index([unitId])
+  @@index([leaseId])
+  @@index([rentChargeId])
+  @@index([rentalReturnId, propertyId])
+  @@index([propertyId, unitId])
+}
+
+/// Audit trail for attempts to submit or sync with KRA.
+model KraSubmissionAttempt {
+  id              String             @id @default(cuid())
+  rentalReturnId  String
+  channel         KraFilingChannel
+  requestPayload  Json?
+  responsePayload Json?
+  httpStatus      Int?
+  outcome         KraAttemptOutcome
+  errorMessage    String?
+  attemptedAt     DateTime           @default(now())
+  rentalReturn    RentalIncomeReturn @relation(fields: [rentalReturnId], references: [id], onDelete: Cascade)
+
+  @@index([rentalReturnId, attemptedAt])
+  @@index([outcome])
+  @@index([channel])
+}
+
+/// Water meter reading submitted and optionally approved.
+model MeterReading {
+  id                String        @id @default(cuid())
+  unitId            String
+  period            String
+  prevReading       Int
+  currentReading    Int
+  unitsUsed         Int
+  status            ReadingStatus @default(SUBMITTED)
+  submittedByUserId String
+  approvedByUserId  String?
+  approvedAt        DateTime?
+  rejectionReason   String?
+  notes             String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  photoAssetId      String?
+  approvedBy        User?         @relation("MeterReadingApprovedBy", fields: [approvedByUserId], references: [id])
+  photoAsset        Asset?        @relation("MeterPhoto", fields: [photoAssetId], references: [id])
+  submittedBy       User          @relation("MeterReadingSubmittedBy", fields: [submittedByUserId], references: [id])
+  unit              Unit          @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, period])
+  @@index([unitId, status])
+  @@index([period, status])
+  @@index([submittedByUserId, createdAt])
+  @@index([status, createdAt])
+  @@index([unitId, period, status])
+  @@index([approvedByUserId, approvedAt])
+}
+
+/// Water bill generated from meter usage for a tenant/unit.
+model WaterBill {
+  id          String       @id @default(cuid())
+  orgId       String
+  unitId      String
+  tenantId    String
+  period      String
+  unitsUsed   Int
+  ratePerUnit Decimal      @db.Decimal(10, 2)
+  fixedCharge Decimal      @default(0) @db.Decimal(10, 2)
+  total       Decimal      @db.Decimal(12, 2)
+  dueDate     DateTime
+  status      BillStatus   @default(ISSUED)
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  payments    Payment[]    @relation("PaymentToWaterBill")
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unit        Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, period])
+  @@index([orgId])
+  @@index([tenantId, period])
+  @@index([unitId, period])
+  @@index([status])
+  @@index([dueDate])
+  @@index([orgId, status])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, period, status])
+  @@index([orgId, dueDate, status])
+}
+
+/// Tax obligation or KRA-linked charge.
+model TaxCharge {
+  id               String              @id @default(cuid())
+  orgId            String
+  propertyId       String?
+  leaseId          String?
+  tenantId         String?
+  taxType          TaxType
+  taxAuthority     String              @default("KRA")
+  taxAccountNumber String?
+  period           String
+  baseAmount       Decimal?            @db.Decimal(12, 2)
+  taxRate          Decimal?            @db.Decimal(7, 4)
+  amountDue        Decimal             @db.Decimal(12, 2)
+  amountPaid       Decimal             @default(0) @db.Decimal(12, 2)
+  balance          Decimal             @db.Decimal(12, 2)
+  dueDate          DateTime
+  status           TaxStatus           @default(PENDING)
+  assessmentRef    String?
+  kraPaymentRef    String?
+  kraReceiptNo     String?
+  notes            String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  acknowledgedAt   DateTime?
+  filingStatus     KraFilingStatus?
+  rawKraResponse   Json?
+  rentalReturnId   String?
+  submittedAt      DateTime?
+  payments         Payment[]           @relation("PaymentToTaxCharge")
+  lease            Lease?              @relation(fields: [leaseId], references: [id])
+  org              Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  property         Property?           @relation(fields: [propertyId], references: [id])
+  rentalReturn     RentalIncomeReturn? @relation(fields: [rentalReturnId], references: [id])
+  tenant           Tenant?             @relation(fields: [tenantId], references: [id])
+
+  @@index([orgId])
+  @@index([propertyId])
+  @@index([leaseId])
+  @@index([tenantId])
+  @@index([rentalReturnId])
+  @@index([taxType])
+  @@index([status])
+  @@index([filingStatus])
+  @@index([dueDate])
+  @@index([period])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, period, status])
+  @@index([orgId, taxType, period])
+}
+
+/// Incoming payment record allocated to rent, water, tax, or other target.
+model Payment {
+  id                 String              @id @default(cuid())
+  orgId              String
+  payerTenantId      String?
+  method             PaymentMethod
+  amount             Decimal             @db.Decimal(12, 2)
+  reference          String?
+  externalReference  String?
+  targetType         PaymentTargetType
+  rentChargeId       String?
+  waterBillId        String?
+  taxChargeId        String?
+  gatewayStatus      GatewayStatus       @default(INITIATED)
+  verificationStatus VerificationStatus  @default(PENDING)
+  checkoutRequestId  String?             @unique
+  merchantRequestId  String?
+  phoneUsed          String?
+  callbackRaw        Json?
+  paidAt             DateTime?
+  notes              String?
+  remittedToKra      Boolean             @default(false)
+  remittedAt         DateTime?
+  kraReference       String?
+  kraReceiptNo       String?
+  unappliedAmount    Decimal             @default(0) @db.Decimal(12, 2)
+  coveredPeriods     String[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  payerName          String?
+  payerType          PayerType           @default(TENANT)
+  payerUserId        String?
+  rentalReturnId     String?
+  org                Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  payerTenant        Tenant?             @relation("PaymentPayerTenant", fields: [payerTenantId], references: [id], onDelete: Cascade)
+  payerUser          User?               @relation("PaymentPayerUser", fields: [payerUserId], references: [id])
+  rentCharge         RentCharge?         @relation("PaymentToRentCharge", fields: [rentChargeId], references: [id])
+  rentalReturn       RentalIncomeReturn? @relation("PaymentToRentalReturn", fields: [rentalReturnId], references: [id])
+  taxCharge          TaxCharge?          @relation("PaymentToTaxCharge", fields: [taxChargeId], references: [id])
+  waterBill          WaterBill?          @relation("PaymentToWaterBill", fields: [waterBillId], references: [id])
+  allocations        PaymentAllocation[]
+  receipt            Receipt?
+
+  @@index([orgId, createdAt])
+  @@index([payerTenantId, createdAt])
+  @@index([payerUserId, createdAt])
+  @@index([gatewayStatus, verificationStatus])
+  @@index([rentChargeId])
+  @@index([waterBillId])
+  @@index([taxChargeId])
+  @@index([rentalReturnId])
+  @@index([reference])
+  @@index([externalReference])
+  @@index([paidAt])
+  @@index([remittedToKra, remittedAt])
+  @@index([orgId, gatewayStatus, verificationStatus])
+  @@index([orgId, updatedAt])
+  @@index([orgId, paidAt])
+  @@index([orgId, targetType, createdAt])
+  @@index([orgId, method, createdAt])
+  @@index([orgId, unappliedAmount])
+}
+
+/// Allocation of a single payment across one or many rent charge periods.
+model PaymentAllocation {
+  id           String     @id @default(cuid())
+  orgId        String
+  paymentId    String
+  rentChargeId String
+  amount       Decimal    @db.Decimal(12, 2)
+  period       String
+  createdAt    DateTime   @default(now())
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  payment      Payment    @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  rentCharge   RentCharge @relation(fields: [rentChargeId], references: [id], onDelete: Cascade)
+
+  @@unique([paymentId, rentChargeId])
+  @@index([orgId, period])
+  @@index([paymentId])
+  @@index([rentChargeId])
+}
+
+/// Receipt generated from a verified payment.
+model Receipt {
+  id        String   @id @default(cuid())
+  paymentId String   @unique
+  receiptNo String   @unique
+  pdfUrl    String?
+  issuedAt  DateTime @default(now())
+  payment   Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+}
+
+/// User or tenant notification queued/sent through a delivery channel.
+model Notification {
+  id               String              @id @default(cuid())
+  orgId            String
+  userId           String?
+  tenantId         String?
+  channel          NotificationChannel
+  type             NotificationType
+  title            String
+  message          String
+  status           NotificationStatus  @default(QUEUED)
+  providerResponse Json?
+  sentAt           DateTime?
+  readAt           DateTime?
+  createdAt        DateTime            @default(now())
+  org              Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenant           Tenant?             @relation("NotificationTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  user             User?               @relation("NotificationUser", fields: [userId], references: [id])
+
+  @@index([orgId, createdAt])
+  @@index([userId, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([status, channel])
+  @@index([type, createdAt])
+  @@index([orgId, readAt])
+  @@index([orgId, status, createdAt])
+  @@index([orgId, channel, status])
+  @@index([tenantId, readAt])
+}
+
+/// Tenant move-out notice and inspection lifecycle trigger.
+model MoveOutNotice {
+  id          String       @id @default(cuid())
+  leaseId     String
+  tenantId    String
+  noticeDate  DateTime     @default(now())
+  moveOutDate DateTime
+  status      NoticeStatus @default(SUBMITTED)
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  inspection  Inspection?
+  lease       Lease        @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([leaseId, status])
+  @@index([tenantId, status])
+  @@index([moveOutDate])
+  @@index([tenantId, moveOutDate])
+  @@index([leaseId, moveOutDate])
+}
+
+/// Move-out or property inspection record.
+model Inspection {
+  id              String           @id @default(cuid())
+  noticeId        String           @unique
+  scheduledAt     DateTime
+  inspectorUserId String
+  status          InspectionStatus @default(SCHEDULED)
+  notes           String?
+  checklist       Json?
+  completedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  inspector       User             @relation("InspectionInspector", fields: [inspectorUserId], references: [id])
+  notice          MoveOutNotice    @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledAt])
+  @@index([status])
+  @@index([inspectorUserId, scheduledAt])
+  @@index([status, scheduledAt])
+}
+
+/// Maintenance or operational issue ticket.
+model IssueTicket {
+  id                String                  @id @default(cuid())
+  orgId             String
+  propertyId        String?
+  unitId            String?
+  reportedByUserId  String
+  assignedToUserId  String?
+  title             String
+  description       String
+  priority          TicketPriority          @default(MEDIUM)
+  status            TicketStatus            @default(OPEN)
+  resolutionNotes   String?
+  resolvedAt        DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  photoAssetId      String?
+  assignedByUserId  String?
+  assignedBy        User?                   @relation("IssueAssignedBy", fields: [assignedByUserId], references: [id])
+  assignedTo        User?                   @relation("IssueAssignedTo", fields: [assignedToUserId], references: [id])
+  org               Organization            @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  photoAsset        Asset?                  @relation("IssuePhoto", fields: [photoAssetId], references: [id])
+  property          Property?               @relation(fields: [propertyId], references: [id])
+  reportedBy        User                    @relation("IssueReportedBy", fields: [reportedByUserId], references: [id])
+  resolutionReports IssueResolutionReport[]
+  unit              Unit?                   @relation(fields: [unitId], references: [id])
+
+  @@index([orgId, status, priority])
+  @@index([propertyId])
+  @@index([unitId])
+  @@index([reportedByUserId])
+  @@index([assignedToUserId])
+  @@index([assignedByUserId])
+  @@index([resolvedAt])
+  @@index([orgId, createdAt])
+  @@index([orgId, updatedAt])
+  @@index([orgId, assignedToUserId, status])
+  @@index([orgId, propertyId, status])
+  @@index([orgId, unitId, status])
+}
+
+/// Caretaker completion report that must be reviewed by office and confirmed by tenant before closure.
+model IssueResolutionReport {
+  id                      String                      @id @default(cuid())
+  issueId                 String
+  orgId                   String
+  caretakerUserId         String
+  officeReviewedByUserId  String?
+  tenantConfirmedByUserId String?
+  status                  IssueResolutionReportStatus @default(SUBMITTED)
+  workSummary             String
+  materialsUsed           String?
+  tenantInstructions      String?
+  officeNotes             String?
+  tenantFeedback          String?
+  submittedAt             DateTime                    @default(now())
+  officeReviewedAt        DateTime?
+  tenantConfirmedAt       DateTime?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  caretaker               User                        @relation("IssueResolutionReportCaretaker", fields: [caretakerUserId], references: [id])
+  issue                   IssueTicket                 @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  officeReviewedBy        User?                       @relation("IssueResolutionReportOfficeReviewer", fields: [officeReviewedByUserId], references: [id])
+  org                     Organization                @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenantConfirmedBy       User?                       @relation("IssueResolutionReportTenantConfirmer", fields: [tenantConfirmedByUserId], references: [id])
+
+  @@index([issueId, status])
+  @@index([orgId, status, submittedAt])
+  @@index([caretakerUserId, submittedAt])
+  @@index([tenantConfirmedByUserId, tenantConfirmedAt])
+}
+
+/// Immutable audit trail for organization actions.
+model AuditLog {
+  id          String       @id @default(cuid())
+  orgId       String
+  actorUserId String
+  action      String
+  entityType  String
+  entityId    String
+  metadata    Json?
+  beforeState Json?
+  afterState  Json?
+  ip          String?
+  userAgent   String?
+  requestId   String?
+  createdAt   DateTime     @default(now())
+  actor       User         @relation("AuditActor", fields: [actorUserId], references: [id])
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([orgId, action, createdAt])
+  @@index([orgId, entityType, createdAt])
+  @@index([requestId])
+}
+
+/// Tenant lifecycle action history.
+model TenantActionLog {
+  id          String           @id @default(cuid())
+  orgId       String
+  tenantId    String
+  leaseId     String?
+  unitId      String?
+  actorUserId String
+  action      TenantActionType
+  reason      String?
+  notes       String?
+  metadata    Json?
+  createdAt   DateTime         @default(now())
+  actor       User             @relation("TenantActionActor", fields: [actorUserId], references: [id])
+  lease       Lease?           @relation(fields: [leaseId], references: [id])
+  org         Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unit        Unit?            @relation(fields: [unitId], references: [id])
+
+  @@index([orgId, tenantId, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([leaseId])
+  @@index([unitId])
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
+  @@index([orgId, action, createdAt])
+  @@index([orgId, actorUserId, createdAt])
+}
+
+/// Organization invite token for staff or tenant onboarding.
+model Invitation {
+  id             String       @id @default(cuid())
+  orgId          String
+  email          String
+  role           OrgRole
+  scopeType      ScopeType    @default(ORG)
+  scopeId        String       @default("ORG_SCOPE")
+  token          String       @unique
+  expiresAt      DateTime
+  status         InvitationStatus @default(PENDING)
+  invitedById    String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deliveryMeta   Json?
+  emailSentAt    DateTime?
+  phone          String?
+  whatsappSentAt DateTime?
+  invitedBy      User         @relation("InvitedBy", fields: [invitedById], references: [id])
+  org            Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([email])
+  @@index([phone])
+  @@index([token])
+  @@index([expiresAt])
+  @@index([orgId, status])
+  @@index([orgId, role, status])
+}
+
+/// Password reset token with expiry and usage tracking.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  email     String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+  @@index([token])
+  @@index([expiresAt])
+  @@index([usedAt])
+}
+
+/// Email verification token with expiry and usage tracking.
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  email     String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+  @@index([token])
+  @@index([expiresAt])
+  @@index([usedAt])
+}
+
+/// Organization API key metadata; stores only a key hash.
+model ApiKey {
+  id          String       @id @default(cuid())
+  orgId       String
+  name        String
+  keyHash     String
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  permissions Json?
+  isActive    Boolean      @default(true)
+  createdById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  createdBy   User         @relation("CreatedBy", fields: [createdById], references: [id])
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([isActive])
+  @@index([orgId, isActive, createdAt])
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum DataExportRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  CANCELLED
+}
+
+enum PlatformRole {
+  USER
+  SUPER_ADMIN
+  PLATFORM_ADMIN
+}
+
+enum PlatformPermissionType {
+  VIEW_PLATFORM_DASHBOARD
+  VIEW_ORGANIZATIONS
+  CREATE_ORGANIZATIONS
+  EDIT_ORGANIZATIONS
+  SUSPEND_ORGANIZATIONS
+  VIEW_PLATFORM_USERS
+  CREATE_PLATFORM_ADMINS
+  EDIT_PLATFORM_ADMINS
+  DISABLE_PLATFORM_ADMINS
+  VIEW_AUDIT_LOGS
+  VIEW_BILLING
+  MANAGE_BILLING
+  VIEW_REPORTS
+  EXPORT_REPORTS
+  MANAGE_SYSTEM_SETTINGS
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum MarketerStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum MarketingCommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  CANCELLED
+}
+
+enum OrgRole {
+  ADMIN
+  MANAGER
+  OFFICE
+  ACCOUNTANT
+  CARETAKER
+  TENANT
+  LANDLORD
+}
+
+enum ScopeType {
+  ORG
+  PROPERTY
+  BUILDING
+  UNIT
+}
+
+enum PropertyType {
+  RESIDENTIAL
+  COMMERCIAL
+  MIXED_USE
+  GODOWN
+}
+
+enum UnitType {
+  APARTMENT
+  BEDSITTER
+  SHOP
+  OFFICE
+  STALL
+  WAREHOUSE
+  GODOWN
+  STUDIO
+  SINGLE_ROOM
+}
+
+enum TenantType {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum TaxpayerKind {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum TenantStatus {
+  ACTIVE
+  INACTIVE
+  BLACKLISTED
+}
+
+enum TenantTransferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum TenantHistoryStatus {
+  VACATED
+  TRANSFERRED
+  ACTIVE_RECORD
+  ARCHIVED
+}
+
+enum TenantActionType {
+  CREATED
+  UPDATED
+  UNLINKED
+  BLACKLISTED
+  UNBLACKLISTED
+  ARCHIVED
+  RESTORED
+  SOFT_DELETED
+}
+
+enum UnitStatus {
+  VACANT
+  OCCUPIED
+  RESERVED
+  UNDER_MAINTENANCE
+  INACTIVE
+}
+
+enum LeaseStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  TERMINATED
+  CANCELLED
+}
+
+enum ChargeStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  OVERDUE
+  WAIVED
+}
+
+enum ChargeType {
+  RENT
+  DEPOSIT
+  WATER
+  PENALTY
+  SERVICE_CHARGE
+  OTHER
+}
+
+enum ReadingStatus {
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum BillStatus {
+  ISSUED
+  PAYMENT_PENDING
+  PAID_PENDING_VERIFICATION
+  PAID_VERIFIED
+  DISPUTED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  MPESA_STK
+  BANK
+  CASH
+}
+
+enum PayerType {
+  TENANT
+  USER
+  ORGANIZATION
+  EXTERNAL
+}
+
+enum PaymentTargetType {
+  RENT
+  WATER
+  DEPOSIT
+  TAX
+  OTHER
+}
+
+enum GatewayStatus {
+  INITIATED
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum VerificationStatus {
+  NOT_REQUIRED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum NoticeStatus {
+  SUBMITTED
+  INSPECTION_SCHEDULED
+  INSPECTION_COMPLETED
+  CLOSED
+  CANCELLED
+}
+
+enum InspectionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
+
+enum IssueResolutionReportStatus {
+  SUBMITTED
+  OFFICE_APPROVED
+  TENANT_CONFIRMED
+  REJECTED
+}
+
+enum NotificationChannel {
+  IN_APP
+  SMS
+  EMAIL
+  WHATSAPP
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
+enum NotificationType {
+  RENT_DUE_REMINDER
+  RENT_OVERDUE_REMINDER
+  WATER_BILL_ISSUED
+  PAYMENT_RECEIVED
+  PAYMENT_VERIFIED
+  INSPECTION_SCHEDULED
+  MOVE_OUT_CLOSED
+  ISSUE_CREATED
+  ISSUE_RESOLVED
+  GENERAL
+}
+
+enum AssetType {
+  PROFILE_IMAGE
+  CONTRACT
+  PHOTO
+  DOCUMENT
+  GENERIC
+}
+
+enum TaxType {
+  WITHHOLDING_TAX
+  VAT
+  RENTAL_INCOME_TAX
+  PAYE
+  OTHER
+}
+
+enum TaxStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+  WAIVED
+  CANCELLED
+}
+
+enum KraFilingChannel {
+  GAVACONNECT
+  ERITS_MANUAL
+  ECITIZEN_MANUAL
+  IMPORTED
+}
+
+enum KraFilingStatus {
+  DRAFT
+  READY
+  SUBMITTED
+  ACKNOWLEDGED
+  PAYMENT_PENDING
+  PAID
+  REJECTED
+  FAILED
+  MANUAL_REVIEW
+  CANCELLED
+}
+
+enum KraAttemptOutcome {
+  SUCCESS
+  FAILED
+  RETRYABLE
+}
+
+enum KraFilingMode {
+  API
+  ERITS_MANUAL
+  HYBRID
+}
+
+enum KraEnvironment {
+  SANDBOX
+  PRODUCTION
+}
+
+enum IntegrationStatus {
+  ACTIVE
+  DISABLED
+  ERROR
+}
+
+enum RentalTaxRegime {
+  MRI
+  ANNUAL_RETURN
+}
+
+enum RentalAssessmentBasis {
+  GROSS_RENT_BILLED
+  GROSS_RENT_COLLECTED
+}
+
+enum BillingPlan {
+  FREE
+  PRO
+  PLUS
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
