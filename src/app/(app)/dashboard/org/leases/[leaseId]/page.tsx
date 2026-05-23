@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getOrgUnitHref } from "@/lib/units/url";
+import { requireManagementAccess } from "@/lib/permissions/guards";
 
 export const dynamic = "force-dynamic";
 
@@ -80,11 +81,14 @@ function getChargeStatusClass(status: string) {
 }
 
 export default async function LeaseDetailPage({ params }: LeasePageProps) {
+  const session = await requireManagementAccess();
   const { leaseId } = await params;
 
-  const lease = await prisma.lease.findUnique({
+  const lease = await prisma.lease.findFirst({
     where: {
       id: leaseId,
+      orgId: session.activeOrgId!,
+      deletedAt: null,
     },
     include: {
       org: {

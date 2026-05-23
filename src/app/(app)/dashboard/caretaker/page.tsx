@@ -22,6 +22,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 function SoftBadge({
   label,
@@ -280,183 +281,187 @@ export default async function CaretakerDashboardPage() {
     pendingWaterBills,
     recentIssues,
     upcomingInspections,
-  ] = await Promise.all([
-    prisma.unit.count({ where: unitScope }),
-    prisma.lease.count({
-      where: {
-        orgId,
-        deletedAt: null,
-        status: LeaseStatus.ACTIVE,
-        unitId: {
-          in: allowedUnitIds,
-        },
-      },
-    }),
-    prisma.tenant.count({
-      where: {
-        orgId,
-        deletedAt: null,
-        leases: {
-          some: {
+  ] = await retryTransientDatabaseOperation(
+    () =>
+      Promise.all([
+        prisma.unit.count({ where: unitScope }),
+        prisma.lease.count({
+          where: {
+            orgId,
             deletedAt: null,
             status: LeaseStatus.ACTIVE,
             unitId: {
               in: allowedUnitIds,
             },
           },
-        },
-      },
-    }),
-    prisma.issueTicket.count({
-      where: {
-        ...issueScope,
-        status: {
-          in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS],
-        },
-      },
-    }),
-    prisma.issueTicket.count({
-      where: {
-        ...issueScope,
-        status: {
-          in: [TicketStatus.RESOLVED, TicketStatus.CLOSED],
-        },
-        resolvedAt: {
-          gte: today,
-        },
-      },
-    }),
-    prisma.issueTicket.count({
-      where: {
-        ...issueScope,
-        priority: TicketPriority.URGENT,
-        status: {
-          notIn: [
-            TicketStatus.RESOLVED,
-            TicketStatus.CLOSED,
-            TicketStatus.CANCELLED,
-          ],
-        },
-      },
-    }),
-    prisma.inspection.count({
-      where: {
-        status: InspectionStatus.SCHEDULED,
-        OR: [
-          { inspectorUserId: session.userId },
-          {
-            notice: {
-              lease: {
-                orgId,
+        }),
+        prisma.tenant.count({
+          where: {
+            orgId,
+            deletedAt: null,
+            leases: {
+              some: {
+                deletedAt: null,
+                status: LeaseStatus.ACTIVE,
                 unitId: {
                   in: allowedUnitIds,
                 },
               },
             },
           },
-        ],
-      },
-    }),
-    prisma.inspection.count({
-      where: {
-        status: InspectionStatus.COMPLETED,
-        completedAt: {
-          gte: today,
-        },
-        OR: [
-          { inspectorUserId: session.userId },
-          {
-            notice: {
-              lease: {
-                orgId,
-                unitId: {
-                  in: allowedUnitIds,
-                },
-              },
+        }),
+        prisma.issueTicket.count({
+          where: {
+            ...issueScope,
+            status: {
+              in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS],
             },
           },
-        ],
-      },
-    }),
-    prisma.waterBill.count({
-      where: {
-        orgId,
-        unitId: {
-          in: allowedUnitIds,
-        },
-        status: {
-          in: [
-            BillStatus.ISSUED,
-            BillStatus.PAYMENT_PENDING,
-            BillStatus.PAID_PENDING_VERIFICATION,
-            BillStatus.DISPUTED,
-          ],
-        },
-      },
-    }),
-    prisma.issueTicket.findMany({
-      where: issueScope,
-      orderBy: {
-        updatedAt: "desc",
-      },
-      take: 4,
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        updatedAt: true,
-        unit: {
+        }),
+        prisma.issueTicket.count({
+          where: {
+            ...issueScope,
+            status: {
+              in: [TicketStatus.RESOLVED, TicketStatus.CLOSED],
+            },
+            resolvedAt: {
+              gte: today,
+            },
+          },
+        }),
+        prisma.issueTicket.count({
+          where: {
+            ...issueScope,
+            priority: TicketPriority.URGENT,
+            status: {
+              notIn: [
+                TicketStatus.RESOLVED,
+                TicketStatus.CLOSED,
+                TicketStatus.CANCELLED,
+              ],
+            },
+          },
+        }),
+        prisma.inspection.count({
+          where: {
+            status: InspectionStatus.SCHEDULED,
+            OR: [
+              { inspectorUserId: session.userId },
+              {
+                notice: {
+                  lease: {
+                    orgId,
+                    unitId: {
+                      in: allowedUnitIds,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        }),
+        prisma.inspection.count({
+          where: {
+            status: InspectionStatus.COMPLETED,
+            completedAt: {
+              gte: today,
+            },
+            OR: [
+              { inspectorUserId: session.userId },
+              {
+                notice: {
+                  lease: {
+                    orgId,
+                    unitId: {
+                      in: allowedUnitIds,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        }),
+        prisma.waterBill.count({
+          where: {
+            orgId,
+            unitId: {
+              in: allowedUnitIds,
+            },
+            status: {
+              in: [
+                BillStatus.ISSUED,
+                BillStatus.PAYMENT_PENDING,
+                BillStatus.PAID_PENDING_VERIFICATION,
+                BillStatus.DISPUTED,
+              ],
+            },
+          },
+        }),
+        prisma.issueTicket.findMany({
+          where: issueScope,
+          orderBy: {
+            updatedAt: "desc",
+          },
+          take: 4,
           select: {
-            houseNo: true,
-            property: { select: { name: true } },
-            building: { select: { name: true } },
-          },
-        },
-      },
-    }),
-    prisma.inspection.findMany({
-      where: {
-        status: InspectionStatus.SCHEDULED,
-        OR: [
-          { inspectorUserId: session.userId },
-          {
-            notice: {
-              lease: {
-                orgId,
-                unitId: {
-                  in: allowedUnitIds,
-                },
-              },
-            },
-          },
-        ],
-      },
-      orderBy: {
-        scheduledAt: "asc",
-      },
-      take: 3,
-      select: {
-        id: true,
-        scheduledAt: true,
-        notice: {
-          select: {
-            tenant: { select: { fullName: true } },
-            lease: {
+            id: true,
+            title: true,
+            status: true,
+            updatedAt: true,
+            unit: {
               select: {
-                unit: {
+                houseNo: true,
+                property: { select: { name: true } },
+                building: { select: { name: true } },
+              },
+            },
+          },
+        }),
+        prisma.inspection.findMany({
+          where: {
+            status: InspectionStatus.SCHEDULED,
+            OR: [
+              { inspectorUserId: session.userId },
+              {
+                notice: {
+                  lease: {
+                    orgId,
+                    unitId: {
+                      in: allowedUnitIds,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          orderBy: {
+            scheduledAt: "asc",
+          },
+          take: 3,
+          select: {
+            id: true,
+            scheduledAt: true,
+            notice: {
+              select: {
+                tenant: { select: { fullName: true } },
+                lease: {
                   select: {
-                    houseNo: true,
-                    property: { select: { name: true } },
-                    building: { select: { name: true } },
+                    unit: {
+                      select: {
+                        houseNo: true,
+                        property: { select: { name: true } },
+                        building: { select: { name: true } },
+                      },
+                    },
                   },
                 },
               },
             },
           },
-        },
-      },
-    }),
-  ]);
+        }),
+      ]),
+    { label: "caretaker dashboard data load" },
+  );
 
   return (
     <div className="space-y-5 sm:space-y-6">

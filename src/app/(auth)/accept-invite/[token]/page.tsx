@@ -90,7 +90,11 @@ export default function AcceptInvitePage() {
   }, [token]);
 
   useEffect(() => {
-    void acceptInvite();
+    const timeoutId = window.setTimeout(() => {
+      void acceptInvite();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [acceptInvite]);
 
   const isLoading = status === "idle" || status === "loading";

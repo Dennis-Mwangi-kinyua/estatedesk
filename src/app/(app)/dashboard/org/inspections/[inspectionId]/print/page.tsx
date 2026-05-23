@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import { requireUserSession } from "@/lib/auth/session";
+import { requireManagementAccess } from "@/lib/permissions/guards";
 import PrintReportButton from "../PrintReportButton";
 
 export const dynamic = "force-dynamic";
@@ -123,16 +123,9 @@ function sectionCard(title: string, children: React.ReactNode) {
 }
 
 export default async function OrgInspectionPrintPage({ params }: PageProps) {
-  const session = await requireUserSession();
+  const session = await requireManagementAccess();
   const { inspectionId } = await params;
-
-  if (!session.activeOrgId) {
-    return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900 shadow-sm">
-        No active organisation found for your account.
-      </div>
-    );
-  }
+  const orgId = session.activeOrgId!;
 
   const [inspection, printedBy, organization] = await Promise.all([
     prisma.inspection.findFirst({
@@ -140,7 +133,7 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
         id: inspectionId,
         notice: {
           lease: {
-            orgId: session.activeOrgId,
+            orgId,
             deletedAt: null,
           },
         },
@@ -187,7 +180,7 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
     }),
     prisma.organization.findUnique({
       where: {
-        id: session.activeOrgId,
+        id: orgId,
       },
       select: {
         id: true,

@@ -31,6 +31,7 @@ export async function forgotPasswordAction(formData: FormData) {
 
   if (user?.email) {
     const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
     await prisma.passwordResetToken.deleteMany({
@@ -43,7 +44,7 @@ export async function forgotPasswordAction(formData: FormData) {
     await prisma.passwordResetToken.create({
       data: {
         email,
-        token,
+        token: tokenHash,
         expiresAt,
       },
     });

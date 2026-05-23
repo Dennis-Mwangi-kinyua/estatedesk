@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Building2, Home, MapPin, ShieldCheck, UserCircle2 } from "lucide-react";
 
 type Vacancy = {
@@ -205,9 +206,11 @@ export default async function VacanciesPage() {
               className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
             >
               <div className="aspect-[4/3] bg-slate-200">
-                <img
+                <Image
                   src={listing.image}
                   alt={listing.property}
+                  width={640}
+                  height={480}
                   className="h-full w-full object-cover"
                 />
               </div>

@@ -68,9 +68,9 @@ export default function MarketingPage() {
             <a href="#pricing" className="transition hover:text-white">
               Pricing
             </a>
-            <a href="/vacancies" className="transition hover:text-white">
+            <Link href="/vacancies" className="transition hover:text-white">
               Vacancies
-            </a>
+            </Link>
           </nav>
 
           <div className="flex items-center gap-3">

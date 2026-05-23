@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0" stop-color="#0ea5a4" />
+      <stop offset="1" stop-color="#06b6d4" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)" />
+  <g fill="#fff" font-family="Inter, Arial, sans-serif">
+    <text x="72" y="200" font-size="56" font-weight="700">EstateDesk</text>
+    <text x="72" y="280" font-size="40">Vacancy listing</text>
+    <rect x="72" y="320" width="560" height="260" rx="18" fill="#fff" opacity="0.08" />
+    <text x="96" y="380" font-size="28">3 BR Apartment in Kilimani</text>
+    <text x="96" y="420" font-size="24">Rent: KES 55,000</text>
+  </g>
+</svg>

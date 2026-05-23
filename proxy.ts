@@ -137,7 +137,11 @@ function isProtectedPath(pathname: string) {
   );
 }
 
-function applySecurityHeaders(response: NextResponse) {
+function shouldNoIndex(pathname: string) {
+  return isProtectedPath(pathname) || pathname.startsWith("/login");
+}
+
+function applySecurityHeaders(response: NextResponse, pathname: string) {
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -145,7 +149,11 @@ function applySecurityHeaders(response: NextResponse) {
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=()",
   );
-  response.headers.set("X-Robots-Tag", "noindex, nofollow");
+
+  if (shouldNoIndex(pathname)) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+
   return response;
 }
 
@@ -169,6 +177,7 @@ function applyTenantRateLimit(req: NextRequest, response: NextResponse) {
           "X-RateLimit-Reset": String(Math.floor(result.resetAt / 1000)),
         },
       }),
+      req.nextUrl.pathname,
     );
   }
 
@@ -191,6 +200,7 @@ export function proxy(req: NextRequest) {
   if (isPublicPath(pathname)) {
     return applySecurityHeaders(
       NextResponse.next({ request: { headers: requestHeaders } }),
+      pathname,
     );
   }
 
@@ -198,17 +208,19 @@ export function proxy(req: NextRequest) {
     if (pathname.startsWith("/api")) {
       return applySecurityHeaders(
         NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+        pathname,
       );
     }
 
     const url = req.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
-    return applySecurityHeaders(NextResponse.redirect(url));
+    return applySecurityHeaders(NextResponse.redirect(url), pathname);
   }
 
   const response = applySecurityHeaders(
     NextResponse.next({ request: { headers: requestHeaders } }),
+    pathname,
   );
 
   if (RATE_LIMITED_PATHS.has(pathname)) {

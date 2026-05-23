@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
-import { requireUserSession } from "@/lib/auth/session";
+import { requireManagementAccess } from "@/lib/permissions/guards";
 
 export const dynamic = "force-dynamic";
 
@@ -63,23 +63,16 @@ function badgeClass(status: string) {
 }
 
 export default async function OrgInspectionDetailPage({ params }: PageProps) {
-  const session = await requireUserSession();
+  const session = await requireManagementAccess();
   const { inspectionId } = await params;
-
-  if (!session.activeOrgId) {
-    return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900 shadow-sm">
-        No active organisation found for your account.
-      </div>
-    );
-  }
+  const orgId = session.activeOrgId!;
 
   const inspection = await prisma.inspection.findFirst({
     where: {
       id: inspectionId,
       notice: {
         lease: {
-          orgId: session.activeOrgId,
+          orgId,
           deletedAt: null,
         },
       },

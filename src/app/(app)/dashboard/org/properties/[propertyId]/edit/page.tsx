@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PropertyType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { requireManagementAccess } from "@/lib/permissions/guards";
 
 type EditPropertyPageProps = {
   params: Promise<{
@@ -14,10 +15,15 @@ const propertyTypes = Object.values(PropertyType);
 export default async function EditPropertyPage({
   params,
 }: EditPropertyPageProps) {
+  const session = await requireManagementAccess();
   const { propertyId } = await params;
 
-  const property = await prisma.property.findUnique({
-    where: { id: propertyId },
+  const property = await prisma.property.findFirst({
+    where: {
+      id: propertyId,
+      orgId: session.activeOrgId!,
+      deletedAt: null,
+    },
     select: {
       id: true,
       name: true,

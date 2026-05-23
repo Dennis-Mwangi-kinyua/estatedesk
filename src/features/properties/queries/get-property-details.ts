@@ -57,11 +57,14 @@ export type PropertyDetails = {
 };
 
 export async function getPropertyDetails(
-  propertyId: string
+  propertyId: string,
+  orgId: string
 ): Promise<PropertyDetails | null> {
-  const property = await prisma.property.findUnique({
+  const property = await prisma.property.findFirst({
     where: {
       id: propertyId,
+      orgId,
+      deletedAt: null,
     },
     include: {
       buildings: {

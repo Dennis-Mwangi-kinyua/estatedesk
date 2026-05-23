@@ -1,8 +1,16 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
+
+function getClientIp(request: Request) {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0]?.trim() || "unknown";
+
+  return request.headers.get("x-real-ip")?.trim() || "unknown";
+}
 
 function getBearerToken(request: Request) {
   const auth = request.headers.get("authorization") ?? "";
@@ -27,8 +35,36 @@ function hasVacantListingsPermission(value: unknown) {
   );
 }
 
+async function enforceRateLimit(request: Request, token: string | null) {
+  const keyPart = token
+    ? createHash("sha256").update(token).digest("hex").slice(0, 16)
+    : getClientIp(request);
+  const result = await checkRateLimit({
+    key: `public-vacant-houses:${keyPart}`,
+    limit: 60,
+    windowMs: 60_000,
+  });
+
+  if (result.allowed) return null;
+
+  return NextResponse.json(
+    {
+      error: `Too many requests. Please retry in ${result.retryAfterSeconds} seconds.`,
+    },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(result.retryAfterSeconds),
+      },
+    },
+  );
+}
+
 export async function GET(request: Request) {
   const token = getBearerToken(request);
+  const rateLimitResponse = await enforceRateLimit(request, token);
+
+  if (rateLimitResponse) return rateLimitResponse;
 
   if (!token) {
     return NextResponse.json({ error: "Missing bearer token." }, { status: 401 });
@@ -43,6 +79,7 @@ export async function GET(request: Request) {
     },
     select: {
       id: true,
+      orgId: true,
       permissions: true,
     },
   });
@@ -57,6 +94,7 @@ export async function GET(request: Request) {
       deletedAt: null,
       status: "VACANT",
       property: {
+        orgId: apiKey.orgId,
         deletedAt: null,
         isActive: true,
       },

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { UnitStatus, UnitType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { requireManagementAccess } from "@/lib/permissions/guards";
 
 type NewUnitPageProps = {
   params: Promise<{
@@ -13,10 +14,15 @@ const unitTypes = Object.values(UnitType);
 const unitStatuses = Object.values(UnitStatus);
 
 export default async function NewUnitPage({ params }: NewUnitPageProps) {
+  const session = await requireManagementAccess();
   const { propertyId } = await params;
 
-  const property = await prisma.property.findUnique({
-    where: { id: propertyId },
+  const property = await prisma.property.findFirst({
+    where: {
+      id: propertyId,
+      orgId: session.activeOrgId!,
+      deletedAt: null,
+    },
     select: {
       id: true,
       name: true,

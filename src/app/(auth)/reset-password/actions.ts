@@ -1,5 +1,6 @@
 "use server";
 
+import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
@@ -35,8 +36,10 @@ export async function resetPasswordAction(formData: FormData) {
     );
   }
 
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
   const resetToken = await prisma.passwordResetToken.findUnique({
-    where: { token },
+    where: { token: tokenHash },
   });
 
   if (!resetToken) {
