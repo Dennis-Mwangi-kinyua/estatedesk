@@ -764,7 +764,7 @@ export default async function UnitDetailsPage({
                     placeholder="Public and internal property description notes"
                     className="rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-500 lg:col-span-3"
                   />
-                  <button className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white lg:w-fit">
+                  <button className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 lg:w-fit">
                     Save listing details
                   </button>
                 </form>
@@ -780,7 +780,7 @@ export default async function UnitDetailsPage({
                     multiple
                     className="mt-3 block w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
                   />
-                  <button className="mt-3 inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white">
+                  <button className="mt-3 inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
                     Upload images
                   </button>
                 </form>

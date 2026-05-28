@@ -58,7 +58,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="antialiased" suppressHydrationWarning>
+    <html
+      lang="en"
+      className="antialiased"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         <ThemeInitScript />
       </head>

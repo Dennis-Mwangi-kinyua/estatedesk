@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  ArrowLeft,
   ChevronRight,
   ShieldCheck,
   Building2,
@@ -45,7 +46,30 @@ const windowDots = [
   },
 ];
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams?: Promise<{
+    returnTo?: string;
+  }>;
+};
+
+function getSafeReturnTo(value: string | undefined) {
+  if (!value) return undefined;
+
+  try {
+    const decoded = decodeURIComponent(value);
+    if (!decoded.startsWith("/vacancies")) return undefined;
+    if (decoded.startsWith("//")) return undefined;
+    if (decoded.includes("://")) return undefined;
+    return decoded;
+  } catch {
+    return undefined;
+  }
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams;
+  const returnTo = getSafeReturnTo(params?.returnTo);
+
   return (
     <div className="login-screen fixed inset-0 w-screen overflow-hidden bg-[#F2F6FB] text-slate-950">
       <style>{`
@@ -291,7 +315,14 @@ export default function LoginPage() {
                   </div>
                 </Link>
 
-                <div className="flex justify-center">
+                <div className="flex items-center justify-center gap-3 lg:justify-between">
+                  <Link
+                    href="/"
+                    className="hidden min-h-9 items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-3 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur transition hover:border-slate-300 hover:bg-white hover:text-slate-950 lg:inline-flex"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Back to EstateDesk
+                  </Link>
                   <div className="secure-pill inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white/70 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-slate-600 shadow-sm backdrop-blur">
                     <ShieldCheck className="h-3.5 w-3.5 text-[#007AFF]" />
                     Secure log in
@@ -309,7 +340,7 @@ export default function LoginPage() {
               </div>
 
               <div className="login-form-shell relative min-h-0 flex-1 overflow-hidden">
-                <LoginForm />
+                <LoginForm returnTo={returnTo} />
               </div>
             </section>
 

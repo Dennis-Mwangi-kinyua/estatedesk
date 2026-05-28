@@ -3,23 +3,34 @@ import { type ElementType, type ReactNode } from "react";
 import {
   ArrowRight,
   Building2,
+  CalendarCheck2,
   Check,
-  ChevronLeft,
   ClipboardList,
   CreditCard,
   Droplets,
   FileCheck2,
+  Home,
+  KeyRound,
   Layers3,
   LockKeyhole,
+  MapPin,
+  PhoneCall,
+  Search,
   ShieldCheck,
+  SlidersHorizontal,
   UsersRound,
   WalletCards,
 } from "lucide-react";
+import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
+import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { APP_PLAN_ORDER, APP_PLANS } from "@/lib/billing/plans";
 
 type OperationsShowcaseProps = {
   standalone?: boolean;
   compact?: boolean;
+  publicHeaderActive?: "home" | "services";
+  variant?: "operations" | "rentals";
+  showPricingNav?: boolean;
 };
 
 type IconType = ElementType<{ className?: string }>;
@@ -121,6 +132,41 @@ const OPERATIONS: readonly OperationCard[] = [
   },
 ] as const;
 
+const RENTAL_STEPS: readonly OperationCard[] = [
+  {
+    icon: Search,
+    title: "Find vacancies",
+    label: "Search",
+    description: "Browse available homes by location, rent range, property, and unit details.",
+    accent: "border-l-sky-500",
+    iconClassName: "border-sky-100 bg-sky-50 text-sky-700",
+  },
+  {
+    icon: Home,
+    title: "Review the unit",
+    label: "Details",
+    description: "Check rent, rooms, service charges, photos, and manager contact information.",
+    accent: "border-l-emerald-500",
+    iconClassName: "border-emerald-100 bg-emerald-50 text-emerald-700",
+  },
+  {
+    icon: CalendarCheck2,
+    title: "Book a viewing",
+    label: "Visit",
+    description: "Contact the listed landlord or manager to confirm availability and viewing terms.",
+    accent: "border-l-amber-500",
+    iconClassName: "border-amber-100 bg-amber-50 text-amber-700",
+  },
+  {
+    icon: KeyRound,
+    title: "Move in with records",
+    label: "Lease",
+    description: "Once approved, tenant details, lease records, and billing can be managed digitally.",
+    accent: "border-l-indigo-500",
+    iconClassName: "border-indigo-100 bg-indigo-50 text-indigo-700",
+  },
+] as const;
+
 const SNAPSHOT_ITEMS: readonly SnapshotItem[] = [
   {
     icon: Layers3,
@@ -148,6 +194,33 @@ const SNAPSHOT_ITEMS: readonly SnapshotItem[] = [
   },
 ] as const;
 
+const RENTAL_SNAPSHOT_ITEMS: readonly SnapshotItem[] = [
+  {
+    icon: MapPin,
+    label: "Location",
+    value: "Search areas",
+    iconClassName: "border-sky-100 bg-sky-50 text-sky-700",
+  },
+  {
+    icon: CreditCard,
+    label: "Rent",
+    value: "Compare costs",
+    iconClassName: "border-emerald-100 bg-emerald-50 text-emerald-700",
+  },
+  {
+    icon: Home,
+    label: "Unit",
+    value: "View details",
+    iconClassName: "border-amber-100 bg-amber-50 text-amber-700",
+  },
+  {
+    icon: PhoneCall,
+    label: "Enquiry",
+    value: "Contact manager",
+    iconClassName: "border-indigo-100 bg-indigo-50 text-indigo-700",
+  },
+] as const;
+
 const CONTROLS: readonly ControlItem[] = [
   {
     icon: LockKeyhole,
@@ -168,6 +241,62 @@ const CONTROLS: readonly ControlItem[] = [
     iconClassName: "border-indigo-100 bg-indigo-50 text-indigo-700",
   },
 ] as const;
+
+const RENTAL_CONTROLS: readonly ControlItem[] = [
+  {
+    icon: ShieldCheck,
+    title: "Published listings",
+    detail: "Manager posted",
+    iconClassName: "border-emerald-100 bg-emerald-50 text-emerald-700",
+  },
+  {
+    icon: CalendarCheck2,
+    title: "Viewing steps",
+    detail: "Confirmed direct",
+    iconClassName: "border-sky-100 bg-sky-50 text-sky-700",
+  },
+  {
+    icon: FileCheck2,
+    title: "Tenant records",
+    detail: "Ready after approval",
+    iconClassName: "border-indigo-100 bg-indigo-50 text-indigo-700",
+  },
+] as const;
+
+const SHOWCASE_COPY = {
+  operations: {
+    sectionLabel: "Property operations software",
+    panelKicker: "Operations command center",
+    panelTitle: "A structured workspace for billing, inspections, tenants, staff, and records.",
+    status: "Live",
+    helperText: "Built for daily property operations.",
+    primaryCta: { href: "/register", label: "Create account" },
+    secondaryCta: { href: "/login", label: "Sign in" },
+    workspaceTitle: "Workspace overview",
+    workspaceSubtitle: "Essential modules at a glance",
+    workspaceStatus: "Active",
+    footerTagline: "Professional property workspace",
+    operations: OPERATIONS,
+    snapshotItems: SNAPSHOT_ITEMS,
+    controls: CONTROLS,
+  },
+  rentals: {
+    sectionLabel: "Rent or find a property",
+    panelKicker: "Rental discovery workspace",
+    panelTitle: "Search vacant homes, compare unit details, contact managers, and move in with clear records.",
+    status: "Open",
+    helperText: "Built for tenants looking for a reliable place to rent.",
+    primaryCta: { href: "/vacancies", label: "View vacancies" },
+    secondaryCta: { href: "/login", label: "Tenant sign in" },
+    workspaceTitle: "Rental overview",
+    workspaceSubtitle: "The search journey at a glance",
+    workspaceStatus: "Ready",
+    footerTagline: "Professional rental discovery",
+    operations: RENTAL_STEPS,
+    snapshotItems: RENTAL_SNAPSHOT_ITEMS,
+    controls: RENTAL_CONTROLS,
+  },
+} as const;
 
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -194,7 +323,7 @@ function ShellCard({
 
 function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-600 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+    <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-neutral-200 bg-white/85 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-600 shadow-[0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-xl">
       {children}
     </div>
   );
@@ -219,33 +348,83 @@ function IconBox({
   );
 }
 
-function OperationsPanel() {
+function RentalSearchStrip() {
   return (
-    <ShellCard className="flex min-h-0 flex-col p-4 sm:p-5 lg:p-4">
-      <div className="flex items-start justify-between gap-4 border-b border-neutral-200 pb-4 sm:pb-5 lg:pb-3">
+    <div className="grid gap-2 rounded-[1.35rem] border border-white/80 bg-white/82 p-2 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur-2xl sm:grid-cols-[1fr_0.9fr_auto] lg:rounded-2xl">
+      <div className="flex min-h-12 items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-3 lg:min-h-11 lg:rounded-xl lg:px-4">
+        <Search className="h-4 w-4 shrink-0 text-slate-400" />
+        <span className="min-w-0 truncate text-sm font-medium text-slate-500">
+          Search by estate, area, or property
+        </span>
+      </div>
+      <div className="flex min-h-12 items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-3 lg:min-h-11 lg:rounded-xl lg:px-4">
+        <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
+        <span className="min-w-0 truncate text-sm font-medium text-slate-500">
+          Choose location
+        </span>
+      </div>
+      <Link
+        href="/vacancies"
+        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 lg:min-h-11 lg:rounded-xl lg:px-5"
+      >
+        <SlidersHorizontal className="h-4 w-4" />
+        Browse
+      </Link>
+    </div>
+  );
+}
+
+function OperationsPanel({
+  copy,
+  variant,
+}: {
+  copy: (typeof SHOWCASE_COPY)[keyof typeof SHOWCASE_COPY];
+  variant: OperationsShowcaseProps["variant"];
+}) {
+  const isRental = variant === "rentals";
+
+  return (
+    <ShellCard
+      className={cx(
+        "flex min-h-0 flex-col p-4 sm:p-5 lg:h-full lg:p-4 xl:p-5",
+        isRental &&
+          "rounded-[1.75rem] border-white/80 bg-white/78 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur-2xl lg:rounded-3xl",
+      )}
+    >
+      <div className="flex items-start justify-between gap-4 border-b border-neutral-200/80 pb-4 sm:pb-5 lg:pb-3">
         <div className="min-w-0">
           <p
             id="operations-showcase-title"
-            className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700"
+            className={cx(
+              "text-[11px] font-semibold uppercase tracking-[0.2em]",
+              isRental ? "text-sky-700" : "text-emerald-700",
+            )}
           >
-            Operations command center
+            {copy.panelKicker}
           </p>
-          <p className="mt-1.5 max-w-xl text-base font-semibold leading-6 text-neutral-950 sm:text-lg sm:leading-7 lg:text-base lg:leading-5">
-            A structured workspace for billing, inspections, tenants, staff, and records.
+          <p className="mt-2 max-w-3xl text-[1.35rem] font-semibold leading-7 text-neutral-950 sm:text-lg sm:leading-7 lg:text-xl lg:leading-7 xl:text-2xl xl:leading-8">
+            {copy.panelTitle}
           </p>
         </div>
 
         <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
-          Live
+          {copy.status}
         </span>
       </div>
 
-      <div className="mt-4 grid min-h-0 grid-cols-1 gap-3.5 sm:grid-cols-2 lg:mt-3 lg:gap-3">
-        {OPERATIONS.map(({ icon, title, label, description, accent, iconClassName }) => (
+      {isRental ? (
+        <div className="mt-4 lg:mt-3">
+          <RentalSearchStrip />
+        </div>
+      ) : null}
+
+      <div className="mt-4 grid min-h-0 grid-cols-1 gap-3.5 sm:grid-cols-2 lg:mt-3 lg:flex-1 lg:gap-3 xl:gap-4">
+        {copy.operations.map(({ icon, title, label, description, accent, iconClassName }) => (
           <article
             key={title}
             className={cx(
-              "min-w-0 rounded-xl border border-l-2 border-neutral-200 bg-white p-4 transition-colors hover:border-neutral-300 lg:p-3",
+              "min-w-0 rounded-xl border border-l-2 border-neutral-200 bg-white p-4 transition-colors hover:border-neutral-300 lg:flex lg:min-h-0 lg:flex-col lg:p-4",
+              isRental && "rounded-2xl border-white/80 bg-white/86 shadow-[0_12px_28px_rgba(15,23,42,0.055)] backdrop-blur",
               accent,
             )}
           >
@@ -255,73 +434,93 @@ function OperationsPanel() {
                 {label}
               </span>
             </div>
-            <h3 className="mt-3 text-sm font-semibold text-neutral-950">
+            <h3 className="mt-3 text-sm font-semibold text-neutral-950 lg:mt-3 lg:text-[15px]">
               {title}
             </h3>
-            <p className="mt-1.5 text-[13px] leading-5 text-neutral-600 lg:line-clamp-2 lg:text-xs lg:leading-4">
+            <p className="mt-1.5 text-[13px] leading-5 text-neutral-600 lg:line-clamp-2 lg:text-xs lg:leading-5 xl:text-[13px]">
               {description}
             </p>
           </article>
         ))}
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-[1fr_auto_auto] sm:items-center lg:mt-3 lg:gap-2">
+      <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-[1fr_auto_auto] sm:items-center lg:mt-3 lg:gap-3">
         <div className="text-xs text-neutral-600">
-          Built for daily property operations.
+          {copy.helperText}
         </div>
         <Link
-          href="/register"
-          className="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-neutral-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:text-xs lg:min-h-9 lg:px-3 lg:py-2"
+          href={copy.primaryCta.href}
+          className="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-neutral-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:text-xs lg:px-4"
         >
-          Create account
+          {copy.primaryCta.label}
         </Link>
         <Link
-          href="/login"
-          className="inline-flex w-full min-h-11 items-center justify-center rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-900 transition hover:border-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:text-xs lg:min-h-9 lg:px-3 lg:py-2"
+          href={copy.secondaryCta.href}
+          className="inline-flex w-full min-h-11 items-center justify-center rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-900 transition hover:border-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:text-xs lg:px-4"
         >
-          Sign in
+          {copy.secondaryCta.label}
         </Link>
       </div>
     </ShellCard>
   );
 }
 
-function WorkspacePanel() {
+function WorkspacePanel({
+  copy,
+  variant,
+}: {
+  copy: (typeof SHOWCASE_COPY)[keyof typeof SHOWCASE_COPY];
+  variant: OperationsShowcaseProps["variant"];
+}) {
+  const isRental = variant === "rentals";
+
   return (
-    <ShellCard className="flex min-h-0 flex-col p-4 sm:p-5 lg:p-4">
-      <div className="flex items-start justify-between gap-3 border-b border-neutral-200 pb-4 lg:pb-3">
+    <ShellCard
+      className={cx(
+        "flex min-h-0 flex-col p-4 sm:p-5 lg:h-full lg:p-4 xl:p-5",
+        isRental &&
+          "rounded-[1.75rem] border-white/80 bg-white/72 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur-2xl lg:rounded-3xl",
+      )}
+    >
+      <div className="flex items-start justify-between gap-3 border-b border-neutral-200/80 pb-4 lg:pb-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-neutral-950">Workspace overview</p>
-          <p className="mt-1 text-xs text-neutral-500">Essential modules at a glance</p>
+          <p className="text-sm font-semibold text-neutral-950 lg:text-[15px]">{copy.workspaceTitle}</p>
+          <p className="mt-1 text-xs text-neutral-500">{copy.workspaceSubtitle}</p>
         </div>
         <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-sky-700">
-          Active
+          {copy.workspaceStatus}
         </span>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3.5 lg:mt-3 lg:grid-cols-2 lg:gap-2">
-        {SNAPSHOT_ITEMS.map(({ icon, label, value, iconClassName }) => (
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3.5 lg:mt-3 lg:grid-cols-2 lg:gap-2.5">
+        {copy.snapshotItems.map(({ icon, label, value, iconClassName }) => (
           <div
             key={label}
-            className="min-w-0 rounded-xl border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 lg:p-2.5"
+            className={cx(
+              "min-w-0 rounded-xl border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 lg:p-3",
+              isRental && "rounded-2xl border-white/80 bg-white/86 shadow-[0_10px_22px_rgba(15,23,42,0.045)]",
+            )}
           >
             <IconBox icon={icon} className={iconClassName} />
             <p className="mt-2 text-xs font-semibold text-neutral-950">{label}</p>
-            <p className="text-[11px] text-neutral-500 lg:text-[10px]">{value}</p>
+            <p className="text-[11px] text-neutral-500">{value}</p>
           </div>
         ))}
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-3.5 lg:mt-3 lg:grid-cols-1 lg:gap-2">
-        {CONTROLS.map(({ icon, title, detail, iconClassName }) => (
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-3.5 lg:mt-3 lg:flex-1 lg:grid-cols-1 lg:gap-2.5">
+        {copy.controls.map(({ icon, title, detail, iconClassName }) => (
           <div
             key={title}
-            className="flex min-w-0 items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 lg:gap-2 lg:p-2.5"
+            className={cx(
+              "flex min-w-0 items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 lg:gap-3 lg:p-3",
+              isRental && "rounded-2xl border-white/80 bg-white/86 shadow-[0_10px_22px_rgba(15,23,42,0.045)]",
+            )}
           >
             <IconBox icon={icon} className={iconClassName} />
             <div className="min-w-0">
               <p className="text-xs font-semibold text-neutral-950">{title}</p>
-              <p className="text-[11px] text-neutral-500 lg:text-[10px]">{detail}</p>
+              <p className="text-[11px] text-neutral-500">{detail}</p>
             </div>
           </div>
         ))}
@@ -408,62 +607,83 @@ function PlansSection() {
 export default function OperationsShowcase({
   standalone = false,
   compact = false,
+  publicHeaderActive = "services",
+  variant = "operations",
+  showPricingNav = true,
 }: OperationsShowcaseProps) {
-  const currentYear = new Date().getFullYear();
+  const copy = SHOWCASE_COPY[variant];
+  const isRental = variant === "rentals";
 
   return (
-    <section
-      aria-labelledby="operations-showcase-title"
-      className="relative w-full overflow-x-hidden bg-white text-neutral-950 min-h-screen lg:overflow-hidden"
-    >
+    <>
+      {standalone ? (
+        <PublicAccessHeader active={publicHeaderActive} showPricing={showPricingNav} />
+      ) : null}
+      <section
+        aria-labelledby="operations-showcase-title"
+        className={cx(
+          "relative min-h-screen w-full overflow-x-hidden text-neutral-950 lg:overflow-hidden",
+          standalone ? "lg:h-[calc(100svh-65px)] lg:min-h-[calc(100svh-65px)]" : "lg:h-screen",
+          isRental
+            ? "bg-[linear-gradient(180deg,#f8fbff_0%,#eef4fb_48%,#ffffff_100%)]"
+            : "bg-white",
+        )}
+      >
       <div
-        className="pointer-events-none absolute inset-y-0 right-0 z-20 w-px bg-neutral-950"
+        className={cx(
+          "pointer-events-none absolute inset-y-0 right-0 z-20 w-px",
+          isRental ? "bg-white/50" : "bg-neutral-950",
+        )}
         aria-hidden="true"
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-4 bg-white px-4 py-4 sm:px-6 sm:py-5 lg:grid lg:h-full lg:grid-rows-[auto_1fr_auto] lg:gap-3 lg:px-8 lg:py-4">
-        <header className="flex items-center justify-between gap-3 bg-white">
-          <Link
-            href="/"
-            aria-label="Go to EstateDesk home"
-            className="inline-flex min-w-0 items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-neutral-950 transition hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2"
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-neutral-300 bg-white">
-              <Building2 className="h-5 w-5 text-emerald-700" />
-            </span>
-            <span className="truncate">EstateDesk</span>
-          </Link>
-
-          {standalone ? (
+      <div
+        className={cx(
+          "relative z-10 mx-auto flex w-full max-w-[1536px] flex-col gap-4 px-4 py-4 sm:px-6 sm:py-5 lg:h-full lg:gap-5 lg:px-8 lg:py-7 xl:py-8",
+          isRental ? "bg-transparent" : "bg-white",
+        )}
+      >
+        {!standalone ? (
+          <header className="flex items-center justify-between gap-3 bg-white">
             <Link
-              href="/login"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-900 transition hover:border-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2"
+              href="/"
+              aria-label="Go to EstateDesk home"
+              className="inline-flex min-w-0 items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-neutral-950 transition hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2"
             >
-              <ChevronLeft className="h-3.5 w-3.5" />
-              Back
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-neutral-300 bg-white">
+                <Building2 className="h-5 w-5 text-emerald-700" />
+              </span>
+              <span className="truncate">EstateDesk</span>
             </Link>
-          ) : null}
-        </header>
+          </header>
+        ) : null}
 
-        <main className="flex min-h-0 flex-col gap-4 bg-white lg:grid lg:grid-rows-[auto_1fr_auto] lg:gap-3">
+        <main
+          className={cx(
+            "flex min-h-0 flex-col gap-4 lg:grid lg:flex-1 lg:grid-rows-[auto_minmax(0,1fr)_auto] lg:gap-5",
+            isRental ? "bg-transparent" : "bg-white",
+          )}
+        >
           <SectionLabel>
             <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
-            <span className="truncate">Property operations software</span>
+            <span className="truncate">{copy.sectionLabel}</span>
           </SectionLabel>
 
-          <div className="grid min-h-0 gap-4 bg-white lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.42fr)] lg:gap-3">
-            <OperationsPanel />
-            <WorkspacePanel />
+          <div
+            className={cx(
+              "grid min-h-0 gap-4 lg:min-h-[560px] lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.38fr)] lg:gap-5 xl:min-h-[620px] xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.36fr)]",
+              isRental ? "bg-transparent" : "bg-white",
+            )}
+          >
+            <OperationsPanel copy={copy} variant={variant} />
+            <WorkspacePanel copy={copy} variant={variant} />
           </div>
 
-          {!compact ? <PlansSection /> : null}
+          {!compact && !isRental ? <PlansSection /> : null}
         </main>
-
-        <footer className="flex flex-col gap-2 bg-white pb-1 text-[10px] text-neutral-500 sm:flex-row sm:items-center sm:justify-between lg:pb-0">
-          <span>© {currentYear} EstateDesk.</span>
-          <span className="inline-flex">Professional property workspace</span>
-        </footer>
       </div>
-    </section>
+      </section>
+      {standalone ? <PublicAccessFooter /> : null}
+    </>
   );
 }

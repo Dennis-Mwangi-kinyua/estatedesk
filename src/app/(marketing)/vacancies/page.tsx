@@ -1,18 +1,18 @@
-import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowLeft,
-  Bath,
-  BedDouble,
-  Building2,
   Home,
-  LogIn,
   MapPin,
-  Phone,
   Search,
   ShieldCheck,
-  UserPlus,
+  SlidersHorizontal,
 } from "lucide-react";
+import { Prisma } from "@prisma/client";
+import { PublicAccessHeader } from "@/components/marketing/public-access-header";
+import {
+  VacancyListingGrid,
+  type VacancyListingCard,
+} from "@/components/marketing/vacancy-listing-grid";
+import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
 import { publicPageMetadata } from "@/lib/seo";
 
@@ -27,6 +27,7 @@ export const dynamic = "force-dynamic";
 
 type PageProps = {
   searchParams?: Promise<{
+    q?: string;
     location?: string;
     sort?: string;
   }>;
@@ -56,134 +57,241 @@ function unitLabel(type: string, bedrooms: number | null) {
   return type.toLowerCase().replaceAll("_", " ");
 }
 
+function listingReference(id: string, houseNo: string) {
+  return `ED-${houseNo}-${id.replace(/-/g, "").slice(-4).toUpperCase()}`;
+}
+
+function listingDescription({
+  notes,
+  propertyNotes,
+  type,
+  bedrooms,
+  place,
+}: {
+  notes: string | null;
+  propertyNotes: string | null;
+  type: string;
+  bedrooms: number | null;
+  place: string;
+}) {
+  const customDescription = notes?.trim() || propertyNotes?.trim();
+  if (customDescription) return customDescription;
+
+  return `${unitLabel(type, bedrooms)} in ${place} with rent, viewing, and manager details ready for review.`;
+}
+
+function buildLoginHref(returnTo: string) {
+  return `/login?returnTo=${encodeURIComponent(returnTo)}`;
+}
+
+function isPublicVacancyDatabaseError(error: unknown) {
+  if (isTransientDatabaseError(error)) return true;
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return error.code === "P2021" || error.code === "P2022";
+  }
+
+  return false;
+}
+
+function getVacancyListings({
+  query,
+  location,
+  sort,
+}: {
+  query: string;
+  location: string;
+  sort: "location" | "rent_asc" | "rent_desc";
+}) {
+  return retryTransientDatabaseOperation(
+    () =>
+      prisma.unit.findMany({
+        where: {
+          isActive: true,
+          deletedAt: null,
+          status: "VACANT",
+          ...(query
+            ? {
+                OR: [
+                  { houseNo: { contains: query, mode: "insensitive" } },
+                  { property: { is: { name: { contains: query, mode: "insensitive" } } } },
+                  { property: { is: { location: { contains: query, mode: "insensitive" } } } },
+                  { property: { is: { address: { contains: query, mode: "insensitive" } } } },
+                  { property: { is: { org: { is: { name: { contains: query, mode: "insensitive" } } } } } },
+                  { building: { is: { name: { contains: query, mode: "insensitive" } } } },
+                ],
+              }
+            : {}),
+          property: {
+            is: {
+              isActive: true,
+              deletedAt: null,
+              ...(location
+                ? {
+                    OR: [
+                      { location: { contains: location, mode: "insensitive" } },
+                      { address: { contains: location, mode: "insensitive" } },
+                      { name: { contains: location, mode: "insensitive" } },
+                    ],
+                  }
+                : {}),
+            },
+          },
+        },
+        orderBy:
+          sort === "rent_asc"
+            ? [{ rentAmount: "asc" }, { property: { name: "asc" } }]
+            : sort === "rent_desc"
+              ? [{ rentAmount: "desc" }, { property: { name: "asc" } }]
+              : [{ property: { location: "asc" } }, { property: { name: "asc" } }, { houseNo: "asc" }],
+        take: 120,
+        select: {
+          id: true,
+          houseNo: true,
+          type: true,
+          bedrooms: true,
+          bathrooms: true,
+          roomCount: true,
+          rentAmount: true,
+          serviceCharge: true,
+          viewingFeeRequired: true,
+          viewingFeeAmount: true,
+          notes: true,
+          images: {
+            where: { deletedAt: null },
+            orderBy: { createdAt: "asc" },
+            take: 1,
+            select: { key: true, fileName: true },
+          },
+          building: { select: { name: true } },
+          property: {
+            select: {
+              name: true,
+              location: true,
+              address: true,
+              notes: true,
+              org: { select: { name: true, phone: true } },
+            },
+          },
+        },
+      }),
+    { label: "public-vacancy-list" },
+  );
+}
+
 export default async function VacanciesPage({ searchParams }: PageProps) {
   const params = await searchParams;
+  const query = params?.q?.trim() ?? "";
   const location = params?.location?.trim() ?? "";
   const sort = params?.sort === "rent_desc" ? "rent_desc" : params?.sort === "rent_asc" ? "rent_asc" : "location";
+  const hasFilters = Boolean(query || location);
+  const returnParams = new URLSearchParams();
+  if (query) returnParams.set("q", query);
+  if (location) returnParams.set("location", location);
+  if (sort !== "location") returnParams.set("sort", sort);
+  const returnTo = `/vacancies${returnParams.size ? `?${returnParams.toString()}` : ""}`;
+  const loginHref = buildLoginHref(returnTo);
+  let databaseUnavailable = false;
+  let houses: Awaited<ReturnType<typeof getVacancyListings>> = [];
 
-  const houses = await prisma.unit.findMany({
-    where: {
-      isActive: true,
-      deletedAt: null,
-      status: "VACANT",
-      property: {
-        isActive: true,
-        deletedAt: null,
-        ...(location
-          ? {
-              OR: [
-                { location: { contains: location, mode: "insensitive" } },
-                { address: { contains: location, mode: "insensitive" } },
-                { name: { contains: location, mode: "insensitive" } },
-              ],
-            }
-          : {}),
-      },
-    },
-    orderBy:
-      sort === "rent_asc"
-        ? [{ rentAmount: "asc" }, { property: { name: "asc" } }]
-        : sort === "rent_desc"
-          ? [{ rentAmount: "desc" }, { property: { name: "asc" } }]
-          : [{ property: { location: "asc" } }, { property: { name: "asc" } }, { houseNo: "asc" }],
-    take: 120,
-    select: {
-      id: true,
-      houseNo: true,
-      type: true,
-      bedrooms: true,
-      bathrooms: true,
-      roomCount: true,
-      rentAmount: true,
-      serviceCharge: true,
-      viewingFeeRequired: true,
-      viewingFeeAmount: true,
-      images: {
-        where: { deletedAt: null },
-        orderBy: { createdAt: "asc" },
-        take: 1,
-        select: { key: true, fileName: true },
-      },
-      building: { select: { name: true } },
-      property: {
-        select: {
-          name: true,
-          location: true,
-          address: true,
-          org: { select: { name: true, phone: true } },
-        },
-      },
-    },
+  try {
+    houses = await getVacancyListings({ query, location, sort });
+  } catch (error) {
+    if (!isPublicVacancyDatabaseError(error)) {
+      throw error;
+    }
+
+    console.error("Unable to load public vacancy listings", error);
+    databaseUnavailable = true;
+  }
+
+  const listingCards: VacancyListingCard[] = houses.map((listing) => {
+    const place = listing.property.location ?? listing.property.address ?? listing.property.name;
+    const href = `/vacancies/${listing.id}`;
+    const rooms = listing.bedrooms ?? listing.roomCount;
+
+    return {
+      id: listing.id,
+      reference: listingReference(listing.id, listing.houseNo),
+      href,
+      imageSrc: imageUrl(listing.images[0]?.key),
+      hasImage: Boolean(listing.images[0]?.key),
+      imageAlt: listing.images[0]?.fileName ?? `${listing.property.name} Unit ${listing.houseNo}`,
+      managerName: listing.property.org.name,
+      propertyName: listing.property.name,
+      houseNo: listing.houseNo,
+      place,
+      typeLabel: unitLabel(listing.type, listing.bedrooms),
+      roomsLabel: rooms ? `${rooms} room${rooms === 1 ? "" : "s"}` : "Rooms",
+      bathsLabel: listing.bathrooms ? `${listing.bathrooms} bath${listing.bathrooms === 1 ? "" : "s"}` : "Baths",
+      rentLabel: formatCurrency(listing.rentAmount),
+      serviceChargeLabel: listing.serviceCharge
+        ? `Service ${formatCurrency(listing.serviceCharge)}`
+        : "Service included/none",
+      viewingLabel: listing.viewingFeeRequired ? "Viewing fee" : "Free viewing",
+      description: listingDescription({
+        notes: listing.notes,
+        propertyNotes: listing.property.notes,
+        type: listing.type,
+        bedrooms: listing.bedrooms,
+        place,
+      }),
+      callHref: listing.property.org.phone ? `tel:${listing.property.org.phone}` : "/contact",
+    };
   });
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <Link
-            href="/"
-            className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-700 transition hover:text-slate-950"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to EstateDesk
-          </Link>
+    <main className="min-h-screen bg-[#F2F6FB] text-slate-950 dark:bg-slate-950 dark:text-slate-100">
+      <PublicAccessHeader active="vacancies" loginHref={loginHref} />
 
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-            <Link
-              href="/login"
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
-            >
-              <LogIn className="h-4 w-4" />
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-slate-950 px-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-            >
-              <UserPlus className="h-4 w-4" />
-              Create account
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+      <section className="border-b border-white/80 bg-white/60 dark:border-white/10 dark:bg-slate-900/60">
+        <div className="mx-auto max-w-screen-2xl px-4 py-7 sm:px-6 lg:px-8 2xl:max-w-none">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700">
+              <p className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm dark:border-sky-400/20 dark:bg-sky-400/10 dark:text-sky-100">
                 <ShieldCheck className="h-4 w-4" />
                 Verified vacant units
               </p>
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
                 Vacant houses and apartments
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-                View photos, rent details, viewing fee status, and enquire directly with the landlord or property manager.
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Browse a paginated grid of vacant homes with photos, professional listing references, rent details, descriptions, and direct manager contacts.
               </p>
             </div>
 
-            <form className="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[1fr_auto] lg:min-w-[32rem]">
+            <form className="grid gap-2 rounded-xl border border-white/85 bg-white/80 p-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur dark:border-white/10 dark:bg-slate-950/70 sm:grid-cols-[1fr_0.75fr_auto] lg:min-w-[42rem]">
               <label className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
+                  name="q"
+                  defaultValue={query}
+                  placeholder="Search by house, property, manager..."
+                  className="min-h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
+                />
+              </label>
+              <label className="relative">
+                <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
                   name="location"
                   defaultValue={location}
-                  placeholder="Sort or filter by location"
-                  className="min-h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-slate-500"
+                  placeholder="Location"
+                  className="min-h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
                 />
               </label>
               <div className="grid grid-cols-[1fr_auto] gap-2">
                 <select
                   name="sort"
                   defaultValue={sort}
-                  className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-slate-500"
+                  aria-label="Sort vacancies"
+                  className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
                 >
                   <option value="location">Location</option>
                   <option value="rent_asc">Rent low to high</option>
                   <option value="rent_desc">Rent high to low</option>
                 </select>
-                <button className="min-h-11 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white">
+                <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
+                  <SlidersHorizontal className="h-4 w-4" />
                   Apply
                 </button>
               </div>
@@ -192,101 +300,29 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-4 flex items-center gap-2 text-sm text-slate-600">
-          <Home className="h-4 w-4" />
-          <span>{houses.length} vacant {houses.length === 1 ? "unit" : "units"} available</span>
+      <section className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8 2xl:max-w-none">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+            <Home className="h-4 w-4" />
+            <span>{houses.length} vacant {houses.length === 1 ? "unit" : "units"} available</span>
+          </div>
+          {hasFilters ? (
+            <Link href="/vacancies" className="text-sm font-semibold text-slate-700 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white">
+              Clear search
+            </Link>
+          ) : null}
         </div>
 
-        {houses.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+        {databaseUnavailable ? (
+          <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-700 shadow-sm dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
+            Vacancies are temporarily unavailable. Please refresh in a moment.
+          </div>
+        ) : houses.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600 shadow-sm dark:border-white/15 dark:bg-slate-900 dark:text-slate-300">
             No vacant units match that search yet.
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {houses.map((listing) => {
-              const place = listing.property.location ?? listing.property.address ?? listing.property.name;
-              const callHref = listing.property.org.phone ? `tel:${listing.property.org.phone}` : "/contact";
-
-              return (
-                <article key={listing.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <Link href={`/vacancies/${listing.id}`} className="block">
-                    <div className="relative aspect-[4/3] bg-slate-100">
-                      <Image
-                        src={imageUrl(listing.images[0]?.key)}
-                        alt={listing.images[0]?.fileName ?? listing.property.name}
-                        fill
-                        sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-                        className="object-cover"
-                      />
-                    </div>
-                  </Link>
-
-                  <div className="space-y-4 p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                          {listing.property.org.name}
-                        </p>
-                        <h2 className="mt-1 truncate text-lg font-semibold text-slate-950">
-                          {listing.property.name} · Unit {listing.houseNo}
-                        </h2>
-                      </div>
-                      <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
-                        {listing.viewingFeeRequired ? "Viewing fee" : "Free viewing"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <MapPin className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{place}</span>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2 text-xs text-slate-600">
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-slate-50 px-2 py-2">
-                        <BedDouble className="h-4 w-4" />
-                        {listing.bedrooms ?? listing.roomCount ?? 0} rooms
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-slate-50 px-2 py-2">
-                        <Bath className="h-4 w-4" />
-                        {listing.bathrooms ?? 0} baths
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-slate-50 px-2 py-2">
-                        <Building2 className="h-4 w-4" />
-                        {unitLabel(listing.type, listing.bedrooms)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-end justify-between gap-3">
-                      <div>
-                        <p className="text-lg font-semibold text-slate-950">
-                          {formatCurrency(listing.rentAmount)}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          Service {listing.serviceCharge ? formatCurrency(listing.serviceCharge) : "included/none"}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <a
-                          href={callHref}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-800 transition hover:bg-slate-100"
-                          aria-label="Call landlord or agent"
-                        >
-                          <Phone className="h-4 w-4" />
-                        </a>
-                        <Link
-                          href={`/vacancies/${listing.id}`}
-                          className="inline-flex min-h-10 items-center rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-                        >
-                          View more
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+          <VacancyListingGrid listings={listingCards} />
         )}
       </section>
     </main>

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  ArrowRight,
   Building2,
   Check,
   CreditCard,
@@ -12,6 +11,7 @@ import {
   WalletCards,
   X,
 } from "lucide-react";
+import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { APP_PLAN_ORDER, APP_PLANS } from "@/lib/billing/plans";
 import { publicPageMetadata } from "@/lib/seo";
 
@@ -85,37 +85,7 @@ const highlights = [
 export default function PricingPage() {
   return (
     <main className="min-h-dvh bg-[#f5f7fb] text-neutral-950">
-      <section className="border-b border-neutral-200 bg-white">
-        <div className="mx-auto max-w-7xl px-5 py-5 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-3 text-sm font-semibold tracking-[-0.02em] text-neutral-950"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-50">
-                <Building2 className="h-5 w-5" />
-              </div>
-              <span>EstateDesk</span>
-            </Link>
-
-            <div className="flex items-center gap-3">
-              <Link
-                href="/login"
-                className="hidden rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 sm:inline-flex"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/register"
-                className="inline-flex items-center gap-2 rounded-full bg-[#0b1720] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#10202c]"
-              >
-                Get started
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PublicAccessHeader active="pricing" />
 
       <section className="border-b border-neutral-200 bg-[linear-gradient(180deg,#ffffff_0%,#f5f7fb_100%)]">
         <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6 lg:px-8 lg:py-20">

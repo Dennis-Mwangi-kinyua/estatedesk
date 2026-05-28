@@ -10,6 +10,27 @@ function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function summarizeDatabaseError(error: unknown) {
+  const value = error as {
+    code?: unknown;
+    message?: unknown;
+    cause?: {
+      code?: unknown;
+      message?: unknown;
+    };
+  };
+
+  const code = String(value.code ?? value.cause?.code ?? "unknown");
+  const message = String(value.message ?? value.cause?.message ?? "Database request failed")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return {
+    code,
+    message: message.length > 180 ? `${message.slice(0, 177)}...` : message,
+  };
+}
+
 export function isTransientDatabaseError(error: unknown) {
   const value = error as {
     code?: unknown;
@@ -46,7 +67,10 @@ export async function retryTransientDatabaseOperation<T>(
         throw error;
       }
 
-      console.warn(`${label} failed transiently; retrying`, error);
+      console.warn(`${label} failed transiently; retrying`, {
+        attempt,
+        ...summarizeDatabaseError(error),
+      });
       await wait(delayMs * attempt);
     }
   }

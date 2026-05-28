@@ -19,6 +19,10 @@ const loginSchema = z.object({
     .transform((value) => value.toLowerCase()),
   password: z.string().min(1, "Password is required"),
   remember: z.boolean().optional(),
+  returnTo: z.preprocess(
+    (value) => (typeof value === "string" && value ? value : undefined),
+    z.string().optional(),
+  ),
 });
 
 export type LoginActionState = {
@@ -106,6 +110,20 @@ function getClientIp(headerStore: Awaited<ReturnType<typeof headers>>) {
   return headerStore.get("x-real-ip") ?? "unknown";
 }
 
+function getSafeReturnTo(value: string | undefined) {
+  if (!value) return null;
+
+  try {
+    const decoded = decodeURIComponent(value);
+    if (!decoded.startsWith("/vacancies")) return null;
+    if (decoded.startsWith("//")) return null;
+    if (decoded.includes("://")) return null;
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
 async function timed<T>(label: string, fn: () => Promise<T>): Promise<T> {
   if (process.env.NODE_ENV === "production") {
     return fn();
@@ -127,6 +145,7 @@ export async function loginAction(
     email: formData.get("email"),
     password: formData.get("password"),
     remember: formData.get("remember") === "on",
+    returnTo: formData.get("returnTo"),
   });
 
   if (!parsed.success) {
@@ -137,7 +156,8 @@ export async function loginAction(
     };
   }
 
-  const { email: identifier, password, remember } = parsed.data;
+  const { email: identifier, password, remember, returnTo } = parsed.data;
+  const safeReturnTo = getSafeReturnTo(returnTo);
   const headerStore = await headers();
   const ipAddress = getClientIp(headerStore);
   const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -243,12 +263,13 @@ export async function loginAction(
         async () =>
           user.mustChangePassword
             ? "/change-password"
-            : getRedirectAfterLogin({
-                platformRole: user.platformRole,
-                activeOrgRole: null,
-                activeOrgId: null,
-                hasTenantProfile: false,
-              }),
+            : safeReturnTo ??
+              getRedirectAfterLogin({
+                  platformRole: user.platformRole,
+                  activeOrgRole: null,
+                  activeOrgId: null,
+                  hasTenantProfile: false,
+                }),
       );
 
       redirect(destination);
@@ -328,12 +349,13 @@ export async function loginAction(
       async () =>
         user.mustChangePassword
           ? "/change-password"
-          : getRedirectAfterLogin({
-              platformRole: user.platformRole,
-              activeOrgRole: primaryMembership?.role ?? null,
-              activeOrgId: primaryMembership?.orgId ?? null,
-              hasTenantProfile: Boolean(tenant),
-            }),
+          : safeReturnTo ??
+            getRedirectAfterLogin({
+                platformRole: user.platformRole,
+                activeOrgRole: primaryMembership?.role ?? null,
+                activeOrgId: primaryMembership?.orgId ?? null,
+                hasTenantProfile: Boolean(tenant),
+              }),
     );
 
     return redirect(destination);

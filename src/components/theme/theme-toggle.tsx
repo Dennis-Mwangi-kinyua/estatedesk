@@ -7,6 +7,7 @@ import { Theme, useTheme } from "@/components/theme/theme-provider";
 const subscribe = () => () => {};
 const getClientSnapshot = () => true;
 const getServerSnapshot = () => false;
+const label = "Change color theme";
 
 export function ThemeToggle() {
   const { theme, resolvedTheme, setTheme } = useTheme();
@@ -24,12 +25,6 @@ export function ThemeToggle() {
   };
   const Icon =
     currentTheme === "system" ? Monitor : isDark ? Sun : Moon;
-  const label =
-    currentTheme === "system"
-      ? `Using system ${resolvedTheme} mode. Switch to light mode`
-      : currentTheme === "light"
-        ? "Using light mode. Switch to dark mode"
-        : "Using dark mode. Switch to system mode";
 
   return (
     <button
