@@ -1,0 +1,94 @@
+"use server";
+
+import { NotificationChannel, NotificationType } from "@prisma/client";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { notifyRecipients } from "@/lib/notifications/notify";
+
+function requiredText(value: FormDataEntryValue | null, field: string) {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error(`${field} is required.`);
+  }
+
+  return value.trim();
+}
+
+function optionalText(value: FormDataEntryValue | null) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+export async function sendVacancyInquiryAction(unitId: string, formData: FormData) {
+  const fullName = requiredText(formData.get("fullName"), "Name");
+  const phone = requiredText(formData.get("phone"), "Phone");
+  const email = optionalText(formData.get("email"));
+  const message = requiredText(formData.get("message"), "Message");
+
+  const unit = await prisma.unit.findFirst({
+    where: {
+      id: unitId,
+      isActive: true,
+      deletedAt: null,
+      status: "VACANT",
+      property: {
+        isActive: true,
+        deletedAt: null,
+      },
+    },
+    select: {
+      id: true,
+      houseNo: true,
+      property: {
+        select: {
+          orgId: true,
+          name: true,
+          org: {
+            select: {
+              memberships: {
+                where: {
+                  role: { in: ["ADMIN", "MANAGER", "OFFICE"] },
+                  employmentEndedAt: null,
+                  deactivatedAt: null,
+                },
+                select: { userId: true },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!unit) {
+    redirect(`/vacancies/${unitId}?error=${encodeURIComponent("This vacancy is no longer available.")}`);
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.vacancyInquiry.create({
+      data: {
+        orgId: unit.property.orgId,
+        unitId: unit.id,
+        fullName,
+        phone,
+        email,
+        message,
+      },
+    });
+
+    await notifyRecipients({
+      db: tx,
+      orgId: unit.property.orgId,
+      recipients: unit.property.org.memberships.map((member) => ({ userId: member.userId })),
+      channels: [NotificationChannel.IN_APP],
+      type: NotificationType.GENERAL,
+      title: "New vacancy enquiry",
+      message: `${fullName} enquired about ${unit.property.name}, Unit ${unit.houseNo}. Phone: ${phone}.`,
+    });
+  });
+
+  revalidatePath(`/vacancies/${unitId}`);
+  revalidatePath("/dashboard/org/notifications");
+  redirect(`/vacancies/${unitId}?sent=1#enquire`);
+}

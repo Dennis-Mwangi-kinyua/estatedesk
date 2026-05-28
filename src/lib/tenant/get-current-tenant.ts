@@ -45,6 +45,16 @@ export async function getCurrentTenantWithActiveLease() {
             include: {
               building: true,
               property: true,
+              images: {
+                where: { deletedAt: null },
+                orderBy: { createdAt: "asc" },
+                take: 4,
+                select: {
+                  id: true,
+                  key: true,
+                  fileName: true,
+                },
+              },
             },
           },
         },

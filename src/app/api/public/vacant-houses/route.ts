@@ -105,8 +105,26 @@ export async function GET(request: Request) {
       id: true,
       houseNo: true,
       bedrooms: true,
+      bathrooms: true,
+      roomCount: true,
       rentAmount: true,
+      serviceCharge: true,
+      garbageFee: true,
+      securityFee: true,
+      electricityBilling: true,
+      hasBalcony: true,
+      viewingFeeRequired: true,
+      viewingFeeAmount: true,
       type: true,
+      images: {
+        where: { deletedAt: null },
+        orderBy: { createdAt: "asc" },
+        take: 4,
+        select: {
+          key: true,
+          fileName: true,
+        },
+      },
       property: {
         select: {
           name: true,
@@ -137,6 +155,8 @@ export async function GET(request: Request) {
       id: unit.id,
       houseNumber: unit.houseNo,
       bedrooms: unit.bedrooms,
+      bathrooms: unit.bathrooms,
+      roomCount: unit.roomCount,
       location:
         unit.property.location ??
         unit.property.address ??
@@ -145,6 +165,17 @@ export async function GET(request: Request) {
       building: unit.building?.name ?? null,
       type: unit.type,
       price: Number(unit.rentAmount),
+      serviceCharge: unit.serviceCharge ? Number(unit.serviceCharge) : null,
+      garbageFee: unit.garbageFee ? Number(unit.garbageFee) : null,
+      securityFee: unit.securityFee ? Number(unit.securityFee) : null,
+      electricityBilling: unit.electricityBilling,
+      hasBalcony: unit.hasBalcony,
+      viewingFeeRequired: unit.viewingFeeRequired,
+      viewingFeeAmount: unit.viewingFeeAmount ? Number(unit.viewingFeeAmount) : null,
+      images: unit.images.map((image) => ({
+        url: image.key,
+        fileName: image.fileName,
+      })),
       currency: "KES",
     })),
   });

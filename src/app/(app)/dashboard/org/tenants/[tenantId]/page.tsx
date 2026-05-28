@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { memo } from "react";
 import { prisma } from "@/lib/prisma";
@@ -131,6 +132,12 @@ function getInitials(name: string) {
     .slice(0, 2)
     .join("")
     .toUpperCase();
+}
+
+function imageUrl(key: string | null | undefined) {
+  if (!key) return "/images/og-vacancy.svg";
+  if (key.startsWith("/") || key.startsWith("http")) return key;
+  return `/${key.replace(/^public\//, "")}`;
 }
 
 const DetailItem = memo(function DetailItem({
@@ -370,6 +377,16 @@ export default async function TenantDetailsPage({ params }: PageProps) {
           unit: {
             select: {
               houseNo: true,
+              images: {
+                where: { deletedAt: null },
+                orderBy: { createdAt: "asc" },
+                take: 4,
+                select: {
+                  id: true,
+                  key: true,
+                  fileName: true,
+                },
+              },
               building: {
                 select: { name: true },
               },
@@ -687,6 +704,25 @@ export default async function TenantDetailsPage({ params }: PageProps) {
                           <DetailItem label="Lease start" value={formatDate(lease.startDate)} />
                           <DetailItem label="Lease end" value={formatDate(lease.endDate)} />
                         </div>
+
+                        {lease.unit.images.length > 0 ? (
+                          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                            {lease.unit.images.map((asset) => (
+                              <div
+                                key={asset.id}
+                                className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-black/5 bg-white"
+                              >
+                                <Image
+                                  src={imageUrl(asset.key)}
+                                  alt={asset.fileName}
+                                  fill
+                                  sizes="(min-width: 1024px) 18vw, 50vw"
+                                  className="object-cover"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
 
                         <div className="mt-4 grid gap-3 sm:grid-cols-2">
                           <DetailItem label="Caretaker" value={lease.caretaker?.fullName || "Not assigned"} />

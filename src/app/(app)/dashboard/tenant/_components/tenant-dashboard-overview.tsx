@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getStatusTone } from "@/lib/tenant/tenant-format";
 
 type TenantDashboardOverviewProps = {
@@ -5,13 +6,25 @@ type TenantDashboardOverviewProps = {
   buildingName?: string | null;
   houseNo?: string | null;
   leaseStatus?: string | null;
+  images?: Array<{
+    id: string;
+    key: string;
+    fileName: string;
+  }>;
 };
+
+function imageUrl(key: string | null | undefined) {
+  if (!key) return "/images/og-vacancy.svg";
+  if (key.startsWith("/") || key.startsWith("http")) return key;
+  return `/${key.replace(/^public\//, "")}`;
+}
 
 export function TenantDashboardOverview({
   propertyName,
   buildingName,
   houseNo,
   leaseStatus,
+  images = [],
 }: TenantDashboardOverviewProps) {
   return (
     <div className="xl:col-span-2 rounded-[30px] border border-neutral-200/80 bg-white p-5 shadow-sm sm:p-6">
@@ -26,6 +39,25 @@ export function TenantDashboardOverview({
           📡 Live data
         </span>
       </div>
+
+      {images.length > 0 ? (
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {images.map((asset) => (
+            <div
+              key={asset.id}
+              className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100"
+            >
+              <Image
+                src={imageUrl(asset.key)}
+                alt={asset.fileName}
+                fill
+                sizes="(min-width: 1024px) 16vw, 50vw"
+                className="object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-[24px] bg-neutral-50 p-4">

@@ -197,6 +197,7 @@ export default async function TenantDashboardPage() {
           buildingName={unit?.building?.name}
           houseNo={unit?.houseNo}
           leaseStatus={activeLease?.status}
+          images={unit?.images ?? []}
         />
         <TenantDashboardQuickActions />
       </section>
