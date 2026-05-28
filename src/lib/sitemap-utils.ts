@@ -1,9 +1,7 @@
 import { gzipSync } from 'node:zlib'
+import { getSiteUrl } from './seo'
 
-export const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL ||
-  process.env.APP_URL ||
-  'https://www.estatedesk.co.ke'
+export const APP_URL = getSiteUrl()
 
 export const XML_HEADERS = {
   'Content-Type': 'application/xml',

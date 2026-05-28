@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 
-type Theme = "light" | "dark" | "system";
+export type Theme = "light" | "dark" | "system";
 type ResolvedTheme = "light" | "dark";
 
 type ThemeContextValue = {
@@ -70,6 +70,8 @@ function applyTheme(theme: Theme, resolvedTheme: ResolvedTheme) {
   root.classList.remove(...THEME_CLASSES);
   root.classList.add(resolvedTheme);
   root.style.colorScheme = resolvedTheme;
+  root.dataset.theme = theme;
+  root.dataset.resolvedTheme = resolvedTheme;
 
   try {
     if (theme === "system") {

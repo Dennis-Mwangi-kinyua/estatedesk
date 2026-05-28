@@ -8,24 +8,28 @@ on:
 jobs:
   ping:
     runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ secrets.SITE_URL || 'https://estatedesk.co.ke' }}
+      AWS_REGION: ${{ secrets.AWS_REGION || 'af-south-1' }}
+      HAS_AWS_S3_CONFIG: ${{ secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_ACCESS_KEY != '' && secrets.S3_BUCKET_NAME != '' }}
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
     steps:
-      - name: Set SITE_URL
-        id: site
+      - name: Normalize SITE_URL
         run: |
-          echo "SITE_URL=${{ secrets.SITE_URL || 'https://www.estatedesk.co.ke' }}" >> $GITHUB_ENV
+          SITE_URL="${SITE_URL%/}"
+          SITE_URL="${SITE_URL/https:\/\/www.estatedesk.co.ke/https:\/\/estatedesk.co.ke}"
+          echo "SITE_URL=$SITE_URL" >> "$GITHUB_ENV"
 
       - name: Download sitemaps
         run: |
           mkdir -p sitemaps
-          curl -sS "$SITE_URL/sitemap-index.xml" -o sitemaps/sitemap-index.xml || true
-          curl -sS "$SITE_URL/sitemap.xml" -o sitemaps/sitemap.xml || true
-          curl -sS "$SITE_URL/sitemap-vacancies.xml" -o sitemaps/sitemap-vacancies.xml || true
-          curl -sS "$SITE_URL/sitemap-properties.xml" -o sitemaps/sitemap-properties.xml || true
-          curl -sS "$SITE_URL/sitemap-units.xml" -o sitemaps/sitemap-units.xml || true
+          curl --fail --location --silent --show-error "$SITE_URL/sitemap-index.xml" -o sitemaps/sitemap-index.xml
+          curl --fail --location --silent --show-error "$SITE_URL/sitemap.xml" -o sitemaps/sitemap.xml
+          curl --fail --location --silent --show-error "$SITE_URL/sitemap-vacancies.xml" -o sitemaps/sitemap-vacancies.xml
 
       - name: Gzip sitemaps
         run: |
-          for f in sitemaps/*.xml; do gzip -c "$f" > "$f.gz" || true; done
+          for f in sitemaps/*.xml; do gzip -c "$f" > "$f.gz"; done
 
       - name: Notify Google
         run: |
@@ -36,18 +40,16 @@ jobs:
           curl -sS "https://www.bing.com/ping?sitemap=$SITE_URL/sitemap-index.xml" -o /dev/null || true
 
       - name: Upload sitemaps to S3 (optional)
-        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_ACCESS_KEY != '' && secrets.S3_BUCKET_NAME != '' }}
-        uses: aws-actions/configure-aws-credentials@v3
+        if: ${{ env.HAS_AWS_S3_CONFIG == 'true' }}
+        uses: aws-actions/configure-aws-credentials@v6.1.2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION || 'af-south-1' }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Copy gzipped sitemaps to S3
-        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_ACCESS_KEY != '' && secrets.S3_BUCKET_NAME != '' }}
+        if: ${{ env.HAS_AWS_S3_CONFIG == 'true' }}
         run: |
-          aws s3 cp sitemaps/sitemap-index.xml.gz s3://${{ secrets.S3_BUCKET_NAME }}/sitemap-index.xml.gz --acl public-read || true
-          aws s3 cp sitemaps/sitemap.xml.gz s3://${{ secrets.S3_BUCKET_NAME }}/sitemap.xml.gz --acl public-read || true
-          aws s3 cp sitemaps/sitemap-vacancies.xml.gz s3://${{ secrets.S3_BUCKET_NAME }}/sitemap-vacancies.xml.gz --acl public-read || true
-          aws s3 cp sitemaps/sitemap-properties.xml.gz s3://${{ secrets.S3_BUCKET_NAME }}/sitemap-properties.xml.gz --acl public-read || true
-          aws s3 cp sitemaps/sitemap-units.xml.gz s3://${{ secrets.S3_BUCKET_NAME }}/sitemap-units.xml.gz --acl public-read || true
+          aws s3 cp sitemaps/sitemap-index.xml.gz "s3://$S3_BUCKET_NAME/sitemap-index.xml.gz" --acl public-read
+          aws s3 cp sitemaps/sitemap.xml.gz "s3://$S3_BUCKET_NAME/sitemap.xml.gz" --acl public-read
+          aws s3 cp sitemaps/sitemap-vacancies.xml.gz "s3://$S3_BUCKET_NAME/sitemap-vacancies.xml.gz" --acl public-read

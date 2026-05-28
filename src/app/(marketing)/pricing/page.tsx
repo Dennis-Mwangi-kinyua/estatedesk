@@ -13,6 +13,14 @@ import {
   X,
 } from "lucide-react";
 import { APP_PLAN_ORDER, APP_PLANS } from "@/lib/billing/plans";
+import { publicPageMetadata } from "@/lib/seo";
+
+export const metadata = publicPageMetadata({
+  title: "Pricing",
+  description:
+    "Compare EstateDesk pricing plans for landlords, property managers, caretakers, tenant workflows, rent tracking, inspections, reports, and enterprise rollout support.",
+  path: "/pricing",
+});
 
 function formatPlanPrice(amount: number) {
   if (amount === 0) return "KES 0";

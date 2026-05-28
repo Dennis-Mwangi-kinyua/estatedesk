@@ -1,5 +1,8 @@
 import { ReactNode } from "react";
 import { requireAuthenticated } from "@/lib/permissions/guards";
+import { privatePageMetadata } from "@/lib/seo";
+
+export const metadata = privatePageMetadata;
 
 export default async function AppLayout({
   children,

@@ -23,7 +23,7 @@ export async function renderSitemapXml() {
     entries.push({ loc: '/' })
   }
 
-  const scanFolders = [path.join(ROOT, 'src', 'app', '(marketing)'), path.join(ROOT, 'src', 'app', '(auth)')]
+  const scanFolders = [path.join(ROOT, 'src', 'app', '(marketing)')]
 
   for (const folder of scanFolders) {
     try {
@@ -45,17 +45,6 @@ export async function renderSitemapXml() {
       }
     } catch {
       // folder may not exist; ignore
-    }
-  }
-
-  const authStatic = ['/login', '/register', '/forgot-password', '/verify-email']
-  for (const route of authStatic) {
-    const name = route.replace(/^\//, '')
-    const folder = path.join(ROOT, 'src', 'app', '(auth)', name)
-    const pageFile = ['page.tsx', 'page.ts', 'page.jsx', 'page.js'].map((f) => path.join(folder, f)).find(fileExists)
-    if (pageFile && !entries.find((e) => e.loc === route)) {
-      const lastmod = fs.statSync(pageFile).mtime.toISOString().slice(0, 10)
-      entries.push({ loc: route, lastmod })
     }
   }
 

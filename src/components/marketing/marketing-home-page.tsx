@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { absoluteUrl } from "@/lib/seo";
 
 const features = [
   {
@@ -47,9 +48,44 @@ const steps = [
   },
 ];
 
-export default function MarketingPage() {
+export default function MarketingHomePage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "EstateDesk",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    url: absoluteUrl("/"),
+    description:
+      "Property management software for Kenya covering tenants, leases, rent, water bills, caretakers, inspections, maintenance issues, and team access.",
+    areaServed: {
+      "@type": "Country",
+      name: "Kenya",
+    },
+    offers: {
+      "@type": "Offer",
+      category: "SaaS subscription",
+      priceCurrency: "KES",
+      url: absoluteUrl("/pricing"),
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "EstateDesk",
+      url: absoluteUrl("/"),
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        url: absoluteUrl("/contact"),
+      },
+    },
+  };
+
   return (
     <main className="min-h-screen bg-white text-slate-950">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="relative overflow-hidden border-b border-slate-200 bg-slate-950 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.25),transparent_35%),radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_30%)]" />
 

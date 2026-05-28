@@ -104,6 +104,7 @@
 }
 
 :root {
+  color-scheme: light;
   --font-system-sans: "Geist", "Inter", "Segoe UI", Arial, sans-serif;
   --font-system-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --background: oklch(0.978 0.004 248);

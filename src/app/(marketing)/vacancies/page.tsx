@@ -1,6 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Building2, Home, MapPin, ShieldCheck, UserCircle2 } from "lucide-react";
+import { publicPageMetadata } from "@/lib/seo";
+
+export const metadata = publicPageMetadata({
+  title: "Vacant Houses in Kenya",
+  description:
+    "Browse available rental houses and vacant units published through EstateDesk by landlords and property managers in Kenya.",
+  path: "/vacancies",
+});
 
 type Vacancy = {
   id: string;

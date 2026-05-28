@@ -13,7 +13,15 @@ import {
   UsersRound,
 } from "lucide-react";
 import { ReferralCodeField } from "@/components/marketing/referral-code-field";
+import { publicPageMetadata } from "@/lib/seo";
 import { contactSalesAction } from "./actions";
+
+export const metadata = publicPageMetadata({
+  title: "Contact EstateDesk",
+  description:
+    "Contact EstateDesk for property management software rollout support in Kenya, including tenant management, billing workflows, caretaker operations, and enterprise onboarding.",
+  path: "/contact",
+});
 
 type SearchParams = Promise<{
   request?: string;

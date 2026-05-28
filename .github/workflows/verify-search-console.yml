@@ -6,32 +6,45 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    if: ${{ secrets.GCP_SA_KEY != '' }}
+    env:
+      SITE_URL: ${{ secrets.SITE_URL || 'https://estatedesk.co.ke' }}
+      HAS_GCP_SA_KEY: ${{ secrets.GCP_SA_KEY != '' }}
     steps:
-      - name: Set SITE_URL
-        run: echo "SITE_URL=${{ secrets.SITE_URL || 'https://www.estatedesk.co.ke' }}" >> $GITHUB_ENV
+      - name: Normalize SITE_URL
+        run: |
+          SITE_URL="${SITE_URL%/}"
+          SITE_URL="${SITE_URL/https:\/\/www.estatedesk.co.ke/https:\/\/estatedesk.co.ke}"
+          echo "SITE_URL=$SITE_URL" >> "$GITHUB_ENV"
+
+      - name: Skip when Google credentials are not configured
+        if: ${{ env.HAS_GCP_SA_KEY != 'true' }}
+        run: echo "GCP_SA_KEY is not configured; skipping Search Console property setup."
 
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
+        if: ${{ env.HAS_GCP_SA_KEY == 'true' }}
+        uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Install gcloud
-        uses: google-github-actions/setup-gcloud@v1
+        if: ${{ env.HAS_GCP_SA_KEY == 'true' }}
+        uses: google-github-actions/setup-gcloud@v3
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID || '' }}
 
       - name: Print access token
+        if: ${{ env.HAS_GCP_SA_KEY == 'true' }}
         id: token
         run: echo "TOKEN=$(gcloud auth print-access-token)" >> $GITHUB_ENV
 
       - name: Create Search Console property
+        if: ${{ env.HAS_GCP_SA_KEY == 'true' }}
         env:
           SITE_URL: ${{ env.SITE_URL }}
           TOKEN: ${{ env.TOKEN }}
         run: |
-          SITE_ENC=$(python -c "import urllib.parse, os; print(urllib.parse.quote(os.environ['SITE_URL'], safe=''))")
-          curl -sS -X PUT \
+          SITE_ENC=$(python3 -c "import urllib.parse, os; print(urllib.parse.quote(os.environ['SITE_URL'], safe=''))")
+          curl --fail-with-body --silent --show-error -X PUT \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/json" \
             "https://www.googleapis.com/webmasters/v3/sites/$SITE_ENC"
