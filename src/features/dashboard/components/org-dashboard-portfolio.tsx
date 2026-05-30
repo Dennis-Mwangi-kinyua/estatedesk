@@ -23,20 +23,20 @@ export function OrgDashboardPortfolio({
                 <Activity className="h-3.5 w-3.5" />
                 Portfolio performance
               </Badge>
-              <h2 className="mt-4 text-xl font-semibold text-neutral-950">
+              <h2 className="mt-4 text-xl font-semibold text-neutral-950 dark:text-white">
                 Occupancy, buildings, and portfolio distribution
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-neutral-500">
+              <p className="mt-1.5 text-sm leading-6 text-neutral-500 dark:text-neutral-300">
                 A quick view of how the organization is performing across inventory,
                 occupancy, and physical asset structure.
               </p>
             </div>
 
-            <div className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 lg:w-auto lg:min-w-[170px]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-500">
+            <div className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-white/10 dark:bg-slate-800/70 lg:w-auto lg:min-w-[170px]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-500 dark:text-neutral-400">
                 Properties / Buildings
               </p>
-              <p className="mt-2 text-2xl font-semibold text-neutral-950">
+              <p className="mt-2 text-2xl font-semibold text-neutral-950 dark:text-white">
                 {data.totalProperties} / {data.totalBuildings}
               </p>
             </div>
@@ -82,7 +82,7 @@ export function OrgDashboardPortfolio({
         />
 
         <SectionCard className="p-5">
-          <div className="flex items-center gap-2 text-sm font-medium text-neutral-700">
+          <div className="flex items-center gap-2 text-sm font-medium text-neutral-700 dark:text-neutral-200">
             <ShieldCheck className="h-4 w-4" />
             Team coverage
           </div>

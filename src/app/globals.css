@@ -234,6 +234,43 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  ::selection {
+    background: color-mix(in oklch, var(--primary) 24%, transparent);
+    color: var(--foreground);
+  }
+
+  :where(input, select, textarea) {
+    color-scheme: light;
+    border-color: var(--input);
+    background-color: var(--card);
+    color: var(--foreground);
+    caret-color: var(--foreground);
+  }
+
+  :where(input, textarea)::placeholder {
+    color: var(--muted-foreground);
+    opacity: 1;
+  }
+
+  :where(select option, select optgroup) {
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+  }
+
+  :where(input[type="checkbox"], input[type="radio"], input[type="range"]) {
+    accent-color: var(--primary);
+  }
+
+  :where(input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill) {
+    -webkit-text-fill-color: var(--foreground);
+    box-shadow: 0 0 0 1000px var(--card) inset;
+    caret-color: var(--foreground);
+  }
+
+  .dark :where(input, select, textarea) {
+    color-scheme: dark;
+  }
+
   #__next {
     min-height: 100%;
   }
@@ -507,6 +544,10 @@
   .dark .border-stone-300,
   .dark .border-zinc-200,
   .dark .border-zinc-300,
+  .dark .border-black\/5,
+  .dark .border-black\/10,
+  .dark .border-black\/20,
+  .dark .border-black\/30,
   .dark .border-white\/60,
   .dark .border-white\/70,
   .dark .border-white\/75,
@@ -525,6 +566,8 @@
   .dark .ring-white,
   .dark .ring-white\/70,
   .dark .ring-black\/5,
+  .dark .ring-black\/10,
+  .dark .ring-black\/20,
   .dark .ring-slate-950\/5 {
     --tw-ring-color: rgb(73 77 85 / 0.86) !important;
   }
@@ -669,6 +712,14 @@
     background-color: rgb(31 33 37 / 0.92);
     color: rgb(250 250 250);
     border-color: rgb(73 77 85 / 0.86);
+  }
+
+  .dark input:-webkit-autofill,
+  .dark textarea:-webkit-autofill,
+  .dark select:-webkit-autofill {
+    -webkit-text-fill-color: rgb(250 250 250);
+    box-shadow: 0 0 0 1000px rgb(31 33 37) inset;
+    caret-color: rgb(250 250 250);
   }
 
   .dark input::placeholder,

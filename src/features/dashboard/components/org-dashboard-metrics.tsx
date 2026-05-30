@@ -22,6 +22,7 @@ export function OrgDashboardMetrics({
       subtitle: "All active rentable units",
       icon: Home,
       tint: "blue" as const,
+      href: "/dashboard/org/units",
     },
     {
       title: "Apartments",
@@ -29,6 +30,7 @@ export function OrgDashboardMetrics({
       subtitle: `${data.apartmentMix}% of total unit stock`,
       icon: Building,
       tint: "neutral" as const,
+      href: "/dashboard/org/units",
     },
     {
       title: "Online Now",
@@ -36,6 +38,7 @@ export function OrgDashboardMetrics({
       subtitle: "Active users in this organization",
       icon: Wifi,
       tint: "green" as const,
+      href: "/dashboard/org/notifications",
     },
     {
       title: "Caretakers",
@@ -43,6 +46,7 @@ export function OrgDashboardMetrics({
       subtitle: `${data.activeCaretakerAssignments} active assignments`,
       icon: UserCog,
       tint: "amber" as const,
+      href: "/dashboard/org/staff",
     },
     {
       title: "Active Tenants",
@@ -50,6 +54,7 @@ export function OrgDashboardMetrics({
       subtitle: `${data.totalTenants} total tenant records`,
       icon: Users,
       tint: "green" as const,
+      href: "/dashboard/org/tenants",
     },
     {
       title: "Employees",
@@ -57,6 +62,7 @@ export function OrgDashboardMetrics({
       subtitle: "Admin, manager, office, and accountant staff",
       icon: Briefcase,
       tint: "neutral" as const,
+      href: "/dashboard/org/staff",
     },
     {
       title: "Active Leases",
@@ -64,11 +70,12 @@ export function OrgDashboardMetrics({
       subtitle: "Current signed lease coverage",
       icon: FileText,
       tint: "neutral" as const,
+      href: "/dashboard/org/leases",
     },
   ] as const;
 
   return (
-    <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+    <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-7">
       {topMetrics.map((item) => (
         <MetricCard
           key={item.title}
@@ -77,6 +84,7 @@ export function OrgDashboardMetrics({
           subtitle={item.subtitle}
           icon={item.icon}
           tint={item.tint}
+          href={item.href}
         />
       ))}
     </section>

@@ -50,7 +50,7 @@ export function OrgDashboardHeader({
             <Bell className="h-4 w-4" />
           </Link>
 
-          <div className="hidden rounded-2xl border border-slate-200 bg-white/76 px-3 py-2 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/76 sm:block">
+          <div className="hidden max-w-[16rem] rounded-2xl border border-slate-200 bg-white/76 px-3 py-2 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/76 sm:block">
             <p className="text-sm font-medium leading-none text-slate-950 dark:text-white">
               {userName}
             </p>

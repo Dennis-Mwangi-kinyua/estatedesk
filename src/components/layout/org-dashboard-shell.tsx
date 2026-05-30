@@ -34,6 +34,8 @@ export function OrgDashboardShell({
       />
 
       <OrgDashboardHeader
+        title={organizationName}
+        subtitle={`${userRole} workspace`}
         onMenuClick={() => setMobileOpen(true)}
         userName={userName}
         userRole={userRole}

@@ -31,6 +31,8 @@ export function PublicAccessHeader({
     ? publicLinks
     : publicLinks.filter((item) => item.key !== "pricing");
   const mobileLinkGridClass = showPricing ? "grid-cols-2" : "grid-cols-3";
+  const signInClassName =
+    "items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:!border-white/15 dark:!bg-slate-900 dark:!text-white dark:hover:!bg-slate-800 dark:focus-visible:ring-white";
 
   return (
     <header className="z-40 shrink-0 border-b border-slate-200/80 bg-white/95 shadow-[0_14px_34px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/95 dark:shadow-none">
@@ -49,7 +51,7 @@ export function PublicAccessHeader({
 
           <Link
             href={loginHref}
-            className="inline-flex min-h-10 min-w-[6.5rem] items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 dark:focus-visible:ring-white sm:text-sm md:hidden"
+            className={`inline-flex min-h-10 min-w-[6.5rem] text-xs sm:text-sm md:hidden ${signInClassName}`}
           >
             <LogIn className="h-4 w-4 shrink-0" />
             <span className="truncate">Sign in</span>
@@ -84,7 +86,7 @@ export function PublicAccessHeader({
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:items-center">
             <Link
               href={loginHref}
-              className="hidden min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white/85 px-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 dark:focus-visible:ring-white md:inline-flex"
+              className={`hidden min-h-10 min-w-0 text-sm md:inline-flex ${signInClassName}`}
             >
               <LogIn className="h-4 w-4 shrink-0" />
               <span className="truncate">Sign in</span>

@@ -60,7 +60,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="antialiased"
+      className="dark antialiased"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >

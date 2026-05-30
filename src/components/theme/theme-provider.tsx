@@ -34,7 +34,7 @@ function getSystemTheme(): ResolvedTheme {
 }
 
 function getStoredTheme(): Theme {
-  if (typeof window === "undefined") return "system";
+  if (typeof window === "undefined") return "dark";
 
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -46,7 +46,7 @@ function getStoredTheme(): Theme {
     // Ignore storage access failures in restricted browser contexts.
   }
 
-  return "system";
+  return "dark";
 }
 
 function disableTransitionsTemporarily() {

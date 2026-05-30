@@ -89,12 +89,12 @@ export function OrgDashboardSidebar({
         <div className="p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-neutral-950">Quick actions</h2>
-              <p className="mt-1 text-sm text-neutral-500">
+              <h2 className="text-lg font-semibold text-neutral-950 dark:text-white">Quick actions</h2>
+              <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-300">
                 Common organization workflows in one place.
               </p>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700 dark:bg-white/10 dark:text-neutral-200">
               <ArrowRight className="h-4 w-4" />
             </div>
           </div>
@@ -115,8 +115,8 @@ export function OrgDashboardSidebar({
 
       <SectionCard>
         <div className="p-5">
-          <h2 className="text-lg font-semibold text-neutral-950">Operations snapshot</h2>
-          <p className="mt-1 text-sm text-neutral-500">Items needing attention right now.</p>
+          <h2 className="text-lg font-semibold text-neutral-950 dark:text-white">Operations snapshot</h2>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-300">Items needing attention right now.</p>
 
           <div className="mt-4 space-y-3">
             {snapshotItems.map((item) => (
@@ -134,8 +134,8 @@ export function OrgDashboardSidebar({
 
       <SectionCard>
         <div className="p-5">
-          <h2 className="text-lg font-semibold text-neutral-950">Organization context</h2>
-          <p className="mt-1 text-sm text-neutral-500">
+          <h2 className="text-lg font-semibold text-neutral-950 dark:text-white">Organization context</h2>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-300">
             Useful metadata for billing, reporting, and operations.
           </p>
 
