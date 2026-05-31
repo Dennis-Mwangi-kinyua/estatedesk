@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const fallbackDatasourceUrl = "postgresql://user:password@localhost:5432/estatedesk";
+const legacyPgSslModes = new Set(["prefer", "require", "verify-ca"]);
 
 export type RuntimeEnvKey =
   | "DATABASE_URL"
@@ -178,11 +179,36 @@ export function requireEnvValue(key: RuntimeEnvKey) {
   return value;
 }
 
+export function normalizeDatabaseUrlSslMode(databaseUrl: string) {
+  try {
+    const parsed = new URL(databaseUrl);
+    const isPostgres =
+      parsed.protocol === "postgresql:" || parsed.protocol === "postgres:";
+    const usesLibpqCompatibility =
+      parsed.searchParams.get("uselibpqcompat") === "true";
+    const sslMode = parsed.searchParams.get("sslmode")?.toLowerCase();
+
+    if (
+      isPostgres &&
+      sslMode &&
+      legacyPgSslModes.has(sslMode) &&
+      !usesLibpqCompatibility
+    ) {
+      parsed.searchParams.set("sslmode", "verify-full");
+      return parsed.toString();
+    }
+  } catch {
+    return databaseUrl;
+  }
+
+  return databaseUrl;
+}
+
 export function getDatabaseUrl() {
   const databaseUrl = getEnvValue("DIRECT_URL") ?? getEnvValue("DATABASE_URL");
 
   if (databaseUrl) {
-    return databaseUrl;
+    return normalizeDatabaseUrlSslMode(databaseUrl);
   }
 
   if (isProduction()) {

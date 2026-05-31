@@ -37,8 +37,11 @@ import {
   SubscriptionStatus,
 } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { normalizeDatabaseUrlSslMode } from "../src/lib/config/env";
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL
+  ? normalizeDatabaseUrlSslMode(process.env.DATABASE_URL)
+  : undefined;
 
 if (!connectionString) {
   throw new Error("DATABASE_URL is not set");

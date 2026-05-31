@@ -6,7 +6,7 @@ import {
   ShieldCheck,
   SlidersHorizontal,
 } from "lucide-react";
-import { Prisma } from "@prisma/client";
+import { Prisma, UnitType } from "@prisma/client";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import {
   VacancyListingGrid,
@@ -57,6 +57,23 @@ function unitLabel(type: string, bedrooms: number | null) {
   return type.toLowerCase().replaceAll("_", " ");
 }
 
+function unitTypesForSearch(query: string): UnitType[] {
+  const normalized = query.toLowerCase().replace(/[^a-z0-9]+/g, " ");
+  const types: UnitType[] = [];
+
+  if (/\bbedsitters?\b/.test(normalized)) types.push(UnitType.BEDSITTER);
+  if (/\bstudios?\b/.test(normalized)) types.push(UnitType.STUDIO);
+  if (/\bsingle\s*rooms?\b/.test(normalized)) types.push(UnitType.SINGLE_ROOM);
+  if (/\bshops?\b/.test(normalized)) types.push(UnitType.SHOP);
+  if (/\boffices?\b/.test(normalized)) types.push(UnitType.OFFICE);
+  if (/\bstalls?\b/.test(normalized)) types.push(UnitType.STALL);
+  if (/\bwarehouses?\b/.test(normalized)) types.push(UnitType.WAREHOUSE);
+  if (/\bgodowns?\b/.test(normalized)) types.push(UnitType.GODOWN);
+  if (/\bapartments?\b|\bflats?\b/.test(normalized)) types.push(UnitType.APARTMENT);
+
+  return Array.from(new Set(types));
+}
+
 function listingDescription({
   notes,
   propertyNotes,
@@ -99,6 +116,8 @@ function getVacancyListings({
   location: string;
   sort: "location" | "rent_asc" | "rent_desc";
 }) {
+  const queryUnitTypes = unitTypesForSearch(query);
+
   return retryTransientDatabaseOperation(
     () =>
       prisma.unit.findMany({
@@ -115,6 +134,7 @@ function getVacancyListings({
                   { property: { is: { address: { contains: query, mode: "insensitive" } } } },
                   { property: { is: { org: { is: { name: { contains: query, mode: "insensitive" } } } } } },
                   { building: { is: { name: { contains: query, mode: "insensitive" } } } },
+                  ...(queryUnitTypes.length ? [{ type: { in: queryUnitTypes } }] : []),
                 ],
               }
             : {}),
