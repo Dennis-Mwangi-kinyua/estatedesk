@@ -17,9 +17,9 @@ import { prisma } from "@/lib/prisma";
 import { publicPageMetadata } from "@/lib/seo";
 
 export const metadata = publicPageMetadata({
-  title: "Public Property Information",
+  title: "Public Information Kiosk - EstateDesk",
   description:
-    "Browse available rental houses and vacant units published through EstateDesk by landlords and property managers in Kenya.",
+    "Browse vacant homes, rental houses, and available units published through EstateDesk by landlords and property managers in Kenya.",
   path: "/vacancies",
 });
 

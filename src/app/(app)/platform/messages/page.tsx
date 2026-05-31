@@ -1,5 +1,17 @@
 import Link from "next/link";
 import { Prisma } from "@prisma/client";
+import {
+  Building2,
+  Clock3,
+  ExternalLink,
+  Filter,
+  Inbox,
+  Mail,
+  MessageSquare,
+  Phone,
+  Search,
+  UserRound,
+} from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getPagination } from "@/lib/db/pagination";
 import {
@@ -43,6 +55,29 @@ function buildWhere({
   }
 
   return where;
+}
+
+function ContactLine({
+  email,
+  phone,
+}: {
+  email: string | null | undefined;
+  phone?: string | null;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-300">
+      <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 dark:border-white/10 dark:bg-slate-950/70">
+        <Mail className="h-3.5 w-3.5" />
+        <span className="break-all">{email ?? "No email"}</span>
+      </span>
+      {phone ? (
+        <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 dark:border-white/10 dark:bg-slate-950/70">
+          <Phone className="h-3.5 w-3.5" />
+          <span>{phone}</span>
+        </span>
+      ) : null}
+    </div>
+  );
 }
 
 export default async function PlatformMessagesPage({
@@ -118,121 +153,173 @@ export default async function PlatformMessagesPage({
         <StatCard label="New onboarding" value={newOnboardingCount} />
       </section>
 
-      <section className="overflow-hidden rounded-[26px] border border-neutral-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-2 border-b border-neutral-200 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-neutral-950">
-              New onboarding requests
-            </h2>
-            <p className="mt-1 text-sm text-neutral-500">
-              Public access requests submitted from the registration page.
-            </p>
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900/90">
+        <div className="flex flex-col gap-4 border-b border-slate-100 p-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 dark:border-white/10 dark:bg-slate-950 dark:text-slate-200">
+              <Inbox className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-base font-semibold text-slate-950 dark:text-white">
+                New onboarding requests
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-300">
+                Public access requests submitted from the registration page.
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge tone={toneForStatus(newOnboardingCount > 0 ? "pending" : "closed")}>
               {newOnboardingCount} new
             </Badge>
             <Link
               href="/platform/onboarding"
-              className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-50"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-800"
             >
+              <ExternalLink className="h-3.5 w-3.5" />
               Manage
             </Link>
           </div>
         </div>
 
         {onboardingRequests.length === 0 ? (
-          <div className="p-8 text-center text-sm text-neutral-500">
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-300">
             No onboarding requests found.
           </div>
         ) : (
-          <div className="divide-y divide-neutral-100">
+          <div className="grid gap-3 p-4 sm:p-5 lg:grid-cols-2">
             {onboardingRequests.map((request) => (
-              <article key={request.id} className="p-4 sm:p-5">
+              <article
+                key={request.id}
+                className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm dark:border-white/10 dark:bg-slate-950/45"
+              >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                    <h3 className="text-base font-semibold text-neutral-950">
+                    <h3 className="text-base font-semibold text-slate-950 dark:text-white">
                       {request.companyName}
                     </h3>
-                    <p className="mt-1 text-sm text-neutral-500">
-                      {request.fullName} • {request.managedPropertyType}
+                    <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-300">
+                      <UserRound className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{request.fullName}</span>
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">
                     <Badge tone={toneForStatus(request.status === "NEW" ? "pending" : request.status)}>
                       {request.status}
                     </Badge>
-                    <Badge>{formatDateTime(request.createdAt)}</Badge>
+                    <Badge>
+                      <Clock3 className="mr-1 h-3.5 w-3.5" />
+                      {formatDateTime(request.createdAt)}
+                    </Badge>
                   </div>
                 </div>
 
+                <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 dark:border-white/10 dark:bg-slate-950/70 dark:text-slate-300">
+                  <Building2 className="h-3.5 w-3.5" />
+                  {request.managedPropertyType}
+                </div>
+
                 {request.message ? (
-                  <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-neutral-700">
+                  <p className="mt-4 whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200">
                     {request.message}
                   </p>
                 ) : null}
 
-                <p className="mt-4 text-xs text-neutral-500">
-                  Contact: {request.workEmail}
-                  {request.phone ? ` • ${request.phone}` : ""}
-                </p>
+                <div className="mt-4">
+                  <ContactLine email={request.workEmail} phone={request.phone} />
+                </div>
               </article>
             ))}
           </div>
         )}
       </section>
 
-      <section className="overflow-hidden rounded-[26px] border border-neutral-200 bg-white shadow-sm">
-        <form className="grid gap-3 border-b border-neutral-200 p-4 md:grid-cols-[1fr_180px_auto]">
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Search subject, message, org, or sender"
-            className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none"
-          />
-          <select
-            name="status"
-            defaultValue={status}
-            className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-medium outline-none"
-          >
-            <option value="">All statuses</option>
-            <option value="OPEN">Open</option>
-            <option value="CLOSED">Closed</option>
-          </select>
-          <button className="rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white">
-            Apply
-          </button>
-        </form>
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900/90">
+        <div className="border-b border-slate-100 p-4 dark:border-white/10 sm:p-5">
+          <div className="mb-4 flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 dark:border-white/10 dark:bg-slate-950 dark:text-slate-200">
+              <MessageSquare className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-base font-semibold text-slate-950 dark:text-white">
+                Organization support messages
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-300">
+                Search, filter, and review messages sent from organization workspaces.
+              </p>
+            </div>
+          </div>
+
+          <form className="grid gap-3 md:grid-cols-[1fr_180px_auto]">
+            <label className="relative block">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                name="q"
+                defaultValue={q}
+                placeholder="Search subject, message, org, or sender"
+                className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-11 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-white/25"
+              />
+            </label>
+            <label className="relative block">
+              <Filter className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <select
+                name="status"
+                defaultValue={status}
+                className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50 px-11 text-sm font-medium text-slate-950 outline-none transition focus:border-slate-400 focus:bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white dark:focus:border-white/25"
+              >
+                <option value="">All statuses</option>
+                <option value="OPEN">Open</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+            </label>
+            <button className="h-12 rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
+              Apply
+            </button>
+          </form>
+        </div>
 
         {messages.length === 0 ? (
-          <div className="p-10 text-center text-sm text-neutral-500">No messages found.</div>
+          <div className="p-10 text-center text-sm text-slate-500 dark:text-slate-300">No messages found.</div>
         ) : (
-          <div className="divide-y divide-neutral-100">
+          <div className="grid gap-3 p-4 sm:p-5 xl:grid-cols-2">
             {messages.map((message) => (
-              <article key={message.id} className="p-4 sm:p-5">
+              <article
+                key={message.id}
+                className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm dark:border-white/10 dark:bg-slate-950/45"
+              >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                    <h2 className="text-base font-semibold text-neutral-950">
+                    <h2 className="text-base font-semibold text-slate-950 dark:text-white">
                       {message.subject}
                     </h2>
-                    <p className="mt-1 text-sm text-neutral-500">
-                      {message.org.name} / {message.org.slug} • {message.sender.fullName}
+                    <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-slate-500 dark:text-slate-300">
+                      <Building2 className="h-4 w-4 shrink-0" />
+                      <span>{message.org.name}</span>
+                      <span className="text-slate-300 dark:text-slate-600">/</span>
+                      <span>{message.org.slug}</span>
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">
                     <Badge tone={toneForStatus(message.status)}>{message.status}</Badge>
-                    <Badge>{formatDateTime(message.createdAt)}</Badge>
+                    <Badge>
+                      <Clock3 className="mr-1 h-3.5 w-3.5" />
+                      {formatDateTime(message.createdAt)}
+                    </Badge>
                   </div>
                 </div>
 
-                <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-neutral-700">
+                <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 dark:border-white/10 dark:bg-slate-950/70 dark:text-slate-300">
+                  <UserRound className="h-3.5 w-3.5" />
+                  {message.sender.fullName}
+                </div>
+
+                <p className="mt-4 whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200">
                   {message.message}
                 </p>
 
-                <p className="mt-4 text-xs text-neutral-500">
-                  Contact: {message.sender.email ?? "No email"}
-                  {message.sender.phone ? ` • ${message.sender.phone}` : ""}
-                </p>
+                <div className="mt-4">
+                  <ContactLine email={message.sender.email} phone={message.sender.phone} />
+                </div>
               </article>
             ))}
           </div>

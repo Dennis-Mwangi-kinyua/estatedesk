@@ -22,9 +22,9 @@ import { RegisterStatusToast } from "./register-status-toast";
 import { publicPageMetadata } from "@/lib/seo";
 
 export const metadata = publicPageMetadata({
-  title: "Sign Up",
+  title: "Sign Up - EstateDesk Dashboard",
   description:
-    "Request EstateDesk access for your property management team. Share your portfolio details and start onboarding for tenants, billing, maintenance, and reports.",
+    "Create an EstateDesk account or request workspace access for property management, tenant records, billing, maintenance, reports, and team onboarding.",
   path: "/register",
 });
 

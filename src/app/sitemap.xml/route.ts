@@ -14,6 +14,7 @@ function fileExists(p: string) {
 
 export async function renderSitemapXml() {
   const entries: { loc: string; lastmod?: string }[] = []
+  const protectedPublicPages = ['/login', '/register']
 
   const rootPage = path.join(ROOT, 'src', 'app', 'page.tsx')
   if (fileExists(rootPage)) {
@@ -48,13 +49,19 @@ export async function renderSitemapXml() {
     }
   }
 
+  for (const loc of protectedPublicPages) {
+    const pageFile = path.join(ROOT, 'src', 'app', '(auth)', loc.slice(1), 'page.tsx')
+    const lastmod = fileExists(pageFile) ? fs.statSync(pageFile).mtime.toISOString().slice(0, 10) : undefined
+    entries.push({ loc, lastmod })
+  }
+
   const urls = entries
     .map((e) =>
       buildUrlEntry({
         loc: `${APP_URL}${e.loc}`,
         lastmod: e.lastmod,
         changefreq: e.loc === '/' ? 'daily' : 'weekly',
-        priority: e.loc === '/' ? '1.0' : '0.6',
+        priority: e.loc === '/' ? '1.0' : protectedPublicPages.includes(e.loc) ? '0.8' : '0.6',
       }),
     )
     .join('\n')

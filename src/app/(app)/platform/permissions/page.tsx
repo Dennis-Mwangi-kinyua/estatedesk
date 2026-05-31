@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import {
   Badge,
-  EmptyRow,
   PageHeader,
   StatCard,
   Surface,
@@ -51,82 +50,95 @@ export default async function AdminPermissionsPage() {
         <StatCard label="Root admins" value={admins.filter((admin) => admin.isRootSuperAdmin).length} />
       </section>
 
-      <Surface title="Permission matrix">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-neutral-50 text-left text-neutral-500">
-              <tr>
-                <th className="px-4 py-3 font-medium">Admin</th>
-                <th className="px-4 py-3 font-medium">Role</th>
-                <th className="px-4 py-3 font-medium">Root</th>
-                <th className="px-4 py-3 font-medium">Create admins</th>
-                <th className="px-4 py-3 font-medium">Explicit permissions</th>
-                <th className="px-4 py-3 font-medium">Last login</th>
-              </tr>
-            </thead>
-            <tbody>
-              {admins.map((admin) => (
-                <tr key={admin.id} className="border-t border-neutral-100">
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-neutral-950">{admin.fullName}</p>
-                    <p className="mt-1 text-xs text-neutral-500">{admin.email ?? admin.username ?? "-"}</p>
-                  </td>
-                  <td className="px-4 py-3 text-neutral-600">{admin.platformRole}</td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      tone={
-                        admin.isRootSuperAdmin
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                          : "border-neutral-200 bg-neutral-50 text-neutral-600"
-                      }
-                    >
+      <Surface
+        title="Permission matrix"
+        description="Each card shows the admin identity, role footprint, creation rights, explicit overrides, and latest platform activity."
+      >
+        <div className="grid gap-4 p-4 lg:grid-cols-2">
+          {admins.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500 dark:border-white/15 dark:bg-slate-950 dark:text-slate-300 lg:col-span-2">
+              No platform admins found.
+            </div>
+          ) : (
+            admins.map((admin) => (
+              <article
+                key={admin.id}
+                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <h3 className="break-words text-base font-semibold text-slate-950 dark:text-white">
+                      {admin.fullName}
+                    </h3>
+                    <p className="mt-1 break-words text-sm text-slate-500 dark:text-slate-300">
+                      {admin.email ?? admin.username ?? "-"}
+                    </p>
+                  </div>
+                  <Badge>{labelize(admin.platformRole)}</Badge>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                      Root
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">
                       {admin.isRootSuperAdmin ? "Yes" : "No"}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      tone={
-                        admin.canCreatePlatformAdmins
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                          : "border-neutral-200 bg-neutral-50 text-neutral-600"
-                      }
-                    >
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                      Create admins
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">
                       {admin.canCreatePlatformAdmins ? "Yes" : "No"}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex max-w-[520px] flex-wrap gap-1.5">
-                      {admin.platformPermissions.length === 0 ? (
-                        <span className="text-neutral-500">No overrides</span>
-                      ) : (
-                        admin.platformPermissions.map((permission) => (
-                          <Badge
-                            key={permission.id}
-                            tone={
-                              permission.granted
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                : "border-red-200 bg-red-50 text-red-700"
-                            }
-                          >
-                            {labelize(permission.permission)}
-                          </Badge>
-                        ))
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-neutral-600">{formatDateTime(admin.lastLoginAt)}</td>
-                </tr>
-              ))}
-              {admins.length === 0 ? <EmptyRow colSpan={6} label="No platform admins found." /> : null}
-            </tbody>
-          </table>
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                      Last login
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">
+                      {formatDateTime(admin.lastLoginAt)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                    Explicit permissions
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {admin.platformPermissions.length === 0 ? (
+                      <span className="text-sm text-slate-500 dark:text-slate-300">
+                        No overrides
+                      </span>
+                    ) : (
+                      admin.platformPermissions.map((permission) => (
+                        <Badge key={permission.id}>
+                          {permission.granted ? "" : "No "}
+                          {labelize(permission.permission)}
+                        </Badge>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </Surface>
 
-      <Surface title="Permission catalog">
-        <div className="grid gap-2 p-4 sm:grid-cols-2 xl:grid-cols-3">
+      <Surface
+        title="Permission catalog"
+        description="Reference list of platform capabilities available for direct grants or revocations."
+      >
+        <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3">
           {permissionTypes.map((permission) => (
-            <div key={permission} className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3 text-sm font-medium text-neutral-700">
+            <div
+              key={permission}
+              className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium text-slate-700 dark:border-white/10 dark:bg-slate-950 dark:text-slate-200"
+            >
               {labelize(permission)}
             </div>
           ))}

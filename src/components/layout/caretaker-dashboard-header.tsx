@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Bell, Menu } from "lucide-react";
 import { useCallback, useState } from "react";
 import { CaretakerMobileSidebar } from "@/components/layout/caretaker-mobile-nav";
+import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 
 type CaretakerDashboardHeaderProps = {
   fullName: string;
@@ -47,6 +48,8 @@ export function CaretakerDashboardHeader({
           </div>
 
           <div className="flex items-center gap-2">
+            <HeaderThemeToggle className="xl:hidden" />
+
             <Link
               href="/dashboard/caretaker/notifications"
               aria-label="View notifications"

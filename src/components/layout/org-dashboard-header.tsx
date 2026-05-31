@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Bell, Menu } from "lucide-react";
+import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 
 type OrgDashboardHeaderProps = {
   title?: string;
@@ -42,6 +43,8 @@ export function OrgDashboardHeader({
         </div>
 
         <div className="ml-2 flex shrink-0 items-center gap-2">
+          <HeaderThemeToggle className="lg:hidden" />
+
           <Link
             href="/dashboard/org/notifications"
             aria-label="Notifications"

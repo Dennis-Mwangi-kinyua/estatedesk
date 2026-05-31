@@ -35,11 +35,11 @@ export function toneForStatus(value: string | null | undefined) {
   const status = (value ?? "").toLowerCase();
 
   if (["active", "sent", "success", "verified", "paid", "enabled"].includes(status)) {
-    return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    return "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200";
   }
 
   if (["pending", "queued", "trialing", "initiated", "partial", "draft"].includes(status)) {
-    return "border-amber-200 bg-amber-50 text-amber-700";
+    return "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200";
   }
 
   if (
@@ -47,10 +47,10 @@ export function toneForStatus(value: string | null | undefined) {
       status,
     )
   ) {
-    return "border-red-200 bg-red-50 text-red-700";
+    return "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200";
   }
 
-  return "border-neutral-200 bg-neutral-50 text-neutral-700";
+  return "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200";
 }
 
 export function PageHeader({
@@ -65,19 +65,21 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900/90 sm:p-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div>
-        <p className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
           {eyebrow}
         </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-neutral-950">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
           {title}
         </h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-300">
           {description}
         </p>
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
+      </div>
     </div>
   );
 }
@@ -92,14 +94,14 @@ export function StatCard({
   note?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900/90">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-neutral-950">
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
         {value}
       </p>
-      {note ? <p className="mt-1 text-xs text-neutral-500">{note}</p> : null}
+      {note ? <p className="mt-1 text-xs text-slate-500 dark:text-slate-300">{note}</p> : null}
     </div>
   );
 }
@@ -114,10 +116,10 @@ export function Surface({
   children: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
-      <div className="border-b border-neutral-200 px-4 py-3">
-        <h2 className="text-base font-semibold text-neutral-950">{title}</h2>
-        {description ? <p className="mt-1 text-sm text-neutral-500">{description}</p> : null}
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900/90">
+      <div className="border-b border-slate-100 px-4 py-4 dark:border-white/10">
+        <h2 className="text-base font-semibold text-slate-950 dark:text-white">{title}</h2>
+        {description ? <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-300">{description}</p> : null}
       </div>
       {children}
     </section>
@@ -128,7 +130,7 @@ export function Badge({ children, tone }: { children: ReactNode; tone?: string }
   return (
     <span
       className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${
-        tone ?? "border-neutral-200 bg-neutral-50 text-neutral-700"
+        tone ?? "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
       }`}
     >
       {children}
@@ -138,7 +140,7 @@ export function Badge({ children, tone }: { children: ReactNode; tone?: string }
 
 export function AdminLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className="font-semibold text-neutral-950 underline-offset-4 hover:underline">
+    <Link href={href} className="font-semibold text-slate-950 underline-offset-4 hover:underline dark:text-white">
       {children}
     </Link>
   );
@@ -147,7 +149,7 @@ export function AdminLink({ href, children }: { href: string; children: ReactNod
 export function EmptyRow({ colSpan, label }: { colSpan: number; label: string }) {
   return (
     <tr>
-      <td colSpan={colSpan} className="px-4 py-8 text-center text-sm text-neutral-500">
+      <td colSpan={colSpan} className="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-300">
         {label}
       </td>
     </tr>
@@ -186,7 +188,7 @@ export function PaginationControls({
   }
 
   return (
-    <div className="flex flex-col gap-3 border-t border-neutral-200 px-4 py-3 text-sm text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-3 text-sm text-slate-600 dark:border-white/10 dark:text-slate-300 sm:flex-row sm:items-center sm:justify-between">
       <p>
         Showing {from}-{to} of {formatNumber(total)}
       </p>
@@ -194,24 +196,24 @@ export function PaginationControls({
         <Link
           href={href(Math.max(1, page - 1))}
           aria-disabled={page <= 1}
-          className={`rounded-xl border border-neutral-200 px-3 py-2 font-medium ${
+          className={`rounded-xl border border-slate-200 px-3 py-2 font-medium dark:border-white/10 ${
             page <= 1
-              ? "pointer-events-none bg-neutral-50 text-neutral-300"
-              : "bg-white text-neutral-800 hover:bg-neutral-50"
+              ? "pointer-events-none bg-slate-50 text-slate-300 dark:bg-slate-900 dark:text-slate-600"
+              : "bg-white text-slate-800 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
           }`}
         >
           Previous
         </Link>
-        <span className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2">
+        <span className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-slate-900">
           {page} / {totalPages}
         </span>
         <Link
           href={href(Math.min(totalPages, page + 1))}
           aria-disabled={page >= totalPages}
-          className={`rounded-xl border border-neutral-200 px-3 py-2 font-medium ${
+          className={`rounded-xl border border-slate-200 px-3 py-2 font-medium dark:border-white/10 ${
             page >= totalPages
-              ? "pointer-events-none bg-neutral-50 text-neutral-300"
-              : "bg-white text-neutral-800 hover:bg-neutral-50"
+              ? "pointer-events-none bg-slate-50 text-slate-300 dark:bg-slate-900 dark:text-slate-600"
+              : "bg-white text-slate-800 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
           }`}
         >
           Next

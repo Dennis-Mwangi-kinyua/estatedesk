@@ -8,6 +8,7 @@ import {
   UserPlus,
   WalletCards,
 } from "lucide-react";
+import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 
 type PublicAccessHeaderProps = {
   active?: "home" | "vacancies" | "services" | "pricing" | "contact";
@@ -49,13 +50,16 @@ export function PublicAccessHeader({
             <span className="truncate">EstateDesk</span>
           </Link>
 
-          <Link
-            href={loginHref}
-            className={`inline-flex min-h-10 min-w-[6.5rem] text-xs sm:text-sm md:hidden ${signInClassName}`}
-          >
-            <LogIn className="h-4 w-4 shrink-0" />
-            <span className="truncate">Sign in</span>
-          </Link>
+          <div className="flex shrink-0 items-center gap-2 md:hidden">
+            <HeaderThemeToggle />
+            <Link
+              href={loginHref}
+              className={`inline-flex min-h-10 min-w-[6.5rem] text-xs sm:text-sm ${signInClassName}`}
+            >
+              <LogIn className="h-4 w-4 shrink-0" />
+              <span className="truncate">Sign in</span>
+            </Link>
+          </div>
         </div>
 
         <nav className="grid w-full gap-2 md:flex md:w-auto md:flex-1 md:items-center md:justify-end">
@@ -68,14 +72,14 @@ export function PublicAccessHeader({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border px-2 text-[11px] font-semibold transition sm:min-h-11 sm:flex-row sm:gap-1.5 sm:text-sm md:min-h-10 md:px-3.5 ${
+                  className={`public-access-nav-link inline-flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border px-2 text-[11px] font-semibold transition sm:min-h-11 sm:flex-row sm:gap-1.5 sm:text-sm md:min-h-10 md:px-3.5 ${
                     isActive
-                      ? "border-slate-300 bg-white text-slate-950 shadow-sm dark:border-white/15 dark:bg-slate-900 dark:text-white"
-                      : "border-slate-200/80 bg-slate-50/85 text-slate-600 shadow-sm hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-slate-900/85 dark:text-slate-300 dark:hover:border-white/20 dark:hover:bg-slate-800 dark:hover:text-white md:border-transparent md:bg-transparent md:shadow-none md:dark:bg-transparent"
+                      ? "public-access-nav-link-active border-slate-300 bg-white text-slate-950 shadow-sm"
+                      : "border-slate-200/80 bg-slate-50/85 text-slate-950 shadow-sm hover:border-slate-300 hover:bg-white hover:text-slate-950 md:border-transparent md:bg-transparent md:shadow-none"
                   }`}
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="max-w-full truncate">{item.label}</span>
+                  <Icon className="h-4 w-4 shrink-0 text-current" />
+                  <span className="max-w-full truncate text-current">{item.label}</span>
                 </Link>
               );
             })}

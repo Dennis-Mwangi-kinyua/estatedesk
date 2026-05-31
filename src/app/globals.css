@@ -1025,6 +1025,34 @@
   }
 }
 
+.public-access-nav-link {
+  opacity: 1 !important;
+}
+
+.public-access-nav-link :where(svg, span) {
+  color: currentColor !important;
+  opacity: 1 !important;
+}
+
+.dark .public-access-nav-link {
+  background-color: rgb(15 23 42) !important;
+  border-color: rgb(255 255 255 / 0.16) !important;
+  color: rgb(255 255 255) !important;
+  opacity: 1 !important;
+}
+
+.dark .public-access-nav-link:hover,
+.dark .public-access-nav-link-active {
+  background-color: rgb(30 41 59) !important;
+  border-color: rgb(255 255 255 / 0.26) !important;
+  color: rgb(255 255 255) !important;
+}
+
+.dark .public-access-nav-link :where(svg, span) {
+  color: rgb(255 255 255) !important;
+  opacity: 1 !important;
+}
+
 @media print {
   html.dark,
   html.dark body {

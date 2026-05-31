@@ -11,6 +11,7 @@ import {
 import { tenantNavItems } from "./tenant-nav";
 import { isTenantRouteActive } from "./tenant-route";
 import { logoutAction } from "@/features/auth/actions/logout-action";
+import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 
 type TenantHeaderProps = {
   fullName: string;
@@ -68,11 +69,15 @@ export function TenantHeader({
               </div>
             </div>
 
-            <div className="ed-soft-button hidden rounded-[22px] border px-4 py-3 text-right shadow-sm sm:block">
+            <div className="flex shrink-0 items-center gap-2">
+              <HeaderThemeToggle className="lg:hidden" />
+
+              <div className="ed-soft-button hidden rounded-[22px] border px-4 py-3 text-right shadow-sm sm:block">
               <p className="max-w-[200px] truncate text-sm font-semibold text-neutral-950">
                 {fullName}
               </p>
               <p className="text-xs text-neutral-500">{orgName}</p>
+              </div>
             </div>
           </div>
 

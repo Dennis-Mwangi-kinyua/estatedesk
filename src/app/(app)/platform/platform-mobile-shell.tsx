@@ -31,6 +31,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 
 const iconMap = {
@@ -118,16 +119,19 @@ export default function PlatformMobileShell({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            aria-label="Open menu"
-            aria-expanded={open}
-            aria-controls={panelId}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-900 transition hover:bg-slate-50 active:scale-[0.98]"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <HeaderThemeToggle />
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={open}
+              aria-controls={panelId}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-900 transition hover:bg-slate-50 active:scale-[0.98] dark:border-white/10 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </div>
         </header>
 
         <div className="min-h-0 flex-1 overflow-hidden">{children}</div>

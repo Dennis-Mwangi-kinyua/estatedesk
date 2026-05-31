@@ -17,9 +17,9 @@ import { publicPageMetadata } from "@/lib/seo";
 import { contactSalesAction } from "./actions";
 
 export const metadata = publicPageMetadata({
-  title: "Help and Contact",
+  title: "Help - EstateDesk Dashboard",
   description:
-    "Get help with EstateDesk onboarding, property management workflows, tenant records, billing, caretaker operations, reports, and enterprise rollout support.",
+    "Get EstateDesk help for onboarding, property management workflows, tenant records, billing, caretaker operations, reports, and rollout support.",
   path: "/contact",
 });
 

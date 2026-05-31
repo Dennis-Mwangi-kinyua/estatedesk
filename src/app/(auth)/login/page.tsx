@@ -14,9 +14,9 @@ import { publicPageMetadata } from "@/lib/seo";
 import LoginForm from "./LoginForm";
 
 export const metadata = publicPageMetadata({
-  title: "Login Page",
+  title: "Login Page - EstateDesk Dashboard",
   description:
-    "Sign in to EstateDesk to securely manage property records, tenants, leases, payments, inspections, maintenance, and team access online.",
+    "Securely sign in to EstateDesk Dashboard to manage properties, tenants, leases, rent payments, inspections, maintenance, and team access online.",
   path: "/login",
 });
 
