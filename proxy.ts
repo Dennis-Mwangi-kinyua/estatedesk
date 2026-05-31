@@ -38,6 +38,7 @@ const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 30;
 const CLEANUP_INTERVAL_MS = 5 * 60_000;
 const RATE_LIMITED_PATHS = new Set(["/dashboard/org/tenants"]);
+const API_BROWSER_DESTINATIONS = new Set(["document", "iframe"]);
 
 const globalForRateLimit = globalThis as typeof globalThis & {
   __rateLimitStore?: Map<string, RateLimitEntry>;
@@ -138,7 +139,11 @@ function isProtectedPath(pathname: string) {
 }
 
 function shouldNoIndex(pathname: string) {
-  return isProtectedPath(pathname) || pathname.startsWith("/login");
+  return (
+    isProtectedPath(pathname) ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/are-you-lost")
+  );
 }
 
 function applySecurityHeaders(response: NextResponse, pathname: string) {
@@ -155,6 +160,18 @@ function applySecurityHeaders(response: NextResponse, pathname: string) {
   }
 
   return response;
+}
+
+function isBrowserApiNavigation(req: NextRequest) {
+  if (req.method !== "GET" && req.method !== "HEAD") return false;
+
+  const accept = req.headers.get("accept") ?? "";
+  const destination = req.headers.get("sec-fetch-dest") ?? "";
+
+  return (
+    API_BROWSER_DESTINATIONS.has(destination) ||
+    accept.includes("text/html")
+  );
 }
 
 function applyTenantRateLimit(req: NextRequest, response: NextResponse) {
@@ -196,6 +213,13 @@ export function proxy(req: NextRequest) {
   const hasSession = Boolean(req.cookies.get(SESSION_COOKIE_NAME)?.value);
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-estatedesk-pathname", pathname);
+
+  if (pathname.startsWith("/api") && isBrowserApiNavigation(req)) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/are-you-lost";
+    url.searchParams.set("from", pathname);
+    return applySecurityHeaders(NextResponse.redirect(url), pathname);
+  }
 
   if (isPublicPath(pathname)) {
     return applySecurityHeaders(

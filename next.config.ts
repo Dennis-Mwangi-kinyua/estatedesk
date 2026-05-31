@@ -1,5 +1,32 @@
 import type { NextConfig } from "next";
 
+const PRIVATE_HEADERS = [
+  { key: "X-Robots-Tag", value: "noindex, nofollow" },
+  { key: "Cache-Control", value: "no-store, max-age=0" },
+];
+
+const PUBLIC_EDGE_CACHE_HEADERS = [
+  {
+    key: "Cache-Control",
+    value: "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+  },
+  {
+    key: "CDN-Cache-Control",
+    value: "public, max-age=3600, stale-while-revalidate=86400",
+  },
+];
+
+const PUBLIC_FAST_EDGE_CACHE_HEADERS = [
+  {
+    key: "Cache-Control",
+    value: "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+  },
+  {
+    key: "CDN-Cache-Control",
+    value: "public, max-age=300, stale-while-revalidate=3600",
+  },
+];
+
 const nextConfig: NextConfig = {
   async redirects() {
     return [
@@ -19,52 +46,89 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/services",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/pricing",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/contact",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/vacancies",
+        headers: PUBLIC_FAST_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/vacancies/:path*",
+        headers: PUBLIC_FAST_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
         source: "/dashboard/:path*",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/platform/:path*",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/api/:path*",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/print/:path*",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/login",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: [{ key: "Cache-Control", value: "no-store, max-age=0" }],
       },
       {
         source: "/register",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: [{ key: "Cache-Control", value: "no-store, max-age=0" }],
       },
       {
         source: "/forgot-password",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/reset-password",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/verify-email",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/accept-invite/:path*",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/properties/:path*",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/units/:path*",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: PRIVATE_HEADERS,
+      },
+      {
+        source: "/are-you-lost",
+        headers: PRIVATE_HEADERS,
       },
     ];
   },
