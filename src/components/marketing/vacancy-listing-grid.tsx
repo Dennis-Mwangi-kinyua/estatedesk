@@ -7,7 +7,6 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 
 export type VacancyListingCard = {
   id: string;
-  reference: string;
   href: string;
   imageSrc: string;
   hasImage: boolean;
@@ -107,9 +106,6 @@ export function VacancyListingGrid({ listings }: VacancyListingGridProps) {
                     </div>
                   </div>
                 )}
-                <div className="absolute left-2 top-2 max-w-[calc(100%-1rem)] rounded-full bg-slate-950/78 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur">
-                  <span className="block truncate">{listing.reference}</span>
-                </div>
                 <div className="absolute bottom-2 left-2 rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-semibold text-slate-900 shadow-sm backdrop-blur dark:bg-slate-950/88 dark:text-slate-100">
                   {listing.viewingLabel}
                 </div>

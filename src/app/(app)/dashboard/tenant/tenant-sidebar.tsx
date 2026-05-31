@@ -19,11 +19,11 @@ export function TenantSidebar({ fullName, hasActiveLease }: TenantSidebarProps) 
   );
 
   return (
-    <aside className="hidden border-r border-white/60 bg-white/70 shadow-[12px_0_40px_rgba(15,23,42,0.06)] backdrop-blur-2xl lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex lg:h-screen lg:w-[300px] lg:flex-col xl:w-[320px]">
+    <aside className="ed-shell-panel hidden border-r lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex lg:h-screen lg:w-[300px] lg:flex-col xl:w-[320px]">
       <div className="border-b border-neutral-200/70 px-4 py-4 xl:px-5 xl:py-5">
         <div className="ios-panel rounded-[26px] p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-950 text-lg text-white shadow-sm">
+            <div className="ed-brand-mark flex h-11 w-11 items-center justify-center rounded-2xl text-lg shadow-sm">
               🏡
             </div>
 
@@ -71,15 +71,15 @@ export function TenantSidebar({ fullName, hasActiveLease }: TenantSidebarProps) 
                 href={item.href}
                   className={`group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200 active:scale-[0.99] ${
                   isActive
-                    ? "bg-neutral-950 text-white shadow-[0_10px_20px_rgba(15,23,42,0.14)]"
-                    : "text-neutral-600 hover:bg-white/86 hover:text-neutral-950 hover:shadow-sm"
+                    ? "ed-nav-item-active"
+                    : "ed-nav-item"
                 }`}
               >
                 <span
                   className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
                     isActive
-                      ? "bg-white/10 text-white"
-                      : "bg-neutral-100 text-neutral-500 group-hover:bg-neutral-950 group-hover:text-white"
+                      ? "ed-nav-icon-active"
+                      : "ed-nav-icon"
                   }`}
                 >
                   <Icon className="h-4.5 w-4.5" />

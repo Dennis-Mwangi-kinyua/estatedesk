@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { queueDuePaymentNotifications } from "@/lib/ledger";
+import { recordVacatedTenancy } from "@/lib/tenants/identity";
 
 async function requireOrgReviewer() {
   const session = await requireUserSession();
@@ -332,4 +333,103 @@ export async function sendPaymentRemindersAction() {
   });
 
   revalidatePath("/dashboard/org/notifications");
+}
+
+export async function confirmMoveOutAction(formData: FormData) {
+  const { session, membership } = await requireOrgReviewer();
+  const noticeId = String(formData.get("noticeId") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim();
+
+  if (!noticeId) {
+    throw new Error("Move-out notice is required.");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const notice = await tx.moveOutNotice.findFirst({
+      where: {
+        id: noticeId,
+        status: "INSPECTION_COMPLETED",
+        lease: {
+          orgId: membership.orgId,
+        },
+      },
+      select: {
+        id: true,
+        tenantId: true,
+        leaseId: true,
+        tenant: {
+          select: {
+            fullName: true,
+          },
+        },
+      },
+    });
+
+    if (!notice) {
+      throw new Error("Only inspection-completed move-outs can be confirmed.");
+    }
+
+    await tx.moveOutNotice.update({
+      where: { id: notice.id },
+      data: {
+        status: "CLOSED",
+        notes: notes || undefined,
+      },
+    });
+
+    await recordVacatedTenancy(tx, {
+      tenantId: notice.tenantId,
+      leaseId: notice.leaseId,
+      moveOutNoticeId: notice.id,
+      actorUserId: session.userId,
+      notes: notes || "Move-out confirmed by organization.",
+    });
+
+    await tx.tenantHistoryRecord.updateMany({
+      where: {
+        tenantId: notice.tenantId,
+        leaseId: notice.leaseId,
+        moveOutNoticeId: notice.id,
+      },
+      data: {
+        status: "ARCHIVED",
+        notes: notes || undefined,
+      },
+    });
+
+    await tx.notification.create({
+      data: {
+        orgId: membership.orgId,
+        tenantId: notice.tenantId,
+        channel: "IN_APP",
+        type: "MOVE_OUT_CLOSED",
+        title: "Move-out confirmed",
+        message: `Move-out closeout for ${notice.tenant.fullName} has been confirmed.${notes ? ` Notes: ${notes}` : ""}`,
+        status: "SENT",
+        sentAt: new Date(),
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        orgId: membership.orgId,
+        actorUserId: session.userId,
+        action: "MOVE_OUT_CLOSED",
+        entityType: "MoveOutNotice",
+        entityId: notice.id,
+        metadata: {
+          notes,
+        },
+      },
+    });
+  });
+
+  revalidatePath("/move-outs");
+  revalidatePath("/dashboard/org");
+  revalidatePath("/dashboard/org/notifications");
+  revalidatePath("/dashboard/org/verify-tenant");
+  revalidatePath("/dashboard/org/units");
+  revalidatePath("/dashboard/org/properties");
+  revalidatePath("/dashboard/org/tenants");
+  revalidatePath("/dashboard/tenant");
 }

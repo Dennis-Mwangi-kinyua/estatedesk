@@ -10,7 +10,15 @@ import {
   Users2,
 } from "lucide-react";
 import OperationsShowcase from "@/components/marketing/operations-showcase";
+import { publicPageMetadata } from "@/lib/seo";
 import LoginForm from "./LoginForm";
+
+export const metadata = publicPageMetadata({
+  title: "Login Page",
+  description:
+    "Sign in to EstateDesk to securely manage property records, tenants, leases, payments, inspections, maintenance, and team access online.",
+  path: "/login",
+});
 
 const serviceItems = [
   {

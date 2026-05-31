@@ -19,6 +19,14 @@ import {
 import { createOnboardingRequestAction } from "./actions";
 import { ReferralCodeField } from "@/components/marketing/referral-code-field";
 import { RegisterStatusToast } from "./register-status-toast";
+import { publicPageMetadata } from "@/lib/seo";
+
+export const metadata = publicPageMetadata({
+  title: "Sign Up",
+  description:
+    "Request EstateDesk access for your property management team. Share your portfolio details and start onboarding for tenants, billing, maintenance, and reports.",
+  path: "/register",
+});
 
 const features = [
   {

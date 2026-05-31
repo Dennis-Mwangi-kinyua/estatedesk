@@ -31,6 +31,19 @@ export default function MarketingHomePage() {
         },
       },
       {
+        "@type": "ItemList",
+        "@id": `${absoluteUrl("/")}#sitelinks`,
+        name: "EstateDesk site links",
+        itemListElement: [
+          { "@type": "SiteNavigationElement", position: 1, name: "Login", url: absoluteUrl("/login") },
+          { "@type": "SiteNavigationElement", position: 2, name: "Vacancies", url: absoluteUrl("/vacancies") },
+          { "@type": "SiteNavigationElement", position: 3, name: "EstateDesk System", url: absoluteUrl("/services") },
+          { "@type": "SiteNavigationElement", position: 4, name: "Sign Up", url: absoluteUrl("/register") },
+          { "@type": "SiteNavigationElement", position: 5, name: "Pricing", url: absoluteUrl("/pricing") },
+          { "@type": "SiteNavigationElement", position: 6, name: "Help", url: absoluteUrl("/contact") },
+        ],
+      },
+      {
         "@type": "SoftwareApplication",
         name: "EstateDesk",
         applicationCategory: "BusinessApplication",

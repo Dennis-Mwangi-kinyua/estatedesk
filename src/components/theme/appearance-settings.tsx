@@ -1,7 +1,12 @@
 "use client";
 
 import { Monitor, Moon, Sun } from "lucide-react";
+import { useSyncExternalStore } from "react";
 import { useTheme } from "@/components/theme/theme-provider";
+
+const subscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 const OPTIONS = [
   {
@@ -26,6 +31,12 @@ const OPTIONS = [
 
 export function AppearanceSettings() {
   const { theme, setTheme } = useTheme();
+  const isHydrated = useSyncExternalStore(
+    subscribe,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
+  const currentTheme = isHydrated ? theme : "system";
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white/78 p-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/76">
@@ -41,7 +52,7 @@ export function AppearanceSettings() {
       <div className="grid gap-2 sm:grid-cols-3">
         {OPTIONS.map((option) => {
           const Icon = option.icon;
-          const active = theme === option.value;
+          const active = currentTheme === option.value;
 
           return (
             <button

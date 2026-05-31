@@ -71,22 +71,12 @@ type Props = {
   fullName: string;
 };
 
-const iconToneMap = {
-  blue: "bg-blue-50 text-blue-700",
-  amber: "bg-amber-50 text-amber-700",
-  indigo: "bg-indigo-50 text-indigo-700",
-  emerald: "bg-emerald-50 text-emerald-700",
-  violet: "bg-violet-50 text-violet-700",
-  sky: "bg-sky-50 text-sky-700",
-  rose: "bg-rose-50 text-rose-700",
-} as const;
-
 export function CaretakerDashboardSidebar({ fullName }: Props) {
   const pathname = usePathname();
 
   return (
     <aside className="hidden xl:block xl:w-72 xl:shrink-0 2xl:w-80">
-      <div className="sticky top-0 h-dvh border-r border-slate-200 bg-white">
+      <div className="ed-shell-panel sticky top-0 h-dvh border-r">
         <div className="flex h-full flex-col">
           <div className="shrink-0 border-b border-slate-200 px-5 py-5">
             <Link href="/dashboard/caretaker" className="block">
@@ -117,14 +107,14 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
                     className={clsx(
                       "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150 active:scale-[0.99]",
                       active
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                        ? "ed-nav-item-active"
+                        : "ed-nav-item"
                     )}
                   >
                     <span
                       className={clsx(
                         "flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition",
-                        active ? "bg-white/10 text-white" : iconToneMap[item.tone]
+                        active ? "ed-nav-icon-active" : "ed-nav-icon"
                       )}
                     >
                       <Icon className="h-[18px] w-[18px]" />

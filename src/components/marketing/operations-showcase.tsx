@@ -622,7 +622,7 @@ export default function OperationsShowcase({
       <section
         aria-labelledby="operations-showcase-title"
         className={cx(
-          "relative min-h-screen w-full overflow-x-hidden text-neutral-950 lg:overflow-hidden",
+          "relative min-h-dvh w-full overflow-x-hidden text-neutral-950 lg:overflow-hidden",
           standalone ? "lg:h-[calc(100svh-65px)] lg:min-h-[calc(100svh-65px)]" : "lg:h-screen",
           isRental
             ? "bg-[linear-gradient(180deg,#f8fbff_0%,#eef4fb_48%,#ffffff_100%)]"
@@ -639,7 +639,7 @@ export default function OperationsShowcase({
 
       <div
         className={cx(
-          "relative z-10 mx-auto flex w-full max-w-[1536px] flex-col gap-4 px-4 py-4 sm:px-6 sm:py-5 lg:h-full lg:gap-5 lg:px-8 lg:py-7 xl:py-8",
+          "relative z-10 mx-auto flex w-full max-w-[1536px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-5 md:px-6 lg:h-full lg:gap-5 lg:px-8 lg:py-7 xl:py-8",
           isRental ? "bg-transparent" : "bg-white",
         )}
       >
@@ -671,7 +671,7 @@ export default function OperationsShowcase({
 
           <div
             className={cx(
-              "grid min-h-0 gap-4 lg:min-h-[560px] lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.38fr)] lg:gap-5 xl:min-h-[620px] xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.36fr)]",
+              "grid min-h-0 gap-4 md:gap-5 lg:min-h-[560px] lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.38fr)] xl:min-h-[620px] xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.36fr)]",
               isRental ? "bg-transparent" : "bg-white",
             )}
           >

@@ -77,16 +77,16 @@ function LandlordNav({
             className={[
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
               active
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-slate-700 hover:bg-slate-100 hover:text-slate-950",
+                ? "ed-nav-item-active"
+                : "ed-nav-item",
             ].join(" ")}
           >
             <span
               className={[
                 "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
                 active
-                  ? "bg-white/12 text-white"
-                  : "bg-slate-100 text-slate-600",
+                  ? "ed-nav-icon-active"
+                  : "ed-nav-icon",
               ].join(" ")}
             >
               <Icon className="h-4 w-4" />
@@ -109,9 +109,9 @@ export function LandlordDashboardShell({
 
   return (
     <div className="app-mobile-canvas min-h-screen">
-      <aside className="fixed inset-y-0 left-0 z-[100] hidden w-72 border-r border-slate-200 bg-white/95 p-4 shadow-[8px_0_24px_rgba(15,23,42,0.04)] backdrop-blur lg:block">
+      <aside className="ed-shell-panel fixed inset-y-0 left-0 z-[100] hidden w-72 border-r p-4 lg:block">
         <Link href="/dashboard/landlord" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+          <div className="ed-brand-mark flex h-10 w-10 items-center justify-center rounded-lg shadow-sm">
             <Building2 className="h-5 w-5" />
           </div>
           <div className="min-w-0">
@@ -148,14 +148,14 @@ export function LandlordDashboardShell({
         </form>
       </aside>
 
-      <header className="fixed left-0 right-0 top-0 z-[90] border-b border-slate-200 bg-white/95 shadow-[0_6px_18px_rgba(15,23,42,0.04)] backdrop-blur lg:left-72">
+      <header className="ed-shell-panel fixed left-0 right-0 top-0 z-[90] border-b lg:left-72">
         <div className="flex h-[72px] items-center justify-between gap-3 px-3 sm:px-6 lg:h-16 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label="Open navigation"
-              className="ios-button flex h-11 w-11 shrink-0 items-center justify-center border border-slate-200 bg-white text-slate-900 shadow-sm lg:hidden"
+              className="ios-button ed-soft-button flex h-11 w-11 shrink-0 items-center justify-center border shadow-sm lg:hidden"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -169,7 +169,7 @@ export function LandlordDashboardShell({
             </div>
           </div>
 
-          <div className="hidden rounded-lg border border-slate-200 bg-white px-3 py-2 text-right shadow-sm sm:block">
+          <div className="ed-soft-button hidden rounded-lg border px-3 py-2 text-right shadow-sm sm:block">
             <p className="max-w-[200px] truncate text-sm font-medium leading-none text-slate-950">
               {displayName}
             </p>
@@ -188,7 +188,7 @@ export function LandlordDashboardShell({
             className="absolute inset-0 bg-slate-950/35 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="absolute inset-x-3 top-4 mx-auto max-h-[calc(100vh-2rem)] max-w-[430px] overflow-y-auto rounded-[28px] border border-white/70 bg-white/95 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.28)] backdrop-blur">
+          <div className="ed-shell-panel absolute inset-x-3 top-4 mx-auto max-h-[calc(100vh-2rem)] max-w-[430px] overflow-y-auto rounded-[28px] border p-4 shadow-[0_24px_80px_rgba(15,23,42,0.28)]">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
@@ -201,7 +201,7 @@ export function LandlordDashboardShell({
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                className="ios-button inline-flex h-11 w-11 items-center justify-center border border-slate-200 bg-white text-slate-900 shadow-sm"
+                className="ios-button ed-soft-button inline-flex h-11 w-11 items-center justify-center border shadow-sm"
                 aria-label="Close navigation"
               >
                 <X className="h-5 w-5" />

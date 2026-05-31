@@ -42,14 +42,14 @@ export function TenantHeader({
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-30 border-b border-white/60 bg-white/78 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-2xl lg:left-[300px] xl:left-[320px]">
+      <header className="ed-shell-panel fixed left-0 right-0 top-0 z-30 border-b lg:left-[300px] xl:left-[320px]">
         <div className="px-3 py-3 sm:px-6 lg:px-8 lg:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
-                className="ios-button inline-flex h-11 w-11 items-center justify-center border border-neutral-200 bg-white/88 text-neutral-800 shadow-sm lg:hidden"
+                className="ios-button ed-soft-button inline-flex h-11 w-11 items-center justify-center border shadow-sm lg:hidden"
                 aria-label="Open menu"
               >
                 <HiBars3 className="h-5 w-5" />
@@ -68,7 +68,7 @@ export function TenantHeader({
               </div>
             </div>
 
-            <div className="hidden rounded-[22px] border border-neutral-200 bg-white/88 px-4 py-3 text-right shadow-sm sm:block">
+            <div className="ed-soft-button hidden rounded-[22px] border px-4 py-3 text-right shadow-sm sm:block">
               <p className="max-w-[200px] truncate text-sm font-semibold text-neutral-950">
                 {fullName}
               </p>
@@ -103,7 +103,7 @@ export function TenantHeader({
             aria-label="Close menu overlay"
           />
 
-          <div className="absolute inset-x-3 top-4 mx-auto max-h-[calc(100vh-2rem)] max-w-[430px] overflow-y-auto rounded-[32px] border border-white/70 bg-white/90 shadow-[0_24px_80px_rgba(15,23,42,0.28)] backdrop-blur-2xl sm:inset-x-6">
+          <div className="ed-shell-panel absolute inset-x-3 top-4 mx-auto max-h-[calc(100vh-2rem)] max-w-[430px] overflow-y-auto rounded-[32px] border shadow-[0_24px_80px_rgba(15,23,42,0.28)] sm:inset-x-6">
             <div className="px-4 pb-5 pt-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -118,7 +118,7 @@ export function TenantHeader({
                 <button
                   type="button"
                   onClick={() => setMenuOpen(false)}
-                  className="ios-button inline-flex h-11 w-11 items-center justify-center border border-neutral-200 bg-white/88 text-neutral-800 shadow-sm"
+                  className="ios-button ed-soft-button inline-flex h-11 w-11 items-center justify-center border shadow-sm"
                   aria-label="Close menu"
                 >
                   <HiXMark className="h-5 w-5" />
@@ -144,16 +144,16 @@ export function TenantHeader({
                       onClick={() => setMenuOpen(false)}
                       className={`flex items-center gap-3 rounded-[22px] px-4 py-4 text-sm font-medium transition active:scale-[0.99] ${
                         isActive
-                          ? "bg-neutral-950 text-white shadow-sm"
-                          : "bg-white/78 text-neutral-700 hover:bg-white"
+                          ? "ed-nav-item-active"
+                          : "ed-nav-item"
                       }`}
                     >
                       <span className="text-base">{item.emoji}</span>
                       <span
                         className={`flex h-9 w-9 items-center justify-center rounded-xl ${
                           isActive
-                            ? "bg-white/10 text-white"
-                            : "bg-neutral-100 text-neutral-600"
+                            ? "ed-nav-icon-active"
+                            : "ed-nav-icon"
                         }`}
                       >
                         <Icon className="h-4.5 w-4.5" />

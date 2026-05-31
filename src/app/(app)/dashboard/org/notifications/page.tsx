@@ -18,6 +18,7 @@ import { requireUserSession } from "@/lib/auth/session";
 import { encodePublicId } from "@/lib/public-id";
 import {
   approveMeterReading,
+  confirmMoveOutAction,
   markAllOrgNotificationsReadAction,
   markNotificationReadAction,
   rejectMeterReading,
@@ -242,17 +243,17 @@ function getNotificationStatusMeta(status: string) {
     case "SENT":
       return {
         icon: Send,
-        tone: "border-emerald-200 bg-emerald-50 text-emerald-700",
+        tone: "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300",
       };
     case "FAILED":
       return {
         icon: XCircle,
-        tone: "border-red-200 bg-red-50 text-red-700",
+        tone: "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300",
       };
     default:
       return {
         icon: Clock3,
-        tone: "border-amber-200 bg-amber-50 text-amber-700",
+        tone: "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300",
       };
   }
 }
@@ -617,28 +618,19 @@ function KpiTile({
   label,
   value,
   icon: Icon,
-  tone = "neutral",
 }: {
   label: string;
   value: string | number;
   icon: React.ComponentType<{ className?: string }>;
-  tone?: "neutral" | "warn" | "danger" | "success";
 }) {
-  const toneClass = {
-    neutral: "bg-white border-black/10",
-    warn: "bg-amber-50 border-amber-200",
-    danger: "bg-red-50 border-red-200",
-    success: "bg-emerald-50 border-emerald-200",
-  }[tone];
-
   return (
-    <div className={cn("rounded-3xl border p-4 shadow-sm", toneClass)}>
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">{label}</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">{value}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">{label}</p>
+          <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">{value}</p>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black/[0.04] text-neutral-800">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 dark:border-white/10 dark:bg-slate-950 dark:text-slate-300">
           <Icon className="h-4 w-4" />
         </div>
       </div>
@@ -657,13 +649,13 @@ function PanelHeader({
 }) {
   return (
     <div>
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-neutral-400">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
         {eyebrow}
       </p>
-      <h2 className="mt-2 text-lg font-semibold tracking-tight text-neutral-950 sm:text-xl">
+      <h2 className="mt-2 text-lg font-semibold tracking-tight text-slate-950 dark:text-white sm:text-xl">
         {title}
       </h2>
-      <p className="mt-1 text-sm text-neutral-500">{description}</p>
+      <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-300">{description}</p>
     </div>
   );
 }
@@ -676,9 +668,9 @@ function EmptyState({
   message: string;
 }) {
   return (
-    <div className="rounded-3xl border border-dashed border-black/10 bg-neutral-50 p-6 text-center sm:p-8">
-      <p className="text-sm font-medium text-neutral-900">{title}</p>
-      <p className="mt-1 text-sm text-neutral-500">{message}</p>
+    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center dark:border-white/15 dark:bg-slate-900">
+      <p className="text-sm font-semibold text-slate-900 dark:text-white">{title}</p>
+      <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-300">{message}</p>
     </div>
   );
 }
@@ -691,7 +683,7 @@ function PaymentStatusBadge({
   verificationStatus: string;
 }) {
   return (
-    <span className="inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-700">
+    <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
       {formatEnumLabel(gatewayStatus)} / {formatEnumLabel(verificationStatus)}
     </span>
   );
@@ -714,8 +706,8 @@ function NotificationFilterLink({
       className={cn(
         "inline-flex h-10 shrink-0 items-center justify-center rounded-full border px-4 text-sm font-medium transition",
         active
-          ? "border-neutral-950 bg-neutral-950 text-white"
-          : "border-black/10 bg-white text-neutral-700 hover:bg-neutral-50",
+          ? "border-slate-950 bg-slate-950 text-white dark:border-white dark:bg-white dark:text-slate-950"
+          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800",
       )}
     >
       {label}
@@ -739,37 +731,37 @@ export default async function OrganizationNotificationsPage({
   } = await loadNotificationsPageData(activeFilter);
 
   return (
-    <div className="space-y-4 bg-neutral-50/70 sm:space-y-6">
-      <section className="overflow-hidden rounded-[32px] border border-black/10 bg-white shadow-sm">
-        <div className="border-b border-black/5 bg-[radial-gradient(circle_at_top_left,_rgba(0,0,0,0.04),_transparent_40%)] p-4 sm:p-6">
+    <div className="space-y-4 pb-8 sm:space-y-6">
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900/90">
+        <div className="border-b border-slate-100 p-4 dark:border-white/10 sm:p-6">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-medium text-neutral-700 shadow-sm">
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow-sm dark:border-white/10 dark:bg-slate-950 dark:text-slate-200">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 {membership.org.name} Operations Desk
               </div>
 
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl">
+              <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
                 Operations overview
               </h1>
-              <p className="mt-3 text-sm leading-6 text-neutral-600 sm:text-base">
+              <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base">
                 A single workspace for water approvals, payment signals, and outbound communication
                 across the organization.
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="rounded-2xl border border-black/10 bg-white px-4 py-3 shadow-sm">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-neutral-400">
+            <div className="grid gap-3 sm:grid-cols-2 xl:flex xl:items-center">
+              <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-slate-950">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                   Organization time
                 </p>
-                <p className="mt-1 text-sm font-medium text-neutral-950">
+                <p className="mt-1 text-sm font-medium text-slate-950 dark:text-white">
                   {membership.org.timezone}
                 </p>
               </div>
               <Link
                 href="/dashboard/org"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-black/10 bg-neutral-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Dashboard
@@ -777,7 +769,7 @@ export default async function OrganizationNotificationsPage({
               <form action={sendPaymentRemindersAction}>
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
                 >
                   <Send className="h-4 w-4" />
                   Send reminders
@@ -788,17 +780,17 @@ export default async function OrganizationNotificationsPage({
         </div>
 
         <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 sm:p-6 xl:grid-cols-5">
-          <KpiTile label="Water Review" value={approvalQueue.length} icon={Droplets} tone="warn" />
-          <KpiTile label="Move-outs" value={moveOutQueue.length} icon={Megaphone} tone="warn" />
+          <KpiTile label="Water Review" value={approvalQueue.length} icon={Droplets} />
+          <KpiTile label="Move-outs" value={moveOutQueue.length} icon={Megaphone} />
           <KpiTile label="Unread" value={unreadCount} icon={Bell} />
           <KpiTile label="Queued" value={queuedCount} icon={Clock3} />
-          <KpiTile label="Sent" value={sentCount} icon={Send} tone="success" />
+          <KpiTile label="Sent" value={sentCount} icon={Send} />
         </div>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         <div className="space-y-4 xl:col-span-8">
-          <div className="rounded-[28px] border border-black/10 bg-white p-4 shadow-sm sm:p-6">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900/90 sm:p-6">
             <PanelHeader
               eyebrow="Move-out desk"
               title="Notice review queue"
@@ -826,81 +818,78 @@ export default async function OrganizationNotificationsPage({
                     return (
                       <article
                         key={notice.id}
-                        className="rounded-[28px] border border-black/10 bg-neutral-50 p-4"
+                        className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950"
                       >
-                        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-medium text-neutral-700 ring-1 ring-black/5">
+                              <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
                                 {notice.lease.unit.property.name}
                               </span>
-                              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-medium text-neutral-700 ring-1 ring-black/5">
+                              <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
                                 Unit {notice.lease.unit.houseNo}
                               </span>
-                              <span className="rounded-full bg-amber-50 px-3 py-1 text-[11px] font-medium text-amber-700 ring-1 ring-amber-200">
+                              <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
                                 {formatEnumLabel(notice.status)}
                               </span>
                               <span
                                 className={cn(
-                                  "rounded-full px-3 py-1 text-[11px] font-medium ring-1",
-                                  clearanceBalance <= 0
-                                    ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-                                    : "bg-red-50 text-red-700 ring-red-200",
+                                  "rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300",
                                 )}
                               >
                                 {clearanceBalance <= 0 ? "Clearance ready" : "Balance pending"}
                               </span>
                             </div>
 
-                            <h3 className="mt-4 text-base font-semibold text-neutral-950 sm:text-lg">
+                            <h3 className="mt-4 text-base font-semibold text-slate-950 dark:text-white sm:text-lg">
                               {notice.tenant.fullName}
                             </h3>
-                            <p className="mt-1 text-sm text-neutral-500">
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">
                               Move-out date {formatDateTime(notice.moveOutDate, membership.org.timezone)}
                             </p>
-                            <p className="mt-1 text-sm text-neutral-500">
+                            <p className="mt-1 break-words text-sm text-slate-500 dark:text-slate-300">
                               {notice.tenant.phone}
                               {notice.tenant.email ? ` / ${notice.tenant.email}` : ""}
                             </p>
 
                             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                              <div className="rounded-2xl bg-white p-3 ring-1 ring-black/5">
-                                <p className="text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+                              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
                                   Rent Balance
                                 </p>
-                                <p className="mt-2 text-sm font-semibold text-neutral-950">
+                                <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">
                                   {formatMoney(rentBalance, membership.org.currencyCode)}
                                 </p>
                               </div>
-                              <div className="rounded-2xl bg-white p-3 ring-1 ring-black/5">
-                                <p className="text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+                              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
                                   Water Balance
                                 </p>
-                                <p className="mt-2 text-sm font-semibold text-neutral-950">
+                                <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">
                                   {formatMoney(waterBalance, membership.org.currencyCode)}
                                 </p>
                               </div>
-                              <div className="rounded-2xl bg-white p-3 ring-1 ring-black/5">
-                                <p className="text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+                              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
                                   Clearance
                                 </p>
-                                <p className="mt-2 text-sm font-semibold text-neutral-950">
+                                <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">
                                   {formatMoney(clearanceBalance, membership.org.currencyCode)}
                                 </p>
                               </div>
                             </div>
 
                             {notice.notes ? (
-                              <div className="mt-4 rounded-2xl bg-white p-3 text-sm text-neutral-700 ring-1 ring-black/5">
+                              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
                                 {notice.notes}
                               </div>
                             ) : null}
                           </div>
 
-                          <div className="w-full space-y-2 xl:max-w-xs">
+                          <div className="grid w-full gap-2 sm:grid-cols-2 lg:max-w-xs lg:grid-cols-1">
                             <Link
                               href={`/dashboard/org/tenants/${notice.tenant.id}`}
-                              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
+                              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
                             >
                               Review tenant
                             </Link>
@@ -910,17 +899,48 @@ export default async function OrganizationNotificationsPage({
                                   notice.inspection.id,
                                   "inspection",
                                 )}`}
-                                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50"
+                                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
                               >
                                 View inspection
                               </Link>
                             ) : (
                               <Link
                                 href="/move-outs"
-                                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50"
+                                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
                               >
                                 Schedule inspection
                               </Link>
+                            )}
+                            {notice.status === "INSPECTION_COMPLETED" ? (
+                              <form
+                                action={confirmMoveOutAction}
+                                className="grid gap-2 sm:col-span-2 lg:col-span-1"
+                              >
+                                <input
+                                  type="hidden"
+                                  name="noticeId"
+                                  value={notice.id}
+                                />
+                                <input
+                                  name="notes"
+                                  placeholder="Closeout notes"
+                                  className="min-h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                                />
+                                <button
+                                  type="submit"
+                                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+                                >
+                                  Confirm move-out
+                                </button>
+                              </form>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled
+                                className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-400 sm:col-span-2 dark:border-white/10 dark:bg-slate-900 dark:text-slate-500 lg:col-span-1"
+                              >
+                                Confirm after inspection
+                              </button>
                             )}
                           </div>
                         </div>
@@ -931,7 +951,7 @@ export default async function OrganizationNotificationsPage({
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-black/10 bg-white p-4 shadow-sm sm:p-6">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900/90 sm:p-6">
             <PanelHeader
               eyebrow="Review queue"
               title="Water reading approvals"
@@ -953,37 +973,37 @@ export default async function OrganizationNotificationsPage({
                   return (
                     <article
                       key={reading.id}
-                      className="rounded-[28px] border border-black/10 bg-neutral-50 p-4"
+                      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950"
                     >
-                      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-full bg-white px-3 py-1 text-[11px] font-medium text-neutral-700 ring-1 ring-black/5">
+                            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
                               {reading.unit.property.name}
                             </span>
-                            <span className="rounded-full bg-white px-3 py-1 text-[11px] font-medium text-neutral-700 ring-1 ring-black/5">
+                            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
                               Unit {reading.unit.houseNo}
                             </span>
-                            <span className="rounded-full bg-amber-50 px-3 py-1 text-[11px] font-medium text-amber-700 ring-1 ring-amber-200">
+                            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
                               Awaiting review
                             </span>
                           </div>
 
-                          <div className="mt-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                             <div>
-                              <h3 className="text-base font-semibold text-neutral-950 sm:text-lg">
+                              <h3 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">
                                 Water reading for {reading.period}
                               </h3>
-                              <p className="mt-1 text-sm text-neutral-500">
+                              <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-300">
                                 Submitted by {reading.submittedBy.fullName} on{" "}
                                 {formatDateTime(reading.createdAt, membership.org.timezone)}
                               </p>
                             </div>
-                            <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-black/5">
-                              <p className="text-[11px] uppercase tracking-[0.16em] text-neutral-400">
+                            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-slate-900">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                                 Projected bill
                               </p>
-                              <p className="mt-1 text-lg font-semibold text-neutral-950">
+                              <p className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">
                                 {formatMoney(projectedTotal, membership.org.currencyCode)}
                               </p>
                             </div>
@@ -1001,12 +1021,12 @@ export default async function OrganizationNotificationsPage({
                             ].map((item) => (
                               <div
                                 key={item.label}
-                                className="rounded-2xl bg-white p-3 ring-1 ring-black/5"
+                                className="rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900"
                               >
-                                <dt className="text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+                                <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
                                   {item.label}
                                 </dt>
-                                <dd className="mt-2 text-sm font-semibold text-neutral-950">
+                                <dd className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">
                                   {item.value}
                                 </dd>
                               </div>
@@ -1014,12 +1034,12 @@ export default async function OrganizationNotificationsPage({
                           </dl>
                         </div>
 
-                        <div className="w-full space-y-3 xl:max-w-sm">
+                        <div className="w-full space-y-3 lg:max-w-sm">
                           <form action={approveMeterReading}>
                             <input type="hidden" name="readingId" value={reading.id} />
                             <button
                               type="submit"
-                              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-2"
+                              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
                             >
                               <CheckCircle2 className="h-4 w-4" />
                               Approve and issue tenant bill
@@ -1036,12 +1056,12 @@ export default async function OrganizationNotificationsPage({
                                 rows={3}
                                 minLength={10}
                                 placeholder="Add a clear rejection reason for the caretaker..."
-                                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-300 focus:ring-2 focus:ring-neutral-200"
+                                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                               />
                             </label>
                             <button
                               type="submit"
-                              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-200 focus:ring-offset-2"
+                              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
                             >
                               <XCircle className="h-4 w-4" />
                               Reject and send back
@@ -1056,7 +1076,7 @@ export default async function OrganizationNotificationsPage({
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-black/10 bg-white p-4 shadow-sm sm:p-6">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900/90 sm:p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <PanelHeader
                 eyebrow="Activity log"
@@ -1067,7 +1087,7 @@ export default async function OrganizationNotificationsPage({
               <form action={markAllOrgNotificationsReadAction}>
                 <button
                   type="submit"
-                  className="inline-flex h-10 items-center justify-center rounded-2xl border border-black/10 bg-white px-4 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50"
+                  className="inline-flex min-h-10 w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800 sm:w-auto"
                 >
                   Mark all read
                 </button>
@@ -1097,7 +1117,7 @@ export default async function OrganizationNotificationsPage({
                   return (
                     <article
                       key={notification.id}
-                      className="rounded-3xl border border-black/5 bg-neutral-50 p-4"
+                      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950"
                     >
                       <div className="flex items-start gap-3">
                         <div
@@ -1111,11 +1131,11 @@ export default async function OrganizationNotificationsPage({
 
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="truncate text-sm font-semibold text-neutral-950">
+                            <p className="min-w-0 text-sm font-semibold text-slate-950 dark:text-white">
                               {notification.title}
                             </p>
                             {!notification.readAt && (
-                              <span className="rounded-full bg-neutral-950 px-2 py-0.5 text-[10px] font-medium text-white">
+                              <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
                                 New
                               </span>
                             )}
@@ -1129,11 +1149,11 @@ export default async function OrganizationNotificationsPage({
                             </span>
                           </div>
 
-                          <p className="mt-1 line-clamp-2 text-sm text-neutral-600">
+                          <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
                             {notification.message}
                           </p>
 
-                          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                             <span>{formatEnumLabel(notification.type)}</span>
                             <span>•</span>
                             <span>{formatEnumLabel(notification.channel)}</span>
@@ -1144,7 +1164,7 @@ export default async function OrganizationNotificationsPage({
                           </div>
 
                           {(notification.user || notification.tenant) && (
-                            <p className="mt-2 text-xs text-neutral-500">
+                            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                               Recipient:{" "}
                               {notification.tenant?.fullName ??
                                 notification.user?.fullName ??
@@ -1161,7 +1181,7 @@ export default async function OrganizationNotificationsPage({
                               />
                               <button
                                 type="submit"
-                                className="inline-flex h-9 items-center justify-center rounded-xl border border-black/10 bg-white px-3 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50"
+                                className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                               >
                                 Mark read
                               </button>
@@ -1184,12 +1204,12 @@ export default async function OrganizationNotificationsPage({
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-2xl bg-neutral-50 p-4 ring-1 ring-black/5"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950"
                 >
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-neutral-400">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                     {item.label}
                   </p>
-                  <p className="mt-2 text-xl font-semibold text-neutral-950">{item.value}</p>
+                  <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{item.value}</p>
                 </div>
               ))}
             </div>
@@ -1197,7 +1217,7 @@ export default async function OrganizationNotificationsPage({
         </div>
 
         <aside className="space-y-4 xl:col-span-4">
-          <div className="rounded-[28px] border border-black/10 bg-white p-4 shadow-sm sm:p-6">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900/90 sm:p-6">
             <PanelHeader
               eyebrow="Collections"
               title="Recent payment activity"
@@ -1214,24 +1234,24 @@ export default async function OrganizationNotificationsPage({
                 recentPayments.map((payment) => (
                   <article
                     key={payment.id}
-                    className="rounded-3xl border border-black/5 bg-neutral-50 p-4"
+                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-neutral-700 ring-1 ring-black/5">
+                      <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
                         <CreditCard className="h-4 w-4" />
                       </div>
 
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <div>
-                            <p className="truncate text-sm font-semibold text-neutral-950">
+                            <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
                               {payment.payerTenant.fullName}
                             </p>
-                            <p className="mt-1 text-sm text-neutral-500">
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">
                               {getPaymentLabel(payment)}
                             </p>
                           </div>
-                          <p className="text-sm font-semibold text-neutral-950">
+                          <p className="text-sm font-semibold text-slate-950 dark:text-white">
                             {formatMoney(
                               toNumber(payment.amount),
                               membership.org.currencyCode,
@@ -1244,12 +1264,12 @@ export default async function OrganizationNotificationsPage({
                             gatewayStatus={payment.gatewayStatus}
                             verificationStatus={payment.verificationStatus}
                           />
-                          <span className="text-xs text-neutral-500">
+                          <span className="text-xs text-slate-500 dark:text-slate-400">
                             {formatEnumLabel(payment.method)}
                           </span>
                         </div>
 
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                           <span>
                             {formatDateTime(
                               payment.paidAt ?? payment.createdAt,
@@ -1273,27 +1293,27 @@ export default async function OrganizationNotificationsPage({
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-black/10 bg-neutral-950 p-5 text-white shadow-sm">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">Snapshot</p>
-            <h3 className="mt-3 text-xl font-semibold tracking-tight">Operations at a glance</h3>
-            <p className="mt-2 text-sm leading-6 text-white/70">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-900/90">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Snapshot</p>
+            <h3 className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">Operations at a glance</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
               {approvalQueue.length > 0
                 ? `${approvalQueue.length} approvals are waiting for action. Prioritize submitted readings to keep billing current.`
                 : "No pending water approvals right now. The queue is clear."}
             </p>
 
             <div className="mt-5 space-y-3">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs text-white/50">Delivery health</p>
-                <p className="mt-1 text-2xl font-semibold">{sentCount}</p>
-                <p className="mt-1 text-sm text-white/65">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950">
+                <p className="text-xs text-slate-500 dark:text-slate-400">Delivery health</p>
+                <p className="mt-1 text-2xl font-semibold text-slate-950 dark:text-white">{sentCount}</p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">
                   successful sends in the current feed
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs text-white/50">Attention needed</p>
-                <p className="mt-1 text-2xl font-semibold">{failedCount + unreadCount}</p>
-                <p className="mt-1 text-sm text-white/65">failed or unread items to review</p>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950">
+                <p className="text-xs text-slate-500 dark:text-slate-400">Attention needed</p>
+                <p className="mt-1 text-2xl font-semibold text-slate-950 dark:text-white">{failedCount + unreadCount}</p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">failed or unread items to review</p>
               </div>
             </div>
           </div>

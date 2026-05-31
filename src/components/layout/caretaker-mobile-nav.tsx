@@ -83,7 +83,7 @@ export function CaretakerMobileSidebar({
 
       <aside
         className={clsx(
-          "absolute left-0 top-0 flex h-full w-[88%] max-w-[360px] flex-col border-r border-white/60 bg-white/86 shadow-2xl backdrop-blur-2xl transition-transform duration-300",
+          "ed-shell-panel absolute left-0 top-0 flex h-full w-[88%] max-w-[360px] flex-col border-r shadow-2xl transition-transform duration-300",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -113,7 +113,7 @@ export function CaretakerMobileSidebar({
               type="button"
               onClick={onClose}
               aria-label="Close menu"
-              className="ios-button inline-flex h-11 w-11 shrink-0 items-center justify-center border border-neutral-200 bg-white/88 text-neutral-700 shadow-sm hover:bg-white"
+              className="ios-button ed-soft-button inline-flex h-11 w-11 shrink-0 items-center justify-center border shadow-sm"
             >
               <X className="h-5 w-5" />
             </button>
@@ -146,16 +146,16 @@ export function CaretakerMobileSidebar({
                   className={clsx(
                     "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition active:scale-[0.99]",
                     active
-                      ? "bg-neutral-900 text-white shadow-sm"
-                      : "text-neutral-700 hover:bg-neutral-100"
+                      ? "ed-nav-item-active"
+                      : "ed-nav-item"
                   )}
                 >
                   <span
                     className={clsx(
                       "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition",
                       active
-                        ? "bg-white/10 text-white"
-                        : "bg-neutral-100 text-neutral-600 group-hover:bg-white"
+                        ? "ed-nav-icon-active"
+                        : "ed-nav-icon"
                     )}
                   >
                     <Icon className="h-4 w-4" />

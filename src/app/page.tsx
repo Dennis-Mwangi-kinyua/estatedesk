@@ -2,9 +2,9 @@ import MarketingHomePage from "@/components/marketing/marketing-home-page";
 import { publicPageMetadata } from "@/lib/seo";
 
 export const metadata = publicPageMetadata({
-  title: "EstateDesk | Property Management Software in Kenya",
+  title: "EstateDesk Dashboard - Property Management System",
   description:
-    "EstateDesk helps Kenyan landlords and property managers run tenants, leases, payments, caretakers, inspections, maintenance issues, and staff access from one clean dashboard.",
+    "Securely manage Kenyan rental properties online. EstateDesk helps landlords and managers track tenants, leases, payments, caretakers, inspections, maintenance, and reports.",
   path: "/",
 });
 

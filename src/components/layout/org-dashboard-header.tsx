@@ -19,14 +19,14 @@ export function OrgDashboardHeader({
   onMenuClick,
 }: OrgDashboardHeaderProps) {
   return (
-    <header className="fixed left-0 right-0 top-0 z-[90] border-b border-slate-200/80 bg-white/78 shadow-[0_10px_34px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/72 lg:left-72">
+    <header className="ed-shell-panel fixed left-0 right-0 top-0 z-[90] border-b lg:left-72">
       <div className="flex h-[76px] items-center justify-between gap-3 px-3 pt-safe sm:px-6 lg:h-16 lg:px-8 lg:pt-0">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             onClick={onMenuClick}
             aria-label="Open navigation"
-            className="ios-button touch-target flex shrink-0 items-center justify-center border border-slate-200 bg-white/86 text-slate-900 shadow-sm dark:border-white/10 dark:bg-slate-900/86 dark:text-white lg:hidden"
+            className="ios-button ed-soft-button touch-target flex shrink-0 items-center justify-center border shadow-sm lg:hidden"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -45,12 +45,12 @@ export function OrgDashboardHeader({
           <Link
             href="/dashboard/org/notifications"
             aria-label="Notifications"
-            className="ios-button touch-target flex items-center justify-center border border-slate-200 bg-white/86 text-slate-900 shadow-sm hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900/86 dark:text-white dark:hover:bg-slate-800 lg:h-10 lg:w-10"
+            className="ios-button ed-soft-button touch-target flex items-center justify-center border shadow-sm lg:h-10 lg:w-10"
           >
             <Bell className="h-4 w-4" />
           </Link>
 
-          <div className="hidden max-w-[16rem] rounded-2xl border border-slate-200 bg-white/76 px-3 py-2 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/76 sm:block">
+          <div className="ed-soft-button hidden max-w-[16rem] rounded-2xl border px-3 py-2 text-right shadow-sm backdrop-blur-xl sm:block">
             <p className="text-sm font-medium leading-none text-slate-950 dark:text-white">
               {userName}
             </p>

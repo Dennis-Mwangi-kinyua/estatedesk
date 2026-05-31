@@ -17,9 +17,9 @@ import { publicPageMetadata } from "@/lib/seo";
 import { contactSalesAction } from "./actions";
 
 export const metadata = publicPageMetadata({
-  title: "Contact EstateDesk",
+  title: "Help and Contact",
   description:
-    "Contact EstateDesk for property management software rollout support in Kenya, including tenant management, billing workflows, caretaker operations, and enterprise onboarding.",
+    "Get help with EstateDesk onboarding, property management workflows, tenant records, billing, caretaker operations, reports, and enterprise rollout support.",
   path: "/contact",
 });
 

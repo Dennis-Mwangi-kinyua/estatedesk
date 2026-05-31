@@ -1,10 +1,12 @@
+import Script from "next/script";
+
 const THEME_INIT_SCRIPT = `
 (() => {
   try {
     const storageKey = "theme";
     const root = document.documentElement;
     const stored = window.localStorage.getItem(storageKey);
-    const theme = stored === "light" || stored === "dark" || stored === "system" ? stored : "dark";
+    const theme = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const resolvedTheme = theme === "system" ? systemTheme : theme;
 
@@ -14,17 +16,17 @@ const THEME_INIT_SCRIPT = `
     root.dataset.theme = theme;
     root.dataset.resolvedTheme = resolvedTheme;
   } catch {
-    document.documentElement.classList.add("dark");
-    document.documentElement.style.colorScheme = "dark";
+    document.documentElement.classList.add("light");
+    document.documentElement.style.colorScheme = "light";
   }
 })();
 `;
 
 export function ThemeInitScript() {
   return (
-    <script
+    <Script
+      id="estatedesk-theme-init"
       dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
-      suppressHydrationWarning
     />
   );
 }

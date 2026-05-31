@@ -182,17 +182,15 @@ const SidebarNavItem = memo(function SidebarNavItem({
         onClick={onNavigate}
         className={[
           "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors duration-150",
-          active
-            ? "bg-primary text-primary-foreground shadow-sm"
-            : "text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white",
+          active ? "ed-nav-item-active" : "ed-nav-item",
         ].join(" ")}
       >
         <span
           className={[
             "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
             active
-              ? "bg-white/12 text-white"
-              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+              ? "ed-nav-icon-active"
+              : "ed-nav-icon",
           ].join(" ")}
         >
           <Icon className="h-4 w-4" />
@@ -202,7 +200,7 @@ const SidebarNavItem = memo(function SidebarNavItem({
           <span className="truncate">{item.label}</span>
           <Icon
             className={
-            active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-slate-400 dark:text-slate-500"
+            active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-current opacity-45"
             }
           />
         </div>
@@ -215,17 +213,15 @@ const SidebarNavItem = memo(function SidebarNavItem({
       href={item.href}
       className={[
         "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors",
-        active
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white",
+        active ? "ed-nav-item-active" : "ed-nav-item",
       ].join(" ")}
     >
       <span
         className={[
           "flex h-9 w-9 items-center justify-center rounded-md",
           active
-            ? "bg-white/12 text-white"
-            : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+          ? "ed-nav-icon-active"
+          : "ed-nav-icon",
         ].join(" ")}
       >
         <Icon className="h-4 w-4" />
@@ -233,7 +229,7 @@ const SidebarNavItem = memo(function SidebarNavItem({
 
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
         <span className="truncate">{item.label}</span>
-        <Icon className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-slate-400 dark:text-slate-500"} />
+        <Icon className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-current opacity-45"} />
       </div>
     </Link>
   );
@@ -246,7 +242,7 @@ const SidebarBrand = memo(function SidebarBrand({
 }) {
   return (
     <Link href="/dashboard/org" className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+      <div className="ed-brand-mark flex h-10 w-10 items-center justify-center rounded-lg shadow-sm">
         <Building2 className="h-5 w-5" />
       </div>
 
@@ -311,7 +307,7 @@ export function OrgDashboardSidebar({
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r border-slate-200 bg-white/92 shadow-[10px_0_28px_rgba(15,23,42,0.04)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/88 lg:flex">
+      <aside className="ed-shell-panel fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r lg:flex">
         <div className="border-b border-slate-200 px-5 py-5 dark:border-white/10">
           <SidebarBrand organizationName={organizationName} />
         </div>
@@ -364,7 +360,7 @@ export function OrgDashboardSidebar({
                   type="button"
                   onClick={closeMobile}
                   aria-label="Close navigation"
-                  className="ios-button touch-target inline-flex items-center justify-center border border-slate-200 bg-white/86 text-slate-900 shadow-sm dark:border-white/10 dark:bg-slate-900/86 dark:text-white"
+                  className="ios-button ed-soft-button touch-target inline-flex items-center justify-center border shadow-sm"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -430,8 +426,8 @@ export function OrgDashboardSidebar({
                 className={[
                   "flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[11px] font-semibold transition active:scale-95",
                   active
-                    ? "bg-slate-950 text-white dark:bg-white dark:text-slate-950"
-                    : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900",
+                    ? "ed-nav-item-active"
+                    : "ed-nav-item",
                 ].join(" ")}
               >
                 <Icon className="h-5 w-5" />

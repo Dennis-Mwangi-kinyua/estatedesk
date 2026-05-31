@@ -111,7 +111,7 @@ async function getVacancyUnitOrUnavailable(id: string) {
       throw error;
     }
 
-    console.error("Unable to load public vacancy detail after retries", error);
+    console.warn("Public vacancy detail is temporarily unavailable.");
     return { unit: null, databaseUnavailable: true };
   }
 }
@@ -238,10 +238,6 @@ function buildLoginHref(returnTo: string) {
   return `/login?returnTo=${encodeURIComponent(returnTo)}`;
 }
 
-function listingReference(id: string, houseNo: string) {
-  return `ED-${houseNo}-${id.replace(/-/g, "").slice(-4).toUpperCase()}`;
-}
-
 function shuffleVacancies<T>(items: T[]) {
   return [...items].sort(() => Math.random() - 0.5);
 }
@@ -272,9 +268,6 @@ function RelatedVacancyCard({ listing }: { listing: RelatedVacancyUnit }) {
         )}
       </div>
       <div className="min-w-0 self-center sm:self-auto">
-        <p className="truncate text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
-          {listingReference(listing.id, listing.houseNo)}
-        </p>
         <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-5 text-slate-950 dark:text-white">
           {listing.property.name} · Unit {listing.houseNo}
         </h3>
@@ -388,14 +381,13 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
       throw error;
     }
 
-    console.error("Unable to load related public vacancies", error);
+    console.warn("Related public vacancies are temporarily unavailable.");
   }
 
   const title = buildTitle(unit);
   const description = buildDescription(unit);
   const url = `${APP_URL}/vacancies/${unit.id}`;
   const loginHref = buildLoginHref(`/vacancies/${unit.id}`);
-  const reference = listingReference(unit.id, unit.houseNo);
   const place = unit.property?.location ?? unit.property?.address ?? unit.property?.name ?? "Location not listed";
   const roomLabel = unit.roomCount ?? unit.bedrooms;
   const detailCandidates: Array<VacancyDetailItem | null> = [
@@ -490,9 +482,6 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-[11px] font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-950 dark:text-slate-300">
-                    {reference}
-                  </span>
                   <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-100">
                     Vacant now
                   </span>

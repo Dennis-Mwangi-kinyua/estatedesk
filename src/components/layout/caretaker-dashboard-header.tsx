@@ -17,14 +17,14 @@ export function CaretakerDashboardHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-40 shrink-0 border-b border-white/60 bg-white/78 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-2xl">
+      <header className="ed-shell-panel sticky top-0 z-40 shrink-0 border-b">
         <div className="flex h-[72px] items-center justify-between gap-3 px-3 sm:h-[68px] sm:px-6 xl:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={() => setOpen(true)}
               aria-label="Open navigation menu"
-              className="ios-button inline-flex h-11 w-11 shrink-0 items-center justify-center border border-neutral-200 bg-white/88 text-neutral-700 shadow-sm hover:bg-white xl:hidden"
+              className="ios-button ed-soft-button inline-flex h-11 w-11 shrink-0 items-center justify-center border shadow-sm xl:hidden"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -50,10 +50,10 @@ export function CaretakerDashboardHeader({
             <Link
               href="/dashboard/caretaker/notifications"
               aria-label="View notifications"
-              className="ios-button relative inline-flex h-11 w-11 shrink-0 items-center justify-center border border-neutral-200 bg-white/88 text-neutral-700 shadow-sm hover:bg-white"
+              className="ios-button ed-soft-button relative inline-flex h-11 w-11 shrink-0 items-center justify-center border shadow-sm"
             >
               <Bell className="h-5 w-5" />
-              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-neutral-900" />
+              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-accent" />
             </Link>
           </div>
         </div>

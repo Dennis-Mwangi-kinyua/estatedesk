@@ -3,6 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { APP_PLANS } from "@/lib/billing/plans";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 const GRACE_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -44,16 +45,20 @@ function addDays(date: Date, days: number) {
 export async function getSubscriptionAccessState(
   orgId: string,
 ): Promise<SubscriptionAccessState> {
-  const subscription = await prisma.subscription.findUnique({
-    where: { orgId },
-    select: {
-      plan: true,
-      status: true,
-      trialEndsAt: true,
-      currentPeriodEnd: true,
-      metadata: true,
-    },
-  });
+  const subscription = await retryTransientDatabaseOperation(
+    () =>
+      prisma.subscription.findUnique({
+        where: { orgId },
+        select: {
+          plan: true,
+          status: true,
+          trialEndsAt: true,
+          currentPeriodEnd: true,
+          metadata: true,
+        },
+      }),
+    { label: "getSubscriptionAccessState-find-subscription" },
+  );
 
   const plan = normalizePlan(subscription?.plan);
   const amountDue =

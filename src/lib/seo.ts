@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const SITE_NAME = "EstateDesk";
 export const SITE_DESCRIPTION =
-  "EstateDesk is property management software for Kenya, helping landlords and property managers handle tenants, leases, rent, water bills, caretakers, inspections, and maintenance in one workspace.";
+  "EstateDesk helps Kenyan landlords and property managers securely manage tenants, leases, rent, water bills, caretakers, inspections, maintenance, and staff access online.";
 export const DEFAULT_SITE_URL = "https://estatedesk.co.ke";
 
 export function getSiteUrl() {
@@ -29,15 +29,16 @@ export function publicPageMetadata({
   path?: string;
 }): Metadata {
   const url = absoluteUrl(path);
+  const resolvedTitle = title.includes(SITE_NAME) ? title : `${title} - ${SITE_NAME}`;
 
   return {
-    title,
+    title: resolvedTitle,
     description,
     alternates: {
       canonical: url,
     },
     openGraph: {
-      title,
+      title: resolvedTitle,
       description,
       url,
       siteName: SITE_NAME,
@@ -46,7 +47,7 @@ export function publicPageMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: resolvedTitle,
       description,
     },
     robots: {

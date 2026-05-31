@@ -17,7 +17,7 @@ import { prisma } from "@/lib/prisma";
 import { publicPageMetadata } from "@/lib/seo";
 
 export const metadata = publicPageMetadata({
-  title: "Vacant Houses in Kenya",
+  title: "Public Property Information",
   description:
     "Browse available rental houses and vacant units published through EstateDesk by landlords and property managers in Kenya.",
   path: "/vacancies",
@@ -55,10 +55,6 @@ function imageUrl(key: string | null | undefined) {
 function unitLabel(type: string, bedrooms: number | null) {
   if (type === "APARTMENT" && bedrooms) return `${bedrooms} bedroom apartment`;
   return type.toLowerCase().replaceAll("_", " ");
-}
-
-function listingReference(id: string, houseNo: string) {
-  return `ED-${houseNo}-${id.replace(/-/g, "").slice(-4).toUpperCase()}`;
 }
 
 function listingDescription({
@@ -201,7 +197,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
       throw error;
     }
 
-    console.error("Unable to load public vacancy listings", error);
+    console.warn("Public vacancy listings are temporarily unavailable.");
     databaseUnavailable = true;
   }
 
@@ -212,7 +208,6 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
 
     return {
       id: listing.id,
-      reference: listingReference(listing.id, listing.houseNo),
       href,
       imageSrc: imageUrl(listing.images[0]?.key),
       hasImage: Boolean(listing.images[0]?.key),
@@ -256,7 +251,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                 Vacant houses and apartments
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Browse a paginated grid of vacant homes with photos, professional listing references, rent details, descriptions, and direct manager contacts.
+                Browse a paginated grid of vacant homes with photos, rent details, descriptions, and direct manager contacts.
               </p>
             </div>
 
