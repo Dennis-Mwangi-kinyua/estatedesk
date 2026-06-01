@@ -65,7 +65,7 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900/90 sm:p-6">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
@@ -94,7 +94,7 @@ export function StatCard({
   note?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900/90">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950">
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
         {label}
       </p>
@@ -116,7 +116,7 @@ export function Surface({
   children: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900/90">
+    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950">
       <div className="border-b border-slate-100 px-4 py-4 dark:border-white/10">
         <h2 className="text-base font-semibold text-slate-950 dark:text-white">{title}</h2>
         {description ? <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-300">{description}</p> : null}
@@ -129,7 +129,7 @@ export function Surface({
 export function Badge({ children, tone }: { children: ReactNode; tone?: string }) {
   return (
     <span
-      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${
+      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
         tone ?? "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
       }`}
     >

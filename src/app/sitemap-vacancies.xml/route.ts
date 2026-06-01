@@ -36,7 +36,19 @@ function categorySlug(type: string) {
 
 export async function renderSitemapXml() {
   const units = await prisma.unit.findMany({
-    where: { status: 'VACANT', isActive: true, deletedAt: null },
+    where: {
+      status: 'VACANT',
+      isActive: true,
+      deletedAt: null,
+      property: {
+        isActive: true,
+        deletedAt: null,
+        org: {
+          status: 'ACTIVE',
+          deletedAt: null,
+        },
+      },
+    },
     include: { property: { select: { location: true, address: true, name: true } } },
     orderBy: { updatedAt: 'desc' },
     take: 1000,

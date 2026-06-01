@@ -44,11 +44,20 @@ export function publicPageMetadata({
       siteName: SITE_NAME,
       type: "website",
       locale: "en_KE",
+      images: [
+        {
+          url: "/images/og-vacancy.svg",
+          width: 1200,
+          height: 630,
+          alt: resolvedTitle,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: resolvedTitle,
       description,
+      images: ["/images/og-vacancy.svg"],
     },
     robots: {
       index: true,

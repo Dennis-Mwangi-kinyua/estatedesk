@@ -837,30 +837,78 @@
     color: rgb(161 161 170);
   }
 
-  :where(button)[class*="bg-slate-950"],
-  :where(button)[class*="bg-slate-900"],
-  :where(button)[class*="bg-neutral-950"],
-  :where(button)[class*="bg-neutral-900"],
-  :where(button)[class*="bg-emerald-600"],
-  :where(button)[class*="bg-emerald-700"],
-  :where(button)[class*="bg-blue-600"],
-  :where(button)[class*="bg-blue-700"],
-  :where(button)[class*="bg-indigo-600"],
-  :where(button)[class*="bg-violet-600"],
-  :where(button)[class*="bg-purple-600"],
-  :where(button)[class*="bg-cyan-600"],
-  :where(button)[class*="bg-[#007AFF]"] {
-    background-color: var(--primary) !important;
-    color: var(--primary-foreground) !important;
-    border-color: color-mix(in oklch, var(--primary) 92%, black) !important;
+  :where(button, a)[class*="bg-slate-950"],
+  :where(button, a)[class*="bg-slate-900"],
+  :where(button, a)[class*="bg-neutral-950"],
+  :where(button, a)[class*="bg-neutral-900"],
+  :where(button, a)[class*="bg-emerald-600"],
+  :where(button, a)[class*="bg-emerald-700"],
+  :where(button, a)[class*="bg-blue-600"],
+  :where(button, a)[class*="bg-blue-700"],
+  :where(button, a)[class*="bg-indigo-600"],
+  :where(button, a)[class*="bg-violet-600"],
+  :where(button, a)[class*="bg-purple-600"],
+  :where(button, a)[class*="bg-cyan-600"],
+  :where(button, a)[class*="bg-[#007AFF]"] {
+    background-color: rgb(255 255 255) !important;
+    color: rgb(30 41 59) !important;
+    border: 1px solid rgb(226 232 240) !important;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.08) !important;
   }
 
-  :where(button)[class*="hover:bg-slate-800"]:hover,
-  :where(button)[class*="hover:bg-neutral-800"]:hover,
-  :where(button)[class*="hover:bg-emerald-700"]:hover,
-  :where(button)[class*="hover:bg-emerald-800"]:hover {
-    background-color: color-mix(in oklch, var(--primary) 88%, black) !important;
-    color: var(--primary-foreground) !important;
+  :where(button, a)[class*="bg-slate-950"]:hover,
+  :where(button, a)[class*="bg-slate-900"]:hover,
+  :where(button, a)[class*="bg-neutral-950"]:hover,
+  :where(button, a)[class*="bg-neutral-900"]:hover,
+  :where(button, a)[class*="bg-emerald-600"]:hover,
+  :where(button, a)[class*="bg-emerald-700"]:hover,
+  :where(button, a)[class*="bg-blue-600"]:hover,
+  :where(button, a)[class*="bg-blue-700"]:hover,
+  :where(button, a)[class*="bg-indigo-600"]:hover,
+  :where(button, a)[class*="bg-violet-600"]:hover,
+  :where(button, a)[class*="bg-purple-600"]:hover,
+  :where(button, a)[class*="bg-cyan-600"]:hover,
+  :where(button, a)[class*="bg-[#007AFF]"]:hover {
+    background-color: rgb(248 250 252) !important;
+    color: rgb(15 23 42) !important;
+    border-color: rgb(203 213 225) !important;
+  }
+
+  .dark :where(button, a)[class*="bg-slate-950"],
+  .dark :where(button, a)[class*="bg-slate-900"],
+  .dark :where(button, a)[class*="bg-neutral-950"],
+  .dark :where(button, a)[class*="bg-neutral-900"],
+  .dark :where(button, a)[class*="bg-emerald-600"],
+  .dark :where(button, a)[class*="bg-emerald-700"],
+  .dark :where(button, a)[class*="bg-blue-600"],
+  .dark :where(button, a)[class*="bg-blue-700"],
+  .dark :where(button, a)[class*="bg-indigo-600"],
+  .dark :where(button, a)[class*="bg-violet-600"],
+  .dark :where(button, a)[class*="bg-purple-600"],
+  .dark :where(button, a)[class*="bg-cyan-600"],
+  .dark :where(button, a)[class*="bg-[#007AFF]"] {
+    background-color: rgb(15 23 42) !important;
+    color: rgb(255 255 255) !important;
+    border-color: rgb(255 255 255 / 0.15) !important;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.28) !important;
+  }
+
+  .dark :where(button, a)[class*="bg-slate-950"]:hover,
+  .dark :where(button, a)[class*="bg-slate-900"]:hover,
+  .dark :where(button, a)[class*="bg-neutral-950"]:hover,
+  .dark :where(button, a)[class*="bg-neutral-900"]:hover,
+  .dark :where(button, a)[class*="bg-emerald-600"]:hover,
+  .dark :where(button, a)[class*="bg-emerald-700"]:hover,
+  .dark :where(button, a)[class*="bg-blue-600"]:hover,
+  .dark :where(button, a)[class*="bg-blue-700"]:hover,
+  .dark :where(button, a)[class*="bg-indigo-600"]:hover,
+  .dark :where(button, a)[class*="bg-violet-600"]:hover,
+  .dark :where(button, a)[class*="bg-purple-600"]:hover,
+  .dark :where(button, a)[class*="bg-cyan-600"]:hover,
+  .dark :where(button, a)[class*="bg-[#007AFF]"]:hover {
+    background-color: rgb(30 41 59) !important;
+    color: rgb(255 255 255) !important;
+    border-color: rgb(255 255 255 / 0.22) !important;
   }
 
   .dark :where([class*="text-white"], [class*="text-slate-100"], [class*="text-neutral-100"]) {

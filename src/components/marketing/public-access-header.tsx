@@ -74,8 +74,8 @@ export function PublicAccessHeader({
                   href={item.href}
                   className={`public-access-nav-link inline-flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border px-2 text-[11px] font-semibold transition sm:min-h-11 sm:flex-row sm:gap-1.5 sm:text-sm md:min-h-10 md:px-3.5 ${
                     isActive
-                      ? "public-access-nav-link-active border-slate-300 bg-white text-slate-950 shadow-sm"
-                      : "border-slate-200/80 bg-slate-50/85 text-slate-950 shadow-sm hover:border-slate-300 hover:bg-white hover:text-slate-950 md:border-transparent md:bg-transparent md:shadow-none"
+                      ? "public-access-nav-link-active border-slate-300 bg-white text-slate-950 shadow-sm dark:border-white/20 dark:bg-white dark:text-slate-950"
+                      : "border-slate-200/80 bg-slate-50/85 text-slate-950 shadow-sm hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-white/20 dark:hover:bg-slate-800 dark:hover:text-white md:border-transparent md:bg-transparent md:shadow-none md:dark:bg-transparent"
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0 text-current" />
@@ -97,7 +97,7 @@ export function PublicAccessHeader({
             </Link>
             <Link
               href="/register"
-              className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 dark:focus-visible:ring-white md:min-h-10"
+              className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-800 dark:focus-visible:ring-white md:min-h-10 [&_*]:text-current"
             >
               <UserPlus className="h-4 w-4 shrink-0" />
               <span className="truncate">Create account</span>

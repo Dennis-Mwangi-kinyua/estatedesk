@@ -289,6 +289,12 @@ export async function loginAction(
               role: true,
               scopeType: true,
               scopeId: true,
+              org: {
+                select: {
+                  name: true,
+                  status: true,
+                },
+              },
             },
             orderBy: {
               createdAt: "desc",
@@ -298,7 +304,7 @@ export async function loginAction(
       },
     );
 
-    let tenant: { id: string } | null = null;
+    let tenant: { id: string; org: { name: string; status: string } } | null = null;
 
     if (!primaryMembership) {
       tenant = await timed(
@@ -311,6 +317,12 @@ export async function loginAction(
               },
               select: {
                 id: true,
+                org: {
+                  select: {
+                    name: true,
+                    status: true,
+                  },
+                },
               },
             }),
           );
@@ -323,6 +335,20 @@ export async function loginAction(
         success: false,
         error: "No active organization or tenant account is linked to this user.",
       };
+    }
+
+    if (primaryMembership && primaryMembership.org.status !== "ACTIVE") {
+      const organizationName = primaryMembership.org.name;
+      redirect(
+        `/service-terminated?organization=${encodeURIComponent(organizationName)}`,
+      );
+    }
+
+    if (tenant && tenant.org.status !== "ACTIVE") {
+      const organizationName = tenant.org.name;
+      redirect(
+        `/service-terminated?organization=${encodeURIComponent(organizationName)}`,
+      );
     }
 
     await timed(makeLabel("login-set-session", requestId), async () => {

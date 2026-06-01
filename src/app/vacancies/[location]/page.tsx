@@ -25,7 +25,7 @@ import { APP_URL } from "@/lib/sitemap-utils";
 import { sendVacancyInquiryAction } from "./actions";
 
 type Props = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ location: string }>;
   searchParams?: Promise<{ sent?: string; error?: string }>;
 };
 
@@ -46,6 +46,10 @@ async function getVacancyUnit(id: string) {
           property: {
             isActive: true,
             deletedAt: null,
+            org: {
+              status: "ACTIVE",
+              deletedAt: null,
+            },
           },
         },
         include: {
@@ -145,6 +149,10 @@ async function getRelatedVacancyUnits(currentUnitId: string) {
           property: {
             isActive: true,
             deletedAt: null,
+            org: {
+              status: "ACTIVE",
+              deletedAt: null,
+            },
           },
         },
         orderBy: [{ updatedAt: "desc" }, { houseNo: "asc" }],
@@ -327,7 +335,7 @@ function CompactFact({
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
+  const { location: id } = await params;
   const { unit, databaseUnavailable } = await getVacancyUnitOrUnavailable(id);
   if (databaseUnavailable) {
     return {
@@ -367,7 +375,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function VacancyDetail({ params, searchParams }: Props) {
-  const { id } = await params;
+  const { location: id } = await params;
   const statusParams = await searchParams;
   const { unit, databaseUnavailable } = await getVacancyUnitOrUnavailable(id);
   if (databaseUnavailable) return <VacancyTemporarilyUnavailable />;

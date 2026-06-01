@@ -96,19 +96,19 @@ export default async function PlatformLayout({
   });
 
   return (
-    <div className="h-screen overflow-hidden bg-slate-50 text-slate-900">
+    <div className="h-screen overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <div className="flex h-full">
-        <aside className="hidden h-full w-[280px] shrink-0 border-r border-slate-200 bg-white lg:flex lg:flex-col">
-          <div className="border-b border-slate-200 px-5 py-5">
+        <aside className="hidden h-full w-[280px] shrink-0 border-r border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 lg:flex lg:flex-col">
+          <div className="border-b border-slate-200 px-5 py-5 dark:border-white/10">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
                 <Building2 className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <h1 className="truncate text-base font-semibold tracking-tight text-slate-950">
+                <h1 className="truncate text-base font-semibold tracking-tight text-slate-950 dark:text-white">
                   EstateDesk
                 </h1>
-                <p className="text-xs text-slate-500">Platform administration</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Platform administration</p>
               </div>
             </div>
           </div>
@@ -121,9 +121,9 @@ export default async function PlatformLayout({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950"
+                  className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
                 >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-100 text-slate-600 transition-colors group-hover:bg-white group-hover:text-primary">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-100 text-slate-600 transition-colors group-hover:bg-white group-hover:text-primary dark:bg-slate-900 dark:text-slate-300 dark:group-hover:bg-slate-800 dark:group-hover:text-white">
                     <Icon className="h-4 w-4" />
                   </span>
                   <span className="truncate">{item.label}</span>
@@ -132,12 +132,12 @@ export default async function PlatformLayout({
             })}
           </nav>
 
-          <div className="border-t border-slate-200 p-4">
-            <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
+          <div className="border-t border-slate-200 p-4 dark:border-white/10">
+            <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-slate-900">
+              <p className="text-xs uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
                 Signed in as
               </p>
-              <p className="mt-1 truncate text-sm font-medium text-slate-900">
+              <p className="mt-1 truncate text-sm font-medium text-slate-900 dark:text-white">
                 {session.fullName}
               </p>
             </div>
@@ -145,7 +145,7 @@ export default async function PlatformLayout({
             <form action={logoutAction}>
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>
@@ -156,20 +156,20 @@ export default async function PlatformLayout({
 
         <PlatformMobileShell navItems={navItems} fullName={session.fullName}>
           <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-            <header className="hidden shrink-0 border-b border-slate-200 bg-white px-6 py-4 lg:block">
+            <header className="hidden shrink-0 border-b border-slate-200 bg-white px-6 py-4 dark:border-white/10 dark:bg-slate-950 lg:block">
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <h2 className="truncate text-xl font-semibold tracking-tight text-slate-950">
+                  <h2 className="truncate text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
                     Platform Admin
                   </h2>
-                  <p className="truncate text-sm text-slate-500">
+                  <p className="truncate text-sm text-slate-500 dark:text-slate-400">
                     Manage organizations, platform users, billing, audit logs, and reports
                   </p>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2">
-                  <MessageSquareText className="h-4 w-4 text-slate-500" />
-                  <span className="max-w-[180px] truncate text-sm font-medium text-slate-700">
+                <div className="flex shrink-0 items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 dark:border-white/10 dark:bg-slate-900">
+                  <MessageSquareText className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                  <span className="max-w-[180px] truncate text-sm font-medium text-slate-700 dark:text-slate-200">
                     {session.fullName}
                   </span>
                 </div>
@@ -177,7 +177,7 @@ export default async function PlatformLayout({
             </header>
 
             <section className="min-h-0 flex-1 overflow-hidden p-3 sm:p-4 lg:p-6">
-              <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900/70">
                 <div className="h-full overflow-auto p-4 sm:p-5 lg:p-6">
                   {children}
                 </div>

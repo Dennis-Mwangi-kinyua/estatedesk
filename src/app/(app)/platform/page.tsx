@@ -64,9 +64,9 @@ function calcTrend(current: number, previous: number) {
 }
 
 function trendTone(current: number, previous: number) {
-  if (current > previous) return "text-emerald-600";
-  if (current < previous) return "text-rose-600";
-  return "text-stone-500";
+  if (current > previous) return "text-emerald-600 dark:text-emerald-300";
+  if (current < previous) return "text-rose-600 dark:text-rose-300";
+  return "text-slate-500 dark:text-slate-400";
 }
 
 function getInitials(name: string) {
@@ -86,7 +86,7 @@ function statusTone(status: string | null | undefined) {
       value,
     )
   ) {
-    return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-300/30 dark:bg-emerald-300/10 dark:text-emerald-100";
   }
 
   if (
@@ -100,7 +100,7 @@ function statusTone(status: string | null | undefined) {
       "partial",
     ].includes(value)
   ) {
-    return "border-amber-200 bg-amber-50 text-amber-700";
+    return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-300/30 dark:bg-amber-300/10 dark:text-amber-100";
   }
 
   if (
@@ -115,10 +115,10 @@ function statusTone(status: string | null | undefined) {
       "inactive",
     ].includes(value)
   ) {
-    return "border-rose-200 bg-rose-50 text-rose-700";
+    return "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-300/30 dark:bg-rose-300/10 dark:text-rose-100";
   }
 
-  return "border-stone-200 bg-stone-100 text-stone-700";
+  return "border-slate-200 bg-slate-100 text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200";
 }
 
 function buildBars(values: number[]) {
@@ -382,9 +382,9 @@ export default async function PlatformPage() {
   const revenueBars = buildBars(revenueSeries.map((item) => item.value));
 
   return (
-    <div className="min-h-screen bg-[#f6f4ef] text-stone-900">
+    <div className="min-h-full text-slate-900 dark:text-slate-100">
       <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-3 py-4 sm:px-4 lg:px-6 lg:py-6">
-        <section className="overflow-hidden rounded-[34px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(249,247,242,0.96)_100%)] p-4 shadow-[0_18px_50px_rgba(28,25,23,0.06)] lg:p-5">
+        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
           <div className="grid gap-3 xl:grid-cols-[1.55fr_0.9fr]">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               <MetricCard
@@ -403,13 +403,13 @@ export default async function PlatformPage() {
                 label="Online now"
                 value={formatNumber(onlineUsers)}
                 meta={`${formatNumber(totalUsers)} total users`}
-                metaTone="text-emerald-600"
+                metaTone="text-emerald-600 dark:text-emerald-300"
               />
               <MetricCard
                 label="Users"
                 value={formatNumber(totalUsers)}
                 meta={`${formatNumber(totalPlatformAdmins)} admins`}
-                metaTone="text-stone-500"
+                metaTone="text-slate-500 dark:text-slate-400"
               />
             </div>
 
@@ -528,18 +528,18 @@ export default async function PlatformPage() {
                     <Link
                       key={org.id}
                       href={`/platform/organizations/${org.slug}`}
-                      className="group relative flex flex-col overflow-hidden rounded-[28px] border border-stone-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8f7f4_100%)] p-4 shadow-[0_8px_22px_rgba(28,25,23,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_32px_rgba(28,25,23,0.08)] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-white/80"
+                      className="group relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex min-w-0 items-center gap-3">
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] bg-stone-950 text-sm font-semibold text-white">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-950 text-sm font-semibold text-white dark:border-white/10 dark:bg-white dark:text-slate-950">
                             {getInitials(org.name)}
                           </div>
                           <div className="min-w-0">
-                            <h3 className="truncate text-[15px] font-semibold text-stone-950">
+                            <h3 className="truncate text-[15px] font-semibold text-slate-950 dark:text-white">
                               {org.name}
                             </h3>
-                            <p className="mt-0.5 truncate text-[11px] text-stone-500">
+                            <p className="mt-0.5 truncate text-[11px] text-slate-500 dark:text-slate-400">
                               {org.email ?? "No email provided"}
                             </p>
                           </div>
@@ -554,13 +554,13 @@ export default async function PlatformPage() {
                         <OrgPill label="Staff" value={org._count.memberships} />
                       </div>
 
-                      <div className="mt-4 rounded-[20px] border border-stone-200/80 bg-white/80 p-3">
+                      <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900">
                         <div className="flex items-center justify-between gap-2">
                           <div className="min-w-0">
-                            <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-stone-400">
+                            <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                               Subscription
                             </p>
-                            <p className="mt-1 truncate text-xs font-medium text-stone-700">
+                            <p className="mt-1 truncate text-xs font-medium text-slate-700 dark:text-slate-200">
                               {org.subscription?.plan ?? "No active plan"}
                             </p>
                           </div>
@@ -572,7 +572,7 @@ export default async function PlatformPage() {
                         </div>
                       </div>
 
-                      <div className="mt-auto flex items-center justify-between gap-3 pt-4 text-[11px] text-stone-500">
+                      <div className="mt-auto flex items-center justify-between gap-3 pt-4 text-[11px] text-slate-500 dark:text-slate-400">
                         <span>{formatDate(org.createdAt)}</span>
                         <span className="truncate">{org.timezone ?? "—"}</span>
                       </div>
@@ -586,18 +586,18 @@ export default async function PlatformPage() {
                   {recentPayments.map((payment) => (
                     <div
                       key={payment.id}
-                      className="group flex items-center justify-between gap-3 rounded-[24px] border border-stone-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8f7f4_100%)] p-3.5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_22px_rgba(28,25,23,0.06)]"
+                      className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20"
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-stone-900">
+                        <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
                           {payment.payerTenant?.fullName ?? "Tenant payment"}
                         </p>
-                        <p className="mt-0.5 truncate text-xs text-stone-500">
+                        <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                           {payment.org?.name ?? "Unknown organization"}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-stone-950">
+                        <p className="text-sm font-semibold text-slate-950 dark:text-white">
                           {formatCurrency(Number(payment.amount ?? 0))}
                         </p>
                         <div className="mt-1 flex justify-end">
@@ -628,12 +628,12 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[34px] border border-white/80 bg-[linear-gradient(180deg,#ffffff_0%,#fbfaf7_100%)] p-4 shadow-[0_14px_34px_rgba(28,25,23,0.05)] lg:p-5">
+    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
       <div className="mb-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-400">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
           {title}
         </p>
-        <h2 className="mt-1 text-base font-semibold tracking-tight text-stone-950">
+        <h2 className="mt-1 text-base font-semibold tracking-tight text-slate-950 dark:text-white">
           {subtitle}
         </h2>
       </div>
@@ -654,12 +654,12 @@ function MetricCard({
   metaTone: string;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-[26px] border border-stone-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8f7f4_100%)] px-4 py-3.5 shadow-[0_8px_20px_rgba(28,25,23,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_28px_rgba(28,25,23,0.07)] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-white/80">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-400">
+    <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
         {label}
       </p>
       <div className="mt-2 flex items-end justify-between gap-3">
-        <p className="text-lg font-semibold tracking-tight text-stone-950 lg:text-[22px]">
+        <p className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white lg:text-[22px]">
           {value}
         </p>
         <p className={`text-[11px] font-medium ${metaTone}`}>{meta}</p>
@@ -678,15 +678,15 @@ function CompactInfoCard({
   helper: string;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-[26px] border border-stone-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8f7f4_100%)] px-4 py-3.5 shadow-[0_8px_20px_rgba(28,25,23,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_28px_rgba(28,25,23,0.07)] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-white/80">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-400">
+    <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
         {label}
       </p>
       <div className="mt-2 flex items-end justify-between gap-3">
-        <p className="text-lg font-semibold tracking-tight text-stone-950 lg:text-[22px]">
+        <p className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white lg:text-[22px]">
           {value}
         </p>
-        <p className="text-[11px] text-stone-500">{helper}</p>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">{helper}</p>
       </div>
     </div>
   );
@@ -704,12 +704,12 @@ function ActionLink({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3.5 py-3.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+      className="group flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3.5 py-3.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20 dark:hover:bg-slate-900"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600 transition-colors group-hover:bg-white group-hover:text-primary">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600 transition-colors group-hover:bg-white group-hover:text-slate-950 dark:bg-slate-900 dark:text-slate-300 dark:group-hover:bg-slate-800 dark:group-hover:text-white">
         <Icon className="h-4 w-4" />
       </div>
-      <p className="truncate text-sm font-semibold text-slate-800 transition-colors group-hover:text-slate-950">
+      <p className="truncate text-sm font-semibold text-slate-800 transition-colors group-hover:text-slate-950 dark:text-slate-200 dark:group-hover:text-white">
         {label}
       </p>
     </Link>
@@ -718,11 +718,11 @@ function ActionLink({
 
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[20px] border border-stone-200/80 bg-stone-50/80 px-3 py-3">
-      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-stone-400">
+    <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 dark:border-white/10 dark:bg-slate-900">
+      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
         {label}
       </p>
-      <p className="mt-1 text-sm font-semibold text-stone-950">{value}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">{value}</p>
     </div>
   );
 }
@@ -739,15 +739,15 @@ function ChartPanel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[34px] border border-white/80 bg-[linear-gradient(180deg,#ffffff_0%,#fbfaf7_100%)] p-4 shadow-[0_14px_34px_rgba(28,25,23,0.05)] lg:p-5">
+    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-400">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
           {eyebrow}
         </p>
-        <h2 className="mt-1 text-lg font-semibold tracking-tight text-stone-950">
+        <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">
           {title}
         </h2>
-        <p className="mt-1 text-xs text-stone-500">{subtitle}</p>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>
       </div>
       <div className="mt-4 h-[240px]">{children}</div>
     </section>
@@ -769,28 +769,28 @@ function PremiumBarChart({
 }) {
   if (bars.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center rounded-[24px] border border-stone-200 bg-stone-50 text-sm text-stone-500">
+      <div className="flex h-full items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-500 dark:border-white/10 dark:bg-slate-900 dark:text-slate-400">
         No analytics available.
       </div>
     );
   }
 
   return (
-    <div className="flex h-full items-end gap-2 rounded-[24px] border border-stone-200/80 bg-[linear-gradient(180deg,#fafaf9_0%,#f5f4f1_100%)] p-3">
+    <div className="flex h-full items-end gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900">
       {bars.map((bar, index) => (
         <div key={bar.id} className="group flex min-w-0 flex-1 flex-col items-center gap-2">
           <div className="flex w-full flex-1 items-end justify-center">
             <div
-              className={`w-full max-w-[48px] rounded-t-[16px] ${tone} shadow-[0_10px_20px_rgba(28,25,23,0.08)] transition-all duration-300 group-hover:-translate-y-1`}
+              className={`w-full max-w-[48px] rounded-t-lg ${tone} shadow-sm transition-all duration-200 group-hover:-translate-y-1 dark:bg-white`}
               style={{ height: `${bar.height}%` }}
               title={`${labels[index]}: ${valueFormatter(values[index])}`}
             />
           </div>
           <div className="w-full text-center">
-            <p className="truncate text-[10px] font-semibold text-stone-700">
+            <p className="truncate text-[10px] font-semibold text-slate-700 dark:text-slate-200">
               {labels[index]}
             </p>
-            <p className="mt-0.5 text-[10px] text-stone-500">
+            <p className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">
               {valueFormatter(values[index])}
             </p>
           </div>
@@ -815,11 +815,11 @@ function ProgressRow({
 
   return (
     <div>
-      <div className="mb-1.5 flex items-center justify-between text-xs text-stone-600">
+      <div className="mb-1.5 flex items-center justify-between text-xs text-slate-600 dark:text-slate-300">
         <span>{label}</span>
         <span>{formatNumber(value)}</span>
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-stone-200">
+      <div className="h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
         <div className={`h-full rounded-full ${tone}`} style={{ width: `${width}%` }} />
       </div>
     </div>
@@ -828,9 +828,9 @@ function ProgressRow({
 
 function OrgPill({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-[16px] border border-stone-200/80 bg-white/80 p-2 text-center">
-      <p className="text-[9px] uppercase tracking-[0.14em] text-stone-400">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-stone-950">{formatNumber(value)}</p>
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-2 text-center dark:border-white/10 dark:bg-slate-900">
+      <p className="text-[9px] uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">{formatNumber(value)}</p>
     </div>
   );
 }

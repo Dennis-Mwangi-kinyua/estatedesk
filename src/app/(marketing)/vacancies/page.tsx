@@ -142,6 +142,12 @@ function getVacancyListings({
             is: {
               isActive: true,
               deletedAt: null,
+              org: {
+                is: {
+                  status: "ACTIVE",
+                  deletedAt: null,
+                },
+              },
               ...(location
                 ? {
                     OR: [
@@ -256,14 +262,14 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
   });
 
   return (
-    <main className="min-h-screen bg-[#F2F6FB] text-slate-950 dark:bg-slate-950 dark:text-slate-100">
+    <main className="min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
       <PublicAccessHeader active="vacancies" loginHref={loginHref} />
 
-      <section className="border-b border-white/80 bg-white/60 dark:border-white/10 dark:bg-slate-900/60">
+      <section className="border-b border-slate-200 bg-white/85 dark:border-white/10 dark:bg-slate-900/80">
         <div className="mx-auto max-w-screen-2xl px-4 py-7 sm:px-6 lg:px-8 2xl:max-w-none">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm dark:border-sky-400/20 dark:bg-sky-400/10 dark:text-sky-100">
+              <p className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm dark:border-cyan-200/50 dark:bg-cyan-200/15 dark:text-cyan-50">
                 <ShieldCheck className="h-4 w-4" />
                 Verified vacant units
               </p>
@@ -271,11 +277,11 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                 Vacant houses and apartments
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Browse a paginated grid of vacant homes with photos, rent details, descriptions, and direct manager contacts.
+                Find verified available units with clear pricing, location details, and direct access to the managing office.
               </p>
             </div>
 
-            <form className="grid gap-2 rounded-xl border border-white/85 bg-white/80 p-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur dark:border-white/10 dark:bg-slate-950/70 sm:grid-cols-[1fr_0.75fr_auto] lg:min-w-[42rem]">
+            <form className="grid gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur dark:border-white/10 dark:bg-slate-950 sm:grid-cols-[1fr_0.75fr_auto] lg:min-w-[42rem]">
               <label className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
@@ -305,7 +311,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                   <option value="rent_asc">Rent low to high</option>
                   <option value="rent_desc">Rent high to low</option>
                 </select>
-                <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
+                <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-800 dark:focus-visible:ring-white dark:focus-visible:ring-offset-slate-900 [&_*]:text-current">
                   <SlidersHorizontal className="h-4 w-4" />
                   Apply
                 </button>

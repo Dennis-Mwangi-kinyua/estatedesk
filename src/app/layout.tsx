@@ -6,9 +6,14 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { SITE_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/seo";
 import "./globals.css";
 
+const siteUrl = getSiteUrl();
+
 export const metadata: Metadata = {
-  metadataBase: new URL(getSiteUrl()),
+  metadataBase: new URL(siteUrl),
   applicationName: SITE_NAME,
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "Property management software",
   title: {
     default: "EstateDesk | Property Management Software in Kenya",
     template: `%s | ${SITE_NAME}`,
@@ -52,6 +57,46 @@ export const metadata: Metadata = {
   },
 };
 
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE_NAME,
+    url: siteUrl,
+    logo: `${siteUrl}/images/og-vacancy.svg`,
+    areaServed: "KE",
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      url: `${siteUrl}/contact`,
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: siteUrl,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteUrl}/vacancies?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: SITE_NAME,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    url: siteUrl,
+    description: SITE_DESCRIPTION,
+    offers: {
+      "@type": "Offer",
+      category: "SaaS",
+    },
+  },
+];
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -66,6 +111,10 @@ export default function RootLayout({
     >
       <head>
         <ThemeInitScript />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
       </head>
       <body className="min-h-screen bg-background">
         <ThemeProvider>

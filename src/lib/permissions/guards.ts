@@ -57,6 +57,17 @@ export async function requireOrgMembership(
     deny(options?.redirectTo ?? "/login");
   }
 
+  const org = await prisma.organization.findUnique({
+    where: { id: session.activeOrgId },
+    select: { name: true, status: true, deletedAt: true },
+  });
+
+  if (!org || org.deletedAt || org.status !== "ACTIVE") {
+    redirect(
+      `/service-terminated${org?.name ? `?organization=${encodeURIComponent(org.name)}` : ""}`,
+    );
+  }
+
   return session;
 }
 

@@ -29,6 +29,8 @@ type SearchParams = Promise<{
   pageSize?: string;
   q?: string;
   status?: string;
+  deleted?: string;
+  archived?: string;
 }>;
 
 const STATUS_VALUES = Object.values(OrganizationStatus);
@@ -85,6 +87,8 @@ export default async function PlatformOrganizationsPage({
   const params = await searchParams;
   const q = (params.q ?? "").trim();
   const status = parseStatus(params.status);
+  const deletedSlug = (params.deleted ?? "").trim();
+  const archivedSlug = (params.archived ?? "").trim();
   const { page, pageSize, skip, take } = getPagination({
     page: Number(params.page ?? 1),
     pageSize: Number(params.pageSize ?? 24),
@@ -97,6 +101,7 @@ export default async function PlatformOrganizationsPage({
     totalOrganizations,
     activeOrganizations,
     suspendedOrganizations,
+    archivedOrganizations,
     subscribedOrganizations,
   ] = await Promise.all([
     prisma.organization.findMany({
@@ -119,6 +124,7 @@ export default async function PlatformOrganizationsPage({
     prisma.organization.count({ where: { deletedAt: null } }),
     prisma.organization.count({ where: { deletedAt: null, status: "ACTIVE" } }),
     prisma.organization.count({ where: { deletedAt: null, status: "SUSPENDED" } }),
+    prisma.organization.count({ where: { deletedAt: null, status: "DISABLED" } }),
     prisma.subscription.count({
       where: {
         org: { deletedAt: null },
@@ -202,10 +208,23 @@ export default async function PlatformOrganizationsPage({
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {deletedSlug ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 dark:border-emerald-300/30 dark:bg-emerald-300/10 dark:text-emerald-100">
+          Organization /{deletedSlug} was permanently deleted. The directory has been refreshed.
+        </div>
+      ) : null}
+
+      {archivedSlug ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 dark:border-amber-300/30 dark:bg-amber-300/10 dark:text-amber-100">
+          Organization /{archivedSlug} was archived. Its users will now see the service termination notice at login.
+        </div>
+      ) : null}
+
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Organizations" value={formatNumber(totalOrganizations)} />
         <StatCard label="Active" value={formatNumber(activeOrganizations)} />
         <StatCard label="Suspended" value={formatNumber(suspendedOrganizations)} />
+        <StatCard label="Archived" value={formatNumber(archivedOrganizations)} />
         <StatCard label="Subscribed" value={formatNumber(subscribedOrganizations)} />
       </section>
 

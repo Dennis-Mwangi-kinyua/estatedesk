@@ -372,10 +372,25 @@ export async function switchActiveMembership(
       userId: dbSession.userId,
       employmentEndedAt: null,
     },
+    include: {
+      org: {
+        select: {
+          name: true,
+          status: true,
+          deletedAt: true,
+        },
+      },
+    },
   });
 
   if (!membership) {
     throw new Error("Membership not found for this user.");
+  }
+
+  if (membership.org.deletedAt || membership.org.status !== "ACTIVE") {
+    redirect(
+      `/service-terminated?organization=${encodeURIComponent(membership.org.name)}`,
+    );
   }
 
   const now = new Date();
