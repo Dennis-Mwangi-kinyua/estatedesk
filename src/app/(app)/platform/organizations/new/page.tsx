@@ -25,7 +25,7 @@ const initialState: CreateOrganizationState = {
 
 const steps = [
   { id: 1, title: "Organization" },
-  { id: 2, title: "Admin account" },
+  { id: 2, title: "Master login" },
   { id: 3, title: "Review" },
 ];
 
@@ -48,6 +48,7 @@ export default function NewOrganizationPage() {
   const [accountType, setAccountType] = useState("PROPERTY_MANAGER");
 
   const [adminFullName, setAdminFullName] = useState("");
+  const [adminUsername, setAdminUsername] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPhone, setAdminPhone] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
@@ -75,6 +76,7 @@ export default function NewOrganizationPage() {
   function canGoStep3() {
     return (
       adminFullName.trim().length >= 2 &&
+      /^[a-z0-9._-]{3,30}$/.test(adminUsername.trim()) &&
       adminEmail.trim().length > 0 &&
       adminPassword.length >= 8 &&
       adminPassword === adminPasswordConfirm
@@ -121,7 +123,7 @@ export default function NewOrganizationPage() {
             </h1>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
-              Set up a new organization workspace and its first admin account.
+              Set up a new organization workspace and its master login.
             </p>
           </div>
 
@@ -188,6 +190,7 @@ export default function NewOrganizationPage() {
           <input type="hidden" name="plan" value={plan} />
           <input type="hidden" name="accountType" value={accountType} />
           <input type="hidden" name="adminFullName" value={adminFullName} />
+          <input type="hidden" name="adminUsername" value={adminUsername} />
           <input type="hidden" name="adminEmail" value={adminEmail} />
           <input type="hidden" name="adminPhone" value={adminPhone} />
           <input type="hidden" name="adminPassword" value={adminPassword} />
@@ -343,8 +346,8 @@ export default function NewOrganizationPage() {
                     <option value="LANDLORD">Landlord organization</option>
                   </select>
                   <p className="mt-2 text-xs text-neutral-500">
-                    Landlord organizations create the first user as a landlord
-                    account instead of an admin account.
+                    The master login is always an organization admin. Landlord
+                    access can be mapped separately after setup.
                   </p>
                 </Field>
               </div>
@@ -357,16 +360,19 @@ export default function NewOrganizationPage() {
                 <div className="inline-flex rounded-full bg-neutral-100 p-2">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
-                <h2 className="mt-4 text-xl font-semibold">First admin account</h2>
+                <h2 className="mt-4 text-xl font-semibold">
+                  Organization master login
+                </h2>
                 <p className="mt-2 text-sm text-neutral-600">
-                  Create the initial organization admin who will manage the new
-                  workspace.
+                  Create the organization-level admin account. This login can
+                  create admins, managers, accountants, caretakers, tenants, and
+                  landlord mappings inside the workspace.
                 </p>
               </div>
 
               <div className="grid gap-4">
                 <Field
-                  label="Admin full name"
+                  label="Master full name"
                   required
                   error={state.fieldErrors?.adminFullName?.[0]}
                 >
@@ -381,9 +387,29 @@ export default function NewOrganizationPage() {
                   </div>
                 </Field>
 
+                <Field
+                  label="Master username"
+                  required
+                  error={state.fieldErrors?.adminUsername?.[0]}
+                >
+                  <div className="relative">
+                    <User2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                    <input
+                      value={adminUsername}
+                      onChange={(e) =>
+                        setAdminUsername(
+                          e.target.value.toLowerCase().replace(/\s+/g, ""),
+                        )
+                      }
+                      placeholder="greenview-admin"
+                      className="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-neutral-400"
+                    />
+                  </div>
+                </Field>
+
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field
-                    label="Admin email"
+                    label="Master email"
                     required
                     error={state.fieldErrors?.adminEmail?.[0]}
                   >
@@ -399,7 +425,10 @@ export default function NewOrganizationPage() {
                     </div>
                   </Field>
 
-                  <Field label="Admin phone">
+                  <Field
+                    label="Master phone"
+                    error={state.fieldErrors?.adminPhone?.[0]}
+                  >
                     <div className="relative">
                       <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
                       <input
@@ -487,9 +516,10 @@ export default function NewOrganizationPage() {
                 />
 
                 <ReviewCard
-                  title="Admin account"
+                  title="Master login"
                   items={[
                     ["Full name", adminFullName || "—"],
+                    ["Username", adminUsername || "—"],
                     ["Login email", adminEmail || "—"],
                     ["Phone", adminPhone || "—"],
                     ["Org role", "ADMIN"],

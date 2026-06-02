@@ -169,8 +169,8 @@ export async function setUserSession({
   const membership = await resolveMembershipForSession(userId, activeMembershipId);
 
   await prisma.$transaction(async (tx) => {
-    await tx.$queryRaw<Array<{ pg_advisory_xact_lock: unknown }>>(
-      Prisma.sql`select pg_advisory_xact_lock(hashtext(${userId}))`,
+    await tx.$queryRaw<Array<{ locked: number }>>(
+      Prisma.sql`select 1::int as locked from pg_advisory_xact_lock(hashtext(${userId}))`,
     );
 
     await tx.userSession.deleteMany({

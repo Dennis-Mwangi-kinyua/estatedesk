@@ -12,11 +12,17 @@ import {
   LogIn,
   Mail,
   Phone,
+  Save,
   Shield,
+  Trash2,
   User2,
   Users,
   XCircle,
 } from "lucide-react";
+import {
+  archiveOrphanPlatformUser,
+  updatePlatformUserStatus,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -38,14 +44,67 @@ function getInitials(name: string | null | undefined) {
   return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
 }
 
+function getNotice(params?: { error?: string; updated?: string }) {
+  if (params?.updated === "status") {
+    return {
+      tone: "success" as const,
+      message: "User status updated.",
+    };
+  }
+
+  if (params?.error === "self-status") {
+    return {
+      tone: "error" as const,
+      message: "You cannot change your own platform account status.",
+    };
+  }
+
+  if (params?.error === "self-archive") {
+    return {
+      tone: "error" as const,
+      message: "You cannot archive your own platform account.",
+    };
+  }
+
+  if (params?.error === "root-protected") {
+    return {
+      tone: "error" as const,
+      message: "Root super admin accounts are protected from this action.",
+    };
+  }
+
+  if (params?.error === "not-orphan") {
+    return {
+      tone: "error" as const,
+      message:
+        "This user still has memberships or platform permissions and cannot be archived as an orphan.",
+    };
+  }
+
+  if (params?.error === "confirm-archive") {
+    return {
+      tone: "error" as const,
+      message: "Confirmation did not match. Type the shown value exactly.",
+    };
+  }
+
+  return null;
+}
+
 type PlatformUserDetailsPageProps = {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{
+    error?: string;
+    updated?: string;
+  }>;
 };
 
 export default async function PlatformUserDetailsPage({
   params,
+  searchParams,
 }: PlatformUserDetailsPageProps) {
   const { id } = await params;
+  const paramsValue = await searchParams;
 
   const user = await prisma.user.findFirst({
     where: {
@@ -77,6 +136,10 @@ export default async function PlatformUserDetailsPage({
 
   const grantedPermissions = user.platformPermissions.filter((p) => p.granted);
   const revokedPermissions = user.platformPermissions.filter((p) => !p.granted);
+  const isOrphanUser =
+    user.memberships.length === 0 && user.platformPermissions.length === 0;
+  const archiveConfirmation = user.username || user.email || user.fullName;
+  const notice = getNotice(paramsValue);
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
@@ -120,6 +183,18 @@ export default async function PlatformUserDetailsPage({
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto px-6 py-6">
+        {notice ? (
+          <div
+            className={`mb-5 rounded-2xl border px-4 py-3 text-sm ${
+              notice.tone === "success"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                : "border-red-200 bg-red-50 text-red-700"
+            }`}
+          >
+            {notice.message}
+          </div>
+        ) : null}
+
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
           <section className="space-y-6">
             <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
@@ -169,6 +244,12 @@ export default async function PlatformUserDetailsPage({
                   icon={<Mail className="h-4 w-4" />}
                   label="Email Address"
                   value={user.email ?? "—"}
+                  breakValue
+                />
+                <InfoRow
+                  icon={<User2 className="h-4 w-4" />}
+                  label="Username"
+                  value={user.username ?? "—"}
                   breakValue
                 />
                 <InfoRow
@@ -260,6 +341,67 @@ export default async function PlatformUserDetailsPage({
           </section>
 
           <aside className="space-y-6">
+            <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+              <div className="mb-4 flex items-center gap-2">
+                <Shield className="h-5 w-5 text-neutral-700" />
+                <h3 className="text-lg font-semibold text-neutral-950">
+                  Account Controls
+                </h3>
+              </div>
+
+              <form action={updatePlatformUserStatus} className="space-y-3">
+                <input type="hidden" name="userId" value={user.id} />
+                <label className="block text-sm font-medium text-neutral-800">
+                  Account status
+                </label>
+                <select
+                  name="status"
+                  defaultValue={user.status}
+                  className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"
+                  disabled={user.isRootSuperAdmin}
+                >
+                  <option value="ACTIVE">Active</option>
+                  <option value="SUSPENDED">Suspended</option>
+                  <option value="DISABLED">Disabled</option>
+                </select>
+                <button
+                  type="submit"
+                  disabled={user.isRootSuperAdmin}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Save className="h-4 w-4" />
+                  Update status
+                </button>
+              </form>
+
+              <div className="mt-5 border-t border-neutral-200 pt-5">
+                <h4 className="text-sm font-semibold text-neutral-950">
+                  Delete orphan user
+                </h4>
+                <p className="mt-1 text-sm leading-6 text-neutral-600">
+                  Available only for users with no organization memberships and
+                  no platform permissions.
+                </p>
+                <form action={archiveOrphanPlatformUser} className="mt-3 space-y-3">
+                  <input type="hidden" name="userId" value={user.id} />
+                  <input
+                    name="confirmation"
+                    placeholder={`Type ${archiveConfirmation}`}
+                    className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400 disabled:bg-neutral-100"
+                    disabled={!isOrphanUser || user.isRootSuperAdmin}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!isOrphanUser || user.isRootSuperAdmin}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete user
+                  </button>
+                </form>
+              </div>
+            </div>
+
             <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
               <div className="mb-4 flex items-center gap-2">
                 <Shield className="h-5 w-5 text-neutral-700" />

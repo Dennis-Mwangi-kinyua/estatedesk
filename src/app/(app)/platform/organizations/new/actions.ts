@@ -36,6 +36,16 @@ const createOrganizationSchema = z
     }),
 
     adminFullName: z.string().trim().min(2, "Admin full name is required"),
+    adminUsername: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .min(3, "Master username must be at least 3 characters")
+      .max(30, "Master username must be 30 characters or fewer")
+      .regex(
+        /^[a-z0-9._-]+$/,
+        "Use only letters, numbers, dots, underscores, and hyphens",
+      ),
     adminEmail: z.string().trim().email("Enter a valid admin email"),
     adminPhone: z.string().trim().optional(),
     adminPassword: z
@@ -91,6 +101,7 @@ export async function createOrganizationAction(
     accountType: formData.get("accountType"),
 
     adminFullName: formData.get("adminFullName"),
+    adminUsername: formData.get("adminUsername"),
     adminEmail: formData.get("adminEmail"),
     adminPhone: formData.get("adminPhone"),
     adminPassword: formData.get("adminPassword"),
@@ -107,6 +118,7 @@ export async function createOrganizationAction(
 
   const data = parsed.data;
   const slug = slugify(data.organizationSlug || data.organizationName);
+  const adminPhone = (data.adminPhone ?? "").replace(/\s+/g, "") || null;
 
   if (!slug) {
     return {
@@ -124,10 +136,14 @@ export async function createOrganizationAction(
     }),
     prisma.user.findFirst({
       where: {
-        email: data.adminEmail.toLowerCase(),
+        OR: [
+          { username: data.adminUsername },
+          { email: data.adminEmail.toLowerCase() },
+          ...(adminPhone ? [{ phone: adminPhone }] : []),
+        ],
         deletedAt: null,
       },
-      select: { id: true, email: true },
+      select: { id: true, username: true, email: true, phone: true },
     }),
   ]);
 
@@ -142,9 +158,32 @@ export async function createOrganizationAction(
   }
 
   if (existingUser) {
+    if (existingUser.username === data.adminUsername) {
+      return {
+        success: false,
+        error: "A user with this master username already exists.",
+        fieldErrors: {
+          adminUsername: ["Choose a different master username."],
+        },
+      };
+    }
+
+    if (existingUser.phone && existingUser.phone === adminPhone) {
+      return {
+        success: false,
+        error: "A user with this master phone number already exists.",
+        fieldErrors: {
+          adminPhone: ["Use a different phone number or leave it blank."],
+        },
+      };
+    }
+
     return {
       success: false,
       error: "A user with this admin email already exists.",
+      fieldErrors: {
+        adminEmail: ["Use a different email address."],
+      },
     };
   }
 
@@ -168,11 +207,15 @@ export async function createOrganizationAction(
     const adminUser = await tx.user.create({
       data: {
         fullName: data.adminFullName,
+        username: data.adminUsername,
         email: data.adminEmail.toLowerCase(),
-        phone: data.adminPhone || null,
+        phone: adminPhone,
         passwordHash,
         status: "ACTIVE",
         platformRole: "USER",
+        mustChangePassword: true,
+        emailVerified: new Date(),
+        phoneVerified: adminPhone ? new Date() : null,
         createdByUserId: session.userId,
       },
     });
@@ -181,7 +224,7 @@ export async function createOrganizationAction(
       data: {
         orgId: org.id,
         userId: adminUser.id,
-        role: data.accountType === "LANDLORD" ? "LANDLORD" : "ADMIN",
+        role: "ADMIN",
         scopeType: "ORG",
         scopeId: "ORG_SCOPE",
       },
@@ -194,8 +237,8 @@ export async function createOrganizationAction(
           userId: adminUser.id,
           displayName: data.adminFullName,
           email: data.adminEmail.toLowerCase(),
-          phone: data.adminPhone || null,
-          notes: "Created as landlord organization owner.",
+          phone: adminPhone,
+          notes: "Created with the organization master admin account.",
         },
       });
     }

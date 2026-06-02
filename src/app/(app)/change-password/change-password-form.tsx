@@ -73,6 +73,20 @@ export function ChangePasswordForm() {
         </div>
       </label>
 
+      <label className="flex items-start gap-3 rounded-2xl border border-neutral-200 bg-white p-4">
+        <input
+          name="acceptedTerms"
+          type="checkbox"
+          className="mt-1 h-4 w-4 rounded border-neutral-300"
+          required
+        />
+        <span className="text-sm leading-6 text-neutral-700">
+          I accept the EstateDesk terms of use, agree to use only authorized
+          records, and understand that system activity may be logged for
+          security and accountability.
+        </span>
+      </label>
+
       <button
         type="submit"
         disabled={pending}

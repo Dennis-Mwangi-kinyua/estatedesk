@@ -9,7 +9,11 @@ import {
   useState,
   type ChangeEvent,
 } from "react";
-import { STAFF_ROLES, type StaffRole } from "@/features/staff/constants/role-meta";
+import {
+  ROLE_META,
+  STAFF_ROLES,
+  type StaffRole,
+} from "@/features/staff/constants/role-meta";
 
 type AssignmentTargetType = "BUILDING";
 
@@ -77,6 +81,34 @@ const CARETAKER_STEPS = ["Details", "Login", "Mapping", "Review"] as const;
 
 const INITIAL_ACTION_STATE: CreateMembershipState = {
   ok: false,
+};
+
+const ROLE_CAPABILITIES: Record<StaffRole, string[]> = {
+  ADMIN: [
+    "Manage organization settings and access.",
+    "Create and update staff accounts.",
+    "Review organization-wide records and dashboards.",
+  ],
+  MANAGER: [
+    "Coordinate day-to-day property operations.",
+    "Work with tenants, leases, issues, and inspections.",
+    "Review operational dashboards and follow-up queues.",
+  ],
+  OFFICE: [
+    "Maintain tenant, lease, and support records.",
+    "Coordinate office workflows and communication.",
+    "Assist managers with organization administration.",
+  ],
+  ACCOUNTANT: [
+    "Manage rent, water, payments, and balances.",
+    "Review finance reports and payment verification.",
+    "Support billing and reconciliation workflows.",
+  ],
+  CARETAKER: [
+    "Work only within mapped apartments or blocks.",
+    "Handle assigned inspections and maintenance follow-up.",
+    "Submit field updates from their operational scope.",
+  ],
 };
 
 function getInitialValues(
@@ -544,6 +576,32 @@ const RoleSelect = memo(function RoleSelect({
           </option>
         ))}
       </select>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        {STAFF_ROLES.map((role) => (
+          <button
+            key={role}
+            type="button"
+            onClick={() => onChange(role)}
+            className={`rounded-2xl border p-3 text-left transition ${
+              selectedRole === role
+                ? "border-neutral-950 bg-neutral-950 text-white"
+                : "border-neutral-200 bg-neutral-50 text-neutral-900 hover:border-neutral-300"
+            }`}
+          >
+            <span className="block text-sm font-semibold">
+              {ROLE_META[role].label}
+            </span>
+            <span
+              className={`mt-1 block text-xs leading-5 ${
+                selectedRole === role ? "text-neutral-200" : "text-neutral-600"
+              }`}
+            >
+              {ROLE_META[role].description}
+            </span>
+          </button>
+        ))}
+      </div>
+      <RoleCapabilityCard role={selectedRole} />
     </div>
   );
 });
@@ -818,7 +876,32 @@ const RoleDisplay = memo(function RoleDisplay({ role }: { role: StaffRole }) {
         Role
       </label>
       <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-medium text-neutral-800">
-        {role}
+        {ROLE_META[role].label}
+      </div>
+      <RoleCapabilityCard role={role} />
+    </div>
+  );
+});
+
+const RoleCapabilityCard = memo(function RoleCapabilityCard({
+  role,
+}: {
+  role: StaffRole;
+}) {
+  return (
+    <div className="mt-3 rounded-2xl border border-neutral-200 bg-white p-4">
+      <p className="text-sm font-semibold text-neutral-950">
+        What this role can do
+      </p>
+      <div className="mt-3 grid gap-2">
+        {ROLE_CAPABILITIES[role].map((capability) => (
+          <p
+            key={capability}
+            className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm leading-5 text-neutral-700"
+          >
+            {capability}
+          </p>
+        ))}
       </div>
     </div>
   );

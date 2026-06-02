@@ -1,6 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
@@ -10,6 +11,8 @@ export type ChangePasswordState = {
   error: string | null;
 };
 
+const TERMS_VERSION = "2026-06-02";
+
 export async function changeInitialPasswordAction(
   _prevState: ChangePasswordState,
   formData: FormData,
@@ -18,6 +21,7 @@ export async function changeInitialPasswordAction(
   const currentPassword = String(formData.get("currentPassword") ?? "");
   const newPassword = String(formData.get("newPassword") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const acceptedTerms = String(formData.get("acceptedTerms") ?? "") === "on";
 
   if (!currentPassword || !newPassword || !confirmPassword) {
     return { error: "Fill in all password fields." };
@@ -33,6 +37,10 @@ export async function changeInitialPasswordAction(
 
   if (newPassword === currentPassword) {
     return { error: "Choose a different password from the temporary one." };
+  }
+
+  if (!acceptedTerms) {
+    return { error: "Accept the terms of use to continue." };
   }
 
   const user = await prisma.user.findUnique({
@@ -57,14 +65,19 @@ export async function changeInitialPasswordAction(
 
   const passwordHash = await bcrypt.hash(newPassword, 12);
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      passwordHash,
-      mustChangePassword: false,
-      passwordChangedAt: new Date(),
-    },
-  });
+  await prisma.$executeRaw(
+    Prisma.sql`
+      update "User"
+      set
+        "passwordHash" = ${passwordHash},
+        "mustChangePassword" = false,
+        "passwordChangedAt" = now(),
+        "termsAcceptedAt" = now(),
+        "termsAcceptedVersion" = ${TERMS_VERSION},
+        "updatedAt" = now()
+      where "id" = ${user.id}
+    `,
+  );
 
   const destination = getRedirectAfterLogin({
     platformRole: session.platformRole,

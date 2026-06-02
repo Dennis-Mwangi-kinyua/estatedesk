@@ -24,6 +24,8 @@ model User {
   phoneVerified            DateTime?
   mustChangePassword       Boolean                 @default(false)
   passwordChangedAt        DateTime?
+  termsAcceptedAt          DateTime?
+  termsAcceptedVersion     String?
   twoFactorEnabled         Boolean                 @default(false)
   lastLoginAt              DateTime?
   deletedAt                DateTime?

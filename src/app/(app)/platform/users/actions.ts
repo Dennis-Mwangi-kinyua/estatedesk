@@ -1,0 +1,114 @@
+"use server";
+
+import { hash } from "bcryptjs";
+import {
+  PlatformPermissionType,
+  PlatformRole,
+  UserStatus,
+} from "@prisma/client";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { requirePlatformRole } from "@/lib/permissions/guards";
+
+const ALL_PLATFORM_PERMISSIONS = Object.values(PlatformPermissionType);
+
+function normalizeUsername(value: FormDataEntryValue | null) {
+  return String(value ?? "").trim().toLowerCase().replace(/\s+/g, "");
+}
+
+function normalizePhone(value: FormDataEntryValue | null) {
+  return String(value ?? "").trim().replace(/\s+/g, "") || null;
+}
+
+function parsePlatformRole(value: FormDataEntryValue | null) {
+  const role = String(value ?? "").trim().toUpperCase();
+  return Object.values(PlatformRole).includes(role as PlatformRole)
+    ? (role as PlatformRole)
+    : PlatformRole.USER;
+}
+
+export async function createPlatformUserAction(formData: FormData) {
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/login",
+  });
+
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  const username = normalizeUsername(formData.get("username"));
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const phone = normalizePhone(formData.get("phone"));
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const platformRole = parsePlatformRole(formData.get("platformRole"));
+  const canCreatePlatformAdmins =
+    String(formData.get("canCreatePlatformAdmins") ?? "") === "on";
+  const selectedPermissions = formData
+    .getAll("permissions")
+    .map((value) => String(value))
+    .filter((value): value is PlatformPermissionType =>
+      ALL_PLATFORM_PERMISSIONS.includes(value as PlatformPermissionType),
+    );
+
+  if (!fullName || !username || !email) {
+    redirect("/platform/users?createError=missing");
+  }
+
+  if (!/^[a-z0-9._-]{3,30}$/.test(username)) {
+    redirect("/platform/users?createError=username");
+  }
+
+  if (password.length < 8 || password !== confirmPassword) {
+    redirect("/platform/users?createError=password");
+  }
+
+  if (platformRole === PlatformRole.SUPER_ADMIN && session.platformRole !== "SUPER_ADMIN") {
+    redirect("/platform/users?createError=super-admin");
+  }
+
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [{ username }, { email }, ...(phone ? [{ phone }] : [])],
+    },
+    select: { username: true, email: true, phone: true },
+  });
+
+  if (existingUser) {
+    redirect("/platform/users?createError=duplicate");
+  }
+
+  const passwordHash = await hash(password, 12);
+  const verifiedAt = new Date();
+
+  await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        fullName,
+        username,
+        email,
+        phone,
+        passwordHash,
+        status: UserStatus.ACTIVE,
+        platformRole,
+        canCreatePlatformAdmins,
+        mustChangePassword: true,
+        emailVerified: verifiedAt,
+        phoneVerified: phone ? verifiedAt : null,
+        createdByUserId: session.userId,
+      },
+      select: { id: true },
+    });
+
+    if (selectedPermissions.length > 0) {
+      await tx.platformPermission.createMany({
+        data: selectedPermissions.map((permission) => ({
+          userId: user.id,
+          permission,
+          granted: true,
+        })),
+      });
+    }
+  });
+
+  revalidatePath("/platform/users");
+  redirect("/platform/users?created=1");
+}

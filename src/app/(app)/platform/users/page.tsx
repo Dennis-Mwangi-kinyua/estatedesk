@@ -1,17 +1,27 @@
 import Link from "next/link";
-import { PlatformRole, Prisma, UserStatus } from "@prisma/client";
+import {
+  PlatformPermissionType,
+  PlatformRole,
+  Prisma,
+  UserStatus,
+} from "@prisma/client";
 import {
   ArrowUpRight,
   Crown,
+  KeyRound,
   Mail,
   Phone,
+  Plus,
   Search,
   Shield,
+  Trash2,
   User2,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { getPagination } from "@/lib/db/pagination";
+import { createPlatformUserAction } from "./actions";
 import {
   Badge,
   PageHeader,
@@ -30,10 +40,40 @@ type SearchParams = Promise<{
   q?: string;
   role?: string;
   status?: string;
+  created?: string;
+  createError?: string;
+  archived?: string;
 }>;
 
 const ROLE_VALUES = Object.values(PlatformRole);
 const STATUS_VALUES = Object.values(UserStatus);
+const PLATFORM_PERMISSION_VALUES = Object.values(PlatformPermissionType);
+
+const PLATFORM_ROLE_META = {
+  USER: {
+    title: "Platform User",
+    description:
+      "Standard account. Access depends on organization membership or tenant/landlord mapping.",
+  },
+  PLATFORM_ADMIN: {
+    title: "Platform Admin",
+    description:
+      "Can operate the control plane according to granted platform permissions.",
+  },
+  SUPER_ADMIN: {
+    title: "Super Admin",
+    description:
+      "Highest platform role. Use for trusted system owners only.",
+  },
+} satisfies Record<PlatformRole, { title: string; description: string }>;
+
+const CREATE_ERROR_MESSAGES: Record<string, string> = {
+  missing: "Full name, username, and email are required.",
+  username: "Username must be 3-30 characters using letters, numbers, dots, underscores, or hyphens.",
+  password: "Password must be at least 8 characters and both password fields must match.",
+  duplicate: "A user with the same username, email, or phone already exists.",
+  "super-admin": "Only a super admin can create another super admin.",
+};
 
 function getInitials(name: string | null | undefined) {
   if (!name) return "U";
@@ -52,6 +92,14 @@ function parseStatus(value?: string) {
   if (!value) return null;
   const normalized = value.trim().toUpperCase();
   return STATUS_VALUES.find((status) => status === normalized) ?? null;
+}
+
+function formatPermission(value: string) {
+  return value
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.slice(0, 1).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function buildWhere({
@@ -99,8 +147,8 @@ export default async function PlatformUsersPage({
   });
   const where = buildWhere({ q, role, status });
 
-  const [users, totalFiltered, totalUsers, totalAdmins, activeUsers] =
-    await Promise.all([
+  const users = await retryTransientDatabaseOperation(
+    () =>
       prisma.user.findMany({
         where,
         orderBy: { createdAt: "desc" },
@@ -121,6 +169,11 @@ export default async function PlatformUsersPage({
           platformPermissions: {
             orderBy: { permission: "asc" },
             take: 6,
+            select: {
+              id: true,
+              permission: true,
+              granted: true,
+            },
           },
           memberships: {
             orderBy: { createdAt: "desc" },
@@ -140,24 +193,75 @@ export default async function PlatformUsersPage({
           },
         },
       }),
-      prisma.user.count({ where }),
-      prisma.user.count({ where: { deletedAt: null } }),
+    { label: "platform-users-findMany", attempts: 3, delayMs: 400 },
+  );
+
+  const totalFiltered = await retryTransientDatabaseOperation(
+    () => prisma.user.count({ where }),
+    { label: "platform-users-count-filtered", attempts: 3, delayMs: 300 },
+  );
+
+  const totalUsers = await retryTransientDatabaseOperation(
+    () => prisma.user.count({ where: { deletedAt: null } }),
+    { label: "platform-users-count-total", attempts: 3, delayMs: 300 },
+  );
+
+  const totalAdmins = await retryTransientDatabaseOperation(
+    () =>
       prisma.user.count({
         where: {
           deletedAt: null,
           platformRole: { in: ["SUPER_ADMIN", "PLATFORM_ADMIN"] },
         },
       }),
-      prisma.user.count({ where: { deletedAt: null, status: "ACTIVE" } }),
-    ]);
+    { label: "platform-users-count-admins", attempts: 3, delayMs: 300 },
+  );
+
+  const activeUsers = await retryTransientDatabaseOperation(
+    () => prisma.user.count({ where: { deletedAt: null, status: "ACTIVE" } }),
+    { label: "platform-users-count-active", attempts: 3, delayMs: 300 },
+  );
 
   return (
     <div className="space-y-5">
       <PageHeader
         eyebrow="Identity directory"
         title="Platform users"
-        description="Search and review users with server-side pagination, compact membership previews, and permission summaries."
+        description="Create platform users, assign system roles, review memberships, and clean up orphan accounts from one control surface."
       />
+
+      {params.created ? (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          Platform user created. They will reset their password and accept the
+          terms on first sign-in.
+        </div>
+      ) : null}
+
+      {params.createError ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {CREATE_ERROR_MESSAGES[params.createError] ??
+            "Could not create this platform user."}
+        </div>
+      ) : null}
+
+      {params.archived ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Deleted orphan user: {params.archived}
+        </div>
+      ) : null}
+
+      <section className="grid gap-3 md:grid-cols-3">
+        {ROLE_VALUES.map((roleValue) => (
+          <RoleCard
+            key={roleValue}
+            role={roleValue}
+            title={PLATFORM_ROLE_META[roleValue].title}
+            description={PLATFORM_ROLE_META[roleValue].description}
+          />
+        ))}
+      </section>
+
+      <CreatePlatformUserPanel />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Users" value={formatNumber(totalUsers)} />
@@ -248,6 +352,18 @@ export default async function PlatformUsersPage({
                   <ArrowUpRight className="h-4 w-4 shrink-0 text-neutral-400 transition group-hover:text-neutral-700" />
                 </div>
 
+                <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
+                    System role
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-neutral-950">
+                    {PLATFORM_ROLE_META[user.platformRole].title}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-neutral-600">
+                    {PLATFORM_ROLE_META[user.platformRole].description}
+                  </p>
+                </div>
+
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Badge tone={toneForStatus(user.platformRole)}>
                     <span className="inline-flex items-center gap-1">
@@ -262,6 +378,15 @@ export default async function PlatformUsersPage({
                     </span>
                   </Badge>
                   {user.canCreatePlatformAdmins ? <Badge>Can create admins</Badge> : null}
+                  {user._count.memberships === 0 &&
+                  user._count.platformPermissions === 0 ? (
+                    <Badge>
+                      <span className="inline-flex items-center gap-1 text-red-700">
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Deletable orphan
+                      </span>
+                    </Badge>
+                  ) : null}
                 </div>
 
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -308,6 +433,199 @@ export default async function PlatformUsersPage({
         />
       </section>
     </div>
+  );
+}
+
+function RoleCard({
+  role,
+  title,
+  description,
+}: {
+  role: PlatformRole;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-[24px] border border-neutral-200 bg-white p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
+            {role}
+          </p>
+          <h2 className="mt-2 text-base font-semibold text-neutral-950">
+            {title}
+          </h2>
+        </div>
+        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-2">
+          {role === "SUPER_ADMIN" ? (
+            <Crown className="h-4 w-4 text-neutral-700" />
+          ) : role === "PLATFORM_ADMIN" ? (
+            <Shield className="h-4 w-4 text-neutral-700" />
+          ) : (
+            <User2 className="h-4 w-4 text-neutral-700" />
+          )}
+        </div>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-neutral-600">{description}</p>
+    </div>
+  );
+}
+
+function CreatePlatformUserPanel() {
+  return (
+    <section className="overflow-hidden rounded-[26px] border border-neutral-200 bg-white shadow-sm">
+      <details>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 border-b border-neutral-200 p-4">
+          <div>
+            <h2 className="text-base font-semibold text-neutral-950">
+              Add platform user
+            </h2>
+            <p className="mt-1 text-sm text-neutral-600">
+              Create standard users, platform admins, or super admins with clear
+              permissions.
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-2 rounded-2xl bg-neutral-950 px-4 py-2 text-sm font-semibold text-white">
+            <Plus className="h-4 w-4" />
+            Add user
+          </span>
+        </summary>
+
+        <form action={createPlatformUserAction} className="grid gap-5 p-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Full name">
+              <input
+                name="fullName"
+                required
+                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
+                placeholder="Jane Admin"
+              />
+            </Field>
+            <Field label="Username">
+              <input
+                name="username"
+                required
+                minLength={3}
+                maxLength={30}
+                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
+                placeholder="jane.admin"
+              />
+            </Field>
+            <Field label="Email">
+              <input
+                name="email"
+                type="email"
+                required
+                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
+                placeholder="jane@example.com"
+              />
+            </Field>
+            <Field label="Phone">
+              <input
+                name="phone"
+                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
+                placeholder="+254700000000"
+              />
+            </Field>
+            <Field label="Temporary password">
+              <input
+                name="password"
+                type="password"
+                required
+                minLength={8}
+                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
+              />
+            </Field>
+            <Field label="Confirm password">
+              <input
+                name="confirmPassword"
+                type="password"
+                required
+                minLength={8}
+                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
+              />
+            </Field>
+            <Field label="System role">
+              <select
+                name="platformRole"
+                defaultValue={PlatformRole.USER}
+                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
+              >
+                {ROLE_VALUES.map((role) => (
+                  <option key={role} value={role}>
+                    {PLATFORM_ROLE_META[role].title}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <label className="flex items-start gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+              <input
+                type="checkbox"
+                name="canCreatePlatformAdmins"
+                className="mt-1 h-4 w-4 rounded border-neutral-300"
+              />
+              <span>
+                <span className="block text-sm font-semibold text-neutral-950">
+                  Can create platform admins
+                </span>
+                <span className="mt-1 block text-xs leading-5 text-neutral-600">
+                  Allows this account to create other control-plane admins.
+                </span>
+              </span>
+            </label>
+          </div>
+
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+            <div className="flex items-center gap-2">
+              <KeyRound className="h-4 w-4 text-neutral-600" />
+              <h3 className="text-sm font-semibold text-neutral-950">
+                Platform permissions
+              </h3>
+            </div>
+            <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+              {PLATFORM_PERMISSION_VALUES.map((permission) => (
+                <label
+                  key={permission}
+                  className="flex items-start gap-3 rounded-2xl border border-neutral-200 bg-white p-3"
+                >
+                  <input
+                    type="checkbox"
+                    name="permissions"
+                    value={permission}
+                    className="mt-1 h-4 w-4 rounded border-neutral-300"
+                  />
+                  <span className="text-sm font-medium text-neutral-800">
+                    {formatPermission(permission)}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 md:w-fit">
+            <Plus className="h-4 w-4" />
+            Create platform user
+          </button>
+        </form>
+      </details>
+    </section>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-sm font-medium text-neutral-800">
+        {label}
+      </span>
+      {children}
+    </label>
   );
 }
 
