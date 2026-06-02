@@ -63,7 +63,9 @@ export function publicPageMetadata({
   const resolvedTitle = title.includes(SITE_NAME) ? title : `${title} - ${SITE_NAME}`;
 
   return {
-    title: resolvedTitle,
+    title: {
+      absolute: resolvedTitle,
+    },
     description,
     keywords: [...SEO_KEYWORDS, ...keywords],
     alternates: {

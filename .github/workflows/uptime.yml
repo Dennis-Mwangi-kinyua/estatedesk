@@ -1,0 +1,31 @@
+name: Uptime
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  healthcheck:
+    name: Health check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: ${{ vars.HEALTHCHECK_ENABLED == 'true' }}
+
+    steps:
+      - name: Check liveness endpoint
+        env:
+          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+        run: |
+          test -n "$HEALTHCHECK_URL"
+          curl --fail --silent --show-error --max-time 10 "$HEALTHCHECK_URL/api/health"
+
+      - name: Check readiness endpoint
+        env:
+          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+        run: |
+          test -n "$HEALTHCHECK_URL"
+          curl --fail --silent --show-error --max-time 15 "$HEALTHCHECK_URL/api/health?deep=1"

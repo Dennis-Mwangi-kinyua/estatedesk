@@ -12,6 +12,7 @@ import {
   Home,
   LayoutGrid,
   LogOut,
+  Upload,
   Receipt,
   Send,
   Settings,
@@ -123,6 +124,12 @@ const SIDEBAR_LINKS: readonly SidebarLink[] = [
     href: "/dashboard/org/reports",
     icon: ShieldCheck,
     roles: ["ADMIN", "MANAGER", "ACCOUNTANT"],
+  },
+  {
+    label: "Imports",
+    href: "/dashboard/org/imports",
+    icon: Upload,
+    roles: ["ADMIN", "MANAGER", "OFFICE"],
   },
   {
     label: "Taxes",

@@ -41,13 +41,14 @@ type SetUserSessionInput = {
 export class ActiveSessionLimitError extends Error {
   constructor() {
     super(
-      "Limit reached. This account is already signed in on another device. Please log out from the other device first.",
+      "Limit reached. This account is already signed in on two devices. Please log out from another device first.",
     );
     this.name = "ActiveSessionLimitError";
   }
 }
 
 const SESSION_COOKIE_NAME = "estatedesk_session";
+const MAX_ACTIVE_SESSIONS_PER_USER = 2;
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 12;
 const REMEMBERED_SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
@@ -157,6 +158,8 @@ export async function setUserSession({
   remember = false,
 }: SetUserSessionInput): Promise<void> {
   const cookieStore = await cookies();
+  const currentToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const currentTokenHash = currentToken ? hashSessionToken(currentToken) : null;
   const { ipAddress, userAgent } = await getRequestMeta();
 
   const token = generateSessionToken();
@@ -166,26 +169,40 @@ export async function setUserSession({
   const membership = await resolveMembershipForSession(userId, activeMembershipId);
 
   await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw<Array<{ pg_advisory_xact_lock: unknown }>>(
+      Prisma.sql`select pg_advisory_xact_lock(hashtext(${userId}))`,
+    );
+
     await tx.userSession.deleteMany({
       where: {
         userId,
-        expiresAt: {
-          lte: new Date(),
-        },
+        OR: [
+          {
+            expiresAt: {
+              lte: new Date(),
+            },
+          },
+          ...(currentTokenHash
+            ? [
+                {
+                  tokenHash: currentTokenHash,
+                },
+              ]
+            : []),
+        ],
       },
     });
 
-    const activeSession = await tx.userSession.findFirst({
+    const activeSessionCount = await tx.userSession.count({
       where: {
         userId,
         expiresAt: {
           gt: new Date(),
         },
       },
-      select: { id: true },
     });
 
-    if (activeSession) {
+    if (activeSessionCount >= MAX_ACTIVE_SESSIONS_PER_USER) {
       throw new ActiveSessionLimitError();
     }
 

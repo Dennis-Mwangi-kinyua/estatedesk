@@ -17,10 +17,20 @@ export async function renderSitemapXml() {
   const priorityByPage: Record<string, string> = {
     '/': '1.0',
     '/faq': '0.95',
+    '/property-management-software-kenya': '0.95',
     '/pricing': '0.9',
     '/services': '0.9',
     '/vacancies': '0.9',
+    '/landlord-software': '0.85',
+    '/rent-tracking-software': '0.85',
+    '/water-billing-software': '0.85',
+    '/property-management-software-dubai': '0.8',
     '/contact': '0.75',
+    '/security': '0.65',
+    '/privacy': '0.5',
+    '/terms': '0.5',
+    '/data-processing': '0.5',
+    '/status': '0.5',
   }
 
   const rootPage = path.join(ROOT, 'src', 'app', 'page.tsx')

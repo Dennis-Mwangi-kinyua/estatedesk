@@ -129,6 +129,12 @@ npm run start
 npm run lint
 ```
 
+### Tests
+
+```bash
+npm test
+```
+
 ## Environment and Configuration
 
 Important configuration files and values:
@@ -145,6 +151,8 @@ Important configuration files and values:
 - `NEXT_PUBLIC_APP_URL` / `APP_URL` — base URL for the app
 - `AUTH_SECRET`, `CRON_SECRET` — secrets used by auth and cron workflows
 - `PLATFORM_API_KEYS_PAGE_PASSWORD` — admin-level API key page password
+- `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `ALERT_WEBHOOK_URL` — optional observability and alerting settings
+- `NEXT_PUBLIC_STATUS_PAGE_URL` — optional public status page URL
 - `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` — storage credentials
 - `WHATSAPP_*` — optional WhatsApp messaging integration
 
@@ -217,6 +225,8 @@ For deeper architecture, data model, developer workflows, and operational guidan
 
 - `docs/PROJECT_DOCUMENTATION.md`
 - `docs/PRODUCT_DOCUMENTATION.md`
+- `docs/OPERATIONS.md`
+- `docs/LAUNCH_READINESS.md`
 
 ## Product and Market Context
 

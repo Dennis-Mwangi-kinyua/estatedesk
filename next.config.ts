@@ -54,6 +54,50 @@ const nextConfig: NextConfig = {
         headers: PUBLIC_EDGE_CACHE_HEADERS,
       },
       {
+        source: "/faq",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/landlord-software",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/rent-tracking-software",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/water-billing-software",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/property-management-software-kenya",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/property-management-software-dubai",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/privacy",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/terms",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/security",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/data-processing",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/status",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
         source: "/pricing",
         headers: PUBLIC_EDGE_CACHE_HEADERS,
       },
@@ -119,7 +163,15 @@ const nextConfig: NextConfig = {
         headers: PRIVATE_HEADERS,
       },
       {
+        source: "/properties",
+        headers: PRIVATE_HEADERS,
+      },
+      {
         source: "/properties/:path*",
+        headers: PRIVATE_HEADERS,
+      },
+      {
+        source: "/units",
         headers: PRIVATE_HEADERS,
       },
       {

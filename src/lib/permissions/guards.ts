@@ -10,15 +10,15 @@ import {
 } from "@/lib/auth/session";
 import { auditDeniedAccess } from "@/lib/audit/security";
 import { prisma } from "@/lib/prisma";
+import {
+  hasOrgRole,
+  hasPlatformRole,
+  tenantPathRequiresActiveLease,
+} from "@/lib/permissions/access";
 
 type GuardOptions = {
   redirectTo?: string;
 };
-
-const TENANT_HISTORY_ONLY_PATHS = new Set([
-  "/dashboard/tenant",
-  "/dashboard/tenant/profile",
-]);
 
 function deny(redirectTo = "/access-denied"): never {
   redirect(redirectTo);
@@ -34,7 +34,7 @@ export async function requirePlatformRole(
 ): Promise<AppSession> {
   const session = await requireAuthenticated();
 
-  if (!allowedRoles.includes(session.platformRole)) {
+  if (!hasPlatformRole(session.platformRole, allowedRoles)) {
     await auditDeniedAccess({
       session,
       reason: "Missing platform role",
@@ -77,7 +77,7 @@ export async function requireOrgRole(
 ): Promise<AppSession> {
   const session = await requireOrgMembership(options);
 
-  if (!session.activeOrgRole || !allowedRoles.includes(session.activeOrgRole)) {
+  if (!hasOrgRole(session.activeOrgRole, allowedRoles)) {
     await auditDeniedAccess({
       session,
       reason: "Missing organization role",
@@ -113,10 +113,7 @@ export async function requireTenantAccess(options?: GuardOptions) {
   const headerStore = await headers();
   const pathname = headerStore.get("x-estatedesk-pathname") ?? "";
 
-  if (
-    pathname.startsWith("/dashboard/tenant") &&
-    !TENANT_HISTORY_ONLY_PATHS.has(pathname)
-  ) {
+  if (tenantPathRequiresActiveLease(pathname)) {
     const activeLease = await prisma.lease.findFirst({
       where: {
         orgId: session.activeOrgId!,

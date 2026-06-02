@@ -63,8 +63,7 @@ Available gzip endpoints:
 - `/sitemap-index.xml.gz`
 - `/sitemap.xml.gz`
 - `/sitemap-vacancies.xml.gz`
-- `/sitemap-properties.xml.gz`
-- `/sitemap-units.xml.gz`
+- `/properties` and `/units` are authenticated workspace routes, so they should stay out of submitted sitemap indexes.
 
 Search Console automation & verification
 
@@ -87,4 +86,4 @@ Important notes
 If you want, I can also:
 - Add scheduled server-side sitemap regeneration and CDN publishing.
 - Add hreflang and multi-locale sitemap support if the site serves more than one language.
-- Add public listing landing pages for `/properties/[id]` or `/units/[id]` to support richer indexing beyond vacancy detail pages.
+- Keep property and unit workspace pages private unless a separate public listing route is intentionally designed for SEO.

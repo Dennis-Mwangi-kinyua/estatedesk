@@ -10,6 +10,10 @@ const footerLinks = [
   { href: "/water-billing-software", label: "Water billing" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
+  { href: "/security", label: "Security" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+  { href: "/status", label: "Status" },
 ] as const;
 
 const footerHighlights = [

@@ -63,7 +63,7 @@ model User {
   tenantTransfersRequested TenantTransferRequest[] @relation("TenantTransferRequestedBy")
   createdBy                User?                   @relation("UserCreatedBy", fields: [createdByUserId], references: [id])
   createdUsers             User[]                  @relation("UserCreatedBy")
-  activeSession            UserSession?
+  sessions                 UserSession[]
 
   @@index([username])
   @@index([email])
@@ -81,7 +81,7 @@ model User {
 /// Server-side user session with active organization membership context.
 model UserSession {
   id                 String      @id @default(cuid())
-  userId             String      @unique
+  userId             String
   userAgent          String?
   ipAddress          String?
   createdAt          DateTime    @default(now())
@@ -151,6 +151,7 @@ model Organization {
   caretakerAssignments   CaretakerAssignment[]
   dataExportRequests     DataExportRequest[]
   invitations            Invitation[]
+  importRuns             ImportRun[]
   issues                 IssueTicket[]
   issueResolutionReports IssueResolutionReport[]
   kraIntegration         KraIntegration?
@@ -167,6 +168,7 @@ model Organization {
   properties             Property[]
   rentCharges            RentCharge[]
   rentalReturns          RentalIncomeReturn[]
+  reportExports          ReportExport[]
   vacancyInquiries       VacancyInquiry[]
   subscription           Subscription?
   taxCharges             TaxCharge[]
@@ -187,6 +189,49 @@ model Organization {
   @@index([marketerId])
   @@index([referralCode])
   @@index([commissionStatus])
+}
+
+/// CSV import attempt for onboarding and migration auditability.
+model ImportRun {
+  id              String       @id @default(cuid())
+  orgId           String
+  actorUserId     String
+  kind            String
+  mode            String
+  status          String
+  totalRows       Int          @default(0)
+  validRows       Int          @default(0)
+  createdRows     Int          @default(0)
+  errorCount      Int          @default(0)
+  errors          Json?
+  rowResults      Json?
+  rollbackSummary String?
+  createdAt       DateTime     @default(now())
+  completedAt     DateTime?
+  org             Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([kind, createdAt])
+  @@index([status, createdAt])
+}
+
+/// Report export request archive for operational download history.
+model ReportExport {
+  id          String       @id @default(cuid())
+  orgId       String
+  actorUserId String
+  reportType  String
+  period      String?
+  fileName    String
+  status      String       @default("COMPLETED")
+  metadata    Json?
+  createdAt   DateTime     @default(now())
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([reportType, createdAt])
 }
 
 /// Message sent by an organization to platform administrators.

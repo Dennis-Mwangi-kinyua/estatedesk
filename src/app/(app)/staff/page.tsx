@@ -135,7 +135,11 @@ export default async function StaffPage({
               phone: true,
               status: true,
               lastLoginAt: true,
-              activeSession: {
+              sessions: {
+                orderBy: {
+                  lastSeenAt: "desc",
+                },
+                take: 1,
                 select: {
                   lastSeenAt: true,
                   expiresAt: true,
@@ -190,12 +194,13 @@ export default async function StaffPage({
 
   const rows = staff.map((membership) => {
     const role = membership.role as StaffRole;
+    const latestSession = membership.user.sessions[0] ?? null;
     const lastSeenAt =
-      membership.user.activeSession?.lastSeenAt ?? membership.user.lastLoginAt;
+      latestSession?.lastSeenAt ?? membership.user.lastLoginAt;
     const isOnline = Boolean(
-      membership.user.activeSession &&
-        membership.user.activeSession.expiresAt > now &&
-        membership.user.activeSession.lastSeenAt >= onlineSince,
+      latestSession &&
+        latestSession.expiresAt > now &&
+        latestSession.lastSeenAt >= onlineSince,
     );
 
     return {

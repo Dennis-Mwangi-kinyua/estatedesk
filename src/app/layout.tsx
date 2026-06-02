@@ -30,11 +30,20 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     type: "website",
     locale: "en_KE",
+    images: [
+      {
+        url: "/images/og-vacancy.svg",
+        width: 1200,
+        height: 630,
+        alt: "EstateDesk property management software",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "EstateDesk | Property Management Software in Kenya",
     description: SITE_DESCRIPTION,
+    images: ["/images/og-vacancy.svg"],
   },
   robots: {
     index: true,

@@ -26,6 +26,36 @@ const pages = [
       "Detailed FAQ for landlords, property managers, diaspora landlords, East Africa, Dubai, UAE, remote rental management, vacant units, rent tracking, water billing, and caretaker workflows.",
   },
   {
+    title: "Property Management Software Kenya",
+    url: absoluteUrl("/property-management-software-kenya"),
+    description:
+      "Search landing page for Kenyan landlords, property managers, agencies, caretakers, rent tracking, water billing, vacancies, maintenance, inspections, reports, and staff access.",
+  },
+  {
+    title: "Landlord Software",
+    url: absoluteUrl("/landlord-software"),
+    description:
+      "Public page for landlords comparing online rental operations, tenants, leases, rent tracking, water billing, caretaker work, vacancies, and portfolio reporting.",
+  },
+  {
+    title: "Rent Tracking Software",
+    url: absoluteUrl("/rent-tracking-software"),
+    description:
+      "Public page for rent tracking, balances, unpaid rent follow-up, tenant ledgers, payments, and reporting workflows.",
+  },
+  {
+    title: "Water Billing Software",
+    url: absoluteUrl("/water-billing-software"),
+    description:
+      "Public page for rental water billing, meter readings, tenant water bills, billing history, balances, and reports.",
+  },
+  {
+    title: "Property Management Software Dubai",
+    url: absoluteUrl("/property-management-software-dubai"),
+    description:
+      "Public page for Dubai, UAE, diaspora, and remote property teams managing tenants, rent, maintenance, inspections, vacancies, reports, and staff access.",
+  },
+  {
     title: "Vacancies",
     url: absoluteUrl("/vacancies"),
     description:
@@ -36,6 +66,30 @@ const pages = [
     url: absoluteUrl("/contact"),
     description:
       "Contact EstateDesk for onboarding, sales, support, and custom rollout questions.",
+  },
+  {
+    title: "Security",
+    url: absoluteUrl("/security"),
+    description:
+      "Security overview for EstateDesk access controls, organization isolation, auditability, private routes, monitoring, and responsible disclosure.",
+  },
+  {
+    title: "Privacy",
+    url: absoluteUrl("/privacy"),
+    description:
+      "Privacy policy for account data, organization records, tenant records, staff records, vacancy enquiries, and operational data handling.",
+  },
+  {
+    title: "Data Processing",
+    url: absoluteUrl("/data-processing"),
+    description:
+      "Data processing and retention overview for customer-controlled property, tenant, lease, billing, audit, export, backup, and deletion workflows.",
+  },
+  {
+    title: "Status",
+    url: absoluteUrl("/status"),
+    description:
+      "System status page that points to EstateDesk health checks and external incident communication when configured.",
   },
 ];
 

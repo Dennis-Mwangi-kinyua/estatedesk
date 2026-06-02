@@ -27,6 +27,7 @@ import {
   UserCog,
   Users,
 } from "lucide-react";
+import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import PlatformMobileShell from "./platform-mobile-shell";
@@ -96,10 +97,10 @@ export default async function PlatformLayout({
   });
 
   return (
-    <div className="min-h-dvh overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <div className="flex min-h-dvh">
-        <aside className="hidden h-full w-[280px] shrink-0 border-r border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 lg:flex lg:flex-col">
-          <div className="border-b border-slate-200 px-5 py-5 dark:border-white/10">
+    <div className="h-dvh overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <div className="flex h-dvh overflow-hidden">
+        <aside className="fixed bottom-0 left-0 top-0 z-40 hidden w-[280px] border-r border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 lg:flex lg:flex-col">
+          <div className="shrink-0 border-b border-slate-200 px-5 py-5 dark:border-white/10">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
                 <Building2 className="h-5 w-5" />
@@ -113,7 +114,7 @@ export default async function PlatformLayout({
             </div>
           </div>
 
-          <nav className="flex-1 space-y-1 overflow-auto px-3 py-4">
+          <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-4">
             {navItems.map((item) => {
               const Icon = iconMap[item.icon];
 
@@ -132,7 +133,7 @@ export default async function PlatformLayout({
             })}
           </nav>
 
-          <div className="border-t border-slate-200 p-4 dark:border-white/10">
+          <div className="shrink-0 border-t border-slate-200 p-4 dark:border-white/10">
             <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-slate-900">
               <p className="text-xs uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
                 Signed in as
@@ -155,9 +156,9 @@ export default async function PlatformLayout({
         </aside>
 
         <PlatformMobileShell navItems={navItems} fullName={session.fullName}>
-          <main className="flex min-h-dvh min-w-0 flex-1 flex-col overflow-hidden">
-            <header className="hidden shrink-0 border-b border-slate-200 bg-white px-6 py-4 dark:border-white/10 dark:bg-slate-950 lg:block">
-              <div className="flex items-center justify-between gap-4">
+          <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden lg:pl-[280px]">
+            <header className="hidden h-[76px] shrink-0 border-b border-slate-200 bg-white px-6 dark:border-white/10 dark:bg-slate-950 lg:block">
+              <div className="flex h-full items-center justify-between gap-4">
                 <div className="min-w-0">
                   <h2 className="truncate text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
                     Platform Admin
@@ -167,11 +168,14 @@ export default async function PlatformLayout({
                   </p>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 dark:border-white/10 dark:bg-slate-900">
-                  <MessageSquareText className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                  <span className="max-w-[180px] truncate text-sm font-medium text-slate-700 dark:text-slate-200">
-                    {session.fullName}
-                  </span>
+                <div className="flex shrink-0 items-center gap-3">
+                  <HeaderThemeToggle />
+                  <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 shadow-sm dark:border-white/10 dark:bg-slate-900">
+                    <MessageSquareText className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                    <span className="max-w-[220px] truncate text-sm font-medium text-slate-700 dark:text-slate-200">
+                      {session.fullName}
+                    </span>
+                  </div>
                 </div>
               </div>
             </header>
@@ -183,6 +187,35 @@ export default async function PlatformLayout({
                 </div>
               </div>
             </section>
+
+            <footer className="hidden h-11 shrink-0 border-t border-slate-200 bg-white px-6 dark:border-white/10 dark:bg-slate-950 lg:block">
+              <div className="flex h-full items-center justify-between gap-4">
+                <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                  © {new Date().getFullYear()} EstateDesk platform control plane
+                </p>
+
+                <nav aria-label="Platform footer navigation" className="flex shrink-0 items-center gap-2">
+                  <Link
+                    href="/platform/audit-logs"
+                    className="rounded-md px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
+                  >
+                    Audit Logs
+                  </Link>
+                  <Link
+                    href="/platform/security"
+                    className="rounded-md px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
+                  >
+                    Security
+                  </Link>
+                  <Link
+                    href="/platform/settings"
+                    className="rounded-md px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
+                  >
+                    Settings
+                  </Link>
+                </nav>
+              </div>
+            </footer>
           </main>
         </PlatformMobileShell>
       </div>
