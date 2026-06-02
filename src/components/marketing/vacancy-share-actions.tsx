@@ -57,13 +57,13 @@ export function VacancyShareActions({
   return (
     <div className={compact ? "space-y-2" : "space-y-3"}>
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-[#9ca3af]">
           Share
         </p>
         <button
           type="button"
           onClick={nativeShare}
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800"
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#0b0f16] dark:text-[#f8fafc] dark:hover:bg-white/[0.10]"
         >
           <Share2 className="h-3.5 w-3.5" />
           {compact ? "Share" : "Share link"}
@@ -80,7 +80,7 @@ export function VacancyShareActions({
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800"
+              className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#0b0f16] dark:text-[#f8fafc] dark:hover:bg-white/[0.10]"
               aria-label={`Share vacancy on ${item.label}`}
             >
               {Icon ? (
@@ -97,7 +97,7 @@ export function VacancyShareActions({
       <button
         type="button"
         onClick={copyLink}
-        className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-700 transition hover:bg-white dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+        className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-700 transition hover:bg-white dark:border-white/10 dark:bg-[#111827] dark:text-[#e5e7eb] dark:hover:bg-white/[0.10]"
       >
         {copied ? <Send className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
         {copied ? "Copied" : "Copy link"}

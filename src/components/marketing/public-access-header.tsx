@@ -35,18 +35,18 @@ export function PublicAccessHeader({
     : publicLinks.filter((item) => item.key !== "pricing");
   const mobileLinkGridClass = "grid-cols-2";
   const signInClassName =
-    "items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:!border-white/15 dark:!bg-slate-900 dark:!text-white dark:hover:!bg-slate-800 dark:focus-visible:ring-white";
+    "items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:!border-white/20 dark:!bg-white/[0.10] dark:!text-[#f8fafc] dark:hover:!bg-white/[0.16] dark:focus-visible:ring-white";
 
   return (
-    <header className="z-40 shrink-0 border-b border-slate-200/80 bg-white/95 shadow-[0_14px_34px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/95 dark:shadow-none">
+    <header className="z-40 shrink-0 border-b border-slate-200/80 bg-white/95 shadow-[0_14px_34px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#0b0f16]/95 dark:shadow-none">
       <div className="mx-auto flex max-w-[1536px] flex-col gap-2.5 px-3 py-3 sm:px-6 md:flex-row md:items-center md:justify-between md:gap-5 md:py-2.5 lg:px-8">
         <div className="flex items-center justify-between gap-2 md:contents">
           <Link
             href="/"
             aria-label="Go to EstateDesk home"
-            className="inline-flex min-h-10 min-w-0 items-center gap-2.5 rounded-xl pr-2 text-sm font-bold uppercase tracking-[0.14em] text-slate-950 transition hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:text-white dark:hover:text-slate-200 dark:focus-visible:ring-white"
+            className="inline-flex min-h-10 min-w-0 items-center gap-2.5 rounded-xl pr-2 text-sm font-bold uppercase tracking-[0.14em] text-slate-950 transition hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:text-[#f8fafc] dark:hover:text-[#e5e7eb] dark:focus-visible:ring-white"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 shadow-sm dark:border-white/10 dark:bg-slate-900">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 shadow-sm dark:border-white/12 dark:bg-white/[0.08]">
               <Building2 className="h-5 w-5 text-emerald-700" />
             </span>
             <span className="truncate">EstateDesk</span>
@@ -76,8 +76,8 @@ export function PublicAccessHeader({
                   href={item.href}
                   className={`public-access-nav-link inline-flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border px-2 text-[11px] font-semibold transition sm:min-h-11 sm:flex-row sm:gap-1.5 sm:text-sm md:min-h-10 md:px-3.5 ${
                     isActive
-                      ? "public-access-nav-link-active border-slate-300 bg-white text-slate-950 shadow-sm dark:border-white/20 dark:bg-white dark:text-slate-950"
-                      : "border-slate-200/80 bg-slate-50/85 text-slate-950 shadow-sm hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-white/20 dark:hover:bg-slate-800 dark:hover:text-white md:border-transparent md:bg-transparent md:shadow-none md:dark:bg-transparent"
+                      ? "public-access-nav-link-active border-slate-300 bg-white text-slate-950 shadow-sm dark:border-white/20 dark:bg-white dark:text-[#0b0f16]"
+                      : "border-slate-200/80 bg-slate-50/85 text-slate-950 shadow-sm hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-white/15 dark:bg-white/[0.08] dark:text-white dark:hover:border-white/25 dark:hover:bg-white/[0.14] dark:hover:text-white md:border-transparent md:bg-transparent md:shadow-none md:dark:border-white/10 md:dark:bg-white/[0.06]"
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0 text-current" />
@@ -99,7 +99,7 @@ export function PublicAccessHeader({
             </Link>
             <Link
               href="/register"
-              className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-800 dark:focus-visible:ring-white md:min-h-10 [&_*]:text-current"
+              className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-[#e5e7eb] dark:focus-visible:ring-white md:min-h-10 [&_*]:text-current"
             >
               <UserPlus className="h-4 w-4 shrink-0" />
               <span className="truncate">Create account</span>

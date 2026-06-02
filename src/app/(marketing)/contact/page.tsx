@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   UsersRound,
 } from "lucide-react";
+import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { ReferralCodeField } from "@/components/marketing/referral-code-field";
 import { publicPageMetadata } from "@/lib/seo";
@@ -99,7 +100,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-semibold text-slate-800">
+      <span className="mb-1.5 block text-sm font-semibold text-slate-800 dark:text-[#f8fafc]">
         {label}
       </span>
       {children}
@@ -112,8 +113,8 @@ function StatusMessage({ message }: { message: RequestMessage | null }) {
 
   const classes =
     message.tone === "success"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-      : "border-amber-200 bg-amber-50 text-amber-900";
+      ? "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-400/30 dark:bg-emerald-400/12 dark:text-emerald-100"
+      : "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-300/30 dark:bg-amber-300/12 dark:text-amber-100";
 
   return (
     <div className={`mb-4 rounded-2xl border px-4 py-3 ${classes}`}>
@@ -132,40 +133,37 @@ export default async function ContactPage({
   const message = requestMessage(params.request);
   const referralCode = (params.ref ?? params.referral ?? "").trim();
   const inputClassName =
-    "h-12 w-full rounded-2xl border border-slate-200/85 bg-white/90 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-4 focus:ring-sky-100";
+    "h-12 w-full rounded-2xl border border-slate-200/85 bg-white/90 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-200/70 dark:border-white/[0.16] dark:bg-[#171b22] dark:text-[#f8fafc] dark:placeholder:text-[#9ca3af] dark:focus:border-white/40 dark:focus:ring-white/10";
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#f8fbff_0%,#eef4fb_48%,#ffffff_100%)] text-slate-950">
+    <main className="min-h-screen bg-[linear-gradient(180deg,#f8fbff_0%,#eef4fb_48%,#ffffff_100%)] text-slate-950 dark:bg-[linear-gradient(180deg,#080b12_0%,#10141c_52%,#090b10_100%)] dark:text-[#f8fafc]">
       <PublicAccessHeader active="contact" />
 
-      <section className="relative overflow-hidden border-b border-white/80">
-        <div className="pointer-events-none absolute left-1/2 top-[-120px] h-72 w-72 -translate-x-1/2 rounded-full bg-white/90 blur-3xl" />
-        <div className="pointer-events-none absolute right-[-120px] top-44 h-72 w-72 rounded-full bg-sky-200/45 blur-3xl" />
-
+      <section className="relative border-b border-slate-200/80 dark:border-white/10">
         <div className="relative mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-10 lg:px-8 lg:py-14 xl:grid-cols-[minmax(0,1fr)_480px]">
           <div className="min-w-0">
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/80 bg-white/82 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur-2xl">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200/80 bg-white/82 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur-2xl dark:border-white/14 dark:bg-white/[0.10] dark:text-[#f3f4f6]">
               <Landmark className="h-3.5 w-3.5" />
               Enterprise property operations
             </div>
 
-            <h1 className="mt-5 max-w-3xl text-[clamp(2.15rem,10vw,4.75rem)] font-semibold leading-[0.98] tracking-tight text-slate-950">
+            <h1 className="mt-5 max-w-3xl text-[clamp(2.15rem,10vw,4.75rem)] font-semibold leading-[0.98] tracking-tight text-slate-950 dark:text-white">
               Talk to sales about EstateDesk for your team.
             </h1>
 
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 dark:text-[#d1d5db] sm:text-lg">
               Share the shape of your portfolio and the sales team will help
               map the right plan, onboarding path, and support model.
             </p>
 
-            <div className="mt-6 grid gap-2.5 rounded-[1.5rem] border border-white/80 bg-white/74 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.07)] backdrop-blur-2xl sm:p-4">
+            <div className="mt-6 grid gap-2.5 rounded-[1.5rem] border border-slate-200/80 bg-white/78 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.08] dark:shadow-none sm:p-4">
               {fitPoints.map((item) => (
                 <div
                   key={item}
-                  className="flex items-start gap-3 rounded-2xl border border-white/75 bg-white/80 p-3"
+                  className="flex items-start gap-3 rounded-2xl border border-slate-200/75 bg-white/86 p-3 dark:border-white/10 dark:bg-white/[0.07]"
                 >
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-                  <p className="text-sm leading-6 text-slate-700">{item}</p>
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-300" />
+                  <p className="text-sm leading-6 text-slate-700 dark:text-[#e5e7eb]">{item}</p>
                 </div>
               ))}
             </div>
@@ -177,15 +175,15 @@ export default async function ContactPage({
                 return (
                   <article
                     key={step.title}
-                    className="rounded-[1.35rem] border border-white/80 bg-white/76 p-4 shadow-[0_14px_36px_rgba(15,23,42,0.06)] backdrop-blur-2xl"
+                    className="rounded-[1.35rem] border border-slate-200/80 bg-white/78 p-4 shadow-[0_14px_36px_rgba(15,23,42,0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.08] dark:shadow-none"
                   >
-                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-900">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-900 dark:border-white/14 dark:bg-white/[0.10] dark:text-[#f8fafc]">
                       <Icon className="h-5 w-5" />
                     </span>
-                    <h2 className="mt-4 text-sm font-semibold text-slate-950">
+                    <h2 className="mt-4 text-sm font-semibold text-slate-950 dark:text-[#f8fafc]">
                       {step.title}
                     </h2>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-[#d1d5db]">
                       {step.description}
                     </p>
                   </article>
@@ -196,19 +194,19 @@ export default async function ContactPage({
 
           <div
             id="contact-sales"
-            className="rounded-[1.75rem] border border-white/85 bg-white/78 p-4 shadow-[0_28px_80px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl sm:p-5"
+            className="rounded-[1.75rem] border border-slate-200/85 bg-white/84 p-4 shadow-[0_28px_80px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl dark:border-white/[0.16] dark:bg-[#0b0f16]/95 dark:shadow-[0_28px_80px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.08)] sm:p-5"
           >
             <StatusMessage message={message} />
 
-            <div className="mb-5 flex items-start gap-3 border-b border-slate-200/80 pb-5">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-sm">
+            <div className="mb-5 flex items-start gap-3 border-b border-slate-200/80 pb-5 dark:border-white/10">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-sm dark:bg-white dark:text-[#0b0f16]">
                 <Mail className="h-5 w-5" />
               </span>
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-[#f8fafc]">
                   Contact sales
                 </h2>
-                <p className="mt-1 text-sm leading-6 text-slate-500">
+                <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-[#d1d5db]">
                   Send your details and the EstateDesk team will follow up.
                 </p>
               </div>
@@ -309,40 +307,41 @@ export default async function ContactPage({
                   name="message"
                   rows={4}
                   maxLength={1200}
-                  className="w-full resize-none rounded-2xl border border-slate-200/85 bg-white/90 px-3 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
+                  className="w-full resize-none rounded-2xl border border-slate-200/85 bg-white/90 px-3 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-200/70 dark:border-white/[0.16] dark:bg-[#171b22] dark:text-[#f8fafc] dark:placeholder:text-[#9ca3af] dark:focus:border-white/40 dark:focus:ring-white/10"
                   placeholder="Number of units, team size, billing pain points, or rollout timeline"
                 />
               </Field>
 
               <button
                 type="submit"
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-[#e5e7eb]"
               >
                 Send sales request
                 <ArrowRight className="h-4 w-4" />
               </button>
             </form>
 
-            <div className="mt-4 grid gap-2 rounded-2xl border border-slate-200/80 bg-white/78 p-3 text-sm text-slate-600">
+            <div className="mt-4 grid gap-2 rounded-2xl border border-slate-200/80 bg-white/78 p-3 text-sm text-slate-600 dark:border-white/14 dark:bg-white/[0.08] dark:text-[#e5e7eb]">
               <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-slate-950" />
+                <Building2 className="h-4 w-4 text-slate-950 dark:text-[#f8fafc]" />
                 <span>Best for enterprise or guided setup conversations.</span>
               </div>
               <div className="flex items-center gap-2">
-                <UsersRound className="h-4 w-4 text-slate-950" />
+                <UsersRound className="h-4 w-4 text-slate-950 dark:text-[#f8fafc]" />
                 <span>Already ready to start? Create an account instead.</span>
               </div>
             </div>
 
-            <p className="mt-4 text-center text-sm text-slate-500">
+            <p className="mt-4 text-center text-sm text-slate-500 dark:text-[#d1d5db]">
               Prefer self-service?{" "}
-              <Link href="/register" className="font-semibold text-slate-950">
+              <Link href="/register" className="font-semibold text-slate-950 dark:text-[#f8fafc]">
                 Request onboarding
               </Link>
             </p>
           </div>
         </div>
       </section>
+      <PublicAccessFooter />
     </main>
   );
 }

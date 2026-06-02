@@ -269,7 +269,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
   });
 
   return (
-    <main className="min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
+    <main className="min-h-screen bg-slate-100 text-slate-950 dark:bg-[#0b0f16] dark:text-[#f8fafc]">
       <PublicAccessHeader active="vacancies" loginHref={loginHref} />
 
       <section className="border-b border-slate-200 bg-white/85 dark:border-white/10 dark:bg-slate-900/80">
@@ -283,19 +283,19 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
               <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
                 Vacant houses and apartments
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-[#d1d5db]">
                 Find verified available units with clear pricing, location details, and direct access to the managing office.
               </p>
             </div>
 
-            <form className="grid gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur dark:border-white/10 dark:bg-slate-950 sm:grid-cols-[1fr_0.75fr_auto] lg:min-w-[42rem]">
+            <form className="grid gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur dark:border-white/12 dark:bg-[#0f1319] sm:grid-cols-[1fr_0.75fr_auto] lg:min-w-[42rem]">
               <label className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
                   name="q"
                   defaultValue={query}
                   placeholder="Search by house, property, manager..."
-                  className="min-h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
+                  className="min-h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/12 dark:bg-[#171b22] dark:text-[#f8fafc] dark:placeholder:text-[#9ca3af] dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
                 />
               </label>
               <label className="relative">
@@ -304,7 +304,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                   name="location"
                   defaultValue={location}
                   placeholder="Location"
-                  className="min-h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
+                  className="min-h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/12 dark:bg-[#171b22] dark:text-[#f8fafc] dark:placeholder:text-[#9ca3af] dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
                 />
               </label>
               <div className="grid grid-cols-[1fr_auto] gap-2">
@@ -312,13 +312,13 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                   name="sort"
                   defaultValue={sort}
                   aria-label="Sort vacancies"
-                  className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
+                  className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/12 dark:bg-[#171b22] dark:text-[#f8fafc] dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
                 >
                   <option value="location">Location</option>
                   <option value="rent_asc">Rent low to high</option>
                   <option value="rent_desc">Rent high to low</option>
                 </select>
-                <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-800 dark:focus-visible:ring-white dark:focus-visible:ring-offset-slate-900 [&_*]:text-current">
+                <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-[#e5e7eb] dark:focus-visible:ring-white dark:focus-visible:ring-offset-[#0b0f16] [&_*]:text-current">
                   <SlidersHorizontal className="h-4 w-4" />
                   Apply
                 </button>
@@ -330,23 +330,23 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
 
       <section className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8 2xl:max-w-none">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-[#d1d5db]">
             <Home className="h-4 w-4" />
             <span>{houses.length} vacant {houses.length === 1 ? "unit" : "units"} available</span>
           </div>
           {hasFilters ? (
-            <Link href="/vacancies" className="text-sm font-semibold text-slate-700 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white">
+            <Link href="/vacancies" className="text-sm font-semibold text-slate-700 transition hover:text-slate-950 dark:text-[#d1d5db] dark:hover:text-white">
               Clear search
             </Link>
           ) : null}
         </div>
 
         {databaseUnavailable ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-700 shadow-sm dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-700 shadow-sm dark:border-white/12 dark:bg-[#111827] dark:text-[#d1d5db]">
             Vacancies are temporarily unavailable. Please refresh in a moment.
           </div>
         ) : houses.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600 shadow-sm dark:border-white/15 dark:bg-slate-900 dark:text-slate-300">
+          <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600 shadow-sm dark:border-white/15 dark:bg-[#111827] dark:text-[#d1d5db]">
             No vacant units match that search yet.
           </div>
         ) : (

@@ -1,4 +1,7 @@
+import Link from "next/link";
+import { ArrowRight, CheckCircle2, Layers3 } from "lucide-react";
 import OperationsShowcase from "@/components/marketing/operations-showcase";
+import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 
 export const metadata = publicPageMetadata({
@@ -49,7 +52,150 @@ export default function ServicesPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <OperationsShowcase standalone />
+      <OperationsShowcase standalone showFooter={false} />
+      <ServicesSeoContent />
+      <PublicAccessFooter />
     </main>
+  );
+}
+
+const services = [
+  {
+    title: "Property Management Software",
+    href: "/property-management-software-kenya",
+    body: "EstateDesk gives rental teams one workspace for properties, buildings, units, tenants, leases, rent records, water bills, vacancies, maintenance, inspections, staff access, reports, and daily operations. It is built for landlords, property managers, agencies, caretakers, and tenants who need a clearer alternative to scattered spreadsheets and manual files.",
+  },
+  {
+    title: "Tenant Management",
+    href: "/landlord-software",
+    body: "Tenant management keeps profiles, contacts, leases, occupancy, balances, movement history, notices, and operational notes connected to the right property and unit. This helps managers search tenant records faster, support renewals or move-outs, and reduce confusion when staff members need to review a tenant history.",
+  },
+  {
+    title: "Rent Collection Tracking",
+    href: "/rent-tracking-software",
+    body: "EstateDesk supports rent tracking, tenant balances, payment records, paid and unpaid tenant visibility, payment verification, reminders, and reporting workflows. Property managers can follow up rent more consistently because the rent record is connected to tenants, leases, units, water bills, and reports.",
+  },
+  {
+    title: "Water Billing",
+    href: "/water-billing-software",
+    body: "Water billing workflows help teams record readings, create tenant water charges, review billing history, and understand balances. This is useful for apartments, bedsitters, shops, offices, and mixed-use properties where water charges must be tracked alongside rent and tenant records.",
+  },
+  {
+    title: "Vacancy Listings",
+    href: "/vacancies",
+    body: "EstateDesk supports public vacancy discovery so available units can be found by tenants online. Property teams can publish vacant houses, apartments, bedsitters, shops, offices, warehouses, and other spaces with clearer location and unit details instead of relying only on calls or social posts.",
+  },
+  {
+    title: "Maintenance Management",
+    href: "/services",
+    body: "Maintenance workflows help tenants, caretakers, and office teams track issues from report to follow-up. Managers can review issue status, assignments, history, inspections, and related property records so repairs and complaints do not disappear into message threads.",
+  },
+  {
+    title: "Reporting and Analytics",
+    href: "/services",
+    body: "Reports help teams understand occupancy, rent balances, paid and unpaid tenants, issues, inspections, staff activity, vacancies, and operational progress. EstateDesk makes reporting easier by keeping core property records in one structured system.",
+  },
+];
+
+function ServicesSeoContent() {
+  return (
+    <>
+      <section className="border-y border-neutral-200 bg-[#f7f9fc] py-10 sm:py-12 lg:py-14">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-600">
+              <Layers3 className="h-3.5 w-3.5" />
+              EstateDesk services
+            </div>
+            <h1 className="mt-4 text-3xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-4xl">
+              Services for organized property management
+            </h1>
+            <div className="mt-4 grid gap-4 text-base leading-8 text-neutral-600">
+              <p>
+                EstateDesk provides property management software and operational
+                workflows for landlords, property managers, real estate agencies,
+                caretakers, and tenants. The platform is designed to help rental
+                teams manage the work that happens every day: tenant records, lease
+                records, rent tracking, water billing, vacancies, maintenance
+                requests, inspections, staff access, reporting, and communication.
+              </p>
+              <p>
+                These services are especially useful for teams in Kenya, East
+                Africa, Dubai, the UAE, and remote landlord markets where property
+                operations often depend on many people. A landlord may need to see
+                balances and vacancies. A property manager may need to follow rent
+                and inspections. A caretaker may need to report issues. A tenant may
+                need a clearer path for maintenance or available homes. EstateDesk
+                connects these workflows so the record does not live in separate
+                spreadsheets, notebooks, receipts, and message threads.
+              </p>
+              <p>
+                The result is a more searchable, accountable, and professional
+                operating system for rental property. Teams can start with basic
+                property and tenant records, then grow into rent tracking, water
+                billing, issue management, caretaker assignments, inspections,
+                reports, public vacancies, data exports, and guided onboarding for
+                larger organizations.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white py-10 sm:py-12 lg:py-14">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {services.map((service) => (
+              <article key={service.title} className="rounded-2xl border border-neutral-200 bg-[#fbfcfe] p-5 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <div className="min-w-0">
+                    <h2 className="text-lg font-semibold tracking-[-0.02em] text-neutral-950">
+                      {service.title}
+                    </h2>
+                    <p className="mt-2 text-sm leading-7 text-neutral-600">{service.body}</p>
+                    <Link
+                      href={service.href}
+                      className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl border border-neutral-300 bg-white px-3 text-sm font-semibold text-neutral-800 transition hover:border-neutral-400"
+                    >
+                      Learn more
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-white/10 bg-[#10141a] py-10 text-[#f8fafc] sm:py-12 lg:py-14">
+        <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
+            Build a cleaner property management workflow
+          </h2>
+          <p className="mx-auto mt-3 max-w-3xl text-base leading-7 text-[#d1d5db]">
+            EstateDesk helps teams replace scattered rental records with one
+            online system for tenants, rent, water bills, vacancies, maintenance,
+            inspections, staff access, and reports.
+          </p>
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link
+              href="/register"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-100"
+            >
+              Start free
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/20 px-5 text-sm font-semibold text-white transition hover:bg-white/10"
+            >
+              Talk to sales
+            </Link>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

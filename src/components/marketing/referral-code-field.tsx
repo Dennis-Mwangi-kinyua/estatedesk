@@ -29,7 +29,8 @@ export function ReferralCodeField({ defaultCode = "" }: ReferralCodeFieldProps) 
     if (!code) {
       return {
         Icon: Ticket,
-        className: "border-neutral-200 bg-neutral-50 text-neutral-500",
+        className:
+          "border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-white/14 dark:bg-white/[0.08] dark:text-[#d1d5db]",
         text: "Optional. Enter a marketer promo code if someone referred you.",
       };
     }
@@ -37,7 +38,8 @@ export function ReferralCodeField({ defaultCode = "" }: ReferralCodeFieldProps) 
     if (status === "loading") {
       return {
         Icon: Loader2,
-        className: "border-neutral-200 bg-neutral-50 text-neutral-500",
+        className:
+          "border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-white/14 dark:bg-white/[0.08] dark:text-[#d1d5db]",
         text: "Checking promo code...",
       };
     }
@@ -45,7 +47,8 @@ export function ReferralCodeField({ defaultCode = "" }: ReferralCodeFieldProps) 
     if (status === "found") {
       return {
         Icon: CheckCircle2,
-        className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+        className:
+          "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-400/12 dark:text-emerald-100",
         text: `Referral confirmed: ${marketerName}`,
       };
     }
@@ -53,14 +56,16 @@ export function ReferralCodeField({ defaultCode = "" }: ReferralCodeFieldProps) 
     if (status === "not_found") {
       return {
         Icon: XCircle,
-        className: "border-amber-200 bg-amber-50 text-amber-800",
+        className:
+          "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-300/30 dark:bg-amber-300/12 dark:text-amber-100",
         text: "No active marketer found. The code will still be recorded for review.",
       };
     }
 
     return {
       Icon: XCircle,
-      className: "border-red-200 bg-red-50 text-red-800",
+      className:
+        "border-red-200 bg-red-50 text-red-800 dark:border-red-300/30 dark:bg-red-300/12 dark:text-red-100",
       text: "Could not check this code right now. You can still continue.",
     };
   }, [code, marketerName, status]);
@@ -125,7 +130,7 @@ export function ReferralCodeField({ defaultCode = "" }: ReferralCodeFieldProps) 
   return (
     <div>
       <label className="block">
-        <span className="mb-1.5 block text-sm font-medium text-neutral-700">
+        <span className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-[#f8fafc]">
           Promo code (optional)
         </span>
         <input
@@ -143,7 +148,7 @@ export function ReferralCodeField({ defaultCode = "" }: ReferralCodeFieldProps) 
           }}
           maxLength={40}
           autoComplete="off"
-          className="h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm font-semibold uppercase outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+          className="h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm font-semibold uppercase text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100 dark:border-white/[0.16] dark:bg-[#171b22] dark:text-[#f8fafc] dark:placeholder:text-[#9ca3af] dark:focus:border-white/40 dark:focus:ring-white/10"
           placeholder="Example: JANE10"
         />
       </label>
