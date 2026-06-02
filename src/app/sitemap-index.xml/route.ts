@@ -1,7 +1,12 @@
 import { APP_URL, XML_HEADERS, buildSitemapIndexEntry, wrapSitemapIndex } from '@/lib/sitemap-utils'
 
 export async function renderSitemapXml() {
-  const sitemaps = [`${APP_URL}/sitemap.xml`, `${APP_URL}/sitemap-vacancies.xml`]
+  const sitemaps = [
+    `${APP_URL}/sitemap.xml`,
+    `${APP_URL}/sitemap-vacancies.xml`,
+    `${APP_URL}/sitemap-properties.xml`,
+    `${APP_URL}/sitemap-units.xml`,
+  ]
 
   const entries = sitemaps.map((s) => buildSitemapIndexEntry(s))
   return wrapSitemapIndex(entries)

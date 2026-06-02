@@ -20,6 +20,7 @@ import {
   Zap,
 } from "lucide-react";
 import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
+import { VacancyShareActions } from "@/components/marketing/vacancy-share-actions";
 import { prisma } from "@/lib/prisma";
 import { APP_URL } from "@/lib/sitemap-utils";
 import { sendVacancyInquiryAction } from "./actions";
@@ -416,6 +417,7 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
   const gallery = unit.images.length > 0 ? unit.images : [{ key: FALLBACK_IMAGE, fileName: title }];
   const callHref = unit.property?.org.phone ? `tel:${unit.property.org.phone}` : `mailto:${unit.property?.org.email ?? "info@estatedesk.com"}`;
   const boundInquiryAction = sendVacancyInquiryAction.bind(null, unit.id);
+  const shareText = `${title} is vacant in ${place}. Rent: ${formatCurrency(unit.rentAmount)}. View details on EstateDesk.`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -552,6 +554,10 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
               <Phone className="h-4 w-4" />
               Call landlord/agent
             </a>
+
+            <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-900">
+              <VacancyShareActions url={url} title={title} text={shareText} />
+            </section>
 
             <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-slate-900">
               <h2 className="text-lg font-semibold text-slate-950 dark:text-white">Enquire about this property</h2>

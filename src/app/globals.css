@@ -216,6 +216,8 @@
     scroll-behavior: smooth;
     overscroll-behavior-x: auto;
     overscroll-behavior-y: auto;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
@@ -232,6 +234,42 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  @supports (min-height: 100dvh) {
+    body {
+      min-height: 100dvh;
+    }
+  }
+
+  :where(img, picture, video, canvas, iframe) {
+    max-width: 100%;
+  }
+
+  :where(img, picture, video, canvas) {
+    height: auto;
+  }
+
+  :where(svg) {
+    flex-shrink: 0;
+  }
+
+  :where(button, input, select, textarea) {
+    max-width: 100%;
+    font: inherit;
+  }
+
+  :where(input, select, textarea) {
+    min-width: 0;
+    font-size: max(1rem, 16px);
+  }
+
+  :where(p, li, dd, dt, blockquote, figcaption, a, label, td, th) {
+    overflow-wrap: anywhere;
+  }
+
+  :where(table) {
+    max-width: 100%;
   }
 
   ::selection {

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 
-const PAGE_PATHS = ["/platform/onboarding", "/platform/messages", "/platform/broadcasts"];
+const PAGE_PATHS = ["/platform", "/platform/onboarding", "/platform/messages", "/platform/broadcasts"];
 const STATUSES = ["NEW", "CONTACTED", "QUALIFIED", "CLOSED", "REJECTED"] as const;
 
 function readString(formData: FormData, key: string) {
@@ -70,6 +70,23 @@ export async function quickUpdateOnboardingStatusAction(formData: FormData) {
       handledAt: status === "NEW" ? null : new Date(),
       handledByUserId: status === "NEW" ? null : session.userId,
     },
+  });
+
+  revalidateOnboardingViews();
+}
+
+export async function deleteOnboardingRequestAction(formData: FormData) {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
+  });
+  const requestId = readString(formData, "requestId");
+
+  if (!requestId) {
+    throw new Error("Missing onboarding request id.");
+  }
+
+  await prisma.onboardingRequest.deleteMany({
+    where: { id: requestId },
   });
 
   revalidateOnboardingViews();

@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Building2, Home, Mail, Search, ShieldCheck } from "lucide-react";
+import { Building2, Home, MessageCircleQuestion, Search, ShieldCheck } from "lucide-react";
 
 const footerLinks = [
   { href: "/vacancies", label: "Vacancies" },
   { href: "/services", label: "Services" },
+  { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
 ] as const;
 
@@ -45,7 +46,7 @@ export function PublicAccessFooter() {
           ))}
         </div>
 
-        <nav className="grid grid-cols-4 gap-2 md:col-span-2 lg:col-span-1 lg:flex lg:items-center lg:justify-end">
+        <nav className="grid grid-cols-2 gap-2 sm:grid-cols-5 md:col-span-2 lg:col-span-1 lg:flex lg:items-center lg:justify-end">
           {footerLinks.map((link) => (
             <Link
               key={link.href}
@@ -56,11 +57,11 @@ export function PublicAccessFooter() {
             </Link>
           ))}
           <Link
-            href="/contact"
+            href="/faq"
             className="inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-2 text-xs font-semibold text-neutral-800 shadow-sm transition hover:border-neutral-300 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2"
           >
-            <Mail className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
-            <span className="truncate">Talk</span>
+            <MessageCircleQuestion className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
+            <span className="truncate">Help</span>
           </Link>
         </nav>
       </div>

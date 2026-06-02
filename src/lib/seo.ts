@@ -2,8 +2,37 @@ import type { Metadata } from "next";
 
 export const SITE_NAME = "EstateDesk";
 export const SITE_DESCRIPTION =
-  "EstateDesk helps Kenyan landlords and property managers securely manage tenants, leases, rent, water bills, caretakers, inspections, maintenance, and staff access online.";
+  "EstateDesk is property management software for landlords and property managers in Kenya, East Africa, Dubai, and global rental markets, helping teams manage tenants, leases, rent, water bills, caretakers, inspections, maintenance, vacant houses, and staff access online.";
 export const DEFAULT_SITE_URL = "https://estatedesk.co.ke";
+
+export const SEO_KEYWORDS = [
+  "EstateDesk",
+  "property management software Kenya",
+  "landlord software Kenya",
+  "rental property management system Kenya",
+  "rent management system",
+  "tenant management software Kenya",
+  "caretaker management software",
+  "water billing software Kenya",
+  "lease management software Kenya",
+  "vacant houses Kenya",
+  "houses for rent Kenya",
+  "property manager software Nairobi",
+  "real estate management software Kenya",
+  "property management software East Africa",
+  "landlord software East Africa",
+  "property management software Uganda",
+  "property management software Tanzania",
+  "property management software Rwanda",
+  "property management software Dubai",
+  "property management software UAE",
+  "real estate management software Dubai",
+  "rental management software for landlords",
+  "property management software for small landlords",
+  "cloud property management software",
+  "online property management system",
+  "rental portfolio management software",
+] as const;
 
 export function getSiteUrl() {
   const raw =
@@ -23,10 +52,12 @@ export function publicPageMetadata({
   title,
   description,
   path = "/",
+  keywords = [],
 }: {
   title: string;
   description: string;
   path?: string;
+  keywords?: readonly string[];
 }): Metadata {
   const url = absoluteUrl(path);
   const resolvedTitle = title.includes(SITE_NAME) ? title : `${title} - ${SITE_NAME}`;
@@ -34,8 +65,18 @@ export function publicPageMetadata({
   return {
     title: resolvedTitle,
     description,
+    keywords: [...SEO_KEYWORDS, ...keywords],
     alternates: {
       canonical: url,
+      languages: {
+        "en-KE": url,
+        "en-UG": url,
+        "en-TZ": url,
+        "en-RW": url,
+        "en-AE": url,
+        "en": url,
+        "x-default": url,
+      },
     },
     openGraph: {
       title: resolvedTitle,

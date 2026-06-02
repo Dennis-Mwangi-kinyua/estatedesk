@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { ComponentType } from "react";
-import { CreditCard, FileClock, Plus, Users } from "lucide-react";
+import { Bell, Clock3, CreditCard, ExternalLink, FileClock, Mail, Phone, Plus, SlidersHorizontal, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { countOnlineUsers } from "@/lib/auth/presence";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { OnboardingRequestPopup } from "./_components/onboarding-request-popup";
 
 export const dynamic = "force-dynamic";
 
@@ -238,6 +239,8 @@ export default async function PlatformPage() {
     atRiskSubscriptions,
     recentOrganizations,
     recentPayments,
+    newOnboardingCount,
+    recentOnboardingRequests,
     organizationSeries,
     revenueSeries,
   ] = await Promise.all([
@@ -371,6 +374,21 @@ export default async function PlatformPage() {
       },
     })),
 
+    platformQuery("platform-new-onboarding-count", () =>
+      prisma.onboardingRequest.count({ where: { status: "NEW" } }),
+    ),
+
+    platformQuery("platform-recent-onboarding", () =>
+      prisma.onboardingRequest.findMany({
+        where: { status: "NEW" },
+        orderBy: { createdAt: "desc" },
+        take: 4,
+        include: {
+          marketer: { select: { fullName: true, referralCode: true } },
+        },
+      }),
+    ),
+
     getOrganizationSeries(6),
     getRevenueSeries(6),
   ]);
@@ -383,7 +401,39 @@ export default async function PlatformPage() {
 
   return (
     <div className="min-h-full text-slate-900 dark:text-slate-100">
+      <OnboardingRequestPopup
+        count={newOnboardingCount}
+        latestRequestId={recentOnboardingRequests[0]?.id ?? null}
+        latestCompany={recentOnboardingRequests[0]?.companyName ?? null}
+      />
       <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-3 py-4 sm:px-4 lg:px-6 lg:py-6">
+        {newOnboardingCount > 0 ? (
+          <Link
+            href="/platform/onboarding?status=NEW"
+            className="flex flex-col gap-3 rounded-xl border border-slate-300 bg-slate-950 p-4 text-white shadow-sm transition hover:bg-slate-900 dark:border-white/10 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 dark:bg-slate-950/10">
+                <Bell className="h-5 w-5" />
+              </span>
+              <span>
+                <span className="block text-sm font-semibold">
+                  {formatNumber(newOnboardingCount)} new onboarding request
+                  {newOnboardingCount === 1 ? "" : "s"} need attention
+                </span>
+                <span className="mt-1 block text-sm text-white/75 dark:text-slate-600">
+                  Latest: {recentOnboardingRequests[0]?.companyName ?? "New company"} from{" "}
+                  {recentOnboardingRequests[0]?.fullName ?? "a new contact"}.
+                </span>
+              </span>
+            </span>
+            <span className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-white px-3 text-xs font-semibold text-slate-950 dark:bg-slate-950 dark:text-white">
+              Review queue
+              <ExternalLink className="h-3.5 w-3.5" />
+            </span>
+          </Link>
+        ) : null}
+
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
           <div className="grid gap-3 xl:grid-cols-[1.55fr_0.9fr]">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -429,6 +479,11 @@ export default async function PlatformPage() {
                 value={formatNumber(totalProperties)}
                 helper={`${formatNumber(totalUnits)} units`}
               />
+              <CompactInfoCard
+                label="Onboarding"
+                value={formatNumber(newOnboardingCount)}
+                helper="new requests"
+              />
             </div>
           </div>
         </section>
@@ -438,6 +493,7 @@ export default async function PlatformPage() {
             <Panel title="Quick actions" subtitle="High-priority shortcuts">
               <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-1">
                 <ActionLink href="/platform/organizations/new" label="New organization" icon={Plus} />
+                <ActionLink href="/platform/onboarding?status=NEW" label="New onboarding" icon={SlidersHorizontal} />
                 <ActionLink href="/platform/users" label="Platform users" icon={Users} />
                 <ActionLink href="/platform/billing" label="Billing center" icon={CreditCard} />
                 <ActionLink href="/platform/audit-logs" label="Audit logs" icon={FileClock} />
@@ -522,6 +578,59 @@ export default async function PlatformPage() {
             </section>
 
             <section className="grid gap-5 xl:grid-cols-[1.2fr_0.95fr]">
+              <Panel title="Onboarding queue" subtitle="New requests needing first response">
+                {recentOnboardingRequests.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-slate-900 dark:text-slate-400">
+                    No new onboarding requests.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {recentOnboardingRequests.map((request) => (
+                      <Link
+                        key={request.id}
+                        href="/platform/onboarding?status=NEW"
+                        className="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                              {request.companyName}
+                            </p>
+                            <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                              {request.fullName} / {request.managedPropertyType}
+                            </p>
+                          </div>
+                          <StatusBadge tone={statusTone("pending")}>NEW</StatusBadge>
+                        </div>
+                        <div className="mt-3 grid gap-2 text-[11px] text-slate-500 dark:text-slate-400 sm:grid-cols-2">
+                          <span className="inline-flex min-w-0 items-center gap-1.5">
+                            <Mail className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">{request.workEmail}</span>
+                          </span>
+                          {request.phone ? (
+                            <span className="inline-flex min-w-0 items-center gap-1.5">
+                              <Phone className="h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate">{request.phone}</span>
+                            </span>
+                          ) : null}
+                          <span className="inline-flex min-w-0 items-center gap-1.5">
+                            <Clock3 className="h-3.5 w-3.5 shrink-0" />
+                            <span>{formatDate(request.createdAt)}</span>
+                          </span>
+                          <span className="truncate">
+                            {request.marketer
+                              ? `${request.marketer.fullName} (${request.marketer.referralCode})`
+                              : request.referralCode
+                                ? `Referral ${request.referralCode}`
+                                : "No referral"}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </Panel>
+
               <Panel title="Recent organizations" subtitle="Newest workspaces on the platform">
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
                   {recentOrganizations.map((org) => (

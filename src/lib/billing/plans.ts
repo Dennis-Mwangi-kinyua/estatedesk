@@ -31,7 +31,7 @@ export const APP_PLANS = {
   PRO: {
     name: "Pro",
     badge: "Popular",
-    monthlyAmount: 4500,
+    monthlyAmount: 3000,
     propertiesLimit: 5,
     unitsLimit: 100,
     usersLimit: 8,
@@ -62,7 +62,7 @@ export const APP_PLANS = {
   PLUS: {
     name: "Plus",
     badge: "Growth",
-    monthlyAmount: 9500,
+    monthlyAmount: 6500,
     propertiesLimit: 20,
     unitsLimit: 500,
     usersLimit: 25,

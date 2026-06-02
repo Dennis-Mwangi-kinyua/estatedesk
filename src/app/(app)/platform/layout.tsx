@@ -96,8 +96,8 @@ export default async function PlatformLayout({
   });
 
   return (
-    <div className="h-screen overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <div className="flex h-full">
+    <div className="min-h-dvh overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <div className="flex min-h-dvh">
         <aside className="hidden h-full w-[280px] shrink-0 border-r border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 lg:flex lg:flex-col">
           <div className="border-b border-slate-200 px-5 py-5 dark:border-white/10">
             <div className="flex items-center gap-3">
@@ -155,7 +155,7 @@ export default async function PlatformLayout({
         </aside>
 
         <PlatformMobileShell navItems={navItems} fullName={session.fullName}>
-          <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+          <main className="flex min-h-dvh min-w-0 flex-1 flex-col overflow-hidden">
             <header className="hidden shrink-0 border-b border-slate-200 bg-white px-6 py-4 dark:border-white/10 dark:bg-slate-950 lg:block">
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
@@ -176,8 +176,8 @@ export default async function PlatformLayout({
               </div>
             </header>
 
-            <section className="min-h-0 flex-1 overflow-hidden p-3 sm:p-4 lg:p-6">
-              <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900/70">
+            <section className="min-h-0 flex-1 overflow-hidden p-2 sm:p-4 lg:p-6">
+              <div className="h-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900/70 sm:rounded-xl">
                 <div className="h-full overflow-auto p-4 sm:p-5 lg:p-6">
                   {children}
                 </div>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Bath, BedDouble, Building2, ChevronLeft, ChevronRight, MapPin, Phone } from "lucide-react";
 import { useMemo, useState, useSyncExternalStore } from "react";
+import { VacancyShareActions } from "@/components/marketing/vacancy-share-actions";
 
 export type VacancyListingCard = {
   id: string;
@@ -23,6 +24,9 @@ export type VacancyListingCard = {
   viewingLabel: string;
   description: string;
   callHref: string;
+  shareUrl: string;
+  shareTitle: string;
+  shareText: string;
 };
 
 type VacancyListingGridProps = {
@@ -165,6 +169,15 @@ export function VacancyListingGrid({ listings }: VacancyListingGridProps) {
                   >
                     View details
                   </Link>
+                </div>
+
+                <div className="mt-3 border-t border-slate-100 pt-3 dark:border-white/10">
+                  <VacancyShareActions
+                    url={listing.shareUrl}
+                    title={listing.shareTitle}
+                    text={listing.shareText}
+                    compact
+                  />
                 </div>
               </div>
             </div>

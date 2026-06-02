@@ -15,6 +15,7 @@ import {
 import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
 import { publicPageMetadata } from "@/lib/seo";
+import { APP_URL } from "@/lib/sitemap-utils";
 
 export const metadata = publicPageMetadata({
   title: "Public Information Kiosk - EstateDesk",
@@ -231,6 +232,9 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
     const place = listing.property.location ?? listing.property.address ?? listing.property.name;
     const href = `/vacancies/${listing.id}`;
     const rooms = listing.bedrooms ?? listing.roomCount;
+    const rentLabel = formatCurrency(listing.rentAmount);
+    const shareTitle = `${listing.property.name} Unit ${listing.houseNo} is vacant`;
+    const shareText = `${shareTitle} in ${place}. Rent: ${rentLabel}. View details on EstateDesk.`;
 
     return {
       id: listing.id,
@@ -245,7 +249,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
       typeLabel: unitLabel(listing.type, listing.bedrooms),
       roomsLabel: rooms ? `${rooms} room${rooms === 1 ? "" : "s"}` : "Rooms",
       bathsLabel: listing.bathrooms ? `${listing.bathrooms} bath${listing.bathrooms === 1 ? "" : "s"}` : "Baths",
-      rentLabel: formatCurrency(listing.rentAmount),
+      rentLabel,
       serviceChargeLabel: listing.serviceCharge
         ? `Service ${formatCurrency(listing.serviceCharge)}`
         : "Service included/none",
@@ -258,6 +262,9 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
         place,
       }),
       callHref: listing.property.org.phone ? `tel:${listing.property.org.phone}` : "/contact",
+      shareUrl: `${APP_URL}${href}`,
+      shareTitle,
+      shareText,
     };
   });
 

@@ -6,9 +6,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { prisma } from "@/lib/prisma";
-import { setUserSession } from "@/lib/auth/session";
+import { ActiveSessionLimitError, setUserSession } from "@/lib/auth/session";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
-import { retryTransientDatabaseOperation } from "@/lib/db/retry";
+import {
+  isTransientDatabaseError,
+  retryTransientDatabaseOperation,
+} from "@/lib/db/retry";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 const loginSchema = z.object({
@@ -37,7 +40,9 @@ export type LoginActionState = {
 const INVALID_CREDENTIALS_MESSAGE = "Invalid email or password.";
 const GENERIC_LOGIN_ERROR_MESSAGE =
   "Unable to sign in right now. Please try again.";
-const LOGIN_RATE_LIMIT_TIMEOUT_MS = 5_000;
+const DATABASE_UNAVAILABLE_MESSAGE =
+  "The database is taking too long to respond. Please try again in a moment.";
+const LOGIN_RATE_LIMIT_TIMEOUT_MS = 2_500;
 
 async function withTimeout<T>(
   promise: Promise<T>,
@@ -66,7 +71,11 @@ async function retryTransientLoginDbOperation<T>(
   label: string,
   operation: () => Promise<T>,
 ): Promise<T> {
-  return retryTransientDatabaseOperation(operation, { label });
+  return retryTransientDatabaseOperation(operation, {
+    attempts: 2,
+    delayMs: 350,
+    label,
+  });
 }
 
 async function getLoginRateLimitError({
@@ -94,7 +103,9 @@ async function getLoginRateLimitError({
       };
     }
   } catch (error) {
-    console.error("login rate limit check failed:", error);
+    const message =
+      error instanceof Error ? error.message : "login rate limit check failed";
+    console.warn("login rate limit skipped:", message);
   }
 
   return null;
@@ -388,6 +399,22 @@ export async function loginAction(
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
+    }
+
+    if (error instanceof ActiveSessionLimitError) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    if (isTransientDatabaseError(error)) {
+      console.error("loginAction database unavailable:", error);
+
+      return {
+        success: false,
+        error: DATABASE_UNAVAILABLE_MESSAGE,
+      };
     }
 
     console.error("loginAction error:", error);

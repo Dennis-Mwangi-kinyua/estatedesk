@@ -4,6 +4,7 @@ import {
   Home,
   LogIn,
   Mail,
+  MessageCircleQuestion,
   Search,
   UserPlus,
   WalletCards,
@@ -11,7 +12,7 @@ import {
 import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 
 type PublicAccessHeaderProps = {
-  active?: "home" | "vacancies" | "services" | "pricing" | "contact";
+  active?: "home" | "vacancies" | "services" | "pricing" | "contact" | "faq";
   loginHref?: string;
   showPricing?: boolean;
 };
@@ -20,6 +21,7 @@ const publicLinks = [
   { href: "/vacancies", label: "Vacancies", key: "vacancies", icon: Home },
   { href: "/services", label: "Services", key: "services", icon: Search },
   { href: "/pricing", label: "Pricing", key: "pricing", icon: WalletCards },
+  { href: "/faq", label: "FAQ", key: "faq", icon: MessageCircleQuestion },
   { href: "/contact", label: "Contact", key: "contact", icon: Mail },
 ] as const;
 
@@ -31,7 +33,7 @@ export function PublicAccessHeader({
   const visibleLinks = showPricing
     ? publicLinks
     : publicLinks.filter((item) => item.key !== "pricing");
-  const mobileLinkGridClass = showPricing ? "grid-cols-2" : "grid-cols-3";
+  const mobileLinkGridClass = "grid-cols-2";
   const signInClassName =
     "items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:!border-white/15 dark:!bg-slate-900 dark:!text-white dark:hover:!bg-slate-800 dark:focus-visible:ring-white";
 

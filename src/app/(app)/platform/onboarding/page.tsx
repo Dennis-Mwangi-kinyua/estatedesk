@@ -1,6 +1,8 @@
 import { Prisma } from "@prisma/client";
+import { CheckCircle2, Clock3, Mail, Phone, Search, Trash2, UserRound } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getPagination } from "@/lib/db/pagination";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import {
   Badge,
   PageHeader,
@@ -10,6 +12,7 @@ import {
   toneForStatus,
 } from "../_components/control-plane";
 import {
+  deleteOnboardingRequestAction,
   quickUpdateOnboardingStatusAction,
   updateOnboardingRequestAction,
 } from "./actions";
@@ -24,6 +27,22 @@ type SearchParams = Promise<{
 }>;
 
 const STATUSES = ["NEW", "CONTACTED", "QUALIFIED", "CLOSED", "REJECTED"] as const;
+
+function onboardingQuery<T>(label: string, operation: () => Promise<T>) {
+  return retryTransientDatabaseOperation(operation, {
+    attempts: 4,
+    delayMs: 650,
+    label,
+  });
+}
+
+function getPriorityLabel(status: string) {
+  if (status === "NEW") return "Needs first response";
+  if (status === "CONTACTED") return "Awaiting qualification";
+  if (status === "QUALIFIED") return "Ready for setup";
+  if (status === "CLOSED") return "Completed";
+  return "No further action";
+}
 
 function buildWhere({
   q,
@@ -69,21 +88,33 @@ export default async function PlatformOnboardingPage({
 
   const [requests, totalFiltered, newCount, contactedCount, qualifiedCount, closedCount] =
     await Promise.all([
-      prisma.onboardingRequest.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take,
-        include: {
-          handledBy: { select: { fullName: true, email: true } },
-          marketer: { select: { fullName: true, referralCode: true } },
-        },
-      }),
-      prisma.onboardingRequest.count({ where }),
-      prisma.onboardingRequest.count({ where: { status: "NEW" } }),
-      prisma.onboardingRequest.count({ where: { status: "CONTACTED" } }),
-      prisma.onboardingRequest.count({ where: { status: "QUALIFIED" } }),
-      prisma.onboardingRequest.count({ where: { status: { in: ["CLOSED", "REJECTED"] } } }),
+      onboardingQuery("platform-onboarding-requests", () =>
+        prisma.onboardingRequest.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip,
+          take,
+          include: {
+            handledBy: { select: { fullName: true, email: true } },
+            marketer: { select: { fullName: true, referralCode: true } },
+          },
+        }),
+      ),
+      onboardingQuery("platform-onboarding-total-filtered", () =>
+        prisma.onboardingRequest.count({ where }),
+      ),
+      onboardingQuery("platform-onboarding-new-count", () =>
+        prisma.onboardingRequest.count({ where: { status: "NEW" } }),
+      ),
+      onboardingQuery("platform-onboarding-contacted-count", () =>
+        prisma.onboardingRequest.count({ where: { status: "CONTACTED" } }),
+      ),
+      onboardingQuery("platform-onboarding-qualified-count", () =>
+        prisma.onboardingRequest.count({ where: { status: "QUALIFIED" } }),
+      ),
+      onboardingQuery("platform-onboarding-closed-count", () =>
+        prisma.onboardingRequest.count({ where: { status: { in: ["CLOSED", "REJECTED"] } } }),
+      ),
     ]);
 
   return (
@@ -104,12 +135,15 @@ export default async function PlatformOnboardingPage({
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900/90">
         <form className="grid gap-3 border-b border-slate-100 p-4 dark:border-white/10 md:grid-cols-[1fr_180px_auto]">
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Search company, contact, email, phone, or notes"
-            className="min-h-11 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
-          />
+          <label className="relative block">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              name="q"
+              defaultValue={q}
+              placeholder="Search company, contact, email, phone, or notes"
+              className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-11 py-3 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
+            />
+          </label>
           <select
             name="status"
             defaultValue={status}
@@ -136,95 +170,141 @@ export default async function PlatformOnboardingPage({
             {requests.map((request) => (
               <article
                 key={request.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:p-5"
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950"
               >
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="min-w-0">
-                    <h2 className="break-words text-base font-semibold text-slate-950 dark:text-white">
-                      {request.companyName}
-                    </h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">
-                      {request.fullName} • {request.managedPropertyType}
-                    </p>
-                    <p className="mt-2 break-words text-sm text-slate-600 dark:text-slate-300">
-                      {request.workEmail}
-                      {request.phone ? ` • ${request.phone}` : ""}
-                    </p>
-                    <p className="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                      Marketer:{" "}
+                <div className="border-b border-slate-100 p-4 dark:border-white/10 sm:p-5">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="break-words text-base font-semibold text-slate-950 dark:text-white">
+                          {request.companyName}
+                        </h2>
+                        <Badge tone={toneForStatus(request.status === "NEW" ? "pending" : request.status)}>
+                          {request.status}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-300">
+                        <UserRound className="h-4 w-4 shrink-0" />
+                        <span className="break-words">{request.fullName}</span>
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap gap-2">
+                      <Badge>{getPriorityLabel(request.status)}</Badge>
+                      <Badge>
+                        <Clock3 className="mr-1 h-3.5 w-3.5" />
+                        {formatDateTime(request.createdAt)}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-2 text-xs text-slate-600 dark:text-slate-300 sm:grid-cols-2 xl:grid-cols-4">
+                    <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 dark:border-white/10 dark:bg-slate-900">
+                      <Mail className="h-3.5 w-3.5 shrink-0" />
+                      <span className="break-all">{request.workEmail}</span>
+                    </span>
+                    {request.phone ? (
+                      <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 dark:border-white/10 dark:bg-slate-900">
+                        <Phone className="h-3.5 w-3.5 shrink-0" />
+                        <span>{request.phone}</span>
+                      </span>
+                    ) : null}
+                    <span className="inline-flex min-h-9 items-center rounded-full border border-slate-200 bg-slate-50 px-3 font-medium dark:border-white/10 dark:bg-slate-900">
+                      {request.managedPropertyType}
+                    </span>
+                    <span className="inline-flex min-h-9 items-center rounded-full border border-slate-200 bg-slate-50 px-3 dark:border-white/10 dark:bg-slate-900">
                       {request.marketer
                         ? `${request.marketer.fullName} (${request.marketer.referralCode})`
                         : request.referralCode
-                          ? `Unmatched referral ${request.referralCode}`
-                          : "Unassigned"}
-                      {request.commissionRate
-                        ? ` • ${request.commissionRate.toString()}%`
-                        : ""}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 flex-wrap gap-2">
-                    <Badge tone={toneForStatus(request.status === "NEW" ? "pending" : request.status)}>
-                      {request.status}
-                    </Badge>
-                    <Badge>{formatDateTime(request.createdAt)}</Badge>
+                          ? `Unmatched ${request.referralCode}`
+                          : "No referral"}
+                    </span>
                   </div>
                 </div>
 
-                {request.message ? (
-                  <p className="mt-4 whitespace-pre-wrap rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
-                    {request.message}
-                  </p>
-                ) : null}
+                <div className="grid gap-4 p-4 sm:p-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
+                  <div className="space-y-3">
+                    {request.message ? (
+                      <p className="whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
+                        {request.message}
+                      </p>
+                    ) : (
+                      <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3 text-sm text-slate-500 dark:border-white/10 dark:bg-slate-900 dark:text-slate-400">
+                        No customer message was included.
+                      </p>
+                    )}
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                      {request.handledBy ? (
+                        <span>
+                          Last handled by {request.handledBy.fullName ?? request.handledBy.email}{" "}
+                          {request.handledAt ? `on ${formatDateTime(request.handledAt)}` : ""}
+                        </span>
+                      ) : (
+                        <span>Not handled yet</span>
+                      )}
+                      {request.commissionRate ? (
+                        <span>Commission {request.commissionRate.toString()}%</span>
+                      ) : null}
+                    </div>
+                  </div>
 
-                <form
-                  action={updateOnboardingRequestAction}
-                  className="mt-4 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900 lg:grid-cols-[180px_1fr_auto]"
-                >
-                  <input type="hidden" name="requestId" value={request.id} />
-                  <select
-                    name="status"
-                    defaultValue={request.status}
-                    className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-950 outline-none focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
+                  <form
+                    action={updateOnboardingRequestAction}
+                    className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900"
                   >
-                    {STATUSES.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                  <textarea
-                    name="internalNotes"
-                    defaultValue={request.internalNotes ?? ""}
-                    rows={2}
-                    placeholder="Internal follow-up notes"
-                    className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
-                  />
-                  <button className="min-h-11 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
-                    Save
-                  </button>
-                </form>
-
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                  {request.handledBy ? (
-                    <span>
-                      Last handled by {request.handledBy.fullName ?? request.handledBy.email}{" "}
-                      {request.handledAt ? `on ${formatDateTime(request.handledAt)}` : ""}
-                    </span>
-                  ) : (
-                    <span>Not handled yet</span>
-                  )}
-                  <form action={quickUpdateOnboardingStatusAction}>
                     <input type="hidden" name="requestId" value={request.id} />
-                    <input type="hidden" name="status" value="CONTACTED" />
-                    <button className="rounded-full border border-slate-200 bg-white px-2.5 py-1 font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
-                      Mark contacted
-                    </button>
+                    <select
+                      name="status"
+                      defaultValue={request.status}
+                      className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-950 outline-none focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
+                    >
+                      {STATUSES.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                    <textarea
+                      name="internalNotes"
+                      defaultValue={request.internalNotes ?? ""}
+                      rows={3}
+                      placeholder="Internal follow-up notes"
+                      className="min-h-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      <button className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Save
+                      </button>
+                    </div>
                   </form>
-                  <form action={quickUpdateOnboardingStatusAction}>
+                </div>
+
+                <div className="flex flex-wrap gap-2 border-t border-slate-100 p-4 dark:border-white/10 sm:px-5">
+                  {request.status === "NEW" ? (
+                    <form action={quickUpdateOnboardingStatusAction}>
+                      <input type="hidden" name="requestId" value={request.id} />
+                      <input type="hidden" name="status" value="CONTACTED" />
+                      <button className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                        <Phone className="h-3.5 w-3.5" />
+                        Mark contacted
+                      </button>
+                    </form>
+                  ) : null}
+                  {request.status !== "CLOSED" ? (
+                    <form action={quickUpdateOnboardingStatusAction}>
+                      <input type="hidden" name="requestId" value={request.id} />
+                      <input type="hidden" name="status" value="CLOSED" />
+                      <button className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Close
+                      </button>
+                    </form>
+                  ) : null}
+                  <form action={deleteOnboardingRequestAction}>
                     <input type="hidden" name="requestId" value={request.id} />
-                    <input type="hidden" name="status" value="CLOSED" />
-                    <button className="rounded-full border border-slate-200 bg-white px-2.5 py-1 font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
-                      Close
+                    <button className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 shadow-sm transition hover:bg-red-100 dark:border-red-300/30 dark:bg-red-300/10 dark:text-red-100 dark:hover:bg-red-300/20">
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete
                     </button>
                   </form>
                 </div>

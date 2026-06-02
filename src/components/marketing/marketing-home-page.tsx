@@ -45,6 +45,7 @@ export default function MarketingHomePage() {
       },
       {
         "@type": "SoftwareApplication",
+        "@id": `${absoluteUrl("/")}#software`,
         name: "EstateDesk",
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",

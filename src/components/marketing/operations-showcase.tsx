@@ -31,6 +31,7 @@ type OperationsShowcaseProps = {
   publicHeaderActive?: "home" | "services";
   variant?: "operations" | "rentals";
   showPricingNav?: boolean;
+  showFooter?: boolean;
 };
 
 type IconType = ElementType<{ className?: string }>;
@@ -610,6 +611,7 @@ export default function OperationsShowcase({
   publicHeaderActive = "services",
   variant = "operations",
   showPricingNav = true,
+  showFooter = true,
 }: OperationsShowcaseProps) {
   const copy = SHOWCASE_COPY[variant];
   const isRental = variant === "rentals";
@@ -683,7 +685,7 @@ export default function OperationsShowcase({
         </main>
       </div>
       </section>
-      {standalone ? <PublicAccessFooter /> : null}
+      {standalone && showFooter ? <PublicAccessFooter /> : null}
     </>
   );
 }

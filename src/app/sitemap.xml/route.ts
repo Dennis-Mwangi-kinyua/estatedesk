@@ -15,6 +15,14 @@ function fileExists(p: string) {
 export async function renderSitemapXml() {
   const entries: { loc: string; lastmod?: string }[] = []
   const protectedPublicPages = ['/login', '/register']
+  const priorityByPage: Record<string, string> = {
+    '/': '1.0',
+    '/faq': '0.95',
+    '/pricing': '0.9',
+    '/services': '0.9',
+    '/vacancies': '0.9',
+    '/contact': '0.75',
+  }
 
   const rootPage = path.join(ROOT, 'src', 'app', 'page.tsx')
   if (fileExists(rootPage)) {
@@ -61,7 +69,9 @@ export async function renderSitemapXml() {
         loc: `${APP_URL}${e.loc}`,
         lastmod: e.lastmod,
         changefreq: e.loc === '/' ? 'daily' : 'weekly',
-        priority: e.loc === '/' ? '1.0' : protectedPublicPages.includes(e.loc) ? '0.8' : '0.6',
+        priority:
+          priorityByPage[e.loc] ??
+          (protectedPublicPages.includes(e.loc) ? '0.8' : '0.6'),
       }),
     )
     .join('\n')

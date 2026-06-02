@@ -13,13 +13,23 @@ import {
 } from "lucide-react";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { APP_PLAN_ORDER, APP_PLANS } from "@/lib/billing/plans";
-import { publicPageMetadata } from "@/lib/seo";
+import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 
 export const metadata = publicPageMetadata({
-  title: "Pricing",
+  title: "EstateDesk Pricing for Kenya, East Africa and Dubai",
   description:
-    "Compare EstateDesk pricing plans for landlords, property managers, caretakers, tenant workflows, rent tracking, inspections, reports, and enterprise rollout support.",
+    "Compare EstateDesk property management software pricing for Kenya, East Africa, Dubai, the UAE, and global rental teams: Free, Pro at KES 3,000 per month, Plus at KES 6,500 per month, and Custom plans.",
   path: "/pricing",
+  keywords: [
+    "EstateDesk pricing",
+    "property management software pricing Kenya",
+    "property management software pricing East Africa",
+    "property management software pricing Dubai",
+    "property management software pricing UAE",
+    "landlord software pricing Kenya",
+    "rent management system pricing",
+    "tenant management software cost Kenya",
+  ],
 });
 
 function formatPlanPrice(amount: number) {
@@ -83,8 +93,40 @@ const highlights = [
 ];
 
 export default function PricingPage() {
+  const pricingJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "@id": `${absoluteUrl("/pricing")}#software`,
+        name: "EstateDesk",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: absoluteUrl("/pricing"),
+        areaServed: {
+          "@type": "Country",
+          name: "Kenya",
+        },
+        availableLanguage: "English",
+        offers: plans.map((plan) => ({
+          "@type": "Offer",
+          name: `${plan.name} plan`,
+          url: absoluteUrl(plan.href),
+          priceCurrency: "KES",
+          price: plan.key === "ENTERPRISE" ? "0" : String(plan.monthlyAmount),
+          category: plan.key === "ENTERPRISE" ? "Custom SaaS plan" : "SaaS subscription",
+          availability: "https://schema.org/InStock",
+        })),
+      },
+    ],
+  };
+
   return (
     <main className="min-h-dvh bg-[#f5f7fb] text-neutral-950">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }}
+      />
       <PublicAccessHeader active="pricing" />
 
       <section className="border-b border-neutral-200 bg-[linear-gradient(180deg,#ffffff_0%,#f5f7fb_100%)]">

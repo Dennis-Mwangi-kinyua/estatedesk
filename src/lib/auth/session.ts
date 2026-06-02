@@ -38,6 +38,15 @@ type SetUserSessionInput = {
   remember?: boolean;
 };
 
+export class ActiveSessionLimitError extends Error {
+  constructor() {
+    super(
+      "Limit reached. This account is already signed in on another device. Please log out from the other device first.",
+    );
+    this.name = "ActiveSessionLimitError";
+  }
+}
+
 const SESSION_COOKIE_NAME = "estatedesk_session";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 12;
 const REMEMBERED_SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
@@ -158,8 +167,27 @@ export async function setUserSession({
 
   await prisma.$transaction(async (tx) => {
     await tx.userSession.deleteMany({
-      where: { userId },
+      where: {
+        userId,
+        expiresAt: {
+          lte: new Date(),
+        },
+      },
     });
+
+    const activeSession = await tx.userSession.findFirst({
+      where: {
+        userId,
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
+      select: { id: true },
+    });
+
+    if (activeSession) {
+      throw new ActiveSessionLimitError();
+    }
 
     await tx.userSession.create({
       data: {

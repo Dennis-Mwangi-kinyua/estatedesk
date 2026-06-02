@@ -3,7 +3,7 @@ import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
 import { ThemeInitScript } from "@/components/theme/theme-init-script";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { SITE_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/seo";
+import { SEO_KEYWORDS, SITE_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/seo";
 import "./globals.css";
 
 const siteUrl = getSiteUrl();
@@ -19,15 +19,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  keywords: [
-    "EstateDesk",
-    "property management software Kenya",
-    "landlord software Kenya",
-    "rent management system",
-    "tenant management",
-    "caretaker management",
-    "water billing software",
-  ],
+  keywords: [...SEO_KEYWORDS],
   alternates: {
     canonical: "/",
   },
@@ -64,7 +56,7 @@ const structuredData = [
     name: SITE_NAME,
     url: siteUrl,
     logo: `${siteUrl}/images/og-vacancy.svg`,
-    areaServed: "KE",
+    areaServed: ["KE", "UG", "TZ", "RW", "AE"],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
@@ -90,6 +82,13 @@ const structuredData = [
     operatingSystem: "Web",
     url: siteUrl,
     description: SITE_DESCRIPTION,
+    areaServed: [
+      { "@type": "Country", name: "Kenya" },
+      { "@type": "Country", name: "Uganda" },
+      { "@type": "Country", name: "Tanzania" },
+      { "@type": "Country", name: "Rwanda" },
+      { "@type": "Country", name: "United Arab Emirates" },
+    ],
     offers: {
       "@type": "Offer",
       category: "SaaS",
