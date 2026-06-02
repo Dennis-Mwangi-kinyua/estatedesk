@@ -22,7 +22,12 @@ export default function robots(): MetadataRoute.Robots {
         "/units/",
       ],
     },
-    sitemap: [`${siteUrl}/sitemap-index.xml`, `${siteUrl}/sitemap.xml`],
+    sitemap: [
+      `${siteUrl}/sitemap-index.xml`,
+      `${siteUrl}/sitemap_index.xml`,
+      `${siteUrl}/sitemap.xml`,
+      `${siteUrl}/sitemap-vacancies.xml`,
+    ],
     host: siteUrl,
   };
 }
