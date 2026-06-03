@@ -29,7 +29,12 @@ function createPrismaClient() {
     query_timeout: 60_000,
   });
 
-  return new PrismaClient({ adapter });
+  const logs: Array<"query" | "info" | "warn" | "error"> =
+    process.env.NODE_ENV === "production"
+      ? ["warn", "error"]
+      : ["query", "info", "warn", "error"];
+
+  return new PrismaClient({ adapter, log: logs as any });
 }
 
 export const prisma =
@@ -37,6 +42,30 @@ export const prisma =
   globalForPrisma.prisma
     ? globalForPrisma.prisma
     : createPrismaClient();
+
+// Add simple timing middleware and query event listener in non-production
+if (process.env.NODE_ENV !== "production") {
+  try {
+    prisma.$use(async (params, next) => {
+      const start = Date.now();
+      const result = await next(params);
+      const ms = Date.now() - start;
+      if (ms > 50) {
+        // eslint-disable-next-line no-console
+        console.warn(`prisma: ${params.model}.${params.action} took ${ms}ms`);
+      }
+      return result;
+    });
+
+    prisma.$on("query", (e: any) => {
+      // eslint-disable-next-line no-console
+      console.debug(`prisma query (${e.duration}ms): ${e.query}`);
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("Failed to attach prisma middleware/listener:", err);
+  }
+}
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

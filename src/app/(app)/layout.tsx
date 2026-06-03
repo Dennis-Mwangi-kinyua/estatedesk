@@ -18,14 +18,17 @@ export default async function AppLayout({
   const pathname = rawPath.replace(/\/+$/, "");
 
   // Only force password change / terms acceptance for non-platform users.
+  const isPlatformAdmin =
+    session.platformRole === "PLATFORM_ADMIN" || session.platformRole === "SUPER_ADMIN";
+
   const shouldForceChange =
     !pathname.startsWith("/change-password") &&
     (session.mustChangePassword || session.requiresTermsAcceptance) &&
-    !session.platformRole;
+    !isPlatformAdmin;
 
   if (shouldForceChange) {
     // Prevent rapid redirect loops by using a short-lived cookie marker.
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const marker = cookieStore.get("__redirect_change_pw");
 
     if (marker) {
