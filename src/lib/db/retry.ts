@@ -13,20 +13,27 @@ function wait(ms: number) {
 function summarizeDatabaseError(error: unknown) {
   const value = error as {
     code?: unknown;
+    name?: unknown;
     message?: unknown;
     cause?: {
       code?: unknown;
+      name?: unknown;
       message?: unknown;
     };
   };
 
   const code = String(value.code ?? value.cause?.code ?? "unknown");
-  const message = String(value.message ?? value.cause?.message ?? "Database request failed")
+  const primaryMessage = String(value.message ?? "");
+  const causeMessage = String(value.cause?.message ?? "");
+  const message = (primaryMessage.startsWith("Invalid `") && causeMessage
+    ? causeMessage
+    : primaryMessage || causeMessage || "Database request failed")
     .replace(/\s+/g, " ")
     .trim();
 
   return {
     code,
+    name: String(value.name ?? value.cause?.name ?? "unknown"),
     message: message.length > 180 ? `${message.slice(0, 177)}...` : message,
   };
 }

@@ -32,6 +32,8 @@ type Props = {
 
 const DEFAULT_CURRENCY = process.env.DEFAULT_CURRENCY || "KES";
 const FALLBACK_IMAGE = "/images/og-vacancy.svg";
+const PUBLIC_VACANCY_ATTEMPTS = 2;
+const PUBLIC_VACANCY_DELAY_MS = 250;
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +73,11 @@ async function getVacancyUnit(id: string) {
           },
         },
       }),
-    { label: `public-vacancy-detail:${id}` },
+    {
+      attempts: PUBLIC_VACANCY_ATTEMPTS,
+      delayMs: PUBLIC_VACANCY_DELAY_MS,
+      label: `public-vacancy-detail:${id}`,
+    },
   );
 }
 
@@ -180,7 +186,11 @@ async function getRelatedVacancyUnits(currentUnitId: string) {
           },
         },
       }),
-    { label: `related-vacancies:${currentUnitId}` },
+    {
+      attempts: PUBLIC_VACANCY_ATTEMPTS,
+      delayMs: PUBLIC_VACANCY_DELAY_MS,
+      label: `related-vacancies:${currentUnitId}`,
+    },
   );
 }
 

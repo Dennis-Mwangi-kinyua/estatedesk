@@ -36,6 +36,11 @@ type PageProps = {
 
 const DEFAULT_CURRENCY = process.env.DEFAULT_CURRENCY || "KES";
 const FALLBACK_IMAGE = "/images/og-vacancy.svg";
+const PUBLIC_VACANCY_RETRY_OPTIONS = {
+  attempts: 2,
+  delayMs: 250,
+  label: "public-vacancy-list",
+};
 
 function formatCurrency(value: unknown, currency = DEFAULT_CURRENCY) {
   const amount = Number(value ?? 0);
@@ -198,7 +203,7 @@ function getVacancyListings({
           },
         },
       }),
-    { label: "public-vacancy-list" },
+    PUBLIC_VACANCY_RETRY_OPTIONS,
   );
 }
 
