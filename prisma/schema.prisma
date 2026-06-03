@@ -1488,7 +1488,7 @@ model IssueResolutionReport {
 /// Immutable audit trail for organization actions.
 model AuditLog {
   id          String       @id @default(cuid())
-  orgId       String
+  orgId       String?
   actorUserId String
   action      String
   entityType  String
@@ -1501,7 +1501,7 @@ model AuditLog {
   requestId   String?
   createdAt   DateTime     @default(now())
   actor       User         @relation("AuditActor", fields: [actorUserId], references: [id])
-  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org         Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
   @@index([orgId, createdAt])
   @@index([actorUserId, createdAt])

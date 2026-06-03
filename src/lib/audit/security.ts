@@ -1,5 +1,6 @@
 import "server-only";
 
+import crypto from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
@@ -86,7 +87,7 @@ export async function auditDeniedAccess(input: {
 }
 
 export async function writeAuditLog(input: {
-  orgId: string;
+  orgId: string | null;
   actorUserId: string;
   action: string;
   entityType: string;
@@ -97,6 +98,45 @@ export async function writeAuditLog(input: {
 }) {
   try {
     const request = await getRequestAuditMetadata();
+
+    if (!input.orgId) {
+      const auditId = `audit_${crypto.randomUUID().replace(/-/g, "")}`;
+      await prisma.$executeRaw(
+        Prisma.sql`
+          insert into "AuditLog" (
+            "id",
+            "orgId",
+            "actorUserId",
+            "action",
+            "entityType",
+            "entityId",
+            "metadata",
+            "beforeState",
+            "afterState",
+            "ip",
+            "userAgent",
+            "requestId",
+            "createdAt"
+          )
+          values (
+            ${auditId},
+            null,
+            ${input.actorUserId},
+            ${input.action},
+            ${input.entityType},
+            ${input.entityId},
+            ${JSON.stringify({ ...(input.metadata ?? {}), geo: request.geo })}::jsonb,
+            ${input.beforeState ? JSON.stringify(input.beforeState) : null}::jsonb,
+            ${input.afterState ? JSON.stringify(input.afterState) : null}::jsonb,
+            ${request.ip},
+            ${request.userAgent},
+            ${request.requestId},
+            now()
+          )
+        `,
+      );
+      return;
+    }
 
     await prisma.auditLog.create({
       data: {
@@ -119,4 +159,25 @@ export async function writeAuditLog(input: {
   } catch (error) {
     console.error("Failed to write audit log:", error);
   }
+}
+
+export async function writePlatformAuditLog(input: {
+  actorUserId: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  metadata?: Prisma.InputJsonObject;
+  beforeState?: Prisma.InputJsonObject | null;
+  afterState?: Prisma.InputJsonObject | null;
+}) {
+  return writeAuditLog({
+    orgId: null,
+    actorUserId: input.actorUserId,
+    action: input.action,
+    entityType: input.entityType,
+    entityId: input.entityId,
+    metadata: input.metadata,
+    beforeState: input.beforeState,
+    afterState: input.afterState,
+  });
 }

@@ -6,7 +6,7 @@ import { ChangePasswordForm } from "./change-password-form";
 export default async function ChangePasswordPage() {
   const session = await requireUserSession();
 
-  if (!session.mustChangePassword) {
+  if (!session.mustChangePassword && !session.requiresTermsAcceptance) {
     redirect(
       getRedirectAfterLogin({
         platformRole: session.platformRole,
@@ -28,12 +28,13 @@ export default async function ChangePasswordPage() {
             Change your password
           </h1>
           <p className="mt-2 text-sm leading-6 text-neutral-500">
-            This is your first sign-in with a temporary password. Create your own
-            password before continuing to EstateDesk.
+            {session.mustChangePassword
+              ? "This is your first sign-in with a temporary password. Create your own password and accept the terms before continuing to EstateDesk."
+              : "Accept the EstateDesk terms of use before continuing to the system."}
           </p>
         </div>
 
-        <ChangePasswordForm />
+        <ChangePasswordForm requirePasswordChange={session.mustChangePassword} />
       </section>
     </div>
   );

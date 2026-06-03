@@ -24,6 +24,7 @@ export type AppSession = {
   activeOrgId: string | null;
   activeOrgRole: OrgRole | null;
   mustChangePassword: boolean;
+  requiresTermsAcceptance: boolean;
   membershipScope:
     | {
         scopeType: ScopeType;
@@ -282,6 +283,15 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       return null;
     }
 
+    const termsRows = await retryTransientDatabaseOperation(
+      () =>
+        prisma.$queryRaw<Array<{ termsAcceptedAt: Date | null }>>(
+          Prisma.sql`select "termsAcceptedAt" from "User" where "id" = ${user.id} limit 1`,
+        ),
+      { label: "getUserSession-terms-accepted" },
+    );
+    const termsAcceptedAt = termsRows[0]?.termsAcceptedAt ?? null;
+
     const now = new Date();
 
     if (dbSession.lastSeenAt < getSessionHeartbeatBefore(now)) {
@@ -348,6 +358,7 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       fullName: user.fullName,
       platformRole: user.platformRole,
       mustChangePassword: user.mustChangePassword,
+      requiresTermsAcceptance: !termsAcceptedAt,
       activeOrgId: activeMembership?.orgId ?? null,
       activeOrgRole: activeMembership?.role ?? null,
       membershipScope: activeMembership

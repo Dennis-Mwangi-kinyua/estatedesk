@@ -218,12 +218,12 @@ export async function loginAction(
       };
     }
 
+    if (user.status === "SUSPENDED" || user.status === "DISABLED") {
+      redirect(`/account-suspended?status=${encodeURIComponent(user.status)}`);
+    }
+
     if (user.status !== "ACTIVE") {
-      return {
-        success: false,
-        error:
-          "Your account is not active. Contact support or your administrator.",
-      };
+      redirect("/account-suspended");
     }
 
     if (!user.passwordHash || typeof user.passwordHash !== "string") {

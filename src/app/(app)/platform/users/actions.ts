@@ -9,6 +9,7 @@ import {
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { writePlatformAuditLog } from "@/lib/audit/security";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 
 const ALL_PLATFORM_PERMISSIONS = Object.values(PlatformPermissionType);
@@ -78,6 +79,7 @@ export async function createPlatformUserAction(formData: FormData) {
 
   const passwordHash = await hash(password, 12);
   const verifiedAt = new Date();
+  let createdUserId: string | null = null;
 
   await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
@@ -97,6 +99,7 @@ export async function createPlatformUserAction(formData: FormData) {
       },
       select: { id: true },
     });
+    createdUserId = user.id;
 
     if (selectedPermissions.length > 0) {
       await tx.platformPermission.createMany({
@@ -108,6 +111,23 @@ export async function createPlatformUserAction(formData: FormData) {
       });
     }
   });
+
+  if (createdUserId) {
+    await writePlatformAuditLog({
+      actorUserId: session.userId,
+      action: "PLATFORM_USER_CREATED",
+      entityType: "User",
+      entityId: createdUserId,
+      metadata: {
+        fullName,
+        username,
+        email,
+        platformRole,
+        canCreatePlatformAdmins,
+        permissions: selectedPermissions,
+      },
+    });
+  }
 
   revalidatePath("/platform/users");
   redirect("/platform/users?created=1");

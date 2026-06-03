@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { requireOrgPermission } from "@/lib/permissions/guards";
 
 const STAFF_ROLES = ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER"] as const;
 
@@ -17,6 +18,7 @@ function parseEndDate(value: string) {
 }
 
 export async function deactivateMembershipAction(formData: FormData) {
+  await requireOrgPermission("org.users.delete");
   const session = await requireUserSession();
 
   if (!session.activeOrgId) {

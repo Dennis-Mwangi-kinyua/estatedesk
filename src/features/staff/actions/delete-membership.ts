@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
+import { requireOrgPermission } from "@/lib/permissions/guards";
 
 export async function deleteMembership(memberId: string) {
+  await requireOrgPermission("org.users.delete");
   const orgId = await requireCurrentOrgId();
 
   const membership = await prisma.membership.findFirst({

@@ -23,22 +23,6 @@ export async function changeInitialPasswordAction(
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const acceptedTerms = String(formData.get("acceptedTerms") ?? "") === "on";
 
-  if (!currentPassword || !newPassword || !confirmPassword) {
-    return { error: "Fill in all password fields." };
-  }
-
-  if (newPassword.length < 8) {
-    return { error: "New password must be at least 8 characters." };
-  }
-
-  if (newPassword !== confirmPassword) {
-    return { error: "New passwords do not match." };
-  }
-
-  if (newPassword === currentPassword) {
-    return { error: "Choose a different password from the temporary one." };
-  }
-
   if (!acceptedTerms) {
     return { error: "Accept the terms of use to continue." };
   }
@@ -57,13 +41,35 @@ export async function changeInitialPasswordAction(
     return { error: "User account not found." };
   }
 
-  const currentMatches = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (user.mustChangePassword) {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return { error: "Fill in all password fields." };
+    }
+
+    if (newPassword.length < 8) {
+      return { error: "New password must be at least 8 characters." };
+    }
+
+    if (newPassword !== confirmPassword) {
+      return { error: "New passwords do not match." };
+    }
+
+    if (newPassword === currentPassword) {
+      return { error: "Choose a different password from the temporary one." };
+    }
+  }
+
+  const currentMatches = user.mustChangePassword
+    ? await bcrypt.compare(currentPassword, user.passwordHash)
+    : true;
 
   if (!currentMatches) {
     return { error: "Temporary password is incorrect." };
   }
 
-  const passwordHash = await bcrypt.hash(newPassword, 12);
+  const passwordHash = user.mustChangePassword
+    ? await bcrypt.hash(newPassword, 12)
+    : user.passwordHash;
 
   await prisma.$executeRaw(
     Prisma.sql`

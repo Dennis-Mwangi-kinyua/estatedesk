@@ -322,7 +322,7 @@ export default async function PlatformUsersPage({
             {users.map((user) => (
               <Link
                 key={user.id}
-                href={`/platform/users/${user.id}`}
+                href={`/platform/users/${user.username ?? user.id}`}
                 className="group rounded-[24px] border border-neutral-200 bg-white p-4 shadow-sm transition hover:border-neutral-300 hover:shadow-md"
               >
                 <div className="flex items-start justify-between gap-3">
