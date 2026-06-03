@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/notifications/email";
+import { hashOpaqueToken } from "@/lib/crypto/tokens";
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -31,7 +32,7 @@ export async function forgotPasswordAction(formData: FormData) {
 
   if (user?.email) {
     const token = crypto.randomBytes(32).toString("hex");
-    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const tokenHash = hashOpaqueToken(token, "password-reset");
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
     await prisma.passwordResetToken.deleteMany({

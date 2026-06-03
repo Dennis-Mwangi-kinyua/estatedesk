@@ -60,7 +60,7 @@ export default async function SystemHealthPage() {
         <StatCard
           label="Latest audit"
           value={latestAudit ? labelize(latestAudit.action) : "-"}
-          note={latestAudit ? `${latestAudit.org.name} • ${formatDateTime(latestAudit.createdAt)}` : undefined}
+          note={latestAudit ? `${latestAudit.org?.name ?? "Platform"} • ${formatDateTime(latestAudit.createdAt)}` : undefined}
         />
       </section>
 

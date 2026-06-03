@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/notifications/email";
+import { hashOpaqueToken } from "@/lib/crypto/tokens";
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -17,8 +18,15 @@ export async function verifyEmailAction(formData: FormData) {
     redirect("/verify-email?status=invalid");
   }
 
-  const verificationToken = await prisma.emailVerificationToken.findUnique({
-    where: { token },
+  const tokenHash = hashOpaqueToken(token, "email-verification");
+
+  const verificationToken = await prisma.emailVerificationToken.findFirst({
+    where: {
+      OR: [
+        { token: tokenHash },
+        { token },
+      ],
+    },
   });
 
   if (!verificationToken) {
@@ -111,6 +119,7 @@ export async function resendVerificationEmailAction(formData: FormData) {
   }
 
   const token = crypto.randomBytes(32).toString("hex");
+  const tokenHash = hashOpaqueToken(token, "email-verification");
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   await prisma.emailVerificationToken.deleteMany({
@@ -123,7 +132,7 @@ export async function resendVerificationEmailAction(formData: FormData) {
   await prisma.emailVerificationToken.create({
     data: {
       email,
-      token,
+      token: tokenHash,
       expiresAt,
     },
   });

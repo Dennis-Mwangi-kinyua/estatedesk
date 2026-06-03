@@ -100,7 +100,11 @@ export default async function SecurityCenterPage() {
                     <p className="mt-1 text-xs text-neutral-500">{log.actor.email ?? log.actor.platformRole}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <AdminLink href={`/platform/organizations/${log.org.slug}`}>{log.org.name}</AdminLink>
+                    {log.org ? (
+                      <AdminLink href={`/platform/organizations/${log.org.slug}`}>{log.org.name}</AdminLink>
+                    ) : (
+                      <span className="text-neutral-500">Platform</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <Badge tone={toneForStatus(log.action)}>{labelize(log.action)}</Badge>

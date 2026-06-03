@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { sendInviteEmail } from "@/lib/notifications/email";
 import { sendInviteWhatsapp } from "@/lib/whatsapp/send-invite-whatsapp";
+import { hashOpaqueToken } from "@/lib/crypto/tokens";
 
 type CreateInvitationInput = {
   orgId: string;
@@ -26,6 +27,7 @@ export async function createInvitation(input: CreateInvitationInput) {
   const phone = input.phone?.trim() || null;
 
   const token = crypto.randomBytes(32).toString("hex");
+  const tokenHash = hashOpaqueToken(token, "invitation");
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   const invitation = await prisma.invitation.create({
@@ -37,7 +39,7 @@ export async function createInvitation(input: CreateInvitationInput) {
       role: input.role,
       scopeType: input.scopeType ?? "ORG",
       scopeId: input.scopeId ?? "ORG_SCOPE",
-      token,
+      token: tokenHash,
       expiresAt,
       status: "PENDING",
     },

@@ -8,6 +8,7 @@ import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
 import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { writeAuditLog } from "@/lib/audit/security";
+import { hashOpaqueToken } from "@/lib/crypto/tokens";
 
 type AcceptInviteBody = {
   token?: unknown;
@@ -57,10 +58,17 @@ export async function POST(request: Request) {
     );
   }
 
+  const tokenHash = hashOpaqueToken(token, "invitation");
+
   const invitation = await retryTransientDatabaseOperation(
     () =>
-      prisma.invitation.findUnique({
-        where: { token },
+      prisma.invitation.findFirst({
+        where: {
+          OR: [
+            { token: tokenHash },
+            { token },
+          ],
+        },
         include: {
           org: { select: { id: true, name: true, status: true, deletedAt: true } },
         },

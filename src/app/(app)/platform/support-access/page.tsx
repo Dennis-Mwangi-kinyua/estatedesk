@@ -108,7 +108,7 @@ export default async function SupportAccessPage() {
             <div key={log.id} className="p-4">
               <p className="font-medium text-neutral-950">{log.action}</p>
               <p className="mt-1 text-sm text-neutral-500">
-                {log.actor.fullName} • {log.org.name} • {formatDateTime(log.createdAt)}
+                {log.actor.fullName} • {log.org?.name ?? "Platform"} • {formatDateTime(log.createdAt)}
               </p>
             </div>
           ))}
