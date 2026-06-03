@@ -43,27 +43,17 @@ export const prisma =
     ? globalForPrisma.prisma
     : createPrismaClient();
 
-// Add simple timing middleware and query event listener in non-production
+// Add query event listener in non-production to surface slow queries.
 if (process.env.NODE_ENV !== "production") {
   try {
-    prisma.$use(async (params, next) => {
-      const start = Date.now();
-      const result = await next(params);
-      const ms = Date.now() - start;
-      if (ms > 50) {
-        // eslint-disable-next-line no-console
-        console.warn(`prisma: ${params.model}.${params.action} took ${ms}ms`);
-      }
-      return result;
-    });
-
-    prisma.$on("query", (e: any) => {
+    const prismaAny = prisma as any;
+    prismaAny.$on("query", (e: any) => {
       // eslint-disable-next-line no-console
       console.debug(`prisma query (${e.duration}ms): ${e.query}`);
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.warn("Failed to attach prisma middleware/listener:", err);
+    console.warn("Failed to attach prisma query listener:", err);
   }
 }
 
