@@ -90,6 +90,7 @@ export function AppActionFeedback() {
     () => `${pathname}?${searchParams.toString()}`,
     [pathname, searchParams],
   );
+  const refreshEnabled = pathname !== "/change-password";
 
   useEffect(() => {
     const stored = getStoredAction();
@@ -135,6 +136,8 @@ export function AppActionFeedback() {
   }, [locationKey]);
 
   useEffect(() => {
+    if (!refreshEnabled) return;
+
     const refresh = (force = false) => {
       if (document.visibilityState !== "visible") return;
 
@@ -157,7 +160,7 @@ export function AppActionFeedback() {
       window.removeEventListener("focus", passiveRefresh);
       document.removeEventListener("visibilitychange", passiveRefresh);
     };
-  }, [router]);
+  }, [refreshEnabled, router]);
 
   useEffect(() => {
     if (!toast || toast.type === "pending") return;

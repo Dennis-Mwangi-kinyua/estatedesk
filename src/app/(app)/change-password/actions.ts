@@ -1,11 +1,12 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import { Prisma } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 export type ChangePasswordState = {
   error: string | null;
@@ -27,15 +28,19 @@ export async function changeInitialPasswordAction(
     return { error: "Accept the terms of use to continue." };
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.userId },
-    select: {
-      id: true,
-      passwordHash: true,
-      platformRole: true,
-      mustChangePassword: true,
-    },
-  });
+  const user = await retryTransientDatabaseOperation(
+    () =>
+      prisma.user.findUnique({
+        where: { id: session.userId },
+        select: {
+          id: true,
+          passwordHash: true,
+          platformRole: true,
+          mustChangePassword: true,
+        },
+      }),
+    { label: "change-password-find-user" },
+  );
 
   if (!user) {
     return { error: "User account not found." };
@@ -71,19 +76,32 @@ export async function changeInitialPasswordAction(
     ? await bcrypt.hash(newPassword, 12)
     : user.passwordHash;
 
-  await prisma.$executeRaw(
-    Prisma.sql`
-      update "User"
-      set
-        "passwordHash" = ${passwordHash},
-        "mustChangePassword" = false,
-        "passwordChangedAt" = now(),
-        "termsAcceptedAt" = now(),
-        "termsAcceptedVersion" = ${TERMS_VERSION},
-        "updatedAt" = now()
-      where "id" = ${user.id}
-    `,
+  const acceptedAt = new Date();
+  const updatedUser = await retryTransientDatabaseOperation(
+    () =>
+      prisma.user.update({
+        where: { id: user.id },
+        data: {
+          passwordHash,
+          mustChangePassword: false,
+          passwordChangedAt: acceptedAt,
+          termsAcceptedAt: acceptedAt,
+          termsAcceptedVersion: TERMS_VERSION,
+        },
+        select: {
+          mustChangePassword: true,
+          termsAcceptedAt: true,
+        },
+      }),
+    { label: "change-password-update-user" },
   );
+
+  if (updatedUser.mustChangePassword || !updatedUser.termsAcceptedAt) {
+    return {
+      error:
+        "Your account was not fully updated. Please try again, or contact an administrator.",
+    };
+  }
 
   const destination = getRedirectAfterLogin({
     platformRole: session.platformRole,
@@ -91,6 +109,9 @@ export async function changeInitialPasswordAction(
     activeOrgId: session.activeOrgId,
     hasTenantProfile: session.activeOrgRole === "TENANT",
   });
+
+  revalidatePath("/", "layout");
+  revalidatePath(destination);
 
   redirect(destination);
 }

@@ -6,6 +6,10 @@ type RetryOptions = {
   label: string;
 };
 
+const shouldLogTransientRetries =
+  process.env.NODE_ENV === "production" ||
+  process.env.LOG_TRANSIENT_DB_RETRIES === "true";
+
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -74,10 +78,13 @@ export async function retryTransientDatabaseOperation<T>(
         throw error;
       }
 
-      console.warn(`${label} failed transiently; retrying`, {
-        attempt,
-        ...summarizeDatabaseError(error),
-      });
+      if (shouldLogTransientRetries) {
+        console.warn(`${label} failed transiently; retrying`, {
+          attempt,
+          ...summarizeDatabaseError(error),
+        });
+      }
+
       await wait(delayMs * attempt);
     }
   }

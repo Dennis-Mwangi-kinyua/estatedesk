@@ -204,6 +204,7 @@ export async function loginAction(
               status: true,
               passwordHash: true,
               mustChangePassword: true,
+              termsAcceptedAt: true,
               deletedAt: true,
             },
           }),
@@ -273,6 +274,7 @@ export async function loginAction(
         makeLabel("login-get-destination", requestId),
         async () =>
           user.mustChangePassword
+          || !user.termsAcceptedAt
             ? "/change-password"
             : safeReturnTo ??
               getRedirectAfterLogin({
@@ -385,6 +387,7 @@ export async function loginAction(
       makeLabel("login-get-destination", requestId),
       async () =>
         user.mustChangePassword
+        || !user.termsAcceptedAt
           ? "/change-password"
           : safeReturnTo ??
             getRedirectAfterLogin({

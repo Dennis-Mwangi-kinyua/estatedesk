@@ -26,7 +26,7 @@ export default async function AppLayout({
   return (
     <div className="app-mobile-canvas min-h-screen">
       {children}
-      <AppActionFeedback />
+      {pathname === "/change-password" ? null : <AppActionFeedback />}
     </div>
   );
 }

@@ -242,6 +242,7 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
             userAgent: true,
             expiresAt: true,
             lastSeenAt: true,
+            activeMembershipId: true,
           },
         }),
       { label: "getUserSession-find-session" },
@@ -249,16 +250,6 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
 
     if (!dbSession) return null;
     if (dbSession.expiresAt <= new Date()) return null;
-
-    const activeMembershipRows = await retryTransientDatabaseOperation(
-      () =>
-        prisma.$queryRaw<Array<{ activeMembershipId: string | null }>>(
-          Prisma.sql`select "activeMembershipId" from "UserSession" where "id" = ${dbSession.id} limit 1`,
-        ),
-      { label: "getUserSession-active-membership-id" },
-    );
-    const activeMembershipId =
-      activeMembershipRows[0]?.activeMembershipId ?? null;
 
     const user = await retryTransientDatabaseOperation(
       () =>
@@ -270,6 +261,7 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
             fullName: true,
             platformRole: true,
             mustChangePassword: true,
+            termsAcceptedAt: true,
             status: true,
             deletedAt: true,
           },
@@ -282,15 +274,6 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
     if (user.status !== "ACTIVE" || user.deletedAt !== null) {
       return null;
     }
-
-    const termsRows = await retryTransientDatabaseOperation(
-      () =>
-        prisma.$queryRaw<Array<{ termsAcceptedAt: Date | null }>>(
-          Prisma.sql`select "termsAcceptedAt" from "User" where "id" = ${user.id} limit 1`,
-        ),
-      { label: "getUserSession-terms-accepted" },
-    );
-    const termsAcceptedAt = termsRows[0]?.termsAcceptedAt ?? null;
 
     const now = new Date();
 
@@ -332,6 +315,7 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       return null;
     }
 
+    const activeMembershipId = dbSession.activeMembershipId;
     const activeMembership = activeMembershipId
       ? await retryTransientDatabaseOperation(
           () =>
@@ -358,7 +342,7 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       fullName: user.fullName,
       platformRole: user.platformRole,
       mustChangePassword: user.mustChangePassword,
-      requiresTermsAcceptance: !termsAcceptedAt,
+      requiresTermsAcceptance: !user.termsAcceptedAt,
       activeOrgId: activeMembership?.orgId ?? null,
       activeOrgRole: activeMembership?.role ?? null,
       membershipScope: activeMembership
