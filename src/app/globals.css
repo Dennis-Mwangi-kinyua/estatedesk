@@ -1139,6 +1139,22 @@
   opacity: 1 !important;
 }
 
+@media (max-width: 1023px) {
+  .public-mobile-menu-open body {
+    overflow: hidden;
+  }
+
+  .public-mobile-menu-open main > section,
+  .public-mobile-menu-open main > footer {
+    filter: blur(10px);
+    transform: scale(0.992);
+    transform-origin: top center;
+    transition:
+      filter 180ms ease,
+      transform 180ms ease;
+  }
+}
+
 .seo-steps-panel,
 .dark .seo-steps-panel {
   background-color: #f8fafc !important;

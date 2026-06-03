@@ -128,72 +128,91 @@ export default function MarketingHomePage() {
 function HomepageSeoContent() {
   return (
     <>
-      <section className="border-y border-neutral-200 bg-[#f7f9fc] py-10 sm:py-12 lg:py-14">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
-          <div className="min-w-0">
-            <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-600">
-              <Layers3 className="h-3.5 w-3.5" />
+      <section className="border-y border-neutral-200 bg-[#f7f9fc] py-8 sm:py-10 lg:py-12 dark:border-white/10 dark:bg-[#0d1117]">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <nav
+            aria-label="Breadcrumb"
+            className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-500 dark:text-slate-300"
+          >
+            <Link href="/" className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-neutral-700 transition hover:border-neutral-300 dark:border-white/12 dark:bg-white/[0.07] dark:text-slate-100">
+              Home
+            </Link>
+            <ArrowRight className="h-3.5 w-3.5 shrink-0" />
+            <span className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 dark:border-white/12 dark:bg-white/[0.07]">
               Property management software
-            </div>
-            <h2 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl">
-              What is EstateDesk?
-            </h2>
-            <div className="mt-4 grid gap-4 text-base leading-8 text-neutral-600">
-              <p>
-                EstateDesk is property management software for landlords, property managers,
-                real estate agencies, caretakers, and tenants. It gives a rental team one
-                organized online workspace for the daily work of managing property: tenants,
-                leases, rent records, water bills, vacancies, maintenance requests,
-                inspections, staff access, notifications, and reports. Instead of keeping
-                important information across notebooks, spreadsheets, message threads,
-                receipts, and staff memory, EstateDesk connects the record to the correct
-                property, unit, tenant, and workflow.
-              </p>
-              <p>
-                The platform is especially focused on rental operations in Kenya, East
-                Africa, Dubai, the UAE, and remote landlord markets where property owners
-                need visibility without being physically present every day. A landlord can
-                review vacant units, balances, maintenance activity, and tenant records. A
-                property manager can follow rent, water billing, caretaker tasks, inspections,
-                and move-outs. A real estate agency can manage multiple clients with clearer
-                staff roles and reports. Tenants can find public vacancies and use structured
-                workflows for communication and maintenance.
-              </p>
-              <p>
-                EstateDesk is not only a database of property records. It is an operating
-                system for rental work. The goal is to make every action easier to trace:
-                who occupies a unit, what rent is expected, whether payment has been
-                recorded, what water bill was charged, which issue is pending, which unit is
-                vacant, and which staff member is responsible for follow-up. That structure
-                helps teams reduce confusion, improve accountability, and build a more
-                professional rental management process.
-              </p>
-            </div>
-          </div>
+            </span>
+            <ArrowRight className="h-3.5 w-3.5 shrink-0" />
+            <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-emerald-700 dark:border-emerald-300/25 dark:bg-emerald-400/10 dark:text-emerald-200">
+              EstateDesk overview
+            </span>
+          </nav>
 
-          <aside className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-500">
-              Quick paths
-            </p>
-            <div className="mt-4 grid gap-3">
-              {[
-                ["Kenya software", "/property-management-software-kenya"],
-                ["Landlord software", "/landlord-software"],
-                ["Rent tracking", "/rent-tracking-software"],
-                ["Water billing", "/water-billing-software"],
-                ["Full FAQ", "/faq"],
-              ].map(([label, href]) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="inline-flex min-h-11 items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-[#fbfcfe] px-3 text-sm font-semibold text-neutral-800 transition hover:border-neutral-300 hover:bg-white"
-                >
-                  {label}
-                  <ArrowRight className="h-4 w-4 shrink-0" />
-                </Link>
-              ))}
+          <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.45fr)] lg:items-start">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-600 dark:border-white/12 dark:bg-white/[0.07] dark:text-slate-200">
+                <Layers3 className="h-3.5 w-3.5" />
+                Property management software
+              </div>
+              <h2 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl dark:text-slate-50">
+                What is EstateDesk?
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-600 sm:text-base dark:text-slate-300">
+                EstateDesk is a property management workspace for landlords, managers,
+                agencies, caretakers, and tenants. It keeps properties, units, tenants,
+                rent records, water bills, vacancies, maintenance, inspections, staff access,
+                and reports connected in one place.
+              </p>
+
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
+                {[
+                  [
+                    "Organized records",
+                    "Every tenant, unit, payment, issue, and inspection is tied to the correct property workflow.",
+                  ],
+                  [
+                    "Built for rental teams",
+                    "Useful for Kenya, East Africa, Dubai, and remote landlords who need clear portfolio visibility.",
+                  ],
+                  [
+                    "Operational visibility",
+                    "Teams can see occupancy, balances, vacancies, maintenance activity, and staff responsibility faster.",
+                  ],
+                ].map(([title, body]) => (
+                  <article
+                    key={title}
+                    className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-white/12 dark:bg-[#121821]"
+                  >
+                    <h3 className="text-sm font-semibold text-neutral-950 dark:text-slate-50">{title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-slate-300">{body}</p>
+                  </article>
+                ))}
+              </div>
             </div>
-          </aside>
+
+            <aside className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-white/12 dark:bg-[#121821]">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500 dark:text-slate-300">
+                Quick paths
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {[
+                  ["Kenya software", "/property-management-software-kenya"],
+                  ["Landlord software", "/landlord-software"],
+                  ["Rent tracking", "/rent-tracking-software"],
+                  ["Water billing", "/water-billing-software"],
+                  ["Full FAQ", "/faq"],
+                ].map(([label, href]) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="inline-flex min-h-10 min-w-0 items-center gap-2 rounded-lg border border-neutral-200 bg-[#fbfcfe] px-3 text-sm font-semibold text-neutral-800 transition hover:border-neutral-300 hover:bg-white dark:border-white/12 dark:bg-white/[0.07] dark:text-slate-100 dark:hover:border-white/24 dark:hover:bg-white/[0.12]"
+                  >
+                    <span className="truncate">{label}</span>
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0" />
+                  </Link>
+                ))}
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
 
