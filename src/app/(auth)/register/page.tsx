@@ -141,6 +141,14 @@ function requestMessage(status?: string): RequestMessage | null {
     };
   }
 
+  if (status === "needs-access") {
+    return {
+      tone: "warning",
+      title: "Access required",
+      text: "This account isn't linked to an organization yet. Please request access so we can connect your workspace.",
+    };
+  }
+
   return null;
 }
 

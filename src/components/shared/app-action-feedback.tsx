@@ -174,7 +174,7 @@ export function AppActionFeedback() {
     toast.type === "pending" ? Loader2 : toast.type === "success" ? CheckCircle2 : XCircle;
 
   return (
-    <div className="fixed bottom-4 left-3 right-3 z-[80] mx-auto max-w-md sm:bottom-6 sm:left-auto sm:right-6">
+    <div className="fixed top-4 left-3 right-3 z-[80] mx-auto max-w-md sm:top-6 sm:left-auto sm:right-6">
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-slate-950">
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-950 text-white dark:bg-white dark:text-slate-950">

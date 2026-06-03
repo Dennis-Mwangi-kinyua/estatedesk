@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { requireAuthenticated } from "@/lib/permissions/guards";
 import { privatePageMetadata } from "@/lib/seo";
@@ -14,13 +14,42 @@ export default async function AppLayout({
 }) {
   const session = await requireAuthenticated();
   const headerStore = await headers();
-  const pathname = headerStore.get("x-estatedesk-pathname") ?? "";
+  const rawPath = headerStore.get("x-estatedesk-pathname") ?? "";
+  const pathname = rawPath.replace(/\/+$/, "");
 
-  if (
-    pathname !== "/change-password" &&
-    (session.mustChangePassword || session.requiresTermsAcceptance)
-  ) {
-    redirect("/change-password");
+  // Only force password change / terms acceptance for non-platform users.
+  const shouldForceChange =
+    !pathname.startsWith("/change-password") &&
+    (session.mustChangePassword || session.requiresTermsAcceptance) &&
+    !session.platformRole;
+
+  if (shouldForceChange) {
+    // Prevent rapid redirect loops by using a short-lived cookie marker.
+    const cookieStore = cookies();
+    const marker = cookieStore.get("__redirect_change_pw");
+
+    if (marker) {
+      if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.log(
+          "[debug] skipping /change-password redirect because marker cookie is present",
+        );
+      }
+    } else {
+      // set a 5 second marker to avoid redirect storms
+      cookieStore.set("__redirect_change_pw", "1", {
+        httpOnly: true,
+        path: "/",
+        maxAge: 5,
+      });
+
+      if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.log("[debug] AppLayout redirecting to /change-password from", rawPath, session);
+      }
+
+      redirect("/change-password");
+    }
   }
 
   return (

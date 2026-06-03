@@ -6,6 +6,20 @@ import { ChangePasswordForm } from "./change-password-form";
 export default async function ChangePasswordPage() {
   const session = await requireUserSession();
 
+  // Debugging: log session so we can see why the page may be redirecting
+  // or rendering unexpectedly during development.
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.log("[debug] change-password session:", {
+      userId: session.userId,
+      mustChangePassword: session.mustChangePassword,
+      requiresTermsAcceptance: session.requiresTermsAcceptance,
+      platformRole: session.platformRole,
+      activeOrgId: session.activeOrgId,
+      activeOrgRole: session.activeOrgRole,
+    });
+  }
+
   if (!session.mustChangePassword && !session.requiresTermsAcceptance) {
     redirect(
       getRedirectAfterLogin({

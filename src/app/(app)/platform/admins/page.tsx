@@ -204,6 +204,25 @@ async function createPlatformAdmin(formData: FormData) {
   revalidatePath("/platform/admins");
 }
 
+async function deletePlatformAdmin(formData: FormData) {
+  "use server";
+
+  const userId = String(formData.get("userId") ?? "").trim();
+
+  if (!userId) {
+    throw new Error("Missing user id.");
+  }
+
+  // Soft-delete the user by setting `deletedAt` so the record is excluded
+  // from normal queries without permanently removing it.
+  await prisma.user.update({
+    where: { id: userId },
+    data: { deletedAt: new Date() },
+  });
+
+  revalidatePath("/platform/admins");
+}
+
 export default async function PlatformAdminsPage() {
   const admins = await getPlatformAdmins();
 
@@ -528,6 +547,18 @@ function AdminRow({ admin }: { admin: AdminRecord }) {
       </div>
 
       <PermissionsSection permissions={admin.platformPermissions} />
+
+      <div className="flex justify-end">
+        <form action={deletePlatformAdmin} className="inline" method="post">
+          <input type="hidden" name="userId" value={admin.id} />
+          <button
+            type="submit"
+            className="inline-flex items-center rounded-xl border border-red-200 bg-red-50 px-3 py-1 text-sm font-medium text-red-700 hover:opacity-90"
+          >
+            Delete Admin
+          </button>
+        </form>
+      </div>
     </article>
   );
 }

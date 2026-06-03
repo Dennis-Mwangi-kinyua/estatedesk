@@ -273,16 +273,16 @@ export async function loginAction(
       const destination = await timed(
         makeLabel("login-get-destination", requestId),
         async () =>
-          user.mustChangePassword
-          || !user.termsAcceptedAt
-            ? "/change-password"
-            : safeReturnTo ??
-              getRedirectAfterLogin({
-                  platformRole: user.platformRole,
-                  activeOrgRole: null,
-                  activeOrgId: null,
-                  hasTenantProfile: false,
-                }),
+          // Platform admins and super admins should not be forced to change
+          // password via the login flow. Respect `safeReturnTo` or the
+          // standard post-login redirect.
+          safeReturnTo ??
+          getRedirectAfterLogin({
+            platformRole: user.platformRole,
+            activeOrgRole: null,
+            activeOrgId: null,
+            hasTenantProfile: false,
+          }),
       );
 
       redirect(destination);
@@ -344,10 +344,10 @@ export async function loginAction(
     }
 
     if (!primaryMembership && !tenant) {
-      return {
-        success: false,
-        error: "No active organization or tenant account is linked to this user.",
-      };
+      // If the account isn't linked to any organization or tenant yet,
+      // send the user to the register/onboarding request page so they
+      // can request access or start onboarding instead of showing an error.
+      redirect("/register?request=needs-access#request-access");
     }
 
     if (primaryMembership && primaryMembership.org.status !== "ACTIVE") {
