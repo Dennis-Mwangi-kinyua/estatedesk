@@ -32,7 +32,11 @@ function optionalInteger(value: FormDataEntryValue | null) {
 }
 
 function uploadError(unitId: string, message: string): never {
-  redirect(`/dashboard/org/units/${unitId}?error=${encodeURIComponent(message)}`);
+  redirect(
+    `/dashboard/org/units/${unitId}?message=${encodeURIComponent(
+      message,
+    )}&messageType=error`,
+  );
 }
 
 function publicAssetUrl(key: string) {

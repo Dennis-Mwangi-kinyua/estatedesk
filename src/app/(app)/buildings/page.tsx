@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { deleteBuildingAction } from "@/app/(app)/dashboard/org/buildings/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -543,6 +544,18 @@ export default async function BuildingsPage({
                           ) : null}
                         </div>
                       )}
+                    </div>
+
+                    <div className="mt-5 flex justify-end">
+                      <form action={deleteBuildingAction} method="post">
+                        <input type="hidden" name="buildingId" value={building.id} />
+                        <button
+                          type="submit"
+                          className="inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                        >
+                          Delete building
+                        </button>
+                      </form>
                     </div>
                   </article>
                 );

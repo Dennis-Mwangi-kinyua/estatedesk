@@ -1,6 +1,7 @@
 import "dotenv/config";
 import dns from "node:dns";
 import { PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { getDatabaseUrl } from "@/lib/config/env";
 
@@ -29,12 +30,12 @@ function createPrismaClient() {
     query_timeout: 60_000,
   });
 
-  const logs: Array<"query" | "info" | "warn" | "error"> =
+  const logs: Prisma.LogLevel[] =
     process.env.NODE_ENV === "production"
       ? ["warn", "error"]
       : ["query", "info", "warn", "error"];
 
-  return new PrismaClient({ adapter, log: logs as any });
+  return new PrismaClient({ adapter, log: logs });
 }
 
 export const prisma =
@@ -46,11 +47,17 @@ export const prisma =
 // Add query event listener in non-production to surface slow queries.
 if (process.env.NODE_ENV !== "production") {
   try {
-    const prismaAny = prisma as any;
-    prismaAny.$on("query", (e: any) => {
-      // eslint-disable-next-line no-console
-      console.debug(`prisma query (${e.duration}ms): ${e.query}`);
-    });
+    // Prisma client's $on typings may vary across environments. Use a
+    // narrow unknown cast to avoid widening to `any` while still
+    // allowing us to inspect query events in dev mode.
+    (prisma as unknown as { $on: (event: string, cb: (arg: unknown) => void) => void }).$on(
+      "query",
+      (e: unknown) => {
+        const ev = e as { duration?: number; query?: string };
+        // eslint-disable-next-line no-console
+        console.debug(`prisma query (${ev.duration ?? "?"}ms): ${ev.query}`);
+      },
+    );
   } catch (err) {
     // eslint-disable-next-line no-console
     console.warn("Failed to attach prisma query listener:", err);

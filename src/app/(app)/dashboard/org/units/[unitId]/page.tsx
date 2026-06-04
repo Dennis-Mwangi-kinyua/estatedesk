@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { getUnitSlug } from "@/lib/units/url";
+import { deleteUnitAction } from "../actions";
 import {
   updateUnitVacancyMarketingAction,
   uploadUnitVacancyImagesAction,
@@ -469,6 +470,15 @@ export default async function UnitDetailsPage({
               >
                 View Property
               </Link>
+              <form action={deleteUnitAction} method="post">
+                <input type="hidden" name="unitId" value={unit.id} />
+                <button
+                  type="submit"
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition hover:bg-rose-100"
+                >
+                  Delete unit
+                </button>
+              </form>
             </div>
           </section>
 

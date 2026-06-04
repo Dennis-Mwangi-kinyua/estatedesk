@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { getOrgUnitHref } from "@/lib/units/url";
+import { deleteUnitAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -719,6 +720,16 @@ export default async function UnitsPage({ searchParams }: UnitsPageProps) {
                                 >
                                   Properties
                                 </Link>
+
+                                <form action={deleteUnitAction} method="post" className="inline">
+                                  <input type="hidden" name="unitId" value={unit.id} />
+                                  <button
+                                    type="submit"
+                                    className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                                  >
+                                    Delete unit
+                                  </button>
+                                </form>
                               </div>
                             </article>
                           ))}

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { completedLabel, getQueryMessageType } from "@/lib/action-feedback";
 
 type ToastState = {
   type: "pending" | "success" | "error";
@@ -38,22 +39,6 @@ function inferActionLabel(form: HTMLFormElement, submitter: HTMLElement | null) 
   return text.length > 24 ? "Working" : text;
 }
 
-function completedLabel(label: string) {
-  const lower = label.toLowerCase();
-
-  if (lower === "saving") return "Saved";
-  if (lower === "deleting") return "Deleted";
-  if (lower === "archiving") return "Archived";
-  if (lower === "restoring") return "Restored";
-  if (lower === "rejecting") return "Rejected";
-  if (lower === "approving") return "Approved";
-  if (lower === "sending") return "Sent";
-  if (lower === "updating") return "Updated";
-  if (lower === "creating") return "Created";
-  if (lower === "working") return "Completed";
-
-  return "Completed";
-}
 
 function isServerActionForm(form: HTMLFormElement) {
   if (form.method.toLowerCase() === "get") return false;
@@ -80,6 +65,7 @@ function clearStoredAction() {
   window.sessionStorage.removeItem(STORAGE_KEY);
 }
 
+
 export function AppActionFeedback() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -90,11 +76,22 @@ export function AppActionFeedback() {
     () => `${pathname}?${searchParams.toString()}`,
     [pathname, searchParams],
   );
+  const message = useMemo(() => searchParams.get("message"), [searchParams]);
+  const messageType = useMemo(
+    () => getQueryMessageType(searchParams.get("messageType")),
+    [searchParams],
+  );
+  const hasError = useMemo(() => {
+    for (const key of searchParams.keys()) {
+      if (key.toLowerCase().endsWith("error")) return true;
+    }
+    return messageType === "error";
+  }, [searchParams, messageType]);
   const refreshEnabled = pathname !== "/change-password";
 
   useEffect(() => {
     const stored = getStoredAction();
-    if (!stored) return;
+    if (!stored || message || hasError) return;
     if (Date.now() - stored.at < 400) return;
 
     const timer = window.setTimeout(() => {
@@ -107,7 +104,23 @@ export function AppActionFeedback() {
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, [locationKey]);
+  }, [locationKey, message, hasError]);
+
+  useEffect(() => {
+    if (!message) return;
+
+    setToast({
+      type: messageType,
+      title: message,
+    });
+    clearStoredAction();
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("message");
+    params.delete("messageType");
+    const url = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+    router.replace(url);
+  }, [message, messageType, pathname, router, searchParams]);
 
   useEffect(() => {
     const onSubmit = (event: SubmitEvent) => {
