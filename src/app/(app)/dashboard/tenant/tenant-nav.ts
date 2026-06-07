@@ -6,6 +6,7 @@ import {
   HiOutlineFolder,
   HiOutlineHome,
   HiOutlineReceiptRefund,
+  HiOutlineShieldCheck,
   HiOutlineUser,
   HiOutlineWrenchScrewdriver,
   HiOutlineClipboardDocumentList,
@@ -14,6 +15,7 @@ import {
 export const tenantNavItems = [
   { label: "Dashboard", href: "/dashboard/tenant", icon: HiOutlineHome, emoji: "🏠", requiresActiveLease: false },
   { label: "Profile", href: "/dashboard/tenant/profile", icon: HiOutlineUser, emoji: "👤", requiresActiveLease: false },
+  { label: "Security", href: "/dashboard/security", icon: HiOutlineShieldCheck, emoji: "🔐", requiresActiveLease: false },
   { label: "Lease", href: "/dashboard/tenant/lease", icon: HiOutlineDocumentText, emoji: "📄", requiresActiveLease: true },
   { label: "Payments", href: "/dashboard/tenant/payments", icon: HiOutlineCreditCard, emoji: "💳", requiresActiveLease: true },
   { label: "Invoices", href: "/dashboard/tenant/invoice", icon: HiOutlineReceiptRefund, emoji: "🧾", requiresActiveLease: true },

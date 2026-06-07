@@ -89,6 +89,7 @@ export async function sendVacancyInquiryAction(unitId: string, formData: FormDat
   });
 
   revalidatePath(`/vacancies/${unitId}`);
+  revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/notifications");
   redirect(`/vacancies/${unitId}?sent=1#enquire`);
 }

@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   Receipt,
+  ShieldCheck,
   Users,
   X,
 } from "lucide-react";
@@ -42,6 +43,11 @@ const navItems = [
     label: "Tenants",
     href: "/dashboard/landlord#tenants",
     icon: Users,
+  },
+  {
+    label: "Security",
+    href: "/dashboard/security",
+    icon: ShieldCheck,
   },
 ] as const;
 

@@ -1,4 +1,5 @@
 import { APP_PLANS } from "@/lib/billing/plans";
+import { isTransientDatabaseError } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import {
@@ -50,60 +51,97 @@ function estimateMonthlyCommission({
   return (APP_PLANS[plan].monthlyAmount * toNumber(rate)) / 100;
 }
 
+async function loadPlatformMarketingData() {
+  try {
+    const [marketers, leads, organizations, unassignedLeads, unassignedOrgs] =
+      await Promise.all([
+        prisma.platformMarketer.findMany({
+          orderBy: [{ status: "asc" }, { fullName: "asc" }],
+          include: {
+            _count: {
+              select: {
+                onboardingRequests: true,
+                organizations: true,
+              },
+            },
+          },
+        }),
+        prisma.onboardingRequest.findMany({
+          orderBy: { createdAt: "desc" },
+          take: 30,
+          include: {
+            marketer: {
+              select: {
+                id: true,
+                fullName: true,
+                referralCode: true,
+              },
+            },
+          },
+        }),
+        prisma.organization.findMany({
+          where: { deletedAt: null },
+          orderBy: { createdAt: "desc" },
+          take: 30,
+          include: {
+            marketer: {
+              select: {
+                id: true,
+                fullName: true,
+                referralCode: true,
+              },
+            },
+            subscription: {
+              select: {
+                plan: true,
+                status: true,
+              },
+            },
+          },
+        }),
+        prisma.onboardingRequest.count({ where: { marketerId: null } }),
+        prisma.organization.count({ where: { marketerId: null, deletedAt: null } }),
+      ]);
+
+    return {
+      degraded: false,
+      marketers,
+      leads,
+      organizations,
+      unassignedLeads,
+      unassignedOrgs,
+    };
+  } catch (error) {
+    if (!isTransientDatabaseError(error)) {
+      throw error;
+    }
+
+    console.warn("Platform marketing data temporarily unavailable:", error);
+
+    return {
+      degraded: true,
+      marketers: [],
+      leads: [],
+      organizations: [],
+      unassignedLeads: 0,
+      unassignedOrgs: 0,
+    };
+  }
+}
+
 export default async function PlatformMarketingPage() {
   await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/dashboard",
   });
 
-  const [marketers, leads, organizations, unassignedLeads, unassignedOrgs] =
-    await Promise.all([
-      prisma.platformMarketer.findMany({
-        orderBy: [{ status: "asc" }, { fullName: "asc" }],
-        include: {
-          _count: {
-            select: {
-              onboardingRequests: true,
-              organizations: true,
-            },
-          },
-        },
-      }),
-      prisma.onboardingRequest.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 30,
-        include: {
-          marketer: {
-            select: {
-              id: true,
-              fullName: true,
-              referralCode: true,
-            },
-          },
-        },
-      }),
-      prisma.organization.findMany({
-        where: { deletedAt: null },
-        orderBy: { createdAt: "desc" },
-        take: 30,
-        include: {
-          marketer: {
-            select: {
-              id: true,
-              fullName: true,
-              referralCode: true,
-            },
-          },
-          subscription: {
-            select: {
-              plan: true,
-              status: true,
-            },
-          },
-        },
-      }),
-      prisma.onboardingRequest.count({ where: { marketerId: null } }),
-      prisma.organization.count({ where: { marketerId: null, deletedAt: null } }),
-    ]);
+  const {
+    degraded,
+    marketers,
+    leads,
+    organizations,
+    unassignedLeads,
+    unassignedOrgs,
+  } = await loadPlatformMarketingData();
 
   const activeMarketers = marketers.filter(
     (marketer) => marketer.status === "ACTIVE" && marketer.deletedAt === null,
@@ -137,6 +175,14 @@ export default async function PlatformMarketingPage() {
         title="Marketing attribution"
         description="Track which marketer brought each lead or customer, manage referral codes, and follow commission readiness from the platform side."
       />
+
+      {degraded ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+          Marketing attribution data could not be loaded because the database
+          timed out. The page is still available; refresh once the database
+          connection recovers.
+        </div>
+      ) : null}
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Active marketers" value={activeMarketers.length} />

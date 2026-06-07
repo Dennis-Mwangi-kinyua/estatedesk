@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { getCachedOrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { OrgDashboardLive } from "@/features/dashboard/components/org-dashboard-live";
+import { getVacancyInquiryAlerts } from "@/features/dashboard/server/get-vacancy-inquiry-alerts";
 
 const getCurrentOrgContext = cache(async function getCurrentOrgContext() {
   const session = await requireUserSession();
@@ -79,11 +80,15 @@ const getCurrentOrgContext = cache(async function getCurrentOrgContext() {
 
 export default async function OrganizationDashboardPage() {
   const membership = await getCurrentOrgContext();
-  const data = await getCachedOrgDashboardSummary(membership.orgId);
+  const [data, vacancyInquiries] = await Promise.all([
+    getCachedOrgDashboardSummary(membership.orgId),
+    getVacancyInquiryAlerts(membership.orgId),
+  ]);
 
   return (
     <OrgDashboardLive
       initialData={data}
+      initialVacancyInquiries={vacancyInquiries}
       membership={membership}
       interval={30_000}
     />

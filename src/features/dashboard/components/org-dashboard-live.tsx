@@ -5,6 +5,8 @@ import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-da
 import { getLiveOrgDashboardSummaryAction } from "@/features/dashboard/actions/get-live-org-dashboard-summary-action";
 import { OrgDashboardHero } from "@/features/dashboard/components/org-dashboard-hero";
 import { OrgDashboardMetrics } from "@/features/dashboard/components/org-dashboard-metrics";
+import { VacancyInquiryAlert } from "@/features/dashboard/components/vacancy-inquiry-alert";
+import type { VacancyInquiryAlert as VacancyInquiryAlertItem } from "@/features/dashboard/server/get-vacancy-inquiry-alerts";
 
 type Membership = {
   orgId: string;
@@ -26,10 +28,12 @@ type NavigatorWithConnection = Navigator & {
 
 export function OrgDashboardLive({
   initialData,
+  initialVacancyInquiries,
   membership,
   interval = 30_000,
 }: {
   initialData: OrgDashboardSummary;
+  initialVacancyInquiries: VacancyInquiryAlertItem[];
   membership: Membership;
   interval?: number;
 }) {
@@ -92,6 +96,10 @@ export function OrgDashboardLive({
 
   return (
     <div className="space-y-6">
+      <VacancyInquiryAlert
+        inquiries={initialVacancyInquiries}
+        orgId={membership.orgId}
+      />
       <OrgDashboardHero data={data} organizationName={membership.org.name} />
       <OrgDashboardMetrics data={data} />
     </div>

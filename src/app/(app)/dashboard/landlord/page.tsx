@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import {
+  AlertTriangle,
   BarChart3,
   Building2,
+  CheckCircle2,
   ClipboardList,
   Home,
   Receipt,
@@ -360,6 +362,25 @@ export default async function LandlordDashboardPage() {
       unpaidCount,
     };
   });
+  const atRiskUnits = [...unpaidUnits]
+    .sort((a, b) => Number(b.balance ?? 0) - Number(a.balance ?? 0))
+    .slice(0, 5);
+  const vacantUnitQueue = units
+    .filter((unit) => unit.status === "VACANT")
+    .slice(0, 5);
+  const collectionGap = Math.max(monthlyAmountDue - monthlyAmountPaid, 0);
+  const portfolioHealth =
+    collectionRate >= 95 && vacantUnits === 0
+      ? "Healthy"
+      : collectionRate >= 80
+        ? "Watch"
+        : "Needs attention";
+  const healthTone =
+    portfolioHealth === "Healthy"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+      : portfolioHealth === "Watch"
+        ? "border-amber-200 bg-amber-50 text-amber-800"
+        : "border-red-200 bg-red-50 text-red-800";
 
   return (
     <div className="space-y-5">
@@ -450,6 +471,108 @@ export default async function LandlordDashboardPage() {
               </div>
             );
           })}
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-[1fr_1fr]">
+          <div className="ios-panel rounded-[28px] p-4 sm:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                  Executive view
+                </p>
+                <h2 className="mt-1 text-xl font-bold tracking-tight text-neutral-950">
+                  Portfolio health
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-neutral-500">
+                  A concise readout of collection, occupancy, and immediate risk for the current period.
+                </p>
+              </div>
+              <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${healthTone}`}>
+                {portfolioHealth}
+              </span>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <InsightTile
+                label="Collection gap"
+                value={formatCurrency(collectionGap)}
+                detail={`${formatPercent(collectionRate)} collected`}
+                tone={collectionGap > 0 ? "warn" : "good"}
+              />
+              <InsightTile
+                label="Vacancy exposure"
+                value={formatCurrency(vacantRent)}
+                detail={`${vacantUnits} vacant unit${vacantUnits === 1 ? "" : "s"}`}
+                tone={vacantUnits > 0 ? "warn" : "good"}
+              />
+              <InsightTile
+                label="Outstanding tenants"
+                value={unpaidUnits.length.toLocaleString()}
+                detail={`${formatCurrency(monthlyBalance)} open balance`}
+                tone={unpaidUnits.length > 0 ? "bad" : "good"}
+              />
+            </div>
+          </div>
+
+          <div className="ios-panel rounded-[28px] p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                  Priority actions
+                </p>
+                <h2 className="mt-1 text-xl font-bold tracking-tight text-neutral-950">
+                  What needs attention
+                </h2>
+              </div>
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-950 text-white">
+                <AlertTriangle className="h-5 w-5" />
+              </span>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              {atRiskUnits.length > 0 ? (
+                atRiskUnits.map((unit) => (
+                  <div
+                    key={`risk-${unit.id}`}
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-red-100 bg-red-50 px-3 py-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-red-950">
+                        {unit.tenantName} · Unit {unit.houseNo}
+                      </p>
+                      <p className="mt-0.5 text-xs text-red-700">
+                        Follow up on current-period balance
+                      </p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-red-700 ring-1 ring-red-200">
+                      {formatCurrency(unit.balance)}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-3 py-3 text-emerald-800">
+                  <CheckCircle2 className="h-5 w-5 shrink-0" />
+                  <p className="text-sm font-semibold">
+                    No unpaid tenant balances need attention right now.
+                  </p>
+                </div>
+              )}
+
+              {vacantUnitQueue.length > 0 ? (
+                <div className="rounded-2xl border border-amber-100 bg-amber-50 px-3 py-3">
+                  <p className="text-sm font-semibold text-amber-950">
+                    Vacancy follow-up
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-amber-800">
+                    {vacantUnitQueue
+                      .map((unit) => `Unit ${unit.houseNo}`)
+                      .join(", ")}{" "}
+                    should be reviewed for listing, viewing, or pricing action.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </div>
         </section>
 
         <section id="reports" className="grid gap-4 lg:grid-cols-[1.35fr_0.9fr]">
@@ -791,6 +914,35 @@ export default async function LandlordDashboardPage() {
           )}
         </section>
 
+    </div>
+  );
+}
+
+function InsightTile({
+  label,
+  value,
+  detail,
+  tone,
+}: {
+  label: string;
+  value: string;
+  detail: string;
+  tone: "good" | "warn" | "bad";
+}) {
+  const toneClass =
+    tone === "good"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+      : tone === "warn"
+        ? "border-amber-200 bg-amber-50 text-amber-800"
+        : "border-red-200 bg-red-50 text-red-800";
+
+  return (
+    <div className={`rounded-2xl border p-4 ${toneClass}`}>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-75">
+        {label}
+      </p>
+      <p className="mt-2 text-xl font-bold">{value}</p>
+      <p className="mt-1 text-xs leading-5 opacity-80">{detail}</p>
     </div>
   );
 }

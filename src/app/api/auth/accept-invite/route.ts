@@ -223,6 +223,7 @@ export async function POST(request: Request) {
   await setUserSession({
     userId: result.user.id,
     activeMembershipId: result.membership.id,
+    replaceExistingSessions: true,
   });
 
   if (result.createdUser) {

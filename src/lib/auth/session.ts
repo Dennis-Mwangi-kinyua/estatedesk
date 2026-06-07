@@ -33,10 +33,20 @@ export type AppSession = {
     | null;
 };
 
+export type ManagedUserSession = {
+  id: string;
+  createdAt: Date;
+  lastSeenAt: Date;
+  expiresAt: Date;
+  ipAddress: string | null;
+  userAgent: string | null;
+  isCurrent: boolean;
+};
+
 type SetUserSessionInput = {
   userId: string;
   activeMembershipId?: string | null;
-  remember?: boolean;
+  replaceExistingSessions?: boolean;
 };
 
 export class ActiveSessionLimitError extends Error {
@@ -50,8 +60,7 @@ export class ActiveSessionLimitError extends Error {
 
 const SESSION_COOKIE_NAME = "estatedesk_session";
 const MAX_ACTIVE_SESSIONS_PER_USER = 2;
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 12;
-const REMEMBERED_SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+const SESSION_MAX_AGE_SECONDS = 60 * 30;
 
 const ENFORCE_USER_AGENT_MATCH = false;
 const ENFORCE_IP_MATCH = false;
@@ -64,12 +73,12 @@ function hashSessionToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-function getSessionMaxAgeSeconds(remember?: boolean): number {
-  return remember ? REMEMBERED_SESSION_MAX_AGE_SECONDS : SESSION_MAX_AGE_SECONDS;
+function getSessionMaxAgeSeconds(): number {
+  return SESSION_MAX_AGE_SECONDS;
 }
 
-function getSessionExpiryDate(remember?: boolean): Date {
-  return new Date(Date.now() + getSessionMaxAgeSeconds(remember) * 1000);
+function getSessionExpiryDate(): Date {
+  return new Date(Date.now() + getSessionMaxAgeSeconds() * 1000);
 }
 
 function getIpFromHeaderValue(forwardedFor: string | null): string | null {
@@ -86,6 +95,13 @@ async function getRequestMeta() {
   const userAgent = headerStore.get("user-agent");
 
   return { ipAddress, userAgent };
+}
+
+async function getCurrentTokenHash() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+
+  return token ? hashSessionToken(token) : null;
 }
 
 function getCookieOptions(
@@ -106,12 +122,11 @@ function getCookieOptions(
 function setSessionCookie(
   cookieStore: Awaited<ReturnType<typeof cookies>>,
   token: string,
-  remember?: boolean,
 ) {
   cookieStore.set(
     SESSION_COOKIE_NAME,
     token,
-    getCookieOptions({ maxAge: getSessionMaxAgeSeconds(remember) }),
+    getCookieOptions({ maxAge: getSessionMaxAgeSeconds() }),
   );
 }
 
@@ -156,7 +171,7 @@ async function resolveMembershipForSession(
 export async function setUserSession({
   userId,
   activeMembershipId,
-  remember = false,
+  replaceExistingSessions = false,
 }: SetUserSessionInput): Promise<void> {
   const cookieStore = await cookies();
   const currentToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
@@ -165,7 +180,7 @@ export async function setUserSession({
 
   const token = generateSessionToken();
   const tokenHash = hashSessionToken(token);
-  const expiresAt = getSessionExpiryDate(remember);
+  const expiresAt = getSessionExpiryDate();
 
   const membership = await resolveMembershipForSession(userId, activeMembershipId);
 
@@ -203,8 +218,36 @@ export async function setUserSession({
       },
     });
 
-    if (activeSessionCount >= MAX_ACTIVE_SESSIONS_PER_USER) {
+    if (activeSessionCount >= MAX_ACTIVE_SESSIONS_PER_USER && !replaceExistingSessions) {
       throw new ActiveSessionLimitError();
+    }
+
+    if (activeSessionCount >= MAX_ACTIVE_SESSIONS_PER_USER) {
+      const sessionsToRemove = await tx.userSession.findMany({
+        where: {
+          userId,
+          expiresAt: {
+            gt: new Date(),
+          },
+        },
+        select: {
+          id: true,
+        },
+        orderBy: {
+          lastSeenAt: "asc",
+        },
+        take: activeSessionCount - MAX_ACTIVE_SESSIONS_PER_USER + 1,
+      });
+
+      if (sessionsToRemove.length > 0) {
+        await tx.userSession.deleteMany({
+          where: {
+            id: {
+              in: sessionsToRemove.map((session) => session.id),
+            },
+          },
+        });
+      }
     }
 
     await tx.userSession.create({
@@ -219,7 +262,7 @@ export async function setUserSession({
     });
   });
 
-  setSessionCookie(cookieStore, token, remember);
+  setSessionCookie(cookieStore, token);
 }
 
 export const getUserSession = cache(async function getUserSession(): Promise<AppSession | null> {
@@ -380,6 +423,93 @@ export async function clearUserSession(): Promise<void> {
   }
 
   clearCookie(cookieStore);
+}
+
+export async function getManagedUserSessions(
+  userId: string,
+): Promise<ManagedUserSession[]> {
+  const currentTokenHash = await getCurrentTokenHash();
+
+  const sessions = await prisma.userSession.findMany({
+    where: {
+      userId,
+      expiresAt: {
+        gt: new Date(),
+      },
+    },
+    select: {
+      id: true,
+      tokenHash: true,
+      createdAt: true,
+      lastSeenAt: true,
+      expiresAt: true,
+      ipAddress: true,
+      userAgent: true,
+    },
+    orderBy: [
+      {
+        lastSeenAt: "desc",
+      },
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+
+  return sessions.map((session) => ({
+    id: session.id,
+    createdAt: session.createdAt,
+    lastSeenAt: session.lastSeenAt,
+    expiresAt: session.expiresAt,
+    ipAddress: session.ipAddress,
+    userAgent: session.userAgent,
+    isCurrent: Boolean(currentTokenHash && session.tokenHash === currentTokenHash),
+  }));
+}
+
+export async function revokeOtherUserSession({
+  userId,
+  sessionId,
+}: {
+  userId: string;
+  sessionId: string;
+}): Promise<boolean> {
+  const currentTokenHash = await getCurrentTokenHash();
+
+  const result = await prisma.userSession.deleteMany({
+    where: {
+      id: sessionId,
+      userId,
+      ...(currentTokenHash
+        ? {
+            tokenHash: {
+              not: currentTokenHash,
+            },
+          }
+        : {}),
+    },
+  });
+
+  return result.count > 0;
+}
+
+export async function revokeOtherUserSessions(userId: string): Promise<number> {
+  const currentTokenHash = await getCurrentTokenHash();
+
+  const result = await prisma.userSession.deleteMany({
+    where: {
+      userId,
+      ...(currentTokenHash
+        ? {
+            tokenHash: {
+              not: currentTokenHash,
+            },
+          }
+        : {}),
+    },
+  });
+
+  return result.count;
 }
 
 export async function switchActiveMembership(

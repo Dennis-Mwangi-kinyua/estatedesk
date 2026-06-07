@@ -12,6 +12,7 @@ import {
   Droplets,
   Bell,
   LogOut,
+  ShieldCheck,
   UserRound,
 } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
@@ -64,6 +65,12 @@ const navItems = [
     label: "My Profile",
     icon: UserRound,
     tone: "blue",
+  },
+  {
+    href: "/dashboard/security",
+    label: "Security",
+    icon: ShieldCheck,
+    tone: "emerald",
   },
 ] as const;
 

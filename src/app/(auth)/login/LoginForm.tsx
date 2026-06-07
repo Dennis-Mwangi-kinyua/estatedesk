@@ -42,7 +42,6 @@ export default function LoginForm() {
   );
 
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
 
   const globalError = state?.error ?? null;
 
@@ -251,38 +250,6 @@ export default function LoginForm() {
                 {state.fieldErrors.password[0]}
               </p>
             ) : null}
-          </div>
-
-          <div className="remember-row flex items-center justify-between gap-3 pt-0.5">
-            <label
-              htmlFor="remember"
-              className="group inline-flex cursor-pointer items-center gap-2.5 text-sm text-slate-600"
-            >
-              <input
-                id="remember"
-                type="checkbox"
-                name="remember"
-                value="on"
-                checked={rememberMe}
-                onChange={(event) => setRememberMe(event.target.checked)}
-                disabled={isPending}
-                className="peer sr-only"
-              />
-
-              <span
-                className={`flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition peer-focus-visible:ring-4 peer-focus-visible:ring-primary/20 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 ${
-                  rememberMe ? "bg-primary" : "bg-slate-200"
-                }`}
-              >
-                <span
-                  className={`h-5 w-5 rounded-full bg-white shadow-sm transition ${
-                    rememberMe ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </span>
-
-              <span>Remember me</span>
-            </label>
           </div>
 
           {globalError ? (

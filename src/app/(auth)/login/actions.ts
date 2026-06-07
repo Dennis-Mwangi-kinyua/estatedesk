@@ -21,7 +21,6 @@ const loginSchema = z.object({
     .min(1, "Email or username is required")
     .transform((value) => value.toLowerCase()),
   password: z.string().min(1, "Password is required"),
-  remember: z.boolean().optional(),
 });
 
 export type LoginActionState = {
@@ -137,7 +136,6 @@ export async function loginAction(
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
-    remember: formData.get("remember") === "on",
   });
 
   if (!parsed.success) {
@@ -148,7 +146,7 @@ export async function loginAction(
     };
   }
 
-  const { email: identifier, password, remember } = parsed.data;
+  const { email: identifier, password } = parsed.data;
   const headerStore = await headers();
   const ipAddress = getClientIp(headerStore);
   const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -236,7 +234,7 @@ export async function loginAction(
           setUserSession({
             userId: user.id,
             activeMembershipId: null,
-            remember,
+            replaceExistingSessions: true,
           }),
         );
       });
@@ -345,7 +343,7 @@ export async function loginAction(
         setUserSession({
           userId: user.id,
           activeMembershipId: primaryMembership?.id ?? null,
-          remember,
+          replaceExistingSessions: true,
         }),
       );
     });
