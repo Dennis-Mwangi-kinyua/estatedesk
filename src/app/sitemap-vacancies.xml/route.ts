@@ -51,7 +51,7 @@ export async function renderSitemapXml() {
     },
     include: { property: { select: { location: true, address: true, name: true } } },
     orderBy: { updatedAt: 'desc' },
-    take: 1000,
+    take: 50_000,
   })
 
   const landingPages = new Map<string, string>()

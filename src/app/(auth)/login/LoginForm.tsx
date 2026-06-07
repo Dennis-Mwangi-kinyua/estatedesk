@@ -35,7 +35,7 @@ const InputShell = memo(function InputShell({
   );
 });
 
-export default function LoginForm({ returnTo }: { returnTo?: string }) {
+export default function LoginForm() {
   const [state, formAction, isPending] = useActionState(
     loginAction,
     initialState,
@@ -173,7 +173,6 @@ export default function LoginForm({ returnTo }: { returnTo?: string }) {
 
       <div className="px-5 py-6 sm:px-7">
         <form action={formAction} className="flex flex-col gap-4">
-          {returnTo ? <input type="hidden" name="returnTo" value={returnTo} /> : null}
           <div className="flex flex-col gap-2">
             <label htmlFor="email" className="text-sm font-medium text-slate-800">
               Email or username

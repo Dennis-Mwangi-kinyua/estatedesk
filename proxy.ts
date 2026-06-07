@@ -143,7 +143,9 @@ function shouldNoIndex(pathname: string) {
   return (
     isProtectedPath(pathname) ||
     pathname.startsWith("/login") ||
-    pathname.startsWith("/are-you-lost")
+    pathname.startsWith("/are-you-lost") ||
+    pathname.startsWith("/account-suspended") ||
+    pathname.startsWith("/service-terminated")
   );
 }
 

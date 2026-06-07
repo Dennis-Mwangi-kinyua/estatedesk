@@ -5,6 +5,21 @@ export const SITE_DESCRIPTION =
   "EstateDesk is property management software for landlords and property managers in Kenya, East Africa, Dubai, and global rental markets, helping teams manage tenants, leases, rent, water bills, caretakers, inspections, maintenance, vacant houses, and staff access online.";
 export const DEFAULT_SITE_URL = "https://estatedesk.co.ke";
 
+export const PUBLIC_LOCALES = [
+  "en",
+  "en-KE",
+  "en-UG",
+  "en-TZ",
+  "en-RW",
+  "en-AE",
+  "en-US",
+  "en-GB",
+  "en-CA",
+  "en-AU",
+  "en-ZA",
+  "en-IN",
+] as const;
+
 export const SEO_KEYWORDS = [
   "EstateDesk",
   "property management software Kenya",
@@ -61,6 +76,9 @@ export function publicPageMetadata({
 }): Metadata {
   const url = absoluteUrl(path);
   const resolvedTitle = title.includes(SITE_NAME) ? title : `${title} - ${SITE_NAME}`;
+  const languages = Object.fromEntries(
+    PUBLIC_LOCALES.map((locale) => [locale, url]),
+  );
 
   return {
     title: {
@@ -71,12 +89,7 @@ export function publicPageMetadata({
     alternates: {
       canonical: url,
       languages: {
-        "en-KE": url,
-        "en-UG": url,
-        "en-TZ": url,
-        "en-RW": url,
-        "en-AE": url,
-        "en": url,
+        ...languages,
         "x-default": url,
       },
     },

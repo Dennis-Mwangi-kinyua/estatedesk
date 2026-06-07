@@ -99,10 +99,6 @@ function listingDescription({
   return `${unitLabel(type, bedrooms)} in ${place} with rent, viewing, and manager details ready for review.`;
 }
 
-function buildLoginHref(returnTo: string) {
-  return `/login?returnTo=${encodeURIComponent(returnTo)}`;
-}
-
 function isPublicVacancyDatabaseError(error: unknown) {
   if (isTransientDatabaseError(error)) return true;
 
@@ -213,12 +209,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
   const location = params?.location?.trim() ?? "";
   const sort = params?.sort === "rent_desc" ? "rent_desc" : params?.sort === "rent_asc" ? "rent_asc" : "location";
   const hasFilters = Boolean(query || location);
-  const returnParams = new URLSearchParams();
-  if (query) returnParams.set("q", query);
-  if (location) returnParams.set("location", location);
-  if (sort !== "location") returnParams.set("sort", sort);
-  const returnTo = `/vacancies${returnParams.size ? `?${returnParams.toString()}` : ""}`;
-  const loginHref = buildLoginHref(returnTo);
+  const loginHref = "/login";
   let databaseUnavailable = false;
   let houses: Awaited<ReturnType<typeof getVacancyListings>> = [];
 

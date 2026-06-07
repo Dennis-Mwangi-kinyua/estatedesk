@@ -3,6 +3,8 @@ import { APP_URL, XML_HEADERS, buildSitemapIndexEntry, wrapSitemapIndex } from '
 export async function renderSitemapXml() {
   const sitemaps = [
     `${APP_URL}/sitemap.xml`,
+    `${APP_URL}/sitemap-properties.xml`,
+    `${APP_URL}/sitemap-units.xml`,
     `${APP_URL}/sitemap-vacancies.xml`,
   ]
 

@@ -253,10 +253,6 @@ function buildAddress(unit: VacancyUnit) {
   };
 }
 
-function buildLoginHref(returnTo: string) {
-  return `/login?returnTo=${encodeURIComponent(returnTo)}`;
-}
-
 function shuffleVacancies<T>(items: T[]) {
   return [...items].sort(() => Math.random() - 0.5);
 }
@@ -406,7 +402,7 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
   const title = buildTitle(unit);
   const description = buildDescription(unit);
   const url = `${APP_URL}/vacancies/${unit.id}`;
-  const loginHref = buildLoginHref(`/vacancies/${unit.id}`);
+  const loginHref = "/login";
   const place = unit.property?.location ?? unit.property?.address ?? unit.property?.name ?? "Location not listed";
   const roomLabel = unit.roomCount ?? unit.bedrooms;
   const detailCandidates: Array<VacancyDetailItem | null> = [

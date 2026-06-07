@@ -55,28 +55,11 @@ const windowDots = [
 ];
 
 type LoginPageProps = {
-  searchParams?: Promise<{
-    returnTo?: string;
-  }>;
+  searchParams?: Promise<Record<string, string | undefined>>;
 };
 
-function getSafeReturnTo(value: string | undefined) {
-  if (!value) return undefined;
-
-  try {
-    const decoded = decodeURIComponent(value);
-    if (!decoded.startsWith("/vacancies")) return undefined;
-    if (decoded.startsWith("//")) return undefined;
-    if (decoded.includes("://")) return undefined;
-    return decoded;
-  } catch {
-    return undefined;
-  }
-}
-
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const params = await searchParams;
-  const returnTo = getSafeReturnTo(params?.returnTo);
+  await searchParams;
 
   return (
     <div className="login-screen fixed inset-0 w-screen overflow-hidden bg-[#F2F6FB] text-slate-950">
@@ -348,7 +331,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               </div>
 
               <div className="login-form-shell relative min-h-0 flex-1 overflow-hidden">
-                <LoginForm returnTo={returnTo} />
+                <LoginForm />
               </div>
             </section>
 

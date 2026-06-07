@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { Ban, Mail } from "lucide-react";
+import { privatePageMetadata } from "@/lib/seo";
+
+export const metadata = privatePageMetadata;
 
 type SuspendedAccountPageProps = {
   searchParams?: Promise<{

@@ -17,7 +17,6 @@ export default function robots(): MetadataRoute.Robots {
         "/reset-password",
         "/verify-email",
         "/accept-invite/",
-        "/are-you-lost",
         "/properties",
         "/properties/",
         "/units",
@@ -26,9 +25,6 @@ export default function robots(): MetadataRoute.Robots {
     },
     sitemap: [
       `${siteUrl}/sitemap-index.xml`,
-      `${siteUrl}/sitemap_index.xml`,
-      `${siteUrl}/sitemap.xml`,
-      `${siteUrl}/sitemap-vacancies.xml`,
     ],
     host: siteUrl,
   };

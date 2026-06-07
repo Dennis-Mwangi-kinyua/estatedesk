@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Building2, Mail, ShieldAlert } from "lucide-react";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
+import { privatePageMetadata } from "@/lib/seo";
+
+export const metadata = privatePageMetadata;
 
 type PageProps = {
   searchParams?: Promise<{

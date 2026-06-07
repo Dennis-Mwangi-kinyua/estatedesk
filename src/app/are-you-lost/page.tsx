@@ -1,14 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, Home, LifeBuoy, Search, ShieldCheck } from "lucide-react";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
-import { publicPageMetadata } from "@/lib/seo";
+import { privatePageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
-  title: "Are You Lost?",
-  description:
-    "This EstateDesk address is not a public page. Find vacancies, services, pricing, support, or sign in to your workspace.",
-  path: "/are-you-lost",
-});
+export const metadata = privatePageMetadata;
 
 const serviceLinks = [
   {
