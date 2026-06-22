@@ -19,6 +19,11 @@ function getStatusMessage(status?: string) {
         type: "error" as const,
         text: "Please enter a valid email address.",
       };
+    case "limited":
+      return {
+        type: "error" as const,
+        text: "Too many password reset attempts. Please wait a while and try again.",
+      };
     default:
       return null;
   }

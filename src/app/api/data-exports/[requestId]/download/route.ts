@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { buildOrganizationCsvZip } from "@/lib/data-export/org-export";
 import { writeAuditLog } from "@/lib/audit/security";
+import { sendSecurityAlert } from "@/lib/security/alerts";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,21 @@ export async function GET(_request: Request, context: RouteContext) {
     action: "DATA_EXPORT_DOWNLOADED",
     entityType: "DataExportRequest",
     entityId: exportRequest.id,
+    metadata: {
+      platformRole: session.platformRole,
+      activeOrgRole: session.activeOrgRole,
+      requestedByUserId: exportRequest.requestedByUserId,
+    },
+  });
+
+  await sendSecurityAlert({
+    event: "DATA_EXPORT_DOWNLOADED",
+    severity: "critical",
+    actorUserId: session.userId,
+    orgId: exportRequest.orgId,
+    entityType: "DataExportRequest",
+    entityId: exportRequest.id,
+    summary: "An organization data export was downloaded.",
     metadata: {
       platformRole: session.platformRole,
       activeOrgRole: session.activeOrgRole,

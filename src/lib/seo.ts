@@ -68,11 +68,13 @@ export function publicPageMetadata({
   description,
   path = "/",
   keywords = [],
+  type = "website",
 }: {
   title: string;
   description: string;
   path?: string;
   keywords?: readonly string[];
+  type?: "website" | "article";
 }): Metadata {
   const url = absoluteUrl(path);
   const resolvedTitle = title.includes(SITE_NAME) ? title : `${title} - ${SITE_NAME}`;
@@ -84,6 +86,10 @@ export function publicPageMetadata({
     title: {
       absolute: resolvedTitle,
     },
+    applicationName: SITE_NAME,
+    publisher: SITE_NAME,
+    creator: SITE_NAME,
+    category: "Property management software",
     description,
     keywords: [...SEO_KEYWORDS, ...keywords],
     alternates: {
@@ -98,8 +104,9 @@ export function publicPageMetadata({
       description,
       url,
       siteName: SITE_NAME,
-      type: "website",
+      type,
       locale: "en_KE",
+      alternateLocale: ["en_US", "en_GB", "en_AE", "en_ZA"],
       images: [
         {
           url: "/images/og-vacancy.svg",

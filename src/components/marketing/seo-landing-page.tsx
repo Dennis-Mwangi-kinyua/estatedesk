@@ -42,6 +42,23 @@ export function SeoLandingPage({ content }: { content: SeoLandingPageContent }) 
         },
       },
       {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "EstateDesk",
+            item: absoluteUrl("/"),
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: content.serviceType,
+            item: absoluteUrl(content.path),
+          },
+        ],
+      },
+      {
         "@type": "Service",
         "@id": `${absoluteUrl(content.path)}#service`,
         name: content.title,

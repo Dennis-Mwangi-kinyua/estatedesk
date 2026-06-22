@@ -418,7 +418,6 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
   const meaningfulDetails = detailCandidates.filter(
     (item): item is VacancyDetailItem => Boolean(item),
   );
-  const image = unit.images[0]?.key ? `${APP_URL}${imageUrl(unit.images[0].key)}` : `${APP_URL}/api/og/vacancy/${unit.id}`;
   const addressSchema = buildAddress(unit);
   const gallery = unit.images.length > 0 ? unit.images : [{ key: FALLBACK_IMAGE, fileName: title }];
   const callHref = unit.property?.org.phone ? `tel:${unit.property.org.phone}` : `mailto:${unit.property?.org.email ?? "info@estatedesk.com"}`;
@@ -427,27 +426,54 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Offer",
-    name: title,
-    description,
-    url,
-    price: unit.rentAmount ? Number(unit.rentAmount) : undefined,
-    priceCurrency: DEFAULT_CURRENCY,
-    availability: "https://schema.org/InStock",
-    itemOffered: {
-      "@type": "Accommodation",
-      name: title,
-      description,
-      numberOfRooms: unit.roomCount ?? unit.bedrooms ?? undefined,
-      numberOfBathrooms: unit.bathrooms ?? undefined,
-      floorSize: unit.floorArea
-        ? { "@type": "QuantitativeValue", value: Number(unit.floorArea), unitCode: "MTK" }
-        : undefined,
-      address: addressSchema,
-      image: [image],
-      url,
-    },
-    dateModified: unit.updatedAt.toISOString(),
+    "@graph": [
+      {
+        "@type": "Offer",
+        name: title,
+        description,
+        url,
+        price: unit.rentAmount ? Number(unit.rentAmount) : undefined,
+        priceCurrency: DEFAULT_CURRENCY,
+        availability: "https://schema.org/InStock",
+        itemOffered: {
+          "@type": "Accommodation",
+          name: title,
+          description,
+          numberOfRooms: unit.roomCount ?? unit.bedrooms ?? undefined,
+          numberOfBathrooms: unit.bathrooms ?? undefined,
+          floorSize: unit.floorArea
+            ? { "@type": "QuantitativeValue", value: Number(unit.floorArea), unitCode: "MTK" }
+            : undefined,
+          address: addressSchema,
+          image: gallery.map((asset) => `${APP_URL}${imageUrl(asset.key)}`),
+          url,
+        },
+        seller: {
+          "@type": "Organization",
+          name: unit.property?.org.name,
+          telephone: unit.property?.org.phone ?? undefined,
+          email: unit.property?.org.email ?? undefined,
+        },
+        dateModified: unit.updatedAt.toISOString(),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Vacancies",
+            item: `${APP_URL}/vacancies`,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: place,
+            item: url,
+          },
+        ],
+      },
+    ],
   };
 
   return (
@@ -578,7 +604,25 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
                 </div>
               ) : null}
 
-              <form action={boundInquiryAction} className="mt-4 space-y-3">
+              {statusParams?.error ? (
+                <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-100">
+                  {statusParams.error}
+                </div>
+              ) : null}
+
+              <form
+                action={boundInquiryAction}
+                className="mt-4 space-y-3"
+                data-conversion-event="vacancy_inquiry_submit"
+              >
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  className="hidden"
+                  aria-hidden="true"
+                />
                 <input name="fullName" required placeholder="Full name" className="min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-slate-500 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-white/30" />
                 <input name="phone" required placeholder="Phone number" className="min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-slate-500 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-white/30" />
                 <input name="email" type="email" placeholder="Email address" className="min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-slate-500 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-white/30" />

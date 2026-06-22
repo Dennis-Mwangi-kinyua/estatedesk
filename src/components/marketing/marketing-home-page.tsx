@@ -36,6 +36,18 @@ const homepageFeatures = [
 ];
 
 const homepageFaqItems = marketingFaqItems.slice(0, 8);
+const seoHubLinks = [
+  ["Property management software Kenya", "/property-management-software-kenya"],
+  ["Property management software Dubai", "/property-management-software-dubai"],
+  ["Landlord software", "/landlord-software"],
+  ["Rent tracking software", "/rent-tracking-software"],
+  ["Water billing software", "/water-billing-software"],
+  ["Vacant houses", "/vacancies"],
+  ["Bedsitters in Nairobi", "/vacancies/nairobi/bedsitters"],
+  ["Apartments in Ruaka", "/vacancies/ruaka/apartments"],
+  ["Shops in Thika", "/vacancies/thika/shops"],
+  ["Single rooms in Rongai", "/vacancies/rongai/single-rooms"],
+];
 
 export default function MarketingHomePage() {
   const jsonLd = {
@@ -257,6 +269,37 @@ function HomepageSeoContent() {
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
                 <p className="text-sm leading-7 text-[#e5e7eb]">{feature}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-neutral-200 bg-[#f7f9fc] py-10 sm:py-12 lg:py-14">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl">
+                Browse EstateDesk by search intent
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-7 text-neutral-600">
+                Fast paths for landlords, property managers, tenants, and local rental searches.
+              </p>
+            </div>
+            <Link href="/faq" className="text-sm font-semibold text-neutral-700 hover:text-neutral-950">
+              Full FAQ
+            </Link>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            {seoHubLinks.map(([label, href]) => (
+              <Link
+                key={href}
+                href={href}
+                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 text-sm font-semibold text-neutral-800 transition hover:border-neutral-300 hover:bg-[#fbfcfe]"
+              >
+                {label}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             ))}
           </div>
         </div>

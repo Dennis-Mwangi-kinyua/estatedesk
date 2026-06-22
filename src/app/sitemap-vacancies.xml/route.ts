@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { APP_URL, XML_HEADERS, buildUrlEntry, wrapUrlset, formatDate } from '@/lib/sitemap-utils'
+import { publicRentalLandingPaths } from '@/lib/public-rental-seo'
 
 function slugify(value: string) {
   return value
@@ -55,6 +56,11 @@ export async function renderSitemapXml() {
   })
 
   const landingPages = new Map<string, string>()
+  const today = formatDate(new Date())
+
+  for (const landingPage of publicRentalLandingPaths()) {
+    landingPages.set(landingPage.path, today)
+  }
 
   for (const unit of units) {
     const location = unit.property.location ?? unit.property.address ?? unit.property.name

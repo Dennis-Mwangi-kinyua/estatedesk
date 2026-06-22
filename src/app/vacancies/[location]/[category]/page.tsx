@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import VacanciesPage from "@/app/(marketing)/vacancies/page";
 import { publicPageMetadata } from "@/lib/seo";
+import {
+  buildRentalLandingDescription,
+  buildRentalLandingTitle,
+  categorySearchTerm,
+  locationLabel,
+  publicRentalLandingPaths,
+} from "@/lib/public-rental-seo";
 
 type PageProps = {
   params: Promise<{
@@ -9,35 +16,27 @@ type PageProps = {
   }>;
 };
 
-function titleCaseSegment(value: string) {
-  return value
-    .replace(/-/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function categorySearchTerm(category: string) {
-  const normalized = category.toLowerCase().replace(/-/g, " ");
-
-  if (normalized === "bedsitter") return "bedsitters";
-  if (normalized === "studio") return "studios";
-  if (normalized === "single room") return "single rooms";
-  if (normalized === "apartment") return "apartments";
-
-  return normalized;
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { location, category } = await params;
-  const locationLabel = titleCaseSegment(location);
-  const categoryLabel = titleCaseSegment(categorySearchTerm(category));
 
   return publicPageMetadata({
-    title: `${categoryLabel} in ${locationLabel}`,
-    description: `Find vacant ${categorySearchTerm(category)} in ${locationLabel} on EstateDesk with rent, unit details, viewing information, and manager contacts.`,
+    title: buildRentalLandingTitle(location, category),
+    description: buildRentalLandingDescription(location, category),
     path: `/vacancies/${location}/${category}`,
+    keywords: [
+      `${categorySearchTerm(category)} in ${locationLabel(location)}`,
+      `${categorySearchTerm(category)} for rent in ${locationLabel(location)}`,
+      `vacant ${categorySearchTerm(category)} ${locationLabel(location)}`,
+      `houses for rent ${locationLabel(location)}`,
+    ],
   });
+}
+
+export function generateStaticParams() {
+  return publicRentalLandingPaths().map(({ location, category }) => ({
+    location,
+    category,
+  }));
 }
 
 export default async function VacancySearchLandingPage({ params }: PageProps) {
@@ -47,7 +46,7 @@ export default async function VacancySearchLandingPage({ params }: PageProps) {
     <VacanciesPage
       searchParams={Promise.resolve({
         q: categorySearchTerm(category),
-        location: titleCaseSegment(location),
+        location: locationLabel(location),
       })}
     />
   );

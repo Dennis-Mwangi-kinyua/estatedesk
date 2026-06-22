@@ -16,6 +16,17 @@ Use this checklist before commercial launch or before onboarding a larger proper
 - Configure `NEXT_PUBLIC_STATUS_PAGE_URL` to point `/status` users to the public incident page.
 - Publish incident updates with impact, affected workflows, mitigation, and resolution time.
 
+## Visibility And Performance
+
+- Configure Google Search Console and Bing Webmaster verification tokens.
+- Submit `https://your-domain/sitemap-index.xml` after launch and after domain changes.
+- Configure analytics and Google Ads tags only after privacy/consent review.
+- Track conversions for registration, contact sales, vacancy enquiries, call clicks, and pricing CTA clicks.
+- Enable Web Vitals reporting and review Core Web Vitals after real traffic arrives.
+- Run `npm run build` in CI before production releases.
+- Configure `SECURITY_ALERT_WEBHOOK_URL` for platform admin, API key, export, reset, and retention alerts.
+- Schedule `POST /api/cron/retention` with `Authorization: Bearer $CRON_SECRET` to review soft-deleted records past policy.
+
 ## Backups And Recovery
 
 - Enable managed PostgreSQL daily backups.

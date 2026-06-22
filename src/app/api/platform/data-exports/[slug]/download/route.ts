@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { buildOrganizationCsvZip } from "@/lib/data-export/org-export";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { writeAuditLog } from "@/lib/audit/security";
+import { sendSecurityAlert } from "@/lib/security/alerts";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,20 @@ export async function GET(_request: Request, context: RouteContext) {
     action: "PLATFORM_DATA_EXPORT_DOWNLOADED",
     entityType: "Organization",
     entityId: org.id,
+    metadata: {
+      slug,
+      platformRole: session.platformRole,
+    },
+  });
+
+  await sendSecurityAlert({
+    event: "PLATFORM_DATA_EXPORT_DOWNLOADED",
+    severity: "critical",
+    actorUserId: session.userId,
+    orgId: org.id,
+    entityType: "Organization",
+    entityId: org.id,
+    summary: `A platform administrator downloaded an organization export for ${slug}.`,
     metadata: {
       slug,
       platformRole: session.platformRole,

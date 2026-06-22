@@ -2,9 +2,11 @@
 
 import { NotificationChannel, NotificationType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { notifyRecipients } from "@/lib/notifications/notify";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 function requiredText(value: FormDataEntryValue | null, field: string) {
   if (typeof value !== "string" || value.trim().length === 0) {
@@ -20,7 +22,35 @@ function optionalText(value: FormDataEntryValue | null) {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+function getClientIp(headerStore: Awaited<ReturnType<typeof headers>>) {
+  const forwardedFor = headerStore.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0]?.trim() ?? "unknown";
+  return headerStore.get("x-real-ip") ?? "unknown";
+}
+
 export async function sendVacancyInquiryAction(unitId: string, formData: FormData) {
+  const headerStore = await headers();
+  const ipAddress = getClientIp(headerStore);
+  const website = optionalText(formData.get("website"));
+
+  if (website) {
+    redirect(`/vacancies/${unitId}?sent=1#enquire`);
+  }
+
+  const limiter = await checkRateLimit({
+    key: `vacancy-inquiry:${ipAddress}:${unitId}`,
+    limit: 5,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!limiter.allowed) {
+    redirect(
+      `/vacancies/${unitId}?error=${encodeURIComponent(
+        "Too many enquiries. Please wait before sending another message.",
+      )}#enquire`,
+    );
+  }
+
   const fullName = requiredText(formData.get("fullName"), "Name");
   const phone = requiredText(formData.get("phone"), "Phone");
   const email = optionalText(formData.get("email"));

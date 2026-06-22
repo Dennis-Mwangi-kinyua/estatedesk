@@ -5,7 +5,9 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { writeAuditLog } from "@/lib/audit/security";
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { sendSecurityAlert } from "@/lib/security/alerts";
 
 const UNLOCK_COOKIE = "estatedesk_platform_api_keys_unlocked";
 const PAGE_PATH = "/platform/api-keys";
@@ -49,7 +51,7 @@ export async function isPlatformApiKeysUnlocked() {
 }
 
 export async function unlockPlatformApiKeysPageAction(formData: FormData) {
-  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/dashboard",
   });
 
@@ -62,6 +64,13 @@ export async function unlockPlatformApiKeysPageAction(formData: FormData) {
   const password = readString(formData, "password");
 
   if (!safeEquals(password, configuredPassword)) {
+    await sendSecurityAlert({
+      event: "PLATFORM_API_KEYS_UNLOCK_FAILED",
+      severity: "warning",
+      actorUserId: session.userId,
+      summary: "A platform user entered an invalid API key vault password.",
+    });
+
     redirect(`${PAGE_PATH}?error=invalid-password`);
   }
 
@@ -129,7 +138,7 @@ export async function createVacantHousesApiKeyAction(
   const plainKey = `edk_vacant_${randomBytes(32).toString("hex")}`;
   const keyHash = createHash("sha256").update(plainKey).digest("hex");
 
-  await prisma.apiKey.create({
+  const apiKey = await prisma.apiKey.create({
     data: {
       orgId,
       name,
@@ -140,6 +149,37 @@ export async function createVacantHousesApiKeyAction(
       permissions: {
         publicListings: ["vacant_units:read"],
       },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  await writeAuditLog({
+    orgId,
+    actorUserId: session.userId,
+    action: "PUBLIC_API_KEY_CREATED",
+    entityType: "ApiKey",
+    entityId: apiKey.id,
+    metadata: {
+      name,
+      expiresAt: expiresAt?.toISOString() ?? null,
+      permissions: ["vacant_units:read"],
+    },
+  });
+
+  await sendSecurityAlert({
+    event: "PUBLIC_API_KEY_CREATED",
+    severity: "critical",
+    actorUserId: session.userId,
+    orgId,
+    entityType: "ApiKey",
+    entityId: apiKey.id,
+    summary: `${session.fullName} created a public vacant houses API key.`,
+    metadata: {
+      name,
+      expiresAt: expiresAt?.toISOString() ?? null,
+      permissions: ["vacant_units:read"],
     },
   });
 
@@ -161,9 +201,43 @@ export async function togglePlatformApiKeyStatusAction(formData: FormData) {
     throw new Error("API key id is required.");
   }
 
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
+  });
+  const existing = await prisma.apiKey.findUnique({
+    where: { id: apiKeyId },
+    select: { id: true, orgId: true, name: true, isActive: true },
+  });
+
+  if (!existing) {
+    throw new Error("API key not found.");
+  }
+
   await prisma.apiKey.update({
     where: { id: apiKeyId },
     data: { isActive: nextActive },
+  });
+
+  await writeAuditLog({
+    orgId: existing.orgId,
+    actorUserId: session.userId,
+    action: "PUBLIC_API_KEY_STATUS_UPDATED",
+    entityType: "ApiKey",
+    entityId: apiKeyId,
+    beforeState: { isActive: existing.isActive },
+    afterState: { isActive: nextActive },
+    metadata: { name: existing.name },
+  });
+
+  await sendSecurityAlert({
+    event: "PUBLIC_API_KEY_STATUS_UPDATED",
+    severity: nextActive ? "critical" : "warning",
+    actorUserId: session.userId,
+    orgId: existing.orgId,
+    entityType: "ApiKey",
+    entityId: apiKeyId,
+    summary: `${session.fullName} ${nextActive ? "activated" : "deactivated"} a public API key.`,
+    metadata: { name: existing.name },
   });
 
   revalidatePath(PAGE_PATH);
@@ -178,7 +252,44 @@ export async function deletePlatformApiKeyAction(formData: FormData) {
     throw new Error("API key id is required.");
   }
 
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
+  });
+  const existing = await prisma.apiKey.findUnique({
+    where: { id: apiKeyId },
+    select: { id: true, orgId: true, name: true, permissions: true },
+  });
+
+  if (!existing) {
+    throw new Error("API key not found.");
+  }
+
   await prisma.apiKey.delete({ where: { id: apiKeyId } });
+
+  await writeAuditLog({
+    orgId: existing.orgId,
+    actorUserId: session.userId,
+    action: "PUBLIC_API_KEY_DELETED",
+    entityType: "ApiKey",
+    entityId: apiKeyId,
+    beforeState: {
+      name: existing.name,
+      permissions: existing.permissions,
+    },
+  });
+
+  await sendSecurityAlert({
+    event: "PUBLIC_API_KEY_DELETED",
+    severity: "critical",
+    actorUserId: session.userId,
+    orgId: existing.orgId,
+    entityType: "ApiKey",
+    entityId: apiKeyId,
+    summary: `${session.fullName} deleted a public API key.`,
+    metadata: {
+      name: existing.name,
+    },
+  });
 
   revalidatePath(PAGE_PATH);
 }

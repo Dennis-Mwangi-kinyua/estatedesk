@@ -8,9 +8,18 @@ export type RuntimeEnvKey =
   | "DIRECT_URL"
   | "NEXT_PUBLIC_APP_URL"
   | "APP_URL"
+  | "NEXT_PUBLIC_STATUS_PAGE_URL"
+  | "NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION"
+  | "NEXT_PUBLIC_BING_SITE_VERIFICATION"
+  | "NEXT_PUBLIC_GA_MEASUREMENT_ID"
+  | "NEXT_PUBLIC_GOOGLE_ADS_ID"
+  | "NEXT_PUBLIC_ENABLE_WEB_VITALS"
+  | "NEXT_PUBLIC_ANALYTICS_DEBUG"
   | "AUTH_SECRET"
   | "CRON_SECRET"
   | "PLATFORM_API_KEYS_PAGE_PASSWORD"
+  | "ALERT_WEBHOOK_URL"
+  | "SECURITY_ALERT_WEBHOOK_URL"
   | "S3_BUCKET"
   | "S3_REGION"
   | "S3_ENDPOINT"
@@ -61,10 +70,64 @@ export const runtimeEnvChecks = [
     importance: "required",
   },
   {
+    key: "ALERT_WEBHOOK_URL",
+    label: "General alert webhook",
+    group: "Security",
+    importance: "optional",
+  },
+  {
+    key: "SECURITY_ALERT_WEBHOOK_URL",
+    label: "Security alert webhook",
+    group: "Security",
+    importance: "recommended",
+  },
+  {
     key: "NEXT_PUBLIC_APP_URL",
     label: "Public app URL",
     group: "Core",
     importance: "recommended",
+  },
+  {
+    key: "NEXT_PUBLIC_STATUS_PAGE_URL",
+    label: "Public status page URL",
+    group: "Core",
+    importance: "optional",
+  },
+  {
+    key: "NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION",
+    label: "Google Search Console verification",
+    group: "Core",
+    importance: "optional",
+  },
+  {
+    key: "NEXT_PUBLIC_BING_SITE_VERIFICATION",
+    label: "Bing Webmaster verification",
+    group: "Core",
+    importance: "optional",
+  },
+  {
+    key: "NEXT_PUBLIC_GA_MEASUREMENT_ID",
+    label: "Google Analytics measurement ID",
+    group: "Core",
+    importance: "optional",
+  },
+  {
+    key: "NEXT_PUBLIC_GOOGLE_ADS_ID",
+    label: "Google Ads tag ID",
+    group: "Core",
+    importance: "optional",
+  },
+  {
+    key: "NEXT_PUBLIC_ENABLE_WEB_VITALS",
+    label: "Web Vitals reporting",
+    group: "Core",
+    importance: "optional",
+  },
+  {
+    key: "NEXT_PUBLIC_ANALYTICS_DEBUG",
+    label: "Analytics debug reporting",
+    group: "Core",
+    importance: "optional",
   },
   {
     key: "S3_BUCKET",

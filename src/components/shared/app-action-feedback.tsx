@@ -109,10 +109,12 @@ export function AppActionFeedback() {
   useEffect(() => {
     if (!message) return;
 
-    setToast({
-      type: messageType,
-      title: message,
-    });
+    const timer = window.setTimeout(() => {
+      setToast({
+        type: messageType,
+        title: message,
+      });
+    }, 0);
     clearStoredAction();
 
     const params = new URLSearchParams(searchParams.toString());
@@ -120,6 +122,8 @@ export function AppActionFeedback() {
     params.delete("messageType");
     const url = params.toString() ? `${pathname}?${params.toString()}` : pathname;
     router.replace(url);
+
+    return () => window.clearTimeout(timer);
   }, [message, messageType, pathname, router, searchParams]);
 
   useEffect(() => {

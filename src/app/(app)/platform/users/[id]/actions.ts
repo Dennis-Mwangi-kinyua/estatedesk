@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { writePlatformAuditLog } from "@/lib/audit/security";
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { sendSecurityAlert } from "@/lib/security/alerts";
 
 const USER_STATUSES = ["ACTIVE", "SUSPENDED", "DISABLED"] as const;
 const PLATFORM_PERMISSIONS = Object.values(PlatformPermissionType);
@@ -74,6 +75,21 @@ export async function updatePlatformUserStatus(formData: FormData) {
     metadata: {
       username: user.username,
       email: user.email,
+    },
+  });
+
+  await sendSecurityAlert({
+    event: "PLATFORM_USER_STATUS_UPDATED",
+    severity: status === "ACTIVE" ? "warning" : "critical",
+    actorUserId: session.userId,
+    entityType: "User",
+    entityId: userId,
+    summary: `${session.fullName} changed ${user.username ?? user.email ?? userId} status from ${user.status} to ${status}.`,
+    metadata: {
+      username: user.username,
+      email: user.email,
+      beforeStatus: user.status,
+      afterStatus: status,
     },
   });
 
@@ -177,6 +193,26 @@ export async function updatePlatformUserProfile(formData: FormData) {
     },
   });
 
+  if (
+    user.platformRole !== platformRole ||
+    user.canCreatePlatformAdmins !== canCreatePlatformAdmins
+  ) {
+    await sendSecurityAlert({
+      event: "PLATFORM_USER_ROLE_UPDATED",
+      severity: platformRole === "SUPER_ADMIN" ? "critical" : "warning",
+      actorUserId: session.userId,
+      entityType: "User",
+      entityId: userId,
+      summary: `${session.fullName} updated platform role for ${username}.`,
+      metadata: {
+        beforeRole: user.platformRole,
+        afterRole: platformRole,
+        beforeCanCreatePlatformAdmins: user.canCreatePlatformAdmins,
+        afterCanCreatePlatformAdmins: canCreatePlatformAdmins,
+      },
+    });
+  }
+
   revalidatePath("/platform/users");
   revalidatePath(`/platform/users/${userId}`);
   redirect(`/platform/users/${username}?updated=profile`);
@@ -233,6 +269,18 @@ export async function updatePlatformUserPermissions(formData: FormData) {
     },
   });
 
+  await sendSecurityAlert({
+    event: "PLATFORM_USER_PERMISSIONS_UPDATED",
+    severity: "warning",
+    actorUserId: session.userId,
+    entityType: "User",
+    entityId: userId,
+    summary: `${session.fullName} updated platform permissions for ${user.username ?? userId}.`,
+    metadata: {
+      permissions: selectedPermissions,
+    },
+  });
+
   revalidatePath("/platform/users");
   revalidatePath(`/platform/users/${userId}`);
   redirect(getUserPath(user) + "?updated=permissions");
@@ -275,6 +323,20 @@ export async function resetPlatformUserPassword(formData: FormData) {
     action: "PLATFORM_USER_PASSWORD_RESET",
     entityType: "User",
     entityId: userId,
+    metadata: {
+      username: user.username,
+      email: user.email,
+      forcedPasswordChange: true,
+    },
+  });
+
+  await sendSecurityAlert({
+    event: "PLATFORM_USER_PASSWORD_RESET",
+    severity: "critical",
+    actorUserId: session.userId,
+    entityType: "User",
+    entityId: userId,
+    summary: `${session.fullName} reset a platform user's password.`,
     metadata: {
       username: user.username,
       email: user.email,
@@ -355,6 +417,20 @@ export async function archiveOrphanPlatformUser(formData: FormData) {
     },
     metadata: {
       deletionMode: "soft_delete_orphan",
+    },
+  });
+
+  await sendSecurityAlert({
+    event: "PLATFORM_USER_DELETED",
+    severity: "critical",
+    actorUserId: session.userId,
+    entityType: "User",
+    entityId: userId,
+    summary: `${session.fullName} archived orphan platform user ${expectedConfirmation}.`,
+    metadata: {
+      deletionMode: "soft_delete_orphan",
+      username: user.username,
+      email: user.email,
     },
   });
 

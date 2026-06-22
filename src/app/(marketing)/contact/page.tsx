@@ -212,7 +212,11 @@ export default async function ContactPage({
               </div>
             </div>
 
-            <form action={contactSalesAction} className="space-y-3">
+            <form
+              action={contactSalesAction}
+              className="space-y-3"
+              data-conversion-event="contact_sales_submit"
+            >
               <div className="hidden" aria-hidden="true">
                 <label>
                   Website

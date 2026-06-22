@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { writePlatformAuditLog } from "@/lib/audit/security";
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { sendSecurityAlert } from "@/lib/security/alerts";
 
 const ALL_PLATFORM_PERMISSIONS = Object.values(PlatformPermissionType);
 
@@ -120,6 +121,22 @@ export async function createPlatformUserAction(formData: FormData) {
       entityId: createdUserId,
       metadata: {
         fullName,
+        username,
+        email,
+        platformRole,
+        canCreatePlatformAdmins,
+        permissions: selectedPermissions,
+      },
+    });
+
+    await sendSecurityAlert({
+      event: "PLATFORM_USER_CREATED",
+      severity: platformRole === "SUPER_ADMIN" ? "critical" : "warning",
+      actorUserId: session.userId,
+      entityType: "User",
+      entityId: createdUserId,
+      summary: `${session.fullName} created platform user ${username} with role ${platformRole}.`,
+      metadata: {
         username,
         email,
         platformRole,

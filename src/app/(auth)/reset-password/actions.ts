@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { hashOpaqueToken, legacyHashOpaqueToken } from "@/lib/crypto/tokens";
+import { sendSecurityAlert } from "@/lib/security/alerts";
 
 function isStrongEnough(password: string) {
   return password.length >= 8;
@@ -99,6 +100,18 @@ export async function resetPasswordAction(formData: FormData) {
       },
     }),
   ]);
+
+  await sendSecurityAlert({
+    event: "PASSWORD_RESET_COMPLETED",
+    severity: "warning",
+    actorUserId: user.id,
+    entityType: "User",
+    entityId: user.id,
+    summary: "A user completed password reset with a reset token.",
+    metadata: {
+      email: resetToken.email,
+    },
+  });
 
   redirect("/reset-password?status=success");
 }

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
+import { WebVitalsReporter } from "@/components/monitoring/web-vitals-reporter";
 import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
 import { ThemeInitScript } from "@/components/theme/theme-init-script";
 import { ThemeProvider } from "@/components/theme/theme-provider";
@@ -7,6 +9,8 @@ import { SEO_KEYWORDS, SITE_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/seo
 import "./globals.css";
 
 const siteUrl = getSiteUrl();
+const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+const bingSiteVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -55,6 +59,14 @@ export const metadata: Metadata = {
       "max-snippet": -1,
       "max-video-preview": -1,
     },
+  },
+  verification: {
+    google: googleSiteVerification,
+    other: bingSiteVerification
+      ? {
+          "msvalidate.01": bingSiteVerification,
+        }
+      : undefined,
   },
 };
 
@@ -126,6 +138,8 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-background">
         <ThemeProvider>
+          <MarketingAnalytics />
+          <WebVitalsReporter />
           <MobileSwipeBack />
           <div className="min-h-screen w-full">{children}</div>
           <ThemeToggle />

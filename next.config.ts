@@ -1,5 +1,58 @@
 import type { NextConfig } from "next";
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const cspDirectives = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "style-src 'self' 'unsafe-inline'",
+  [
+    "script-src 'self' 'unsafe-inline'",
+    isProduction ? "" : "'unsafe-eval'",
+    "https://www.googletagmanager.com",
+    "https://www.google-analytics.com",
+    "https://www.googleadservices.com",
+    "https://googleads.g.doubleclick.net",
+  ]
+    .filter(Boolean)
+    .join(" "),
+  [
+    "connect-src 'self'",
+    "https://www.google-analytics.com",
+    "https://region1.google-analytics.com",
+    "https://stats.g.doubleclick.net",
+  ].join(" "),
+  "frame-src https://www.googletagmanager.com https://td.doubleclick.net",
+  "worker-src 'self' blob:",
+  isProduction ? "upgrade-insecure-requests" : "",
+].filter(Boolean);
+
+const SECURITY_HEADERS = [
+  { key: "Content-Security-Policy", value: cspDirectives.join("; ") },
+  { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "X-DNS-Prefetch-Control", value: "on" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  {
+    key: "Permissions-Policy",
+    value: [
+      "camera=()",
+      "microphone=()",
+      "geolocation=(self)",
+      "payment=()",
+      "usb=()",
+      "fullscreen=(self)",
+    ].join(", "),
+  },
+];
+
 const PRIVATE_HEADERS = [
   { key: "X-Robots-Tag", value: "noindex, nofollow" },
   { key: "Cache-Control", value: "no-store, max-age=0" },
@@ -45,6 +98,10 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/:path*",
+        headers: SECURITY_HEADERS,
+      },
       {
         source: "/",
         headers: PUBLIC_EDGE_CACHE_HEADERS,

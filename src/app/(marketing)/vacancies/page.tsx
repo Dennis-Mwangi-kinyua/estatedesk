@@ -16,6 +16,11 @@ import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib
 import { prisma } from "@/lib/prisma";
 import { publicPageMetadata } from "@/lib/seo";
 import { APP_URL } from "@/lib/sitemap-utils";
+import {
+  PUBLIC_RENTAL_CATEGORIES,
+  PUBLIC_RENTAL_LOCATIONS,
+  publicRentalLandingPaths,
+} from "@/lib/public-rental-seo";
 
 export const metadata = publicPageMetadata({
   title: "Public Information Kiosk - EstateDesk",
@@ -263,9 +268,49 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
       shareText,
     };
   });
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "EstateDesk vacant houses and apartments",
+    itemListElement: listingCards.slice(0, 50).map((listing, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: listing.shareUrl,
+      name: `${listing.propertyName} Unit ${listing.houseNo}`,
+    })),
+  };
+  const popularLandingLinks = publicRentalLandingPaths()
+    .filter(({ location, category }) => {
+      const priorityLocations = ["nairobi", "ruaka", "kiambu", "thika", "rongai", "kitengela", "nakuru"];
+      const priorityCategories = ["bedsitters", "single-rooms", "studios", "apartments", "shops"];
+      return priorityLocations.includes(location) && priorityCategories.includes(category);
+    })
+    .slice(0, 30);
+  const collectionJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      itemListJsonLd,
+      {
+        "@type": "CollectionPage",
+        name: "Vacant houses, apartments, bedsitters, shops, and offices",
+        url: `${APP_URL}/vacancies`,
+        description:
+          "Browse available rental units published through EstateDesk by landlords and property managers.",
+        about: PUBLIC_RENTAL_CATEGORIES.map((category) => category.pluralLabel),
+        areaServed: PUBLIC_RENTAL_LOCATIONS.map((location) => ({
+          "@type": "Place",
+          name: location.label,
+        })),
+      },
+    ],
+  };
 
   return (
     <main className="min-h-screen bg-slate-100 text-slate-950 dark:bg-[#0b0f16] dark:text-[#f8fafc]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
       <PublicAccessHeader active="vacancies" loginHref={loginHref} />
 
       <section className="border-b border-slate-200 bg-white/85 dark:border-white/10 dark:bg-slate-900/80">
@@ -348,6 +393,34 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
         ) : (
           <VacancyListingGrid listings={listingCards} />
         )}
+
+        <section className="mt-8 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/12 dark:bg-[#111827]">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-950 dark:text-white">
+                Popular rental searches
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-[#d1d5db]">
+                Browse high-intent local searches for vacant homes, rooms, shops, and apartments.
+              </p>
+            </div>
+            <Link href="/property-management-software-kenya" className="text-sm font-semibold text-slate-700 hover:text-slate-950 dark:text-[#d1d5db] dark:hover:text-white">
+              Property management software Kenya
+            </Link>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {popularLandingLinks.map((item) => (
+              <Link
+                key={item.path}
+                href={item.path}
+                className="inline-flex min-h-10 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-white dark:border-white/12 dark:bg-white/[0.06] dark:text-[#f8fafc] dark:hover:border-white/24 dark:hover:bg-white/[0.10]"
+              >
+                {item.title}
+              </Link>
+            ))}
+          </div>
+        </section>
       </section>
     </main>
   );

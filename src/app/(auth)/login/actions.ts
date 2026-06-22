@@ -13,6 +13,7 @@ import {
   retryTransientDatabaseOperation,
 } from "@/lib/db/retry";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { sendSecurityAlert } from "@/lib/security/alerts";
 
 const loginSchema = z.object({
   email: z
@@ -92,6 +93,17 @@ async function getLoginRateLimitError({
     );
 
     if (!limiter.allowed) {
+      await sendSecurityAlert({
+        event: "LOGIN_RATE_LIMITED",
+        severity: "warning",
+        summary: "Login attempts were rate limited.",
+        metadata: {
+          identifier,
+          ipAddress,
+          retryAfterSeconds: limiter.retryAfterSeconds,
+        },
+      });
+
       return {
         success: false,
         error: `Too many sign-in attempts. Please wait ${limiter.retryAfterSeconds} seconds and try again.`,

@@ -195,6 +195,7 @@ export default function PricingPage() {
 
                 <Link
                   href={plan.href}
+                  data-conversion-event="pricing_plan_cta_click"
                   className={`mt-6 inline-flex min-h-[50px] w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium transition ${
                     plan.featured
                       ? "bg-[#0b1720] text-white hover:bg-[#10202c]"
@@ -331,6 +332,7 @@ export default function PricingPage() {
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/register"
+              data-conversion-event="pricing_registration_cta_click"
               className="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-[#0b1720] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#10202c]"
             >
               Create account
@@ -338,6 +340,7 @@ export default function PricingPage() {
 
             <Link
               href="/contact"
+              data-conversion-event="pricing_contact_cta_click"
               className="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-neutral-200 bg-white px-6 py-3 text-sm font-medium text-neutral-900 transition hover:bg-neutral-50"
             >
               Contact sales
