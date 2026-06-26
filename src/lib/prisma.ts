@@ -12,7 +12,7 @@ const globalForPrisma = globalThis as unknown as {
   prismaSchemaVersion?: string;
 };
 
-const PRISMA_SCHEMA_VERSION = "staff-profiles-v1";
+const PRISMA_SCHEMA_VERSION = "cron-job-runs-v1";
 
 const DATABASE_URL = getDatabaseUrl();
 

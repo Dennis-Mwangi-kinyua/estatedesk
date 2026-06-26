@@ -25,6 +25,7 @@ The platform combines portfolio structure, tenant operations, billing, collectio
   - [Project Structure](#project-structure)
   - [Architecture](#architecture)
   - [Deployment](#deployment)
+  - [Load Testing](#load-testing)
   - [Contribution Guidelines](#contribution-guidelines)
   - [Additional Documentation](#additional-documentation)
   - [Product and Market Context](#product-and-market-context)
@@ -210,6 +211,19 @@ Recommended deployment steps:
 4. Start using `npm run start`.
 
 Ensure S3 storage, PostgreSQL, and optional messaging services are configured when deploying.
+
+## Load Testing
+
+Authenticated capacity must be proven with staged load tests before promising high traffic targets. Use the built-in runner:
+
+```bash
+LOAD_BASE_URL=https://your-domain.example \
+LOAD_SESSION_COOKIE=replace-with-cookie-value \
+LOAD_PROFILE=baseline \
+npm run load:test
+```
+
+See `docs/LOAD_TESTING.md` for the 500, 1,000, 2,500, and 5,000 RPM stages.
 
 ## Contribution Guidelines
 

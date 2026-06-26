@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { buildRetentionReport } from "@/lib/data-retention/report";
-import { sendSecurityAlert } from "@/lib/security/alerts";
+import { runRetentionCron } from "@/lib/cron/jobs";
 
 export const dynamic = "force-dynamic";
 
@@ -20,30 +19,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const report = await buildRetentionReport();
-  const totalRecords = report.reduce((sum, org) => sum + org.total, 0);
+  const result = await runRetentionCron();
 
-  if (totalRecords > 0) {
-    await sendSecurityAlert({
-      event: "DATA_RETENTION_REVIEW_REQUIRED",
-      severity: "info",
-      summary: `${totalRecords} soft-deleted records are older than their organization retention policy.`,
-      metadata: {
-        mode: "report_only",
-        organizations: report.map((org) => ({
-          orgId: org.orgId,
-          orgName: org.orgName,
-          total: org.total,
-          cutoff: org.cutoff,
-        })),
-      },
-    });
-  }
-
-  return NextResponse.json({
-    mode: "report_only",
-    totalOrganizations: report.length,
-    totalRecords,
-    report,
-  });
+  return NextResponse.json(result);
 }

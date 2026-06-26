@@ -60,6 +60,13 @@ Expected responses:
 - Configure `NEXT_PUBLIC_STATUS_PAGE_URL` when an external public status page is available.
 - Configure `ALERT_WEBHOOK_URL` only for trusted internal alerting destinations.
 
+## Authenticated Load Testing
+
+- Use `docs/LOAD_TESTING.md` before promising authenticated capacity targets such as 5,000 requests per minute.
+- Run stages in order: `smoke`, `baseline`, `stage1000`, `stage2500`, then `stage5000`.
+- Do not advance when p95 latency, 5xx rates, Prisma retries, or database connection usage are unstable.
+- Capture the load-test summary together with hosting and database metrics for every run.
+
 ## GitHub Uptime Workflow
 
 - `.github/workflows/uptime.yml` can run health checks every 15 minutes.

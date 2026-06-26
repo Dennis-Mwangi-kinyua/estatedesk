@@ -1,0 +1,12 @@
+[
+  { "path": "/dashboard/org", "method": "GET", "weight": 20, "expectedStatus": [200] },
+  { "path": "/dashboard/org/tenants", "method": "GET", "weight": 16, "expectedStatus": [200, 429] },
+  { "path": "/dashboard/org/units", "method": "GET", "weight": 14, "expectedStatus": [200] },
+  { "path": "/dashboard/org/properties", "method": "GET", "weight": 12, "expectedStatus": [200] },
+  { "path": "/dashboard/org/payments", "method": "GET", "weight": 10, "expectedStatus": [200] },
+  { "path": "/dashboard/org/issues", "method": "GET", "weight": 10, "expectedStatus": [200] },
+  { "path": "/dashboard/org/reports", "method": "GET", "weight": 6, "expectedStatus": [200] },
+  { "path": "/dashboard/security", "method": "GET", "weight": 4, "expectedStatus": [200] },
+  { "path": "/platform/jobs", "method": "GET", "weight": 2, "expectedStatus": [200, 302, 307, 403] },
+  { "path": "/api/health", "method": "GET", "weight": 6, "expectedStatus": [200, 503] }
+]

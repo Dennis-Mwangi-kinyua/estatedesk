@@ -41,4 +41,5 @@ Use this checklist for every EstateDesk production release.
    - Confirm analytics, ad tags, and Web Vitals reporting are either intentionally active or intentionally disabled.
    - Trigger a retention report dry run through `/api/cron/retention`.
    - Confirm security alert delivery for API key, data export, and platform-user changes.
+   - For capacity-sensitive releases, run the relevant load-test stage from `docs/LOAD_TESTING.md`.
 9. Check production logs for server component digests, database timeouts, and failed audit writes.

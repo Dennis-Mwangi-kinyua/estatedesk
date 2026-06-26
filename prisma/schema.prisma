@@ -55,6 +55,7 @@ model User {
   meterReadingsSubmitted   MeterReading[]          @relation("MeterReadingSubmittedBy")
   notifications            Notification[]          @relation("NotificationUser")
   paymentsMade             Payment[]               @relation("PaymentPayerUser")
+  cronJobRuns              CronJobRun[]            @relation("CronJobRunActor")
   platformPermissions      PlatformPermission[]
   platformMessagesSent     PlatformMessage[]
   onboardingRequestsHandled OnboardingRequest[]    @relation("OnboardingRequestHandledBy")
@@ -1512,6 +1513,29 @@ model AuditLog {
   @@index([requestId])
 }
 
+/// Execution history for platform cron jobs and manual job runs.
+model CronJobRun {
+  id             String        @id @default(cuid())
+  jobName        String
+  endpoint       String?
+  triggerSource  String
+  status         CronJobStatus @default(RUNNING)
+  startedAt      DateTime      @default(now())
+  finishedAt     DateTime?
+  durationMs     Int?
+  processedCount Int           @default(0)
+  successCount   Int           @default(0)
+  failedCount    Int           @default(0)
+  metadata       Json?
+  error          String?
+  actorUserId    String?
+  actor          User?         @relation("CronJobRunActor", fields: [actorUserId], references: [id])
+
+  @@index([jobName, startedAt])
+  @@index([status, startedAt])
+  @@index([actorUserId, startedAt])
+}
+
 /// Tenant lifecycle action history.
 model TenantActionLog {
   id          String           @id @default(cuid())
@@ -1809,6 +1833,7 @@ enum BillStatus {
 
 enum PaymentMethod {
   MPESA_STK
+  MPESA_MANUAL
   BANK
   CASH
 }
@@ -1841,6 +1866,12 @@ enum VerificationStatus {
   PENDING
   VERIFIED
   REJECTED
+}
+
+enum CronJobStatus {
+  RUNNING
+  SUCCESS
+  FAILED
 }
 
 enum NoticeStatus {

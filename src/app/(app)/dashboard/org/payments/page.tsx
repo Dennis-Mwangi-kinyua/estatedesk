@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Prisma } from "@prisma/client";
 import { requireOrgRole } from "@/lib/permissions/guards";
+import { prisma } from "@/lib/prisma";
 import {
   formatLedgerCurrency,
   formatLedgerDate,
@@ -57,17 +59,62 @@ function formatStatus(value: string) {
     .join(" ");
 }
 
-export default async function PaymentsPage() {
+function getTransactionMessage(value: Prisma.JsonValue | null | undefined) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return "";
+  const message = value.transactionMessage;
+  return typeof message === "string" ? message : "";
+}
+
+export default async function PaymentsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ q?: string }>;
+}) {
   const session = await requireOrgRole(["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"]);
 
   if (!session.activeOrgId) {
     throw new Error("Missing active organization id in session");
   }
 
+  const params = await searchParams;
+  const q = params?.q?.trim() ?? "";
   const ledger = await getOrgLedger(session.activeOrgId);
-  const pendingPayments = ledger.recentPayments.filter(
-    (payment) => payment.verificationStatus === "PENDING",
-  );
+  const pendingPayments = await prisma.payment.findMany({
+    where: {
+      orgId: session.activeOrgId,
+      verificationStatus: "PENDING",
+      ...(q
+        ? {
+            OR: [
+              { externalReference: { contains: q, mode: "insensitive" } },
+              { reference: { contains: q, mode: "insensitive" } },
+              { checkoutRequestId: { contains: q, mode: "insensitive" } },
+              { payerName: { contains: q, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: { createdAt: "desc" },
+    take: 75,
+    select: {
+      id: true,
+      amount: true,
+      method: true,
+      payerName: true,
+      payerType: true,
+      targetType: true,
+      gatewayStatus: true,
+      verificationStatus: true,
+      reference: true,
+      externalReference: true,
+      checkoutRequestId: true,
+      callbackRaw: true,
+      paidAt: true,
+      createdAt: true,
+      payerTenant: { select: { fullName: true } },
+      payerUser: { select: { fullName: true } },
+    },
+  });
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -119,13 +166,33 @@ export default async function PaymentsPage() {
       {pendingPayments.length > 0 ? (
         <section className="overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-sm">
           <div className="border-b border-amber-100 bg-amber-50 px-4 py-3">
-            <h2 className="text-base font-semibold text-amber-950">
-              Payments awaiting verification
-            </h2>
-            <p className="mt-1 text-sm text-amber-700">
-              Verify only after confirming the M-Pesa message, Paybill statement,
-              bank statement, or cash receipt.
-            </p>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <h2 className="text-base font-semibold text-amber-950">
+                  Payments awaiting verification
+                </h2>
+                <p className="mt-1 text-sm text-amber-700">
+                  Verify only after confirming the transaction code, message, Paybill statement,
+                  bank statement, or cash receipt.
+                </p>
+              </div>
+
+              <form action="/dashboard/org/payments" className="flex w-full max-w-md gap-2">
+                <input
+                  type="search"
+                  name="q"
+                  defaultValue={q}
+                  placeholder="Search transaction code"
+                  className="h-10 min-w-0 flex-1 rounded-lg border border-amber-200 bg-white px-3 text-sm outline-none transition focus:border-amber-400"
+                />
+                <button
+                  type="submit"
+                  className="inline-flex h-10 items-center justify-center rounded-lg bg-amber-950 px-4 text-sm font-semibold text-white transition hover:bg-amber-900"
+                >
+                  Search
+                </button>
+              </form>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -137,84 +204,115 @@ export default async function PaymentsPage() {
                   <th className="px-4 py-3 font-medium">Target</th>
                   <th className="px-4 py-3 font-medium">Amount</th>
                   <th className="px-4 py-3 font-medium">Reference</th>
+                  <th className="px-4 py-3 font-medium">Message</th>
                   <th className="px-4 py-3 font-medium">Submitted</th>
                   <th className="px-4 py-3 font-medium">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {pendingPayments.map((payment) => (
-                  <tr key={payment.id} className="border-t border-neutral-100">
-                    <td className="px-4 py-3 font-medium text-neutral-950">
-                      {payment.payerTenant?.fullName ??
-                        payment.payerUser?.fullName ??
-                        payment.payerName ??
-                        payment.payerType}
-                    </td>
-                    <td className="px-4 py-3 text-neutral-600">
-                      {formatStatus(payment.method)}
-                    </td>
-                    <td className="px-4 py-3 text-neutral-600">
-                      {formatStatus(payment.targetType)}
-                    </td>
-                    <td className="px-4 py-3 font-semibold">
-                      {formatLedgerCurrency(payment.amount)}
-                    </td>
-                    <td className="px-4 py-3 text-neutral-600">
-                      {payment.externalReference ??
-                        payment.reference ??
-                        payment.checkoutRequestId ??
-                        "-"}
-                    </td>
-                    <td className="px-4 py-3 text-neutral-600">
-                      {formatLedgerDate(payment.createdAt)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex min-w-64 flex-col gap-2">
-                        <form action={verifyTenantPaymentAction}>
-                          <input
-                            type="hidden"
-                            name="paymentId"
-                            value={payment.id}
-                          />
-                          <button
-                            type="submit"
-                            className="inline-flex h-9 w-full items-center justify-center rounded-xl bg-emerald-700 px-3 text-xs font-semibold text-white transition hover:bg-emerald-800"
-                          >
-                            Verify & Allocate
-                          </button>
-                        </form>
+                {pendingPayments.map((payment) => {
+                  const transactionMessage = getTransactionMessage(payment.callbackRaw);
 
-                        <form
-                          action={rejectTenantPaymentAction}
-                          className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]"
-                        >
-                          <input
-                            type="hidden"
-                            name="paymentId"
-                            value={payment.id}
-                          />
-                          <input
-                            type="text"
-                            name="reason"
-                            placeholder="Optional rejection reason"
-                            className="h-9 rounded-xl border border-neutral-200 px-3 text-xs outline-none transition focus:border-neutral-400"
-                          />
-                          <button
-                            type="submit"
-                            className="inline-flex h-9 items-center justify-center rounded-xl border border-red-200 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                  return (
+                    <tr key={payment.id} className="border-t border-neutral-100">
+                      <td className="px-4 py-3 font-medium text-neutral-950">
+                        {payment.payerTenant?.fullName ??
+                          payment.payerUser?.fullName ??
+                          payment.payerName ??
+                          payment.payerType}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600">
+                        {formatStatus(payment.method)}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600">
+                        {formatStatus(payment.targetType)}
+                      </td>
+                      <td className="px-4 py-3 font-semibold">
+                        {formatLedgerCurrency(payment.amount)}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600">
+                        <span className="font-semibold text-neutral-900">
+                          {payment.externalReference ??
+                            payment.reference ??
+                            payment.checkoutRequestId ??
+                            "-"}
+                        </span>
+                      </td>
+                      <td className="max-w-sm px-4 py-3 text-xs leading-5 text-neutral-600">
+                        {transactionMessage ? transactionMessage : "-"}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600">
+                        {formatLedgerDate(payment.createdAt)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex min-w-64 flex-col gap-2">
+                          <form action={verifyTenantPaymentAction}>
+                            <input
+                              type="hidden"
+                              name="paymentId"
+                              value={payment.id}
+                            />
+                            <button
+                              type="submit"
+                              className="inline-flex h-9 w-full items-center justify-center rounded-xl bg-emerald-700 px-3 text-xs font-semibold text-white transition hover:bg-emerald-800"
+                            >
+                              Verify & Allocate
+                            </button>
+                          </form>
+
+                          <form
+                            action={rejectTenantPaymentAction}
+                            className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]"
                           >
-                            Reject
-                          </button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                            <input
+                              type="hidden"
+                              name="paymentId"
+                              value={payment.id}
+                            />
+                            <input
+                              type="text"
+                              name="reason"
+                              placeholder="Optional rejection reason"
+                              className="h-9 rounded-xl border border-neutral-200 px-3 text-xs outline-none transition focus:border-neutral-400"
+                            />
+                            <button
+                              type="submit"
+                              className="inline-flex h-9 items-center justify-center rounded-xl border border-red-200 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                            >
+                              Reject
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </section>
-      ) : null}
+      ) : (
+        <section className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+          <form action="/dashboard/org/payments" className="flex max-w-md gap-2">
+            <input
+              type="search"
+              name="q"
+              defaultValue={q}
+              placeholder="Search transaction code"
+              className="h-10 min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-3 text-sm outline-none transition focus:border-neutral-400"
+            />
+            <button
+              type="submit"
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-neutral-950 px-4 text-sm font-semibold text-white transition hover:bg-neutral-800"
+            >
+              Search
+            </button>
+          </form>
+          <p className="mt-3 text-sm text-neutral-500">
+            {q ? "No pending payment matches that search." : "No payments are awaiting verification."}
+          </p>
+        </section>
+      )}
 
       <section className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
         <div className="border-b border-neutral-200 px-4 py-3">
