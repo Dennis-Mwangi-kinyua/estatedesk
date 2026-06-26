@@ -19,9 +19,9 @@ import {
 import { createOnboardingRequestAction } from "./actions";
 import { ReferralCodeField } from "@/components/marketing/referral-code-field";
 import { RegisterStatusToast } from "./register-status-toast";
-import { publicPageMetadata } from "@/lib/seo";
+import { noIndexPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata = noIndexPageMetadata({
   title: "Sign Up - EstateDesk Dashboard",
   description:
     "Create an EstateDesk account or request workspace access for property management, tenant records, billing, maintenance, reports, and team onboarding.",

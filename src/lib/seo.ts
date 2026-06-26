@@ -136,6 +136,65 @@ export function publicPageMetadata({
   };
 }
 
+export function noIndexPageMetadata({
+  title,
+  description,
+  path = "/",
+}: {
+  title: string;
+  description: string;
+  path?: string;
+}): Metadata {
+  const url = absoluteUrl(path);
+  const resolvedTitle = title.includes(SITE_NAME) ? title : `${title} - ${SITE_NAME}`;
+
+  return {
+    title: {
+      absolute: resolvedTitle,
+    },
+    applicationName: SITE_NAME,
+    publisher: SITE_NAME,
+    creator: SITE_NAME,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: resolvedTitle,
+      description,
+      url,
+      siteName: SITE_NAME,
+      type: "website",
+      locale: "en_KE",
+      images: [
+        {
+          url: "/images/og-vacancy.svg",
+          width: 1200,
+          height: 630,
+          alt: resolvedTitle,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: resolvedTitle,
+      description,
+      images: ["/images/og-vacancy.svg"],
+    },
+    robots: {
+      index: false,
+      follow: true,
+      googleBot: {
+        index: false,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
+  };
+}
+
 export const privatePageMetadata: Metadata = {
   robots: {
     index: false,

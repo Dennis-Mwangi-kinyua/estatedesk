@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, Download, ShieldCheck } from "lucide-react";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 
@@ -14,6 +14,7 @@ type TrustPageProps = {
   description: string;
   updatedAt: string;
   sections: TrustSection[];
+  downloadHref?: string;
 };
 
 export function TrustPage({
@@ -22,6 +23,7 @@ export function TrustPage({
   description,
   updatedAt,
   sections,
+  downloadHref,
 }: TrustPageProps) {
   return (
     <main className="min-h-screen bg-white text-slate-950 dark:bg-[#0b0f16] dark:text-slate-100">
@@ -38,9 +40,20 @@ export function TrustPage({
           <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600 dark:text-slate-300">
             {description}
           </p>
-          <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400">
-            Last updated: {updatedAt}
-          </p>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              Last updated: {updatedAt}
+            </p>
+            {downloadHref ? (
+              <Link
+                href={downloadHref}
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 sm:w-auto"
+              >
+                <Download className="h-4 w-4" />
+                Download PDF
+              </Link>
+            ) : null}
+          </div>
         </div>
       </section>
 

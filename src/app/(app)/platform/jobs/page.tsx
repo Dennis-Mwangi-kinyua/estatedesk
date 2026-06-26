@@ -202,10 +202,35 @@ function ActionButton({
   return (
     <button
       type="submit"
-      className={`inline-flex h-9 items-center justify-center rounded-lg border px-3 text-xs font-semibold transition ${classes}`}
+      className={`inline-flex min-h-11 items-center justify-center rounded-lg border px-3 text-xs font-semibold transition sm:min-h-9 ${classes}`}
     >
       {children}
     </button>
+  );
+}
+
+function MobileField({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="min-w-0">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+        {label}
+      </p>
+      <div className="mt-1 text-sm text-slate-700 dark:text-slate-200">{children}</div>
+    </div>
+  );
+}
+
+function MobileEmpty({ label }: { label: string }) {
+  return (
+    <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-white/10 dark:text-slate-400">
+      {label}
+    </div>
   );
 }
 
@@ -272,7 +297,34 @@ export default async function JobsPage() {
       </Surface>
 
       <Surface title="Recent job runs">
-        <div className="overflow-x-auto">
+        <div className="grid gap-3 p-4 md:hidden">
+          {jobRuns.map((run) => (
+            <article key={run.id} className="rounded-lg border border-slate-200 p-4 dark:border-white/10">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-950 dark:text-white">{labelize(run.jobName)}</p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{run.endpoint ?? "-"}</p>
+                </div>
+                <Badge tone={toneForStatus(run.status)}>{run.status}</Badge>
+              </div>
+              <div className="mt-4 grid gap-3">
+                <MobileField label="Trigger">
+                  {labelize(run.triggerSource)}
+                  {run.actor ? <p className="mt-1 text-xs text-slate-500">{run.actor.fullName}</p> : null}
+                </MobileField>
+                <div className="grid grid-cols-3 gap-3">
+                  <MobileField label="Done">{formatNumber(run.processedCount)}</MobileField>
+                  <MobileField label="OK">{formatNumber(run.successCount)}</MobileField>
+                  <MobileField label="Failed">{formatNumber(run.failedCount)}</MobileField>
+                </div>
+                <MobileField label="Started">{formatDateTime(run.startedAt)}</MobileField>
+                {run.error ? <MobileField label="Error">{run.error}</MobileField> : null}
+              </div>
+            </article>
+          ))}
+          {jobRuns.length === 0 ? <MobileEmpty label="No job runs recorded yet." /> : null}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -328,7 +380,29 @@ export default async function JobsPage() {
       </Surface>
 
       <Surface title="Queued notification backlog">
-        <div className="overflow-x-auto">
+        <div className="grid gap-3 p-4 md:hidden">
+          {queuedNotifications.map((item) => (
+            <article key={item.id} className="rounded-lg border border-slate-200 p-4 dark:border-white/10">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-950 dark:text-white">{item.org.name}</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{item.title}</p>
+                </div>
+                <Badge tone={toneForStatus(item.status)}>{item.channel}</Badge>
+              </div>
+              <div className="mt-4 grid gap-3">
+                <MobileField label="Recipient">{item.tenant?.fullName ?? item.user?.fullName ?? "-"}</MobileField>
+                <MobileField label="Type">{labelize(item.type)}</MobileField>
+                <div className="grid grid-cols-2 gap-3">
+                  <MobileField label="Age">{formatAge(item.createdAt)}</MobileField>
+                  <MobileField label="Created">{formatDateTime(item.createdAt)}</MobileField>
+                </div>
+              </div>
+            </article>
+          ))}
+          {queuedNotifications.length === 0 ? <MobileEmpty label="No queued notifications found." /> : null}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -368,7 +442,33 @@ export default async function JobsPage() {
             <ActionButton variant="danger">Retry all failed</ActionButton>
           </form>
         </div>
-        <div className="overflow-x-auto">
+        <div className="grid gap-3 p-4 md:hidden">
+          {failedNotifications.map((item) => (
+            <article key={item.id} className="rounded-lg border border-slate-200 p-4 dark:border-white/10">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-950 dark:text-white">{item.org.name}</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{item.title}</p>
+                </div>
+                <Badge tone={toneForStatus(item.status)}>{item.channel}</Badge>
+              </div>
+              <div className="mt-4 grid gap-3">
+                <MobileField label="Recipient">{item.tenant?.fullName ?? item.user?.fullName ?? "-"}</MobileField>
+                <MobileField label="Type">{labelize(item.type)}</MobileField>
+                <MobileField label="Error">{readProviderError(item.providerResponse)}</MobileField>
+                <div className="flex items-center justify-between gap-3">
+                  <MobileField label="Age">{formatAge(item.createdAt)}</MobileField>
+                  <form action={retryFailedNotificationAction}>
+                    <input type="hidden" name="notificationId" value={item.id} />
+                    <ActionButton variant="secondary">Retry</ActionButton>
+                  </form>
+                </div>
+              </div>
+            </article>
+          ))}
+          {failedNotifications.length === 0 ? <MobileEmpty label="No failed notifications found." /> : null}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -407,7 +507,31 @@ export default async function JobsPage() {
       </Surface>
 
       <Surface title="KRA retryable attempts">
-        <div className="overflow-x-auto">
+        <div className="grid gap-3 p-4 md:hidden">
+          {retryableKraAttempts.map((attempt) => (
+            <article key={attempt.id} className="rounded-lg border border-slate-200 p-4 dark:border-white/10">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-950 dark:text-white">{attempt.rentalReturn.org.name}</p>
+                  <p className="mt-1 text-xs text-slate-500">{attempt.rentalReturn.filingKey}</p>
+                </div>
+                <Badge tone={toneForStatus(attempt.rentalReturn.status)}>{attempt.rentalReturn.status}</Badge>
+              </div>
+              <div className="mt-4 grid gap-3">
+                <MobileField label="Return">{attempt.rentalReturn.period}</MobileField>
+                <MobileField label="Property">{attempt.rentalReturn.property?.name ?? "-"}</MobileField>
+                <div className="grid grid-cols-2 gap-3">
+                  <MobileField label="Channel">{labelize(attempt.channel)}</MobileField>
+                  <MobileField label="HTTP">{attempt.httpStatus ?? "-"}</MobileField>
+                </div>
+                <MobileField label="Attempted">{formatDateTime(attempt.attemptedAt)}</MobileField>
+                {attempt.errorMessage ? <MobileField label="Error">{attempt.errorMessage}</MobileField> : null}
+              </div>
+            </article>
+          ))}
+          {retryableKraAttempts.length === 0 ? <MobileEmpty label="No retryable KRA attempts found." /> : null}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>

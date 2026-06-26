@@ -197,11 +197,11 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/login",
-        headers: [{ key: "Cache-Control", value: "no-store, max-age=0" }],
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/register",
-        headers: [{ key: "Cache-Control", value: "no-store, max-age=0" }],
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/forgot-password",

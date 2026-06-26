@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
 import { WebVitalsReporter } from "@/components/monitoring/web-vitals-reporter";
 import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
 import { ThemeInitScript } from "@/components/theme/theme-init-script";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { APP_PLANS } from "@/lib/billing/plans";
 import { SEO_KEYWORDS, SITE_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/seo";
 import "./globals.css";
 
@@ -70,13 +71,28 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+};
+
 const structuredData = [
   {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${siteUrl}/#organization`,
     name: SITE_NAME,
+    legalName: SITE_NAME,
     url: siteUrl,
-    logo: `${siteUrl}/images/og-vacancy.svg`,
+    logo: {
+      "@type": "ImageObject",
+      url: `${siteUrl}/images/og-vacancy.svg`,
+      width: 1200,
+      height: 630,
+    },
+    image: `${siteUrl}/images/og-vacancy.svg`,
     areaServed: ["KE", "UG", "TZ", "RW", "AE"],
     contactPoint: {
       "@type": "ContactPoint",
@@ -87,8 +103,13 @@ const structuredData = [
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${siteUrl}/#website`,
     name: SITE_NAME,
     url: siteUrl,
+    inLanguage: "en-KE",
+    publisher: {
+      "@id": `${siteUrl}/#organization`,
+    },
     potentialAction: {
       "@type": "SearchAction",
       target: `${siteUrl}/vacancies?q={search_term_string}`,
@@ -98,11 +119,31 @@ const structuredData = [
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
+    "@id": `${siteUrl}/#software`,
     name: SITE_NAME,
     applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Property management software",
     operatingSystem: "Web",
     url: siteUrl,
     description: SITE_DESCRIPTION,
+    inLanguage: "en-KE",
+    publisher: {
+      "@id": `${siteUrl}/#organization`,
+    },
+    provider: {
+      "@id": `${siteUrl}/#organization`,
+    },
+    featureList: [
+      "Tenant management",
+      "Lease management",
+      "Rent tracking",
+      "Water billing",
+      "Maintenance issue tracking",
+      "Property inspections",
+      "Vacancy publishing",
+      "Staff permissions",
+      "Operational reports",
+    ],
     areaServed: [
       { "@type": "Country", name: "Kenya" },
       { "@type": "Country", name: "Uganda" },
@@ -110,10 +151,28 @@ const structuredData = [
       { "@type": "Country", name: "Rwanda" },
       { "@type": "Country", name: "United Arab Emirates" },
     ],
-    offers: {
+    offers: Object.values(APP_PLANS).map((plan) => ({
       "@type": "Offer",
+      name: `${SITE_NAME} ${plan.name}`,
       category: "SaaS",
-    },
+      price: plan.monthlyAmount,
+      priceCurrency: "KES",
+      url: `${siteUrl}${plan.href}`,
+      availability: "https://schema.org/InStock",
+    })),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "@id": `${siteUrl}/#primary-navigation`,
+    name: "EstateDesk primary public pages",
+    itemListElement: [
+      { "@type": "SiteNavigationElement", position: 1, name: "Services", url: `${siteUrl}/services` },
+      { "@type": "SiteNavigationElement", position: 2, name: "Pricing", url: `${siteUrl}/pricing` },
+      { "@type": "SiteNavigationElement", position: 3, name: "Vacancies", url: `${siteUrl}/vacancies` },
+      { "@type": "SiteNavigationElement", position: 4, name: "FAQ", url: `${siteUrl}/faq` },
+      { "@type": "SiteNavigationElement", position: 5, name: "Contact", url: `${siteUrl}/contact` },
+    ],
   },
 ];
 

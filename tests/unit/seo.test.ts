@@ -5,12 +5,13 @@ import {
   SITE_NAME,
   absoluteUrl,
   getSiteUrl,
+  noIndexPageMetadata,
   publicPageMetadata,
 } from "../../src/lib/seo";
 
 function assertRobotsObject(
   value: ReturnType<typeof publicPageMetadata>["robots"],
-): asserts value is Exclude<typeof value, string | undefined> {
+): asserts value is Exclude<typeof value, string | null | undefined> {
   assert.equal(typeof value, "object");
   assert.notEqual(value, null);
 }
@@ -65,5 +66,28 @@ describe("seo helpers", () => {
     assert.equal(metadata.robots?.index, true);
     assert.equal(metadata.robots?.follow, true);
     assert.ok(metadata.keywords?.includes("meter reading software"));
+  });
+
+  it("creates noindex metadata for utility pages without blocking link discovery", () => {
+    process.env.NEXT_PUBLIC_APP_URL = "https://app.example";
+
+    const metadata = noIndexPageMetadata({
+      title: "Login",
+      description: "Sign in to EstateDesk.",
+      path: "/login",
+    });
+
+    assert.deepEqual(metadata.title, {
+      absolute: `Login - ${SITE_NAME}`,
+    });
+    assert.equal(metadata.alternates?.canonical, "https://app.example/login");
+    assertRobotsObject(metadata.robots);
+    const robots = metadata.robots;
+    assert.equal(robots.index, false);
+    assert.equal(robots.follow, true);
+
+    assertRobotsObject(robots.googleBot);
+    assert.equal(robots.googleBot.index, false);
+    assert.equal(robots.googleBot.follow, true);
   });
 });
