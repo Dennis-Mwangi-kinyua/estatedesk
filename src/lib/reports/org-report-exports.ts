@@ -1,4 +1,8 @@
 import { buildCsv } from "@/lib/csv";
+import {
+  assertWithinSyncExportLimit,
+  syncExportTake,
+} from "@/lib/data-export/limits";
 import { getCurrentPeriod, getOrgLedger } from "@/lib/ledger";
 import { prisma } from "@/lib/prisma";
 
@@ -59,10 +63,15 @@ export async function buildOrgReportCsv({
   kind: OrgReportExportKind;
   period?: string;
 }) {
+  const take = syncExportTake();
+
   if (kind === "occupancy") {
-    const units = await prisma.unit.findMany({
+    const units = assertWithinSyncExportLimit(
+      "occupancy report",
+      await prisma.unit.findMany({
       where: { property: { orgId, deletedAt: null }, deletedAt: null },
       orderBy: [{ property: { name: "asc" } }, { building: { name: "asc" } }, { houseNo: "asc" }],
+      take,
       select: {
         houseNo: true,
         type: true,
@@ -76,7 +85,8 @@ export async function buildOrgReportCsv({
           select: { tenant: { select: { fullName: true, phone: true } } },
         },
       },
-    });
+      }),
+    );
 
     return buildCsv(
       ["property", "location", "building", "unit", "type", "status", "rentAmount", "tenant", "phone"],
@@ -95,9 +105,12 @@ export async function buildOrgReportCsv({
   }
 
   if (kind === "water-recovery") {
-    const bills = await prisma.waterBill.findMany({
+    const bills = assertWithinSyncExportLimit(
+      "water recovery report",
+      await prisma.waterBill.findMany({
       where: { orgId },
       orderBy: [{ period: "desc" }, { tenant: { fullName: "asc" } }],
+      take,
       select: {
         period: true,
         total: true,
@@ -108,7 +121,8 @@ export async function buildOrgReportCsv({
         unit: { select: { houseNo: true, property: { select: { name: true } } } },
         payments: { select: { amount: true } },
       },
-    });
+      }),
+    );
 
     return buildCsv(
       ["period", "property", "unit", "tenant", "phone", "unitsUsed", "billTotal", "paid", "balance", "status", "dueDate"],
@@ -135,6 +149,7 @@ export async function buildOrgReportCsv({
   const ledger = await getOrgLedger(orgId, period, {
     includeRecentPayments: false,
   });
+  assertWithinSyncExportLimit(`${kind} report`, ledger.rows);
 
   if (kind === "arrears-aging") {
     return buildCsv(

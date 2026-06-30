@@ -8,6 +8,8 @@ import {
   getOrgLedger,
 } from "@/lib/ledger";
 import {
+  disputePaymentReconciliationAction,
+  reconcilePaymentAction,
   rejectTenantPaymentAction,
   verifyTenantPaymentAction,
 } from "./actions";
@@ -59,6 +61,17 @@ function formatStatus(value: string) {
     .join(" ");
 }
 
+function reconciliationClasses(value: string) {
+  switch (value) {
+    case "RECONCILED":
+      return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    case "DISPUTED":
+      return "border-red-200 bg-red-50 text-red-700";
+    default:
+      return "border-amber-200 bg-amber-50 text-amber-700";
+  }
+}
+
 function getTransactionMessage(value: Prisma.JsonValue | null | undefined) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return "";
   const message = value.transactionMessage;
@@ -79,42 +92,111 @@ export default async function PaymentsPage({
   const params = await searchParams;
   const q = params?.q?.trim() ?? "";
   const ledger = await getOrgLedger(session.activeOrgId);
-  const pendingPayments = await prisma.payment.findMany({
-    where: {
-      orgId: session.activeOrgId,
-      verificationStatus: "PENDING",
-      ...(q
-        ? {
-            OR: [
-              { externalReference: { contains: q, mode: "insensitive" } },
-              { reference: { contains: q, mode: "insensitive" } },
-              { checkoutRequestId: { contains: q, mode: "insensitive" } },
-              { payerName: { contains: q, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-    },
-    orderBy: { createdAt: "desc" },
-    take: 75,
-    select: {
-      id: true,
-      amount: true,
-      method: true,
-      payerName: true,
-      payerType: true,
-      targetType: true,
-      gatewayStatus: true,
-      verificationStatus: true,
-      reference: true,
-      externalReference: true,
-      checkoutRequestId: true,
-      callbackRaw: true,
-      paidAt: true,
-      createdAt: true,
-      payerTenant: { select: { fullName: true } },
-      payerUser: { select: { fullName: true } },
-    },
-  });
+  const periodParams = new URLSearchParams({ period: ledger.period });
+  const [yearValue, monthValue] = ledger.period.split("-").map(Number);
+  const periodStart = new Date(yearValue, monthValue - 1, 1);
+  const periodEnd = new Date(yearValue, monthValue, 1);
+
+  const [
+    pendingPayments,
+    unreconciledCount,
+    disputedCount,
+    reconciledThisMonth,
+    reconciliationQueue,
+  ] = await Promise.all([
+    prisma.payment.findMany({
+      where: {
+        orgId: session.activeOrgId,
+        verificationStatus: "PENDING",
+        ...(q
+          ? {
+              OR: [
+                { externalReference: { contains: q, mode: "insensitive" } },
+                { reference: { contains: q, mode: "insensitive" } },
+                { checkoutRequestId: { contains: q, mode: "insensitive" } },
+                { payerName: { contains: q, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: { createdAt: "desc" },
+      take: 75,
+      select: {
+        id: true,
+        amount: true,
+        method: true,
+        payerName: true,
+        payerType: true,
+        targetType: true,
+        gatewayStatus: true,
+        verificationStatus: true,
+        reference: true,
+        externalReference: true,
+        checkoutRequestId: true,
+        callbackRaw: true,
+        paidAt: true,
+        createdAt: true,
+        payerTenant: { select: { fullName: true } },
+        payerUser: { select: { fullName: true } },
+      },
+    }),
+    prisma.payment.count({
+      where: {
+        orgId: session.activeOrgId,
+        verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
+        reconciliationStatus: "UNRECONCILED",
+      },
+    }),
+    prisma.payment.count({
+      where: {
+        orgId: session.activeOrgId,
+        reconciliationStatus: "DISPUTED",
+      },
+    }),
+    prisma.payment.count({
+      where: {
+        orgId: session.activeOrgId,
+        reconciliationStatus: "RECONCILED",
+        reconciledAt: {
+          gte: periodStart,
+          lt: periodEnd,
+        },
+      },
+    }),
+    prisma.payment.findMany({
+      where: {
+        orgId: session.activeOrgId,
+        OR: [
+          {
+            verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
+            reconciliationStatus: "UNRECONCILED",
+          },
+          { reconciliationStatus: "DISPUTED" },
+        ],
+      },
+      orderBy: { createdAt: "desc" },
+      take: 25,
+      select: {
+        id: true,
+        amount: true,
+        method: true,
+        payerName: true,
+        payerType: true,
+        targetType: true,
+        gatewayStatus: true,
+        verificationStatus: true,
+        reconciliationStatus: true,
+        reconciliationNotes: true,
+        reference: true,
+        externalReference: true,
+        checkoutRequestId: true,
+        paidAt: true,
+        createdAt: true,
+        payerTenant: { select: { fullName: true } },
+        payerUser: { select: { fullName: true } },
+      },
+    }),
+  ]);
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -137,6 +219,12 @@ export default async function PaymentsPage({
           className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-800 shadow-sm transition hover:bg-neutral-50"
         >
           View Charges
+        </Link>
+        <Link
+          href={`/api/org/reports/reconciliation?${periodParams.toString()}`}
+          className="inline-flex items-center justify-center rounded-xl bg-neutral-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-neutral-800"
+        >
+          Download reconciliation report
         </Link>
       </div>
 
@@ -161,6 +249,144 @@ export default async function PaymentsPage({
           value={ledger.totals.defaulted}
           note="Balances over 5 days overdue"
         />
+      </section>
+
+      <section className="space-y-3 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">
+              Reconciliation channel
+            </p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight text-neutral-950">
+              Statement matching and exceptions
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-neutral-500">
+              Match verified payments against M-Pesa, bank, or cash source records before relying on finance reports.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={`/api/org/reports/reconciliation?${periodParams.toString()}&status=UNRECONCILED`}
+              className="inline-flex items-center justify-center rounded-xl border border-amber-200 px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50"
+            >
+              Unreconciled CSV
+            </Link>
+            <Link
+              href={`/api/org/reports/reconciliation?${periodParams.toString()}&status=DISPUTED`}
+              className="inline-flex items-center justify-center rounded-xl border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50"
+            >
+              Disputed CSV
+            </Link>
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Unreconciled" value={unreconciledCount} note="Verified payments to match" />
+          <StatCard label="Disputed" value={disputedCount} note="Needs finance review" />
+          <StatCard label="Reconciled this month" value={reconciledThisMonth} note={ledger.period} />
+          <StatCard label="Awaiting verification" value={pendingPayments.length} note="Before reconciliation" />
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-neutral-200">
+          <table className="min-w-full text-sm">
+            <thead className="bg-neutral-50 text-left text-neutral-500">
+              <tr>
+                <th className="px-4 py-3 font-medium">Payer</th>
+                <th className="px-4 py-3 font-medium">Amount</th>
+                <th className="px-4 py-3 font-medium">Reference</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Recorded</th>
+                <th className="px-4 py-3 font-medium">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reconciliationQueue.map((payment) => (
+                <tr key={payment.id} className="border-t border-neutral-100">
+                  <td className="px-4 py-3 font-medium text-neutral-950">
+                    {payment.payerTenant?.fullName ??
+                      payment.payerUser?.fullName ??
+                      payment.payerName ??
+                      payment.payerType}
+                    <p className="mt-1 text-xs text-neutral-500">
+                      {formatStatus(payment.method)} · {formatStatus(payment.targetType)}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3 font-semibold">
+                    {formatLedgerCurrency(payment.amount)}
+                  </td>
+                  <td className="px-4 py-3 text-neutral-600">
+                    {payment.externalReference ??
+                      payment.reference ??
+                      payment.checkoutRequestId ??
+                      "-"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${reconciliationClasses(
+                        payment.reconciliationStatus,
+                      )}`}
+                    >
+                      {formatStatus(payment.reconciliationStatus)}
+                    </span>
+                    {payment.reconciliationNotes ? (
+                      <p className="mt-1 max-w-xs text-xs text-neutral-500">
+                        {payment.reconciliationNotes}
+                      </p>
+                    ) : null}
+                  </td>
+                  <td className="px-4 py-3 text-neutral-600">
+                    {formatLedgerDate(payment.paidAt ?? payment.createdAt)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="grid min-w-72 gap-2">
+                      <form
+                        action={reconcilePaymentAction}
+                        className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]"
+                      >
+                        <input type="hidden" name="paymentId" value={payment.id} />
+                        <input
+                          name="notes"
+                          placeholder="Statement note"
+                          className="h-9 rounded-xl border border-neutral-200 px-3 text-xs outline-none transition focus:border-neutral-400"
+                        />
+                        <button
+                          type="submit"
+                          className="inline-flex h-9 items-center justify-center rounded-xl bg-emerald-700 px-3 text-xs font-semibold text-white transition hover:bg-emerald-800"
+                        >
+                          Mark reconciled
+                        </button>
+                      </form>
+                      <form
+                        action={disputePaymentReconciliationAction}
+                        className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]"
+                      >
+                        <input type="hidden" name="paymentId" value={payment.id} />
+                        <input
+                          name="notes"
+                          placeholder="Issue found"
+                          className="h-9 rounded-xl border border-neutral-200 px-3 text-xs outline-none transition focus:border-neutral-400"
+                        />
+                        <button
+                          type="submit"
+                          className="inline-flex h-9 items-center justify-center rounded-xl border border-red-200 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                        >
+                          Flag issue
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {reconciliationQueue.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-neutral-500">
+                    No verified payments need reconciliation right now.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       {pendingPayments.length > 0 ? (
@@ -407,6 +633,7 @@ export default async function PaymentsPage({
                 <th className="px-4 py-3 font-medium">Amount</th>
                 <th className="px-4 py-3 font-medium">Gateway</th>
                 <th className="px-4 py-3 font-medium">Verification</th>
+                <th className="px-4 py-3 font-medium">Reconciliation</th>
                 <th className="px-4 py-3 font-medium">Reference</th>
                 <th className="px-4 py-3 font-medium">Date</th>
               </tr>
@@ -430,6 +657,15 @@ export default async function PaymentsPage({
                   <td className="px-4 py-3 text-neutral-600">
                     {formatStatus(payment.verificationStatus)}
                   </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${reconciliationClasses(
+                        payment.reconciliationStatus,
+                      )}`}
+                    >
+                      {formatStatus(payment.reconciliationStatus)}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-neutral-600">
                     {payment.reference ??
                       payment.externalReference ??
@@ -443,7 +679,7 @@ export default async function PaymentsPage({
               ))}
               {ledger.recentPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-neutral-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-neutral-500">
                     No payments recorded this month.
                   </td>
                 </tr>

@@ -3,6 +3,10 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createZip, rowsToCsv } from "@/lib/data-export/csv-zip";
+import {
+  assertWithinSyncExportLimit,
+  syncExportTake,
+} from "@/lib/data-export/limits";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 type PrimitiveRecord = Record<string, string | number | boolean | Date | null | undefined>;
@@ -49,10 +53,15 @@ async function getOrganizationExportData(orgId: string) {
     }),
   );
 
-  const memberships = await query("data-export-memberships", () =>
-    prisma.membership.findMany({
+  const take = syncExportTake();
+
+  const memberships = assertWithinSyncExportLimit(
+    "memberships",
+    await query("data-export-memberships", () =>
+      prisma.membership.findMany({
       where: { orgId },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         role: true,
@@ -71,13 +80,17 @@ async function getOrganizationExportData(orgId: string) {
           },
         },
       },
-    }),
+      }),
+    ),
   );
 
-  const properties = await query("data-export-properties", () =>
-    prisma.property.findMany({
+  const properties = assertWithinSyncExportLimit(
+    "properties",
+    await query("data-export-properties", () =>
+      prisma.property.findMany({
       where: { orgId },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         name: true,
@@ -91,13 +104,17 @@ async function getOrganizationExportData(orgId: string) {
         createdAt: true,
         updatedAt: true,
       },
-    }),
+      }),
+    ),
   );
 
-  const buildings = await query("data-export-buildings", () =>
-    prisma.building.findMany({
+  const buildings = assertWithinSyncExportLimit(
+    "buildings",
+    await query("data-export-buildings", () =>
+      prisma.building.findMany({
       where: { property: { orgId } },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         propertyId: true,
@@ -108,13 +125,17 @@ async function getOrganizationExportData(orgId: string) {
         createdAt: true,
         updatedAt: true,
       },
-    }),
+      }),
+    ),
   );
 
-  const units = await query("data-export-units", () =>
-    prisma.unit.findMany({
+  const units = assertWithinSyncExportLimit(
+    "units",
+    await query("data-export-units", () =>
+      prisma.unit.findMany({
       where: { property: { orgId } },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         propertyId: true,
@@ -133,13 +154,17 @@ async function getOrganizationExportData(orgId: string) {
         createdAt: true,
         updatedAt: true,
       },
-    }),
+      }),
+    ),
   );
 
-  const tenants = await query("data-export-tenants", () =>
-    prisma.tenant.findMany({
+  const tenants = assertWithinSyncExportLimit(
+    "tenants",
+    await query("data-export-tenants", () =>
+      prisma.tenant.findMany({
       where: { orgId },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         userId: true,
@@ -159,13 +184,17 @@ async function getOrganizationExportData(orgId: string) {
         createdAt: true,
         updatedAt: true,
       },
-    }),
+      }),
+    ),
   );
 
-  const leases = await query("data-export-leases", () =>
-    prisma.lease.findMany({
+  const leases = assertWithinSyncExportLimit(
+    "leases",
+    await query("data-export-leases", () =>
+      prisma.lease.findMany({
       where: { orgId },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         unitId: true,
@@ -181,13 +210,17 @@ async function getOrganizationExportData(orgId: string) {
         createdAt: true,
         updatedAt: true,
       },
-    }),
+      }),
+    ),
   );
 
-  const rentCharges = await query("data-export-rent-charges", () =>
-    prisma.rentCharge.findMany({
+  const rentCharges = assertWithinSyncExportLimit(
+    "rent charges",
+    await query("data-export-rent-charges", () =>
+      prisma.rentCharge.findMany({
       where: { orgId },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         leaseId: true,
@@ -202,13 +235,17 @@ async function getOrganizationExportData(orgId: string) {
         createdAt: true,
         updatedAt: true,
       },
-    }),
+      }),
+    ),
   );
 
-  const waterBills = await query("data-export-water-bills", () =>
-    prisma.waterBill.findMany({
+  const waterBills = assertWithinSyncExportLimit(
+    "water bills",
+    await query("data-export-water-bills", () =>
+      prisma.waterBill.findMany({
       where: { orgId },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         unitId: true,
@@ -224,13 +261,17 @@ async function getOrganizationExportData(orgId: string) {
         createdAt: true,
         updatedAt: true,
       },
-    }),
+      }),
+    ),
   );
 
-  const payments = await query("data-export-payments", () =>
-    prisma.payment.findMany({
+  const payments = assertWithinSyncExportLimit(
+    "payments",
+    await query("data-export-payments", () =>
+      prisma.payment.findMany({
       where: { orgId },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         payerTenantId: true,
@@ -249,13 +290,17 @@ async function getOrganizationExportData(orgId: string) {
         createdAt: true,
         updatedAt: true,
       },
-    }),
+      }),
+    ),
   );
 
-  const issues = await query("data-export-issues", () =>
-    prisma.issueTicket.findMany({
+  const issues = assertWithinSyncExportLimit(
+    "issues",
+    await query("data-export-issues", () =>
+      prisma.issueTicket.findMany({
       where: { orgId },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         propertyId: true,
@@ -270,13 +315,17 @@ async function getOrganizationExportData(orgId: string) {
         createdAt: true,
         updatedAt: true,
       },
-    }),
+      }),
+    ),
   );
 
-  const notifications = await query("data-export-notifications", () =>
-    prisma.notification.findMany({
+  const notifications = assertWithinSyncExportLimit(
+    "notifications",
+    await query("data-export-notifications", () =>
+      prisma.notification.findMany({
       where: { orgId },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         userId: true,
@@ -289,13 +338,17 @@ async function getOrganizationExportData(orgId: string) {
         readAt: true,
         createdAt: true,
       },
-    }),
+      }),
+    ),
   );
 
-  const assets = await query("data-export-assets", () =>
-    prisma.asset.findMany({
+  const assets = assertWithinSyncExportLimit(
+    "assets",
+    await query("data-export-assets", () =>
+      prisma.asset.findMany({
       where: { orgId },
       orderBy: { createdAt: "asc" },
+      take,
       select: {
         id: true,
         fileName: true,
@@ -308,7 +361,8 @@ async function getOrganizationExportData(orgId: string) {
         createdAt: true,
         updatedAt: true,
       },
-    }),
+      }),
+    ),
   );
 
   return { organization, memberships, properties, buildings, units, tenants, leases, rentCharges, waterBills, payments, issues, notifications, assets };

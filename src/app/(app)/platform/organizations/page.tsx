@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { OrganizationStatus, Prisma } from "@prisma/client";
 import {
   Building2,
@@ -75,6 +76,42 @@ function buildWhere({
   return where;
 }
 
+const getPlatformOrganizationStats = unstable_cache(
+  async () => {
+    const [
+      totalOrganizations,
+      activeOrganizations,
+      suspendedOrganizations,
+      archivedOrganizations,
+      subscribedOrganizations,
+    ] = await Promise.all([
+      prisma.organization.count({ where: { deletedAt: null } }),
+      prisma.organization.count({ where: { deletedAt: null, status: "ACTIVE" } }),
+      prisma.organization.count({ where: { deletedAt: null, status: "SUSPENDED" } }),
+      prisma.organization.count({ where: { deletedAt: null, status: "DISABLED" } }),
+      prisma.subscription.count({
+        where: {
+          org: { deletedAt: null },
+          status: { in: ["ACTIVE", "TRIALING"] },
+        },
+      }),
+    ]);
+
+    return {
+      totalOrganizations,
+      activeOrganizations,
+      suspendedOrganizations,
+      archivedOrganizations,
+      subscribedOrganizations,
+    };
+  },
+  ["platform-organization-directory-stats"],
+  {
+    revalidate: 30,
+    tags: ["platform-organizations"],
+  },
+);
+
 export default async function PlatformOrganizationsPage({
   searchParams,
 }: {
@@ -98,11 +135,7 @@ export default async function PlatformOrganizationsPage({
   const [
     organizations,
     totalFiltered,
-    totalOrganizations,
-    activeOrganizations,
-    suspendedOrganizations,
-    archivedOrganizations,
-    subscribedOrganizations,
+    organizationStats,
   ] = await Promise.all([
     prisma.organization.findMany({
       where,
@@ -121,17 +154,16 @@ export default async function PlatformOrganizationsPage({
       },
     }),
     prisma.organization.count({ where }),
-    prisma.organization.count({ where: { deletedAt: null } }),
-    prisma.organization.count({ where: { deletedAt: null, status: "ACTIVE" } }),
-    prisma.organization.count({ where: { deletedAt: null, status: "SUSPENDED" } }),
-    prisma.organization.count({ where: { deletedAt: null, status: "DISABLED" } }),
-    prisma.subscription.count({
-      where: {
-        org: { deletedAt: null },
-        status: { in: ["ACTIVE", "TRIALING"] },
-      },
-    }),
+    getPlatformOrganizationStats(),
   ]);
+
+  const {
+    totalOrganizations,
+    activeOrganizations,
+    suspendedOrganizations,
+    archivedOrganizations,
+    subscribedOrganizations,
+  } = organizationStats;
 
   const orgIds = organizations.map((org) => org.id);
 

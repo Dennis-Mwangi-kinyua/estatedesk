@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getIntegrationReadinessReport } from "@/lib/integrations";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import {
   Badge,
@@ -38,38 +39,6 @@ function readProviderError(value: Prisma.JsonValue | null | undefined) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return "-";
   const error = value.error;
   return typeof error === "string" && error.trim() ? error : "-";
-}
-
-function providerHealth() {
-  const whatsappReady = Boolean(
-    process.env.WHATSAPP_PHONE_NUMBER_ID?.trim() &&
-      process.env.WHATSAPP_ACCESS_TOKEN?.trim(),
-  );
-
-  return [
-    {
-      provider: "In-app",
-      status: "ENABLED",
-      detail: "Delivered by database notification records.",
-    },
-    {
-      provider: "WhatsApp",
-      status: whatsappReady ? "ENABLED" : "MISCONFIGURED",
-      detail: whatsappReady
-        ? "Meta WhatsApp credentials are present."
-        : "Missing WHATSAPP_PHONE_NUMBER_ID or WHATSAPP_ACCESS_TOKEN.",
-    },
-    {
-      provider: "Email",
-      status: process.env.NODE_ENV === "production" ? "STUBBED" : "CONSOLE",
-      detail: "Email dispatch currently uses the console provider stub.",
-    },
-    {
-      provider: "SMS",
-      status: "DISABLED",
-      detail: "SMS dispatch intentionally throws in the current provider.",
-    },
-  ];
 }
 
 const getJobsPageData = unstable_cache(
@@ -253,6 +222,7 @@ export default async function JobsPage() {
     retryableKraAttempts,
     jobRuns,
   ] = await getJobsPageData();
+  const integrationReadiness = getIntegrationReadinessReport();
 
   return (
     <div className="space-y-6">
@@ -365,15 +335,33 @@ export default async function JobsPage() {
         </div>
       </Surface>
 
-      <Surface title="Delivery provider health">
-        <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-4">
-          {providerHealth().map((provider) => (
-            <div key={provider.provider} className="rounded-lg border border-slate-200 p-4 dark:border-white/10">
+      <Surface
+        title="Integration readiness"
+        description="Structural map for approved and pending external providers. Missing keys mean the adapter is not ready for live traffic; pending approval means credentials can be wired once the provider relationship is cleared."
+      >
+        <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-3">
+          {integrationReadiness.integrations.map((provider) => (
+            <div key={provider.id} className="rounded-lg border border-slate-200 p-4 dark:border-white/10">
               <div className="flex items-center justify-between gap-3">
-                <p className="font-semibold text-slate-950 dark:text-white">{provider.provider}</p>
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-950 dark:text-white">{provider.name}</p>
+                  <p className="mt-1 text-xs uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                    Phase {provider.phase} / {provider.region} / {labelize(provider.category)}
+                  </p>
+                </div>
                 <Badge tone={toneForStatus(provider.status)}>{provider.status}</Badge>
               </div>
-              <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-300">{provider.detail}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-300">
+                {provider.localFoundation}
+              </p>
+              <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                Next: {provider.nextAction}
+              </p>
+              {provider.missingEnv.length > 0 ? (
+                <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  Missing: {provider.missingEnv.join(", ")}
+                </p>
+              ) : null}
             </div>
           ))}
         </div>

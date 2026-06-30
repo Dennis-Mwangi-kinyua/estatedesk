@@ -29,7 +29,7 @@ const InputShell = memo(function InputShell({
   children: ReactNode;
 }) {
   return (
-    <div className="group flex min-h-11 items-center gap-3 rounded-lg border border-slate-300 bg-white px-3 transition duration-150 focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(37,99,235,0.12)] sm:min-h-12 sm:px-3.5">
+    <div className="group flex min-h-11 items-center gap-3 rounded-lg border border-slate-300 bg-white px-3 transition duration-150 focus-within:border-slate-950 focus-within:shadow-[0_0_0_3px_rgba(15,23,42,0.10)] sm:min-h-12 sm:px-3.5">
       {children}
     </div>
   );
@@ -147,7 +147,7 @@ export default function LoginForm() {
         ? createPortal(
         <div className="login-auth-overlay px-5">
           <div className="w-full max-w-[300px] rounded-2xl border border-white/80 bg-white/92 px-6 py-7 text-center shadow-[0_28px_90px_rgba(15,23,42,0.28)] ring-1 ring-slate-950/5 backdrop-blur-xl">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-[0_16px_36px_rgba(37,99,235,0.28)]">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-950 shadow-[0_16px_36px_rgba(15,23,42,0.22)]">
               <div className="login-loading-ring h-9 w-9 rounded-full border-[3px] border-white/30 border-t-white" />
             </div>
 
@@ -160,9 +160,9 @@ export default function LoginForm() {
             </p>
 
             <div className="mt-5 flex items-center justify-center gap-2">
-              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-primary" />
-              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-primary [animation-delay:0.16s]" />
-              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-primary [animation-delay:0.32s]" />
+              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-slate-950" />
+              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-slate-950 [animation-delay:0.16s]" />
+              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-slate-950 [animation-delay:0.32s]" />
             </div>
           </div>
         </div>,
@@ -178,7 +178,7 @@ export default function LoginForm() {
             </label>
 
             <InputShell>
-              <Mail className="h-4 w-4 shrink-0 text-slate-400 transition group-focus-within:text-primary" />
+              <Mail className="h-4 w-4 shrink-0 text-slate-400 transition group-focus-within:text-slate-950" />
 
               <input
                 id="email"
@@ -210,14 +210,14 @@ export default function LoginForm() {
 
               <Link
                 href="/forgot-password"
-                className="text-xs font-semibold text-primary transition hover:text-primary/80 sm:text-sm"
+                className="text-xs font-semibold text-slate-950 underline-offset-4 transition hover:underline sm:text-sm"
               >
                 Forgot password?
               </Link>
             </div>
 
             <InputShell>
-              <LockKeyhole className="h-4 w-4 shrink-0 text-slate-400 transition group-focus-within:text-primary" />
+              <LockKeyhole className="h-4 w-4 shrink-0 text-slate-400 transition group-focus-within:text-slate-950" />
 
               <input
                 id="password"
@@ -261,7 +261,7 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[0_12px_24px_rgba(37,99,235,0.22)] transition duration-150 active:scale-[0.99] hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70 sm:min-h-12"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.18)] transition duration-150 active:scale-[0.99] hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70 sm:min-h-12"
           >
             <span>{isPending ? "Verifying..." : "Log in"}</span>
             {!isPending ? <ArrowRight className="h-4 w-4" /> : null}
@@ -274,14 +274,14 @@ export default function LoginForm() {
               Need an account?
               <Link
                 href="/register"
-                className="ml-1.5 font-semibold text-primary transition hover:text-primary/80"
+                className="ml-1.5 font-semibold text-slate-950 underline-offset-4 transition hover:underline"
               >
                 Create one
               </Link>
             </p>
 
             <div className="hidden items-center gap-1.5 text-xs text-slate-500 sm:inline-flex">
-              <ShieldCheck className="h-4 w-4 text-primary" />
+              <ShieldCheck className="h-4 w-4 text-slate-700" />
               Protected
             </div>
           </div>

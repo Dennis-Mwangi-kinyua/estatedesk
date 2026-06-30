@@ -16,18 +16,35 @@ const PRISMA_SCHEMA_VERSION = "cron-job-runs-v1";
 
 const DATABASE_URL = getDatabaseUrl();
 
+function readPositiveInt(value: string | undefined, fallback: number) {
+  if (!value) return fallback;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 function createPrismaClient() {
+  const poolMax = readPositiveInt(process.env.PRISMA_POOL_MAX, 10);
+  const connectionTimeoutMillis = readPositiveInt(
+    process.env.PRISMA_CONNECTION_TIMEOUT_MS,
+    30_000,
+  );
+  const idleTimeoutMillis = readPositiveInt(
+    process.env.PRISMA_IDLE_TIMEOUT_MS,
+    60_000,
+  );
+  const queryTimeout = readPositiveInt(process.env.PRISMA_QUERY_TIMEOUT_MS, 60_000);
+
   const adapter = new PrismaPg({
     connectionString: DATABASE_URL,
     // Increase timeouts and pool size to be more resilient to transient
     // network blips and slower cloud DB responses.
-    connectionTimeoutMillis: 30_000,
-    idleTimeoutMillis: 60_000,
+    connectionTimeoutMillis,
+    idleTimeoutMillis,
     keepAlive: true,
     keepAliveInitialDelayMillis: 30_000,
-    max: 10,
+    max: poolMax,
     // Allow longer-running queries for heavier lookups
-    query_timeout: 60_000,
+    query_timeout: queryTimeout,
   });
 
   const logs: Prisma.LogLevel[] =
@@ -54,12 +71,10 @@ if (process.env.NODE_ENV !== "production") {
       "query",
       (e: unknown) => {
         const ev = e as { duration?: number; query?: string };
-        // eslint-disable-next-line no-console
         console.debug(`prisma query (${ev.duration ?? "?"}ms): ${ev.query}`);
       },
     );
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.warn("Failed to attach prisma query listener:", err);
   }
 }

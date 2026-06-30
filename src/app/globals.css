@@ -236,6 +236,14 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  :where(a, button, input, select, textarea, label, summary) {
+    color: inherit;
+  }
+
+  :where([class*="text-muted"], [class*="text-slate-400"], [class*="text-slate-500"], [class*="text-gray-400"], [class*="text-gray-500"], [class*="text-neutral-400"], [class*="text-neutral-500"], [class*="text-zinc-400"], [class*="text-zinc-500"]) {
+    text-wrap: pretty;
+  }
+
   @supports (min-height: 100dvh) {
     body {
       min-height: 100dvh;
@@ -677,7 +685,27 @@
   .dark .text-stone-400,
   .dark .text-zinc-500,
   .dark .text-zinc-400 {
-    color: rgb(161 161 170) !important;
+    color: rgb(203 213 225) !important;
+  }
+
+  .dark .text-slate-300,
+  .dark .text-gray-300,
+  .dark .text-neutral-300,
+  .dark .text-stone-300,
+  .dark .text-zinc-300,
+  .dark .text-white,
+  .dark .text-white\/90,
+  .dark .text-white\/80,
+  .dark .text-white\/70,
+  .dark .text-white\/60 {
+    color: rgb(248 250 252) !important;
+  }
+
+  .dark .placeholder\:text-slate-400::placeholder,
+  .dark .placeholder\:text-gray-400::placeholder,
+  .dark .placeholder\:text-neutral-400::placeholder,
+  .dark :where(input, textarea)::placeholder {
+    color: rgb(203 213 225) !important;
   }
 
   .dark .border-slate-200,

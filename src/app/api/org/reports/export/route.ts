@@ -1,4 +1,5 @@
 import { csvResponse } from "@/lib/csv";
+import { DataExportTooLargeError } from "@/lib/data-export/limits";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import {
@@ -28,11 +29,29 @@ export async function GET(request: Request) {
     return new Response("Invalid report export type.", { status: 400 });
   }
 
-  const csv = await buildOrgReportCsv({
-    orgId: session.activeOrgId!,
-    kind,
-    period,
-  });
+  let csv: string;
+
+  try {
+    csv = await buildOrgReportCsv({
+      orgId: session.activeOrgId!,
+      kind,
+      period,
+    });
+  } catch (error) {
+    if (error instanceof DataExportTooLargeError) {
+      return Response.json(
+        {
+          error:
+            "This report is too large for immediate download. Filter it to a smaller period or run it as an offline export.",
+          dataset: error.dataset,
+          rowLimit: error.rowLimit,
+        },
+        { status: error.statusCode },
+      );
+    }
+
+    throw error;
+  }
 
   const fileName = `estatedesk-${kind}-${period ?? "current"}.csv`;
 

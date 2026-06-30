@@ -35,12 +35,50 @@ export type RuntimeEnvKey =
   | "WHATSAPP_GRAPH_VERSION"
   | "WHATSAPP_TEMPLATE_LANGUAGE"
   | "WHATSAPP_INVITE_TEMPLATE_NAME"
-  | "WHATSAPP_CREDENTIALS_TEMPLATE_NAME";
+  | "WHATSAPP_CREDENTIALS_TEMPLATE_NAME"
+  | "KRA_ETIMS_ENVIRONMENT"
+  | "KRA_ETIMS_BASE_URL"
+  | "KRA_ETIMS_CLIENT_ID"
+  | "KRA_ETIMS_CLIENT_SECRET"
+  | "KRA_ETIMS_WEBHOOK_SECRET"
+  | "MPESA_ENVIRONMENT"
+  | "MPESA_CONSUMER_KEY"
+  | "MPESA_CONSUMER_SECRET"
+  | "MPESA_SHORTCODE"
+  | "MPESA_PASSKEY"
+  | "MPESA_CALLBACK_URL"
+  | "AANI_BASE_URL"
+  | "AANI_CLIENT_ID"
+  | "AANI_CLIENT_SECRET"
+  | "AANI_WEBHOOK_SECRET"
+  | "DLD_EJARI_BASE_URL"
+  | "DLD_EJARI_CLIENT_ID"
+  | "DLD_EJARI_CLIENT_SECRET"
+  | "BANKING_AGGREGATOR"
+  | "BANKING_CLIENT_ID"
+  | "BANKING_CLIENT_SECRET"
+  | "BANKING_WEBHOOK_SECRET"
+  | "SCREENING_PROVIDER"
+  | "SCREENING_API_KEY"
+  | "AECB_CLIENT_ID"
+  | "AECB_CLIENT_SECRET"
+  | "FX_PROVIDER"
+  | "FX_API_KEY"
+  | "AI_ASSISTANT_PROVIDER"
+  | "AI_ASSISTANT_API_KEY"
+  | "ESCROW_PROVIDER"
+  | "ESCROW_API_KEY"
+  | "E_SIGNATURE_PROVIDER"
+  | "E_SIGNATURE_API_KEY"
+  | "MARKET_DATA_PROVIDER"
+  | "MARKET_DATA_API_KEY"
+  | "INVESTMENT_COMPLIANCE_PROVIDER"
+  | "KYC_AML_PROVIDER";
 
 type EnvCheck = {
   key: RuntimeEnvKey;
   label: string;
-  group: "Core" | "Security" | "Storage" | "Messaging";
+  group: "Core" | "Security" | "Storage" | "Messaging" | "Integrations";
   importance: "required" | "recommended" | "optional";
 };
 
@@ -217,6 +255,78 @@ export const runtimeEnvChecks = [
     key: "WHATSAPP_CREDENTIALS_TEMPLATE_NAME",
     label: "Credentials template",
     group: "Messaging",
+    importance: "optional",
+  },
+  {
+    key: "KRA_ETIMS_CLIENT_ID",
+    label: "KRA/eTIMS client ID",
+    group: "Integrations",
+    importance: "optional",
+  },
+  {
+    key: "KRA_ETIMS_CLIENT_SECRET",
+    label: "KRA/eTIMS client secret",
+    group: "Integrations",
+    importance: "optional",
+  },
+  {
+    key: "MPESA_CONSUMER_KEY",
+    label: "M-Pesa consumer key",
+    group: "Integrations",
+    importance: "optional",
+  },
+  {
+    key: "MPESA_CONSUMER_SECRET",
+    label: "M-Pesa consumer secret",
+    group: "Integrations",
+    importance: "optional",
+  },
+  {
+    key: "MPESA_SHORTCODE",
+    label: "M-Pesa shortcode",
+    group: "Integrations",
+    importance: "optional",
+  },
+  {
+    key: "AANI_CLIENT_ID",
+    label: "Aani client ID",
+    group: "Integrations",
+    importance: "optional",
+  },
+  {
+    key: "DLD_EJARI_CLIENT_ID",
+    label: "DLD/Ejari client ID",
+    group: "Integrations",
+    importance: "optional",
+  },
+  {
+    key: "BANKING_AGGREGATOR",
+    label: "Banking aggregator",
+    group: "Integrations",
+    importance: "optional",
+  },
+  {
+    key: "SCREENING_PROVIDER",
+    label: "Tenant screening provider",
+    group: "Integrations",
+    importance: "optional",
+  },
+  {
+    key: "FX_PROVIDER",
+    label: "FX provider",
+    group: "Integrations",
+    importance: "optional",
+  },
+  {
+    key: "ESCROW_PROVIDER",
+    label: "Escrow provider",
+    group: "Integrations",
+    importance: "optional",
+  },
+  {
+    key: "E_SIGNATURE_PROVIDER",
+    label: "E-signature provider",
+    group: "Integrations",
     importance: "optional",
   },
 ] satisfies EnvCheck[];

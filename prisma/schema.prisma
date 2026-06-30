@@ -55,6 +55,7 @@ model User {
   meterReadingsSubmitted   MeterReading[]          @relation("MeterReadingSubmittedBy")
   notifications            Notification[]          @relation("NotificationUser")
   paymentsMade             Payment[]               @relation("PaymentPayerUser")
+  reconciledPayments       Payment[]               @relation("PaymentReconciledBy")
   cronJobRuns              CronJobRun[]            @relation("CronJobRunActor")
   platformPermissions      PlatformPermission[]
   platformMessagesSent     PlatformMessage[]
@@ -1129,6 +1130,7 @@ model KraSubmissionAttempt {
 
   @@index([rentalReturnId, attemptedAt])
   @@index([outcome])
+  @@index([outcome, attemptedAt])
   @@index([channel])
 }
 
@@ -1264,6 +1266,7 @@ model Payment {
   taxChargeId        String?
   gatewayStatus      GatewayStatus       @default(INITIATED)
   verificationStatus VerificationStatus  @default(PENDING)
+  reconciliationStatus PaymentReconciliationStatus @default(UNRECONCILED)
   checkoutRequestId  String?             @unique
   merchantRequestId  String?
   phoneUsed          String?
@@ -1274,6 +1277,9 @@ model Payment {
   remittedAt         DateTime?
   kraReference       String?
   kraReceiptNo       String?
+  reconciledAt       DateTime?
+  reconciledByUserId String?
+  reconciliationNotes String?
   unappliedAmount    Decimal             @default(0) @db.Decimal(12, 2)
   coveredPeriods     String[]
   createdAt          DateTime            @default(now())
@@ -1285,6 +1291,7 @@ model Payment {
   org                Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
   payerTenant        Tenant?             @relation("PaymentPayerTenant", fields: [payerTenantId], references: [id], onDelete: Cascade)
   payerUser          User?               @relation("PaymentPayerUser", fields: [payerUserId], references: [id])
+  reconciledBy       User?               @relation("PaymentReconciledBy", fields: [reconciledByUserId], references: [id])
   rentCharge         RentCharge?         @relation("PaymentToRentCharge", fields: [rentChargeId], references: [id])
   rentalReturn       RentalIncomeReturn? @relation("PaymentToRentalReturn", fields: [rentalReturnId], references: [id])
   taxCharge          TaxCharge?          @relation("PaymentToTaxCharge", fields: [taxChargeId], references: [id])
@@ -1305,11 +1312,13 @@ model Payment {
   @@index([paidAt])
   @@index([remittedToKra, remittedAt])
   @@index([orgId, gatewayStatus, verificationStatus])
+  @@index([orgId, reconciliationStatus, createdAt])
   @@index([orgId, updatedAt])
   @@index([orgId, paidAt])
   @@index([orgId, targetType, createdAt])
   @@index([orgId, method, createdAt])
   @@index([orgId, unappliedAmount])
+  @@index([reconciledByUserId, reconciledAt])
 }
 
 /// Allocation of a single payment across one or many rent charge periods.
@@ -1364,6 +1373,7 @@ model Notification {
   @@index([userId, createdAt])
   @@index([tenantId, createdAt])
   @@index([status, channel])
+  @@index([status, createdAt])
   @@index([type, createdAt])
   @@index([orgId, readAt])
   @@index([orgId, status, createdAt])
@@ -1533,6 +1543,7 @@ model CronJobRun {
 
   @@index([jobName, startedAt])
   @@index([status, startedAt])
+  @@index([startedAt])
   @@index([actorUserId, startedAt])
 }
 
@@ -1866,6 +1877,12 @@ enum VerificationStatus {
   PENDING
   VERIFIED
   REJECTED
+}
+
+enum PaymentReconciliationStatus {
+  UNRECONCILED
+  RECONCILED
+  DISPUTED
 }
 
 enum CronJobStatus {

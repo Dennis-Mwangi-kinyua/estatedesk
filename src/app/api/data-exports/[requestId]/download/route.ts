@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { buildOrganizationCsvZip } from "@/lib/data-export/org-export";
+import { DataExportTooLargeError } from "@/lib/data-export/limits";
 import { writeAuditLog } from "@/lib/audit/security";
 import { sendSecurityAlert } from "@/lib/security/alerts";
 
@@ -58,7 +59,25 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Export approval has expired." }, { status: 410 });
   }
 
-  const { fileName, zip } = await buildOrganizationCsvZip(exportRequest.orgId);
+  let exportZip: Awaited<ReturnType<typeof buildOrganizationCsvZip>>;
+
+  try {
+    exportZip = await buildOrganizationCsvZip(exportRequest.orgId);
+  } catch (error) {
+    if (error instanceof DataExportTooLargeError) {
+      return NextResponse.json(
+        {
+          error:
+            "This export is too large for immediate download. Use a smaller period or run it as an offline export.",
+          dataset: error.dataset,
+          rowLimit: error.rowLimit,
+        },
+        { status: error.statusCode },
+      );
+    }
+
+    throw error;
+  }
 
   await writeAuditLog({
     orgId: exportRequest.orgId,
@@ -88,10 +107,10 @@ export async function GET(_request: Request, context: RouteContext) {
     },
   });
 
-  return new NextResponse(zip, {
+  return new NextResponse(exportZip.zip, {
     headers: {
       "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="${fileName}"`,
+      "Content-Disposition": `attachment; filename="${exportZip.fileName}"`,
       "Cache-Control": "no-store",
     },
   });
