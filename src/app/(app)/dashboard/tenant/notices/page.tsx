@@ -217,11 +217,11 @@ export default async function TenantNoticesPage({
   const session = await requireTenantAccess();
 
   if (!session.userId) {
-    throw new Error("Missing user id in session");
+    redirect("/login");
   }
 
   if (!session.activeOrgId) {
-    throw new Error("Missing active organization id in session");
+    redirect("/dashboard/tenant");
   }
 
   const resolvedSearchParams = (await searchParams) ?? {};
@@ -261,11 +261,11 @@ export default async function TenantNoticesPage({
     const session = await requireTenantAccess();
 
     if (!session.userId) {
-      throw new Error("Missing user id in session");
+      redirect("/login");
     }
 
     if (!session.activeOrgId) {
-      throw new Error("Missing active organization id in session");
+      redirect("/dashboard/tenant");
     }
 
     const moveOutDateRaw = String(formData.get("moveOutDate") ?? "").trim();

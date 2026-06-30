@@ -107,11 +107,11 @@ export default async function TenantInspectionReportPage({
   const session = await requireTenantAccess();
 
   if (!session.userId) {
-    throw new Error("Missing user id in session");
+    redirect("/login");
   }
 
   if (!session.activeOrgId) {
-    throw new Error("Missing active organization id in session");
+    redirect("/dashboard/tenant");
   }
 
   const { inspectionId: publicInspectionId } = await params;

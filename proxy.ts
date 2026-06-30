@@ -30,6 +30,7 @@ const PUBLIC_PREFIXES = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  "/verify-document",
   "/accept-invite",
   "/access-denied",
   "/_next",
@@ -145,7 +146,8 @@ function shouldNoIndex(pathname: string) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/are-you-lost") ||
     pathname.startsWith("/account-suspended") ||
-    pathname.startsWith("/service-terminated")
+    pathname.startsWith("/service-terminated") ||
+    pathname.startsWith("/verify-document")
   );
 }
 

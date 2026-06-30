@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
@@ -127,10 +128,7 @@ function getReceiptHref(bill: WaterBillItem) {
     return null;
   }
 
-  return (
-    paymentWithReceipt.receipt.pdfUrl ??
-    `/tenant/receipts/${paymentWithReceipt.receipt.id}`
-  );
+  return `/dashboard/tenant/receipts/${paymentWithReceipt.receipt.id}`;
 }
 
 function getOutstandingAmount(bill: WaterBillItem) {
@@ -291,11 +289,11 @@ export default async function TenantWaterBillsPage({
   const session = await requireTenantAccess();
 
   if (!session.userId) {
-    throw new Error("Missing user id in session");
+    redirect("/login");
   }
 
   if (!session.activeOrgId) {
-    throw new Error("Missing active organization id in session");
+    redirect("/dashboard/tenant");
   }
 
   const resolvedSearchParams = (await searchParams) ?? {};

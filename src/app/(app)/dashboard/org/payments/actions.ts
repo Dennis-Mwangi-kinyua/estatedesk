@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { writeAuditLog } from "@/lib/audit/security";
+import { issueDocumentRecord } from "@/lib/documents/registry";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { allocateRentPayment, getCurrentPeriod } from "@/lib/ledger";
@@ -22,10 +23,6 @@ function paymentsMessageUrl(
 function readString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
-}
-
-function formatReceiptNo(paymentId: string) {
-  return `RCT-${new Date().getFullYear()}-${paymentId.slice(-8).toUpperCase()}`;
 }
 
 function asObject(
@@ -98,6 +95,8 @@ export async function verifyTenantPaymentAction(formData: FormData) {
         receipt: {
           select: {
             id: true,
+            receiptNo: true,
+            documentId: true,
           },
         },
         payerTenant: {
@@ -138,13 +137,42 @@ export async function verifyTenantPaymentAction(formData: FormData) {
       },
     });
 
-    if (!payment.receipt) {
-      await tx.receipt.create({
-        data: {
+    let receiptNumber = payment.receipt?.receiptNo ?? "";
+
+    if (!payment.receipt?.documentId) {
+      const document = await issueDocumentRecord({
+        db: tx,
+        orgId: session.activeOrgId!,
+        documentType: "RECEIPT",
+        entityType: "Payment",
+        entityId: payment.id,
+        title: "Verified payment receipt",
+        issuedByUserId: session.userId,
+        issuedAt: now,
+        preferredSerialNumber: payment.receipt?.receiptNo,
+        metadata: {
           paymentId: payment.id,
-          receiptNo: formatReceiptNo(payment.id),
+          targetType: payment.targetType,
         },
       });
+      receiptNumber = document.serialNumber;
+
+      if (payment.receipt) {
+        await tx.receipt.update({
+          where: { id: payment.receipt.id },
+          data: { documentId: document.id },
+        });
+      } else {
+        await tx.receipt.create({
+          data: {
+            paymentId: payment.id,
+            documentId: document.id,
+            receiptNo: document.serialNumber,
+          },
+        });
+      }
+    } else if (!receiptNumber) {
+      throw new Error("Receipt identity is incomplete.");
     }
 
     if (payment.rentCharge) {
@@ -238,7 +266,7 @@ export async function verifyTenantPaymentAction(formData: FormData) {
           style: "currency",
           currency: "KES",
           maximumFractionDigits: 0,
-        }).format(Number(payment.amount))} has been verified. Receipt ${formatReceiptNo(payment.id)} is available in EstateDesk.`,
+        }).format(Number(payment.amount))} has been verified. Receipt ${receiptNumber} is available in EstateDesk.`,
       });
     }
   });

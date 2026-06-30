@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import {
@@ -183,21 +184,18 @@ function getLatestReceiptUrlFromPayments(
     return null;
   }
 
-  return (
-    matchingPayment.receipt.pdfUrl ??
-    `/dashboard/tenant/receipts/${matchingPayment.receipt.id}`
-  );
+  return `/dashboard/tenant/receipts/${matchingPayment.receipt.id}`;
 }
 
 export default async function TenantInvoicePage() {
   const session = await requireTenantAccess();
 
   if (!session.userId) {
-    throw new Error("Missing user id in session");
+    redirect("/login");
   }
 
   if (!session.activeOrgId) {
-    throw new Error("Missing active organization id in session");
+    redirect("/dashboard/tenant");
   }
 
   const tenant: TenantInvoiceResult | null = await prisma.tenant.findFirst({

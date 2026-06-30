@@ -68,11 +68,11 @@ export default async function TenantReportIssuePage({
   const session = await requireTenantAccess();
 
   if (!session.userId) {
-    throw new Error("Missing user id in session");
+    redirect("/login");
   }
 
   if (!session.activeOrgId) {
-    throw new Error("Missing active organization id in session");
+    redirect("/dashboard/tenant");
   }
 
   const tenant: TenantIssueReportResult | null = await prisma.tenant.findFirst({
@@ -101,11 +101,11 @@ export default async function TenantReportIssuePage({
     const session = await requireTenantAccess();
 
     if (!session.userId) {
-      throw new Error("Missing user id in session");
+      redirect("/login");
     }
 
     if (!session.activeOrgId) {
-      throw new Error("Missing active organization id in session");
+      redirect("/dashboard/tenant");
     }
 
     const title = String(formData.get("title") ?? "").trim();

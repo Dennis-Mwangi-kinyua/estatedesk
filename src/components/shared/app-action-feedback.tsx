@@ -2,8 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2, Loader2, XCircle } from "lucide-react";
-import { completedLabel, getQueryMessageType } from "@/lib/action-feedback";
+import { CheckCircle2, Loader2, X, XCircle } from "lucide-react";
+import {
+  completedLabel,
+  formatQueryFeedback,
+  getQueryMessageType,
+} from "@/lib/action-feedback";
 
 type ToastState = {
   type: "pending" | "success" | "error";
@@ -77,10 +81,36 @@ export function AppActionFeedback() {
     [pathname, searchParams],
   );
   const message = useMemo(() => searchParams.get("message"), [searchParams]);
+  const error = useMemo(() => searchParams.get("error"), [searchParams]);
+  const success = useMemo(() => searchParams.get("success"), [searchParams]);
   const messageType = useMemo(
     () => getQueryMessageType(searchParams.get("messageType")),
     [searchParams],
   );
+  const queryToast = useMemo(() => {
+    if (message) {
+      return {
+        type: messageType,
+        title: formatQueryFeedback(message) ?? message,
+      };
+    }
+
+    if (error) {
+      return {
+        type: "error" as const,
+        title: formatQueryFeedback(error) ?? "The action could not be completed.",
+      };
+    }
+
+    if (success) {
+      return {
+        type: "success" as const,
+        title: formatQueryFeedback(success) ?? "Completed successfully.",
+      };
+    }
+
+    return null;
+  }, [error, message, messageType, success]);
   const hasError = useMemo(() => {
     for (const key of searchParams.keys()) {
       if (key.toLowerCase().endsWith("error")) return true;
@@ -91,7 +121,7 @@ export function AppActionFeedback() {
 
   useEffect(() => {
     const stored = getStoredAction();
-    if (!stored || message || hasError) return;
+    if (!stored || queryToast || hasError) return;
     if (Date.now() - stored.at < 400) return;
 
     const timer = window.setTimeout(() => {
@@ -104,15 +134,15 @@ export function AppActionFeedback() {
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, [locationKey, message, hasError]);
+  }, [locationKey, queryToast, hasError]);
 
   useEffect(() => {
-    if (!message) return;
+    if (!queryToast) return;
 
     const timer = window.setTimeout(() => {
       setToast({
-        type: messageType,
-        title: message,
+        type: queryToast.type,
+        title: queryToast.title,
       });
     }, 0);
     clearStoredAction();
@@ -120,11 +150,13 @@ export function AppActionFeedback() {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("message");
     params.delete("messageType");
+    params.delete("error");
+    params.delete("success");
     const url = params.toString() ? `${pathname}?${params.toString()}` : pathname;
     router.replace(url);
 
     return () => window.clearTimeout(timer);
-  }, [message, messageType, pathname, router, searchParams]);
+  }, [pathname, queryToast, router, searchParams]);
 
   useEffect(() => {
     const onSubmit = (event: SubmitEvent) => {
@@ -197,7 +229,7 @@ export function AppActionFeedback() {
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-950 text-white dark:bg-white dark:text-slate-950">
             <Icon className={`h-5 w-5 ${toast.type === "pending" ? "animate-spin" : ""}`} />
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-slate-950 dark:text-white">
               {toast.title}
             </p>
@@ -207,6 +239,16 @@ export function AppActionFeedback() {
               </p>
             ) : null}
           </div>
+          {toast.type !== "pending" ? (
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              aria-label="Dismiss notification"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

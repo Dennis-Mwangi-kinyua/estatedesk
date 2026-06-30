@@ -69,6 +69,12 @@ export default async function PlatformApiKeysPage({
             </div>
           ) : null}
 
+          {params.error === "missing-password" ? (
+            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              PLATFORM_API_KEYS_PAGE_PASSWORD is not configured.
+            </div>
+          ) : null}
+
           <form action={unlockPlatformApiKeysPageAction} className="mt-5 space-y-3">
             <input
               name="password"

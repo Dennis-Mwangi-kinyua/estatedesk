@@ -1,6 +1,7 @@
 // src/app/(app)/dashboard/tenant/inspections/page.tsx
 
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
@@ -302,11 +303,11 @@ export default async function TenantInspectionsPage({
   const session = await requireTenantAccess();
 
   if (!session.userId) {
-    throw new Error("Missing user id in session");
+    redirect("/login");
   }
 
   if (!session.activeOrgId) {
-    throw new Error("Missing active organization id in session");
+    redirect("/dashboard/tenant");
   }
 
   const resolvedSearchParams = (await searchParams) ?? {};

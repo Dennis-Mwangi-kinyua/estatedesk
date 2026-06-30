@@ -337,6 +337,10 @@ export function isProduction() {
   return process.env.NODE_ENV === "production";
 }
 
+export function isNextProductionBuild() {
+  return process.env.NEXT_PHASE === "phase-production-build";
+}
+
 export function getEnvValue(key: RuntimeEnvKey) {
   const value = process.env[key];
   return value && value.trim().length > 0 ? value.trim() : undefined;
@@ -384,7 +388,7 @@ export function getDatabaseUrl() {
     return normalizeDatabaseUrlSslMode(databaseUrl);
   }
 
-  if (isProduction()) {
+  if (isProduction() && !isNextProductionBuild()) {
     throw new Error(
       "DATABASE_URL or DIRECT_URL must be configured in production.",
     );

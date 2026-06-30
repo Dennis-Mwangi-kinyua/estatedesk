@@ -10,6 +10,7 @@ import {
   CreditCard,
   FileText,
   Home,
+  Lightbulb,
   LayoutGrid,
   LogOut,
   Upload,
@@ -46,6 +47,12 @@ const SIDEBAR_LINKS: readonly SidebarLink[] = [
     href: "/dashboard/org",
     icon: Home,
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER"],
+  },
+  {
+    label: "Smart Insights",
+    href: "/dashboard/org/insights",
+    icon: Lightbulb,
+    roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
   },
   {
     label: "My Profile",

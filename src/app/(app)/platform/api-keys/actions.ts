@@ -58,7 +58,7 @@ export async function unlockPlatformApiKeysPageAction(formData: FormData) {
   const configuredPassword = getPagePassword();
 
   if (!configuredPassword) {
-    throw new Error("PLATFORM_API_KEYS_PAGE_PASSWORD is not configured.");
+    redirect(`${PAGE_PATH}?error=missing-password`);
   }
 
   const password = readString(formData, "password");

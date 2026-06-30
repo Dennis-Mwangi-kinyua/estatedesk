@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { Prisma, LeaseStatus, ChargeStatus } from "@prisma/client";
+import { redirect } from "next/navigation";
 import {
   FileText,
   CalendarDays,
@@ -448,11 +449,11 @@ export default async function TenantLeasePage() {
   const session = await requireTenantAccess();
 
   if (!session.userId) {
-    throw new Error("Missing user id in session");
+    redirect("/login");
   }
 
   if (!session.activeOrgId) {
-    throw new Error("Missing active organization id in session");
+    redirect("/dashboard/tenant");
   }
 
   const tenant: TenantLeaseResult | null = await prisma.tenant.findFirst({

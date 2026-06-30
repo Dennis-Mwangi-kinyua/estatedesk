@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
@@ -218,8 +219,7 @@ function getPaymentCategory(payment: PaymentItem) {
 }
 
 function getReceiptHref(payment: PaymentItem) {
-  if (payment.receipt?.pdfUrl) return payment.receipt.pdfUrl;
-  if (payment.receipt?.id) return `/tenant/receipts/${payment.receipt.id}`;
+  if (payment.receipt?.id) return `/dashboard/tenant/receipts/${payment.receipt.id}`;
   return null;
 }
 
@@ -290,11 +290,11 @@ export default async function TenantPaymentsPage() {
   const session = await requireTenantAccess();
 
   if (!session.userId) {
-    throw new Error("Missing user id in session");
+    redirect("/login");
   }
 
   if (!session.activeOrgId) {
-    throw new Error("Missing active organization id in session");
+    redirect("/dashboard/tenant");
   }
 
   const tenant: TenantPaymentsResult | null = await prisma.tenant.findFirst({
