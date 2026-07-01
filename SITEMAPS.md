@@ -3,10 +3,11 @@
 This document explains the sitemap and indexing setup added to the project and how to validate and submit sitemaps.
 
 Files added
-- `src/app/sitemap.xml/route.ts` — primary sitemap of static marketing/auth pages.
+- `src/app/sitemap.xml/route.ts` — primary sitemap of static public marketing pages.
 - `src/app/sitemap-vacancies.xml/route.ts` — DB-driven sitemap for public vacant unit detail pages.
-- `src/app/sitemap-index.xml/route.ts` — sitemap index referencing the primary sitemap and vacancy sitemap.
-- `src/app/robots.txt/route.ts` — points to `/sitemap-index.xml`.
+- `src/app/sitemap-rental-landings.xml/route.ts` — public location/category rental landing pages.
+- `src/app/sitemap-index.xml/route.ts` — sitemap index referencing the canonical public sitemap shards.
+- `src/app/robots.ts` — points to `/sitemap-index.xml` and blocks private/API surfaces.
 - `src/app/api/public/vacant-houses/route.ts` — public API returning vacant units (requires `VACANT_HOUSES_API_KEY` when set).
 - `src/app/vacancies/[id]/page.tsx` — vacancy detail page with richer metadata, Open Graph, and JSON-LD schema markup.
 - `.github/workflows/ping-sitemaps.yml` — nightly workflow to fetch sitemaps, gzip them, ping search engines, and upload optional S3 assets.
@@ -34,10 +35,12 @@ npm run dev
 curl -sS http://localhost:3000/sitemap-index.xml
 curl -sS http://localhost:3000/sitemap.xml
 curl -sS http://localhost:3000/sitemap-vacancies.xml
+curl -sS http://localhost:3000/sitemap-rental-landings.xml
 curl -sS http://localhost:3000/robots.txt
 curl -sS http://localhost:3000/sitemap-index.xml.gz
 curl -sS http://localhost:3000/sitemap.xml.gz
 curl -sS http://localhost:3000/sitemap-vacancies.xml.gz
+curl -sS http://localhost:3000/sitemap-rental-landings.xml.gz
 # test a vacancy detail (replace <id> with a real unit id from your DB)
 curl -sS http://localhost:3000/vacancies/<id>
 ```
@@ -63,6 +66,8 @@ Available gzip endpoints:
 - `/sitemap-index.xml.gz`
 - `/sitemap.xml.gz`
 - `/sitemap-vacancies.xml.gz`
+- `/sitemap-rental-landings.xml.gz`
+- `/sitemap-properties.xml` and `/sitemap-units.xml` remain compatibility aliases, but they are not submitted in the sitemap index to avoid duplicate discovery paths.
 - `/properties` and `/units` are authenticated workspace routes, so they should stay out of submitted sitemap indexes.
 
 Search Console automation & verification

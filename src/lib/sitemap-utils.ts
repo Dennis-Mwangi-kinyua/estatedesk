@@ -3,6 +3,12 @@ import { getSiteUrl } from './seo'
 
 export const APP_URL = getSiteUrl()
 
+export const PUBLIC_SITEMAP_PATHS = [
+  '/sitemap.xml',
+  '/sitemap-vacancies.xml',
+  '/sitemap-rental-landings.xml',
+] as const
+
 export const XML_HEADERS = {
   'Content-Type': 'application/xml',
   'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400',

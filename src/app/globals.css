@@ -324,12 +324,37 @@
 
 @layer components {
   .app-mobile-canvas {
+    --background: oklch(0.982 0.003 164);
+    --foreground: oklch(0.19 0.012 166);
+    --primary: oklch(0.36 0.075 166);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.955 0.008 164);
+    --secondary-foreground: oklch(0.28 0.025 166);
+    --muted: oklch(0.955 0.006 164);
+    --muted-foreground: oklch(0.49 0.018 166);
+    --accent: oklch(0.93 0.025 164);
+    --accent-foreground: oklch(0.29 0.055 166);
+    --ring: oklch(0.46 0.09 166);
+    --sidebar: oklch(0.975 0.006 164);
+    --sidebar-primary: oklch(0.36 0.075 166);
+    --sidebar-accent: oklch(0.94 0.018 164);
     min-height: 100svh;
     overflow-x: hidden;
     overflow-y: visible;
-    background:
-      radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.92), transparent 28rem),
-      linear-gradient(180deg, rgba(248, 250, 252, 0.96), var(--background));
+    background: var(--background);
+  }
+
+  .dark .app-mobile-canvas {
+    --background: oklch(0.13 0.008 166);
+    --card: oklch(0.18 0.009 166);
+    --popover: oklch(0.18 0.009 166);
+    --primary: oklch(0.61 0.105 166);
+    --primary-foreground: oklch(0.985 0.004 164);
+    --accent: oklch(0.29 0.045 166);
+    --ring: oklch(0.68 0.09 166);
+    --sidebar: oklch(0.155 0.009 166);
+    --sidebar-primary: oklch(0.39 0.075 166);
+    --sidebar-primary-foreground: oklch(0.985 0.004 164);
   }
 
   .app-content-shell {
@@ -344,19 +369,15 @@
   }
 
   .ios-panel {
-    border: 1px solid rgba(203, 213, 225, 0.72);
-    background: rgba(255, 255, 255, 0.86);
-    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-    backdrop-filter: blur(22px) saturate(1.45);
-    -webkit-backdrop-filter: blur(22px) saturate(1.45);
+    border: 1px solid var(--border);
+    background: color-mix(in oklch, var(--card) 96%, transparent);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   }
 
   .ios-card {
-    border: 1px solid rgba(203, 213, 225, 0.72);
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    background: var(--card);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   }
 
   .ios-button {
@@ -392,11 +413,9 @@
   }
 
   .ed-shell-panel {
-    border-color: color-mix(in oklch, var(--border) 92%, black);
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
-    backdrop-filter: blur(22px) saturate(1.35);
-    -webkit-backdrop-filter: blur(22px) saturate(1.35);
+    border-color: var(--border);
+    background: color-mix(in oklch, var(--card) 97%, var(--background));
+    box-shadow: none;
   }
 
   .ed-brand-mark {
@@ -415,9 +434,9 @@
   }
 
   .ed-nav-item-active {
-    background: var(--primary);
+    background: color-mix(in oklch, var(--primary) 88%, black);
     color: var(--primary-foreground);
-    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.14);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
   }
 
   .ed-nav-icon {
@@ -432,26 +451,26 @@
 
   .ed-soft-button {
     border-color: var(--border);
-    background: rgba(255, 255, 255, 0.86);
+    background: var(--card);
     color: var(--foreground);
   }
 
   .dark .ios-panel {
     border-color: rgba(255, 255, 255, 0.12);
     background: rgba(24, 24, 27, 0.78);
-    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
   }
 
   .dark .ios-card {
     border-color: rgba(255, 255, 255, 0.12);
     background: rgba(24, 24, 27, 0.86);
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
   }
 
   .dark .ed-shell-panel {
     border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(23, 23, 25, 0.9);
-    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.32);
+    background: rgb(20 24 23 / 0.98);
+    box-shadow: none;
   }
 
   .dark .ed-brand-mark {
@@ -469,7 +488,7 @@
   }
 
   .dark .ed-nav-item-active {
-    background: var(--primary);
+    background: color-mix(in oklch, var(--primary) 58%, black);
     color: var(--primary-foreground);
   }
 
@@ -1215,6 +1234,129 @@
 .dark .seo-step-body {
   color: #334155 !important;
   opacity: 1 !important;
+}
+
+/* Authenticated EstateDesk mobile foundation. Kept below `.app-mobile-canvas`
+   so public and authentication pages retain their own visual language. */
+@media (max-width: 767px) {
+  .app-mobile-canvas {
+    --mobile-gutter: max(0.875rem, env(safe-area-inset-left));
+    --mobile-radius: 1.375rem;
+    width: 100%;
+    min-width: 0;
+    min-height: 100dvh;
+    background:
+      radial-gradient(circle at 12% -8%, color-mix(in oklch, var(--primary) 10%, transparent), transparent 20rem),
+      var(--background);
+  }
+
+  .app-mobile-canvas :where(main, section, article, form, nav, div) {
+    min-width: 0;
+  }
+
+  .app-mobile-canvas main {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-mobile-canvas .app-content-shell {
+    width: 100%;
+    max-width: none;
+  }
+
+  .app-mobile-canvas :where(.ios-panel, .ios-card) {
+    border-color: color-mix(in oklch, var(--border) 78%, transparent);
+    border-radius: var(--mobile-radius);
+    background: color-mix(in oklch, var(--card) 88%, transparent);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.42) inset,
+      0 10px 30px rgb(15 23 42 / 0.06);
+    backdrop-filter: blur(24px) saturate(1.25);
+    -webkit-backdrop-filter: blur(24px) saturate(1.25);
+  }
+
+  .dark .app-mobile-canvas :where(.ios-panel, .ios-card) {
+    border-color: rgb(255 255 255 / 0.11);
+    background: rgb(27 31 30 / 0.82);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.06) inset,
+      0 12px 34px rgb(0 0 0 / 0.24);
+  }
+
+  .app-mobile-canvas .ed-shell-panel {
+    background: color-mix(in oklch, var(--card) 82%, transparent);
+    backdrop-filter: blur(28px) saturate(1.35);
+    -webkit-backdrop-filter: blur(28px) saturate(1.35);
+  }
+
+  .app-mobile-canvas :where(button, [role="button"], a.ios-button, input, select) {
+    min-height: 2.75rem;
+  }
+
+  .app-mobile-canvas :where(input, select, textarea) {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0.875rem;
+    font-size: 1rem;
+  }
+
+  .app-mobile-canvas textarea {
+    min-height: 7rem;
+  }
+
+  .app-mobile-canvas :where([data-slot="card"], [data-slot="dialog-content"], [data-slot="sheet-content"]) {
+    border-radius: var(--mobile-radius);
+  }
+
+  .app-mobile-canvas [data-slot="table-container"] {
+    width: calc(100% + 1.75rem);
+    margin-inline: -0.875rem;
+    padding-inline: 0.875rem;
+    scroll-padding-inline: 0.875rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-mobile-canvas [data-slot="table-container"]::-webkit-scrollbar {
+    display: none;
+  }
+
+  .app-mobile-canvas [data-slot="table"] {
+    min-width: 42rem;
+  }
+
+  .app-mobile-canvas :where(h1, h2, h3, p) {
+    text-wrap: pretty;
+  }
+
+  .app-mobile-canvas h1 {
+    letter-spacing: -0.025em;
+  }
+
+  .app-mobile-canvas :where(.grid.grid-cols-3, .grid.grid-cols-4, .grid.grid-cols-5) {
+    gap: 0.625rem;
+  }
+
+  .app-mobile-canvas :where(.fixed.inset-0, .fixed.inset-x-0) {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media (max-width: 389px) {
+  .app-mobile-canvas :where(.grid.grid-cols-3, .grid.grid-cols-4, .grid.grid-cols-5) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-mobile-canvas *,
+  .app-mobile-canvas *::before,
+  .app-mobile-canvas *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
 
 @media print {

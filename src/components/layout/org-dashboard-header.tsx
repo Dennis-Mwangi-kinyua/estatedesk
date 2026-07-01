@@ -43,7 +43,7 @@ export function OrgDashboardHeader({
         </div>
 
         <div className="ml-2 flex shrink-0 items-center gap-2">
-          <HeaderThemeToggle className="lg:hidden" />
+          <HeaderThemeToggle />
 
           <Link
             href="/dashboard/org/notifications"

@@ -9,9 +9,7 @@ export const dynamic = "force-dynamic";
 type LeasePageProps = {
   params: Promise<{
     leaseId: string;
-  }> | {
-    leaseId: string;
-  };
+  }>;
 };
 
 function toNumber(value: unknown): number {

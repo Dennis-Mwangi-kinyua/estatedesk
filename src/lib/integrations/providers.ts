@@ -32,6 +32,7 @@ export const integrationProviders = [
       { key: "MPESA_SHORTCODE", label: "Shortcode", requiredForLive: true },
       { key: "MPESA_PASSKEY", label: "Passkey", requiredForLive: true },
       { key: "MPESA_CALLBACK_URL", label: "Callback URL", requiredForLive: true },
+      { key: "MPESA_CALLBACK_SECRET", label: "Callback secret", requiredForLive: true },
     ],
     localFoundation: "Payment records, checkout IDs, callbacks, tenant ledgers.",
     nextAction: "Activate Daraja app credentials and replace STK stub with live adapter.",

@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
+import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 
 type LandlordDashboardShellProps = {
   children: ReactNode;
@@ -175,13 +176,14 @@ export function LandlordDashboardShell({
             </div>
           </div>
 
-          <div className="ed-soft-button hidden rounded-lg border px-3 py-2 text-right shadow-sm sm:block">
-            <p className="max-w-[200px] truncate text-sm font-medium leading-none text-slate-950">
-              {displayName}
-            </p>
-            <p className="mt-1 text-[11px] text-slate-500">
-              Landlord
-            </p>
+          <div className="flex shrink-0 items-center gap-2">
+            <HeaderThemeToggle />
+            <div className="ed-soft-button hidden rounded-lg border px-3 py-2 text-right shadow-sm sm:block">
+              <p className="max-w-[200px] truncate text-sm font-medium leading-none text-slate-950">
+                {displayName}
+              </p>
+              <p className="mt-1 text-[11px] text-slate-500">Landlord</p>
+            </div>
           </div>
         </div>
       </header>

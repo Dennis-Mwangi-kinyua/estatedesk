@@ -1,14 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
-import { getUnitSlug } from "@/lib/units/url";
 import { deleteUnitAction } from "../actions";
+import { getUnitDetailsData } from "./unit-details-data";
 import {
   updateUnitVacancyMarketingAction,
   uploadUnitVacancyImagesAction,
 } from "./actions";
+import {
+  DetailItem,
+  StatCard,
+  formatCurrency,
+  formatDate,
+  formatDateTime,
+  formatEnumLabel,
+  formatUnitTypeLabel,
+  imageUrl,
+  statusClasses,
+} from "./unit-details-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -18,140 +27,6 @@ type UnitDetailsPageProps = {
   }>;
 };
 
-function formatCurrency(value: unknown, currencyCode = "KES") {
-  const amount =
-    typeof value === "object" && value !== null && "toNumber" in value
-      ? (value as { toNumber: () => number }).toNumber()
-      : Number(value ?? 0);
-
-  if (Number.isNaN(amount)) return "—";
-
-  return new Intl.NumberFormat("en-KE", {
-    style: "currency",
-    currency: currencyCode,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
-
-function imageUrl(key: string | null | undefined) {
-  if (!key) return "/images/og-vacancy.svg";
-  if (key.startsWith("/") || key.startsWith("http")) return key;
-  return `/${key.replace(/^public\//, "")}`;
-}
-
-function formatDate(value: Date | string | null | undefined) {
-  if (!value) return "—";
-
-  const date = value instanceof Date ? value : new Date(value);
-
-  if (Number.isNaN(date.getTime())) return "—";
-
-  return new Intl.DateTimeFormat("en-KE", {
-    dateStyle: "medium",
-  }).format(date);
-}
-
-function formatDateTime(value: Date | string | null | undefined) {
-  if (!value) return "—";
-
-  const date = value instanceof Date ? value : new Date(value);
-
-  if (Number.isNaN(date.getTime())) return "—";
-
-  return new Intl.DateTimeFormat("en-KE", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
-
-function formatEnumLabel(value: string | null | undefined) {
-  if (!value) return "Unknown";
-
-  return value
-    .toLowerCase()
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-function formatUnitTypeLabel(
-  type: string | null | undefined,
-  bedrooms: number | null | undefined,
-) {
-  if (!type) return "Unknown";
-
-  if (type === "APARTMENT") {
-    if (bedrooms && bedrooms > 0) {
-      return `${bedrooms} Bedroom Apartment`;
-    }
-
-    return "Apartment";
-  }
-
-  if (type === "SINGLE_ROOM") {
-    return "Single Room";
-  }
-
-  return formatEnumLabel(type);
-}
-
-function statusClasses(status: string | null | undefined) {
-  switch (status) {
-    case "OCCUPIED":
-    case "ACTIVE":
-      return "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200";
-    case "VACANT":
-      return "bg-amber-50 text-amber-700 ring-1 ring-amber-200";
-    case "RESERVED":
-    case "PENDING":
-      return "bg-blue-50 text-blue-700 ring-1 ring-blue-200";
-    case "UNDER_MAINTENANCE":
-      return "bg-rose-50 text-rose-700 ring-1 ring-rose-200";
-    case "INACTIVE":
-    case "DISABLED":
-      return "bg-slate-100 text-slate-700 ring-1 ring-slate-200";
-    default:
-      return "bg-slate-100 text-slate-700 ring-1 ring-slate-200";
-  }
-}
-
-function StatCard({
-  title,
-  value,
-  subtitle,
-}: {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-}) {
-  return (
-    <div className="rounded-[24px] border border-slate-200/80 bg-white p-5 shadow-sm">
-      <p className="text-sm font-medium text-slate-500">{title}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
-        {value}
-      </p>
-      {subtitle ? <p className="mt-1 text-xs text-slate-400">{subtitle}</p> : null}
-    </div>
-  );
-}
-
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl bg-slate-50 px-4 py-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-        {label}
-      </p>
-      <div className="mt-1 text-sm font-medium text-slate-700">{value}</div>
-    </div>
-  );
-}
-
 export default async function UnitDetailsPage({
   params,
 }: UnitDetailsPageProps) {
@@ -159,271 +34,10 @@ export default async function UnitDetailsPage({
   const { unitId } = await params;
   const requestedUnitRef = decodeURIComponent(unitId);
 
-  const directUnit = await prisma.unit.findFirst({
-    where: {
-      id: requestedUnitRef,
-      deletedAt: null,
-      property: {
-        orgId: session.activeOrgId!,
-        deletedAt: null,
-      },
-    },
-    select: {
-      id: true,
-      houseNo: true,
-      property: {
-        select: {
-          name: true,
-        },
-      },
-      building: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
-  let resolvedUnitId = directUnit?.id ?? null;
-
-  if (!resolvedUnitId) {
-    const candidateUnits = await prisma.unit.findMany({
-      where: {
-        deletedAt: null,
-        property: {
-          orgId: session.activeOrgId!,
-          deletedAt: null,
-        },
-      },
-      select: {
-        id: true,
-        houseNo: true,
-        property: {
-          select: {
-            name: true,
-          },
-        },
-        building: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-
-    const slugMatch = candidateUnits.find((unit) => {
-      return (
-        getUnitSlug({
-          id: unit.id,
-          houseNo: unit.houseNo,
-          buildingName: unit.building?.name,
-          propertyName: unit.property.name,
-        }) === requestedUnitRef
-      );
-    });
-
-    resolvedUnitId = slugMatch?.id ?? null;
-  }
-
-  if (!resolvedUnitId) {
-    notFound();
-  }
-
-  const organization = await prisma.organization.findFirst({
-    where: {
-      id: session.activeOrgId!,
-      deletedAt: null,
-    },
-    select: {
-      currencyCode: true,
-      name: true,
-    },
-  });
-
-  const currencyCode = organization?.currencyCode ?? "KES";
-
-  const unit = await prisma.unit.findFirst({
-    where: {
-      id: resolvedUnitId,
-      deletedAt: null,
-      property: {
-        orgId: session.activeOrgId!,
-        deletedAt: null,
-      },
-    },
-    select: {
-      id: true,
-      houseNo: true,
-      type: true,
-      bedrooms: true,
-      bathrooms: true,
-      roomCount: true,
-      hasBalcony: true,
-      floorArea: true,
-      rentAmount: true,
-      depositAmount: true,
-      serviceCharge: true,
-      garbageFee: true,
-      securityFee: true,
-      electricityBilling: true,
-      viewingFeeRequired: true,
-      viewingFeeAmount: true,
-      status: true,
-      vacantSince: true,
-      notes: true,
-      isActive: true,
-      sequenceNo: true,
-      createdAt: true,
-      updatedAt: true,
-      property: {
-        select: {
-          id: true,
-          name: true,
-          location: true,
-          address: true,
-          waterRatePerUnit: true,
-          waterFixedCharge: true,
-        },
-      },
-      building: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      sourcePlan: {
-        select: {
-          id: true,
-          unitType: true,
-          bedrooms: true,
-          bathrooms: true,
-          quantity: true,
-          defaultRentAmount: true,
-          defaultDepositAmount: true,
-          houseNoPrefix: true,
-          startNumber: true,
-          label: true,
-          notes: true,
-          sortOrder: true,
-        },
-      },
-      leases: {
-        where: {
-          deletedAt: null,
-        },
-        orderBy: [
-          { startDate: "desc" },
-          { createdAt: "desc" },
-        ],
-        take: 5,
-        select: {
-          id: true,
-          status: true,
-          startDate: true,
-          endDate: true,
-          monthlyRent: true,
-          deposit: true,
-          dueDay: true,
-          tenant: {
-            select: {
-              id: true,
-              fullName: true,
-              phone: true,
-              email: true,
-              status: true,
-            },
-          },
-        },
-      },
-      issues: {
-        orderBy: [{ createdAt: "desc" }],
-        take: 5,
-        select: {
-          id: true,
-          title: true,
-          priority: true,
-          status: true,
-          createdAt: true,
-        },
-      },
-      waterBills: {
-        orderBy: [{ createdAt: "desc" }],
-        take: 5,
-        select: {
-          id: true,
-          period: true,
-          total: true,
-          dueDate: true,
-          status: true,
-          tenant: {
-            select: {
-              id: true,
-              fullName: true,
-            },
-          },
-        },
-      },
-      meterReadings: {
-        orderBy: [{ createdAt: "desc" }],
-        take: 5,
-        select: {
-          id: true,
-          period: true,
-          prevReading: true,
-          currentReading: true,
-          unitsUsed: true,
-          status: true,
-          createdAt: true,
-        },
-      },
-      images: {
-        where: { deletedAt: null },
-        orderBy: { createdAt: "asc" },
-        select: {
-          id: true,
-          key: true,
-          fileName: true,
-        },
-      },
-      vacancyInquiries: {
-        orderBy: { createdAt: "desc" },
-        take: 6,
-        select: {
-          id: true,
-          fullName: true,
-          phone: true,
-          email: true,
-          message: true,
-          status: true,
-          createdAt: true,
-        },
-      },
-      _count: {
-        select: {
-          leases: true,
-          issues: true,
-          waterBills: true,
-          meterReadings: true,
-          vacancyInquiries: true,
-        },
-      },
-    },
-  });
-
-  if (!unit) {
-    notFound();
-  }
-
-  const canonicalUnitSlug = getUnitSlug({
-    id: unit.id,
-    houseNo: unit.houseNo,
-    buildingName: unit.building?.name,
-    propertyName: unit.property.name,
-  });
-
-  if (requestedUnitRef !== canonicalUnitSlug) {
-    redirect(`/dashboard/org/units/${canonicalUnitSlug}`);
-  }
+  const { unit, currencyCode } = await getUnitDetailsData(
+    session.activeOrgId!,
+    requestedUnitRef,
+  );
 
   const currentLease =
     unit.leases.find((lease) => lease.status === "ACTIVE") ??
@@ -1233,3 +847,4 @@ export default async function UnitDetailsPage({
     </div>
   );
 }
+

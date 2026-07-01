@@ -26,7 +26,7 @@ type ReportsSearchParams = {
 };
 
 type OrgReportsPageProps = {
-  searchParams?: Promise<ReportsSearchParams> | ReportsSearchParams;
+  searchParams?: Promise<ReportsSearchParams>;
 };
 
 const paymentFilters = [

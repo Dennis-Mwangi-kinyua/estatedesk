@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ReactNode, useEffect, useId, useState } from "react";
+import { ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   Activity,
@@ -78,6 +78,13 @@ export default function PlatformMobileShell({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const panelId = useId();
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  const closeMenu = useCallback(() => {
+    // Move focus outside the drawer before it becomes hidden/inert.
+    menuButtonRef.current?.focus();
+    setOpen(false);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -87,7 +94,7 @@ export default function PlatformMobileShell({
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setOpen(false);
+        closeMenu();
       }
     };
 
@@ -97,7 +104,7 @@ export default function PlatformMobileShell({
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
+  }, [closeMenu, open]);
 
   return (
     <>
@@ -122,6 +129,7 @@ export default function PlatformMobileShell({
           <div className="flex shrink-0 items-center gap-2">
             <HeaderThemeToggle />
             <button
+              ref={menuButtonRef}
               type="button"
               onClick={() => setOpen(true)}
               aria-label="Open menu"
@@ -140,7 +148,7 @@ export default function PlatformMobileShell({
       <button
         type="button"
         aria-label="Close menu overlay"
-        onClick={() => setOpen(false)}
+        onClick={closeMenu}
         className={`fixed inset-0 z-40 bg-slate-950/35 transition-opacity duration-300 lg:hidden ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
@@ -149,6 +157,7 @@ export default function PlatformMobileShell({
       <aside
         id={panelId}
         aria-hidden={!open}
+        inert={!open}
         className={`fixed right-0 top-0 z-50 h-full w-[84%] max-w-[360px] border-l border-slate-200 bg-white shadow-2xl transition-transform duration-300 lg:hidden ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
@@ -167,7 +176,7 @@ export default function PlatformMobileShell({
 
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={closeMenu}
               aria-label="Close menu"
               className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-900 transition hover:bg-slate-50 active:scale-[0.98]"
             >
@@ -187,7 +196,7 @@ export default function PlatformMobileShell({
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setOpen(false)}
+                  onClick={closeMenu}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                     active
                       ? "bg-primary text-primary-foreground"

@@ -21,8 +21,17 @@ import {
 } from "lucide-react";
 import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { VacancyShareActions } from "@/components/marketing/vacancy-share-actions";
+import VacanciesPage from "@/app/(marketing)/vacancies/page";
 import { prisma } from "@/lib/prisma";
+import { publicPageMetadata } from "@/lib/seo";
 import { APP_URL } from "@/lib/sitemap-utils";
+import {
+  buildRentalLocationDescription,
+  buildRentalLocationTitle,
+  getPublicRentalLocation,
+  locationLabel,
+  publicRentalLocationPaths,
+} from "@/lib/public-rental-seo";
 import { sendVacancyInquiryAction } from "./actions";
 
 type Props = {
@@ -36,6 +45,10 @@ const PUBLIC_VACANCY_ATTEMPTS = 2;
 const PUBLIC_VACANCY_DELAY_MS = 250;
 
 export const dynamic = "force-dynamic";
+
+export function generateStaticParams() {
+  return publicRentalLocationPaths().map(({ location }) => ({ location }));
+}
 
 async function getVacancyUnit(id: string) {
   return retryTransientDatabaseOperation(
@@ -343,6 +356,23 @@ function CompactFact({
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { location: id } = await params;
+  const rentalLocation = getPublicRentalLocation(id);
+
+  if (rentalLocation) {
+    return publicPageMetadata({
+      title: buildRentalLocationTitle(id),
+      description: buildRentalLocationDescription(id),
+      path: `/vacancies/${id}`,
+      keywords: [
+        `houses for rent in ${rentalLocation.label}`,
+        `vacant houses ${rentalLocation.label}`,
+        `apartments for rent in ${rentalLocation.label}`,
+        `bedsitters in ${rentalLocation.label}`,
+        `rental units ${rentalLocation.label}`,
+      ],
+    });
+  }
+
   const { unit, databaseUnavailable } = await getVacancyUnitOrUnavailable(id);
   if (databaseUnavailable) {
     return {
@@ -383,6 +413,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function VacancyDetail({ params, searchParams }: Props) {
   const { location: id } = await params;
+  const rentalLocation = getPublicRentalLocation(id);
+
+  if (rentalLocation) {
+    return (
+      <VacanciesPage
+        searchParams={Promise.resolve({
+          location: locationLabel(id),
+        })}
+      />
+    );
+  }
+
   const statusParams = await searchParams;
   const { unit, databaseUnavailable } = await getVacancyUnitOrUnavailable(id);
   if (databaseUnavailable) return <VacancyTemporarilyUnavailable />;

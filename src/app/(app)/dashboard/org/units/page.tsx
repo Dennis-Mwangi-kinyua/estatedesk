@@ -19,7 +19,7 @@ type UnitsPageSearchParams = {
 };
 
 type UnitsPageProps = {
-  searchParams?: Promise<UnitsPageSearchParams> | UnitsPageSearchParams;
+  searchParams?: Promise<UnitsPageSearchParams>;
 };
 
 type UnitStatusFilter =
@@ -191,10 +191,7 @@ export default async function UnitsPage({ searchParams }: UnitsPageProps) {
     redirect("/dashboard");
   }
 
-  const resolvedSearchParams =
-    searchParams && typeof (searchParams as Promise<UnitsPageSearchParams>).then === "function"
-      ? await (searchParams as Promise<UnitsPageSearchParams>)
-      : (searchParams as UnitsPageSearchParams | undefined) ?? {};
+  const resolvedSearchParams = (await searchParams) ?? {};
 
   const q = normalizeQuery(resolvedSearchParams.q);
   const status = parseStatusFilter(resolvedSearchParams.status);

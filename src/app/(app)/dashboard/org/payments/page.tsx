@@ -9,8 +9,10 @@ import {
 } from "@/lib/ledger";
 import {
   disputePaymentReconciliationAction,
+  importBankStatementAction,
   reconcilePaymentAction,
   rejectTenantPaymentAction,
+  reverseVerifiedPaymentAction,
   verifyTenantPaymentAction,
 } from "./actions";
 
@@ -287,6 +289,28 @@ export default async function PaymentsPage({
           <StatCard label="Awaiting verification" value={pendingPayments.length} note="Before reconciliation" />
         </div>
 
+        <form
+          action={importBankStatementAction}
+          className="flex flex-col gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4 sm:flex-row sm:items-end"
+        >
+          <label className="min-w-0 flex-1 text-sm font-medium text-sky-950">
+            Bank statement CSV
+            <span className="mt-1 block text-xs font-normal text-sky-700">
+              Required columns: transactionId, amount, paidAt. Optional: payerName.
+            </span>
+            <input
+              type="file"
+              name="statement"
+              required
+              accept=".csv,text/csv"
+              className="mt-2 min-h-11 w-full rounded-xl border border-sky-200 bg-white p-2 text-sm"
+            />
+          </label>
+          <button className="min-h-11 rounded-xl bg-sky-900 px-4 text-sm font-semibold text-white">
+            Import and match
+          </button>
+        </form>
+
         <div className="overflow-x-auto rounded-xl border border-neutral-200">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500">
@@ -478,6 +502,14 @@ export default async function PaymentsPage({
                               name="paymentId"
                               value={payment.id}
                             />
+                            <input
+                              type="text"
+                              name="verificationNote"
+                              required
+                              minLength={5}
+                              placeholder="How was it confirmed?"
+                              className="mb-2 h-9 w-full rounded-xl border border-emerald-200 px-3 text-xs outline-none focus:border-emerald-400"
+                            />
                             <button
                               type="submit"
                               className="inline-flex h-9 w-full items-center justify-center rounded-xl bg-emerald-700 px-3 text-xs font-semibold text-white transition hover:bg-emerald-800"
@@ -636,6 +668,7 @@ export default async function PaymentsPage({
                 <th className="px-4 py-3 font-medium">Reconciliation</th>
                 <th className="px-4 py-3 font-medium">Reference</th>
                 <th className="px-4 py-3 font-medium">Date</th>
+                <th className="px-4 py-3 font-medium">Correction</th>
               </tr>
             </thead>
             <tbody>
@@ -675,11 +708,36 @@ export default async function PaymentsPage({
                   <td className="px-4 py-3 text-neutral-600">
                     {formatLedgerDate(payment.paidAt ?? payment.createdAt)}
                   </td>
+                  <td className="min-w-72 px-4 py-3">
+                    {payment.verificationStatus === "VERIFIED" ? (
+                      <form
+                        action={reverseVerifiedPaymentAction}
+                        className="grid gap-2"
+                      >
+                        <input type="hidden" name="paymentId" value={payment.id} />
+                        <input
+                          name="reason"
+                          required
+                          minLength={10}
+                          placeholder="Required correction reason"
+                          className="h-9 rounded-xl border border-red-200 px-3 text-xs outline-none focus:border-red-400"
+                        />
+                        <button
+                          type="submit"
+                          className="h-9 rounded-xl border border-red-200 px-3 text-xs font-semibold text-red-700 hover:bg-red-50"
+                        >
+                          Reverse payment
+                        </button>
+                      </form>
+                    ) : (
+                      <span className="text-xs text-neutral-400">—</span>
+                    )}
+                  </td>
                 </tr>
               ))}
               {ledger.recentPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-neutral-500">
+                  <td colSpan={9} className="px-4 py-8 text-center text-neutral-500">
                     No payments recorded this month.
                   </td>
                 </tr>

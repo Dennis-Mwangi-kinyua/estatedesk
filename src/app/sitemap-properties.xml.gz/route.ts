@@ -1,5 +1,5 @@
 import { gzipXml, GZIP_HEADERS } from '@/lib/sitemap-utils'
-import { renderSitemapXml } from '../sitemap-properties.xml/route'
+import { GET as getSitemapXml } from '../sitemap-properties.xml/route'
 
 export async function GET() {
   const bucket = process.env.S3_BUCKET_NAME || process.env.S3_BUCKET
@@ -8,7 +8,7 @@ export async function GET() {
     return Response.redirect(url, 302)
   }
 
-  const xml = await renderSitemapXml()
+  const xml = await (await getSitemapXml()).text()
   return new Response(gzipXml(xml), {
     headers: GZIP_HEADERS,
   })

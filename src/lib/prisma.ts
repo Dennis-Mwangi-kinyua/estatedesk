@@ -1,7 +1,6 @@
 import "dotenv/config";
 import dns from "node:dns";
 import { PrismaClient } from "@prisma/client";
-import type { Prisma } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { getDatabaseUrl } from "@/lib/config/env";
 
@@ -12,7 +11,7 @@ const globalForPrisma = globalThis as unknown as {
   prismaSchemaVersion?: string;
 };
 
-const PRISMA_SCHEMA_VERSION = "cron-job-runs-v1";
+const PRISMA_SCHEMA_VERSION = "cron-job-runs-no-db-logs-v1";
 
 const DATABASE_URL = getDatabaseUrl();
 
@@ -47,12 +46,10 @@ function createPrismaClient() {
     query_timeout: queryTimeout,
   });
 
-  const logs: Prisma.LogLevel[] =
-    process.env.NODE_ENV === "production"
-      ? ["warn", "error"]
-      : ["query", "info", "warn", "error"];
-
-  return new PrismaClient({ adapter, log: logs });
+  // Database diagnostics must never be forwarded to application output or
+  // the browser development console. Errors still propagate to the caller
+  // and are handled by the existing application error boundaries.
+  return new PrismaClient({ adapter, log: [] });
 }
 
 export const prisma =
@@ -60,24 +57,6 @@ export const prisma =
   globalForPrisma.prisma
     ? globalForPrisma.prisma
     : createPrismaClient();
-
-// Add query event listener in non-production to surface slow queries.
-if (process.env.NODE_ENV !== "production") {
-  try {
-    // Prisma client's $on typings may vary across environments. Use a
-    // narrow unknown cast to avoid widening to `any` while still
-    // allowing us to inspect query events in dev mode.
-    (prisma as unknown as { $on: (event: string, cb: (arg: unknown) => void) => void }).$on(
-      "query",
-      (e: unknown) => {
-        const ev = e as { duration?: number; query?: string };
-        console.debug(`prisma query (${ev.duration ?? "?"}ms): ${ev.query}`);
-      },
-    );
-  } catch (err) {
-    console.warn("Failed to attach prisma query listener:", err);
-  }
-}
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

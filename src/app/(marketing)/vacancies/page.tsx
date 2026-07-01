@@ -213,6 +213,8 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
   const query = params?.q?.trim() ?? "";
   const location = params?.location?.trim() ?? "";
   const sort = params?.sort === "rent_desc" ? "rent_desc" : params?.sort === "rent_asc" ? "rent_asc" : "location";
+  const rentalLocationOptions: readonly { slug: string; label: string; county?: string }[] = PUBLIC_RENTAL_LOCATIONS;
+  const rentalLocationLabels = new Set(rentalLocationOptions.map((item) => item.label));
   const hasFilters = Boolean(query || location);
   const loginHref = "/login";
   let databaseUnavailable = false;
@@ -341,12 +343,22 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
               </label>
               <label className="relative">
                 <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
+                <select
                   name="location"
                   defaultValue={location}
-                  placeholder="Location"
-                  className="min-h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/12 dark:bg-[#171b22] dark:text-[#f8fafc] dark:placeholder:text-[#9ca3af] dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
-                />
+                  aria-label="Filter vacancies by town"
+                  className="min-h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-950 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/12 dark:bg-[#171b22] dark:text-[#f8fafc] dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
+                >
+                  <option value="">All towns</option>
+                  {location && !rentalLocationLabels.has(location) ? (
+                    <option value={location}>{location}</option>
+                  ) : null}
+                  {rentalLocationOptions.map((item) => (
+                    <option key={item.slug} value={item.label}>
+                      {item.county ? `${item.label}, ${item.county}` : item.label}
+                    </option>
+                  ))}
+                </select>
               </label>
               <div className="grid grid-cols-[1fr_auto] gap-2">
                 <select

@@ -74,6 +74,19 @@ Expected responses:
 - Set repository secret `HEALTHCHECK_URL` to the deployed origin, for example `https://estatedesk.co.ke`.
 - Keep external uptime monitoring as the primary alerting path if the GitHub Actions quota or outage behavior is not acceptable for production.
 
+## Scheduled Production Jobs
+
+- `.github/workflows/cron.yml` schedules notification processing every ten minutes and retention review daily.
+- Set `PRODUCTION_CRON_ENABLED=true`, `PRODUCTION_APP_URL`, and `PRODUCTION_CRON_SECRET` in repository settings.
+- Hosting-provider cron is preferred when it offers stronger delivery guarantees; do not enable two schedulers without accepting duplicate idempotent calls.
+- Cron failures are recorded in the jobs table and should alert through `SECURITY_ALERT_WEBHOOK_URL`.
+
+## Backup And Restore Commands
+
+- `npm run backup:database` creates a custom-format PostgreSQL dump plus SHA-256 checksum.
+- `npm run restore:drill` refuses to run unless a disposable restore URL and explicit confirmation are supplied.
+- Complete `docs/RESTORE_DRILL_EVIDENCE.md`; scripts do not constitute a completed production drill by themselves.
+
 ## Test Standard
 
 - `npm test` runs the TypeScript unit tests through Node's built-in test runner and `tsx`.

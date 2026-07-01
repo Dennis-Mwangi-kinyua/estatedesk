@@ -16,7 +16,7 @@ function formatDate(date: Date) {
 }
 
 type BuildingsPageProps = {
-  searchParams?: Promise<{ q?: string }> | { q?: string };
+  searchParams?: Promise<{ q?: string }>;
 };
 
 export default async function BuildingsPage({
@@ -28,11 +28,7 @@ export default async function BuildingsPage({
     redirect("/dashboard");
   }
 
-  const resolvedSearchParams =
-    searchParams &&
-    typeof (searchParams as Promise<{ q?: string }>).then === "function"
-      ? await (searchParams as Promise<{ q?: string }>)
-      : (searchParams as { q?: string } | undefined);
+  const resolvedSearchParams = await searchParams;
 
   const query = resolvedSearchParams?.q?.trim() ?? "";
 

@@ -8,6 +8,12 @@ import { requireTenantAccess } from "@/lib/permissions/guards";
 import { notifyRecipients } from "@/lib/notifications/notify";
 import { getCurrentPeriod } from "@/lib/ledger";
 import { parsePaymentInstructions } from "@/lib/payments/instructions";
+import {
+  buildBankTransactionKey,
+  buildMpesaTransactionKey,
+  isUniqueConstraintError,
+  normalizeTransactionReference,
+} from "@/lib/payments/transaction-reference";
 
 type StartPaymentInput = {
   source: string;
@@ -15,6 +21,7 @@ type StartPaymentInput = {
   method: string;
   phoneNumber?: string;
   accountName?: string;
+  transactionId?: string;
   amount?: number;
   months?: number;
 };
@@ -219,7 +226,7 @@ export async function getTenantPaymentCheckoutSummary({
 }
 
 function mapPaymentMethod(method: string) {
-  if (method === "mpesa") return "MPESA_STK" as const;
+  if (method === "mpesa") return "MPESA_MANUAL" as const;
   if (method === "cash") return "CASH" as const;
   return "BANK" as const;
 }
@@ -300,8 +307,40 @@ export async function startTenantPayment(input: StartPaymentInput) {
 
   const paymentMethod = mapPaymentMethod(method);
   const paidAt = new Date();
+  const transactionId = normalizeTransactionReference(input.transactionId ?? "");
 
-  await prisma.$transaction(async (tx) => {
+  const isBankPayment = method !== "mpesa" && method !== "airtel-money";
+
+  if ((method === "mpesa" || isBankPayment) && !transactionId) {
+    throw new Error("Transaction ID is required for manual M-Pesa and bank payments.");
+  }
+
+  if (method === "mpesa" && !/^[A-Z0-9]{10}$/.test(transactionId)) {
+    throw new Error("Enter the 10-character M-Pesa transaction code.");
+  }
+
+  if (isBankPayment && (transactionId.length < 4 || transactionId.length > 100)) {
+    throw new Error("Enter a valid bank transaction ID.");
+  }
+
+  const settings = await prisma.organizationSettings.findUnique({
+    where: { orgId: session.activeOrgId },
+    select: { customFields: true },
+  });
+  const instructions = parsePaymentInstructions(settings?.customFields);
+  const transactionReferenceKey =
+    method === "mpesa"
+      ? buildMpesaTransactionKey(transactionId)
+      : isBankPayment
+        ? buildBankTransactionKey({
+            bankName: method || instructions.bankName,
+            accountNumber: instructions.bankAccountNumber,
+            reference: transactionId,
+          })
+        : null;
+
+  try {
+    await prisma.$transaction(async (tx) => {
     if (source === "rent_charge") {
       const charge = await tx.rentCharge.findFirst({
         where: {
@@ -363,11 +402,13 @@ export async function startTenantPayment(input: StartPaymentInput) {
             period: charge.period,
             unitLabel: charge.lease.unit.houseNo,
           }),
-          externalReference: accountName || null,
+          externalReference: transactionId || null,
+          transactionReferenceKey,
           paidAt: null,
           notes: "Tenant submitted payment awaiting organization verification.",
           callbackRaw: {
             source,
+            accountName: accountName || null,
             sourceId: id,
             submittedAt: paidAt.toISOString(),
           },
@@ -448,11 +489,13 @@ export async function startTenantPayment(input: StartPaymentInput) {
             period: getCurrentPeriod(),
             unitLabel: lease.unit.houseNo,
           }),
-          externalReference: accountName || null,
+          externalReference: transactionId || null,
+          transactionReferenceKey,
           paidAt: null,
           notes: `Tenant submitted advance rent for up to ${months} month${months === 1 ? "" : "s"} awaiting organization verification.`,
           callbackRaw: {
             source,
+            accountName: accountName || null,
             sourceId: id,
             leaseId: lease.id,
             months,
@@ -537,11 +580,13 @@ export async function startTenantPayment(input: StartPaymentInput) {
             period: bill.period,
             unitLabel: bill.unit.houseNo,
           }),
-          externalReference: accountName || null,
+          externalReference: transactionId || null,
+          transactionReferenceKey,
           paidAt: null,
           notes: "Tenant submitted water bill payment awaiting organization verification.",
           callbackRaw: {
             source,
+            accountName: accountName || null,
             sourceId: id,
             submittedAt: paidAt.toISOString(),
           },
@@ -579,7 +624,13 @@ export async function startTenantPayment(input: StartPaymentInput) {
     }
 
     throw new Error("Unsupported payment source.");
-  });
+    });
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      throw new Error("That transaction ID has already been submitted.");
+    }
+    throw error;
+  }
 
   revalidatePath("/dashboard/tenant/payments");
   revalidatePath("/dashboard/tenant/invoice");

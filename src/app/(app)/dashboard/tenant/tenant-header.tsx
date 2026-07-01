@@ -70,7 +70,7 @@ export function TenantHeader({
             </div>
 
             <div className="flex shrink-0 items-center gap-2">
-              <HeaderThemeToggle className="lg:hidden" />
+              <HeaderThemeToggle />
 
               <div className="ed-soft-button hidden rounded-[22px] border px-4 py-3 text-right shadow-sm sm:block">
               <p className="max-w-[200px] truncate text-sm font-semibold text-neutral-950">

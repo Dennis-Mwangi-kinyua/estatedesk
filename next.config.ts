@@ -81,6 +81,9 @@ const PUBLIC_FAST_EDGE_CACHE_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: {
+    cpus: 1,
+  },
   async redirects() {
     return [
       {

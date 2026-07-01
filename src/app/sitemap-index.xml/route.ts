@@ -1,12 +1,13 @@
-import { APP_URL, XML_HEADERS, buildSitemapIndexEntry, wrapSitemapIndex } from '@/lib/sitemap-utils'
+import {
+  APP_URL,
+  PUBLIC_SITEMAP_PATHS,
+  XML_HEADERS,
+  buildSitemapIndexEntry,
+  wrapSitemapIndex,
+} from '@/lib/sitemap-utils'
 
-export async function renderSitemapXml() {
-  const sitemaps = [
-    `${APP_URL}/sitemap.xml`,
-    `${APP_URL}/sitemap-vacancies.xml`,
-  ]
-
-  const entries = sitemaps.map((s) => buildSitemapIndexEntry(s))
+async function renderSitemapXml() {
+  const entries = PUBLIC_SITEMAP_PATHS.map((path) => buildSitemapIndexEntry(`${APP_URL}${path}`))
   return wrapSitemapIndex(entries)
 }
 

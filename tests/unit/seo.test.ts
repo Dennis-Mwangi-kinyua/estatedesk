@@ -4,10 +4,12 @@ import {
   DEFAULT_SITE_URL,
   SITE_NAME,
   absoluteUrl,
+  authPageMetadata,
   getSiteUrl,
   noIndexPageMetadata,
   publicPageMetadata,
 } from "../../src/lib/seo";
+import { publicSiteIndexItems } from "../../src/lib/public-site-index";
 
 function assertRobotsObject(
   value: ReturnType<typeof publicPageMetadata>["robots"],
@@ -89,5 +91,28 @@ describe("seo helpers", () => {
     assertRobotsObject(robots.googleBot);
     assert.equal(robots.googleBot.index, false);
     assert.equal(robots.googleBot.follow, true);
+  });
+
+  it("keeps auth pages out of the index without blocking public-context discovery", () => {
+    assertRobotsObject(authPageMetadata.robots);
+    assert.equal(authPageMetadata.robots.index, false);
+    assert.equal(authPageMetadata.robots.follow, true);
+
+    assertRobotsObject(authPageMetadata.robots.googleBot);
+    assert.equal(authPageMetadata.robots.googleBot.index, false);
+    assert.equal(authPageMetadata.robots.googleBot.follow, true);
+  });
+
+  it("indexes every public context page and excludes auth routes from the manifest", () => {
+    const publicPaths = publicSiteIndexItems.map((item) => item.path);
+
+    assert.ok(publicPaths.includes("/property-management-markets"));
+    assert.ok(publicPaths.includes("/terms"));
+    assert.ok(!publicPaths.some((path) => path.startsWith("/login")));
+    assert.ok(!publicPaths.some((path) => path.startsWith("/register")));
+    assert.ok(!publicPaths.some((path) => path.startsWith("/forgot-password")));
+    assert.ok(!publicPaths.some((path) => path.startsWith("/reset-password")));
+    assert.ok(!publicPaths.some((path) => path.startsWith("/verify-email")));
+    assert.ok(!publicPaths.some((path) => path.startsWith("/accept-invite")));
   });
 });

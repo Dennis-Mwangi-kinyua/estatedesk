@@ -1,6 +1,6 @@
-import { privatePageMetadata } from "@/lib/seo";
+import { authPageMetadata } from "@/lib/seo";
 
-export const metadata = privatePageMetadata;
+export const metadata = authPageMetadata;
 
 export default function AuthLayout({
   children,

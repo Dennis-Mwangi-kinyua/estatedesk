@@ -2,6 +2,7 @@ import "server-only";
 
 import { CronJobStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { sendSecurityAlert } from "@/lib/security/alerts";
 
 type CronRunCounts = {
   processedCount?: number;
@@ -69,6 +70,20 @@ export async function recordCronJobRun<T>({
         status: CronJobStatus.FAILED,
         finishedAt,
         durationMs: finishedAt.getTime() - startedAt.getTime(),
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+    });
+
+    await sendSecurityAlert({
+      event: "CRON_JOB_FAILED",
+      severity: "critical",
+      actorUserId,
+      entityType: "CronJobRun",
+      entityId: jobRun.id,
+      summary: `${jobName} cron job failed.`,
+      metadata: {
+        endpoint,
+        triggerSource,
         error: error instanceof Error ? error.message : "Unknown error",
       },
     });

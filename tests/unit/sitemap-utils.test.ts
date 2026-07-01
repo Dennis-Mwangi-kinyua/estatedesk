@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import { describe, it } from "node:test";
 import {
+  PUBLIC_SITEMAP_PATHS,
   buildSitemapIndexEntry,
   buildUrlEntry,
   formatDate,
@@ -9,6 +12,17 @@ import {
   wrapUrlset,
   xmlEscape,
 } from "../../src/lib/sitemap-utils";
+import { GET as getSitemapIndex } from "../../src/app/sitemap-index.xml/route";
+import { GET as getStaticSitemap } from "../../src/app/sitemap.xml/route";
+import { GET as getPropertiesSitemap } from "../../src/app/sitemap-properties.xml/route";
+import { GET as getRentalLandingsSitemap } from "../../src/app/sitemap-rental-landings.xml/route";
+import { GET as getUnitsSitemap } from "../../src/app/sitemap-units.xml/route";
+import { GET as getVacanciesSitemap } from "../../src/app/sitemap-vacancies.xml/route";
+import { publicSiteIndexItems } from "../../src/lib/public-site-index";
+import {
+  PUBLIC_RENTAL_LOCATIONS,
+  publicRentalLocationPaths,
+} from "../../src/lib/public-rental-seo";
 
 describe("sitemap utilities", () => {
   it("escapes XML-sensitive characters", () => {
@@ -48,5 +62,61 @@ describe("sitemap utilities", () => {
     assert.equal(formatDate(new Date("2026-06-02T12:45:00.000Z")), "2026-06-02");
     assert.ok(Buffer.isBuffer(gzipXml("<xml />")));
     assert.ok(gzipXml("<xml />").length > 0);
+  });
+
+  it("lists every public sitemap shard in the sitemap index", async () => {
+    const response = await getSitemapIndex();
+    const xml = await response.text();
+
+    for (const sitemapPath of PUBLIC_SITEMAP_PATHS) {
+      assert.match(xml, new RegExp(`${sitemapPath.replace(".", "\\.")}<\\/loc>`));
+    }
+
+    assert.doesNotMatch(xml, /\/sitemap-properties\.xml<\/loc>/);
+    assert.doesNotMatch(xml, /\/sitemap-units\.xml<\/loc>/);
+  });
+
+  it("emits every public manifest page in the static sitemap", async () => {
+    const response = await getStaticSitemap();
+    const xml = await response.text();
+
+    for (const item of publicSiteIndexItems) {
+      assert.match(xml, new RegExp(`<loc>https://estatedesk\\.co\\.ke${item.path}<\\/loc>`));
+      assert.match(xml, new RegExp(`<priority>${item.priority}<\\/priority>`));
+      assert.match(xml, new RegExp(`<changefreq>${item.changefreq}<\\/changefreq>`));
+    }
+  });
+
+  it("keeps marketing pages covered by the public indexing manifest", () => {
+    const marketingRoot = path.join(process.cwd(), "src", "app", "(marketing)");
+    const marketingPaths = fs
+      .readdirSync(marketingRoot, { withFileTypes: true })
+      .filter((item) => item.isDirectory() && fs.existsSync(path.join(marketingRoot, item.name, "page.tsx")))
+      .map((item) => `/${item.name}`)
+      .sort();
+    const indexedPaths = publicSiteIndexItems.map((item) => item.path).sort();
+    const indexedPathSet = new Set<string>(indexedPaths);
+
+    assert.deepEqual(
+      marketingPaths.filter((pagePath) => !indexedPathSet.has(pagePath)),
+      [],
+    );
+    assert.ok(indexedPaths.includes("/"));
+  });
+
+  it("builds location-only vacancy landing paths from the Kenya town index", () => {
+    const slugs = PUBLIC_RENTAL_LOCATIONS.map((location) => location.slug);
+    const paths = publicRentalLocationPaths().map((location) => location.path);
+
+    assert.ok(slugs.length > 80);
+    assert.ok(paths.includes("/vacancies/nairobi"));
+    assert.ok(paths.includes("/vacancies/kiambu"));
+    assert.ok(paths.includes("/vacancies/kilimani"));
+    assert.equal(new Set(paths).size, paths.length);
+  });
+
+  it("keeps legacy sitemap routes as compatibility aliases", async () => {
+    assert.equal(getPropertiesSitemap, getRentalLandingsSitemap);
+    assert.equal(getUnitsSitemap, getVacanciesSitemap);
   });
 });

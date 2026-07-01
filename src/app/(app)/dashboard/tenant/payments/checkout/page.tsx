@@ -60,6 +60,7 @@ export default function TenantPaymentCheckoutPage() {
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [accountName, setAccountName] = useState("");
+  const [transactionId, setTransactionId] = useState("");
   const [amount, setAmount] = useState(amountParam ?? "");
   const [months, setMonths] = useState(monthsParam ?? "1");
   const [error, setError] = useState("");
@@ -139,6 +140,11 @@ export default function TenantPaymentCheckoutPage() {
       return;
     }
 
+    if ((method === "mpesa" || isBank) && !transactionId.trim()) {
+      setError("Transaction ID is required for manual M-Pesa and bank payments.");
+      return;
+    }
+
     if (source === "advance_rent") {
       const parsedAmount = Number(amount);
       const parsedMonths = Number.parseInt(months, 10);
@@ -162,6 +168,8 @@ export default function TenantPaymentCheckoutPage() {
           method,
           phoneNumber: isMobileMoney ? phoneNumber.trim() : undefined,
           accountName: isBank ? accountName.trim() : undefined,
+          transactionId:
+            method === "mpesa" || isBank ? transactionId.trim() : undefined,
           amount: source === "advance_rent" ? Number(amount) : undefined,
           months: source === "advance_rent" ? Number.parseInt(months, 10) : undefined,
         });
@@ -225,6 +233,7 @@ export default function TenantPaymentCheckoutPage() {
                       className="h-12 w-full rounded-lg border border-emerald-200 bg-white px-4 text-sm outline-none transition focus:border-emerald-600"
                     />
                   </label>
+
                   <label className="block">
                     <span className="mb-2 block text-sm font-medium text-emerald-900">
                       Months to cover
@@ -287,6 +296,23 @@ export default function TenantPaymentCheckoutPage() {
                       className="h-12 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
                     />
                   </label>
+
+                  {method === "mpesa" ? (
+                    <label className="mt-4 block">
+                      <span className="mb-2 block text-sm font-medium text-slate-700">
+                        M-Pesa Transaction Code
+                      </span>
+                      <input
+                        type="text"
+                        required
+                        maxLength={10}
+                        placeholder="e.g. QAB12CD34E"
+                        value={transactionId}
+                        onChange={(e) => setTransactionId(e.target.value)}
+                        className="h-12 w-full rounded-2xl border border-slate-200 px-4 text-sm uppercase outline-none transition focus:border-blue-500"
+                      />
+                    </label>
+                  ) : null}
 
                   {method === "mpesa" && paymentInstructions?.mpesaEnabled ? (
                     <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
@@ -354,6 +380,20 @@ export default function TenantPaymentCheckoutPage() {
                       value={accountName}
                       onChange={(e) => setAccountName(e.target.value)}
                       className="h-12 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
+                    />
+                  </label>
+
+                  <label className="mt-4 block">
+                    <span className="mb-2 block text-sm font-medium text-slate-700">
+                      Bank Transaction ID
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter the bank transfer reference"
+                      value={transactionId}
+                      onChange={(e) => setTransactionId(e.target.value)}
+                      className="h-12 w-full rounded-2xl border border-slate-200 px-4 text-sm uppercase outline-none transition focus:border-blue-500"
                     />
                   </label>
 

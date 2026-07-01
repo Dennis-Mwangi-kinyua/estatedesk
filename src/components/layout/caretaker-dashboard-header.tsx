@@ -48,7 +48,7 @@ export function CaretakerDashboardHeader({
           </div>
 
           <div className="flex items-center gap-2">
-            <HeaderThemeToggle className="xl:hidden" />
+            <HeaderThemeToggle />
 
             <Link
               href="/dashboard/caretaker/notifications"

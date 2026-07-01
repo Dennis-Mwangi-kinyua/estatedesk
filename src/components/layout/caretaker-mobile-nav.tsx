@@ -70,6 +70,7 @@ export function CaretakerMobileSidebar({
         open ? "pointer-events-auto" : "pointer-events-none"
       )}
       aria-hidden={!open}
+      inert={!open}
     >
       <button
         type="button"
