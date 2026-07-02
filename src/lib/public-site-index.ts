@@ -106,6 +106,46 @@ export const publicSiteIndexItems = [
     changefreq: "weekly",
   },
   {
+    title: "Login",
+    path: "/login",
+    description:
+      "Sign in to EstateDesk to manage properties, tenants, leases, rent, water billing, inspections, and team access.",
+    priority: "0.7",
+    changefreq: "monthly",
+  },
+  {
+    title: "Register",
+    path: "/register",
+    description:
+      "Create an EstateDesk account or request workspace access for property management, billing, maintenance, and team onboarding.",
+    priority: "0.7",
+    changefreq: "monthly",
+  },
+  {
+    title: "Forgot Password",
+    path: "/forgot-password",
+    description:
+      "Request a secure password reset link for your EstateDesk account.",
+    priority: "0.4",
+    changefreq: "monthly",
+  },
+  {
+    title: "Reset Password",
+    path: "/reset-password",
+    description:
+      "Set a new password for your EstateDesk account using a secure reset link.",
+    priority: "0.4",
+    changefreq: "monthly",
+  },
+  {
+    title: "Verify Email",
+    path: "/verify-email",
+    description:
+      "Confirm your EstateDesk account email address and complete account verification.",
+    priority: "0.4",
+    changefreq: "monthly",
+  },
+  {
     title: "Security",
     path: "/security",
     description:

@@ -1,9 +1,25 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BadgeCheck, FileCheck2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { publicPageMetadata } from "@/lib/seo";
 
-export const dynamic="force-dynamic";
-export const metadata={title:"Verify signed lease",robots:{index:false,follow:false}};
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ hash: string }>;
+}): Promise<Metadata> {
+  const { hash } = await params;
+
+  return publicPageMetadata({
+    title: "Verify Signed Lease",
+    description:
+      "Confirm that a signed lease fingerprint matches the final document registered by EstateDesk.",
+    path: `/verify-lease/${hash}`,
+  });
+}
 export default async function VerifySignedLeasePage({params}:{params:Promise<{hash:string}>}){
   const {hash}=await params; if(!/^[a-f0-9]{64}$/i.test(hash))notFound();
   const envelope=await prisma.leaseSignatureEnvelope.findUnique({where:{finalDocumentHash:hash.toLowerCase()},include:{org:{select:{name:true}},lease:{include:{unit:{include:{property:true}}}},signers:{select:{role:true,name:true,signedAt:true,signatureMethod:true}},events:{where:{eventType:"COMPLETED"},take:1}}});

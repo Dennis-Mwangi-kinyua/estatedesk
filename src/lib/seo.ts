@@ -208,10 +208,10 @@ export const privatePageMetadata: Metadata = {
 
 export const authPageMetadata: Metadata = {
   robots: {
-    index: false,
+    index: true,
     follow: true,
     googleBot: {
-      index: false,
+      index: true,
       follow: true,
       "max-image-preview": "large",
       "max-snippet": -1,

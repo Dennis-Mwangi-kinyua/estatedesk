@@ -3,14 +3,23 @@ import { notFound } from "next/navigation";
 import { BadgeCheck, Ban, Building2, CalendarDays, FileCheck2, Fingerprint } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { readReceiptSnapshot } from "@/lib/documents/receipt-snapshot";
+import { publicPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Verify document",
-  description: "Verify the current status and origin of an EstateDesk document.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ code: string }>;
+}): Promise<Metadata> {
+  const { code } = await params;
+
+  return publicPageMetadata({
+    title: "Verify Document",
+    description: "Verify the current status and origin of an EstateDesk document.",
+    path: `/verify-document/${code}`,
+  });
+}
 
 function formatLabel(value: string) {
   return value

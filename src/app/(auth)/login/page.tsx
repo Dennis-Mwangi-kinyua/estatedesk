@@ -10,10 +10,10 @@ import {
   Users2,
 } from "lucide-react";
 import OperationsShowcase from "@/components/marketing/operations-showcase";
-import { noIndexPageMetadata } from "@/lib/seo";
+import { publicPageMetadata } from "@/lib/seo";
 import LoginForm from "./LoginForm";
 
-export const metadata = noIndexPageMetadata({
+export const metadata = publicPageMetadata({
   title: "Login Page - EstateDesk Dashboard",
   description:
     "Securely sign in to EstateDesk Dashboard to manage properties, tenants, leases, rent payments, inspections, maintenance, and team access online.",

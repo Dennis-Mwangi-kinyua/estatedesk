@@ -20,7 +20,7 @@ export default function SecurityPage() {
           title: "Access controls",
           body: [
             "EstateDesk uses authenticated sessions, active organization context, organization membership checks, and role-based authorization for admin, manager, office, accountant, caretaker, tenant, and platform users.",
-            "Private dashboards, platform administration, API routes, print routes, invite flows, and reset flows are marked noindex and protected from public discovery.",
+            "Private dashboards, platform administration, API routes, and print routes are marked noindex and protected from public discovery. Public auth and verification pages remain indexable.",
           ],
         },
         {

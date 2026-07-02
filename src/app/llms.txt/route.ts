@@ -30,9 +30,9 @@ export async function GET() {
     "- Dubai and UAE property management",
     "",
     "## Indexing Notes",
-    "- Public marketing, pricing, FAQ, contact, and vacancy pages are intended for discovery.",
-    "- Auth pages are noindex but follow links, so crawlers can discover public context without ranking login, registration, password reset, or invite pages.",
-    "- Private dashboards, platform administration, API, and print routes are not public content.",
+    "- Public marketing, pricing, FAQ, contact, vacancy, auth, and document verification pages are intended for search discovery.",
+    "- Login-required dashboards, platform administration, API, print, and operational routes are noindex and disallowed in robots.txt.",
+    "- Utility pages such as offline, account suspension notices, and are-you-lost remain out of the index.",
   ].join("\n");
 
   return new Response(content, {

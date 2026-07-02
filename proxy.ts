@@ -146,11 +146,13 @@ function isProtectedPath(pathname: string) {
 function shouldNoIndex(pathname: string) {
   return (
     isProtectedPath(pathname) ||
-    pathname.startsWith("/login") ||
+    pathname.startsWith("/change-password") ||
+    pathname.startsWith("/access-denied") ||
+    pathname.startsWith("/sign-lease") ||
+    pathname.startsWith("/offline") ||
     pathname.startsWith("/are-you-lost") ||
     pathname.startsWith("/account-suspended") ||
-    pathname.startsWith("/service-terminated") ||
-    pathname.startsWith("/verify-document")
+    pathname.startsWith("/service-terminated")
   );
 }
 

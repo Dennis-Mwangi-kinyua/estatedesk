@@ -1,5 +1,13 @@
 import Link from "next/link";
 import { forgotPasswordAction } from "@/app/(auth)/forgot-password/actions";
+import { publicPageMetadata } from "@/lib/seo";
+
+export const metadata = publicPageMetadata({
+  title: "Forgot Password",
+  description:
+    "Request a secure password reset link for your EstateDesk account.",
+  path: "/forgot-password",
+});
 
 type ForgotPasswordPageProps = {
   searchParams: Promise<{

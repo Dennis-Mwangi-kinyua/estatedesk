@@ -93,26 +93,27 @@ describe("seo helpers", () => {
     assert.equal(robots.googleBot.follow, true);
   });
 
-  it("keeps auth pages out of the index without blocking public-context discovery", () => {
+  it("indexes auth layout pages that do not require a session", () => {
     assertRobotsObject(authPageMetadata.robots);
-    assert.equal(authPageMetadata.robots.index, false);
+    assert.equal(authPageMetadata.robots.index, true);
     assert.equal(authPageMetadata.robots.follow, true);
 
     assertRobotsObject(authPageMetadata.robots.googleBot);
-    assert.equal(authPageMetadata.robots.googleBot.index, false);
+    assert.equal(authPageMetadata.robots.googleBot.index, true);
     assert.equal(authPageMetadata.robots.googleBot.follow, true);
   });
 
-  it("indexes every public context page and excludes auth routes from the manifest", () => {
+  it("indexes every public no-login page in the manifest, including auth entry points", () => {
     const publicPaths = publicSiteIndexItems.map((item) => item.path);
 
     assert.ok(publicPaths.includes("/property-management-markets"));
     assert.ok(publicPaths.includes("/terms"));
-    assert.ok(!publicPaths.some((path) => path.startsWith("/login")));
-    assert.ok(!publicPaths.some((path) => path.startsWith("/register")));
-    assert.ok(!publicPaths.some((path) => path.startsWith("/forgot-password")));
-    assert.ok(!publicPaths.some((path) => path.startsWith("/reset-password")));
-    assert.ok(!publicPaths.some((path) => path.startsWith("/verify-email")));
+    assert.ok(publicPaths.includes("/login"));
+    assert.ok(publicPaths.includes("/register"));
+    assert.ok(publicPaths.includes("/forgot-password"));
+    assert.ok(publicPaths.includes("/reset-password"));
+    assert.ok(publicPaths.includes("/verify-email"));
     assert.ok(!publicPaths.some((path) => path.startsWith("/accept-invite")));
+    assert.ok(!publicPaths.some((path) => path.startsWith("/dashboard")));
   });
 });

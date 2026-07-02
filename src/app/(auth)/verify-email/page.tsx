@@ -3,6 +3,14 @@ import {
   resendVerificationEmailAction,
   verifyEmailAction,
 } from "@/app/(auth)/verify-email/actions";
+import { publicPageMetadata } from "@/lib/seo";
+
+export const metadata = publicPageMetadata({
+  title: "Verify Email",
+  description:
+    "Confirm your EstateDesk account email address and complete account verification.",
+  path: "/verify-email",
+});
 
 type VerifyEmailPageProps = {
   searchParams: Promise<{

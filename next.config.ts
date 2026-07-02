@@ -234,27 +234,59 @@ const nextConfig: NextConfig = {
         headers: PRIVATE_HEADERS,
       },
       {
-        source: "/login",
+        source: "/staff/:path*",
         headers: PRIVATE_HEADERS,
       },
       {
-        source: "/register",
+        source: "/tenants/:path*",
         headers: PRIVATE_HEADERS,
       },
       {
-        source: "/forgot-password",
+        source: "/buildings/:path*",
         headers: PRIVATE_HEADERS,
       },
       {
-        source: "/reset-password",
+        source: "/charges/:path*",
         headers: PRIVATE_HEADERS,
       },
       {
-        source: "/verify-email",
+        source: "/reports/:path*",
         headers: PRIVATE_HEADERS,
       },
       {
-        source: "/accept-invite/:path*",
+        source: "/move-outs/:path*",
+        headers: PRIVATE_HEADERS,
+      },
+      {
+        source: "/change-password",
+        headers: PRIVATE_HEADERS,
+      },
+      {
+        source: "/taxes/:path*",
+        headers: PRIVATE_HEADERS,
+      },
+      {
+        source: "/api-keys",
+        headers: PRIVATE_HEADERS,
+      },
+      {
+        source: "/access-denied",
+        headers: PRIVATE_HEADERS,
+      },
+      {
+        source: "/sign-lease/:path*",
+        headers: PRIVATE_HEADERS,
+      },
+      {
+        source: "/offline",
+        headers: PRIVATE_HEADERS,
+      },
+      {
+        source: "/account-suspended",
+        headers: PRIVATE_HEADERS,
+      },
+      {
+        source: "/service-terminated",
         headers: PRIVATE_HEADERS,
       },
       {
