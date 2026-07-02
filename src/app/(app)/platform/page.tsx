@@ -813,12 +813,12 @@ function ActionLink({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3.5 py-3.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:shadow-[0_1px_0_rgba(255,255,255,0.04)_inset] dark:hover:border-slate-500 dark:hover:bg-slate-700/90"
+      className="group flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3.5 py-3.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 dark:border-white/25 dark:bg-slate-700 dark:shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] dark:hover:border-white/40 dark:hover:bg-slate-600"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600 transition-colors group-hover:bg-white group-hover:text-slate-950 dark:bg-slate-900 dark:text-slate-100 dark:group-hover:bg-slate-600 dark:group-hover:text-white">
-        <Icon className="h-4 w-4" />
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-700 ring-1 ring-slate-200/80 transition-colors group-hover:bg-white group-hover:text-slate-950 dark:bg-white/15 dark:text-white dark:ring-white/20 dark:group-hover:bg-white/25 dark:group-hover:text-white">
+        <Icon className="h-4 w-4" strokeWidth={2.25} />
       </div>
-      <p className="truncate text-sm font-semibold text-slate-800 transition-colors group-hover:text-slate-950 dark:text-white dark:group-hover:text-white">
+      <p className="truncate text-sm font-semibold text-slate-900 transition-colors group-hover:text-slate-950 dark:text-slate-50 dark:group-hover:text-white">
         {label}
       </p>
     </Link>
