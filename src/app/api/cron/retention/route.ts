@@ -1,21 +1,12 @@
 import { NextResponse } from "next/server";
+import { isCronAuthorized } from "@/lib/cron/auth";
 import { runRetentionCron } from "@/lib/cron/jobs";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
-function isAuthorized(request: Request) {
-  const secret = process.env.CRON_SECRET;
-
-  if (!secret) {
-    return process.env.NODE_ENV !== "production";
-  }
-
-  const authHeader = request.headers.get("authorization");
-  return authHeader === `Bearer ${secret}`;
-}
-
-export async function POST(request: Request) {
-  if (!isAuthorized(request)) {
+async function handleRetentionCron(request: Request) {
+  if (!isCronAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -23,3 +14,6 @@ export async function POST(request: Request) {
 
   return NextResponse.json(result);
 }
+
+export const GET = handleRetentionCron;
+export const POST = handleRetentionCron;
