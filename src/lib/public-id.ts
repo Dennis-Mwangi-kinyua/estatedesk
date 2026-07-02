@@ -1,4 +1,3 @@
-import "server-only";
 import { createCipheriv, createDecipheriv, createHash, createHmac } from "node:crypto";
 
 const TOKEN_PREFIX = "ed";
