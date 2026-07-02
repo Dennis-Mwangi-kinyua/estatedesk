@@ -17,7 +17,11 @@ jobs:
       - env:
           APP_URL: ${{ secrets.PRODUCTION_APP_URL }}
           CRON_SECRET: ${{ secrets.PRODUCTION_CRON_SECRET }}
-        run: curl --fail --silent --show-error --max-time 60 --request POST --header "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/notifications"
+        run: |
+          curl --fail --silent --show-error --max-time 60 \
+            --request POST \
+            --header "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/cron/notifications"
 
   retention:
     if: ${{ vars.PRODUCTION_CRON_ENABLED == 'true' && (github.event.schedule == '20 2 * * *' || github.event_name == 'workflow_dispatch') }}
@@ -26,4 +30,8 @@ jobs:
       - env:
           APP_URL: ${{ secrets.PRODUCTION_APP_URL }}
           CRON_SECRET: ${{ secrets.PRODUCTION_CRON_SECRET }}
-        run: curl --fail --silent --show-error --max-time 120 --request POST --header "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/retention"
+        run: |
+          curl --fail --silent --show-error --max-time 120 \
+            --request POST \
+            --header "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/cron/retention"
