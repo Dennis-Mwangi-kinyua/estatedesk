@@ -10,6 +10,7 @@ import {
   GatewayStatus,
   VerificationStatus,
 } from "@prisma/client";
+import { isPayableWaterBillStatus } from "@/lib/water-bills/status";
 
 const tenantInvoiceArgs = Prisma.validator<Prisma.TenantDefaultArgs>()({
   include: {
@@ -258,6 +259,7 @@ export default async function TenantInvoicePage() {
         const isPaid =
           bill.status === "PAID_VERIFIED" ||
           (bill.status === "PAID_PENDING_VERIFICATION" && !!receiptUrl);
+        const canPay = isPayableWaterBillStatus(bill.status);
 
         return {
           id: bill.id,
@@ -266,15 +268,16 @@ export default async function TenantInvoicePage() {
           period: bill.period,
           dueDate: bill.dueDate,
           amountDue,
-          balance: isPaid ? 0 : amountDue,
+          balance: isPaid ? 0 : canPay ? amountDue : 0,
           status: bill.status.replaceAll("_", " "),
           rawStatus: bill.status,
           description: bill.notes,
           receiptUrl,
           isPaid,
-          payNowHref: isPaid
-            ? null
-            : `/dashboard/tenant/payments/new?source=water_bill&id=${bill.id}`,
+          payNowHref:
+            isPaid || !canPay
+              ? null
+              : `/dashboard/tenant/payments/new?source=water_bill&id=${bill.id}`,
         };
       }) ?? [];
 

@@ -14,6 +14,7 @@ import {
   isUniqueConstraintError,
   normalizeTransactionReference,
 } from "@/lib/payments/transaction-reference";
+import { isPayableWaterBillStatus } from "@/lib/water-bills/status";
 
 type StartPaymentInput = {
   source: string;
@@ -557,6 +558,20 @@ export async function startTenantPayment(input: StartPaymentInput) {
 
       if (bill.status === "PAID_VERIFIED") {
         throw new Error("This water bill is already cleared.");
+      }
+
+      if (bill.status === "PENDING_APPROVAL") {
+        throw new Error(
+          "This water bill is awaiting organization approval and cannot be paid yet.",
+        );
+      }
+
+      if (bill.status === "CANCELLED") {
+        throw new Error("This water bill was cancelled.");
+      }
+
+      if (!isPayableWaterBillStatus(bill.status)) {
+        throw new Error("This water bill is not open for payment.");
       }
 
       const amount = Number(bill.total ?? 0);

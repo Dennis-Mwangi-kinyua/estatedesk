@@ -976,11 +976,15 @@ export default async function OrganizationNotificationsPage({
             <PanelHeader
               eyebrow="Review queue"
               title="Water reading approvals"
-              description="Process caretaker submissions before tenant billing is generated."
+              description={
+                approvalQueueCount > approvalQueue.length
+                  ? `Showing ${approvalQueue.length} of ${approvalQueueCount} submitted readings. Process caretaker submissions before tenant billing is issued.`
+                  : "Process caretaker submissions before tenant billing is generated."
+              }
             />
 
             <div className="mt-5 space-y-4">
-              {approvalQueue.length === 0 ? (
+              {approvalQueueCount === 0 ? (
                 <EmptyState
                   title="Nothing waiting for review"
                   message="New water readings will appear here once submitted."

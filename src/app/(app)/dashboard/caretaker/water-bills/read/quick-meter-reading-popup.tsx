@@ -45,6 +45,14 @@ export function QuickMeterReadingPopup({
     remainingUnits[0];
 
   useEffect(() => {
+    if (!remainingUnits.length) return;
+
+    if (!remainingUnits.some((unit) => unit.id === selectedUnitId)) {
+      setSelectedUnitId(remainingUnits[0].id);
+    }
+  }, [remainingUnits, selectedUnitId]);
+
+  useEffect(() => {
     if (!open) return;
     window.setTimeout(() => currentReadingRef.current?.focus(), 50);
   }, [activeUnit, open]);
@@ -126,7 +134,7 @@ export function QuickMeterReadingPopup({
                   </label>
                   <select
                     name="unitId"
-                    value={activeUnit.id}
+                    value={selectedUnitId}
                     onChange={(event) => setSelectedUnitId(event.target.value)}
                     required
                     className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"

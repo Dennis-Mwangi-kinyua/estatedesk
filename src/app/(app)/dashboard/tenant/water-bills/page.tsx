@@ -10,6 +10,7 @@ import {
   VerificationStatus,
 } from "@prisma/client";
 import { CalendarDays, Droplets, ReceiptText, Waves } from "lucide-react";
+import { getWaterBillOutstandingAmount } from "@/lib/water-bills/status";
 
 const tenantWaterBillsArgs = Prisma.validator<Prisma.TenantDefaultArgs>()({
   include: {
@@ -134,7 +135,7 @@ function getReceiptHref(bill: WaterBillItem) {
 }
 
 function getOutstandingAmount(bill: WaterBillItem) {
-  return bill.status === "PAID_VERIFIED" ? 0 : Number(bill.total ?? 0);
+  return getWaterBillOutstandingAmount(bill.status, bill.total);
 }
 
 function getUnitLabel(bill: WaterBillItem) {
