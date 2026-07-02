@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { isSupportedCurrency } from "@/lib/currencies";
 import { requireCurrentOrgId, requireOrgAccess } from "@/lib/auth/org";
 import { requireUserSession } from "@/lib/auth/session";
 import { createInvitation } from "@/lib/invitations/create-invitation";
@@ -70,6 +71,9 @@ export async function updateOrganizationAction(formData: FormData) {
 
   if (!name || !slug || !timezone || !currency) {
     throw new Error("Name, slug, timezone, and currency are required.");
+  }
+  if (!isSupportedCurrency(currency)) {
+    throw new Error("Select a supported East African or UAE currency.");
   }
 
   await prisma.organization.update({

@@ -4,7 +4,9 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { writeAuditLog } from "@/lib/audit/security";
+import { postVerifiedPayment, reversePaymentPosting } from "@/lib/accounting/payments";
 import { issueDocumentRecord } from "@/lib/documents/registry";
+import { createReceiptSnapshot } from "@/lib/documents/receipt-snapshot";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { allocateRentPayment, getCurrentPeriod } from "@/lib/ledger";
@@ -256,6 +258,24 @@ export async function verifyTenantPaymentAction(formData: FormData) {
       });
     }
 
+    if (payment.receipt?.documentId || receiptNumber) {
+      const snapshot = await createReceiptSnapshot(tx, payment.id, session.userId);
+      await tx.documentRecord.update({
+        where: payment.receipt?.documentId
+          ? { id: payment.receipt.documentId }
+          : { serialNumber: receiptNumber },
+        data: {
+          metadata: {
+            paymentId: payment.id,
+            targetType: payment.targetType,
+            receiptSnapshot: snapshot,
+          },
+        },
+      });
+    }
+
+    await postVerifiedPayment(tx, payment.id, session.userId);
+
     if (payment.payerTenant) {
       await notifyRecipients({
         db: tx,
@@ -431,6 +451,7 @@ export async function reverseVerifiedPaymentAction(formData: FormData) {
           },
         },
         waterBill: { select: { id: true } },
+        receipt: { select: { documentId: true } },
         payerTenant: { select: { id: true, userId: true } },
       },
     });
@@ -483,6 +504,24 @@ export async function reverseVerifiedPaymentAction(formData: FormData) {
         coveredPeriods: [],
       },
     });
+
+    if (payment.receipt?.documentId) {
+      await tx.documentRecord.update({
+        where: { id: payment.receipt.documentId },
+        data: { status: "REVOKED", revokedAt: reversedAt, revocationReason: reason },
+      });
+      await tx.documentEvent.create({
+        data: {
+          orgId: session.activeOrgId!,
+          documentId: payment.receipt.documentId,
+          eventType: "REVOKED",
+          actorUserId: session.userId,
+          metadata: { reason, paymentId: payment.id },
+        },
+      });
+    }
+
+    await reversePaymentPosting(tx, payment.id, reason, session.userId);
 
     await tx.auditLog.create({
       data: {

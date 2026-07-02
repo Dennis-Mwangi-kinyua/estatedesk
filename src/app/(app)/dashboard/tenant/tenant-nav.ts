@@ -19,6 +19,7 @@ export const tenantNavItems = [
   { label: "Lease", href: "/dashboard/tenant/lease", icon: HiOutlineDocumentText, emoji: "📄", requiresActiveLease: true },
   { label: "Payments", href: "/dashboard/tenant/payments", icon: HiOutlineCreditCard, emoji: "💳", requiresActiveLease: true },
   { label: "Invoices", href: "/dashboard/tenant/invoice", icon: HiOutlineReceiptRefund, emoji: "🧾", requiresActiveLease: true },
+  { label: "Expenditures", href: "/dashboard/tenant/expenditures", icon: HiOutlineReceiptRefund, emoji: "💸", requiresActiveLease: true },
   { label: "Water Bills", href: "/dashboard/tenant/water-bills", icon: HiOutlineClipboardDocumentList, emoji: "💧", requiresActiveLease: true },
   { label: "Issues", href: "/dashboard/tenant/issues", icon: HiOutlineWrenchScrewdriver, emoji: "🛠️", requiresActiveLease: true },
   { label: "Maintenance", href: "/dashboard/tenant/maintenance", icon: HiOutlineWrenchScrewdriver, emoji: "🔧", requiresActiveLease: true },

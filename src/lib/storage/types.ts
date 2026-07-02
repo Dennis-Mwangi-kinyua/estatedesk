@@ -15,4 +15,5 @@ export interface StorageProvider {
   uploadFile(input: UploadFileInput): Promise<UploadedFileResult>;
   deleteFile(key: string): Promise<void>;
   getPublicUrl(key: string): string;
+  downloadFile(key: string): Promise<Uint8Array>;
 }

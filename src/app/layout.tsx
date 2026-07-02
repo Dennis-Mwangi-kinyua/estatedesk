@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
 import { WebVitalsReporter } from "@/components/monitoring/web-vitals-reporter";
 import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
+import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { ThemeInitScript } from "@/components/theme/theme-init-script";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -16,6 +17,7 @@ const bingSiteVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION;
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   applicationName: SITE_NAME,
+  manifest: "/manifest.webmanifest",
   creator: SITE_NAME,
   publisher: SITE_NAME,
   category: "Property management software",
@@ -50,6 +52,18 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: ["/images/og-vacancy.svg"],
   },
+  appleWebApp: {
+    capable: true,
+    title: SITE_NAME,
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   robots: {
     index: true,
     follow: true,
@@ -76,6 +90,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
+  themeColor: "#0f766e",
 };
 
 const structuredData = [
@@ -200,6 +215,7 @@ export default function RootLayout({
           <MarketingAnalytics />
           <WebVitalsReporter />
           <MobileSwipeBack />
+          <ServiceWorkerRegistration />
           <div className="min-h-screen w-full">{children}</div>
           <ThemeToggle />
         </ThemeProvider>

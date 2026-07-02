@@ -12,6 +12,7 @@ import {
   Home,
   Lightbulb,
   LayoutGrid,
+  Landmark,
   LogOut,
   Upload,
   Receipt,
@@ -101,6 +102,18 @@ const SIDEBAR_LINKS: readonly SidebarLink[] = [
     href: "/dashboard/org/payments",
     icon: CreditCard,
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
+  },
+  {
+    label: "Accounting",
+    href: "/dashboard/org/accounting",
+    icon: Landmark,
+    roles: ["ADMIN", "MANAGER", "ACCOUNTANT"],
+  },
+  {
+    label: "Expenditures",
+    href: "/dashboard/org/expenditures",
+    icon: Receipt,
+    roles: ["ADMIN", "MANAGER", "ACCOUNTANT"],
   },
   {
     label: "Charges",

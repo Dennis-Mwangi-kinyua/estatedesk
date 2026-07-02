@@ -145,6 +145,8 @@ export async function loginAction(
   _prevState: LoginActionState,
   formData: FormData,
 ): Promise<LoginActionState> {
+  const requestedReturnTo = String(formData.get("returnTo") ?? "");
+  const returnTo = requestedReturnTo.startsWith("/") && !requestedReturnTo.startsWith("//") ? requestedReturnTo : null;
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -271,7 +273,7 @@ export async function loginAction(
           }),
       );
 
-      redirect(destination);
+      redirect(returnTo ?? destination);
     }
 
     const primaryMembership = await timed(
@@ -383,7 +385,7 @@ export async function loginAction(
             }),
     );
 
-    return redirect(destination);
+    return redirect(user.mustChangePassword || !user.termsAcceptedAt ? destination : returnTo ?? destination);
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;

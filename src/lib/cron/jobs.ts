@@ -4,6 +4,7 @@ import { buildRetentionReport } from "@/lib/data-retention/report";
 import { queueDuePaymentNotifications } from "@/lib/ledger";
 import { dispatchQueuedNotifications } from "@/lib/notifications/dispatch";
 import { sendSecurityAlert } from "@/lib/security/alerts";
+import { processLeaseSigningLifecycle } from "@/lib/leases/signing";
 import { recordCronJobRun } from "./job-runs";
 
 export async function runNotificationCron(input?: {
@@ -17,10 +18,12 @@ export async function runNotificationCron(input?: {
     actorUserId: input?.actorUserId,
     run: async () => {
       const reminders = await queueDuePaymentNotifications();
+      const leaseSigning = await processLeaseSigningLifecycle();
       const dispatch = await dispatchQueuedNotifications();
 
       return {
         remindersQueued: reminders.queued,
+        leaseSigning,
         ...dispatch,
       };
     },

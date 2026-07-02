@@ -59,7 +59,8 @@ type LoginPageProps = {
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  await searchParams;
+  const params = await searchParams;
+  const returnTo = params?.returnTo?.startsWith("/") && !params.returnTo.startsWith("//") ? params.returnTo : undefined;
 
   return (
     <div className="login-screen fixed inset-0 w-screen overflow-hidden bg-white text-slate-950">
@@ -316,7 +317,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               </div>
 
               <div className="login-form-shell relative min-h-0 flex-1 overflow-hidden">
-                <LoginForm />
+          <LoginForm returnTo={returnTo} />
               </div>
             </section>
 

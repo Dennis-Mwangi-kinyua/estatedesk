@@ -18,6 +18,7 @@ import {
   createOrganizationAction,
   type CreateOrganizationState,
 } from "./actions";
+import { CurrencySelect } from "@/components/forms/currency-select";
 
 const initialState: CreateOrganizationState = {
   success: false,
@@ -284,12 +285,12 @@ export default function NewOrganizationPage() {
 
                 <div className="grid gap-4 sm:grid-cols-3">
                   <Field label="Currency code">
-                    <input
+                    <CurrencySelect
+                      name="currencyCodeSelector"
                       value={currencyCode}
                       onChange={(e) =>
                         setCurrencyCode(e.target.value.toUpperCase())
                       }
-                      placeholder="KES"
                       className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm uppercase outline-none transition focus:border-neutral-400"
                     />
                   </Field>

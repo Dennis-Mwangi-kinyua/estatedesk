@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
+import { isSupportedCurrency } from "@/lib/currencies";
 
 export async function updateMembership(memberId: string, formData: FormData) {
   const orgId = await requireCurrentOrgId();
@@ -31,6 +32,9 @@ export async function updateMembership(memberId: string, formData: FormData) {
     (salaryAmount === null || !Number.isFinite(salaryAmount) || salaryAmount < 0)
   ) {
     throw new Error("Salary must be a valid positive number.");
+  }
+  if (!isSupportedCurrency(salaryCurrency)) {
+    throw new Error("Select a supported East African or UAE currency.");
   }
 
   const membership = await prisma.membership.findFirst({

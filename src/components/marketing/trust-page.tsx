@@ -15,6 +15,7 @@ type TrustPageProps = {
   updatedAt: string;
   sections: TrustSection[];
   downloadHref?: string;
+  downloadLabel?: string;
 };
 
 export function TrustPage({
@@ -24,6 +25,7 @@ export function TrustPage({
   updatedAt,
   sections,
   downloadHref,
+  downloadLabel = "Download PDF",
 }: TrustPageProps) {
   return (
     <main className="min-h-screen bg-white text-slate-950 dark:bg-[#0b0f16] dark:text-slate-100">
@@ -50,7 +52,7 @@ export function TrustPage({
                 className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 sm:w-auto"
               >
                 <Download className="h-4 w-4" />
-                Download PDF
+                {downloadLabel}
               </Link>
             ) : null}
           </div>

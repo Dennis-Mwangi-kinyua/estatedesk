@@ -134,60 +134,70 @@ model RateLimitBucket {
 
 /// Tenant organization / property management company boundary.
 model Organization {
-  id                     String                    @id @default(cuid())
-  name                   String
-  slug                   String                    @unique
-  phone                  String?
-  email                  String?
-  address                String?
-  status                 OrganizationStatus        @default(ACTIVE)
-  currencyCode           String                    @default("KES")
-  timezone               String                    @default("Africa/Nairobi")
-  dataRetentionDays      Int                       @default(2555)
-  deletedAt              DateTime?
-  createdAt              DateTime                  @default(now())
-  updatedAt              DateTime                  @updatedAt
-  marketerId             String?
-  referralCode           String?
-  commissionRate         Decimal?                  @db.Decimal(5, 2)
-  commissionStatus       MarketingCommissionStatus @default(PENDING)
-  commissionNotes        String?
-  apiKeys                ApiKey[]
-  assets                 Asset[]
-  auditLogs              AuditLog[]
-  caretakerAssignments   CaretakerAssignment[]
-  dataExportRequests     DataExportRequest[]
-  documentRecords        DocumentRecord[]
-  documentEvents         DocumentEvent[]
-  invitations            Invitation[]
-  importRuns             ImportRun[]
-  issues                 IssueTicket[]
-  issueResolutionReports IssueResolutionReport[]
-  kraIntegration         KraIntegration?
-  landlordAssignments    LandlordAssignment[]
-  landlordProfiles       LandlordProfile[]
-  marketer               PlatformMarketer?         @relation(fields: [marketerId], references: [id])
-  leases                 Lease[]
-  memberships            Membership[]
-  notifications          Notification[]
-  platformMessages       PlatformMessage[]
-  settings               OrganizationSettings?
-  payments               Payment[]
-  paymentAllocations     PaymentAllocation[]
-  properties             Property[]
-  rentCharges            RentCharge[]
-  rentalReturns          RentalIncomeReturn[]
-  reportExports          ReportExport[]
-  vacancyInquiries       VacancyInquiry[]
-  subscription           Subscription?
-  taxCharges             TaxCharge[]
-  taxpayerProfiles       TaxpayerProfile[]
-  tenants                Tenant[]
-  tenantActionLogs       TenantActionLog[]
-  tenantHistoryRecords   TenantHistoryRecord[]
-  tenantTransfersIn      TenantTransferRequest[]   @relation("TenantTransferTargetOrg")
-  tenantTransfersOut     TenantTransferRequest[]   @relation("TenantTransferSourceOrg")
-  waterBills             WaterBill[]
+  id                      String                    @id @default(cuid())
+  name                    String
+  slug                    String                    @unique
+  phone                   String?
+  email                   String?
+  address                 String?
+  status                  OrganizationStatus        @default(ACTIVE)
+  currencyCode            String                    @default("KES")
+  timezone                String                    @default("Africa/Nairobi")
+  dataRetentionDays       Int                       @default(2555)
+  deletedAt               DateTime?
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  marketerId              String?
+  referralCode            String?
+  commissionRate          Decimal?                  @db.Decimal(5, 2)
+  commissionStatus        MarketingCommissionStatus @default(PENDING)
+  commissionNotes         String?
+  apiKeys                 ApiKey[]
+  accountingAccounts      AccountingAccount[]
+  accountingPeriods       AccountingPeriod[]
+  bankAccounts            AccountingBankAccount[]
+  budgets                 AccountingBudget[]
+  journalEntries          AccountingJournalEntry[]
+  taxCodes                AccountingTaxCode[]
+  vendors                 AccountingVendor[]
+  vendorBills             AccountingVendorBill[]
+  assets                  Asset[]
+  auditLogs               AuditLog[]
+  caretakerAssignments    CaretakerAssignment[]
+  dataExportRequests      DataExportRequest[]
+  documentRecords         DocumentRecord[]
+  documentEvents          DocumentEvent[]
+  expenditures            Expenditure[]
+  invitations             Invitation[]
+  importRuns              ImportRun[]
+  issues                  IssueTicket[]
+  issueResolutionReports  IssueResolutionReport[]
+  kraIntegration          KraIntegration?
+  landlordAssignments     LandlordAssignment[]
+  landlordProfiles        LandlordProfile[]
+  marketer                PlatformMarketer?         @relation(fields: [marketerId], references: [id])
+  leases                  Lease[]
+  leaseSignatureEnvelopes LeaseSignatureEnvelope[]
+  memberships             Membership[]
+  notifications           Notification[]
+  platformMessages        PlatformMessage[]
+  settings                OrganizationSettings?
+  payments                Payment[]
+  paymentAllocations      PaymentAllocation[]
+  properties              Property[]
+  rentCharges             RentCharge[]
+  rentalReturns           RentalIncomeReturn[]
+  reportExports           ReportExport[]
+  vacancyInquiries        VacancyInquiry[]
+  subscription            Subscription?
+  taxCharges              TaxCharge[]
+  taxpayerProfiles        TaxpayerProfile[]
+  tenants                 Tenant[]
+  tenantActionLogs        TenantActionLog[]
+  tenantHistoryRecords    TenantHistoryRecord[]
+  tenantTransfersIn       TenantTransferRequest[]   @relation("TenantTransferTargetOrg")
+  tenantTransfersOut      TenantTransferRequest[]   @relation("TenantTransferSourceOrg")
+  waterBills              WaterBill[]
 
   @@index([slug])
   @@index([status])
@@ -795,6 +805,7 @@ model Tenant {
   user             User?                   @relation(fields: [userId], references: [id])
   actionLogs       TenantActionLog[]
   historyRecords   TenantHistoryRecord[]
+  expenditures     Expenditure[]
   transferCopies   TenantTransferRequest[] @relation("TenantTransferCreatedTenant")
   transferRequests TenantTransferRequest[] @relation("TenantTransferSourceTenant")
   waterBills       WaterBill[]
@@ -945,6 +956,7 @@ model Lease {
   rentalReturnItems  RentalIncomeReturnItem[]
   taxCharges         TaxCharge[]
   tenantActionLogs   TenantActionLog[]
+  signatureEnvelopes LeaseSignatureEnvelope[]
 
   @@index([orgId])
   @@index([unitId])
@@ -961,6 +973,87 @@ model Lease {
   @@index([orgId, tenantId, status])
   @@index([orgId, unitId, status])
   @@index([orgId, dueDay, status])
+}
+
+model LeaseSignatureEnvelope {
+  id                 String                       @id @default(cuid())
+  orgId              String
+  leaseId            String
+  sourceAssetId      String
+  finalAssetId       String?
+  sourceDocumentHash String
+  finalDocumentHash  String?                      @unique
+  status             LeaseSignatureEnvelopeStatus @default(PENDING)
+  message            String?
+  consentVersion     String                       @default("2026-07-02")
+  jurisdiction       LeaseSigningJurisdiction     @default(KENYA)
+  consentText        String                       @default("I intend to sign this lease electronically and consent to the capture of signing evidence.")
+  signingOrder       LeaseSigningOrder            @default(SEQUENTIAL)
+  version            Int                          @default(1)
+  amendmentOfId      String?
+  expiresAt          DateTime
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?
+  createdByUserId    String
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+  org                Organization                 @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  lease              Lease                        @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  signers            LeaseSignatureSigner[]
+  events             LeaseSignatureEvent[]
+
+  @@index([orgId, status, createdAt])
+  @@index([leaseId, createdAt])
+  @@index([expiresAt, status])
+}
+
+model LeaseSignatureSigner {
+  id                 String                 @id @default(cuid())
+  envelopeId         String
+  userId             String?
+  role               LeaseSignerRole
+  signingOrder       Int                    @default(1)
+  label              String?
+  name               String
+  email              String?
+  phone              String?
+  tokenHash          String                 @unique
+  status             LeaseSignerStatus      @default(PENDING)
+  signatureText      String?
+  signatureMethod    LeaseSignatureMethod?
+  signatureAssetKey  String?
+  signatureImageHash String?
+  consentAcceptedAt  DateTime?
+  signedAt           DateTime?
+  declinedAt         DateTime?
+  declineReason      String?
+  ipAddress          String?
+  userAgent          String?
+  lastReminderAt     DateTime?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  envelope           LeaseSignatureEnvelope @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([envelopeId, status])
+  @@index([envelopeId, signingOrder])
+}
+
+model LeaseSignatureEvent {
+  id          String                  @id @default(cuid())
+  envelopeId  String
+  eventType   LeaseSignatureEventType
+  actorUserId String?
+  signerId    String?
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime                @default(now())
+  envelope    LeaseSignatureEnvelope  @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
+
+  @@index([envelopeId, createdAt])
+  @@index([eventType, createdAt])
 }
 
 /// Caretaker scope assignment for property, building, or unit operations.
@@ -1417,6 +1510,287 @@ model Receipt {
   issuedAt   DateTime        @default(now())
   payment    Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   document   DocumentRecord? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+}
+
+/// Organization-scoped chart of accounts for the double-entry general ledger.
+model AccountingAccount {
+  id            String                     @id @default(cuid())
+  orgId         String
+  code          String
+  name          String
+  type          AccountingAccountType
+  normalBalance AccountingBalanceSide
+  systemKey     String?
+  description   String?
+  isControl     Boolean                    @default(false)
+  isActive      Boolean                    @default(true)
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+  org           Organization               @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  journalLines  AccountingJournalLine[]
+  bankAccounts  AccountingBankAccount[]
+  budgetLines   AccountingBudgetLine[]
+  billLines     AccountingVendorBillLine[]
+
+  @@unique([orgId, code])
+  @@unique([orgId, systemKey])
+  @@index([orgId, type, isActive])
+}
+
+/// Lockable fiscal period. Posted entries cannot be added to a closed period.
+model AccountingPeriod {
+  id             String                   @id @default(cuid())
+  orgId          String
+  name           String
+  startsAt       DateTime
+  endsAt         DateTime
+  status         AccountingPeriodStatus   @default(OPEN)
+  closedAt       DateTime?
+  closedByUserId String?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  org            Organization             @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  journalEntries AccountingJournalEntry[]
+  budgets        AccountingBudget[]
+
+  @@unique([orgId, startsAt, endsAt])
+  @@index([orgId, status, startsAt])
+}
+
+/// Immutable header for a balanced accounting transaction.
+model AccountingJournalEntry {
+  id              String                  @id @default(cuid())
+  orgId           String
+  periodId        String?
+  entryNumber     String
+  entryDate       DateTime
+  description     String
+  memo            String?
+  status          AccountingJournalStatus @default(DRAFT)
+  sourceType      AccountingSourceType
+  sourceId        String?
+  reversalOfId    String?                 @unique
+  postedAt        DateTime?
+  postedByUserId  String?
+  createdByUserId String?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  org             Organization            @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  period          AccountingPeriod?       @relation(fields: [periodId], references: [id])
+  lines           AccountingJournalLine[]
+  reversalOf      AccountingJournalEntry? @relation("JournalReversal", fields: [reversalOfId], references: [id])
+  reversedBy      AccountingJournalEntry? @relation("JournalReversal")
+
+  @@unique([orgId, entryNumber])
+  @@unique([orgId, sourceType, sourceId])
+  @@index([orgId, entryDate, status])
+  @@index([periodId, status])
+}
+
+model AccountingJournalLine {
+  id          String                 @id @default(cuid())
+  orgId       String
+  journalId   String
+  accountId   String
+  description String?
+  debit       Decimal                @default(0) @db.Decimal(14, 2)
+  credit      Decimal                @default(0) @db.Decimal(14, 2)
+  propertyId  String?
+  unitId      String?
+  tenantId    String?
+  vendorId    String?
+  landlordId  String?
+  createdAt   DateTime               @default(now())
+  journal     AccountingJournalEntry @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  account     AccountingAccount      @relation(fields: [accountId], references: [id])
+
+  @@index([orgId, accountId])
+  @@index([journalId])
+  @@index([propertyId])
+  @@index([unitId])
+  @@index([tenantId])
+  @@index([vendorId])
+}
+
+model AccountingBankAccount {
+  id                  String                    @id @default(cuid())
+  orgId               String
+  ledgerAccountId     String
+  name                String
+  type                AccountingBankAccountType
+  institutionName     String?
+  accountNumberMasked String?
+  currencyCode        String                    @default("KES")
+  openingBalance      Decimal                   @default(0) @db.Decimal(14, 2)
+  openingBalanceDate  DateTime?
+  isDefault           Boolean                   @default(false)
+  isActive            Boolean                   @default(true)
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  org                 Organization              @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  ledgerAccount       AccountingAccount         @relation(fields: [ledgerAccountId], references: [id])
+
+  @@unique([orgId, name])
+  @@index([orgId, type, isActive])
+}
+
+model AccountingVendor {
+  id            String                 @id @default(cuid())
+  orgId         String
+  name          String
+  contactPerson String?
+  phone         String?
+  email         String?
+  kraPin        String?
+  address       String?
+  paymentTerms  Int                    @default(0)
+  isActive      Boolean                @default(true)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  org           Organization           @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  bills         AccountingVendorBill[]
+
+  @@unique([orgId, name])
+  @@index([orgId, isActive])
+}
+
+model AccountingTaxCode {
+  id               String                     @id @default(cuid())
+  orgId            String
+  code             String
+  name             String
+  rate             Decimal                    @db.Decimal(7, 4)
+  type             AccountingTaxCodeType
+  payableAccountId String?
+  isActive         Boolean                    @default(true)
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+  org              Organization               @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  billLines        AccountingVendorBillLine[]
+
+  @@unique([orgId, code])
+  @@index([orgId, type, isActive])
+}
+
+model AccountingVendorBill {
+  id               String                     @id @default(cuid())
+  orgId            String
+  vendorId         String
+  billNumber       String
+  billDate         DateTime
+  dueDate          DateTime
+  status           AccountingBillStatus       @default(DRAFT)
+  currencyCode     String                     @default("KES")
+  subtotal         Decimal                    @db.Decimal(14, 2)
+  taxAmount        Decimal                    @default(0) @db.Decimal(14, 2)
+  total            Decimal                    @db.Decimal(14, 2)
+  amountPaid       Decimal                    @default(0) @db.Decimal(14, 2)
+  propertyId       String?
+  unitId           String?
+  notes            String?
+  attachmentKey    String?
+  journalEntryId   String?                    @unique
+  createdByUserId  String?
+  approvedByUserId String?
+  approvedAt       DateTime?
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+  org              Organization               @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  vendor           AccountingVendor           @relation(fields: [vendorId], references: [id])
+  lines            AccountingVendorBillLine[]
+
+  @@unique([orgId, vendorId, billNumber])
+  @@index([orgId, status, dueDate])
+  @@index([propertyId])
+}
+
+model AccountingVendorBillLine {
+  id          String               @id @default(cuid())
+  billId      String
+  accountId   String
+  taxCodeId   String?
+  description String
+  quantity    Decimal              @default(1) @db.Decimal(12, 3)
+  unitPrice   Decimal              @db.Decimal(14, 2)
+  taxAmount   Decimal              @default(0) @db.Decimal(14, 2)
+  total       Decimal              @db.Decimal(14, 2)
+  propertyId  String?
+  unitId      String?
+  bill        AccountingVendorBill @relation(fields: [billId], references: [id], onDelete: Cascade)
+  account     AccountingAccount    @relation(fields: [accountId], references: [id])
+  taxCode     AccountingTaxCode?   @relation(fields: [taxCodeId], references: [id])
+
+  @@index([billId])
+  @@index([accountId])
+}
+
+model AccountingBudget {
+  id        String                 @id @default(cuid())
+  orgId     String
+  periodId  String
+  name      String
+  status    AccountingBudgetStatus @default(DRAFT)
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+  org       Organization           @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  period    AccountingPeriod       @relation(fields: [periodId], references: [id])
+  lines     AccountingBudgetLine[]
+
+  @@unique([orgId, periodId, name])
+  @@index([orgId, status])
+}
+
+model AccountingBudgetLine {
+  id         String            @id @default(cuid())
+  budgetId   String
+  accountId  String
+  propertyId String?
+  unitId     String?
+  amount     Decimal           @db.Decimal(14, 2)
+  budget     AccountingBudget  @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  account    AccountingAccount @relation(fields: [accountId], references: [id])
+
+  @@index([budgetId])
+  @@index([accountId])
+}
+
+/// Auditable expenditure register for platform, organization, and tenant-linked costs.
+model Expenditure {
+  id               String              @id @default(cuid())
+  scope            ExpenditureScope
+  orgId            String?
+  tenantId         String?
+  propertyId       String?
+  unitId           String?
+  category         ExpenditureCategory
+  description      String
+  payee            String?
+  reference        String?
+  amount           Decimal             @db.Decimal(14, 2)
+  currencyCode     String
+  incurredAt       DateTime
+  dueAt            DateTime?
+  paidAt           DateTime?
+  status           ExpenditureStatus   @default(RECORDED)
+  paymentMethod    String?
+  chargeable       Boolean             @default(false)
+  attachmentKey    String?
+  journalEntryId   String?
+  createdByUserId  String
+  approvedByUserId String?
+  approvedAt       DateTime?
+  notes            String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  org              Organization?       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenant           Tenant?             @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@index([scope, incurredAt])
+  @@index([orgId, incurredAt])
+  @@index([tenantId, incurredAt])
+  @@index([propertyId, incurredAt])
+  @@index([status, dueAt])
+  @@index([createdByUserId, createdAt])
 }
 
 /// User or tenant notification queued/sent through a delivery channel.
@@ -1953,6 +2327,157 @@ enum PaymentReconciliationStatus {
   UNRECONCILED
   RECONCILED
   DISPUTED
+}
+
+enum AccountingAccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  INCOME
+  EXPENSE
+}
+
+enum AccountingBalanceSide {
+  DEBIT
+  CREDIT
+}
+
+enum AccountingPeriodStatus {
+  OPEN
+  LOCKED
+  CLOSED
+}
+
+enum AccountingJournalStatus {
+  DRAFT
+  POSTED
+  REVERSED
+  VOIDED
+}
+
+enum AccountingSourceType {
+  MANUAL
+  PAYMENT
+  PAYMENT_REVERSAL
+  VENDOR_BILL
+  BILL_PAYMENT
+  OPENING_BALANCE
+  ADJUSTMENT
+  OWNER_DISTRIBUTION
+  EXPENDITURE
+}
+
+enum AccountingBankAccountType {
+  BANK
+  MPESA
+  CASH
+  PETTY_CASH
+  OTHER
+}
+
+enum AccountingTaxCodeType {
+  VAT_INPUT
+  VAT_OUTPUT
+  WITHHOLDING
+  EXEMPT
+  ZERO_RATED
+  OTHER
+}
+
+enum AccountingBillStatus {
+  DRAFT
+  APPROVED
+  PARTIAL
+  PAID
+  VOIDED
+}
+
+enum AccountingBudgetStatus {
+  DRAFT
+  APPROVED
+  CLOSED
+}
+
+enum ExpenditureScope {
+  PLATFORM
+  ORGANIZATION
+  TENANT
+}
+
+enum ExpenditureCategory {
+  MAINTENANCE
+  UTILITIES
+  ADMINISTRATION
+  MARKETING
+  STAFF
+  TAX
+  INSURANCE
+  LEGAL
+  SOFTWARE
+  TRANSPORT
+  TENANT_REPAIR
+  TENANT_SERVICE
+  OTHER
+}
+
+enum ExpenditureStatus {
+  RECORDED
+  PENDING_APPROVAL
+  APPROVED
+  PAID
+  REJECTED
+  VOIDED
+}
+
+enum LeaseSignatureEnvelopeStatus {
+  PENDING
+  PARTIALLY_SIGNED
+  FINALIZING
+  COMPLETED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+enum LeaseSignerRole {
+  ORGANIZATION
+  TENANT
+  WITNESS
+  GUARANTOR
+  LANDLORD
+}
+
+enum LeaseSigningOrder {
+  SEQUENTIAL
+  PARALLEL
+}
+
+enum LeaseSigningJurisdiction {
+  KENYA
+  UAE
+}
+
+enum LeaseSignatureMethod {
+  TYPED
+  DRAWN
+  UPLOADED
+}
+
+enum LeaseSignerStatus {
+  PENDING
+  SIGNED
+  DECLINED
+}
+
+enum LeaseSignatureEventType {
+  CREATED
+  VIEWED
+  SIGNED
+  DECLINED
+  REMINDER_SENT
+  COMPLETED
+  CANCELLED
+  EXPIRED
 }
 
 enum CronJobStatus {

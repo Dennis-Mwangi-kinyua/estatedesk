@@ -18,6 +18,7 @@ export default function TermsPage() {
       updatedAt={termsUpdatedAt}
       sections={termsSections}
       downloadHref="/api/legal/terms.pdf"
+      downloadLabel="Download current terms"
     />
   );
 }

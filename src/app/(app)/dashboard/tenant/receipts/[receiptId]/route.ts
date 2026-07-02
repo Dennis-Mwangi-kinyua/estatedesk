@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireUserSession } from "@/lib/auth/session";
 import { issueDocumentRecord } from "@/lib/documents/registry";
 import { generateReceiptPdf } from "@/lib/documents/receipt-pdf";
+import { createReceiptSnapshot, readReceiptSnapshot } from "@/lib/documents/receipt-snapshot";
 import {
   documentVerificationPath,
   hashDocumentContent,
@@ -83,27 +84,53 @@ export async function GET(
   const verificationUrl = absoluteUrl(
     documentVerificationPath(document.verificationCode),
   );
+  let snapshot = readReceiptSnapshot(document.metadata);
+  if (!snapshot && !document.contentHash) {
+    snapshot = await createReceiptSnapshot(prisma, receipt.payment.id, document.issuedByUserId);
+    document = await prisma.documentRecord.update({
+      where: { id: document.id },
+      data: {
+        metadata: {
+          paymentId: receipt.payment.id,
+          legacyReceipt: true,
+          receiptSnapshot: snapshot,
+        },
+      },
+    });
+  }
   const pdfBytes = await generateReceiptPdf({
     serialNumber: document.serialNumber,
     verificationUrl,
     status: document.status,
     issuedAt: document.issuedAt,
-    organizationName: receipt.payment.org.name,
-    organizationAddress: receipt.payment.org.address,
-    payerName:
+    organizationName: snapshot?.organizationName ?? receipt.payment.org.name,
+    organizationAddress: snapshot?.organizationAddress ?? receipt.payment.org.address,
+    payerName: snapshot?.payerName ??
       receipt.payment.payerTenant?.fullName ??
       receipt.payment.payerUser?.fullName ??
       receipt.payment.payerName ??
       "Payer",
-    amount: Number(receipt.payment.amount),
-    currencyCode: receipt.payment.org.currencyCode,
-    paymentMethod: receipt.payment.method,
-    paymentFor: receipt.payment.targetType,
-    paymentReference:
+    amount: snapshot?.amount ?? Number(receipt.payment.amount),
+    currencyCode: snapshot?.currencyCode ?? receipt.payment.org.currencyCode,
+    paymentMethod: snapshot?.paymentMethod ?? receipt.payment.method,
+    paymentFor: snapshot?.paymentFor ?? receipt.payment.targetType,
+    paymentReference: snapshot?.paymentReference ??
       receipt.payment.externalReference ??
       receipt.payment.reference ??
       receipt.payment.checkoutRequestId,
-    paidAt: receipt.payment.paidAt ?? receipt.payment.createdAt,
+    paidAt: snapshot ? new Date(snapshot.paidAt) : receipt.payment.paidAt ?? receipt.payment.createdAt,
+    organizationPhone: snapshot?.organizationPhone,
+    organizationEmail: snapshot?.organizationEmail,
+    kraPin: snapshot?.kraPin,
+    tenantIdentifier: snapshot?.tenantIdentifier,
+    propertyName: snapshot?.propertyName,
+    unitName: snapshot?.unitName,
+    leaseIdentifier: snapshot?.leaseIdentifier,
+    periods: snapshot?.periods,
+    allocations: snapshot?.allocations,
+    previousBalance: snapshot?.previousBalance,
+    remainingBalance: snapshot?.remainingBalance,
+    verifiedBy: snapshot?.verifiedBy,
   });
   const contentHash = hashDocumentContent(pdfBytes);
 

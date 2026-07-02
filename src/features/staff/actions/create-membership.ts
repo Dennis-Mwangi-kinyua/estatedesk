@@ -7,6 +7,7 @@ import { OrgRole as PrismaOrgRole, Prisma, UserStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
+import { isSupportedCurrency } from "@/lib/currencies";
 import {
   STAFF_ROLES,
   type StaffRole,
@@ -147,6 +148,9 @@ export async function createMembership(
 
   if (Number.isNaN(salaryAmount)) {
     return fail("Salary must be a valid positive number.", 0, "salaryAmount");
+  }
+  if (!isSupportedCurrency(salaryCurrency)) {
+    return fail("Select a supported East African or UAE currency.", 0, "salaryCurrency");
   }
 
   if (role === "CARETAKER" && !assignmentTargetType) {

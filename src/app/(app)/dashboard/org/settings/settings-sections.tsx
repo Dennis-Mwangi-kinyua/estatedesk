@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { AppearanceSettings } from "@/components/theme/appearance-settings";
+import { CurrencySelect } from "@/components/forms/currency-select";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { formatLabel, getSettingsPageData } from "./settings-data";
 import {
@@ -191,11 +192,14 @@ export async function SettingsSectionPage({
                 name="timezone"
                 defaultValue={data.organization.timezone}
               />
-              <InputField
-                label="Currency"
-                name="currency"
-                defaultValue={data.organization.currency}
-              />
+              <label className="space-y-2 text-sm font-medium text-slate-700">
+                Currency
+                <CurrencySelect
+                  name="currency"
+                  defaultValue={data.organization.currency}
+                  className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-slate-400"
+                />
+              </label>
 
               <div className="flex justify-end md:col-span-2">
                 <button

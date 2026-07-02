@@ -6,9 +6,9 @@ export type TrustSection = {
 export const termsTitle = "EstateDesk Terms of Service";
 
 export const termsDescription =
-  "These Terms of Service govern access to and use of EstateDesk, including account administration, property management workflows, customer data, tenant records, payment operations, retention, deletion, security, and support.";
+  "These Terms of Service govern access to and use of EstateDesk, including account administration, property management workflows, installable app access, customer data, tenant records, electronic signing, document verification, payment operations, retention, deletion, security, and support.";
 
-export const termsUpdatedAt = "June 26, 2026";
+export const termsUpdatedAt = "July 2, 2026";
 
 export const termsSections: TrustSection[] = [
         {
@@ -32,7 +32,8 @@ export const termsSections: TrustSection[] = [
         {
           title: "3. Description of the service",
           body: [
-            "EstateDesk is a property management and rental operations platform. It supports workflows for organizations, buildings, units, tenants, leases, rent tracking, service charges, water billing, payment reconciliation, inspections, maintenance issues, caretakers, staff access, notifications, reports, public vacancy listings, subscription billing, support, and data exports.",
+            "EstateDesk is a property management and rental operations platform. It supports workflows for organizations, buildings, units, tenants, leases, rent tracking, service charges, water billing, payment reconciliation, accounting records, expenditure records, inspections, maintenance issues, caretakers, staff access, notifications, reports, public vacancy listings, subscription billing, support, and data exports.",
+            "The Service may be accessed through a browser, supported mobile browser, installable progressive web application, service worker, public verification page, public vacancy page, or other web-based interface made available by EstateDesk.",
             "The Service is designed to assist with operational recordkeeping and workflow management. EstateDesk does not act as a landlord, property manager, broker, agent, accountant, advocate, financial adviser, tax adviser, insurer, payment institution, credit bureau, or public authority unless expressly agreed in a separate written agreement.",
             "Outputs from the Service, including balances, reports, dashboards, reminders, ledgers, exports, and alerts, depend on customer-entered information, integration status, configuration choices, permissions, and provider data. Customers must review and verify important records before relying on them for legal, financial, tenancy, or operational decisions.",
           ],
@@ -68,9 +69,9 @@ export const termsSections: TrustSection[] = [
           title: "7. Information collected and processed",
           body: [
             "EstateDesk may collect and process account information, including names, email addresses, phone numbers, usernames, password credentials in protected form, organization memberships, roles, invitations, verification status, terms acceptance, login activity, sessions, preferences, security metadata, and support communications.",
-            "Customer Data may include organization records, building and unit details, landlord details, staff profiles, caretaker assignments, tenant profiles, identification details where provided, next of kin details, lease records, rent and deposit information, charges, invoices, water readings, meter history, inspection records, issue reports, maintenance notes, documents, notifications, vacancy listings, public enquiries, marketing attribution, and operational reports.",
-            "Payment and billing data may include payment references, transaction identifiers, amounts, dates, billing periods, payment status, allocation details, provider callbacks, reconciliation notes, subscription plan, billing contact, invoice details, renewal details, trial status, and payment instruction records. EstateDesk does not require ordinary users to store full card numbers, mobile money PINs, online banking passwords, or bank login credentials in the platform.",
-            "Technical, diagnostic, and security data may include IP addresses, device information, browser information, approximate network location, request headers, timestamps, referral URLs, pages viewed, feature usage, error logs, rate-limit activity, audit events, provider webhook data, and system performance information.",
+            "Customer Data may include organization records, building and unit details, landlord details, staff profiles, caretaker assignments, tenant profiles, identification details where provided, next of kin details, lease records, electronic signing records, rent and deposit information, charges, invoices, water readings, meter history, inspection records, issue reports, maintenance notes, documents, document verification records, notifications, vacancy listings, public enquiries, marketing attribution, and operational reports.",
+            "Payment, billing, accounting, and expenditure data may include payment references, transaction identifiers, amounts, dates, billing periods, payment status, allocation details, provider callbacks, reconciliation notes, ledger entries, account categories, expense details, supporting documents, subscription plan, billing contact, invoice details, renewal details, trial status, and payment instruction records. EstateDesk does not require ordinary users to store full card numbers, mobile money PINs, online banking passwords, or bank login credentials in the platform.",
+            "Technical, diagnostic, and security data may include IP addresses, device information, browser information, approximate network location, request headers, timestamps, referral URLs, pages viewed, feature usage, error logs, rate-limit activity, audit events, provider webhook data, service worker activity, cache status, and system performance information.",
           ],
         },
         {
@@ -112,7 +113,7 @@ export const termsSections: TrustSection[] = [
         {
           title: "12. Security, audit logs, and incident response",
           body: [
-            "EstateDesk uses administrative, technical, and organizational measures designed to protect the Service, including authentication, protected sessions, password controls, organization-scoped permissions, role-based access controls, private dashboard indexing controls, rate limiting, audit logging, encrypted transport where supported, secure configuration practices, backup practices, and operational monitoring.",
+            "EstateDesk uses administrative, technical, and organizational measures designed to protect the Service, including authentication, protected sessions, password controls, organization-scoped permissions, role-based access controls, private dashboard indexing controls, rate limiting, audit logging, document trust controls, encrypted transport where supported, secure configuration practices, backup practices, and operational monitoring.",
             "No internet-accessible service can be guaranteed to be completely secure. Customers and users must use secure devices and networks, protect credentials, manage roles carefully, disable unused accounts, avoid unnecessary sensitive data, keep exported files secure, and report suspected security issues promptly.",
             "EstateDesk may monitor, investigate, preserve, and review logs, sessions, requests, account activity, provider callbacks, and Customer Data where reasonably necessary to detect abuse, diagnose errors, support customers, enforce these terms, protect the Service, comply with law, or respond to incidents.",
             "If EstateDesk becomes aware of a security incident affecting Customer Data, EstateDesk will take reasonable steps to investigate, contain, mitigate, and notify affected customers or users where required by law or contract. Customers are responsible for providing accurate contact details for security notices.",
@@ -121,9 +122,9 @@ export const termsSections: TrustSection[] = [
         {
           title: "13. Payments, rent records, and billing workflows",
           body: [
-            "EstateDesk may support rent, deposit, utility, service charge, water billing, invoice, payment instruction, payment reconciliation, and subscription workflows. These workflows may depend on customer configuration, tenant records, lease terms, payment provider data, webhook delivery, user action, and third-party availability.",
-            "Customers are solely responsible for verifying payment status, reconciling provider statements, correcting allocations, issuing receipts or statements, handling reversals, chargebacks, refunds, disputes, overpayments, underpayments, tax reporting, and compliance with financial, tenancy, consumer, accounting, and payment rules.",
-            "EstateDesk is not a bank, mobile money provider, payment institution, escrow agent, debt collector, credit provider, tax authority, or accounting firm. Displayed balances, payment statuses, and reports are operational records and should be verified against source documents and provider statements where accuracy is material.",
+            "EstateDesk may support rent, deposit, utility, service charge, water billing, invoice, payment instruction, payment reconciliation, accounting ledger, expenditure tracking, and subscription workflows. These workflows may depend on customer configuration, tenant records, lease terms, payment provider data, uploaded evidence, webhook delivery, user action, and third-party availability.",
+            "Customers are solely responsible for verifying payment status, reconciling provider statements, correcting allocations, approving expenditure records, issuing receipts or statements, handling reversals, chargebacks, refunds, disputes, overpayments, underpayments, tax reporting, and compliance with financial, tenancy, consumer, accounting, and payment rules.",
+            "EstateDesk is not a bank, mobile money provider, payment institution, escrow agent, debt collector, credit provider, tax authority, or accounting firm. Displayed balances, payment statuses, ledgers, expenditure summaries, and reports are operational records and should be verified against source documents and provider statements where accuracy is material.",
             "Payment providers, banks, mobile money networks, messaging providers, and other third parties may delay, reject, reverse, duplicate, or fail to deliver confirmations. EstateDesk is not responsible for losses caused by third-party provider failures, incorrect account numbers, customer configuration errors, or unauthorized payment instructions entered by customer users.",
           ],
         },
@@ -149,7 +150,7 @@ export const termsSections: TrustSection[] = [
           title: "16. Imports, exports, reports, and backups",
           body: [
             "Import tools are provided for convenience. Customers are responsible for validating source files, confirming mappings, reviewing imported records, correcting duplicates, handling rejected rows, and ensuring imported data was collected lawfully.",
-            "Exports, downloads, reports, backups, CSV files, archives, and API responses may contain sensitive Personal Data and confidential business records. Customers must restrict export permissions, keep exported files secure, avoid unnecessary sharing, and delete or archive files according to their own retention obligations.",
+            "Exports, downloads, reports, receipts, certificates, signed documents, backups, CSV files, archives, and API responses may contain sensitive Personal Data and confidential business records. Customers must restrict export permissions, keep exported files secure, avoid unnecessary sharing, and delete or archive files according to their own retention obligations.",
             "Dashboards and reports may be affected by incomplete data, pending transactions, time zone settings, delayed provider callbacks, role permissions, filters, user entry errors, migration history, archived records, or system processing delays. EstateDesk does not guarantee that reports are suitable for tax filings, court proceedings, audits, or regulated financial reporting without independent review.",
             "EstateDesk may maintain backups and disaster recovery copies for continuity, security, compliance, and recovery purposes. Backup restoration may reintroduce data that was changed or deleted after the backup point unless additional remediation is performed.",
           ],
@@ -168,7 +169,7 @@ export const termsSections: TrustSection[] = [
           title: "18. Customer content and intellectual property",
           body: [
             "Customers retain ownership of Customer Data and customer content submitted to the Service. Customers grant EstateDesk a limited, worldwide, non-exclusive license to host, store, copy, process, transmit, display, back up, secure, troubleshoot, and otherwise use Customer Data as necessary to provide, support, protect, and improve the Service and comply with these terms.",
-            "Customers represent that they have all rights, consents, permissions, notices, and legal bases required to submit, upload, import, publish, or process customer content, including property images, logos, lease documents, tenant details, staff details, identification information, vacancy listings, payment records, and support materials.",
+            "Customers represent that they have all rights, consents, permissions, notices, and legal bases required to submit, upload, import, publish, sign, verify, or process customer content, including property images, logos, lease documents, tenant details, staff details, identification information, vacancy listings, payment records, expenditure records, and support materials.",
             "EstateDesk and its licensors retain all rights in the Service, including software, source code, user interfaces, workflows, designs, databases, documentation, templates, trademarks, service marks, product names, analytics, security systems, and improvements. No rights are granted except as expressly stated in these terms.",
             "Feedback, suggestions, ideas, or improvement requests may be used by EstateDesk without restriction or obligation, provided EstateDesk does not disclose Customer Data in violation of these terms.",
           ],
@@ -185,6 +186,7 @@ export const termsSections: TrustSection[] = [
           title: "20. Service availability, changes, and support",
           body: [
             "EstateDesk aims to provide reliable web-based access, but the Service may be unavailable or degraded because of maintenance, upgrades, migrations, bugs, hosting incidents, database incidents, provider outages, network conditions, excessive usage, cyberattacks, security response, legal restrictions, or events outside reasonable control.",
+            "If a browser installs EstateDesk as a progressive web application or uses service worker caching, some static application files, icons, public pages, or offline fallback screens may be stored on the user's device. Offline or cached screens may be incomplete or out of date, and users must reconnect before relying on current dashboard, tenant, payment, lease, accounting, or vacancy information.",
             "EstateDesk may add, change, suspend, rename, redesign, limit, or discontinue features where reasonably necessary for product improvement, security, compliance, provider changes, commercial reasons, or operational reliability. EstateDesk will use reasonable efforts to avoid materially reducing core paid functionality without notice where practical.",
             "Support requests should include the organization, affected workflow, approximate time, user role, relevant record identifiers, safe screenshots where useful, and a clear description of the issue. EstateDesk may access relevant account, audit, configuration, and operational records to diagnose, reproduce, and resolve support issues.",
             "Beta, preview, experimental, pilot, or newly launched features are provided for evaluation and may be changed, limited, interrupted, or discontinued at any time. Customers should not rely on beta features for critical operations without independent verification.",
@@ -204,7 +206,7 @@ export const termsSections: TrustSection[] = [
           body: [
             "The Service is provided on an \"as is\" and \"as available\" basis to the maximum extent permitted by law. EstateDesk does not warrant that the Service will be uninterrupted, error-free, immune from attack, free from data loss, compatible with every system, or suitable for every customer's legal, tax, accounting, tenancy, property management, reporting, or business requirements.",
             "EstateDesk does not provide legal, tax, accounting, financial, investment, valuation, insurance, lending, credit, eviction, regulatory, or professional advice. Customers should obtain advice from qualified professionals before making decisions that require professional judgment or have legal, financial, or tenancy consequences.",
-            "EstateDesk is not responsible for customer-entered errors, incomplete records, unauthorized customer sharing, insecure customer devices, lost credentials, exported files, public listing inaccuracies, third-party provider failures, internet outages, user decisions, or reliance on records that have not been independently verified.",
+            "EstateDesk is not responsible for customer-entered errors, incomplete records, unauthorized customer sharing, insecure customer devices, lost credentials, exported files, public listing inaccuracies, stale cached screens, third-party provider failures, internet outages, user decisions, or reliance on records that have not been independently verified.",
           ],
         },
         {

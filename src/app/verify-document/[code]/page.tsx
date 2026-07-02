@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BadgeCheck, Ban, Building2, CalendarDays, FileCheck2, Fingerprint } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { readReceiptSnapshot } from "@/lib/documents/receipt-snapshot";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,17 @@ export default async function VerifyDocumentPage({
     { label: "Issued by", value: document.org.name, icon: Building2 },
     { label: "Issued at", value: formatDate(document.issuedAt), icon: CalendarDays },
   ];
+  const receipt = document.documentType === "RECEIPT"
+    ? readReceiptSnapshot(document.metadata)
+    : null;
+  const receiptDetails = receipt ? [
+    ["Payer", receipt.payerName],
+    ["Amount", new Intl.NumberFormat("en-KE", { style: "currency", currency: receipt.currencyCode }).format(receipt.amount)],
+    ["Payment reference", receipt.paymentReference ?? "Not supplied"],
+    ["Property / unit", [receipt.propertyName, receipt.unitName].filter(Boolean).join(" / ") || "Not linked"],
+    ["Payment period", receipt.periods.join(", ") || "Not specified"],
+    ["Payment method", formatLabel(receipt.paymentMethod)],
+  ] : [];
 
   return (
     <main className="min-h-screen bg-neutral-50 px-4 py-10 text-neutral-950 sm:px-6 sm:py-16">
@@ -79,6 +91,11 @@ export default async function VerifyDocumentPage({
               <p className="mt-2 text-sm leading-6 text-neutral-600">
                 Current registry status: {expired ? "Expired" : formatLabel(document.status)}
               </p>
+              {!valid && document.revocationReason ? (
+                <p className="mt-2 text-sm leading-6 text-red-700">
+                  Reason: {document.revocationReason}
+                </p>
+              ) : null}
             </div>
           </div>
         </header>
@@ -96,6 +113,30 @@ export default async function VerifyDocumentPage({
             );
           })}
         </section>
+
+        {receipt && receiptDetails.length > 0 ? (
+          <section className="mt-6">
+            <h2 className="text-base font-semibold">Receipt details</h2>
+            <div className="mt-3 grid gap-px overflow-hidden rounded-lg border border-neutral-200 bg-neutral-200 sm:grid-cols-2">
+              {receiptDetails.map(([label, value]) => (
+                <div key={label} className="bg-white p-4">
+                  <p className="text-xs font-medium text-neutral-500">{label}</p>
+                  <p className="mt-2 break-words text-sm font-semibold">{value}</p>
+                </div>
+              ))}
+            </div>
+            {receipt.allocations.length > 0 ? (
+              <div className="mt-4 overflow-hidden rounded-lg border border-neutral-200 bg-white">
+                {receipt.allocations.map((allocation, index) => (
+                  <div key={`${allocation.period}-${index}`} className="flex justify-between gap-4 border-b border-neutral-100 p-3 last:border-b-0">
+                    <span className="text-sm text-neutral-600">{allocation.period} · {formatLabel(allocation.description)}</span>
+                    <span className="text-sm font-semibold">{new Intl.NumberFormat("en-KE", { style: "currency", currency: receipt.currencyCode }).format(allocation.amount)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </section>
+        ) : null}
 
         <section className="mt-6 border-t border-neutral-200 pt-5">
           <h2 className="text-base font-semibold">{document.title}</h2>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="EstateDesk">
+  <rect width="1024" height="1024" rx="220" fill="#0f766e" />
+  <rect x="172" y="260" width="680" height="536" rx="88" fill="#f8fafc" />
+  <path d="M244 400L512 218l268 182v92L512 310 244 492z" fill="#14b8a6" />
+  <path d="M330 514h364v76H330zm0 134h364v76H330z" fill="#0f172a" opacity=".9" />
+  <path d="M330 514h84v210h-84z" fill="#14b8a6" />
+</svg>

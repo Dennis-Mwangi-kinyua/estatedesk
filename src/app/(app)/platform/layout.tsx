@@ -73,6 +73,7 @@ const navItems = [
   { href: "/platform/subscriptions", label: "Subscriptions", icon: "BriefcaseBusiness" },
   { href: "/platform/api-keys", label: "API Keys", icon: "KeyRound" },
   { href: "/platform/payments", label: "Payments", icon: "ReceiptText" },
+  { href: "/platform/expenditures", label: "Expenditures", icon: "ReceiptText" },
   { href: "/platform/payment-ops", label: "Payment Ops", icon: "RefreshCcw" },
   { href: "/platform/feature-flags", label: "Feature Flags", icon: "Flag" },
   { href: "/platform/onboarding", label: "Onboarding", icon: "SlidersHorizontal" },

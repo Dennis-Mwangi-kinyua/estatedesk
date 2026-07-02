@@ -14,6 +14,7 @@ import {
   STAFF_ROLES,
   type StaffRole,
 } from "@/features/staff/constants/role-meta";
+import { CurrencySelect } from "@/components/forms/currency-select";
 
 type AssignmentTargetType = "BUILDING";
 
@@ -762,14 +763,12 @@ const StaffProfileFields = memo(function StaffProfileFields({
           <label className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-slate-200">
             Currency
           </label>
-          <input
+          <CurrencySelect
             name="salaryCurrency"
             value={values.salaryCurrency}
             onChange={(event) =>
               onChange("salaryCurrency", event.target.value.toUpperCase())
             }
-            maxLength={3}
-            placeholder="KES"
             className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 uppercase outline-none transition focus:border-neutral-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
           />
         </div>

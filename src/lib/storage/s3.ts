@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -26,6 +27,13 @@ function getS3Client() {
 }
 
 export class S3StorageProvider implements StorageProvider {
+  async downloadFile(key: string): Promise<Uint8Array> {
+    const { client, config } = getS3Client();
+    const response = await client.send(new GetObjectCommand({ Bucket: config.bucket, Key: key }));
+    if (!response.Body) throw new Error("Stored document is empty.");
+    return response.Body.transformToByteArray();
+  }
+
   async uploadFile(input: UploadFileInput): Promise<UploadedFileResult> {
     const { client, config } = getS3Client();
 

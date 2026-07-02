@@ -160,12 +160,22 @@ function createPdf() {
   return Buffer.from(pdf, "latin1");
 }
 
+function termsVersionSlug() {
+  return termsUpdatedAt
+    .toLowerCase()
+    .replace(/,/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+}
+
 export function GET() {
   return new NextResponse(createPdf(), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": 'attachment; filename="estatedesk-terms-of-service.pdf"',
+      "Content-Disposition": `attachment; filename="estatedesk-terms-of-service-${termsVersionSlug()}.pdf"`,
       "Cache-Control": "public, max-age=3600",
+      "X-Document-Title": termsTitle,
+      "X-Document-Updated-At": termsUpdatedAt,
     },
   });
 }

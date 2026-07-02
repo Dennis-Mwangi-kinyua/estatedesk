@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { isSupportedCurrency } from "@/lib/currencies";
 
 const createOrganizationSchema = z
   .object({
@@ -21,8 +22,8 @@ const createOrganizationSchema = z
     currencyCode: z
       .string()
       .trim()
-      .min(3, "Currency code must be 3 characters")
-      .max(3, "Currency code must be 3 characters"),
+      .transform((value) => value.toUpperCase())
+      .refine(isSupportedCurrency, "Select a supported East African or UAE currency"),
     timezone: z.string().trim().min(1, "Timezone is required"),
     dataRetentionDays: z.coerce
       .number()
