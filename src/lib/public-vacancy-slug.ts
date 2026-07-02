@@ -1,5 +1,3 @@
-import "server-only";
-
 import { decodePublicId, encodePublicId } from "@/lib/public-id";
 
 const VACANCY_SCOPE = "public-vacancy";
