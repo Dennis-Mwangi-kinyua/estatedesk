@@ -6,6 +6,7 @@ import { TenantSidebar } from "./tenant-sidebar";
 import { TenantFooter } from "./tenant-footer";
 import { requireActiveSubscription } from "@/lib/billing/subscription-access";
 import { SubscriptionWarning } from "@/components/billing/subscription-warning";
+import { UnreadNotificationAlertsPanel } from "@/components/notifications/unread-notification-alerts-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +57,11 @@ export default async function TenantLayout({
         <main className="px-3 pb-32 pt-[104px] sm:px-5 lg:px-8 lg:pb-24 lg:pt-24">
           <div className="app-content-shell">
             <SubscriptionWarning access={access} />
+            <UnreadNotificationAlertsPanel
+              audience="tenant"
+              orgId={tenant.org.id}
+              tenantId={tenant.id}
+            />
             {children}
           </div>
         </main>

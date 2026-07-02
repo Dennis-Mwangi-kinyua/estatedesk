@@ -4,6 +4,7 @@ import { requireManagementAccess } from "@/lib/permissions/guards";
 import { requireActiveSubscription } from "@/lib/billing/subscription-access";
 import { SubscriptionWarning } from "@/components/billing/subscription-warning";
 import { prisma } from "@/lib/prisma";
+import { UnreadNotificationAlertsPanel } from "@/components/notifications/unread-notification-alerts-panel";
 
 const roleLabels: Record<string, string> = {
   ADMIN: "Organization Admin",
@@ -56,6 +57,11 @@ export default async function OrgLayout({
       role={shellRole}
     >
       <SubscriptionWarning access={access} />
+      <UnreadNotificationAlertsPanel
+        audience="org_staff"
+        orgId={session.activeOrgId!}
+        userId={session.userId}
+      />
       {children}
     </OrgDashboardShell>
   );

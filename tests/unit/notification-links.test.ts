@@ -19,14 +19,25 @@ describe("notification deep links", () => {
     );
   });
 
-  it("maps staff notifications to org dashboard routes", () => {
+  it("maps org staff notifications to org dashboard routes", () => {
     assert.equal(
-      getDefaultNotificationActionUrl("ISSUE_CREATED", "staff"),
+      getDefaultNotificationActionUrl("ISSUE_CREATED", "org_staff"),
       "/dashboard/org/issues",
     );
     assert.equal(
-      getDefaultNotificationActionUrl("PAYMENT_RECEIVED", "staff"),
+      getDefaultNotificationActionUrl("PAYMENT_RECEIVED", "org_staff"),
       "/dashboard/org/payments",
+    );
+  });
+
+  it("maps caretaker notifications to caretaker dashboard routes", () => {
+    assert.equal(
+      getDefaultNotificationActionUrl("WATER_BILL_ISSUED", "caretaker"),
+      "/dashboard/caretaker/water-bills",
+    );
+    assert.equal(
+      getDefaultNotificationActionUrl("ISSUE_CREATED", "caretaker"),
+      "/dashboard/caretaker/issues",
     );
   });
 
@@ -51,8 +62,9 @@ describe("notification deep links", () => {
     assert.equal(resolveNotificationAudience({ tenantId: "tenant-1" }), "tenant");
     assert.equal(
       resolveNotificationAudience({ userId: "user-1", tenantId: "tenant-1" }),
-      "staff",
+      "tenant",
     );
+    assert.equal(resolveNotificationAudience({ userId: "user-1" }), "org_staff");
     assert.equal(resolveNotificationAudience({}), "default");
   });
 });

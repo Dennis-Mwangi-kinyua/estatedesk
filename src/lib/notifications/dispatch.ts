@@ -2,10 +2,7 @@ import "server-only";
 
 import { NotificationChannel, NotificationStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import {
-  readNotificationActionUrl,
-  resolveNotificationActionUrl,
-} from "@/lib/push/notification-links";
+import { resolvePushActionUrl } from "@/lib/notifications/push-action-url";
 import { sendWebPushNotification } from "@/lib/push/web-push";
 import { sendMetaWhatsappText } from "@/lib/whatsapp/meta";
 
@@ -216,13 +213,13 @@ export async function dispatchQueuedNotifications(
           title: notification.title,
           body: notification.message,
           notificationId: notification.id,
-          actionUrl:
-            readNotificationActionUrl(notification.providerResponse) ??
-            resolveNotificationActionUrl({
-              type: notification.type,
-              userId: notification.userId,
-              tenantId: notification.tenantId,
-            }),
+          actionUrl: await resolvePushActionUrl({
+            orgId: notification.orgId,
+            type: notification.type,
+            userId: notification.userId,
+            tenantId: notification.tenantId,
+            providerResponse: notification.providerResponse,
+          }),
         });
       } else {
         providerResponse = { status: "in-app" };

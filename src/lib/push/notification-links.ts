@@ -1,6 +1,6 @@
 import type { NotificationType } from "@prisma/client";
 
-type NotificationAudience = "tenant" | "staff" | "default";
+export type NotificationAudience = "tenant" | "org_staff" | "caretaker" | "default";
 
 const TENANT_ROUTES: Partial<Record<NotificationType, string>> = {
   RENT_DUE_REMINDER: "/dashboard/tenant/payments",
@@ -12,10 +12,10 @@ const TENANT_ROUTES: Partial<Record<NotificationType, string>> = {
   MOVE_OUT_CLOSED: "/dashboard/tenant/notices",
   ISSUE_CREATED: "/dashboard/tenant/issues",
   ISSUE_RESOLVED: "/dashboard/tenant/issues",
-  GENERAL: "/dashboard/tenant",
+  GENERAL: "/tenants/notifications",
 };
 
-const STAFF_ROUTES: Partial<Record<NotificationType, string>> = {
+const ORG_STAFF_ROUTES: Partial<Record<NotificationType, string>> = {
   RENT_DUE_REMINDER: "/dashboard/org/payments",
   RENT_OVERDUE_REMINDER: "/dashboard/org/payments",
   WATER_BILL_ISSUED: "/dashboard/org/notifications",
@@ -28,16 +28,29 @@ const STAFF_ROUTES: Partial<Record<NotificationType, string>> = {
   GENERAL: "/dashboard/org/notifications",
 };
 
+const CARETAKER_ROUTES: Partial<Record<NotificationType, string>> = {
+  RENT_DUE_REMINDER: "/dashboard/caretaker/notifications",
+  RENT_OVERDUE_REMINDER: "/dashboard/caretaker/notifications",
+  WATER_BILL_ISSUED: "/dashboard/caretaker/water-bills",
+  PAYMENT_RECEIVED: "/dashboard/caretaker/notifications",
+  PAYMENT_VERIFIED: "/dashboard/caretaker/notifications",
+  INSPECTION_SCHEDULED: "/dashboard/caretaker/inspections",
+  MOVE_OUT_CLOSED: "/dashboard/caretaker/notifications",
+  ISSUE_CREATED: "/dashboard/caretaker/issues",
+  ISSUE_RESOLVED: "/dashboard/caretaker/issues",
+  GENERAL: "/dashboard/caretaker/notifications",
+};
+
 export function resolveNotificationAudience(input: {
   userId?: string | null;
   tenantId?: string | null;
 }): NotificationAudience {
-  if (input.tenantId && !input.userId) {
+  if (input.tenantId) {
     return "tenant";
   }
 
   if (input.userId) {
-    return "staff";
+    return "org_staff";
   }
 
   return "default";
@@ -48,11 +61,15 @@ export function getDefaultNotificationActionUrl(
   audience: NotificationAudience = "default",
 ) {
   if (audience === "tenant") {
-    return TENANT_ROUTES[type] ?? "/dashboard/tenant";
+    return TENANT_ROUTES[type] ?? "/tenants/notifications";
   }
 
-  if (audience === "staff") {
-    return STAFF_ROUTES[type] ?? "/dashboard/org/notifications";
+  if (audience === "caretaker") {
+    return CARETAKER_ROUTES[type] ?? "/dashboard/caretaker/notifications";
+  }
+
+  if (audience === "org_staff") {
+    return ORG_STAFF_ROUTES[type] ?? "/dashboard/org/notifications";
   }
 
   return "/dashboard";
@@ -63,15 +80,15 @@ export function resolveNotificationActionUrl(input: {
   userId?: string | null;
   tenantId?: string | null;
   actionUrl?: string | null;
+  audience?: NotificationAudience;
 }) {
   if (input.actionUrl) {
     return input.actionUrl;
   }
 
-  return getDefaultNotificationActionUrl(
-    input.type,
-    resolveNotificationAudience(input),
-  );
+  const audience = input.audience ?? resolveNotificationAudience(input);
+
+  return getDefaultNotificationActionUrl(input.type, audience);
 }
 
 export function readNotificationActionUrl(providerResponse: unknown) {
