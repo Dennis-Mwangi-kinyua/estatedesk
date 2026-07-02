@@ -9,9 +9,9 @@ set -euo pipefail
 #   ./scripts/import-env-to-vercel.sh .env development
 #
 # Prerequisites:
-#   npm i -g vercel
-#   vercel login
-#   vercel link
+#   npx vercel@latest login
+#   npx vercel@latest link
+#   Optional: VERCEL_TOKEN for non-interactive CI use
 
 ENV_FILE="${1:-.env}"
 TARGET_ENV="${2:-production}"
@@ -21,8 +21,12 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
-if ! command -v vercel >/dev/null 2>&1; then
-  echo "Vercel CLI is not installed. Run: npm i -g vercel" >&2
+if command -v vercel >/dev/null 2>&1; then
+  VERCEL_CMD=(vercel)
+elif command -v npx >/dev/null 2>&1; then
+  VERCEL_CMD=(npx vercel@latest)
+else
+  echo "Vercel CLI is not available. Install Node.js and run: npx vercel@latest login" >&2
   exit 1
 fi
 
@@ -68,9 +72,9 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     continue
   fi
 
-  printf '%s' "$value" | vercel env add "$key" "$TARGET_ENV" --force
+  printf '%s' "$value" | "${VERCEL_CMD[@]}" env add "$key" "$TARGET_ENV" --force
   echo "  + $key"
 done < "$ENV_FILE"
 
 echo "Done. Redeploy production for changes to take effect:"
-echo "  vercel --prod"
+echo "  npx vercel@latest --prod"
