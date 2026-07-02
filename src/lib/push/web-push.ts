@@ -11,16 +11,34 @@ type PushPayload = {
 
 let configured = false;
 
+function readEnv(name: string) {
+  const value = process.env[name];
+  if (!value) {
+    return "";
+  }
+
+  return value.trim().replace(/^['"]|['"]$/g, "");
+}
+
 export function getWebPushPublicKey() {
-  return process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY ?? process.env.WEB_PUSH_PUBLIC_KEY ?? "";
+  return (
+    readEnv("NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY") || readEnv("WEB_PUSH_PUBLIC_KEY")
+  );
 }
 
 export function isWebPushConfigured() {
   return Boolean(
     getWebPushPublicKey() &&
-      process.env.WEB_PUSH_PRIVATE_KEY &&
-      process.env.WEB_PUSH_SUBJECT,
+      readEnv("WEB_PUSH_PRIVATE_KEY") &&
+      readEnv("WEB_PUSH_SUBJECT"),
   );
+}
+
+export function getPushPublicConfig() {
+  return {
+    enabled: isWebPushConfigured(),
+    publicKey: getWebPushPublicKey(),
+  };
 }
 
 function configureWebPush() {
@@ -29,8 +47,8 @@ function configureWebPush() {
   }
 
   const publicKey = getWebPushPublicKey();
-  const privateKey = process.env.WEB_PUSH_PRIVATE_KEY;
-  const subject = process.env.WEB_PUSH_SUBJECT;
+  const privateKey = readEnv("WEB_PUSH_PRIVATE_KEY");
+  const subject = readEnv("WEB_PUSH_SUBJECT");
 
   if (!publicKey || !privateKey || !subject) {
     throw new Error("Web Push is not configured. Set WEB_PUSH_PUBLIC_KEY, WEB_PUSH_PRIVATE_KEY, and WEB_PUSH_SUBJECT.");

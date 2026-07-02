@@ -204,7 +204,13 @@ export const runtimeEnvChecks = [
   },
   {
     key: "NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY",
-    label: "Web Push public key",
+    label: "Web Push public key (client)",
+    group: "Messaging",
+    importance: "recommended",
+  },
+  {
+    key: "WEB_PUSH_PUBLIC_KEY",
+    label: "Web Push public key (server)",
     group: "Messaging",
     importance: "recommended",
   },

@@ -1,4 +1,4 @@
-import { PushNotificationSettings } from "@/components/pwa/push-notification-settings";
+import { PushNotificationSettingsPanel } from "@/components/pwa/push-notification-settings-panel";
 import { getRuntimeEnvReport } from "@/lib/config/env";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { PageHeader, StatCard, Surface } from "../_components/control-plane";
@@ -99,7 +99,7 @@ export default async function PlatformSettingsPage() {
         </div>
       </Surface>
 
-      <PushNotificationSettings />
+      <PushNotificationSettingsPanel />
     </div>
   );
 }

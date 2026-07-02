@@ -17,9 +17,17 @@ type PushSettingsState =
   | "subscribed"
   | "denied";
 
-export function PushNotificationSettings() {
+type PushConfig = {
+  enabled: boolean;
+  publicKey: string;
+};
+
+export function PushNotificationSettings({
+  pushConfig,
+}: {
+  pushConfig: PushConfig;
+}) {
   const [state, setState] = useState<PushSettingsState>("checking");
-  const [publicKey, setPublicKey] = useState("");
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -42,33 +50,18 @@ export function PushNotificationSettings() {
         return;
       }
 
-      const response = await fetch("/api/push/vapid-public-key", {
-        cache: "no-store",
-      }).catch(() => null);
-
-      if (!response?.ok) {
+      if (!pushConfig.enabled || !pushConfig.publicKey) {
         setState("disabled");
         return;
       }
-
-      const data = (await response.json().catch(() => null)) as
-        | { enabled?: boolean; publicKey?: string }
-        | null;
-
-      if (!active) {
-        return;
-      }
-
-      if (!data?.enabled || !data.publicKey) {
-        setState("disabled");
-        return;
-      }
-
-      setPublicKey(data.publicKey);
 
       if (Notification.permission === "granted") {
         const registration = await ensureServiceWorkerRegistration();
         const subscription = await registration.pushManager.getSubscription();
+
+        if (!active) {
+          return;
+        }
 
         if (subscription) {
           await fetch("/api/push/subscriptions", {
@@ -81,6 +74,10 @@ export function PushNotificationSettings() {
         }
       }
 
+      if (!active) {
+        return;
+      }
+
       setState("prompt");
     }
 
@@ -89,13 +86,18 @@ export function PushNotificationSettings() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [pushConfig.enabled, pushConfig.publicKey]);
 
   async function enablePushNotifications() {
     setPending(true);
     setMessage(null);
 
     try {
+      if (!pushConfig.enabled || !pushConfig.publicKey) {
+        setState("disabled");
+        return;
+      }
+
       const permission = await Notification.requestPermission();
 
       if (permission === "denied") {
@@ -114,7 +116,7 @@ export function PushNotificationSettings() {
         (await registration.pushManager.getSubscription()) ??
         (await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicKey),
+          applicationServerKey: urlBase64ToUint8Array(pushConfig.publicKey),
         }));
 
       const response = await fetch("/api/push/subscriptions", {
@@ -208,7 +210,7 @@ export function PushNotificationSettings() {
           <button
             type="button"
             onClick={enablePushNotifications}
-            disabled={pending || !publicKey}
+            disabled={pending || !pushConfig.publicKey}
             className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-60 dark:bg-emerald-500 dark:hover:bg-emerald-400"
           >
             <BellRing className="h-4 w-4" />

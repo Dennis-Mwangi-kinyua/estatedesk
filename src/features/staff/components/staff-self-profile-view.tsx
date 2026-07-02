@@ -1,5 +1,5 @@
 import type { Prisma } from "@prisma/client";
-import { PushNotificationSettings } from "@/components/pwa/push-notification-settings";
+import { PushNotificationSettingsPanel } from "@/components/pwa/push-notification-settings-panel";
 
 type StaffSelfProfileViewProps = {
   title?: string;
@@ -121,7 +121,7 @@ export function StaffSelfProfileView({
         </aside>
       </section>
 
-      <PushNotificationSettings />
+      <PushNotificationSettingsPanel />
     </div>
   );
 }

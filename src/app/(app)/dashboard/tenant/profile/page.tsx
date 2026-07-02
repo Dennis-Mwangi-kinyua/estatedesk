@@ -8,7 +8,7 @@ import {
   getTenantLedger,
 } from "@/lib/ledger";
 import { HiOutlineArrowLeftOnRectangle } from "react-icons/hi2";
-import { PushNotificationSettings } from "@/components/pwa/push-notification-settings";
+import { PushNotificationSettingsPanel } from "@/components/pwa/push-notification-settings-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -363,7 +363,7 @@ export default async function TenantProfilePage() {
         </div>
       </section>
 
-      <PushNotificationSettings />
+      <PushNotificationSettingsPanel />
 
       <section className="rounded-[28px] border border-neutral-200/80 bg-white/90 p-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)] backdrop-blur sm:p-5">
         <div>
