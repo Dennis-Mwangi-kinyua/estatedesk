@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { queueDuePaymentNotifications } from "@/lib/ledger";
 import { recordVacatedTenancy } from "@/lib/tenants/identity";
+import { notifyInAppAndPush } from "@/lib/notifications/notify";
 
 async function requireOrgReviewer() {
   const session = await requireUserSession();
@@ -176,30 +177,9 @@ export async function approveMeterReading(formData: FormData) {
       },
     });
 
-    await tx.notification.create({
-      data: {
-        orgId: membership.orgId,
-        tenantId: activeLease.tenantId,
-        userId: activeLease.tenant.userId ?? undefined,
-        channel: "IN_APP",
-        type: "WATER_BILL_ISSUED",
-        title: "Water bill issued",
-        message: `Your water bill for ${reading.period} has been issued for ${reading.unit.property.name} / Unit ${reading.unit.houseNo}.`,
-        status: "QUEUED",
-      },
-    });
+    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ tenantId: activeLease.tenantId, userId: activeLease.tenant.userId }], type: "WATER_BILL_ISSUED", title: "Water bill issued", message: `Your water bill for ${reading.period} has been issued for ${reading.unit.property.name} / Unit ${reading.unit.houseNo}.` });
 
-    await tx.notification.create({
-      data: {
-        orgId: membership.orgId,
-        userId: reading.submittedByUserId,
-        channel: "IN_APP",
-        type: "GENERAL",
-        title: "Meter reading approved",
-        message: `The ${reading.period} water reading for ${reading.unit.property.name} / Unit ${reading.unit.houseNo} was approved and the tenant bill has been issued.`,
-        status: "QUEUED",
-      },
-    });
+    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: reading.submittedByUserId }], type: "GENERAL", title: "Meter reading approved", message: `The ${reading.period} water reading for ${reading.unit.property.name} / Unit ${reading.unit.houseNo} was approved and the tenant bill has been issued.` });
   });
 
   revalidatePath("/dashboard/org");
@@ -233,6 +213,7 @@ export async function rejectMeterReading(formData: FormData) {
     },
     select: {
       id: true,
+      unitId: true,
       period: true,
       submittedByUserId: true,
       unit: {
@@ -265,17 +246,19 @@ export async function rejectMeterReading(formData: FormData) {
       },
     });
 
-    await tx.notification.create({
+    await tx.waterBill.updateMany({
+      where: {
+        unitId: reading.unitId,
+        period: reading.period,
+        status: "PENDING_APPROVAL",
+      },
       data: {
-        orgId: membership.orgId,
-        userId: reading.submittedByUserId,
-        channel: "IN_APP",
-        type: "GENERAL",
-        title: "Meter reading rejected",
-        message: `The ${reading.period} water reading for ${reading.unit.property.name} / Unit ${reading.unit.houseNo} was rejected. Reason: ${rejectionReason}`,
-        status: "QUEUED",
+        status: "CANCELLED",
+        notes: `Cancelled after rejected meter reading. Reason: ${rejectionReason}`,
       },
     });
+
+    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: reading.submittedByUserId }], type: "GENERAL", title: "Meter reading rejected", message: `The ${reading.period} water reading for ${reading.unit.property.name} / Unit ${reading.unit.houseNo} was rejected. Reason: ${rejectionReason}` });
   });
 
   revalidatePath("/dashboard/org");
@@ -397,18 +380,7 @@ export async function confirmMoveOutAction(formData: FormData) {
       },
     });
 
-    await tx.notification.create({
-      data: {
-        orgId: membership.orgId,
-        tenantId: notice.tenantId,
-        channel: "IN_APP",
-        type: "MOVE_OUT_CLOSED",
-        title: "Move-out confirmed",
-        message: `Move-out closeout for ${notice.tenant.fullName} has been confirmed.${notes ? ` Notes: ${notes}` : ""}`,
-        status: "SENT",
-        sentAt: new Date(),
-      },
-    });
+    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ tenantId: notice.tenantId }], type: "MOVE_OUT_CLOSED", title: "Move-out confirmed", message: `Move-out closeout for ${notice.tenant.fullName} has been confirmed.${notes ? ` Notes: ${notes}` : ""}` });
 
     await tx.auditLog.create({
       data: {

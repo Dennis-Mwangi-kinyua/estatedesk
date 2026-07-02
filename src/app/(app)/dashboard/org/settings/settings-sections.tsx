@@ -81,13 +81,13 @@ export async function SettingsHomePage() {
             <Link
               key={item.id}
               href={item.href}
-              className="group flex min-h-32 items-start rounded-2xl border border-slate-200 !bg-white p-5 !text-slate-950 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:!bg-white hover:shadow-md dark:border-white/10 dark:!bg-slate-900 dark:!text-white dark:hover:border-white/20"
+              className="group flex min-h-32 items-start rounded-2xl border border-slate-200 bg-white p-5 text-slate-950 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:shadow-md dark:border-white/10 dark:bg-slate-900 dark:text-white dark:hover:border-white/20 dark:hover:bg-slate-800"
             >
               <span className="min-w-0">
-                <span className="block text-[15px] font-semibold !text-slate-950 dark:!text-white">
+                <span className="block text-[15px] font-semibold text-slate-950 dark:text-white">
                   {item.label}
                 </span>
-                <span className="mt-2 block text-sm leading-6 !text-slate-500 dark:!text-slate-300">
+                <span className="mt-2 block text-sm leading-6 text-slate-600 dark:text-slate-300">
                   {item.description}
                 </span>
               </span>
@@ -192,12 +192,12 @@ export async function SettingsSectionPage({
                 name="timezone"
                 defaultValue={data.organization.timezone}
               />
-              <label className="space-y-2 text-sm font-medium text-slate-700">
+              <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                 Currency
                 <CurrencySelect
                   name="currency"
                   defaultValue={data.organization.currency}
-                  className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-slate-400"
+                  className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
                 />
               </label>
 

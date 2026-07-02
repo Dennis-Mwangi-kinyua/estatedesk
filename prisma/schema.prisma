@@ -2295,6 +2295,7 @@ enum ReadingStatus {
 }
 
 enum BillStatus {
+  PENDING_APPROVAL
   ISSUED
   PAYMENT_PENDING
   PAID_PENDING_VERIFICATION

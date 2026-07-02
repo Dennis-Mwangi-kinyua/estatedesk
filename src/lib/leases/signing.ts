@@ -3,6 +3,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { prisma } from "@/lib/prisma";
+import { notifyInAppAndPush } from "@/lib/notifications/notify";
 import { absoluteUrl } from "@/lib/seo";
 import { storage } from "@/lib/storage";
 import type { LeaseSignerRole, LeaseSigningJurisdiction, LeaseSigningOrder, LeaseSignatureMethod } from "@prisma/client";
@@ -79,15 +80,14 @@ export async function createLeaseSignatureEnvelope(input: {
         events: { create: { eventType: "CREATED", actorUserId: input.createdByUserId, metadata: { sourceDocumentHash, expiresAt: expiresAt.toISOString() } } },
       },
     });
-    await tx.notification.create({
-      data: {
-        orgId: lease.orgId, tenantId: lease.tenant.id, userId: lease.tenant.userId,
-        channel: "IN_APP", type: "GENERAL", title: "Lease signature requested",
-        message: `${lease.org.name} requested your electronic signature. Review and sign: ${absoluteUrl(`/sign-lease/${tenantToken}`)}`,
-      },
+    await notifyInAppAndPush({
+      db: tx, orgId: lease.orgId,
+      recipients: [{ tenantId: lease.tenant.id, userId: lease.tenant.userId }],
+      type: "GENERAL", title: "Lease signature requested",
+      message: `${lease.org.name} requested your electronic signature. Review and sign: ${absoluteUrl(`/sign-lease/${tenantToken}`)}`,
     });
     for (const { item, user, token } of extraTokens) {
-      await tx.notification.create({ data: { orgId: lease.orgId, userId: user.id, channel: "IN_APP", type: "GENERAL", title: `Lease signature requested: ${item.role.toLowerCase()}`, message: `Review and sign: ${absoluteUrl(`/sign-lease/${token}`)}` } });
+      await notifyInAppAndPush({ db: tx, orgId: lease.orgId, recipients: [{ userId: user.id }], type: "GENERAL", title: `Lease signature requested: ${item.role.toLowerCase()}`, message: `Review and sign: ${absoluteUrl(`/sign-lease/${token}`)}` });
     }
     return created;
   });
@@ -160,7 +160,7 @@ async function finalizeEnvelope(envelopeId: string) {
     await tx.lease.update({ where: { id: envelope.leaseId }, data: { contractDocumentId: asset.id } });
     await tx.leaseSignatureEvent.create({ data: { envelopeId, eventType: "COMPLETED", metadata: { finalDocumentHash, finalAssetId: asset.id } } });
     const signedUrl = storage.getPublicUrl(key);
-    await tx.notification.createMany({ data: envelope.signers.filter((signer) => signer.userId).map((signer) => ({ orgId: envelope.orgId, userId: signer.userId!, tenantId: signer.role === "TENANT" ? envelope.lease.tenantId : null, channel: "IN_APP" as const, type: "GENERAL" as const, title: "Signed lease completed", message: `All required parties signed the lease. Signed copy: ${signedUrl}` })) });
+    await notifyInAppAndPush({ db: tx, orgId: envelope.orgId, recipients: envelope.signers.filter((signer) => signer.userId).map((signer) => ({ userId: signer.userId!, tenantId: signer.role === "TENANT" ? envelope.lease.tenantId : null })), type: "GENERAL", title: "Signed lease completed", message: `All required parties signed the lease. Signed copy: ${signedUrl}` });
     });
   } catch (error) {
     await prisma.leaseSignatureEnvelope.updateMany({ where: { id: envelopeId, status: "FINALIZING" }, data: { status: "PARTIALLY_SIGNED" } });
@@ -219,7 +219,7 @@ export async function remindLeaseSigner(envelopeId: string, signerId: string, or
   const token = newToken();
   await prisma.$transaction(async (tx) => {
     await tx.leaseSignatureSigner.update({ where: { id: signer.id }, data: { tokenHash: tokenHash(token), lastReminderAt: new Date() } });
-    await tx.notification.create({ data: { orgId, userId: signer.userId, tenantId: signer.role === "TENANT" ? signer.envelope.lease.tenantId : null, channel: "IN_APP", type: "GENERAL", title: "Lease signature reminder", message: `Review and sign your lease: ${absoluteUrl(`/sign-lease/${token}`)}` } });
+    await notifyInAppAndPush({ db: tx, orgId, recipients: [{ userId: signer.userId, tenantId: signer.role === "TENANT" ? signer.envelope.lease.tenantId : null }], type: "GENERAL", title: "Lease signature reminder", message: `Review and sign your lease: ${absoluteUrl(`/sign-lease/${token}`)}` });
     await tx.leaseSignatureEvent.create({ data: { envelopeId, signerId, actorUserId, eventType: "REMINDER_SENT" } });
   });
 }

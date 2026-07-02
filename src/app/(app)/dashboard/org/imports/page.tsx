@@ -1,31 +1,28 @@
 import { CsvImportForm } from "./import-form";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 export const dynamic = "force-dynamic";
 
 export default async function OrgImportsPage() {
   const session = await requireManagementAccess();
-  const history = await prisma.importRun.findMany({
-    where: { orgId: session.activeOrgId! },
-    orderBy: { createdAt: "desc" },
-    take: 12,
-    select: {
-      id: true,
-      kind: true,
-      mode: true,
-      status: true,
-      totalRows: true,
-      createdRows: true,
-      errorCount: true,
-      rollbackSummary: true,
-      createdAt: true,
-    },
-  });
+  let history: Awaited<ReturnType<typeof getImportHistory>> = [];
+  let historyUnavailable = false;
+
+  try {
+    history = await retryTransientDatabaseOperation(
+      () => getImportHistory(session.activeOrgId!),
+      { label: "org-import-history", attempts: 3, delayMs: 350 },
+    );
+  } catch (error) {
+    historyUnavailable = true;
+    console.error("Unable to load import history", error);
+  }
 
   return (
     <div className="space-y-5">
-      <section className="ios-panel rounded-[28px] p-4 sm:p-5">
+      <section className="ios-panel rounded-[28px] p-4 text-neutral-950 dark:text-neutral-100 sm:p-5">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
           Data onboarding
         </p>
@@ -47,7 +44,7 @@ export default async function OrgImportsPage() {
             </p>
           </div>
           <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">
-            {history.length} recent
+            {historyUnavailable ? "Unavailable" : `${history.length} recent`}
           </span>
         </div>
         <div className="mt-4 overflow-x-auto">
@@ -95,7 +92,11 @@ export default async function OrgImportsPage() {
               ))}
             </tbody>
           </table>
-          {history.length === 0 ? (
+          {historyUnavailable ? (
+            <div className="border-t border-amber-200 bg-amber-50 py-8 text-center text-sm text-amber-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
+              Import history is temporarily unavailable. You can still validate or upload a CSV.
+            </div>
+          ) : history.length === 0 ? (
             <div className="border-t border-neutral-100 py-8 text-center text-sm text-neutral-500">
               No imports have been run yet.
             </div>
@@ -104,4 +105,23 @@ export default async function OrgImportsPage() {
       </section>
     </div>
   );
+}
+
+function getImportHistory(orgId: string) {
+  return prisma.importRun.findMany({
+    where: { orgId },
+    orderBy: { createdAt: "desc" },
+    take: 12,
+    select: {
+      id: true,
+      kind: true,
+      mode: true,
+      status: true,
+      totalRows: true,
+      createdRows: true,
+      errorCount: true,
+      rollbackSummary: true,
+      createdAt: true,
+    },
+  });
 }

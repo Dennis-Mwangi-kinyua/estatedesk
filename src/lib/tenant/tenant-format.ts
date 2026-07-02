@@ -33,6 +33,7 @@ export function getStatusTone(status: string | null | undefined) {
     case "CLOSED":
       return "bg-emerald-50 text-emerald-700 border-emerald-200";
     case "PENDING":
+    case "PENDING_APPROVAL":
     case "PAYMENT_PENDING":
     case "PAID_PENDING_VERIFICATION":
     case "IN_PROGRESS":

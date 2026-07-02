@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { encodePublicId } from "@/lib/public-id";
 import { recordVacatedTenancy } from "@/lib/tenants/identity";
+import { notifyInAppAndPush } from "@/lib/notifications/notify";
 
 export const dynamic = "force-dynamic";
 
@@ -191,18 +192,7 @@ async function closeMoveOutAction(formData: FormData) {
       },
     });
 
-    await tx.notification.create({
-      data: {
-        orgId: session.activeOrgId!,
-        tenantId: notice.tenantId,
-        channel: "IN_APP",
-        type: "MOVE_OUT_CLOSED",
-        title: "Move-out closed",
-        message: `Move-out closeout for ${notice.tenant.fullName} has been completed.${notes ? ` Notes: ${notes}` : ""}`,
-        status: "SENT",
-        sentAt: new Date(),
-      },
-    });
+    await notifyInAppAndPush({ db: tx, orgId: session.activeOrgId!, recipients: [{ tenantId: notice.tenantId }], type: "MOVE_OUT_CLOSED", title: "Move-out closed", message: `Move-out closeout for ${notice.tenant.fullName} has been completed.${notes ? ` Notes: ${notes}` : ""}` });
 
     await tx.auditLog.create({
       data: {

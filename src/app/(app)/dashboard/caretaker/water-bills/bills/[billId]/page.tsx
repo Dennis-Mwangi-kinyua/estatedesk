@@ -49,6 +49,8 @@ function BillStatusBadge({ status }: { status: string }) {
   const style =
     status === "PAID_VERIFIED"
       ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : status === "PENDING_APPROVAL"
+        ? "border-sky-200 bg-sky-50 text-sky-700"
       : status === "PAYMENT_PENDING" || status === "PAID_PENDING_VERIFICATION"
         ? "border-amber-200 bg-amber-50 text-amber-700"
         : status === "ISSUED"

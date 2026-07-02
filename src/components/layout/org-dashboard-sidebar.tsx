@@ -165,7 +165,7 @@ const SIDEBAR_LINKS: readonly SidebarLink[] = [
   },
   {
     label: "Security",
-    href: "/dashboard/security",
+    href: "/dashboard/org/security",
     icon: ShieldCheck,
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
   },

@@ -53,15 +53,15 @@ function SessionIcon({ session }: { session: ManagedUserSession }) {
 
 function SessionRow({ session }: { session: ManagedUserSession }) {
   return (
-    <div className="grid gap-4 border-t border-slate-200 px-4 py-4 first:border-t-0 sm:grid-cols-[1fr_auto] sm:items-center sm:px-5">
+    <div className="grid gap-4 border-t border-slate-200 px-4 py-4 first:border-t-0 dark:border-white/10 sm:grid-cols-[1fr_auto] sm:items-center sm:px-5">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 dark:border-white/10 dark:bg-slate-800 dark:text-slate-200">
             <SessionIcon session={session} />
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="font-semibold text-slate-950">
+              <p className="font-semibold text-slate-950 dark:text-white">
                 {getDeviceLabel(session.userAgent)}
               </p>
               {session.isCurrent ? (
@@ -70,13 +70,13 @@ function SessionRow({ session }: { session: ManagedUserSession }) {
                 </span>
               ) : null}
             </div>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               IP {session.ipAddress ?? "unknown"}
             </p>
           </div>
         </div>
 
-        <div className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-3">
+        <div className="mt-3 grid gap-2 text-xs text-slate-600 dark:text-slate-300 sm:grid-cols-3">
           <span>Started {formatDateTime(session.createdAt)}</span>
           <span>Last seen {formatDateTime(session.lastSeenAt)}</span>
           <span>Expires {formatDateTime(session.expiresAt)}</span>
@@ -114,9 +114,9 @@ export default async function DashboardSecurityPage() {
   const otherSessionCount = sessions.filter((item) => !item.isCurrent).length;
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-slate-100 px-4 py-6 text-slate-950 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-5">
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-900 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
@@ -172,7 +172,7 @@ export default async function DashboardSecurityPage() {
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900">
           <div className="border-b border-slate-200 px-4 py-4 sm:px-5">
             <h2 className="text-base font-semibold text-slate-950">
               Devices

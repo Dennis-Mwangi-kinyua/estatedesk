@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { notifyInAppAndPush } from "@/lib/notifications/notify";
 
 const CARETAKER_ISSUES_PATH = "/dashboard/caretaker/issues";
 
@@ -82,21 +83,14 @@ export async function submitIssueResolutionReportAction(formData: FormData) {
       },
     });
 
-    await Promise.all(
-      officeMemberships.map((membership) =>
-        tx.notification.create({
-          data: {
-            orgId: issue.orgId,
-            userId: membership.userId,
-            channel: "IN_APP",
-            type: "GENERAL",
-            title: "Issue completion report submitted",
-            message: `A caretaker submitted a completion report for "${issue.title}". Review it before sending to the tenant for confirmation.`,
-            status: "QUEUED",
-          },
-        }),
-      ),
-    );
+    await notifyInAppAndPush({
+      db: tx,
+      orgId: issue.orgId,
+      recipients: officeMemberships.map(({ userId }) => ({ userId })),
+      type: "GENERAL",
+      title: "Issue completion report submitted",
+      message: `A caretaker submitted a completion report for "${issue.title}". Review it before sending to the tenant for confirmation.`,
+    });
 
     await tx.auditLog.create({
       data: {

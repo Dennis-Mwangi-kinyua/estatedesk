@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/permissions/guards";
+import { notifyInAppAndPush } from "@/lib/notifications/notify";
 
 const TENANT_ISSUES_PATH = "/dashboard/tenant/issues";
 
@@ -86,34 +87,10 @@ export async function confirmIssueResolutionAction(formData: FormData) {
       },
     });
 
-    await Promise.all(
-      officeMemberships.map((membership) =>
-        tx.notification.create({
-          data: {
-            orgId: report.issue.orgId,
-            userId: membership.userId,
-            channel: "IN_APP",
-            type: "ISSUE_RESOLVED",
-            title: "Tenant confirmed issue closure",
-            message: `The tenant confirmed the completion report for "${report.issue.title}". The ticket is now closed.`,
-            status: "QUEUED",
-          },
-        }),
-      ),
-    );
+    await notifyInAppAndPush({ db: tx, orgId: report.issue.orgId, recipients: officeMemberships.map(({ userId }) => ({ userId })), type: "ISSUE_RESOLVED", title: "Tenant confirmed issue closure", message: `The tenant confirmed the completion report for "${report.issue.title}". The ticket is now closed.` });
 
     if (report.issue.assignedToUserId) {
-      await tx.notification.create({
-        data: {
-          orgId: report.issue.orgId,
-          userId: report.issue.assignedToUserId,
-          channel: "IN_APP",
-          type: "ISSUE_RESOLVED",
-          title: "Issue confirmed and closed",
-          message: `The tenant confirmed your work for "${report.issue.title}".`,
-          status: "QUEUED",
-        },
-      });
+      await notifyInAppAndPush({ db: tx, orgId: report.issue.orgId, recipients: [{ userId: report.issue.assignedToUserId }], type: "ISSUE_RESOLVED", title: "Issue confirmed and closed", message: `The tenant confirmed your work for "${report.issue.title}".` });
     }
 
     await tx.auditLog.create({

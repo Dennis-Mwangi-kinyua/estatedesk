@@ -55,6 +55,10 @@ type ApprovalQueueItem = {
     fullName: string;
     email: string | null;
   };
+  photoAsset: {
+    key: string;
+    fileName: string;
+  } | null;
   unit: {
     id: string;
     houseNo: string;
@@ -163,6 +167,7 @@ type PaymentItem = {
 type PageData = {
   membership: OrgContext;
   approvalQueue: ApprovalQueueItem[];
+  approvalQueueCount: number;
   moveOutQueue: MoveOutQueueItem[];
   notifications: NotificationItem[];
   recentPayments: PaymentItem[];
@@ -397,15 +402,23 @@ async function loadNotificationsPageData(
 ): Promise<PageData> {
   const membership = await getCurrentOrgContext();
 
+  const approvalQueueWhere = {
+    status: "SUBMITTED" as const,
+    unit: {
+      property: {
+        orgId: membership.orgId,
+        deletedAt: null,
+      },
+    },
+  };
+
+  const approvalQueueCount = await prisma.meterReading.count({
+    where: approvalQueueWhere,
+  });
+
   const approvalQueue = await prisma.meterReading.findMany({
     where: {
-      status: "SUBMITTED",
-      unit: {
-        property: {
-          orgId: membership.orgId,
-          deletedAt: null,
-        },
-      },
+      ...approvalQueueWhere,
     },
     orderBy: { createdAt: "asc" },
     take: 8,
@@ -421,6 +434,12 @@ async function loadNotificationsPageData(
           id: true,
           fullName: true,
           email: true,
+        },
+      },
+      photoAsset: {
+        select: {
+          key: true,
+          fileName: true,
         },
       },
       unit: {
@@ -601,6 +620,7 @@ async function loadNotificationsPageData(
   return {
     membership,
     approvalQueue: approvalQueue as ApprovalQueueItem[],
+    approvalQueueCount,
     moveOutQueue: moveOutQueue as MoveOutQueueItem[],
     notifications: notifications as NotificationItem[],
     recentPayments: recentPayments as PaymentItem[],
@@ -724,6 +744,7 @@ export default async function OrganizationNotificationsPage({
   const {
     membership,
     approvalQueue,
+    approvalQueueCount,
     moveOutQueue,
     notifications,
     recentPayments,
@@ -780,7 +801,7 @@ export default async function OrganizationNotificationsPage({
         </div>
 
         <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 sm:p-6 xl:grid-cols-5">
-          <KpiTile label="Water Review" value={approvalQueue.length} icon={Droplets} />
+          <KpiTile label="Water Review" value={approvalQueueCount} icon={Droplets} />
           <KpiTile label="Move-outs" value={moveOutQueue.length} icon={Megaphone} />
           <KpiTile label="Unread" value={unreadCount} icon={Bell} />
           <KpiTile label="Queued" value={queuedCount} icon={Clock3} />
@@ -1032,6 +1053,19 @@ export default async function OrganizationNotificationsPage({
                               </div>
                             ))}
                           </dl>
+
+                          {reading.photoAsset ? (
+                            <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-900">
+                              <img
+                                src={reading.photoAsset.key}
+                                alt={`Meter evidence for unit ${reading.unit.houseNo}`}
+                                className="max-h-64 w-full object-cover"
+                              />
+                              <div className="border-t border-slate-200 px-4 py-2 text-xs font-medium text-slate-600 dark:border-white/10 dark:text-slate-300">
+                                {reading.photoAsset.fileName}
+                              </div>
+                            </div>
+                          ) : null}
                         </div>
 
                         <div className="w-full space-y-3 lg:max-w-sm">
@@ -1297,8 +1331,8 @@ export default async function OrganizationNotificationsPage({
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Snapshot</p>
             <h3 className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">Operations at a glance</h3>
             <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-              {approvalQueue.length > 0
-                ? `${approvalQueue.length} approvals are waiting for action. Prioritize submitted readings to keep billing current.`
+              {approvalQueueCount > 0
+                ? `${approvalQueueCount} approvals are waiting for action. Prioritize submitted readings to keep billing current.`
                 : "No pending water approvals right now. The queue is clear."}
             </p>
 

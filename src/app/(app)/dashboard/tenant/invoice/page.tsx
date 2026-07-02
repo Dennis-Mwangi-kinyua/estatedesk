@@ -136,6 +136,8 @@ function getWaterBillStatusClasses(status: BillStatus) {
   switch (status) {
     case "PAID_VERIFIED":
       return "border border-emerald-200 bg-emerald-50 text-emerald-700";
+    case "PENDING_APPROVAL":
+      return "border border-sky-200 bg-sky-50 text-sky-700";
     case "PAYMENT_PENDING":
     case "PAID_PENDING_VERIFICATION":
       return "border border-amber-200 bg-amber-50 text-amber-700";

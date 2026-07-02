@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
+import { notifyInAppAndPush } from "@/lib/notifications/notify";
 import { Prisma, TicketPriority } from "@prisma/client";
 import { AlertCircle, ChevronLeft, Send, Wrench } from "lucide-react";
 
@@ -212,32 +213,10 @@ export default async function TenantReportIssuePage({
         },
       });
 
-      await tx.notification.create({
-        data: {
-          orgId: session.activeOrgId!,
-          tenantId: tenant.id,
-          userId: session.userId,
-          channel: "IN_APP",
-          type: "ISSUE_CREATED",
-          title: "Issue submitted",
-          message: `Your issue "${title}" for ${unitText || "your unit"} has been submitted.`,
-          status: "QUEUED",
-        },
-      });
+      await notifyInAppAndPush({ db: tx, orgId: session.activeOrgId!, recipients: [{ tenantId: tenant.id, userId: session.userId }], type: "ISSUE_CREATED", title: "Issue submitted", message: `Your issue "${title}" for ${unitText || "your unit"} has been submitted.` });
 
       if (orgReviewers.length > 0) {
-        await tx.notification.createMany({
-          data: orgReviewers.map((reviewer) => ({
-            orgId: session.activeOrgId!,
-            tenantId: tenant.id,
-            userId: reviewer.userId,
-            channel: "IN_APP" as const,
-            type: "ISSUE_CREATED" as const,
-            title: "New tenant issue",
-            message: `${tenant.fullName} reported "${title}" for ${unitText || "a unit"}. Priority: ${priority}.`,
-            status: "QUEUED" as const,
-          })),
-        });
+        await notifyInAppAndPush({ db: tx, orgId: session.activeOrgId!, recipients: orgReviewers.map(({ userId }) => ({ tenantId: tenant.id, userId })), type: "ISSUE_CREATED", title: "New tenant issue", message: `${tenant.fullName} reported "${title}" for ${unitText || "a unit"}. Priority: ${priority}.` });
       }
 
       await tx.auditLog.create({

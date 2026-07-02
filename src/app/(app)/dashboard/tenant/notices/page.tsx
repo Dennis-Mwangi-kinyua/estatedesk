@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
+import { notifyInAppAndPush } from "@/lib/notifications/notify";
 import { Prisma, NoticeStatus, NotificationStatus } from "@prisma/client";
 import {
   Bell,
@@ -380,32 +381,10 @@ export default async function TenantNoticesPage({
         },
       });
 
-      await tx.notification.create({
-        data: {
-          orgId: session.activeOrgId!,
-          tenantId: tenant.id,
-          userId: tenant.userId ?? undefined,
-          channel: "IN_APP",
-          type: "GENERAL",
-          title: "Move-out notice submitted",
-          message: `Your move-out notice for ${unitLabel || "your unit"} has been submitted for ${formatDate(moveOutDate)}.`,
-          status: "QUEUED",
-        },
-      });
+      await notifyInAppAndPush({ db: tx, orgId: session.activeOrgId!, recipients: [{ tenantId: tenant.id, userId: tenant.userId }], type: "GENERAL", title: "Move-out notice submitted", message: `Your move-out notice for ${unitLabel || "your unit"} has been submitted for ${formatDate(moveOutDate)}.` });
 
       if (orgReviewers.length > 0) {
-        await tx.notification.createMany({
-          data: orgReviewers.map((reviewer) => ({
-            orgId: session.activeOrgId!,
-            userId: reviewer.userId,
-            tenantId: tenant.id,
-            channel: "IN_APP" as const,
-            type: "GENERAL" as const,
-            title: "New move-out notice",
-            message: `${tenant.fullName} submitted a move-out notice for ${unitLabel || "their unit"} on ${formatDate(moveOutDate)}.`,
-            status: "QUEUED" as const,
-          })),
-        });
+        await notifyInAppAndPush({ db: tx, orgId: session.activeOrgId!, recipients: orgReviewers.map(({ userId }) => ({ userId, tenantId: tenant.id })), type: "GENERAL", title: "New move-out notice", message: `${tenant.fullName} submitted a move-out notice for ${unitLabel || "their unit"} on ${formatDate(moveOutDate)}.` });
       }
     });
 

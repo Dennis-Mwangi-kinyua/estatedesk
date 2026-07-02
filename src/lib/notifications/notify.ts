@@ -91,4 +91,13 @@ export async function notifyRecipients({
   return db.notification.createMany({ data });
 }
 
+export function notifyInAppAndPush(
+  input: Omit<NotifyInput, "channels">,
+) {
+  return notifyRecipients({
+    ...input,
+    channels: [NotificationChannel.IN_APP, NotificationChannel.WEB_PUSH],
+  });
+}
+
 export { NotificationChannel };

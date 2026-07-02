@@ -5,6 +5,7 @@ import {
   rentalLocationSlug,
 } from "@/lib/public-rental-seo";
 import { APP_URL, buildUrlEntry, formatDate, wrapUrlset } from "@/lib/sitemap-utils";
+import { vacancyPublicSlug } from "@/lib/public-vacancy-slug";
 
 function categorySlug(type: string) {
   switch (type) {
@@ -51,6 +52,8 @@ export async function buildVacancyDetailSitemapXml() {
     select: {
       id: true,
       updatedAt: true,
+      houseNo: true,
+      property: { select: { name: true } },
     },
     orderBy: { updatedAt: "desc" },
     take: 50_000,
@@ -59,7 +62,7 @@ export async function buildVacancyDetailSitemapXml() {
   const urls = units
     .map((unit) =>
       buildUrlEntry({
-        loc: `${APP_URL}/vacancies/${unit.id}`,
+        loc: `${APP_URL}/vacancies/${vacancyPublicSlug({ id: unit.id, propertyName: unit.property.name, houseNo: unit.houseNo })}`,
         lastmod: formatDate(unit.updatedAt),
         changefreq: "weekly",
         priority: "0.6",

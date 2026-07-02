@@ -4,6 +4,7 @@ import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { encodePublicId } from "@/lib/public-id";
 import { ArrowRight, Droplets } from "lucide-react";
+import { QuickMeterReadingPopup } from "./quick-meter-reading-popup";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,7 @@ export default async function ReadWaterBillsPage({
     membershipScope: session.membershipScope,
   });
 
-  const [units, meterReadings] = await Promise.all([
+  const [units, meterReadings, previousReadings] = await Promise.all([
     prisma.unit.findMany({
       where: {
         id: {
@@ -103,34 +104,76 @@ export default async function ReadWaterBillsPage({
         unitId: true,
       },
     }),
+    prisma.meterReading.findMany({
+      where: {
+        period: {
+          lt: period,
+        },
+        unitId: {
+          in: allowedUnitIds,
+        },
+      },
+      orderBy: [{ period: "desc" }, { createdAt: "desc" }],
+      select: {
+        unitId: true,
+        currentReading: true,
+      },
+    }),
   ]);
 
   const existingReadingUnitIds = new Set(meterReadings.map((r) => r.unitId));
+  const previousReadingMap = new Map<string, number>();
+
+  for (const reading of previousReadings) {
+    if (!previousReadingMap.has(reading.unitId)) {
+      previousReadingMap.set(reading.unitId, reading.currentReading);
+    }
+  }
+
   const pendingUnits = units.filter((unit) => !existingReadingUnitIds.has(unit.id));
+  const quickEntryUnits = pendingUnits.map((unit) => ({
+    id: unit.id,
+    houseNo: unit.houseNo,
+    propertyName: unit.property.name,
+    buildingName: unit.building?.name ?? null,
+    tenantName: unit.leases[0]?.tenant.fullName ?? "No tenant assigned",
+    previousReading: previousReadingMap.get(unit.id) ?? 0,
+  }));
 
   return (
     <div className="space-y-5 sm:space-y-6">
       <section className="rounded-[24px] border border-neutral-200/80 bg-white p-5 shadow-sm sm:p-6">
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-700">
-            <Droplets className="h-6 w-6" />
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-700">
+              <Droplets className="h-6 w-6" />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-neutral-500">
+                Caretaker action
+              </p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-900">
+                Read Water Bills
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
+                Select an apartment, enter previous and current meter readings,
+                then submit the reading to office for approval.
+              </p>
+
+              <div className="mt-4">
+                <StatusPill pulse>
+                  {pendingUnits.length} apartments still need reading
+                </StatusPill>
+              </div>
+            </div>
           </div>
 
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-neutral-500">Caretaker action</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-900">
-              Read Water Bills
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
-              Select an apartment, enter previous and current meter readings,
-              then submit the reading to office for approval.
-            </p>
-
-            <div className="mt-4">
-              <StatusPill pulse>
-                {pendingUnits.length} apartments still need reading
-              </StatusPill>
-            </div>
+          <div className="lg:pt-1">
+            <QuickMeterReadingPopup
+              period={period}
+              pendingUnits={quickEntryUnits}
+            />
           </div>
         </div>
       </section>

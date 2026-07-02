@@ -16,6 +16,7 @@ import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib
 import { prisma } from "@/lib/prisma";
 import { publicPageMetadata } from "@/lib/seo";
 import { APP_URL } from "@/lib/sitemap-utils";
+import { vacancyPublicSlug } from "@/lib/public-vacancy-slug";
 import {
   PUBLIC_RENTAL_CATEGORIES,
   PUBLIC_RENTAL_LOCATIONS,
@@ -233,7 +234,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
 
   const listingCards: VacancyListingCard[] = houses.map((listing) => {
     const place = listing.property.location ?? listing.property.address ?? listing.property.name;
-    const href = `/vacancies/${listing.id}`;
+    const href = `/vacancies/${vacancyPublicSlug({ id: listing.id, propertyName: listing.property.name, houseNo: listing.houseNo })}`;
     const rooms = listing.bedrooms ?? listing.roomCount;
     const rentLabel = formatCurrency(listing.rentAmount);
     const shareTitle = `${listing.property.name} Unit ${listing.houseNo} is vacant`;

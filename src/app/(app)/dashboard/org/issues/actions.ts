@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { TicketStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
-import { notifyRecipients } from "@/lib/notifications/notify";
+import { notifyInAppAndPush, notifyRecipients } from "@/lib/notifications/notify";
 import { getCurrentOrgContext } from "./_lib/queries";
 import {
   buildIssuesHref,
@@ -207,30 +207,10 @@ export async function updateIssueStatusAction(formData: FormData) {
       data,
     });
 
-    await tx.notification.create({
-      data: {
-        orgId: membership.orgId,
-        userId: issue.reportedByUserId,
-        channel: "IN_APP",
-        type: nextStatus === "RESOLVED" || nextStatus === "CLOSED" ? "ISSUE_RESOLVED" : "GENERAL",
-        title: `Issue ${nextStatus.toLowerCase().replaceAll("_", " ")}`,
-        message: `Your issue "${issue.title}" is now ${nextStatus.toLowerCase().replaceAll("_", " ")}.`,
-        status: "QUEUED",
-      },
-    });
+    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: issue.reportedByUserId }], type: nextStatus === "RESOLVED" || nextStatus === "CLOSED" ? "ISSUE_RESOLVED" : "GENERAL", title: `Issue ${nextStatus.toLowerCase().replaceAll("_", " ")}`, message: `Your issue "${issue.title}" is now ${nextStatus.toLowerCase().replaceAll("_", " ")}.` });
 
     if (issue.assignedToUserId && issue.assignedToUserId !== issue.reportedByUserId) {
-      await tx.notification.create({
-        data: {
-          orgId: membership.orgId,
-          userId: issue.assignedToUserId,
-          channel: "IN_APP",
-          type: nextStatus === "RESOLVED" || nextStatus === "CLOSED" ? "ISSUE_RESOLVED" : "GENERAL",
-          title: "Issue status updated",
-          message: `"${issue.title}" is now ${nextStatus.toLowerCase().replaceAll("_", " ")}.`,
-          status: "QUEUED",
-        },
-      });
+      await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: issue.assignedToUserId }], type: nextStatus === "RESOLVED" || nextStatus === "CLOSED" ? "ISSUE_RESOLVED" : "GENERAL", title: "Issue status updated", message: `"${issue.title}" is now ${nextStatus.toLowerCase().replaceAll("_", " ")}.` });
     }
 
     await tx.auditLog.create({
@@ -321,30 +301,10 @@ export async function approveIssueResolutionReportAction(formData: FormData) {
       },
     });
 
-    await tx.notification.create({
-      data: {
-        orgId: membership.orgId,
-        userId: report.issue.reportedByUserId,
-        channel: "IN_APP",
-        type: "ISSUE_RESOLVED",
-        title: "Confirm completed issue",
-        message: `The office approved the caretaker report for "${report.issue.title}". Please confirm the work so the ticket can be closed.`,
-        status: "QUEUED",
-      },
-    });
+    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: report.issue.reportedByUserId }], type: "ISSUE_RESOLVED", title: "Confirm completed issue", message: `The office approved the caretaker report for "${report.issue.title}". Please confirm the work so the ticket can be closed.` });
 
     if (report.issue.assignedToUserId) {
-      await tx.notification.create({
-        data: {
-          orgId: membership.orgId,
-          userId: report.issue.assignedToUserId,
-          channel: "IN_APP",
-          type: "GENERAL",
-          title: "Completion report approved",
-          message: `The office approved your completion report for "${report.issue.title}".`,
-          status: "QUEUED",
-        },
-      });
+      await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: report.issue.assignedToUserId }], type: "GENERAL", title: "Completion report approved", message: `The office approved your completion report for "${report.issue.title}".` });
     }
 
     await tx.auditLog.create({
@@ -434,17 +394,7 @@ export async function rejectIssueResolutionReportAction(formData: FormData) {
     });
 
     if (report.issue.assignedToUserId) {
-      await tx.notification.create({
-        data: {
-          orgId: membership.orgId,
-          userId: report.issue.assignedToUserId,
-          channel: "IN_APP",
-          type: "GENERAL",
-          title: "Completion report needs changes",
-          message: `The office returned the completion report for "${report.issue.title}". Review the notes and submit again.`,
-          status: "QUEUED",
-        },
-      });
+      await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: report.issue.assignedToUserId }], type: "GENERAL", title: "Completion report needs changes", message: `The office returned the completion report for "${report.issue.title}". Review the notes and submit again.` });
     }
 
     await tx.auditLog.create({

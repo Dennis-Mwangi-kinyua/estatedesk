@@ -1359,6 +1359,38 @@
   }
 }
 
+@layer utilities {
+  .dark :where(.platform-theme-content, .org-theme-content) :where(.bg-white, .bg-white\/95, .bg-background, .bg-background\/80, .bg-background\/90) {
+    background-color: var(--card) !important;
+  }
+
+  .dark :where(.platform-theme-content, .org-theme-content) :where(.bg-neutral-50, .bg-slate-50, .bg-gray-50, .bg-muted\/30, .bg-muted\/40, .bg-muted\/50, .bg-muted\/60) {
+    background-color: color-mix(in oklch, var(--card) 82%, white 7%) !important;
+  }
+
+  .dark :where(.platform-theme-content, .org-theme-content) :where(.text-neutral-950, .text-neutral-900, .text-neutral-800, .text-slate-950, .text-slate-900, .text-slate-800, .text-foreground) {
+    color: var(--foreground) !important;
+  }
+
+  .dark :where(.platform-theme-content, .org-theme-content) :where(.text-neutral-700, .text-neutral-600, .text-neutral-500, .text-slate-700, .text-slate-600, .text-slate-500, .text-muted-foreground) {
+    color: var(--muted-foreground) !important;
+  }
+
+  .dark :where(.platform-theme-content, .org-theme-content) :where(.border-neutral-200, .border-slate-200, .border-border\/60, .border-border\/70, .border-white\/60) {
+    border-color: var(--border) !important;
+  }
+
+  .dark :where(.platform-theme-content, .org-theme-content) :where(input, select, textarea) {
+    border-color: var(--border) !important;
+    background-color: var(--card) !important;
+    color: var(--foreground) !important;
+  }
+
+  .dark :where(.platform-theme-content, .org-theme-content) :where(input, textarea)::placeholder {
+    color: var(--muted-foreground) !important;
+  }
+}
+
 @media print {
   html.dark,
   html.dark body {

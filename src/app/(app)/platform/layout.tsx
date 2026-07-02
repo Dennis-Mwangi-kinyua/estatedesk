@@ -185,7 +185,7 @@ export default async function PlatformLayout({
 
             <section className="min-h-0 flex-1 overflow-hidden p-2 sm:p-4 lg:p-6">
               <div className="h-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900/70 sm:rounded-xl">
-                <div className="h-full overflow-auto p-4 sm:p-5 lg:p-6">
+                <div className="platform-theme-content h-full overflow-auto p-4 text-slate-950 dark:text-slate-100 sm:p-5 lg:p-6">
                   {children}
                 </div>
               </div>

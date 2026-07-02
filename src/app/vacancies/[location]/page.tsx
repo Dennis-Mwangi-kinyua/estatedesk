@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import type React from "react";
 import { Prisma } from "@prisma/client";
@@ -33,6 +33,7 @@ import {
   publicRentalLocationPaths,
 } from "@/lib/public-rental-seo";
 import { sendVacancyInquiryAction } from "./actions";
+import { vacancyIdFromPublicSlug, vacancyPublicSlug } from "@/lib/public-vacancy-slug";
 
 type Props = {
   params: Promise<{ location: string }>;
@@ -51,11 +52,12 @@ export function generateStaticParams() {
 }
 
 async function getVacancyUnit(id: string) {
+  const unitId = vacancyIdFromPublicSlug(id);
   return retryTransientDatabaseOperation(
     () =>
       prisma.unit.findFirst({
         where: {
-          id,
+          id: unitId,
           isActive: true,
           deletedAt: null,
           status: "VACANT",
@@ -89,7 +91,7 @@ async function getVacancyUnit(id: string) {
     {
       attempts: PUBLIC_VACANCY_ATTEMPTS,
       delayMs: PUBLIC_VACANCY_DELAY_MS,
-      label: `public-vacancy-detail:${id}`,
+      label: `public-vacancy-detail:${unitId}`,
     },
   );
 }
@@ -277,7 +279,7 @@ function RelatedVacancyCard({ listing }: { listing: RelatedVacancyUnit }) {
 
   return (
     <Link
-      href={`/vacancies/${listing.id}`}
+      href={`/vacancies/${vacancyPublicSlug({ id: listing.id, propertyName: listing.property.name, houseNo: listing.houseNo })}`}
       className="group grid min-w-0 grid-cols-[5rem_1fr] gap-3 rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:hover:border-white/20 dark:hover:bg-slate-800 sm:grid-cols-1"
     >
       <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800 sm:aspect-[4/3]">
@@ -391,7 +393,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = buildTitle(unit);
   const description = buildDescription(unit);
-  const url = `${APP_URL}/vacancies/${unit.id}`;
+  const publicSlug = vacancyPublicSlug({ id: unit.id, propertyName: unit.property.name, houseNo: unit.houseNo });
+  const url = `${APP_URL}/vacancies/${publicSlug}`;
   const image = unit.images[0]?.key ? `${APP_URL}${imageUrl(unit.images[0].key)}` : `${APP_URL}/api/og/vacancy/${unit.id}`;
 
   return {
@@ -429,6 +432,8 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
   const { unit, databaseUnavailable } = await getVacancyUnitOrUnavailable(id);
   if (databaseUnavailable) return <VacancyTemporarilyUnavailable />;
   if (!unit) notFound();
+  const publicSlug = vacancyPublicSlug({ id: unit.id, propertyName: unit.property.name, houseNo: unit.houseNo });
+  if (id !== publicSlug) redirect(`/vacancies/${publicSlug}`);
   let relatedVacancies: RelatedVacancyUnit[] = [];
 
   try {
@@ -443,7 +448,7 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
 
   const title = buildTitle(unit);
   const description = buildDescription(unit);
-  const url = `${APP_URL}/vacancies/${unit.id}`;
+  const url = `${APP_URL}/vacancies/${publicSlug}`;
   const loginHref = "/login";
   const place = unit.property?.location ?? unit.property?.address ?? unit.property?.name ?? "Location not listed";
   const roomLabel = unit.roomCount ?? unit.bedrooms;

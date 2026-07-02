@@ -14,7 +14,7 @@ function isAuthorized(request: Request) {
   return authHeader === `Bearer ${secret}`;
 }
 
-export async function POST(request: Request) {
+async function handleNotificationCron(request: Request) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -23,3 +23,6 @@ export async function POST(request: Request) {
 
   return NextResponse.json(result);
 }
+
+export const GET = handleNotificationCron;
+export const POST = handleNotificationCron;
