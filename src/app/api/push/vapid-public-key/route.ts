@@ -5,10 +5,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   if (!isWebPushConfigured()) {
-    return NextResponse.json(
-      { enabled: false, publicKey: "" },
-      { status: 503 },
-    );
+    return NextResponse.json({
+      enabled: false,
+      publicKey: "",
+    });
   }
 
   return NextResponse.json({
