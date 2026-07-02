@@ -1,4 +1,4 @@
-import { decodePublicId, encodePublicId } from "@/lib/public-id";
+import { decodePublicId, encodePublicId } from "./public-id";
 
 const VACANCY_SCOPE = "public-vacancy";
 const TOKEN_SEPARATOR = "--";
@@ -18,8 +18,13 @@ export function vacancyPublicSlug(input: {
   propertyName: string;
   houseNo: string;
 }) {
-  const label = slugify(`${input.propertyName} unit ${input.houseNo}`) || "vacancy";
-  return `${label}${TOKEN_SEPARATOR}${encodePublicId(input.id, VACANCY_SCOPE)}`;
+  const label =
+    slugify(`${input.propertyName} unit ${input.houseNo}`) || "vacancy";
+
+  return `${label}${TOKEN_SEPARATOR}${encodePublicId(
+    input.id,
+    VACANCY_SCOPE
+  )}`;
 }
 
 export function vacancyIdFromPublicSlug(value: string) {
