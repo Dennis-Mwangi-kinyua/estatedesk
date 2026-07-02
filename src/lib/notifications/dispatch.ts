@@ -2,6 +2,10 @@ import "server-only";
 
 import { NotificationChannel, NotificationStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  readNotificationActionUrl,
+  resolveNotificationActionUrl,
+} from "@/lib/push/notification-links";
 import { sendWebPushNotification } from "@/lib/push/web-push";
 import { sendMetaWhatsappText } from "@/lib/whatsapp/meta";
 
@@ -78,11 +82,13 @@ async function sendWebPush({
   title,
   body,
   notificationId,
+  actionUrl,
 }: {
   userId: string;
   title: string;
   body: string;
   notificationId: string;
+  actionUrl: string;
 }) {
   const subscriptions = await prisma.pushSubscription.findMany({
     where: { userId },
@@ -105,6 +111,7 @@ async function sendWebPush({
         payload: {
           title,
           body,
+          url: actionUrl,
           tag: notificationId,
         },
       }),
@@ -209,6 +216,13 @@ export async function dispatchQueuedNotifications(
           title: notification.title,
           body: notification.message,
           notificationId: notification.id,
+          actionUrl:
+            readNotificationActionUrl(notification.providerResponse) ??
+            resolveNotificationActionUrl({
+              type: notification.type,
+              userId: notification.userId,
+              tenantId: notification.tenantId,
+            }),
         });
       } else {
         providerResponse = { status: "in-app" };

@@ -1,13 +1,18 @@
 import type { MetadataRoute } from "next";
 
-import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/seo";
+import { SITE_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/seo";
 
 export default function manifest(): MetadataRoute.Manifest {
+  const siteUrl = getSiteUrl();
+
   return {
+    id: `${siteUrl}/`,
     name: `${SITE_NAME} Property Management`,
     short_name: SITE_NAME,
     description: SITE_DESCRIPTION,
-    start_url: "/",
+    lang: "en-KE",
+    dir: "ltr",
+    start_url: "/dashboard",
     scope: "/",
     display: "standalone",
     background_color: "#f8fafc",

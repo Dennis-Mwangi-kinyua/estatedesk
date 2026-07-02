@@ -1,4 +1,4 @@
-const CACHE_VERSION = "estatedesk-pwa-v1";
+const CACHE_VERSION = "estatedesk-pwa-v2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const OFFLINE_URL = "/offline";
 
@@ -18,6 +18,12 @@ self.addEventListener("install", (event) => {
       .then((cache) => cache.addAll(PRECACHE_URLS))
       .then(() => self.skipWaiting()),
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("activate", (event) => {

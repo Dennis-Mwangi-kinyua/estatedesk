@@ -9,7 +9,7 @@ import {
 } from "@/lib/auth/cookies";
 import { requireAuthenticated } from "@/lib/permissions/guards";
 import { privatePageMetadata } from "@/lib/seo";
-import { PushNotificationManager } from "@/components/pwa/push-notification-manager";
+
 import { AppActionFeedback } from "@/components/shared/app-action-feedback";
 import { DestructiveActionGuard } from "@/components/shared/destructive-action-guard";
 
@@ -68,7 +68,6 @@ export default async function AppLayout({
       {children}
       {pathname === "/change-password" ? null : <AppActionFeedback />}
       <DestructiveActionGuard />
-      <PushNotificationManager />
     </div>
   );
 }

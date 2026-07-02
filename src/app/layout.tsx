@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
 import { WebVitalsReporter } from "@/components/monitoring/web-vitals-reporter";
 import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
+import { PwaInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
+import { ServiceWorkerUpdatePrompt } from "@/components/pwa/service-worker-update-prompt";
 import { ThemeInitScript } from "@/components/theme/theme-init-script";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -216,6 +218,8 @@ export default function RootLayout({
           <WebVitalsReporter />
           <MobileSwipeBack />
           <ServiceWorkerRegistration />
+          <ServiceWorkerUpdatePrompt />
+          <PwaInstallPrompt />
           <div className="min-h-screen w-full">{children}</div>
           <ThemeToggle />
         </ThemeProvider>

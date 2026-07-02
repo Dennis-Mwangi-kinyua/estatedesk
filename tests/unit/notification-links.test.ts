@@ -1,0 +1,58 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import {
+  getDefaultNotificationActionUrl,
+  readNotificationActionUrl,
+  resolveNotificationActionUrl,
+  resolveNotificationAudience,
+} from "../../src/lib/push/notification-links";
+
+describe("notification deep links", () => {
+  it("maps tenant notifications to tenant dashboard routes", () => {
+    assert.equal(
+      getDefaultNotificationActionUrl("WATER_BILL_ISSUED", "tenant"),
+      "/dashboard/tenant/water-bills",
+    );
+    assert.equal(
+      getDefaultNotificationActionUrl("ISSUE_CREATED", "tenant"),
+      "/dashboard/tenant/issues",
+    );
+  });
+
+  it("maps staff notifications to org dashboard routes", () => {
+    assert.equal(
+      getDefaultNotificationActionUrl("ISSUE_CREATED", "staff"),
+      "/dashboard/org/issues",
+    );
+    assert.equal(
+      getDefaultNotificationActionUrl("PAYMENT_RECEIVED", "staff"),
+      "/dashboard/org/payments",
+    );
+  });
+
+  it("prefers explicit action URLs and reads them from provider responses", () => {
+    assert.equal(
+      resolveNotificationActionUrl({
+        type: "GENERAL",
+        userId: "user-1",
+        actionUrl: "/platform/onboarding",
+      }),
+      "/platform/onboarding",
+    );
+
+    assert.equal(
+      readNotificationActionUrl({ actionUrl: "/dashboard/org/notifications" }),
+      "/dashboard/org/notifications",
+    );
+    assert.equal(readNotificationActionUrl({ actionUrl: "https://evil.example" }), null);
+  });
+
+  it("resolves audience from recipient shape", () => {
+    assert.equal(resolveNotificationAudience({ tenantId: "tenant-1" }), "tenant");
+    assert.equal(
+      resolveNotificationAudience({ userId: "user-1", tenantId: "tenant-1" }),
+      "staff",
+    );
+    assert.equal(resolveNotificationAudience({}), "default");
+  });
+});

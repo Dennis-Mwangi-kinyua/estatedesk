@@ -15,6 +15,10 @@ export type RuntimeEnvKey =
   | "NEXT_PUBLIC_GOOGLE_ADS_ID"
   | "NEXT_PUBLIC_ENABLE_WEB_VITALS"
   | "NEXT_PUBLIC_ANALYTICS_DEBUG"
+  | "NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY"
+  | "WEB_PUSH_PUBLIC_KEY"
+  | "WEB_PUSH_PRIVATE_KEY"
+  | "WEB_PUSH_SUBJECT"
   | "AUTH_SECRET"
   | "CRON_SECRET"
   | "PLATFORM_API_KEYS_PAGE_PASSWORD"
@@ -197,6 +201,24 @@ export const runtimeEnvChecks = [
     label: "S3 public base URL",
     group: "Storage",
     importance: "optional",
+  },
+  {
+    key: "NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY",
+    label: "Web Push public key",
+    group: "Messaging",
+    importance: "recommended",
+  },
+  {
+    key: "WEB_PUSH_PRIVATE_KEY",
+    label: "Web Push private key",
+    group: "Messaging",
+    importance: "recommended",
+  },
+  {
+    key: "WEB_PUSH_SUBJECT",
+    label: "Web Push subject (mailto or https)",
+    group: "Messaging",
+    importance: "recommended",
   },
   {
     key: "WHATSAPP_PROVIDER",

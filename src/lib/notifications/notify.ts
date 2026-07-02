@@ -7,6 +7,7 @@ import {
   type Prisma,
   type PrismaClient,
 } from "@prisma/client";
+import { resolveNotificationActionUrl } from "@/lib/push/notification-links";
 
 type NotificationDb = PrismaClient | Prisma.TransactionClient;
 
@@ -23,6 +24,7 @@ type NotifyInput = {
   type: NotificationType;
   title: string;
   message: string;
+  actionUrl?: string;
   providerResponse?: Prisma.InputJsonValue;
 };
 
@@ -46,6 +48,7 @@ export async function notifyRecipients({
   type,
   title,
   message,
+  actionUrl,
   providerResponse,
 }: NotifyInput) {
   const seen = new Set<string>();
@@ -66,6 +69,13 @@ export async function notifyRecipients({
 
       seen.add(key);
 
+      const resolvedActionUrl = resolveNotificationActionUrl({
+        type,
+        userId: recipient.userId,
+        tenantId: recipient.tenantId,
+        actionUrl,
+      });
+
       data.push({
         orgId,
         userId: recipient.userId ?? null,
@@ -79,7 +89,12 @@ export async function notifyRecipients({
             ? NotificationStatus.SENT
             : NotificationStatus.QUEUED,
         sentAt: channel === NotificationChannel.IN_APP ? now : null,
-        providerResponse,
+        providerResponse: {
+          ...(typeof providerResponse === "object" && providerResponse !== null
+            ? providerResponse
+            : {}),
+          actionUrl: resolvedActionUrl,
+        },
       });
     }
   }
