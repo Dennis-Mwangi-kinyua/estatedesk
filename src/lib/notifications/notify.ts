@@ -31,6 +31,7 @@ const DEFAULT_CHANNELS = [
   NotificationChannel.SMS,
   NotificationChannel.WHATSAPP,
   NotificationChannel.EMAIL,
+  NotificationChannel.WEB_PUSH,
 ] as const;
 
 function recipientKey(recipient: NotificationRecipient, channel: NotificationChannel) {

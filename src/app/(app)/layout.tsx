@@ -3,6 +3,7 @@ import { headers, cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { requireAuthenticated } from "@/lib/permissions/guards";
 import { privatePageMetadata } from "@/lib/seo";
+import { PushNotificationManager } from "@/components/pwa/push-notification-manager";
 import { AppActionFeedback } from "@/components/shared/app-action-feedback";
 
 export const metadata = privatePageMetadata;
@@ -59,6 +60,7 @@ export default async function AppLayout({
     <div className="app-mobile-canvas min-h-screen">
       {children}
       {pathname === "/change-password" ? null : <AppActionFeedback />}
+      <PushNotificationManager />
     </div>
   );
 }

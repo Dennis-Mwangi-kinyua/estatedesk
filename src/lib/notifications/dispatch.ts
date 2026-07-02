@@ -2,6 +2,7 @@ import "server-only";
 
 import { NotificationChannel, NotificationStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { sendWebPushNotification } from "@/lib/push/web-push";
 import { sendMetaWhatsappText } from "@/lib/whatsapp/meta";
 
 type DispatchResult = {
@@ -11,12 +12,13 @@ type DispatchResult = {
 };
 
 function getRecipientContact(notification: {
-  user: { phone: string | null; email: string | null } | null;
-  tenant: { phone: string | null; email: string | null } | null;
+  user: { id: string; phone: string | null; email: string | null } | null;
+  tenant: { userId: string | null; phone: string | null; email: string | null } | null;
 }) {
   return {
     phone: notification.tenant?.phone ?? notification.user?.phone ?? null,
     email: notification.tenant?.email ?? notification.user?.email ?? null,
+    userId: notification.user?.id ?? notification.tenant?.userId ?? null,
   };
 }
 
@@ -62,6 +64,93 @@ async function sendEmail({
   };
 }
 
+function getWebPushErrorStatusCode(error: unknown) {
+  if (typeof error === "object" && error && "statusCode" in error) {
+    const statusCode = (error as { statusCode?: unknown }).statusCode;
+    return typeof statusCode === "number" ? statusCode : null;
+  }
+
+  return null;
+}
+
+async function sendWebPush({
+  userId,
+  title,
+  body,
+  notificationId,
+}: {
+  userId: string;
+  title: string;
+  body: string;
+  notificationId: string;
+}) {
+  const subscriptions = await prisma.pushSubscription.findMany({
+    where: { userId },
+  });
+
+  if (subscriptions.length === 0) {
+    throw new Error("Recipient has no active push subscriptions.");
+  }
+
+  const results = await Promise.allSettled(
+    subscriptions.map((subscription) =>
+      sendWebPushNotification({
+        subscription: {
+          endpoint: subscription.endpoint,
+          keys: {
+            p256dh: subscription.p256dh,
+            auth: subscription.auth,
+          },
+        },
+        payload: {
+          title,
+          body,
+          tag: notificationId,
+        },
+      }),
+    ),
+  );
+
+  const expiredEndpoints = subscriptions
+    .filter((_, index) => {
+      const result = results[index];
+      return (
+        result?.status === "rejected" &&
+        [404, 410].includes(getWebPushErrorStatusCode(result.reason) ?? 0)
+      );
+    })
+    .map((subscription) => subscription.endpoint);
+
+  if (expiredEndpoints.length > 0) {
+    await prisma.pushSubscription.deleteMany({
+      where: {
+        endpoint: {
+          in: expiredEndpoints,
+        },
+      },
+    });
+  }
+
+  const sent = results.filter((result) => result.status === "fulfilled").length;
+
+  if (sent === 0) {
+    const firstError = results.find((result) => result.status === "rejected");
+    const message =
+      firstError?.status === "rejected" && firstError.reason instanceof Error
+        ? firstError.reason.message
+        : "Web Push delivery failed.";
+
+    throw new Error(message);
+  }
+
+  return {
+    provider: "web-push",
+    attempted: subscriptions.length,
+    sent,
+    expired: expiredEndpoints.length,
+  };
+}
+
 export async function dispatchQueuedNotifications(
   limit = 50,
 ): Promise<DispatchResult> {
@@ -76,12 +165,14 @@ export async function dispatchQueuedNotifications(
     include: {
       user: {
         select: {
+          id: true,
           phone: true,
           email: true,
         },
       },
       tenant: {
         select: {
+          userId: true,
           phone: true,
           email: true,
         },
@@ -110,6 +201,14 @@ export async function dispatchQueuedNotifications(
           to: contact.email,
           subject: notification.title,
           body: notification.message,
+        });
+      } else if (notification.channel === NotificationChannel.WEB_PUSH) {
+        if (!contact.userId) throw new Error("Recipient has no linked user account.");
+        providerResponse = await sendWebPush({
+          userId: contact.userId,
+          title: notification.title,
+          body: notification.message,
+          notificationId: notification.id,
         });
       } else {
         providerResponse = { status: "in-app" };

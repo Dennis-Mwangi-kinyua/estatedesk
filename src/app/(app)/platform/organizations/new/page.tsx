@@ -30,6 +30,20 @@ const steps = [
   { id: 3, title: "Review" },
 ];
 
+const pageClass =
+  "min-h-screen bg-neutral-50 text-neutral-950 dark:bg-slate-950 dark:text-slate-100";
+const panelClass =
+  "rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900 sm:p-6";
+const fieldClass =
+  "w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-slate-500";
+const iconFieldClass =
+  "w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-slate-500";
+const iconClass =
+  "pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-slate-500";
+const iconBubbleClass =
+  "inline-flex rounded-full bg-neutral-100 p-2 text-neutral-700 dark:bg-white/10 dark:text-slate-200";
+const helperTextClass = "mt-2 text-xs text-neutral-500 dark:text-slate-400";
+
 export default function NewOrganizationPage() {
   const [state, formAction, pending] = useActionState(
     createOrganizationAction,
@@ -100,43 +114,43 @@ export default function NewOrganizationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 text-neutral-950">
+    <div className={pageClass}>
       <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-8">
         <div className="mb-6 flex items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 text-sm text-neutral-500">
-              <Link href="/platform" className="hover:text-neutral-900">
+            <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-slate-400">
+              <Link href="/platform" className="hover:text-neutral-900 dark:hover:text-white">
                 Platform
               </Link>
               <span>/</span>
               <Link
                 href="/platform/organizations"
-                className="hover:text-neutral-900"
+                className="hover:text-neutral-900 dark:hover:text-white"
               >
                 Organizations
               </Link>
               <span>/</span>
-              <span className="text-neutral-900">New</span>
+              <span className="text-neutral-900 dark:text-white">New</span>
             </div>
 
             <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
               Create organization
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600 dark:text-slate-300">
               Set up a new organization workspace and its master login.
             </p>
           </div>
 
           <Link
             href="/platform/organizations"
-            className="hidden rounded-2xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium shadow-sm transition hover:bg-neutral-100 sm:inline-flex"
+            className="hidden rounded-2xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium shadow-sm transition hover:bg-neutral-100 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-white/10 sm:inline-flex"
           >
             Back
           </Link>
         </div>
 
-        <div className="mb-6 rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="mb-6 rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900 sm:p-5">
           <div className="grid grid-cols-3 gap-2 sm:gap-4">
             {steps.map((item) => {
               const active = item.id === step;
@@ -147,10 +161,10 @@ export default function NewOrganizationPage() {
                   key={item.id}
                   className={`rounded-2xl border px-3 py-3 text-center sm:px-4 ${
                     active
-                      ? "border-neutral-900 bg-neutral-900 text-white"
+                      ? "border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-slate-950"
                       : completed
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                        : "border-neutral-200 bg-neutral-50 text-neutral-500"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300"
+                        : "border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-white/10 dark:bg-slate-950 dark:text-slate-400"
                   }`}
                 >
                   <div className="mb-1 text-xs font-medium sm:text-sm">
@@ -166,7 +180,7 @@ export default function NewOrganizationPage() {
         </div>
 
         {state.error ? (
-          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-300">
             {state.error}
           </div>
         ) : null}
@@ -202,13 +216,13 @@ export default function NewOrganizationPage() {
           />
 
           {step === 1 ? (
-            <section className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
+            <section className={panelClass}>
               <div className="mb-6">
-                <div className="inline-flex rounded-full bg-neutral-100 p-2">
+                <div className={iconBubbleClass}>
                   <Building2 className="h-5 w-5" />
                 </div>
                 <h2 className="mt-4 text-xl font-semibold">Organization details</h2>
-                <p className="mt-2 text-sm text-neutral-600">
+                <p className="mt-2 text-sm text-neutral-600 dark:text-slate-300">
                   Add the main workspace details and default organization settings.
                 </p>
               </div>
@@ -223,7 +237,7 @@ export default function NewOrganizationPage() {
                     value={organizationName}
                     onChange={(e) => setOrganizationName(e.target.value)}
                     placeholder="Greenview Properties Ltd"
-                    className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"
+                    className={fieldClass}
                   />
                 </Field>
 
@@ -232,9 +246,9 @@ export default function NewOrganizationPage() {
                     value={organizationSlug}
                     onChange={(e) => setOrganizationSlug(e.target.value)}
                     placeholder="greenview-properties"
-                    className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"
+                    className={fieldClass}
                   />
-                  <p className="mt-2 text-xs text-neutral-500">
+                  <p className={helperTextClass}>
                     Generated slug:{" "}
                     <span className="font-medium">{generatedSlug || "—"}</span>
                   </p>
@@ -246,25 +260,25 @@ export default function NewOrganizationPage() {
                     error={state.fieldErrors?.organizationEmail?.[0]}
                   >
                     <div className="relative">
-                      <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                      <Mail className={iconClass} />
                       <input
                         type="email"
                         value={organizationEmail}
                         onChange={(e) => setOrganizationEmail(e.target.value)}
                         placeholder="info@greenview.co.ke"
-                        className="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-neutral-400"
+                        className={iconFieldClass}
                       />
                     </div>
                   </Field>
 
                   <Field label="Organization phone">
                     <div className="relative">
-                      <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                      <Phone className={iconClass} />
                       <input
                         value={organizationPhone}
                         onChange={(e) => setOrganizationPhone(e.target.value)}
                         placeholder="+254700000000"
-                        className="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-neutral-400"
+                        className={iconFieldClass}
                       />
                     </div>
                   </Field>
@@ -272,13 +286,13 @@ export default function NewOrganizationPage() {
 
                 <Field label="Address">
                   <div className="relative">
-                    <MapPin className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-neutral-400" />
+                    <MapPin className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-neutral-400 dark:text-slate-500" />
                     <textarea
                       value={organizationAddress}
                       onChange={(e) => setOrganizationAddress(e.target.value)}
                       placeholder="Westlands, Nairobi"
                       rows={4}
-                      className="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-neutral-400"
+                      className={iconFieldClass}
                     />
                   </div>
                 </Field>
@@ -291,7 +305,7 @@ export default function NewOrganizationPage() {
                       onChange={(e) =>
                         setCurrencyCode(e.target.value.toUpperCase())
                       }
-                      className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm uppercase outline-none transition focus:border-neutral-400"
+                      className={`${fieldClass} uppercase`}
                     />
                   </Field>
 
@@ -304,7 +318,7 @@ export default function NewOrganizationPage() {
                       value={timezone}
                       onChange={(e) => setTimezone(e.target.value)}
                       placeholder="Africa/Nairobi"
-                      className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"
+                      className={fieldClass}
                     />
                   </Field>
 
@@ -317,7 +331,7 @@ export default function NewOrganizationPage() {
                       min={1}
                       value={dataRetentionDays}
                       onChange={(e) => setDataRetentionDays(e.target.value)}
-                      className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"
+                      className={fieldClass}
                     />
                   </Field>
                 </div>
@@ -326,7 +340,7 @@ export default function NewOrganizationPage() {
                   <select
                     value={plan}
                     onChange={(e) => setPlan(e.target.value)}
-                    className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"
+                    className={fieldClass}
                   >
                     <option value="FREE">Free</option>
                     <option value="PRO">Pro</option>
@@ -339,14 +353,14 @@ export default function NewOrganizationPage() {
                   <select
                     value={accountType}
                     onChange={(e) => setAccountType(e.target.value)}
-                    className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"
+                    className={fieldClass}
                   >
                     <option value="PROPERTY_MANAGER">
                       Property management organization
                     </option>
                     <option value="LANDLORD">Landlord organization</option>
                   </select>
-                  <p className="mt-2 text-xs text-neutral-500">
+                  <p className={helperTextClass}>
                     The master login is always an organization admin. Landlord
                     access can be mapped separately after setup.
                   </p>
@@ -356,15 +370,15 @@ export default function NewOrganizationPage() {
           ) : null}
 
           {step === 2 ? (
-            <section className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
+            <section className={panelClass}>
               <div className="mb-6">
-                <div className="inline-flex rounded-full bg-neutral-100 p-2">
+                <div className={iconBubbleClass}>
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <h2 className="mt-4 text-xl font-semibold">
                   Organization master login
                 </h2>
-                <p className="mt-2 text-sm text-neutral-600">
+                <p className="mt-2 text-sm text-neutral-600 dark:text-slate-300">
                   Create the organization-level admin account. This login can
                   create admins, managers, accountants, caretakers, tenants, and
                   landlord mappings inside the workspace.
@@ -378,12 +392,12 @@ export default function NewOrganizationPage() {
                   error={state.fieldErrors?.adminFullName?.[0]}
                 >
                   <div className="relative">
-                    <User2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                    <User2 className={iconClass} />
                     <input
                       value={adminFullName}
                       onChange={(e) => setAdminFullName(e.target.value)}
                       placeholder="Dennis Mwangi"
-                      className="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-neutral-400"
+                      className={iconFieldClass}
                     />
                   </div>
                 </Field>
@@ -394,7 +408,7 @@ export default function NewOrganizationPage() {
                   error={state.fieldErrors?.adminUsername?.[0]}
                 >
                   <div className="relative">
-                    <User2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                    <User2 className={iconClass} />
                     <input
                       value={adminUsername}
                       onChange={(e) =>
@@ -403,7 +417,7 @@ export default function NewOrganizationPage() {
                         )
                       }
                       placeholder="greenview-admin"
-                      className="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-neutral-400"
+                      className={iconFieldClass}
                     />
                   </div>
                 </Field>
@@ -415,13 +429,13 @@ export default function NewOrganizationPage() {
                     error={state.fieldErrors?.adminEmail?.[0]}
                   >
                     <div className="relative">
-                      <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                      <Mail className={iconClass} />
                       <input
                         type="email"
                         value={adminEmail}
                         onChange={(e) => setAdminEmail(e.target.value)}
                         placeholder="admin@greenview.co.ke"
-                        className="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-neutral-400"
+                        className={iconFieldClass}
                       />
                     </div>
                   </Field>
@@ -431,12 +445,12 @@ export default function NewOrganizationPage() {
                     error={state.fieldErrors?.adminPhone?.[0]}
                   >
                     <div className="relative">
-                      <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                      <Phone className={iconClass} />
                       <input
                         value={adminPhone}
                         onChange={(e) => setAdminPhone(e.target.value)}
                         placeholder="+254700000001"
-                        className="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-neutral-400"
+                        className={iconFieldClass}
                       />
                     </div>
                   </Field>
@@ -449,13 +463,13 @@ export default function NewOrganizationPage() {
                     error={state.fieldErrors?.adminPassword?.[0]}
                   >
                     <div className="relative">
-                      <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                      <Lock className={iconClass} />
                       <input
                         type="password"
                         value={adminPassword}
                         onChange={(e) => setAdminPassword(e.target.value)}
                         placeholder="At least 8 characters"
-                        className="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-neutral-400"
+                        className={iconFieldClass}
                       />
                     </div>
                   </Field>
@@ -466,13 +480,13 @@ export default function NewOrganizationPage() {
                     error={state.fieldErrors?.adminPasswordConfirm?.[0]}
                   >
                     <div className="relative">
-                      <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                      <Lock className={iconClass} />
                       <input
                         type="password"
                         value={adminPasswordConfirm}
                         onChange={(e) => setAdminPasswordConfirm(e.target.value)}
                         placeholder="Repeat password"
-                        className="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-neutral-400"
+                        className={iconFieldClass}
                       />
                     </div>
                   </Field>
@@ -482,13 +496,13 @@ export default function NewOrganizationPage() {
           ) : null}
 
           {step === 3 ? (
-            <section className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
+            <section className={panelClass}>
               <div className="mb-6">
-                <div className="inline-flex rounded-full bg-emerald-50 p-2 text-emerald-600">
+                <div className="inline-flex rounded-full bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-300">
                   <CheckCircle2 className="h-5 w-5" />
                 </div>
                 <h2 className="mt-4 text-xl font-semibold">Review and create</h2>
-                <p className="mt-2 text-sm text-neutral-600">
+                <p className="mt-2 text-sm text-neutral-600 dark:text-slate-300">
                   Confirm the organization details and the first admin account before
                   creating the workspace.
                 </p>
@@ -531,9 +545,9 @@ export default function NewOrganizationPage() {
             </section>
           ) : null}
 
-          <div className="sticky bottom-3 rounded-3xl border border-neutral-200 bg-white p-3 shadow-lg backdrop-blur sm:p-4">
+          <div className="sticky bottom-3 rounded-3xl border border-neutral-200 bg-white/95 p-3 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-900/95 sm:p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-sm text-neutral-500">
+              <div className="text-sm text-neutral-500 dark:text-slate-400">
                 Step {step} of {steps.length}
               </div>
 
@@ -542,7 +556,7 @@ export default function NewOrganizationPage() {
                   type="button"
                   onClick={prevStep}
                   disabled={step === 1 || pending}
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-neutral-200 px-4 py-3 text-sm font-medium transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-neutral-200 px-4 py-3 text-sm font-medium transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:text-slate-100 dark:hover:bg-white/10 sm:flex-none"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Back
@@ -557,7 +571,7 @@ export default function NewOrganizationPage() {
                       (step === 1 && !canGoStep2()) ||
                       (step === 2 && !canGoStep3())
                     }
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-950 sm:flex-none"
                   >
                     Continue
                     <ArrowRight className="h-4 w-4" />
@@ -566,7 +580,7 @@ export default function NewOrganizationPage() {
                   <button
                     type="submit"
                     disabled={pending}
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-950 sm:flex-none"
                   >
                     {pending ? "Creating..." : "Create organization"}
                     {!pending ? <CheckCircle2 className="h-4 w-4" /> : null}
@@ -594,12 +608,12 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium text-neutral-800">
+      <label className="mb-2 block text-sm font-medium text-neutral-800 dark:text-slate-200">
         {label}
         {required ? <span className="ml-1 text-red-500">*</span> : null}
       </label>
       {children}
-      {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="mt-2 text-sm text-red-600 dark:text-red-300">{error}</p> : null}
     </div>
   );
 }
@@ -612,18 +626,18 @@ function ReviewCard({
   items: [string, string][];
 }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
-      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+    <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 dark:border-white/10 dark:bg-slate-950">
+      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-slate-400">
         {title}
       </h3>
       <div className="space-y-3">
         {items.map(([label, value]) => (
           <div
             key={label}
-            className="flex items-start justify-between gap-4 border-b border-neutral-200 pb-3 last:border-b-0 last:pb-0"
+            className="flex items-start justify-between gap-4 border-b border-neutral-200 pb-3 last:border-b-0 last:pb-0 dark:border-white/10"
           >
-            <span className="text-sm text-neutral-500">{label}</span>
-            <span className="text-right text-sm font-medium text-neutral-900">
+            <span className="text-sm text-neutral-500 dark:text-slate-400">{label}</span>
+            <span className="text-right text-sm font-medium text-neutral-900 dark:text-slate-100">
               {value}
             </span>
           </div>

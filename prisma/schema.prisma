@@ -57,6 +57,7 @@ model User {
   meterReadingsSubmitted    MeterReading[]          @relation("MeterReadingSubmittedBy")
   notifications             Notification[]          @relation("NotificationUser")
   paymentsMade              Payment[]               @relation("PaymentPayerUser")
+  pushSubscriptions         PushSubscription[]
   reconciledPayments        Payment[]               @relation("PaymentReconciledBy")
   reversedPayments          Payment[]               @relation("PaymentReversedBy")
   cronJobRuns               CronJobRun[]            @relation("CronJobRunActor")
@@ -1824,6 +1825,23 @@ model Notification {
   @@index([tenantId, readAt])
 }
 
+/// Browser/device Web Push subscription for an authenticated user.
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastSeenAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([updatedAt])
+}
+
 /// Tenant move-out notice and inspection lifecycle trigger.
 model MoveOutNotice {
   id          String       @id @default(cuid())
@@ -2527,6 +2545,7 @@ enum NotificationChannel {
   SMS
   EMAIL
   WHATSAPP
+  WEB_PUSH
 }
 
 enum NotificationStatus {
