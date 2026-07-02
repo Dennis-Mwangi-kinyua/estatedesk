@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  getSessionCookieName,
+  hasValidSessionCookieShape,
+} from "@/lib/auth/cookie-policy";
 
 type RateLimitEntry = {
   count: number;
   resetAt: number;
 };
-
-const SESSION_COOKIE_NAME = "estatedesk_session";
 
 const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -216,7 +218,8 @@ function applyTenantRateLimit(req: NextRequest, response: NextResponse) {
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const hasSession = Boolean(req.cookies.get(SESSION_COOKIE_NAME)?.value);
+  const sessionCookieValue = req.cookies.get(getSessionCookieName())?.value;
+  const hasSession = hasValidSessionCookieShape(sessionCookieValue);
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-estatedesk-pathname", pathname);
 

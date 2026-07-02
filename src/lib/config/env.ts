@@ -94,7 +94,7 @@ export const runtimeEnvChecks = [
     key: "AUTH_SECRET",
     label: "Cookie signing secret",
     group: "Security",
-    importance: "recommended",
+    importance: "required",
   },
   {
     key: "CRON_SECRET",

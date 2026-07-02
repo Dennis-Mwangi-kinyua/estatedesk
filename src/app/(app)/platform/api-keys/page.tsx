@@ -41,12 +41,12 @@ export default async function PlatformApiKeysPage({
 }: {
   searchParams: SearchParams;
 }) {
-  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/dashboard",
   });
 
   const params = await searchParams;
-  const unlocked = await isPlatformApiKeysUnlocked();
+  const unlocked = await isPlatformApiKeysUnlocked(session.userId);
 
   if (!unlocked) {
     return (

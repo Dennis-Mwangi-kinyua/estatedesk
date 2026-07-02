@@ -2,7 +2,11 @@ import "server-only";
 
 import crypto from "node:crypto";
 
-type TokenPurpose = "password-reset" | "email-verification" | "invitation";
+type TokenPurpose =
+  | "password-reset"
+  | "email-verification"
+  | "invitation"
+  | "session";
 
 function getTokenHashSecret() {
   return (

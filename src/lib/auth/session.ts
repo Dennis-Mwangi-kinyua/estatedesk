@@ -10,9 +10,16 @@ import type {
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import {
+  createSessionCookieValue,
+  getSessionCookieName,
+  getSessionCookieOptions,
+  parseSessionCookieValue,
+} from "@/lib/auth/cookies";
 import { getSessionHeartbeatBefore } from "@/lib/auth/presence";
+import { hashOpaqueToken, legacyHashOpaqueToken } from "@/lib/crypto/tokens";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
+import { prisma } from "@/lib/prisma";
 
 export type { OrgRole, PlatformRole, ScopeType };
 
@@ -58,19 +65,32 @@ export class ActiveSessionLimitError extends Error {
   }
 }
 
-const SESSION_COOKIE_NAME = "estatedesk_session";
 const MAX_ACTIVE_SESSIONS_PER_USER = 2;
 const SESSION_MAX_AGE_SECONDS = 60 * 30;
+const SESSION_RENEWAL_THRESHOLD = 0.5;
 
-const ENFORCE_USER_AGENT_MATCH = false;
-const ENFORCE_IP_MATCH = false;
+function isProduction() {
+  return process.env.NODE_ENV === "production";
+}
+
+function envFlagEnabled(name: string, defaultInProduction: boolean) {
+  const raw = process.env[name]?.trim().toLowerCase();
+
+  if (raw === "true" || raw === "1" || raw === "yes") return true;
+  if (raw === "false" || raw === "0" || raw === "no") return false;
+
+  return isProduction() && defaultInProduction;
+}
+
+const ENFORCE_USER_AGENT_MATCH = envFlagEnabled("SESSION_BIND_USER_AGENT", true);
+const ENFORCE_IP_MATCH = envFlagEnabled("SESSION_BIND_IP", true);
 
 function generateSessionToken(): string {
   return crypto.randomBytes(32).toString("hex");
 }
 
 function hashSessionToken(token: string): string {
-  return crypto.createHash("sha256").update(token).digest("hex");
+  return hashOpaqueToken(token, "session");
 }
 
 function getSessionMaxAgeSeconds(): number {
@@ -97,45 +117,151 @@ async function getRequestMeta() {
   return { ipAddress, userAgent };
 }
 
-async function getCurrentTokenHash() {
+async function readSessionTokenFromCookies() {
   const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const cookieName = getSessionCookieName();
+  const rawValue = cookieStore.get(cookieName)?.value;
 
-  return token ? hashSessionToken(token) : null;
-}
-
-function getCookieOptions(
-  overrides?: Partial<{
-    maxAge: number;
-    expires: Date;
-  }>,
-) {
   return {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-    ...overrides,
+    cookieStore,
+    cookieName,
+    token: parseSessionCookieValue(rawValue),
+    rawValue,
   };
 }
 
 function setSessionCookie(
   cookieStore: Awaited<ReturnType<typeof cookies>>,
   token: string,
+  maxAge = getSessionMaxAgeSeconds(),
 ) {
   cookieStore.set(
-    SESSION_COOKIE_NAME,
-    token,
-    getCookieOptions({ maxAge: getSessionMaxAgeSeconds() }),
+    getSessionCookieName(),
+    createSessionCookieValue(token),
+    getSessionCookieOptions(maxAge),
   );
 }
 
-function clearCookie(cookieStore: Awaited<ReturnType<typeof cookies>>) {
-  cookieStore.set(
-    SESSION_COOKIE_NAME,
-    "",
-    getCookieOptions({ expires: new Date(0) }),
+function clearSessionCookie(cookieStore: Awaited<ReturnType<typeof cookies>>) {
+  cookieStore.set(getSessionCookieName(), "", {
+    ...getSessionCookieOptions(0),
+    expires: new Date(0),
+    maxAge: 0,
+  });
+}
+
+async function findSessionByToken(token: string) {
+  const primaryHash = hashSessionToken(token);
+  const legacyHash = legacyHashOpaqueToken(token);
+
+  const primarySession = await retryTransientDatabaseOperation(
+    () =>
+      prisma.userSession.findUnique({
+        where: { tokenHash: primaryHash },
+        select: {
+          id: true,
+          userId: true,
+          ipAddress: true,
+          userAgent: true,
+          expiresAt: true,
+          lastSeenAt: true,
+          activeMembershipId: true,
+          tokenHash: true,
+        },
+      }),
+    { label: "findSessionByToken-primary" },
   );
+
+  if (primarySession) {
+    return { session: primarySession, tokenHash: primaryHash };
+  }
+
+  if (legacyHash === primaryHash) {
+    return { session: null, tokenHash: primaryHash };
+  }
+
+  const legacySession = await retryTransientDatabaseOperation(
+    () =>
+      prisma.userSession.findUnique({
+        where: { tokenHash: legacyHash },
+        select: {
+          id: true,
+          userId: true,
+          ipAddress: true,
+          userAgent: true,
+          expiresAt: true,
+          lastSeenAt: true,
+          activeMembershipId: true,
+          tokenHash: true,
+        },
+      }),
+    { label: "findSessionByToken-legacy" },
+  );
+
+  if (!legacySession) {
+    return { session: null, tokenHash: primaryHash };
+  }
+
+  await retryTransientDatabaseOperation(
+    () =>
+      prisma.userSession.update({
+        where: { id: legacySession.id },
+        data: { tokenHash: primaryHash },
+      }),
+    { label: "findSessionByToken-upgrade-hash" },
+  );
+
+  return {
+    session: { ...legacySession, tokenHash: primaryHash },
+    tokenHash: primaryHash,
+  };
+}
+
+function sessionBindingMatches(
+  dbSession: {
+    ipAddress: string | null;
+    userAgent: string | null;
+  },
+  requestMeta: {
+    ipAddress: string | null;
+    userAgent: string | null;
+  },
+) {
+  if (
+    ENFORCE_IP_MATCH &&
+    dbSession.ipAddress &&
+    requestMeta.ipAddress &&
+    dbSession.ipAddress !== requestMeta.ipAddress
+  ) {
+    return false;
+  }
+
+  if (
+    ENFORCE_USER_AGENT_MATCH &&
+    dbSession.userAgent &&
+    requestMeta.userAgent &&
+    dbSession.userAgent !== requestMeta.userAgent
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+async function invalidateStoredSession(input: {
+  tokenHash: string;
+  cookieStore: Awaited<ReturnType<typeof cookies>>;
+}) {
+  await prisma.userSession.deleteMany({
+    where: { tokenHash: input.tokenHash },
+  });
+
+  clearSessionCookie(input.cookieStore);
+}
+
+async function getCurrentTokenHash() {
+  const { token } = await readSessionTokenFromCookies();
+  return token ? hashSessionToken(token) : null;
 }
 
 async function resolveMembershipForSession(
@@ -173,8 +299,7 @@ export async function setUserSession({
   activeMembershipId,
   replaceExistingSessions = false,
 }: SetUserSessionInput): Promise<void> {
-  const cookieStore = await cookies();
-  const currentToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const { cookieStore, token: currentToken } = await readSessionTokenFromCookies();
   const currentTokenHash = currentToken ? hashSessionToken(currentToken) : null;
   const { ipAddress, userAgent } = await getRequestMeta();
 
@@ -266,33 +391,28 @@ export async function setUserSession({
 }
 
 export const getUserSession = cache(async function getUserSession(): Promise<AppSession | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const { cookieStore, token, rawValue } = await readSessionTokenFromCookies();
 
-  if (!token) return null;
+  if (!token) {
+    if (rawValue) {
+      clearSessionCookie(cookieStore);
+    }
 
-  const tokenHash = hashSessionToken(token);
+    return null;
+  }
 
   try {
-    const dbSession = await retryTransientDatabaseOperation(
-      () =>
-        prisma.userSession.findUnique({
-          where: { tokenHash },
-          select: {
-            id: true,
-            userId: true,
-            ipAddress: true,
-            userAgent: true,
-            expiresAt: true,
-            lastSeenAt: true,
-            activeMembershipId: true,
-          },
-        }),
-      { label: "getUserSession-find-session" },
-    );
+    const { session: dbSession, tokenHash } = await findSessionByToken(token);
 
     if (!dbSession) return null;
     if (dbSession.expiresAt <= new Date()) return null;
+
+    const requestMeta = await getRequestMeta();
+
+    if (!sessionBindingMatches(dbSession, requestMeta)) {
+      await invalidateStoredSession({ tokenHash, cookieStore });
+      return null;
+    }
 
     const user = await retryTransientDatabaseOperation(
       () =>
@@ -315,12 +435,32 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
     if (!user) return null;
 
     if (user.status !== "ACTIVE" || user.deletedAt !== null) {
+      await invalidateStoredSession({ tokenHash, cookieStore });
       return null;
     }
 
     const now = new Date();
+    const remainingSeconds = Math.max(
+      1,
+      Math.floor((dbSession.expiresAt.getTime() - now.getTime()) / 1000),
+    );
+    const shouldRenewSession =
+      remainingSeconds < getSessionMaxAgeSeconds() * SESSION_RENEWAL_THRESHOLD;
+    const shouldUpgradeCookie = !rawValue?.startsWith("v1.");
 
-    if (dbSession.lastSeenAt < getSessionHeartbeatBefore(now)) {
+    if (shouldRenewSession) {
+      await retryTransientDatabaseOperation(
+        () =>
+          prisma.userSession.updateMany({
+            where: { tokenHash },
+            data: {
+              lastSeenAt: now,
+              expiresAt: getSessionExpiryDate(),
+            },
+          }),
+        { label: "getUserSession-renew" },
+      );
+    } else if (dbSession.lastSeenAt < getSessionHeartbeatBefore(now)) {
       await retryTransientDatabaseOperation(
         () =>
           prisma.userSession.updateMany({
@@ -338,24 +478,12 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       );
     }
 
-    const { ipAddress, userAgent } = await getRequestMeta();
-
-    if (
-      ENFORCE_IP_MATCH &&
-      dbSession.ipAddress &&
-      ipAddress &&
-      dbSession.ipAddress !== ipAddress
-    ) {
-      return null;
-    }
-
-    if (
-      ENFORCE_USER_AGENT_MATCH &&
-      dbSession.userAgent &&
-      userAgent &&
-      dbSession.userAgent !== userAgent
-    ) {
-      return null;
+    if (shouldRenewSession || shouldUpgradeCookie) {
+      setSessionCookie(
+        cookieStore,
+        token,
+        shouldRenewSession ? getSessionMaxAgeSeconds() : remainingSeconds,
+      );
     }
 
     const activeMembershipId = dbSession.activeMembershipId;
@@ -411,18 +539,24 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
 });
 
 export async function clearUserSession(): Promise<void> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const { cookieStore, token } = await readSessionTokenFromCookies();
 
   if (token) {
     const tokenHash = hashSessionToken(token);
 
     await prisma.userSession.deleteMany({
-      where: { tokenHash },
+      where: {
+        OR: [
+          { tokenHash },
+          ...(legacyHashOpaqueToken(token) !== tokenHash
+            ? [{ tokenHash: legacyHashOpaqueToken(token) }]
+            : []),
+        ],
+      },
     });
   }
 
-  clearCookie(cookieStore);
+  clearSessionCookie(cookieStore);
 }
 
 export async function getManagedUserSessions(
@@ -515,24 +649,23 @@ export async function revokeOtherUserSessions(userId: string): Promise<number> {
 export async function switchActiveMembership(
   membershipId: string,
 ): Promise<void> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const { cookieStore, token } = await readSessionTokenFromCookies();
 
   if (!token) {
     redirect("/login");
   }
 
-  const tokenHash = hashSessionToken(token);
-
-  const dbSession = await prisma.userSession.findUnique({
-    where: { tokenHash },
-    include: {
-      user: true,
-    },
-  });
+  const { session: dbSession, tokenHash } = await findSessionByToken(token);
 
   if (!dbSession) {
-    clearCookie(cookieStore);
+    clearSessionCookie(cookieStore);
+    redirect("/login");
+  }
+
+  const requestMeta = await getRequestMeta();
+
+  if (!sessionBindingMatches(dbSession, requestMeta)) {
+    await invalidateStoredSession({ tokenHash, cookieStore });
     redirect("/login");
   }
 
@@ -577,11 +710,7 @@ export async function switchActiveMembership(
     },
   });
 
-  cookieStore.set(
-    SESSION_COOKIE_NAME,
-    token,
-    getCookieOptions({ maxAge: remainingSeconds }),
-  );
+  setSessionCookie(cookieStore, token, remainingSeconds);
 }
 
 export async function requireUserSession(): Promise<AppSession> {

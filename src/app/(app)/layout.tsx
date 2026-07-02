@@ -1,6 +1,12 @@
 import { ReactNode } from "react";
 import { headers, cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import {
+  createRedirectMarkerCookieValue,
+  getEphemeralCookieOptions,
+  getRedirectMarkerCookieName,
+  hasValidRedirectMarkerCookie,
+} from "@/lib/auth/cookies";
 import { requireAuthenticated } from "@/lib/permissions/guards";
 import { privatePageMetadata } from "@/lib/seo";
 import { PushNotificationManager } from "@/components/pwa/push-notification-manager";
@@ -31,9 +37,9 @@ export default async function AppLayout({
   if (shouldForceChange) {
     // Prevent rapid redirect loops by using a short-lived cookie marker.
     const cookieStore = await cookies();
-    const marker = cookieStore.get("__redirect_change_pw");
+    const marker = cookieStore.get(getRedirectMarkerCookieName());
 
-    if (marker) {
+    if (hasValidRedirectMarkerCookie(marker?.value)) {
       if (process.env.NODE_ENV !== "production") {
         // eslint-disable-next-line no-console
         console.log(
@@ -42,11 +48,11 @@ export default async function AppLayout({
       }
     } else {
       // set a 5 second marker to avoid redirect storms
-      cookieStore.set("__redirect_change_pw", "1", {
-        httpOnly: true,
-        path: "/",
-        maxAge: 5,
-      });
+      cookieStore.set(
+        getRedirectMarkerCookieName(),
+        createRedirectMarkerCookieValue(),
+        getEphemeralCookieOptions(5),
+      );
 
       if (process.env.NODE_ENV !== "production") {
         // eslint-disable-next-line no-console

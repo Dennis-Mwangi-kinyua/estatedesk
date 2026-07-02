@@ -4,13 +4,19 @@ import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import {
+  createPlatformUnlockCookieValue,
+  getPlatformUnlockCookieName,
+  getScopedCookieOptions,
+  parsePlatformUnlockCookieValue,
+} from "@/lib/auth/cookies";
 import { prisma } from "@/lib/prisma";
 import { writeAuditLog } from "@/lib/audit/security";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { sendSecurityAlert } from "@/lib/security/alerts";
 
-const UNLOCK_COOKIE = "estatedesk_platform_api_keys_unlocked";
 const PAGE_PATH = "/platform/api-keys";
+const UNLOCK_MAX_AGE_SECONDS = 60 * 30;
 
 export type CreateVacantHousesApiKeyState = {
   success: boolean;
@@ -26,12 +32,6 @@ function getPagePassword() {
   return process.env.PLATFORM_API_KEYS_PAGE_PASSWORD ?? "";
 }
 
-function getCookieToken() {
-  const password = getPagePassword();
-  const secret = process.env.AUTH_SECRET ?? process.env.DATABASE_URL ?? "estatedesk";
-  return createHash("sha256").update(`${password}:${secret}`).digest("hex");
-}
-
 function safeEquals(a: string, b: string) {
   const left = Buffer.from(a);
   const right = Buffer.from(b);
@@ -40,14 +40,17 @@ function safeEquals(a: string, b: string) {
   return timingSafeEqual(left, right);
 }
 
-export async function isPlatformApiKeysUnlocked() {
+export async function isPlatformApiKeysUnlocked(userId: string) {
   const password = getPagePassword();
 
   if (!password) return false;
 
   const cookieStore = await cookies();
-  const token = cookieStore.get(UNLOCK_COOKIE)?.value ?? "";
-  return safeEquals(token, getCookieToken());
+  const unlock = parsePlatformUnlockCookieValue(
+    cookieStore.get(getPlatformUnlockCookieName())?.value,
+  );
+
+  return unlock?.userId === userId;
 }
 
 export async function unlockPlatformApiKeysPageAction(formData: FormData) {
@@ -75,23 +78,26 @@ export async function unlockPlatformApiKeysPageAction(formData: FormData) {
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(UNLOCK_COOKIE, getCookieToken(), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: PAGE_PATH,
-    maxAge: 60 * 30,
-  });
+  const expiresAtUnix = Math.floor(Date.now() / 1000) + UNLOCK_MAX_AGE_SECONDS;
+
+  cookieStore.set(
+    getPlatformUnlockCookieName(),
+    createPlatformUnlockCookieValue({
+      userId: session.userId,
+      expiresAtUnix,
+    }),
+    getScopedCookieOptions(PAGE_PATH, UNLOCK_MAX_AGE_SECONDS),
+  );
 
   redirect(PAGE_PATH);
 }
 
 async function requireUnlockedPlatformApiKeys() {
-  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/dashboard",
   });
 
-  if (!(await isPlatformApiKeysUnlocked())) {
+  if (!(await isPlatformApiKeysUnlocked(session.userId))) {
     throw new Error("API key management page is locked.");
   }
 }
