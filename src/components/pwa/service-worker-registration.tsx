@@ -4,7 +4,12 @@ import { useEffect } from "react";
 
 export function ServiceWorkerRegistration() {
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) {
+    const enableInDev = process.env.NEXT_PUBLIC_ENABLE_PWA_IN_DEV === "true";
+
+    if (
+      (process.env.NODE_ENV !== "production" && !enableInDev) ||
+      !("serviceWorker" in navigator)
+    ) {
       return;
     }
 

@@ -1,10 +1,11 @@
-const CACHE_VERSION = "estatedesk-pwa-v2";
+const CACHE_VERSION = "estatedesk-pwa-v3";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
-const OFFLINE_URL = "/offline";
+const OFFLINE_FALLBACKS = ["/offline", "/offline-shell.html"];
 
 const PRECACHE_URLS = [
-  OFFLINE_URL,
+  ...OFFLINE_FALLBACKS,
   "/manifest.webmanifest",
+  "/icons/icon-144.png",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/icons/maskable-icon-512.png",
@@ -15,7 +16,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(STATIC_CACHE)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then((cache) => precacheUrls(cache, PRECACHE_URLS))
       .then(() => self.skipWaiting()),
   );
 });
@@ -59,14 +60,18 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).catch(() => caches.match(OFFLINE_URL)));
+    event.respondWith(
+      fetch(request).catch(() => matchOfflineFallback()),
+    );
     return;
   }
 
   if (
     url.pathname.startsWith("/_next/static/") ||
     url.pathname.startsWith("/icons/") ||
-    url.pathname === "/manifest.webmanifest"
+    url.pathname.startsWith("/images/") ||
+    url.pathname === "/manifest.webmanifest" ||
+    url.pathname === "/offline-shell.html"
   ) {
     event.respondWith(cacheFirst(request));
   }
@@ -96,6 +101,7 @@ self.addEventListener("push", (event) => {
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",
       data: { url },
+      actions: [{ action: "open", title: "Open" }],
     }),
   );
 });
@@ -103,29 +109,44 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
+  if (event.action && event.action !== "open") {
+    return;
+  }
+
   const targetUrl = new URL(
     event.notification.data?.url || "/dashboard",
     self.location.origin,
   ).href;
 
-  event.waitUntil(
-    self.clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then((clientList) => {
-        for (const client of clientList) {
-          if ("focus" in client && client.url === targetUrl) {
-            return client.focus();
-          }
-        }
-
-        if (self.clients.openWindow) {
-          return self.clients.openWindow(targetUrl);
-        }
-
-        return undefined;
-      }),
-  );
+  event.waitUntil(openOrFocusClient(targetUrl));
 });
+
+async function precacheUrls(cache, urls) {
+  await Promise.allSettled(
+    urls.map(async (url) => {
+      const response = await fetch(url, { cache: "reload" });
+
+      if (response.ok) {
+        await cache.put(url, response);
+      }
+    }),
+  );
+}
+
+async function matchOfflineFallback() {
+  for (const url of OFFLINE_FALLBACKS) {
+    const cachedResponse = await caches.match(url);
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+  }
+
+  return new Response("You are offline.", {
+    status: 503,
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+}
 
 async function cacheFirst(request) {
   const cachedResponse = await caches.match(request);
@@ -142,4 +163,29 @@ async function cacheFirst(request) {
   }
 
   return response;
+}
+
+async function openOrFocusClient(targetUrl) {
+  const clientList = await self.clients.matchAll({
+    type: "window",
+    includeUncontrolled: true,
+  });
+
+  for (const client of clientList) {
+    if (!client.url.startsWith(self.location.origin) || !("focus" in client)) {
+      continue;
+    }
+
+    await client.focus();
+
+    if ("navigate" in client) {
+      return client.navigate(targetUrl);
+    }
+  }
+
+  if (self.clients.openWindow) {
+    return self.clients.openWindow(targetUrl);
+  }
+
+  return undefined;
 }

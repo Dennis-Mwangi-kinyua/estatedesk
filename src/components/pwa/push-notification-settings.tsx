@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BellRing, BellOff, Smartphone } from "lucide-react";
+import { BellRing, BellOff, Send, Smartphone } from "lucide-react";
 import {
   ensureServiceWorkerRegistration,
   isIosDevice,
@@ -29,6 +29,7 @@ export function PushNotificationSettings({
 }) {
   const [state, setState] = useState<PushSettingsState>("checking");
   const [pending, setPending] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -139,6 +140,42 @@ export function PushNotificationSettings({
     }
   }
 
+  async function sendTestAlert() {
+    setTesting(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch("/api/push/test", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          url:
+            typeof window !== "undefined"
+              ? `${window.location.pathname}${window.location.search}`
+              : "/dashboard",
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | { error?: string }
+        | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "Test alert could not be sent.");
+      }
+
+      setMessage("Test alert sent. Check this device for the notification.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Test alert could not be sent.",
+      );
+    } finally {
+      setTesting(false);
+    }
+  }
+
   async function disablePushNotifications() {
     setPending(true);
     setMessage(null);
@@ -195,15 +232,26 @@ export function PushNotificationSettings({
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {state === "subscribed" ? (
-          <button
-            type="button"
-            onClick={disablePushNotifications}
-            disabled={pending}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:opacity-60 dark:border-white/15 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
-          >
-            <BellOff className="h-4 w-4" />
-            {pending ? "Updating..." : "Disable alerts"}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={sendTestAlert}
+              disabled={pending || testing}
+              className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 disabled:opacity-60 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-100 dark:hover:bg-emerald-400/15"
+            >
+              <Send className="h-4 w-4" />
+              {testing ? "Sending..." : "Send test alert"}
+            </button>
+            <button
+              type="button"
+              onClick={disablePushNotifications}
+              disabled={pending || testing}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:opacity-60 dark:border-white/15 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
+            >
+              <BellOff className="h-4 w-4" />
+              {pending ? "Updating..." : "Disable alerts"}
+            </button>
+          </>
         ) : null}
 
         {state === "prompt" ? (

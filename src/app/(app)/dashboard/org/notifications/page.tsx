@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PushNotificationSettingsPanel } from "@/components/pwa/push-notification-settings-panel";
 import {
   ArrowLeft,
   Bell,
@@ -808,6 +809,8 @@ export default async function OrganizationNotificationsPage({
           <KpiTile label="Sent" value={sentCount} icon={Send} />
         </div>
       </section>
+
+      <PushNotificationSettingsPanel />
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         <div className="space-y-4 xl:col-span-8">

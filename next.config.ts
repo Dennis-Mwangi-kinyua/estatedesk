@@ -132,6 +132,10 @@ const nextConfig: NextConfig = {
         headers: PUBLIC_FAST_EDGE_CACHE_HEADERS,
       },
       {
+        source: "/offline-shell.html",
+        headers: PUBLIC_FAST_EDGE_CACHE_HEADERS,
+      },
+      {
         source: "/icons/:path*",
         headers: [
           {
@@ -275,10 +279,6 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/sign-lease/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/offline",
         headers: PRIVATE_HEADERS,
       },
       {

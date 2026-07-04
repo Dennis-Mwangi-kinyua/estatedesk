@@ -11,6 +11,7 @@ import {
   UserRoundCheck,
   Users,
 } from "lucide-react";
+import { PushNotificationSettingsPanel } from "@/components/pwa/push-notification-settings-panel";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { getCurrentPeriod } from "@/lib/ledger";
@@ -384,6 +385,8 @@ export default async function LandlordDashboardPage() {
 
   return (
     <div className="space-y-5">
+        <PushNotificationSettingsPanel />
+
         <section id="overview" className="ios-panel rounded-[28px] p-4 sm:p-5">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center">
             <div className="min-w-0">

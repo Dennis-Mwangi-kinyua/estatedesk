@@ -17,6 +17,7 @@ import {
   Wallet,
 } from "lucide-react";
 
+import { PushNotificationSettingsPanel } from "@/components/pwa/push-notification-settings-panel";
 import { AppearanceSettings } from "@/components/theme/appearance-settings";
 import { CurrencySelect } from "@/components/forms/currency-select";
 import { requireCurrentOrgId } from "@/lib/auth/org";
@@ -219,6 +220,10 @@ export async function SettingsSectionPage({
             description="Control modules and default notification behavior for your organization."
           >
             <AppearanceSettings />
+
+            <div className="mt-4">
+              <PushNotificationSettingsPanel />
+            </div>
 
             <form action={updatePreferencesAction} className="mt-4 space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
