@@ -1,12 +1,10 @@
 "use server";
 
-import {
-  archiveTenant,
-  blacklistTenant,
-  restoreTenant,
-  softDeleteTenant,
-  unlinkTenantFromUnit,
-} from "./actions";
+import { archiveTenant } from "./_lib/archive-tenant-action";
+import { blacklistTenant } from "./_lib/blacklist-tenant-action";
+import { restoreTenant } from "./_lib/restore-tenant-action";
+import { softDeleteTenant } from "./_lib/soft-delete-tenant-action";
+import { unlinkTenantFromUnit } from "./_lib/unlink-tenant-action";
 import { requireUserSession } from "@/lib/auth/session";
 import { enforceTenantAdminRateLimit } from "@/lib/rate-limit/tenant-admin-rate-limit";
 

@@ -28,7 +28,7 @@ const serviceLinks = [
 
 export default function AreYouLostPage() {
   return (
-    <main className="min-h-screen bg-[#F2F6FB] text-slate-950 dark:bg-slate-950 dark:text-white">
+    <main className="ed-theme-page min-h-screen bg-background text-foreground">
       <PublicAccessHeader active="home" showPricing />
 
       <section className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-center px-4 py-10 sm:px-6 lg:px-8">

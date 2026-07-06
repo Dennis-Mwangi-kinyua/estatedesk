@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { safeServerActionError } from "@/lib/errors/server-error-log";
 
 export type AcceptInviteActionResult = {
   success: boolean;
@@ -90,10 +91,11 @@ export async function acceptInviteAction(
   } catch (error) {
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Something went wrong while accepting the invite.",
+      error: safeServerActionError(
+        "acceptInviteAction",
+        error,
+        "Something went wrong while accepting the invite.",
+      ),
     };
   }
 }

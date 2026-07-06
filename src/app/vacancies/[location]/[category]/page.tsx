@@ -16,7 +16,9 @@ type PageProps = {
   }>;
 };
 
-export const dynamic = "force-dynamic";
+import { PUBLIC_VACANCY_REVALIDATE_SECONDS } from "@/lib/public-vacancy-listings";
+
+export const revalidate = PUBLIC_VACANCY_REVALIDATE_SECONDS;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { location, category } = await params;

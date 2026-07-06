@@ -1,183 +1,23 @@
 "use server";
 
-import { randomBytes } from "node:crypto";
-import { hash } from "bcryptjs";
-import { Prisma, TenantStatus } from "@prisma/client";
+import { TenantStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { safeServerActionError } from "@/lib/errors/server-error-log";
+import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
-import { ensureTenantIdentity } from "@/lib/tenants/identity";
+import { getAuthorizedOrgContext } from "./_lib/authorization";
+import { generatePassword } from "./_lib/credentials";
+import { executeCreateTenantTransaction } from "./_lib/create-tenant-transaction";
+import {
+  toNonNegativeDecimal,
+  toOptionalInt,
+  toOptionalString,
+  toRequiredString,
+} from "./_lib/form-helpers";
+import type { CreateTenantActionState } from "./_lib/types";
 
 const ALLOWED_STATUSES: TenantStatus[] = ["ACTIVE", "INACTIVE", "BLACKLISTED"];
-
-type CreateTenantActionState = {
-  status: "idle" | "error" | "success";
-  message?: string;
-  credentials?: {
-    tenantName: string;
-    username: string;
-    password: string;
-  };
-};
-
-function toOptionalString(value: FormDataEntryValue | null): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
-
-function toRequiredString(
-  value: FormDataEntryValue | null,
-  fieldLabel: string,
-): string {
-  const parsed = toOptionalString(value);
-
-  if (!parsed) {
-    throw new Error(`${fieldLabel} is required.`);
-  }
-
-  return parsed;
-}
-
-function toNonNegativeDecimal(
-  value: string | null,
-  fieldLabel: string,
-): Prisma.Decimal | null {
-  if (!value) return null;
-
-  const asNumber = Number(value);
-
-  if (Number.isNaN(asNumber)) {
-    throw new Error(`${fieldLabel} must be a valid number.`);
-  }
-
-  if (asNumber < 0) {
-    throw new Error(`${fieldLabel} cannot be negative.`);
-  }
-
-  return new Prisma.Decimal(value);
-}
-
-function toOptionalInt(value: string | null, fieldLabel: string): number | null {
-  if (!value) return null;
-
-  const parsed = Number.parseInt(value, 10);
-
-  if (!Number.isFinite(parsed)) {
-    throw new Error(`${fieldLabel} must be a whole number.`);
-  }
-
-  return parsed;
-}
-
-function slugifyUsernameBase(fullName: string) {
-  const normalized = fullName
-    .normalize("NFKD")
-    .replace(/[^\w\s-]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, "")
-    .replace(/[^a-z0-9_-]/g, "")
-    .slice(0, 18);
-
-  return normalized || "tenant";
-}
-
-function generatePassword(length = 10) {
-  const alphabet =
-    "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
-  const bytes = randomBytes(length);
-  let password = "";
-
-  for (let index = 0; index < length; index += 1) {
-    password += alphabet[bytes[index] % alphabet.length];
-  }
-
-  return password;
-}
-
-async function generateUniqueUsername(
-  tx: Prisma.TransactionClient,
-  fullName: string,
-) {
-  const base = slugifyUsernameBase(fullName);
-
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    const suffix =
-      attempt === 0 ? "" : `${Math.floor(1000 + Math.random() * 9000)}`;
-    const candidate = `${base}${suffix}`;
-
-    const existing = await tx.user.findFirst({
-      where: {
-        username: candidate,
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    if (!existing) {
-      return candidate;
-    }
-  }
-
-  return `${base}${Date.now().toString().slice(-6)}`;
-}
-
-async function getAuthorizedOrgContext(
-  userId: string,
-  activeOrgId?: string | null,
-) {
-  const membership = await prisma.membership.findFirst({
-    where: {
-      userId,
-      orgId: activeOrgId ?? undefined,
-      role: {
-        in: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
-      },
-      org: {
-        deletedAt: null,
-        status: "ACTIVE",
-      },
-      user: {
-        deletedAt: null,
-      },
-    },
-    select: {
-      orgId: true,
-    },
-  });
-
-  if (membership) return membership;
-
-  const fallbackMembership = await prisma.membership.findFirst({
-    where: {
-      userId,
-      role: {
-        in: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
-      },
-      org: {
-        deletedAt: null,
-        status: "ACTIVE",
-      },
-      user: {
-        deletedAt: null,
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    select: {
-      orgId: true,
-    },
-  });
-
-  if (!fallbackMembership) {
-    throw new Error("No active organisation was found for your account.");
-  }
-
-  return fallbackMembership;
-}
 
 export async function createTenantAction(
   _prevState: CreateTenantActionState,
@@ -259,165 +99,35 @@ export async function createTenantAction(
 
     const generatedPassword = generatePassword(10);
 
-    const result = await prisma.$transaction(async (tx) => {
-      const duplicateTenant = await tx.tenant.findFirst({
-        where: {
-          orgId,
-          OR: [{ phone }, ...(email ? [{ email }] : [])],
-        },
-        select: {
-          id: true,
-        },
-      });
-
-      if (duplicateTenant) {
-        throw new Error(
-          "A tenant with the same phone or email already exists in this organisation.",
-        );
-      }
-
-      const duplicateUser = await tx.user.findFirst({
-        where: {
-          OR: [{ phone }, ...(email ? [{ email }] : [])],
-        },
-        select: {
-          id: true,
-        },
-      });
-
-      if (duplicateUser) {
-        throw new Error(
-          "A user account with the same phone or email already exists.",
-        );
-      }
-
-      const username = await generateUniqueUsername(tx, fullName);
-      const passwordHash = await hash(generatedPassword, 10);
-
-      const user = await tx.user.create({
-        data: {
-          fullName,
-          phone,
-          email,
-          username,
-          passwordHash,
-          mustChangePassword: true,
-          status: "ACTIVE",
-          platformRole: "USER",
-        },
-        select: {
-          id: true,
-          username: true,
-        },
-      });
-
-      await tx.membership.create({
-        data: {
-          orgId,
-          userId: user.id,
-          role: "TENANT",
-          scopeType: "ORG",
-          scopeId: "ORG_SCOPE",
-        },
-      });
-
-      const tenant = await tx.tenant.create({
-        data: {
-          orgId,
-          userId: user.id,
-          fullName,
-          phone,
-          email,
-          nationalId,
-          kraPin,
-          notes,
-          status: statusRaw as TenantStatus,
-          nextOfKin: {
-            create: {
-              name: nextOfKinName,
-              relationship: nextOfKinRelationship,
-              phone: nextOfKinPhone,
-              email: nextOfKinEmail,
-            },
-          },
-        },
-        select: {
-          id: true,
-          fullName: true,
-        },
-      });
-
-      await ensureTenantIdentity(tx, {
-        tenantId: tenant.id,
-        fullName,
-        phone,
-        email,
-        nationalId,
-        kraPin,
-      });
-
-      if (unitId) {
-        const unit = await tx.unit.findFirst({
-          where: {
-            id: unitId,
-            deletedAt: null,
-            isActive: true,
-            status: "VACANT",
-            property: {
-              orgId,
-              deletedAt: null,
-            },
-          },
-          select: {
-            id: true,
-            rentAmount: true,
-            depositAmount: true,
-          },
-        });
-
-        if (!unit) {
-          throw new Error(
-            "The selected unit is no longer available for mapping.",
-          );
-        }
-
-        const effectiveMonthlyRent = monthlyRent ?? unit.rentAmount;
-        const effectiveDeposit = deposit ?? unit.depositAmount ?? null;
-
-        await tx.lease.create({
-          data: {
-            orgId,
-            unitId: unit.id,
-            tenantId: tenant.id,
-            startDate: leaseStartDate,
-            dueDay: dueDay ?? 5,
-            monthlyRent: effectiveMonthlyRent,
-            deposit: effectiveDeposit,
-            status: "ACTIVE",
-          },
-        });
-
-        await tx.unit.update({
-          where: {
-            id: unit.id,
-          },
-          data: {
-            status: "OCCUPIED",
-            vacantSince: null,
-          },
-        });
-      }
-
-      return {
-        tenantName: tenant.fullName,
-        username: user.username ?? username,
-      };
+    const result = await executeCreateTenantTransaction({
+      orgId,
+      fullName,
+      phone,
+      email,
+      nationalId,
+      kraPin,
+      notes,
+      statusRaw: statusRaw as TenantStatus,
+      nextOfKinName,
+      nextOfKinRelationship,
+      nextOfKinPhone,
+      nextOfKinEmail,
+      unitId,
+      leaseStartDate,
+      dueDay,
+      monthlyRent,
+      deposit,
+      generatedPassword,
     });
 
     revalidatePath("/dashboard/org/tenants");
     revalidatePath("/dashboard/org/units");
     revalidatePath("/dashboard/org/properties");
     revalidatePath("/dashboard/org");
+
+    if (unitId) {
+      revalidatePublicVacancies();
+    }
 
     await sendAccountCredentials({
       fullName,
@@ -439,16 +149,13 @@ export async function createTenantAction(
       },
     };
   } catch (error) {
-    if (error instanceof Error) {
-      return {
-        status: "error",
-        message: error.message,
-      };
-    }
-
     return {
       status: "error",
-      message: "Failed to create tenant account.",
+      message: safeServerActionError(
+        "createTenantAction",
+        error,
+        "Failed to create tenant account.",
+      ),
     };
   }
 }

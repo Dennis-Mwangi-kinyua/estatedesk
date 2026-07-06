@@ -17,7 +17,12 @@ import {
   Mail,
   ShieldCheck,
 } from "lucide-react";
-import { loginAction, type LoginActionState } from "./actions";
+import type { LoginActionState } from "./actions";
+
+type LoginActionHandler = (
+  prevState: LoginActionState,
+  formData: FormData,
+) => Promise<LoginActionState>;
 
 const initialState: LoginActionState = {
   success: false,
@@ -35,7 +40,13 @@ const InputShell = memo(function InputShell({
   );
 });
 
-export default function LoginForm({ returnTo }: { returnTo?: string }) {
+export default function LoginForm({
+  returnTo,
+  loginAction,
+}: {
+  returnTo?: string;
+  loginAction: LoginActionHandler;
+}) {
   const [state, formAction, isPending] = useActionState(
     loginAction,
     initialState,
@@ -254,7 +265,11 @@ export default function LoginForm({ returnTo }: { returnTo?: string }) {
           </div>
 
           {globalError ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-medium leading-5 text-red-700 sm:px-4 sm:py-3 sm:text-sm">
+            <div
+              role="alert"
+              aria-live="assertive"
+              className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-medium leading-5 text-red-700 sm:px-4 sm:py-3 sm:text-sm"
+            >
               {globalError}
             </div>
           ) : null}

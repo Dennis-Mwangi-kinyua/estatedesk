@@ -1,0 +1,1 @@
+export { IssueSlaBadge } from "@/components/issues/issue-sla-badge";

@@ -29,8 +29,8 @@ export function TenantDashboardUpdates({
     <div className="rounded-[30px] border border-neutral-200/80 bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-neutral-500">Updates</p>
-          <h2 className="text-lg font-semibold tracking-tight text-neutral-950">
+          <p className="text-sm font-medium text-muted-foreground">Updates</p>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
             Notices & requests
           </h2>
         </div>
@@ -44,8 +44,8 @@ export function TenantDashboardUpdates({
           <div key={notice.id} className="rounded-[24px] bg-neutral-50 p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-neutral-950">{notice.title}</p>
-                <p className="mt-1 text-xs text-neutral-500">
+                <p className="text-sm font-semibold text-foreground">{notice.title}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
                   {notice.type} • {formatDate(notice.createdAt)}
                 </p>
               </div>
@@ -64,8 +64,8 @@ export function TenantDashboardUpdates({
           <div key={issue.id} className="rounded-[24px] bg-neutral-50 p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-neutral-950">{issue.title}</p>
-                <p className="mt-1 text-xs text-neutral-500">
+                <p className="text-sm font-semibold text-foreground">{issue.title}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
                   {issue.priority} • {formatDate(issue.createdAt)}
                 </p>
               </div>
@@ -81,7 +81,7 @@ export function TenantDashboardUpdates({
         ))}
 
         {notifications.length === 0 && issues.length === 0 ? (
-          <div className="rounded-[24px] bg-neutral-50 p-4 text-sm text-neutral-500">
+          <div className="rounded-[24px] bg-neutral-50 p-4 text-sm text-muted-foreground">
             No notices or issues yet.
           </div>
         ) : null}

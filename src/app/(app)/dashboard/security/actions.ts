@@ -8,7 +8,11 @@ import {
 } from "@/lib/auth/session";
 import { writeAuditLog } from "@/lib/audit/security";
 
-const SECURITY_PATH = "/dashboard/security";
+const SECURITY_PATHS = [
+  "/dashboard/security",
+  "/dashboard/caretaker/security",
+  "/dashboard/org/security",
+] as const;
 
 export async function revokeSessionAction(formData: FormData) {
   const session = await requireUserSession();
@@ -36,7 +40,9 @@ export async function revokeSessionAction(formData: FormData) {
     });
   }
 
-  revalidatePath(SECURITY_PATH);
+  for (const path of SECURITY_PATHS) {
+    revalidatePath(path);
+  }
 }
 
 export async function revokeOtherSessionsAction() {
@@ -57,5 +63,7 @@ export async function revokeOtherSessionsAction() {
     });
   }
 
-  revalidatePath(SECURITY_PATH);
+  for (const path of SECURITY_PATHS) {
+    revalidatePath(path);
+  }
 }

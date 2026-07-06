@@ -9,6 +9,7 @@ import {
   type PlatformRole,
 } from "@/lib/auth/session";
 import { auditDeniedAccess } from "@/lib/audit/security";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
 import {
   hasOrgRole,
@@ -61,10 +62,14 @@ export async function requireOrgMembership(
     deny(options?.redirectTo ?? "/login");
   }
 
-  const org = await prisma.organization.findUnique({
-    where: { id: session.activeOrgId },
-    select: { name: true, status: true, deletedAt: true },
-  });
+  const org = await retryTransientDatabaseOperation(
+    () =>
+      prisma.organization.findUnique({
+        where: { id: session.activeOrgId! },
+        select: { name: true, status: true, deletedAt: true },
+      }),
+    { label: "requireOrgMembership-find-org" },
+  );
 
   if (!org || org.deletedAt || org.status !== "ACTIVE") {
     redirect(

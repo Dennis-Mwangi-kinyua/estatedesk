@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# shellcheck source=scripts/lib/load-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/load-env.sh"
+
 : "${DATABASE_URL:?DATABASE_URL is required}"
 
 backup_dir="${BACKUP_DIR:-./backups}"

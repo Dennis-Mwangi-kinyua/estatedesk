@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { safeClientMessage } from "@/lib/errors/client-safe-error";
 
 type InviteStatus = "idle" | "loading" | "success" | "error";
 
@@ -32,8 +33,10 @@ async function readJson(response: Response): Promise<AcceptInviteResponse> {
 }
 
 function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return "Something went wrong while accepting the invite.";
+  return safeClientMessage(
+    error,
+    "Something went wrong while accepting the invite.",
+  );
 }
 
 export default function AcceptInvitePage() {

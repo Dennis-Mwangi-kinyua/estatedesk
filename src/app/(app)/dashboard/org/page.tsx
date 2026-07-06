@@ -1,95 +1,34 @@
-import { cache } from "react";
-import { redirect } from "next/navigation";
+import { requireManagementAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
-import { requireUserSession } from "@/lib/auth/session";
 import { getCachedOrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
-import { OrgDashboardLive } from "@/features/dashboard/components/org-dashboard-live";
 import { getVacancyInquiryAlerts } from "@/features/dashboard/server/get-vacancy-inquiry-alerts";
+import { OrgDashboardWorkspace } from "./_components/org-dashboard-workspace";
 
-const getCurrentOrgContext = cache(async function getCurrentOrgContext() {
-  const session = await requireUserSession();
-
-  const membership = await prisma.membership.findFirst({
-    where: {
-      userId: session.userId,
-      orgId: session.activeOrgId ?? undefined,
-      role: {
-        in: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
-      },
-      org: {
-        deletedAt: null,
-        status: "ACTIVE",
-      },
-      user: {
-        deletedAt: null,
-      },
-    },
-    select: {
-      orgId: true,
-      role: true,
-      org: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          currencyCode: true,
-          timezone: true,
-        },
-      },
-    },
-  });
-
-  if (membership) return membership;
-
-  const fallbackMembership = await prisma.membership.findFirst({
-    where: {
-      userId: session.userId,
-      role: {
-        in: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
-      },
-      org: {
-        deletedAt: null,
-        status: "ACTIVE",
-      },
-      user: {
-        deletedAt: null,
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    select: {
-      orgId: true,
-      role: true,
-      org: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          currencyCode: true,
-          timezone: true,
-        },
-      },
-    },
-  });
-
-  if (!fallbackMembership) redirect("/dashboard");
-
-  return fallbackMembership;
-});
+export const dynamic = "force-dynamic";
 
 export default async function OrganizationDashboardPage() {
-  const membership = await getCurrentOrgContext();
-  const [data, vacancyInquiries] = await Promise.all([
-    getCachedOrgDashboardSummary(membership.orgId),
-    getVacancyInquiryAlerts(membership.orgId),
+  const session = await requireManagementAccess();
+
+  if (!session.activeOrgId) {
+    throw new Error("Missing active organization id in session");
+  }
+
+  const [data, vacancyInquiries, organization] = await Promise.all([
+    getCachedOrgDashboardSummary(session.activeOrgId),
+    getVacancyInquiryAlerts(session.activeOrgId),
+    prisma.organization.findUnique({
+      where: { id: session.activeOrgId },
+      select: { name: true },
+    }),
   ]);
 
   return (
-    <OrgDashboardLive
+    <OrgDashboardWorkspace
       initialData={data}
       initialVacancyInquiries={vacancyInquiries}
-      membership={membership}
+      organizationName={organization?.name ?? "Organisation"}
+      orgId={session.activeOrgId}
+      orgRole={session.activeOrgRole}
       interval={30_000}
     />
   );

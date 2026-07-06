@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import { AssetType, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 
@@ -59,7 +60,11 @@ export async function updateUnitVacancyMarketingAction(
         deletedAt: null,
       },
     },
-    select: { id: true },
+    select: {
+      id: true,
+      houseNo: true,
+      property: { select: { name: true } },
+    },
   });
 
   if (!unit) {
@@ -84,8 +89,11 @@ export async function updateUnitVacancyMarketingAction(
   });
 
   revalidatePath(`/dashboard/org/units/${unitId}`);
-  revalidatePath(`/vacancies/${unitId}`);
-  revalidatePath("/vacancies");
+  revalidatePublicVacancies({
+    unitId: unit.id,
+    propertyName: unit.property.name,
+    houseNo: unit.houseNo,
+  });
 }
 
 export async function uploadUnitVacancyImagesAction(
@@ -105,7 +113,9 @@ export async function uploadUnitVacancyImagesAction(
     },
     select: {
       id: true,
+      houseNo: true,
       propertyId: true,
+      property: { select: { name: true } },
       images: {
         where: { deletedAt: null },
         select: { id: true },
@@ -169,6 +179,9 @@ export async function uploadUnitVacancyImagesAction(
   }
 
   revalidatePath(`/dashboard/org/units/${unitId}`);
-  revalidatePath(`/vacancies/${unitId}`);
-  revalidatePath("/vacancies");
+  revalidatePublicVacancies({
+    unitId: unit.id,
+    propertyName: unit.property.name,
+    houseNo: unit.houseNo,
+  });
 }

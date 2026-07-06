@@ -111,6 +111,7 @@ export async function changeInitialPasswordAction(
   });
 
   revalidatePath("/", "layout");
+  revalidatePath("/change-password");
   revalidatePath(destination);
 
   redirect(destination);

@@ -3,6 +3,7 @@
 import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { throwSafeActionFailure } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { getCurrentPeriod } from "@/lib/ledger";
 import { notifyRecipients } from "@/lib/notifications/notify";
@@ -205,7 +206,11 @@ export async function submitManualRentMpesaAction(formData: FormData) {
     if (isUniqueConstraintError(error)) {
       throw new Error("That M-Pesa transaction code has already been submitted.");
     }
-    throw error;
+    throwSafeActionFailure(
+      "tenantRentPaymentSubmission",
+      error,
+      "Could not submit the rent payment. Please try again.",
+    );
   }
 
   revalidatePath("/dashboard/tenant/payments");

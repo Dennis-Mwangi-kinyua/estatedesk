@@ -1,0 +1,38 @@
+name: Sitemap Ping
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping-search-engines:
+    if: ${{ vars.PRODUCTION_SITEMAP_PING_ENABLED == 'true' }}
+    name: Ping Google and Bing sitemaps
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping sitemap index
+        env:
+          APP_URL: ${{ secrets.PRODUCTION_APP_URL }}
+        run: |
+          if [ -z "$APP_URL" ]; then
+            echo "PRODUCTION_APP_URL secret is not configured."
+            exit 1
+          fi
+
+          SITEMAP_URL="${APP_URL%/}/sitemap-index.xml"
+          ENCODED_SITEMAP_URL="$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$SITEMAP_URL")"
+
+          echo "Pinging Google for ${SITEMAP_URL}"
+          curl --fail --silent --show-error --max-time 30 \
+            "https://www.google.com/ping?sitemap=${ENCODED_SITEMAP_URL}" || true
+
+          echo "Pinging Bing for ${SITEMAP_URL}"
+          curl --fail --silent --show-error --max-time 30 \
+            "https://www.bing.com/ping?sitemap=${ENCODED_SITEMAP_URL}" || true

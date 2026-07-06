@@ -1,4 +1,4 @@
-const CACHE_VERSION = "estatedesk-pwa-v3";
+const CACHE_VERSION = "estatedesk-pwa-v5";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const OFFLINE_FALLBACKS = ["/offline", "/offline-shell.html"];
 
@@ -73,7 +73,7 @@ self.addEventListener("fetch", (event) => {
     url.pathname === "/manifest.webmanifest" ||
     url.pathname === "/offline-shell.html"
   ) {
-    event.respondWith(cacheFirst(request));
+    event.respondWith(networkFirst(request));
   }
 });
 
@@ -95,21 +95,28 @@ self.addEventListener("push", (event) => {
   const tag = typeof payload.tag === "string" ? payload.tag : undefined;
 
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      tag,
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
-      data: { url },
-      actions: [{ action: "open", title: "Open" }],
-    }),
+    Promise.all([
+      self.registration.showNotification(title, {
+        body,
+        tag,
+        icon: "/icons/icon-192.png",
+        badge: "/icons/icon-192.png",
+        vibrate: [120, 60, 120],
+        data: { url },
+        actions: [
+          { action: "open", title: "Open" },
+          { action: "dismiss", title: "Dismiss" },
+        ],
+      }),
+      requestBadgeSync(),
+    ]),
   );
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  if (event.action && event.action !== "open") {
+  if (event.action === "dismiss") {
     return;
   }
 
@@ -118,7 +125,9 @@ self.addEventListener("notificationclick", (event) => {
     self.location.origin,
   ).href;
 
-  event.waitUntil(openOrFocusClient(targetUrl));
+  event.waitUntil(
+    Promise.all([openOrFocusClient(targetUrl), requestBadgeSync()]),
+  );
 });
 
 async function precacheUrls(cache, urls) {
@@ -148,21 +157,38 @@ async function matchOfflineFallback() {
   });
 }
 
-async function cacheFirst(request) {
-  const cachedResponse = await caches.match(request);
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
 
-  if (cachedResponse) {
-    return cachedResponse;
+    if (response.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, response.clone());
+    }
+
+    return response;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    throw error;
   }
+}
 
-  const response = await fetch(request);
+async function requestBadgeSync() {
+  const clientList = await self.clients.matchAll({
+    type: "window",
+    includeUncontrolled: true,
+  });
 
-  if (response.ok) {
-    const cache = await caches.open(STATIC_CACHE);
-    cache.put(request, response.clone());
-  }
-
-  return response;
+  await Promise.allSettled(
+    clientList.map((client) =>
+      client.postMessage({ type: "SYNC_APP_BADGE" }),
+    ),
+  );
 }
 
 async function openOrFocusClient(targetUrl) {

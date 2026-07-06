@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getRuntimeEnvReport } from "@/lib/config/env";
+import { isCronAuthorized } from "@/lib/cron/auth";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -29,6 +30,10 @@ export async function GET(request: Request) {
     | { checked: true; status: "error"; latencyMs: number } = { checked: false };
 
   if (deep) {
+    if (!isCronAuthorized(request)) {
+      return jsonResponse({ error: "Unauthorized" }, 401);
+    }
+
     const dbStartedAt = Date.now();
 
     try {

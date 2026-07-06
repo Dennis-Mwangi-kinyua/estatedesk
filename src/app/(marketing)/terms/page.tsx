@@ -1,4 +1,5 @@
 import { TrustPage } from "@/components/marketing/trust-page";
+import { trustContentDepth } from "@/lib/content-depth/marketing-depth";
 import { termsDescription, termsSections, termsTitle, termsUpdatedAt } from "@/lib/terms";
 import { publicPageMetadata } from "@/lib/seo";
 
@@ -19,6 +20,7 @@ export default function TermsPage() {
       sections={termsSections}
       downloadHref="/api/legal/terms.pdf"
       downloadLabel="Download current terms"
+      contentDepth={trustContentDepth}
     />
   );
 }

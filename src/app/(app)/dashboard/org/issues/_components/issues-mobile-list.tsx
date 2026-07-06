@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { DeferredLink } from "@/components/navigation/app-links";
+import { IssueSlaBadge } from "@/components/issues/issue-sla-badge";
 import { Wrench } from "lucide-react";
 import type { OrgIssue } from "../_lib/types";
 import {
@@ -31,17 +32,17 @@ export function IssuesMobileList({
             className={`rounded-[22px] border p-4 ${
               selected
                 ? "border-neutral-900 bg-white shadow-sm"
-                : "border-black/5 bg-[#fafafa]"
+                : "border-border bg-muted/70"
             }`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <Link
+                <DeferredLink
                   href={buildIssuesHref(currentPage, issue.id)}
                   className="text-sm font-semibold text-neutral-950 underline-offset-4 hover:underline"
                 >
                   {issue.title}
-                </Link>
+                </DeferredLink>
                 <p className="mt-1 text-xs text-neutral-500">
                   {getIssueUnitLabel(issue)}
                 </p>
@@ -62,6 +63,11 @@ export function IssuesMobileList({
                 >
                   {issue.priority}
                 </span>
+                <IssueSlaBadge
+                  createdAt={issue.createdAt}
+                  priority={issue.priority}
+                  status={issue.status}
+                />
               </div>
             </div>
 
@@ -124,13 +130,13 @@ export function IssuesMobileList({
             ) : null}
 
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link
+              <DeferredLink
                 href={buildIssuesHref(currentPage, issue.id)}
                 className="inline-flex items-center rounded-[16px] border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-50"
               >
                 <Wrench className="mr-2 h-4 w-4" />
                 Open issue
-              </Link>
+              </DeferredLink>
             </div>
           </div>
         );

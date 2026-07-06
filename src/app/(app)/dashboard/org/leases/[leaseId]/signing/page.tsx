@@ -1,18 +1,89 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
-import { storage } from "@/lib/storage";
-import { cancelSigningRequestAction, createSigningRequestAction, remindSignerAction } from "./actions";
+import { LeaseSigningWorkspace } from "./_components/lease-signing-workspace";
 
-export const dynamic="force-dynamic";
-export default async function LeaseSigningPage({params}:{params:Promise<{leaseId:string}>}){
-  const session=await requireOrgRole(["ADMIN","MANAGER"]); const {leaseId}=await params;
-  const lease=await prisma.lease.findFirst({where:{id:leaseId,orgId:session.activeOrgId!,deletedAt:null},include:{tenant:true,unit:{include:{property:true}},contractDocument:true,signatureEnvelopes:{include:{signers:true,events:{orderBy:{createdAt:"desc"},take:10}},orderBy:{createdAt:"desc"}}}}); if(!lease)notFound();
+export const dynamic = "force-dynamic";
+
+export default async function LeaseSigningPage({
+  params,
+}: {
+  params: Promise<{ leaseId: string }>;
+}) {
+  const session = await requireOrgRole(["ADMIN", "MANAGER"]);
+  const { leaseId } = await params;
+
+  const lease = await prisma.lease.findFirst({
+    where: {
+      id: leaseId,
+      orgId: session.activeOrgId!,
+      deletedAt: null,
+    },
+    include: {
+      tenant: true,
+      unit: { include: { property: true } },
+      contractDocument: true,
+      signatureEnvelopes: {
+        include: {
+          signers: true,
+          events: { orderBy: { createdAt: "desc" }, take: 10 },
+        },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  if (!lease) {
+    notFound();
+  }
+
   const [members, tenantUsers, landlords] = await Promise.all([
-    prisma.membership.findMany({ where: { orgId: session.activeOrgId!, employmentEndedAt: null }, include: { user: { select: { id: true, fullName: true } } }, orderBy: { user: { fullName: "asc" } } }),
-    prisma.tenant.findMany({ where: { orgId: session.activeOrgId!, userId: { not: null }, id: { not: lease.tenantId }, deletedAt: null }, select: { userId: true, fullName: true }, orderBy: { fullName: "asc" } }),
-    prisma.landlordProfile.findMany({ where: { orgId: session.activeOrgId!, isActive: true, deletedAt: null }, select: { userId: true, displayName: true }, orderBy: { displayName: "asc" } }),
+    prisma.membership.findMany({
+      where: {
+        orgId: session.activeOrgId!,
+        employmentEndedAt: null,
+      },
+      include: { user: { select: { id: true, fullName: true } } },
+      orderBy: { user: { fullName: "asc" } },
+    }),
+    prisma.tenant.findMany({
+      where: {
+        orgId: session.activeOrgId!,
+        userId: { not: null },
+        id: { not: lease.tenantId },
+        deletedAt: null,
+      },
+      select: { userId: true, fullName: true },
+      orderBy: { fullName: "asc" },
+    }),
+    prisma.landlordProfile.findMany({
+      where: {
+        orgId: session.activeOrgId!,
+        isActive: true,
+        deletedAt: null,
+      },
+      select: { userId: true, displayName: true },
+      orderBy: { displayName: "asc" },
+    }),
   ]);
-  const finalIds=lease.signatureEnvelopes.flatMap(e=>e.finalAssetId?[e.finalAssetId]:[]); const assets=await prisma.asset.findMany({where:{id:{in:finalIds}}}); const assetMap=new Map(assets.map(a=>[a.id,a]));
-  return <main className="space-y-6 p-4 sm:p-6 lg:p-8"><header><p className="text-sm font-semibold text-emerald-700">{lease.unit.property.name} · Unit {lease.unit.houseNo}</p><h1 className="text-3xl font-bold">Online lease signing</h1><p className="mt-2 text-neutral-600">Tenant: {lease.tenant.fullName}</p></header><form action={createSigningRequestAction} className="rounded-xl border bg-white p-5"><input type="hidden" name="leaseId" value={lease.id}/><h2 className="font-bold">New signing request</h2>{!lease.contractDocument?<p className="mt-3 text-sm text-red-700">Upload a PDF contract before requesting signatures.</p>:<div className="mt-4 grid gap-3 sm:grid-cols-3"><label className="text-sm">Expires in days<input name="expiresInDays" type="number" min="1" max="60" defaultValue="14" className="mt-1 w-full rounded-lg border px-3 py-2"/></label><label className="text-sm">Jurisdiction<select name="jurisdiction" className="mt-1 w-full rounded-lg border px-3 py-2"><option value="KENYA">Kenya</option><option value="UAE">United Arab Emirates</option></select></label><label className="text-sm">Signing order<select name="signingOrder" className="mt-1 w-full rounded-lg border px-3 py-2"><option value="SEQUENTIAL">Required sequence</option><option value="PARALLEL">Any order</option></select></label><label className="text-sm sm:col-span-3">Message<input name="message" placeholder="Please review and sign this lease." className="mt-1 w-full rounded-lg border px-3 py-2"/></label><label className="text-sm">Additional tenants<select name="additionalTenantUserIds" multiple className="mt-1 h-28 w-full rounded-lg border px-3 py-2">{tenantUsers.map(t=><option key={t.userId} value={t.userId!}>{t.fullName}</option>)}</select></label><label className="text-sm">Witness<select name="witnessUserId" className="mt-1 w-full rounded-lg border px-3 py-2"><option value="">None</option>{members.map(m=><option key={m.user.id} value={m.user.id}>{m.user.fullName}</option>)}</select></label><label className="text-sm">Guarantor<select name="guarantorUserId" className="mt-1 w-full rounded-lg border px-3 py-2"><option value="">None</option>{members.map(m=><option key={m.user.id} value={m.user.id}>{m.user.fullName}</option>)}</select></label><label className="text-sm">Landlord<select name="landlordUserId" className="mt-1 w-full rounded-lg border px-3 py-2"><option value="">None</option>{landlords.map(l=><option key={l.userId} value={l.userId}>{l.displayName}</option>)}</select></label><label className="flex items-center gap-2 text-sm"><input type="checkbox" name="amendment"/>Re-sign after lease amendment</label><button className="rounded-lg bg-neutral-950 px-4 py-2 text-sm font-bold text-white sm:col-span-3 sm:w-fit">Create request and sign</button></div>}</form><section className="space-y-4">{lease.signatureEnvelopes.map(e=>{const finalAsset=e.finalAssetId?assetMap.get(e.finalAssetId):null;const finalUrl=finalAsset?(/^https?:\/\//.test(finalAsset.key)?finalAsset.key:storage.getPublicUrl(finalAsset.key)):null;return <article key={e.id} className="rounded-xl border bg-white p-5"><div className="flex flex-wrap justify-between gap-3"><div><h2 className="font-bold">Version {e.version} · {e.status.replaceAll("_"," ")}</h2><p className="text-xs text-neutral-500">{e.jurisdiction} · {e.signingOrder} · Created {e.createdAt.toLocaleString("en-KE")} · expires {e.expiresAt.toLocaleDateString("en-KE")}</p></div>{finalUrl?<a href={finalUrl} className="rounded-lg border px-3 py-2 text-sm font-bold">Download signed PDF</a>:null}</div><div className="mt-4 grid gap-3 sm:grid-cols-2">{e.signers.sort((a,b)=>a.signingOrder-b.signingOrder).map(s=><div key={s.id} className="rounded-lg bg-neutral-50 p-3"><p className="text-xs text-neutral-500">Step {s.signingOrder} · {s.role}</p><p className="font-semibold">{s.name}</p><p className="text-sm">{s.status}{s.signedAt?` · ${s.signedAt.toLocaleString("en-KE")}`:""}</p>{s.status==="PENDING"&&["PENDING","PARTIALLY_SIGNED"].includes(e.status)?<form action={remindSignerAction} className="mt-2"><input type="hidden" name="leaseId" value={lease.id}/><input type="hidden" name="envelopeId" value={e.id}/><input type="hidden" name="signerId" value={s.id}/><button className="text-xs font-bold text-emerald-700">Send reminder</button></form>:null}</div>)}</div><details className="mt-4"><summary className="cursor-pointer text-sm font-bold">Audit timeline ({e.events.length})</summary><div className="mt-2 space-y-2">{e.events.map(event=><div key={event.id} className="rounded bg-neutral-50 p-2 text-xs"><b>{event.eventType}</b> · {event.createdAt.toLocaleString("en-KE")} {event.ipAddress?`· ${event.ipAddress}`:""}</div>)}</div></details><p className="mt-4 break-all text-xs text-neutral-500">Source SHA-256: {e.sourceDocumentHash}</p>{e.finalDocumentHash?<p className="mt-1 break-all text-xs text-neutral-500">Final SHA-256: {e.finalDocumentHash} · <a className="font-bold text-emerald-700" href={`/verify-lease/${e.finalDocumentHash}`}>Verify publicly</a></p>:null}{["PENDING","PARTIALLY_SIGNED"].includes(e.status)?<form action={cancelSigningRequestAction} className="mt-4 flex gap-2"><input type="hidden" name="leaseId" value={lease.id}/><input type="hidden" name="envelopeId" value={e.id}/><input name="reason" placeholder="Cancellation reason" className="rounded-lg border px-3 py-2 text-sm"/><button className="rounded-lg border border-red-300 px-3 py-2 text-sm font-bold text-red-700">Cancel</button></form>:null}</article>})}</section></main>;
+
+  const finalIds = lease.signatureEnvelopes.flatMap((envelope) =>
+    envelope.finalAssetId ? [envelope.finalAssetId] : [],
+  );
+  const assets = await prisma.asset.findMany({
+    where: { id: { in: finalIds } },
+  });
+  const assetMap = new Map(assets.map((asset) => [asset.id, asset]));
+
+  return (
+    <LeaseSigningWorkspace
+      data={{
+        lease,
+        members,
+        tenantUsers,
+        landlords,
+        assetMap,
+      }}
+    />
+  );
 }

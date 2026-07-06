@@ -162,7 +162,7 @@ export default async function RegisterPage({
   const referralCode = (params.ref ?? params.referral ?? "").trim();
 
   return (
-    <main className="min-h-screen bg-[#f6f7f9] text-neutral-950">
+    <main className="ed-theme-page min-h-screen bg-background text-foreground">
       <RegisterStatusToast message={message} />
       <header className="sticky top-0 z-30 border-b border-neutral-200/80 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">

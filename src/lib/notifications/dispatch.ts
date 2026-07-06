@@ -1,6 +1,8 @@
 import "server-only";
 
 import { NotificationChannel, NotificationStatus } from "@prisma/client";
+import { safeClientMessage } from "@/lib/errors/client-safe-error";
+import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { resolvePushActionUrl } from "@/lib/notifications/push-action-url";
 import { sendWebPushNotification } from "@/lib/push/web-push";
@@ -240,13 +242,14 @@ export async function dispatchQueuedNotifications(
       sent += 1;
     } catch (error) {
       failed += 1;
+      logServerError("notifications.dispatch", error, { notificationId: notification.id });
 
       await prisma.notification.update({
         where: { id: notification.id },
         data: {
           status: NotificationStatus.FAILED,
           providerResponse: {
-            error: error instanceof Error ? error.message : "Unknown error",
+            error: safeClientMessage(error, "Notification delivery failed."),
           },
         },
       });

@@ -2,8 +2,9 @@ import "server-only";
 
 import type { ScopeType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
-type MembershipScope =
+export type MembershipScope =
   | {
       scopeType: ScopeType;
       scopeId: string;
@@ -55,19 +56,23 @@ export async function getCaretakerAllowedUnitIds({
 
   addScopedTarget(membershipScope, targets);
 
-  const assignments = await prisma.caretakerAssignment.findMany({
-    where: {
-      orgId,
-      caretakerUserId,
-      active: true,
-      endedAt: null,
-    },
-    select: {
-      propertyId: true,
-      buildingId: true,
-      unitId: true,
-    },
-  });
+  const assignments = await retryTransientDatabaseOperation(
+    () =>
+      prisma.caretakerAssignment.findMany({
+        where: {
+          orgId,
+          caretakerUserId,
+          active: true,
+          endedAt: null,
+        },
+        select: {
+          propertyId: true,
+          buildingId: true,
+          unitId: true,
+        },
+      }),
+    { label: "caretaker assignment scope" },
+  );
 
   for (const assignment of assignments) {
     if (assignment.propertyId) {
@@ -95,27 +100,31 @@ export async function getCaretakerAllowedUnitIds({
     return [];
   }
 
-  const units = await prisma.unit.findMany({
-    where: {
-      deletedAt: null,
-      property: {
-        orgId,
-        deletedAt: null,
-      },
-      OR: [
-        ...(unitIds.length > 0 ? [{ id: { in: unitIds } }] : []),
-        ...(buildingIds.length > 0
-          ? [{ buildingId: { in: buildingIds } }]
-          : []),
-        ...(propertyIds.length > 0
-          ? [{ propertyId: { in: propertyIds } }]
-          : []),
-      ],
-    },
-    select: {
-      id: true,
-    },
-  });
+  const units = await retryTransientDatabaseOperation(
+    () =>
+      prisma.unit.findMany({
+        where: {
+          deletedAt: null,
+          property: {
+            orgId,
+            deletedAt: null,
+          },
+          OR: [
+            ...(unitIds.length > 0 ? [{ id: { in: unitIds } }] : []),
+            ...(buildingIds.length > 0
+              ? [{ buildingId: { in: buildingIds } }]
+              : []),
+            ...(propertyIds.length > 0
+              ? [{ propertyId: { in: propertyIds } }]
+              : []),
+          ],
+        },
+        select: {
+          id: true,
+        },
+      }),
+    { label: "caretaker allowed units" },
+  );
 
   return units.map((unit) => unit.id);
 }

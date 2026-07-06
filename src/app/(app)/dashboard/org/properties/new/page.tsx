@@ -127,6 +127,7 @@ export default async function NewOrgPropertyPage({
       errorMessage={errorMessage}
       taxpayerProfiles={taxpayerProfiles}
       landlordProfiles={landlordProfiles}
+      helpOrgRole={membership.role}
     />
   );
 }

@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { createMembership } from "@/features/staff/actions/create-membership";
 import { MemberForm } from "@/features/staff/components/member-form";
@@ -7,18 +6,10 @@ import {
   ROLE_META,
   normalizeStaffRole,
 } from "@/features/staff/constants/role-meta";
+import { getCaretakerAssignmentTargets } from "@/app/(app)/staff/new/_lib/queries";
 
 type Props = {
   params: Promise<{ role: string }>;
-};
-
-type AssignmentTargetType = "BUILDING";
-
-type AssignmentTarget = {
-  id: string;
-  type: AssignmentTargetType;
-  label: string;
-  searchText: string;
 };
 
 export default async function NewRoleMemberPage({ params }: Props) {
@@ -53,8 +44,8 @@ export default async function NewRoleMemberPage({ params }: Props) {
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
               {isCaretaker
-                ? "Create the caretaker login, then map the caretaker to one apartment/block. The houses under that apartment become their working scope."
-                : `Create a verified ${roleMeta.label.toLowerCase()} account with the correct organization role and login credentials.`}
+                ? "Assign the caretaker to a property or apartment/block first, then capture profile details and login credentials."
+                : `Create a verified ${roleMeta.label.toLowerCase()} account with profile details and login credentials.`}
             </p>
           </div>
 
@@ -87,11 +78,12 @@ export default async function NewRoleMemberPage({ params }: Props) {
         {isCaretaker ? (
           <div className="rounded-3xl border border-sky-200 bg-sky-50 p-4">
             <h2 className="text-sm font-semibold text-sky-900">
-              Apartment-only mapping
+              Property or apartment mapping
             </h2>
             <p className="mt-1 text-sm leading-6 text-sky-800">
-              Select an apartment/block only. Individual houses are visible to
-              the caretaker through that apartment assignment.
+              Assign a whole property for portfolio coverage, or choose an
+              apartment/block for a narrower scope. Apartments can share
+              multiple caretakers.
             </p>
           </div>
         ) : (
@@ -111,51 +103,22 @@ export default async function NewRoleMemberPage({ params }: Props) {
             Setup order
           </p>
           <div className="mt-3 space-y-3 text-sm text-slate-600">
-            <p>1. Confirm identity and contacts.</p>
-            <p>2. Create login credentials.</p>
-            <p>
-              3. {isCaretaker ? "Assign the apartment/block." : "Save the role."}
-            </p>
+            {isCaretaker ? (
+              <>
+                <p>1. Assign the property or apartment/block.</p>
+                <p>2. Enter profile and HR details.</p>
+                <p>3. Set login credentials and review.</p>
+              </>
+            ) : (
+              <>
+                <p>1. Confirm the locked role.</p>
+                <p>2. Enter profile and HR details.</p>
+                <p>3. Set login credentials.</p>
+              </>
+            )}
           </div>
         </div>
       </aside>
     </div>
   );
-}
-
-async function getCaretakerAssignmentTargets(
-  orgId: string,
-): Promise<AssignmentTarget[]> {
-  const buildings = await prisma.building.findMany({
-      where: {
-        deletedAt: null,
-        isActive: true,
-        property: {
-          orgId,
-          deletedAt: null,
-          isActive: true,
-        },
-      },
-      orderBy: {
-        name: "asc",
-      },
-      select: {
-        id: true,
-        name: true,
-        property: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-
-  const buildingTargets: AssignmentTarget[] = buildings.map((building) => ({
-    id: building.id,
-    type: "BUILDING",
-    label: `Apartment: ${building.property.name} - ${building.name}`,
-    searchText: `apartment block building ${building.property.name} ${building.name}`,
-  }));
-
-  return buildingTargets;
 }

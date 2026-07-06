@@ -3,8 +3,8 @@ import Link from "next/link";
 export function TenantDashboardQuickActions() {
   return (
     <div className="rounded-[30px] border border-neutral-200/80 bg-white p-5 shadow-sm sm:p-6">
-      <p className="text-sm font-medium text-neutral-500">Quick Actions</p>
-      <h2 className="text-lg font-semibold tracking-tight text-neutral-950">
+      <p className="text-sm font-medium text-muted-foreground">Quick Actions</p>
+      <h2 className="text-lg font-semibold tracking-tight text-foreground">
         Jump to a section
       </h2>
 

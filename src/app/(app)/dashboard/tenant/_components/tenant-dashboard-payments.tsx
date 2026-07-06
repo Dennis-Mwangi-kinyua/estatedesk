@@ -1,3 +1,4 @@
+import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { formatCurrency, formatDate, getStatusTone } from "@/lib/tenant/tenant-format";
 
 type PaymentItem = {
@@ -22,8 +23,8 @@ export function TenantDashboardPayments({
     <div className="rounded-[30px] border border-neutral-200/80 bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-neutral-500">Recent Payments</p>
-          <h2 className="text-lg font-semibold tracking-tight text-neutral-950">
+          <p className="text-sm font-medium text-muted-foreground">Recent Payments</p>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
             Payment activity
           </h2>
         </div>
@@ -34,18 +35,21 @@ export function TenantDashboardPayments({
 
       <div className="mt-4 space-y-3">
         {recentPayments.length === 0 ? (
-          <div className="rounded-[24px] bg-neutral-50 p-4 text-sm text-neutral-500">
-            No payments found yet.
+          <div className="rounded-[24px] bg-neutral-50 p-4 text-sm text-muted-foreground">
+            <p>No payments found yet.</p>
+            <div className="mt-3">
+              <InAppGuideLink topic="rent" workspace="tenant" />
+            </div>
           </div>
         ) : (
           recentPayments.map((payment) => (
             <div key={payment.id} className="rounded-[24px] bg-neutral-50 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-neutral-950">
+                  <p className="text-sm font-semibold text-foreground">
                     {formatCurrency(payment.amount as never)}
                   </p>
-                  <p className="mt-1 text-xs text-neutral-500">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {payment.method} • {payment.reference ?? "No reference"} • {formatDate(payment.paidAt ?? payment.createdAt)}
                   </p>
                 </div>

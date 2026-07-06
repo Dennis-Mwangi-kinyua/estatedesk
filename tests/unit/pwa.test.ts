@@ -30,8 +30,15 @@ describe("PWA manifest", () => {
     assert.equal(config.display, "standalone");
     assert.deepEqual(config.display_override, ["standalone", "minimal-ui", "browser"]);
     assert.equal(config.prefer_related_applications, false);
+    assert.equal(config.id, "/");
     assert.equal(config.start_url, "/dashboard");
     assert.equal(config.orientation, "any");
+    assert.deepEqual(config.launch_handler, { client_mode: "navigate-existing" });
+    assert.equal(config.share_target?.action, "/share");
+    assert.equal(
+      config.share_target?.enctype,
+      "application/x-www-form-urlencoded",
+    );
 
     const iconSizes = (config.icons ?? []).map((icon) => icon.sizes);
     assert.ok(iconSizes.includes("144x144"));
@@ -51,11 +58,14 @@ describe("service worker", () => {
       "utf8",
     );
 
-    assert.match(serviceWorker, /estatedesk-pwa-v3/);
+    assert.match(serviceWorker, /estatedesk-pwa-v5/);
+    assert.match(serviceWorker, /requestBadgeSync/);
+    assert.match(serviceWorker, /SYNC_APP_BADGE/);
     assert.match(serviceWorker, /\/offline-shell\.html/);
     assert.match(serviceWorker, /Promise\.allSettled/);
     assert.match(serviceWorker, /openOrFocusClient/);
-    assert.match(serviceWorker, /actions:\s*\[\{ action: "open", title: "Open" \}\]/);
+    assert.match(serviceWorker, /action: "open", title: "Open"/);
+    assert.match(serviceWorker, /action: "dismiss", title: "Dismiss"/);
   });
 });
 

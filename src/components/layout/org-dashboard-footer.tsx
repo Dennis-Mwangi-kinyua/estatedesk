@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { DeferredLink } from "@/components/navigation/app-links";
 
 type OrgDashboardFooterProps = {
   organizationName: string;
@@ -15,24 +15,24 @@ export function OrgDashboardFooter({
         </p>
 
         <nav aria-label="Footer navigation" className="flex items-center gap-1">
-          <Link
+          <DeferredLink
             href="/dashboard/org/settings"
             className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
           >
             Settings
-          </Link>
-          <Link
+          </DeferredLink>
+          <DeferredLink
             href="/reports"
             className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
           >
             Reports
-          </Link>
-          <Link
+          </DeferredLink>
+          <DeferredLink
             href="/notifications"
             className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
           >
             Alerts
-          </Link>
+          </DeferredLink>
         </nav>
       </div>
     </footer>

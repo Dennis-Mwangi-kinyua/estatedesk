@@ -1,35 +1,39 @@
-# Sitemaps & Indexing — EstateDesk
+# Sitemaps and Indexing
 
-This document explains the sitemap and indexing setup added to the project and how to validate and submit sitemaps.
+This document explains the sitemap and indexing setup in EstateDesk and how to validate and submit sitemaps.
 
-Files added
-- `src/app/sitemap.xml/route.ts` — primary sitemap of static public marketing pages.
-- `src/app/sitemap-vacancies.xml/route.ts` — DB-driven sitemap for public vacant unit detail pages.
-- `src/app/sitemap-rental-landings.xml/route.ts` — public location/category rental landing pages.
-- `src/app/sitemap-index.xml/route.ts` — sitemap index referencing the canonical public sitemap shards.
-- `src/app/robots.ts` — points to `/sitemap-index.xml` and blocks private/API surfaces.
-- `src/app/api/public/vacant-houses/route.ts` — public API returning vacant units (requires `VACANT_HOUSES_API_KEY` when set).
-- `src/app/vacancies/[id]/page.tsx` — vacancy detail page with richer metadata, Open Graph, and JSON-LD schema markup.
-- `.github/workflows/ping-sitemaps.yml` — nightly workflow to fetch sitemaps, gzip them, ping search engines, and upload optional S3 assets.
-- `.github/workflows/submit-sitemap-gsc.yml` — optional workflow to submit `sitemap-index.xml` to Google Search Console.
-- `.github/workflows/verify-search-console.yml` — optional workflow to create a Search Console property with a service account.
-- `src/lib/sitemap-utils.ts` — shared sitemap generation and gzip helpers.
+## Routes and files
 
-Required environment variables (production)
-- `NEXT_PUBLIC_APP_URL` or `APP_URL` — base URL (e.g., `https://www.estatedesk.co.ke`).
-- `VACANT_HOUSES_API_KEY` — optional, to enable the public vacant-houses API.
-- `DEFAULT_CURRENCY` — optional, defaults to `KES` in structured data.
-- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME` — optional, for GitHub Action to publish gzipped sitemap files to S3.
+| Path | Purpose |
+| --- | --- |
+| `src/app/sitemap.xml/route.ts` | Static public marketing pages |
+| `src/app/sitemap-vacancies.xml/route.ts` | DB-driven vacant unit detail pages |
+| `src/app/sitemap-rental-landings.xml/route.ts` | Location/category rental landing pages |
+| `src/app/sitemap-index.xml/route.ts` | Sitemap index referencing canonical public shards |
+| `src/app/robots.ts` | Points to `/sitemap-index.xml`, allows `/llms.txt`, blocks dashboards/API/print/invite routes and LLM crawlers from private surfaces |
+| `src/app/llms.txt/route.ts` | LLM/crawler discovery index for public pages and guides |
+| `src/lib/public-site-index.ts` | Canonical public page manifest |
+| `src/lib/sitemap-utils.ts` | Shared sitemap generation and gzip helpers |
+| `src/app/api/public/vacant-houses/route.ts` | Authenticated public vacancy API |
 
-Local testing
-1. Run the dev server:
+## Required environment variables
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_APP_URL` or `APP_URL` | Yes in production | Canonical base URL |
+| `S3_BUCKET_NAME` | Optional | Redirect gzipped sitemap assets to S3 when configured |
+| Organization API keys | Optional | For `GET /api/public/vacant-houses` |
+
+## Local testing
+
+1. Start the app:
 
 ```bash
 npm install
 npm run dev
 ```
 
-2. Check endpoints locally:
+2. Check endpoints:
 
 ```bash
 curl -sS http://localhost:3000/sitemap-index.xml
@@ -37,29 +41,31 @@ curl -sS http://localhost:3000/sitemap.xml
 curl -sS http://localhost:3000/sitemap-vacancies.xml
 curl -sS http://localhost:3000/sitemap-rental-landings.xml
 curl -sS http://localhost:3000/robots.txt
+curl -sS http://localhost:3000/llms.txt
 curl -sS http://localhost:3000/sitemap-index.xml.gz
 curl -sS http://localhost:3000/sitemap.xml.gz
 curl -sS http://localhost:3000/sitemap-vacancies.xml.gz
 curl -sS http://localhost:3000/sitemap-rental-landings.xml.gz
-# test a vacancy detail (replace <id> with a real unit id from your DB)
+```
+
+Replace `<id>` with a real unit id when testing vacancy detail pages:
+
+```bash
 curl -sS http://localhost:3000/vacancies/<id>
 ```
 
-Submitting to Google
-1. Sign in to Google Search Console for your domain.
-2. Add `https://www.estatedesk.co.ke/sitemap-index.xml` as a sitemap. Search engines will discover the index and all child sitemaps.
-3. Monitor Coverage and Indexing reports for errors, blocked pages, or crawl issues.
+## Submitting to Google and Bing
 
-Maintenance
-- The GitHub Action `ping-sitemaps` will fetch all sitemap endpoints daily, gzip them, notify Google and Bing, and optionally upload gzipped sitemap assets to your configured S3 bucket.
-- If you want faster updates, you can run the workflow manually after content changes or use a webhook that triggers the workflow on publish.
+1. Verify the domain in Google Search Console and Bing Webmaster Tools.
+2. Submit `https://your-domain/sitemap-index.xml`.
+3. Monitor Coverage and Indexing reports after publish or major content changes.
 
-Serving gzipped sitemaps
+## Gzipped sitemaps
 
-The app now supports gzipped sitemap delivery in two ways:
+The app supports gzipped sitemap delivery in two ways:
 
-- When `S3_BUCKET_NAME` is configured, the `.gz` route will redirect to the corresponding file in the S3 bucket.
-- When `S3_BUCKET_NAME` is not configured, the `.gz` route will generate and return gzipped XML on demand.
+- When `S3_BUCKET_NAME` is configured, `.gz` routes can redirect to the matching object in S3.
+- Otherwise, `.gz` routes generate and return gzipped XML on demand.
 
 Available gzip endpoints:
 
@@ -67,28 +73,49 @@ Available gzip endpoints:
 - `/sitemap.xml.gz`
 - `/sitemap-vacancies.xml.gz`
 - `/sitemap-rental-landings.xml.gz`
-- `/sitemap-properties.xml` and `/sitemap-units.xml` remain compatibility aliases, but they are not submitted in the sitemap index to avoid duplicate discovery paths.
-- `/properties` and `/units` are authenticated workspace routes, so they should stay out of submitted sitemap indexes.
 
-Search Console automation & verification
+Compatibility aliases `/sitemap-properties.xml` and `/sitemap-units.xml` exist, but they are not submitted in the sitemap index to avoid duplicate discovery paths. `/properties` and `/units` are authenticated workspace routes and should stay out of submitted sitemap indexes.
 
-The repo now includes two optional workflows:
+## Private operational routes (never submit)
 
-- `.github/workflows/submit-sitemap-gsc.yml` — submits `sitemap-index.xml` to Google Search Console using a GCP service account.
-- `.github/workflows/verify-search-console.yml` — attempts to create the Search Console property using the same service account.
+These authenticated surfaces must remain **out** of sitemap indexes and are disallowed in `robots.ts`:
 
-To use them:
-1. Create a Google Cloud service account and download a JSON key.
-2. Add the service account email as an owner or a verified user for the Search Console property.
-3. Store the JSON key in the repository secret `GCP_SA_KEY`.
-4. Set `GCP_PROJECT_ID` and optional `SITE_URL`.
+| Prefix | Examples | Why |
+| --- | --- | --- |
+| `/dashboard/` | `/dashboard/caretaker/today`, `/dashboard/org/issues` | Login-required workspaces |
+| `/platform/` | `/platform/organizations` | Platform administration |
+| `/api/` | `/api/health`, `/api/public/vacant-houses` | Machine endpoints |
+| `/print/` | `/print/issues/[issueId]`, `/print/inspections/[inspectionId]` | Authenticated PDF/print views |
+| `/accept-invite/` | tokenized invite acceptance | Transactional, not marketing |
 
-Important notes
-- Search Console ownership must be granted to the service account or the property must be verified manually before the API can submit a sitemap.
-- Manual verification in Search Console is usually required once per domain, then the service account can be used for automated sitemap submission.
-- If you need further automations, the workflows can be extended to generate verification tokens or publish static sitemaps to a CDN.
+Caretaker field operations (offline queue, SLA badges, handover, vendor dispatch) are product features inside `/dashboard/caretaker/*` and are documented in `docs/PROJECT_DOCUMENTATION.md` and `/llms.txt`, not in submitted sitemaps.
 
-If you want, I can also:
-- Add scheduled server-side sitemap regeneration and CDN publishing.
-- Add hreflang and multi-locale sitemap support if the site serves more than one language.
-- Keep property and unit workspace pages private unless a separate public listing route is intentionally designed for SEO.
+## Automation in this repository
+
+The repo currently ships these GitHub Actions workflows:
+
+| Workflow | File | Purpose |
+| --- | --- | --- |
+| Quality | `.github/workflows/quality.yml` | Lint, typecheck, and tests on push/PR |
+| Uptime | `.github/workflows/uptime.yml` | Polls `/api/health` when `HEALTHCHECK_ENABLED=true` |
+| Production Cron | `.github/workflows/cron.yml` | Calls notification and retention cron routes when `PRODUCTION_CRON_ENABLED=true` |
+
+There is **no** automated Search Console sitemap submission workflow in this repo yet. Submit sitemaps manually after launch, or add a workflow later if you want API-based submission.
+
+### Uptime workflow secrets and vars
+
+- `vars.HEALTHCHECK_ENABLED=true`
+- `secrets.HEALTHCHECK_URL` — base app URL checked by the workflow
+
+### Cron workflow secrets and vars
+
+- `vars.PRODUCTION_CRON_ENABLED=true`
+- `secrets.PRODUCTION_APP_URL`
+- `secrets.PRODUCTION_CRON_SECRET`
+
+## Maintenance
+
+- Update `src/lib/public-site-index.ts` when adding new public marketing pages
+- Update guide content in `src/lib/guides/articles.ts` when publishing new `/guides/*` articles
+- Run `npm test` — `tests/unit/seo.test.ts`, `tests/unit/robots-policy.test.ts`, `tests/unit/guides.test.ts`, and `tests/unit/sitemap-utils.test.ts` guard indexing expectations
+- Re-submit `sitemap-index.xml` after major content or route changes

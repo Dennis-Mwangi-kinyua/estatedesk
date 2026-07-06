@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
+import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 
 type LandlordDashboardShellProps = {
@@ -77,7 +78,7 @@ function LandlordNav({
           pathname === "/dashboard/landlord" && activeHash === itemHash;
 
         return (
-          <Link
+          <HoverPrefetchLink
             key={item.href}
             href={item.href}
             onClick={onNavigate}
@@ -99,7 +100,7 @@ function LandlordNav({
               <Icon className="h-4 w-4" />
             </span>
             <span className="truncate">{item.label}</span>
-          </Link>
+          </HoverPrefetchLink>
         );
       })}
     </nav>
@@ -117,7 +118,7 @@ export function LandlordDashboardShell({
   return (
     <div className="app-mobile-canvas min-h-screen">
       <aside className="ed-shell-panel fixed inset-y-0 left-0 z-[100] hidden w-72 border-r p-4 lg:block">
-        <Link href="/dashboard/landlord" className="flex items-center gap-3">
+        <HoverPrefetchLink href="/dashboard/landlord" className="flex items-center gap-3">
           <div className="ed-brand-mark flex h-10 w-10 items-center justify-center rounded-lg shadow-sm">
             <Building2 className="h-5 w-5" />
           </div>
@@ -127,7 +128,7 @@ export function LandlordDashboardShell({
             </p>
             <p className="text-xs text-slate-500">Landlord workspace</p>
           </div>
-        </Link>
+        </HoverPrefetchLink>
 
         <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-3">
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
@@ -140,6 +141,10 @@ export function LandlordDashboardShell({
 
         <div className="mt-6">
           <LandlordNav />
+        </div>
+
+        <div className="absolute inset-x-4 bottom-20">
+          <InAppHelpNav workspace="landlord" compact />
         </div>
 
         <form action={logoutAction} className="absolute inset-x-4 bottom-4">
@@ -225,6 +230,10 @@ export function LandlordDashboardShell({
 
             <div className="mt-4">
               <LandlordNav onNavigate={() => setMobileOpen(false)} />
+            </div>
+
+            <div className="mt-4">
+              <InAppHelpNav workspace="landlord" compact />
             </div>
 
             <form action={logoutAction} className="mt-4">

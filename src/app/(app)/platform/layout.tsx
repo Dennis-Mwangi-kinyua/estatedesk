@@ -27,6 +27,7 @@ import {
   UserCog,
   Users,
 } from "lucide-react";
+import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { logoutAction } from "@/features/auth/actions/logout-action";
@@ -137,13 +138,8 @@ export default async function PlatformLayout({
           </nav>
 
           <div className="shrink-0 border-t border-slate-200 p-4 dark:border-white/10">
-            <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-slate-900">
-              <p className="text-xs uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                Signed in as
-              </p>
-              <p className="mt-1 truncate text-sm font-medium text-slate-900 dark:text-white">
-                {session.fullName}
-              </p>
+            <div className="mb-3">
+              <InAppHelpNav workspace="platform" compact />
             </div>
 
             <form action={logoutAction}>

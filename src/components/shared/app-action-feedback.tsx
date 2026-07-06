@@ -8,6 +8,10 @@ import {
   formatQueryFeedback,
   getQueryMessageType,
 } from "@/lib/action-feedback";
+import {
+  getPollingIntervalMs,
+  isBackgroundRefreshEnabled,
+} from "@/lib/dev/background-refresh";
 
 type ToastState = {
   type: "pending" | "success" | "error";
@@ -117,7 +121,8 @@ export function AppActionFeedback() {
     }
     return messageType === "error";
   }, [searchParams, messageType]);
-  const refreshEnabled = pathname !== "/change-password";
+  const refreshEnabled =
+    pathname !== "/change-password" && isBackgroundRefreshEnabled();
 
   useEffect(() => {
     const stored = getStoredAction();
@@ -200,7 +205,18 @@ export function AppActionFeedback() {
     const intervalRefresh = () => refresh(true);
     const passiveRefresh = () => refresh();
 
-    const interval = window.setInterval(intervalRefresh, REFRESH_INTERVAL_MS);
+    const refreshIntervalMs = getPollingIntervalMs(REFRESH_INTERVAL_MS);
+    if (refreshIntervalMs <= 0) {
+      window.addEventListener("focus", passiveRefresh);
+      document.addEventListener("visibilitychange", passiveRefresh);
+
+      return () => {
+        window.removeEventListener("focus", passiveRefresh);
+        document.removeEventListener("visibilitychange", passiveRefresh);
+      };
+    }
+
+    const interval = window.setInterval(intervalRefresh, refreshIntervalMs);
     window.addEventListener("focus", passiveRefresh);
     document.addEventListener("visibilitychange", passiveRefresh);
 

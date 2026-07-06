@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, Download, ShieldCheck } from "lucide-react";
+import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
+import type { ContentDepthSections } from "@/lib/content-depth/types";
 
 type TrustSection = {
   title: string;
@@ -16,6 +18,7 @@ type TrustPageProps = {
   sections: TrustSection[];
   downloadHref?: string;
   downloadLabel?: string;
+  contentDepth?: ContentDepthSections;
 };
 
 export function TrustPage({
@@ -26,9 +29,10 @@ export function TrustPage({
   sections,
   downloadHref,
   downloadLabel = "Download PDF",
+  contentDepth,
 }: TrustPageProps) {
   return (
-    <main className="min-h-screen bg-white text-slate-950 dark:bg-[#0b0f16] dark:text-slate-100">
+    <main className="ed-theme-page min-h-screen bg-background text-foreground">
       <PublicAccessHeader />
       <section className="border-b border-slate-200 bg-slate-50 py-10 dark:border-white/10 dark:bg-slate-950">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -93,6 +97,7 @@ export function TrustPage({
           </div>
         </div>
       </section>
+      {contentDepth ? <ContentDepthStack {...contentDepth} /> : null}
       <PublicAccessFooter />
     </main>
   );

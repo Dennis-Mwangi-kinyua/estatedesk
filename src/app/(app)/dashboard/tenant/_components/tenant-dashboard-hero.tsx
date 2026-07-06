@@ -32,7 +32,7 @@ export function TenantDashboardHero({
             </span>
           </div>
 
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-neutral-950 sm:text-3xl">
+          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             Hi, {fullName}
           </h1>
 
@@ -41,13 +41,13 @@ export function TenantDashboardHero({
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-medium text-neutral-700">
+            <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-medium text-foreground/80">
               📍 {propertyName ?? "No property assigned"}
             </span>
-            <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-medium text-neutral-700">
+            <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-medium text-foreground/80">
               🧱 {buildingName ?? "No block assigned"}
             </span>
-            <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-medium text-neutral-700">
+            <span className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-medium text-foreground/80">
               🚪 Unit {houseNo ?? "—"}
             </span>
             <span
@@ -69,7 +69,7 @@ export function TenantDashboardHero({
           </Link>
           <Link
             href="/dashboard/tenant/issues/report"
-            className="inline-flex items-center justify-center rounded-[24px] border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-50 active:scale-[0.99]"
+            className="inline-flex items-center justify-center rounded-[24px] border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-neutral-50 active:scale-[0.99]"
           >
             🛠️ Report Issue
           </Link>

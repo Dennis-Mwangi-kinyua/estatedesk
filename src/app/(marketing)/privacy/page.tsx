@@ -1,4 +1,10 @@
 import { TrustPage } from "@/components/marketing/trust-page";
+import { trustContentDepth } from "@/lib/content-depth/marketing-depth";
+import {
+  breachResponseOutline,
+  dataSubjectRequestProcess,
+  subprocessors,
+} from "@/lib/legal/trust-content";
 import { publicPageMetadata } from "@/lib/seo";
 
 export const metadata = publicPageMetadata({
@@ -44,7 +50,27 @@ export default function PrivacyPage() {
             "Production organizations should define retention requirements for tenant, lease, billing, inspection, and audit records based on their operational and legal obligations.",
           ],
         },
+        {
+          title: "Subprocessors",
+          body: [
+            "EstateDesk may use infrastructure and service providers to operate the platform. Current categories include:",
+            ...subprocessors.map(
+              (provider) =>
+                `${provider.name}: ${provider.purpose}. Typical data: ${provider.data}.`,
+            ),
+            "Customer contracts should name production subprocessors and regions before enterprise rollout.",
+          ],
+        },
+        {
+          title: "Data subject requests",
+          body: [...dataSubjectRequestProcess],
+        },
+        {
+          title: "Incident response",
+          body: [...breachResponseOutline],
+        },
       ]}
+      contentDepth={trustContentDepth}
     />
   );
 }

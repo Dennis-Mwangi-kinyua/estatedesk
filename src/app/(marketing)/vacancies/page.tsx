@@ -1,52 +1,120 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Home,
   MapPin,
   Search,
   ShieldCheck,
-  SlidersHorizontal,
 } from "lucide-react";
-import { Prisma, UnitType } from "@prisma/client";
+import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
+import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import {
   VacancyListingGrid,
   type VacancyListingCard,
 } from "@/components/marketing/vacancy-listing-grid";
-import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
-import { prisma } from "@/lib/prisma";
-import { publicPageMetadata } from "@/lib/seo";
-import { APP_URL } from "@/lib/sitemap-utils";
-import { vacancyPublicSlug } from "@/lib/public-vacancy-slug";
+import { vacancyContentDepth } from "@/lib/content-depth/marketing-depth";
+import { publicVacancyImageUrl } from "@/lib/public-vacancy-image";
+import {
+  getVacancyListingsCached,
+  getVacancyListingsCountCached,
+  isPublicVacancyDatabaseError,
+  PUBLIC_VACANCY_REVALIDATE_SECONDS,
+} from "@/lib/public-vacancy-listings";
+import { vacancyListPaginationMetadata } from "@/lib/seo/vacancy-list-pagination-metadata";
 import {
   PUBLIC_RENTAL_CATEGORIES,
   PUBLIC_RENTAL_LOCATIONS,
   publicRentalLandingPaths,
 } from "@/lib/public-rental-seo";
+import { vacancyPublicSlug } from "@/lib/public-vacancy-slug";
+import { publicPageMetadata } from "@/lib/seo";
+import { APP_URL } from "@/lib/sitemap-utils";
+import {
+  buildVacancyPageHref,
+  paginateItems,
+  parsePositiveInt,
+  PUBLIC_VACANCY_LIST_PAGE_SIZE,
+} from "@/lib/vacancy-pagination";
 
-export const metadata = publicPageMetadata({
-  title: "Public Information Kiosk - EstateDesk",
-  description:
-    "Browse vacant homes, rental houses, and available units published through EstateDesk by landlords and property managers in Kenya.",
-  path: "/vacancies",
-});
-
-export const dynamic = "force-dynamic";
+export const revalidate = PUBLIC_VACANCY_REVALIDATE_SECONDS;
 
 type PageProps = {
   searchParams?: Promise<{
     q?: string;
     location?: string;
     sort?: string;
+    page?: string;
   }>;
 };
 
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const query = params?.q?.trim() ?? "";
+  const location = params?.location?.trim() ?? "";
+  const sort =
+    params?.sort === "rent_desc"
+      ? "rent_desc"
+      : params?.sort === "rent_asc"
+        ? "rent_asc"
+        : "location";
+  const page = parsePositiveInt(params?.page);
+  const filterParams = {
+    q: query || undefined,
+    location: location || undefined,
+    sort: sort === "location" ? undefined : sort,
+  };
+  const path = buildVacancyPageHref("/vacancies", page, filterParams);
+  const hasFilters = Boolean(query || location);
+
+  let totalItems = 0;
+
+  try {
+    if (hasFilters) {
+      const houses = await getVacancyListingsCached({ query, location, sort });
+      totalItems = houses.length;
+    } else {
+      totalItems = await getVacancyListingsCountCached();
+    }
+  } catch {
+    totalItems = 0;
+  }
+
+  const baseTitle =
+    page > 1
+      ? `Vacant houses and apartments in Kenya (Page ${page})`
+      : "Vacant houses and apartments in Kenya";
+  const title =
+    totalItems > 0 && page === 1 && !hasFilters
+      ? `${baseTitle} (${totalItems} available)`
+      : baseTitle;
+  const description =
+    totalItems > 0 && !hasFilters
+      ? `Browse ${totalItems} vacant homes, rental houses, and available units published through EstateDesk by landlords and property managers in Kenya.`
+      : "Browse vacant homes, rental houses, and available units published through EstateDesk by landlords and property managers in Kenya.";
+
+  const base = publicPageMetadata({
+    title,
+    description,
+    path,
+  });
+  const paginationMeta = vacancyListPaginationMetadata({
+    page,
+    totalItems,
+    title,
+    description,
+    path,
+    filterParams,
+  });
+
+  return {
+    ...base,
+    alternates: paginationMeta.alternates,
+    pagination: paginationMeta.pagination,
+  };
+}
+
 const DEFAULT_CURRENCY = process.env.DEFAULT_CURRENCY || "KES";
-const FALLBACK_IMAGE = "/images/og-vacancy.svg";
-const PUBLIC_VACANCY_RETRY_OPTIONS = {
-  attempts: 2,
-  delayMs: 250,
-  label: "public-vacancy-list",
-};
 
 function formatCurrency(value: unknown, currency = DEFAULT_CURRENCY) {
   const amount = Number(value ?? 0);
@@ -58,32 +126,9 @@ function formatCurrency(value: unknown, currency = DEFAULT_CURRENCY) {
   }).format(Number.isFinite(amount) ? amount : 0);
 }
 
-function imageUrl(key: string | null | undefined) {
-  if (!key) return FALLBACK_IMAGE;
-  if (key.startsWith("/") || key.startsWith("http")) return key;
-  return `/${key.replace(/^public\//, "")}`;
-}
-
 function unitLabel(type: string, bedrooms: number | null) {
   if (type === "APARTMENT" && bedrooms) return `${bedrooms} bedroom apartment`;
   return type.toLowerCase().replaceAll("_", " ");
-}
-
-function unitTypesForSearch(query: string): UnitType[] {
-  const normalized = query.toLowerCase().replace(/[^a-z0-9]+/g, " ");
-  const types: UnitType[] = [];
-
-  if (/\bbedsitters?\b/.test(normalized)) types.push(UnitType.BEDSITTER);
-  if (/\bstudios?\b/.test(normalized)) types.push(UnitType.STUDIO);
-  if (/\bsingle\s*rooms?\b/.test(normalized)) types.push(UnitType.SINGLE_ROOM);
-  if (/\bshops?\b/.test(normalized)) types.push(UnitType.SHOP);
-  if (/\boffices?\b/.test(normalized)) types.push(UnitType.OFFICE);
-  if (/\bstalls?\b/.test(normalized)) types.push(UnitType.STALL);
-  if (/\bwarehouses?\b/.test(normalized)) types.push(UnitType.WAREHOUSE);
-  if (/\bgodowns?\b/.test(normalized)) types.push(UnitType.GODOWN);
-  if (/\bapartments?\b|\bflats?\b/.test(normalized)) types.push(UnitType.APARTMENT);
-
-  return Array.from(new Set(types));
 }
 
 function listingDescription({
@@ -105,124 +150,26 @@ function listingDescription({
   return `${unitLabel(type, bedrooms)} in ${place} with rent, viewing, and manager details ready for review.`;
 }
 
-function isPublicVacancyDatabaseError(error: unknown) {
-  if (isTransientDatabaseError(error)) return true;
-
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    return error.code === "P2021" || error.code === "P2022";
-  }
-
-  return false;
-}
-
-function getVacancyListings({
-  query,
-  location,
-  sort,
-}: {
-  query: string;
-  location: string;
-  sort: "location" | "rent_asc" | "rent_desc";
-}) {
-  const queryUnitTypes = unitTypesForSearch(query);
-
-  return retryTransientDatabaseOperation(
-    () =>
-      prisma.unit.findMany({
-        where: {
-          isActive: true,
-          deletedAt: null,
-          status: "VACANT",
-          ...(query
-            ? {
-                OR: [
-                  { houseNo: { contains: query, mode: "insensitive" } },
-                  { property: { is: { name: { contains: query, mode: "insensitive" } } } },
-                  { property: { is: { location: { contains: query, mode: "insensitive" } } } },
-                  { property: { is: { address: { contains: query, mode: "insensitive" } } } },
-                  { property: { is: { org: { is: { name: { contains: query, mode: "insensitive" } } } } } },
-                  { building: { is: { name: { contains: query, mode: "insensitive" } } } },
-                  ...(queryUnitTypes.length ? [{ type: { in: queryUnitTypes } }] : []),
-                ],
-              }
-            : {}),
-          property: {
-            is: {
-              isActive: true,
-              deletedAt: null,
-              org: {
-                is: {
-                  status: "ACTIVE",
-                  deletedAt: null,
-                },
-              },
-              ...(location
-                ? {
-                    OR: [
-                      { location: { contains: location, mode: "insensitive" } },
-                      { address: { contains: location, mode: "insensitive" } },
-                      { name: { contains: location, mode: "insensitive" } },
-                    ],
-                  }
-                : {}),
-            },
-          },
-        },
-        orderBy:
-          sort === "rent_asc"
-            ? [{ rentAmount: "asc" }, { property: { name: "asc" } }]
-            : sort === "rent_desc"
-              ? [{ rentAmount: "desc" }, { property: { name: "asc" } }]
-              : [{ property: { location: "asc" } }, { property: { name: "asc" } }, { houseNo: "asc" }],
-        take: 120,
-        select: {
-          id: true,
-          houseNo: true,
-          type: true,
-          bedrooms: true,
-          bathrooms: true,
-          roomCount: true,
-          rentAmount: true,
-          serviceCharge: true,
-          viewingFeeRequired: true,
-          viewingFeeAmount: true,
-          notes: true,
-          images: {
-            where: { deletedAt: null },
-            orderBy: { createdAt: "asc" },
-            take: 1,
-            select: { key: true, fileName: true },
-          },
-          building: { select: { name: true } },
-          property: {
-            select: {
-              name: true,
-              location: true,
-              address: true,
-              notes: true,
-              org: { select: { name: true, phone: true } },
-            },
-          },
-        },
-      }),
-    PUBLIC_VACANCY_RETRY_OPTIONS,
-  );
-}
-
 export default async function VacanciesPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const query = params?.q?.trim() ?? "";
   const location = params?.location?.trim() ?? "";
   const sort = params?.sort === "rent_desc" ? "rent_desc" : params?.sort === "rent_asc" ? "rent_asc" : "location";
+  const page = parsePositiveInt(params?.page);
+  const filterParams = {
+    q: query || undefined,
+    location: location || undefined,
+    sort: sort === "location" ? undefined : sort,
+  };
   const rentalLocationOptions: readonly { slug: string; label: string; county?: string }[] = PUBLIC_RENTAL_LOCATIONS;
   const rentalLocationLabels = new Set(rentalLocationOptions.map((item) => item.label));
   const hasFilters = Boolean(query || location);
   const loginHref = "/login";
   let databaseUnavailable = false;
-  let houses: Awaited<ReturnType<typeof getVacancyListings>> = [];
+  let houses: Awaited<ReturnType<typeof getVacancyListingsCached>> = [];
 
   try {
-    houses = await getVacancyListings({ query, location, sort });
+    houses = await getVacancyListingsCached({ query, location, sort });
   } catch (error) {
     if (!isPublicVacancyDatabaseError(error)) {
       throw error;
@@ -234,7 +181,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
 
   const listingCards: VacancyListingCard[] = houses.map((listing) => {
     const place = listing.property.location ?? listing.property.address ?? listing.property.name;
-    const href = `/vacancies/${vacancyPublicSlug({ id: listing.id, propertyName: listing.property.name, houseNo: listing.houseNo })}`;
+    const href = `/vacancies/${vacancyPublicSlug({ propertyName: listing.property.name, houseNo: listing.houseNo })}`;
     const rooms = listing.bedrooms ?? listing.roomCount;
     const rentLabel = formatCurrency(listing.rentAmount);
     const shareTitle = `${listing.property.name} Unit ${listing.houseNo} is vacant`;
@@ -243,7 +190,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
     return {
       id: listing.id,
       href,
-      imageSrc: imageUrl(listing.images[0]?.key),
+      imageSrc: listing.images[0]?.key ? publicVacancyImageUrl(listing.images[0].key) : null,
       hasImage: Boolean(listing.images[0]?.key),
       imageAlt: listing.images[0]?.fileName ?? `${listing.property.name} Unit ${listing.houseNo}`,
       managerName: listing.property.org.name,
@@ -252,12 +199,18 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
       place,
       typeLabel: unitLabel(listing.type, listing.bedrooms),
       roomsLabel: rooms ? `${rooms} room${rooms === 1 ? "" : "s"}` : "Rooms",
-      bathsLabel: listing.bathrooms ? `${listing.bathrooms} bath${listing.bathrooms === 1 ? "" : "s"}` : "Baths",
+      bathsLabel: listing.bathrooms
+        ? `${listing.bathrooms} bath${listing.bathrooms === 1 ? "" : "s"}`
+        : "Not listed",
       rentLabel,
       serviceChargeLabel: listing.serviceCharge
-        ? `Service ${formatCurrency(listing.serviceCharge)}`
-        : "Service included/none",
-      viewingLabel: listing.viewingFeeRequired ? "Viewing fee" : "Free viewing",
+        ? `Service charge ${formatCurrency(listing.serviceCharge)}`
+        : "No service charge",
+      viewingLabel: listing.viewingFeeRequired
+        ? listing.viewingFeeAmount
+          ? `Viewing ${formatCurrency(listing.viewingFeeAmount)}`
+          : "Viewing fee"
+        : "Free viewing",
       description: listingDescription({
         notes: listing.notes,
         propertyNotes: listing.property.notes,
@@ -271,13 +224,18 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
       shareText,
     };
   });
+  const { items: visibleListingCards, pagination } = paginateItems(
+    listingCards,
+    page,
+    PUBLIC_VACANCY_LIST_PAGE_SIZE,
+  );
   const itemListJsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "EstateDesk vacant houses and apartments",
-    itemListElement: listingCards.slice(0, 50).map((listing, index) => ({
+    itemListElement: visibleListingCards.map((listing, index) => ({
       "@type": "ListItem",
-      position: index + 1,
+      position: pagination.start + index + 1,
       url: listing.shareUrl,
       name: `${listing.propertyName} Unit ${listing.houseNo}`,
     })),
@@ -309,7 +267,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-slate-100 text-slate-950 dark:bg-[#0b0f16] dark:text-[#f8fafc]">
+    <main className="ed-theme-page min-h-screen bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
@@ -332,7 +290,11 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
               </p>
             </div>
 
-            <form className="grid gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur dark:border-white/12 dark:bg-[#0f1319] sm:grid-cols-[1fr_0.75fr_auto] lg:min-w-[42rem]">
+            <form
+              action="/vacancies"
+              method="get"
+              className="grid gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur dark:border-white/12 dark:bg-[#0f1319] sm:grid-cols-[1fr_0.75fr_auto] lg:min-w-[42rem]"
+            >
               <label className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
@@ -372,9 +334,12 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                   <option value="rent_asc">Rent low to high</option>
                   <option value="rent_desc">Rent high to low</option>
                 </select>
-                <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-[#e5e7eb] dark:focus-visible:ring-white dark:focus-visible:ring-offset-[#0b0f16] [&_*]:text-current">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  Apply
+                <button
+                  type="submit"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-[#e5e7eb] dark:focus-visible:ring-white dark:focus-visible:ring-offset-[#0b0f16] [&_*]:text-current"
+                >
+                  <Search className="h-4 w-4" />
+                  Search
                 </button>
               </div>
             </form>
@@ -386,7 +351,11 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-[#d1d5db]">
             <Home className="h-4 w-4" />
-            <span>{houses.length} vacant {houses.length === 1 ? "unit" : "units"} available</span>
+            <span>
+              {pagination.pageCount > 1
+                ? `Showing ${pagination.start + 1}-${pagination.end} of ${pagination.total} vacant units`
+                : `${pagination.total} vacant ${pagination.total === 1 ? "unit" : "units"} available`}
+            </span>
           </div>
           {hasFilters ? (
             <Link href="/vacancies" className="text-sm font-semibold text-slate-700 transition hover:text-slate-950 dark:text-[#d1d5db] dark:hover:text-white">
@@ -404,7 +373,11 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
             No vacant units match that search yet.
           </div>
         ) : (
-          <VacancyListingGrid listings={listingCards} />
+          <VacancyListingGrid
+            listings={visibleListingCards}
+            pagination={pagination}
+            searchParams={filterParams}
+          />
         )}
 
         <section className="mt-8 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/12 dark:bg-[#111827]">
@@ -435,6 +408,9 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
           </div>
         </section>
       </section>
+
+      <ContentDepthStack {...vacancyContentDepth} />
+      <PublicAccessFooter />
     </main>
   );
 }

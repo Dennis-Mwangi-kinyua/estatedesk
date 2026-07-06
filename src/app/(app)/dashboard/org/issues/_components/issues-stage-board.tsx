@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { DeferredLink } from "@/components/navigation/app-links";
 import type { IssueStatusFilter, OrgIssue } from "../_lib/types";
 import {
   buildIssuesHref,
@@ -65,7 +65,7 @@ export function IssuesStageBoard({
       {columns.map((column) => (
         <div
           key={column.key}
-          className="w-[84vw] max-w-sm shrink-0 snap-center rounded-[28px] border border-black/5 bg-white p-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] xl:w-auto xl:max-w-none"
+          className="w-[84vw] max-w-sm shrink-0 snap-center rounded-[28px] border border-border bg-white p-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] xl:w-auto xl:max-w-none"
         >
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
@@ -81,7 +81,7 @@ export function IssuesStageBoard({
 
           <div className="space-y-3">
             {column.issues.length === 0 ? (
-              <div className="rounded-[20px] border border-dashed border-neutral-200 bg-[#fafafa] px-4 py-5 text-sm text-neutral-500">
+              <div className="rounded-[20px] border border-dashed border-neutral-200 bg-muted/70 px-4 py-5 text-sm text-neutral-500">
                 No issues here.
               </div>
             ) : (
@@ -89,14 +89,14 @@ export function IssuesStageBoard({
                 const selected = selectedIssueId === issue.id;
 
                 return (
-                  <Link
+                  <DeferredLink
                     key={issue.id}
                     href={buildIssuesHref(currentPage, issue.id, activeFilter)}
                     className={[
                       "block rounded-[22px] border p-4 transition",
                       selected
                         ? "border-neutral-900 bg-neutral-50"
-                        : "border-black/5 bg-[#fafafa] hover:bg-white",
+                        : "border-border bg-muted/70 hover:bg-white",
                     ].join(" ")}
                   >
                     <div className="flex flex-wrap gap-2">
@@ -136,7 +136,7 @@ export function IssuesStageBoard({
                       </span>
                       <span>{formatDate(issue.createdAt)}</span>
                     </div>
-                  </Link>
+                  </DeferredLink>
                 );
               })
             )}

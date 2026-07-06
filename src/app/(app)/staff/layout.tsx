@@ -4,6 +4,7 @@ import { OrgDashboardShell } from "@/components/layout/org-dashboard-shell";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { requireActiveSubscription } from "@/lib/billing/subscription-access";
 import { SubscriptionWarning } from "@/components/billing/subscription-warning";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
 
 type DashboardShellRole =
@@ -45,11 +46,17 @@ export default async function StaffLayout({
 
   let organizationName = "Organisation";
 
-  if (session.activeOrgId) {
-    const organization = await prisma.organization.findUnique({
-      where: { id: session.activeOrgId },
-      select: { name: true },
-    });
+  const activeOrgId = session.activeOrgId;
+
+  if (activeOrgId) {
+    const organization = await retryTransientDatabaseOperation(
+      () =>
+        prisma.organization.findUnique({
+          where: { id: activeOrgId },
+          select: { name: true },
+        }),
+      { label: "staff-layout-find-org" },
+    );
 
     if (organization?.name) {
       organizationName = organization.name;

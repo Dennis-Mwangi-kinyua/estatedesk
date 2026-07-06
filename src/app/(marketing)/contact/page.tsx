@@ -11,7 +11,9 @@ import {
   ShieldCheck,
   UsersRound,
 } from "lucide-react";
+import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
+import { sharedTopicGuides } from "@/lib/content-depth/site-topics";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { ReferralCodeField } from "@/components/marketing/referral-code-field";
 import { publicPageMetadata } from "@/lib/seo";
@@ -136,7 +138,7 @@ export default async function ContactPage({
     "h-12 w-full rounded-2xl border border-slate-200/85 bg-white/90 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-200/70 dark:border-white/[0.16] dark:bg-[#171b22] dark:text-[#f8fafc] dark:placeholder:text-[#9ca3af] dark:focus:border-white/40 dark:focus:ring-white/10";
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#f8fbff_0%,#eef4fb_48%,#ffffff_100%)] text-slate-950 dark:bg-[linear-gradient(180deg,#080b12_0%,#10141c_52%,#090b10_100%)] dark:text-[#f8fafc]">
+    <main className="ed-theme-page min-h-screen bg-background text-foreground">
       <PublicAccessHeader active="contact" />
 
       <section className="relative border-b border-slate-200/80 dark:border-white/10">
@@ -345,6 +347,15 @@ export default async function ContactPage({
           </div>
         </div>
       </section>
+      <ContentDepthStack
+        guides={sharedTopicGuides}
+        guidesTitle="Read more before your rollout conversation"
+        editorial={[
+          "Contact pages are more useful when they connect to substantive product context. EstateDesk public guides explain how rent tracking, water billing, caretaker workflows, vacancy publishing, and regional property management fit together before a team starts onboarding or requests enterprise support.",
+        ]}
+        editorialTitle="Prepare for a better onboarding conversation"
+      />
+
       <PublicAccessFooter />
     </main>
   );

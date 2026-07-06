@@ -1,15 +1,23 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
+import { cookies } from "next/headers";
 import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
 import { WebVitalsReporter } from "@/components/monitoring/web-vitals-reporter";
 import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
+import { PwaAppBadgeSync } from "@/components/pwa/pwa-app-badge-sync";
 import { PwaInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { ServiceWorkerUpdatePrompt } from "@/components/pwa/service-worker-update-prompt";
+import { SkipToMain } from "@/components/layout/skip-to-main";
 import { ThemeInitScript } from "@/components/theme/theme-init-script";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { APP_PLANS } from "@/lib/billing/plans";
 import { SEO_KEYWORDS, SITE_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/seo";
+import {
+  THEME_COOKIE_NAME,
+  getServerResolvedTheme,
+} from "@/lib/theme/preference";
 import "./globals.css";
 
 const siteUrl = getSiteUrl();
@@ -194,34 +202,48 @@ const structuredData = [
   },
 ];
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const serverResolvedTheme = getServerResolvedTheme(
+    cookieStore.get(THEME_COOKIE_NAME)?.value,
+  );
+  const htmlClassName = ["antialiased", serverResolvedTheme]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <html
       lang="en"
-      className="antialiased"
+      className={htmlClassName}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
         <ThemeInitScript />
-        <script
+        <Script
+          id="estatedesk-structured-data"
           type="application/ld+json"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
       <body className="min-h-screen bg-background">
+        <SkipToMain />
         <ThemeProvider>
           <MarketingAnalytics />
           <WebVitalsReporter />
           <MobileSwipeBack />
           <ServiceWorkerRegistration />
           <ServiceWorkerUpdatePrompt />
+          <PwaAppBadgeSync />
           <PwaInstallPrompt />
-          <div className="min-h-screen w-full">{children}</div>
+          <div id="main-content" className="min-h-screen w-full">
+            {children}
+          </div>
           <ThemeToggle />
         </ThemeProvider>
       </body>

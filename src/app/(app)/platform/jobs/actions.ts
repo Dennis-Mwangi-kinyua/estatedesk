@@ -7,6 +7,7 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { prisma } from "@/lib/prisma";
 import { runNotificationCron, runRetentionCron } from "@/lib/cron/jobs";
 import { writePlatformAuditLog } from "@/lib/audit/security";
+import { safeServerActionError } from "@/lib/errors/server-error-log";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 
 const JOBS_PATH = "/platform/jobs";
@@ -35,7 +36,11 @@ function redirectWithMessage(returnTo: string, message: string, type: "success" 
 }
 
 function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "The action could not be completed.";
+  return safeServerActionError(
+    "platformJobsAction",
+    error,
+    "The action could not be completed.",
+  );
 }
 
 export async function retryFailedNotificationAction(formData: FormData) {

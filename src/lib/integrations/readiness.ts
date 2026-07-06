@@ -56,3 +56,7 @@ export function getIntegrationReadinessReport() {
     },
   };
 }
+
+export type IntegrationReadinessReport = ReturnType<
+  typeof getIntegrationReadinessReport
+>;

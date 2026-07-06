@@ -1,22 +1,13 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireUserSession } from "@/lib/auth/session";
+import { requireManagementAccess } from "@/lib/permissions/guards";
 import { NewTenantForm } from "./new-tenant-form";
 
 const getCurrentOrgContext = cache(async function getCurrentOrgContext() {
-  const session = await requireUserSession();
+  const session = await requireManagementAccess();
 
   if (!session.activeOrgId) {
-    redirect("/dashboard");
-  }
-
-  if (
-    !session.activeOrgRole ||
-    !["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"].includes(
-      session.activeOrgRole,
-    )
-  ) {
     redirect("/dashboard");
   }
 

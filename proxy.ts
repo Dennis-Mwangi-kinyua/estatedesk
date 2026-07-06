@@ -10,6 +10,7 @@ type RateLimitEntry = {
 };
 
 const PROTECTED_PREFIXES = [
+  "/change-password",
   "/dashboard",
   "/platform",
   "/staff",
@@ -162,7 +163,7 @@ function applySecurityHeaders(response: NextResponse, pathname: string) {
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set(
     "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=()",
+    "camera=(), microphone=(), geolocation=(), display-capture=()",
   );
 
   if (shouldNoIndex(pathname)) {

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { queueDuePaymentNotifications } from "@/lib/ledger";
+import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { recordVacatedTenancy } from "@/lib/tenants/identity";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 
@@ -184,6 +185,7 @@ export async function approveMeterReading(formData: FormData) {
 
   revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/notifications");
+  revalidatePath("/dashboard/org/water-bills");
 }
 
 export async function rejectMeterReading(formData: FormData) {
@@ -263,6 +265,7 @@ export async function rejectMeterReading(formData: FormData) {
 
   revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/notifications");
+  revalidatePath("/dashboard/org/water-bills");
 }
 
 export async function markNotificationReadAction(formData: FormData) {
@@ -397,6 +400,7 @@ export async function confirmMoveOutAction(formData: FormData) {
   });
 
   revalidatePath("/move-outs");
+  revalidatePath("/dashboard/org/move-outs");
   revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/notifications");
   revalidatePath("/dashboard/org/verify-tenant");
@@ -404,4 +408,5 @@ export async function confirmMoveOutAction(formData: FormData) {
   revalidatePath("/dashboard/org/properties");
   revalidatePath("/dashboard/org/tenants");
   revalidatePath("/dashboard/tenant");
+  revalidatePublicVacancies();
 }

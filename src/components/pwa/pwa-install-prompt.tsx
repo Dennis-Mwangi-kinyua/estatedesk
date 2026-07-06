@@ -93,7 +93,8 @@ export function PwaInstallPrompt() {
             Install EstateDesk
           </p>
           <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-            Open your dashboard like an app with faster access and alerts.
+            Install for home-screen access, live unread badges, and share-to-report
+            issue capture.
           </p>
         </div>
         <button

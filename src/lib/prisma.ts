@@ -11,7 +11,7 @@ const globalForPrisma = globalThis as unknown as {
   prismaSchemaVersion?: string;
 };
 
-const PRISMA_SCHEMA_VERSION = "cron-job-runs-no-db-logs-v1";
+const PRISMA_SCHEMA_VERSION = "accounting-requests-v2";
 
 const DATABASE_URL = getDatabaseUrl();
 
@@ -21,8 +21,12 @@ function readPositiveInt(value: string | undefined, fallback: number) {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function hasAccountingRequestDelegate(client: PrismaClient) {
+  return typeof client.accountingRequest?.findMany === "function";
+}
+
 function createPrismaClient() {
-  const poolMax = readPositiveInt(process.env.PRISMA_POOL_MAX, 10);
+  const poolMax = readPositiveInt(process.env.PRISMA_POOL_MAX, 15);
   const connectionTimeoutMillis = readPositiveInt(
     process.env.PRISMA_CONNECTION_TIMEOUT_MS,
     30_000,
@@ -35,30 +39,44 @@ function createPrismaClient() {
 
   const adapter = new PrismaPg({
     connectionString: DATABASE_URL,
-    // Increase timeouts and pool size to be more resilient to transient
-    // network blips and slower cloud DB responses.
     connectionTimeoutMillis,
     idleTimeoutMillis,
     keepAlive: true,
     keepAliveInitialDelayMillis: 30_000,
     max: poolMax,
-    // Allow longer-running queries for heavier lookups
     query_timeout: queryTimeout,
   });
 
-  // Database diagnostics must never be forwarded to application output or
-  // the browser development console. Errors still propagate to the caller
-  // and are handled by the existing application error boundaries.
-  return new PrismaClient({ adapter, log: [] });
+  const client = new PrismaClient({ adapter, log: [] });
+
+  if (!hasAccountingRequestDelegate(client)) {
+    throw new Error(
+      "Prisma client is missing AccountingRequest delegates. Run `npx prisma generate` and restart the dev server.",
+    );
+  }
+
+  return client;
 }
 
-export const prisma =
-  globalForPrisma.prismaSchemaVersion === PRISMA_SCHEMA_VERSION &&
-  globalForPrisma.prisma
-    ? globalForPrisma.prisma
-    : createPrismaClient();
+function getPrismaClient() {
+  const cached = globalForPrisma.prisma;
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-  globalForPrisma.prismaSchemaVersion = PRISMA_SCHEMA_VERSION;
+  if (
+    cached &&
+    globalForPrisma.prismaSchemaVersion === PRISMA_SCHEMA_VERSION &&
+    hasAccountingRequestDelegate(cached)
+  ) {
+    return cached;
+  }
+
+  const client = createPrismaClient();
+
+  if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.prisma = client;
+    globalForPrisma.prismaSchemaVersion = PRISMA_SCHEMA_VERSION;
+  }
+
+  return client;
 }
+
+export const prisma = getPrismaClient();

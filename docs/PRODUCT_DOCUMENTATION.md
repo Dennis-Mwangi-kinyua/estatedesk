@@ -93,10 +93,13 @@ EstateDesk is designed for multi-user property organizations. The core personas 
 
 ### Caretaker
 
-- Submit meter readings
-- Log and update issues
-- Support inspections and field status updates
-- Execute assigned building-level tasks
+- Work from **Today's queue** for inspections, meter readings, and assigned issues with SLA visibility
+- Submit meter readings (online or offline with photo sync)
+- Report issues, start work, add progress notes, and submit completion reports with photo evidence
+- Complete inspections with checklist, GPS check-in, and printable reports
+- Contact tenants and vendors via call, SMS, WhatsApp, and email deep links
+- Hand over bilingual shift notes pre-filled from open issue summaries
+- Request vendor dispatch and browse scoped units, tenants, documents, and calendar tasks
 
 ### Tenant
 

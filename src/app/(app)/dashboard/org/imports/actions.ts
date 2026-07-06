@@ -2,32 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { safeClientMessage } from "@/lib/errors/client-safe-error";
+import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
-import {
-  importCsv,
-  type ImportResult,
-} from "@/lib/imports/csv-import";
+import { importCsv } from "@/lib/imports/csv-import";
+import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { IMPORT_TEMPLATES } from "@/lib/imports/templates";
 import type { ImportKind } from "@/lib/imports/types";
+import {
+  initialImportState,
+  type ImportActionState,
+} from "./import-state";
 
-export type ImportActionState = ImportResult & {
-  message: string;
-  runId?: string;
-};
-
-export const initialImportState: ImportActionState = {
-  ok: true,
-  dryRun: true,
-  kind: "properties",
-  totalRows: 0,
-  validRows: 0,
-  created: 0,
-  errors: [],
-  preview: [],
-  rowResults: [],
-  rollbackSummary: undefined,
-  message: "Paste a CSV and run validation before committing records.",
-};
+export type { ImportActionState } from "./import-state";
 
 function isImportKind(value: FormDataEntryValue | null): value is ImportKind {
   return value === "properties" || value === "units" || value === "tenants";
@@ -85,10 +72,18 @@ export async function runCsvImportAction(
       revalidatePath("/dashboard/org/tenants");
       revalidatePath("/dashboard/org/reports");
       revalidatePath("/dashboard/org/imports");
+
+      if (kindValue === "units" || kindValue === "tenants") {
+        revalidatePublicVacancies();
+      }
     }
 
     return {
+      ...initialImportState,
       ...result,
+      errors: result.errors ?? [],
+      preview: result.preview ?? [],
+      rowResults: result.rowResults ?? [],
       runId: run.id,
       message: result.dryRun
         ? result.ok
@@ -97,7 +92,10 @@ export async function runCsvImportAction(
         : `Imported ${result.created} ${kindValue} row${result.created === 1 ? "" : "s"}.`,
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "CSV import failed.";
+    const message = safeClientMessage(error, "CSV import failed.");
+    if (message === "CSV import failed.") {
+      logServerError("orgCsvImportAction", error);
+    }
     await prisma.importRun.create({
       data: {
         orgId: session.activeOrgId!,

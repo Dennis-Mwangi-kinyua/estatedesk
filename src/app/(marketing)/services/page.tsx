@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Layers3 } from "lucide-react";
+import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import OperationsShowcase from "@/components/marketing/operations-showcase";
+import { siteContentDepth } from "@/lib/content-depth/site-topics";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 
@@ -47,13 +49,14 @@ export default function ServicesPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-neutral-950">
+    <main className="ed-theme-page min-h-screen bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <OperationsShowcase standalone showFooter={false} />
       <ServicesSeoContent />
+      <ContentDepthStack {...siteContentDepth} />
       <PublicAccessFooter />
     </main>
   );
@@ -169,7 +172,7 @@ function ServicesSeoContent() {
         </div>
       </section>
 
-      <section className="border-t border-white/10 bg-[#10141a] py-10 text-[#f8fafc] sm:py-12 lg:py-14">
+      <section className="ed-theme-band-inverse border-t border-white/10 py-10 sm:py-12 lg:py-14">
         <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
             Build a cleaner property management workflow

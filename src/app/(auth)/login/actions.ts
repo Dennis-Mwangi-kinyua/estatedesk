@@ -14,6 +14,7 @@ import {
 } from "@/lib/db/retry";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendSecurityAlert } from "@/lib/security/alerts";
+import { isLoginTimingEnabled } from "@/lib/dev/background-refresh";
 
 const loginSchema = z.object({
   email: z
@@ -129,7 +130,7 @@ function getClientIp(headerStore: Awaited<ReturnType<typeof headers>>) {
 }
 
 async function timed<T>(label: string, fn: () => Promise<T>): Promise<T> {
-  if (process.env.NODE_ENV === "production") {
+  if (!isLoginTimingEnabled()) {
     return fn();
   }
 
@@ -166,7 +167,7 @@ export async function loginAction(
   const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   const totalLabel = makeLabel("loginAction-total", requestId);
-  if (process.env.NODE_ENV !== "production") {
+  if (isLoginTimingEnabled()) {
     console.time(totalLabel);
   }
 
@@ -414,7 +415,7 @@ export async function loginAction(
       error: GENERIC_LOGIN_ERROR_MESSAGE,
     };
   } finally {
-    if (process.env.NODE_ENV !== "production") {
+    if (isLoginTimingEnabled()) {
       console.timeEnd(totalLabel);
     }
   }

@@ -15,6 +15,7 @@ import { requireUserSession } from "@/lib/auth/session";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { notifyRecipients } from "@/lib/notifications/notify";
 import { encodePublicId } from "@/lib/public-id";
+import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { recordVacatedTenancy } from "@/lib/tenants/identity";
 
 export async function completeInspectionAction(formData: FormData) {
@@ -273,6 +274,8 @@ export async function completeInspectionAction(formData: FormData) {
   );
   revalidatePath("/dashboard/org/notifications");
   revalidatePath("/move-outs");
+  revalidatePath("/dashboard/org/move-outs");
+  revalidatePublicVacancies();
 
   redirect(
     `/dashboard/caretaker/inspections/${encodePublicId(

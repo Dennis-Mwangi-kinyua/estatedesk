@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 
@@ -25,6 +26,8 @@ export async function deleteUnitAction(formData: FormData) {
     },
     select: {
       id: true,
+      houseNo: true,
+      property: { select: { name: true } },
       leases: {
         where: {
           deletedAt: null,
@@ -55,6 +58,11 @@ export async function deleteUnitAction(formData: FormData) {
   });
 
   revalidatePath("/dashboard/org/units");
+  revalidatePublicVacancies({
+    unitId: unit.id,
+    propertyName: unit.property.name,
+    houseNo: unit.houseNo,
+  });
   redirect(
     "/dashboard/org/units?message=Unit%20deleted%20successfully&messageType=success",
   );

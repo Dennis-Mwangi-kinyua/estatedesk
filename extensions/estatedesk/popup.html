@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EstateDesk</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="panel">
+      <header class="header">
+        <img src="icons/icon-192.png" alt="" class="logo" width="40" height="40" />
+        <div>
+          <p class="eyebrow">EstateDesk</p>
+          <h1 class="title">Property desk</h1>
+        </div>
+        <span id="badge" class="badge hidden">0</span>
+      </header>
+
+      <p id="status" class="status">Checking your session...</p>
+
+      <div id="actions" class="actions hidden">
+        <button type="button" class="button button-primary" data-path="/dashboard">
+          Open dashboard
+        </button>
+        <button type="button" class="button" data-path="/share">Report issue</button>
+        <button type="button" class="button" data-path="/vacancies">Vacancies</button>
+      </div>
+
+      <div id="signed-out" class="signed-out hidden">
+        <button type="button" class="button button-primary" data-path="/login">
+          Sign in to EstateDesk
+        </button>
+      </div>
+
+      <p class="footnote">
+        Unread badges sync while an EstateDesk tab is open. Install the PWA for
+        home-screen badges and share-to-report on mobile.
+      </p>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

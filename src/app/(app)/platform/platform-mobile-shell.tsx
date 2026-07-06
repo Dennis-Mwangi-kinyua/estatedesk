@@ -31,6 +31,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 
@@ -219,7 +220,8 @@ export default function PlatformMobileShell({
             })}
           </nav>
 
-          <div className="border-t border-slate-200 p-4">
+          <div className="space-y-3 border-t border-slate-200 p-4">
+            <InAppHelpNav workspace="platform" compact />
             <form action={logoutAction}>
               <button
                 type="submit"

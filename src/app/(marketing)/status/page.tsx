@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Activity, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
+import { sharedTopicGuides } from "@/lib/content-depth/site-topics";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { publicPageMetadata } from "@/lib/seo";
 
@@ -15,7 +17,7 @@ export default function StatusPage() {
   const externalStatusUrl = process.env.NEXT_PUBLIC_STATUS_PAGE_URL;
 
   return (
-    <main className="min-h-screen bg-white text-slate-950 dark:bg-[#0b0f16] dark:text-slate-100">
+    <main className="ed-theme-page min-h-screen bg-background text-foreground">
       <PublicAccessHeader />
       <section className="border-b border-slate-200 bg-slate-50 py-12 dark:border-white/10 dark:bg-slate-950">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -38,12 +40,12 @@ export default function StatusPage() {
         <div className="mx-auto grid max-w-5xl gap-4 px-4 sm:px-6 lg:px-8">
           {[
             {
-              title: "Public liveness",
-              body: "GET /api/health checks the app process and required configuration.",
+              title: "Application health",
+              body: "A lightweight health check confirms the app process and required configuration for uptime monitors.",
             },
             {
-              title: "Deep readiness",
-              body: "GET /api/health?deep=1 also verifies database connectivity.",
+              title: "Extended readiness",
+              body: "An authenticated deep readiness check can verify database connectivity for on-call and deployment monitors.",
             },
             {
               title: "Incident updates",
@@ -79,6 +81,17 @@ export default function StatusPage() {
           ) : null}
         </div>
       </section>
+
+      <ContentDepthStack
+        editorialTitle="Operational transparency for rental software"
+        editorial={[
+          "Status and reliability content matters for property teams that depend on EstateDesk during rent collection, tenant communication, caretaker coordination, and vacancy publishing. Public health endpoints help operators verify that the application process and database connectivity are functioning before incidents affect daily workflows.",
+          "EstateDesk also maintains deep public guides on tenants, rent tracking, water billing, inspections, vacancies, and regional property management so visitors can understand product scope even when they arrive from search rather than the homepage.",
+        ]}
+        guides={sharedTopicGuides.slice(0, 4)}
+        guidesTitle="Continue exploring EstateDesk"
+      />
+
       <PublicAccessFooter />
     </main>
   );

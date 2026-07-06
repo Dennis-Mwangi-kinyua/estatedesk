@@ -19,8 +19,11 @@
 
 # production
 /build
+/dist
 backup-*.sql
 *.dump
+/backups/*.dump
+/backups/*.sha256
 
 # misc
 .DS_Store

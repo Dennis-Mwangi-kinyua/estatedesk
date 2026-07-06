@@ -1,15 +1,14 @@
 import { ReactNode } from "react";
-import { headers, cookies } from "next/headers";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import {
-  createRedirectMarkerCookieValue,
-  getEphemeralCookieOptions,
-  getRedirectMarkerCookieName,
-  hasValidRedirectMarkerCookie,
-} from "@/lib/auth/cookies";
+import { auditSensitivePageView } from "@/lib/audit/sensitive-pages";
+import { isSecurityGatePathname } from "@/lib/auth/security-gate";
 import { requireAuthenticated } from "@/lib/permissions/guards";
+import { prisma } from "@/lib/prisma";
 import { privatePageMetadata } from "@/lib/seo";
+import { isDevDebugLoggingEnabled } from "@/lib/dev/background-refresh";
 
+import { SensitiveDataWatermark } from "@/components/security/sensitive-data-watermark";
 import { AppActionFeedback } from "@/components/shared/app-action-feedback";
 import { DestructiveActionGuard } from "@/components/shared/destructive-action-guard";
 
@@ -29,45 +28,49 @@ export default async function AppLayout({
   const isPlatformAdmin =
     session.platformRole === "PLATFORM_ADMIN" || session.platformRole === "SUPER_ADMIN";
 
+  const isSecurityGateRoute = isSecurityGatePathname(pathname);
+
   const shouldForceChange =
-    !pathname.startsWith("/change-password") &&
+    Boolean(pathname) &&
+    !isSecurityGateRoute &&
     (session.mustChangePassword || session.requiresTermsAcceptance) &&
     !isPlatformAdmin;
 
   if (shouldForceChange) {
-    // Prevent rapid redirect loops by using a short-lived cookie marker.
-    const cookieStore = await cookies();
-    const marker = cookieStore.get(getRedirectMarkerCookieName());
-
-    if (hasValidRedirectMarkerCookie(marker?.value)) {
-      if (process.env.NODE_ENV !== "production") {
-        // eslint-disable-next-line no-console
-        console.log(
-          "[debug] skipping /change-password redirect because marker cookie is present",
-        );
-      }
-    } else {
-      // set a 5 second marker to avoid redirect storms
-      cookieStore.set(
-        getRedirectMarkerCookieName(),
-        createRedirectMarkerCookieValue(),
-        getEphemeralCookieOptions(5),
-      );
-
-      if (process.env.NODE_ENV !== "production") {
-        // eslint-disable-next-line no-console
-        console.log("[debug] AppLayout redirecting to /change-password from", rawPath, session);
-      }
-
-      redirect("/change-password");
+    if (isDevDebugLoggingEnabled()) {
+      // eslint-disable-next-line no-console
+      console.log("[debug] AppLayout redirecting to /change-password from", rawPath);
     }
+
+    redirect("/change-password");
+  }
+
+  const viewerLabel = session.email ?? session.fullName ?? session.userId;
+  let orgLabel: string | null = null;
+
+  if (session.activeOrgId) {
+    const organization = await prisma.organization.findUnique({
+      where: { id: session.activeOrgId },
+      select: { name: true },
+    });
+    orgLabel = organization?.name ?? null;
+  } else if (
+    session.platformRole === "PLATFORM_ADMIN" ||
+    session.platformRole === "SUPER_ADMIN"
+  ) {
+    orgLabel = "Platform";
+  }
+
+  if (pathname) {
+    await auditSensitivePageView(session, pathname);
   }
 
   return (
-    <div className="app-mobile-canvas min-h-screen">
+    <div className="app-mobile-canvas app-sensitive-surface relative min-h-screen">
+      <SensitiveDataWatermark viewerLabel={viewerLabel} orgLabel={orgLabel} />
       {children}
-      {pathname === "/change-password" ? null : <AppActionFeedback />}
-      <DestructiveActionGuard />
+      {isSecurityGateRoute ? null : <AppActionFeedback />}
+      {isSecurityGateRoute ? null : <DestructiveActionGuard />}
     </div>
   );
 }

@@ -1,7 +1,10 @@
 import { Prisma } from "@prisma/client";
 
 export const ISSUE_PAGE_PATH = "/dashboard/org/issues";
+export const RESOLUTION_REPORTS_QUEUE_PATH =
+  "/dashboard/org/issues/resolution-reports";
 export const HISTORY_PAGE_SIZE = 12;
+export const STAGE_BOARD_COLUMN_LIMIT = 12;
 
 export const ORG_ISSUE_ROLES = [
   "ADMIN",
@@ -16,6 +19,9 @@ export type IssuesSearchParams = {
   page?: string;
   issueId?: string;
   status?: string;
+  shared?: string;
+  title?: string;
+  description?: string;
 };
 
 export type IssuesPageProps = {
@@ -123,6 +129,7 @@ export type IssueStatusFilter = "all" | "new" | "progress" | "resolved" | "cance
 export type OrgIssuesPageData = {
   membership: OrgMembershipContext;
   issues: OrgIssue[];
+  totalFiltered: number;
   caretakers: CaretakerOption[];
   canAssignCaretaker: boolean;
   selectedIssue: OrgIssue | null;
@@ -133,4 +140,11 @@ export type OrgIssuesPageData = {
   historyEnd: number;
   stats: IssuesStats;
   activeFilter: IssueStatusFilter;
+};
+
+export type IssueDetailPageData = {
+  membership: OrgMembershipContext;
+  issue: OrgIssue;
+  caretakers: CaretakerOption[];
+  canAssignCaretaker: boolean;
 };

@@ -8,6 +8,7 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
+import { inputClassName } from "./_lib/constants";
 
 type AvailableUnit = {
   id: string;
@@ -53,9 +54,7 @@ export function UnitCombobox({
 
   const filteredUnits = useMemo(() => {
     const q = query.trim().toLowerCase();
-
     if (!q) return units;
-
     return units.filter((unit) => unit.label.toLowerCase().includes(q));
   }, [units, query]);
 
@@ -133,14 +132,10 @@ export function UnitCombobox({
       `[data-option-index="${activeIndex}"]`,
     );
 
-    activeEl?.scrollIntoView({
-      block: "nearest",
-    });
+    activeEl?.scrollIntoView({ block: "nearest" });
   }, [activeIndex, open]);
 
-  function handleTriggerKeyDown(
-    event: ReactKeyboardEvent<HTMLButtonElement>,
-  ) {
+  function handleTriggerKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
     if (
       event.key === "ArrowDown" ||
       event.key === "Enter" ||
@@ -188,22 +183,22 @@ export function UnitCombobox({
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-controls={listboxId}
-        className="flex min-h-14 w-full items-center justify-between rounded-[20px] border border-neutral-200 bg-white px-4 text-left outline-none transition hover:border-neutral-300 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+        className="flex min-h-14 w-full items-center justify-between rounded-2xl border border-border bg-background px-4 text-left outline-none transition hover:border-ring focus:border-ring focus:ring-4 focus:ring-ring/20"
       >
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             Vacant unit
           </p>
           <p
-            className={`mt-1 truncate text-[15px] ${
-              selectedUnit ? "text-neutral-900" : "text-neutral-400"
+            className={`mt-1 truncate text-sm ${
+              selectedUnit ? "text-foreground" : "text-muted-foreground"
             }`}
           >
             {selectedUnit ? selectedUnit.label : "Search and select a vacant unit"}
           </p>
         </div>
 
-        <span className="ml-3 shrink-0 text-neutral-400" aria-hidden="true">
+        <span className="ml-3 shrink-0 text-muted-foreground" aria-hidden="true">
           ⌄
         </span>
       </button>
@@ -212,18 +207,16 @@ export function UnitCombobox({
         <>
           <div className="fixed inset-0 z-40 bg-black/20 sm:hidden" />
 
-          <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-[28px] border border-neutral-200 bg-white shadow-[0_-12px_40px_rgba(0,0,0,0.16)] sm:absolute sm:inset-auto sm:left-0 sm:right-0 sm:top-[calc(100%+0.5rem)] sm:rounded-[24px] sm:shadow-xl">
-            <div className="border-b border-neutral-100 px-4 pb-3 pt-3 sm:p-3">
-              <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-neutral-200 sm:hidden" />
+          <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border border-border bg-card shadow-xl sm:absolute sm:inset-auto sm:left-0 sm:right-0 sm:top-[calc(100%+0.5rem)] sm:rounded-2xl">
+            <div className="border-b border-border px-4 pb-3 pt-3 sm:p-3">
+              <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-muted sm:hidden" />
 
               <div className="flex items-center justify-between gap-3 sm:hidden">
-                <h3 className="text-sm font-semibold text-neutral-900">
-                  Select unit
-                </h3>
+                <h3 className="text-sm font-semibold text-foreground">Select unit</h3>
                 <button
                   type="button"
                   onClick={closeCombobox}
-                  className="rounded-full px-2 py-1 text-sm text-neutral-500"
+                  className="rounded-full px-2 py-1 text-sm text-muted-foreground"
                 >
                   Close
                 </button>
@@ -239,7 +232,7 @@ export function UnitCombobox({
                 }}
                 onKeyDown={handleInputKeyDown}
                 placeholder="Search by property, building, unit number..."
-                className="mt-3 h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-[15px] outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100 sm:mt-0"
+                className={`${inputClassName} mt-3 sm:mt-0`}
               />
             </div>
 
@@ -258,16 +251,16 @@ export function UnitCombobox({
                     onClick={() => handleSelect("")}
                     className={`mb-2 w-full rounded-2xl border px-4 py-4 text-left transition ${
                       selectedUnitId === ""
-                        ? "border-neutral-300 bg-neutral-100"
-                        : "border-neutral-200 bg-white hover:bg-neutral-50"
+                        ? "border-primary bg-muted/30"
+                        : "border-border bg-card hover:bg-muted/10"
                     }`}
                   >
-                    <div className="text-sm font-medium text-neutral-900">
+                    <div className="text-sm font-medium text-foreground">
                       No unit assignment yet
                     </div>
                   </button>
 
-                  <div className="rounded-2xl px-4 py-8 text-center text-sm text-neutral-500">
+                  <div className="rounded-2xl px-4 py-8 text-center text-sm text-muted-foreground">
                     No units match your search.
                   </div>
                 </>
@@ -287,34 +280,33 @@ export function UnitCombobox({
                       onClick={() => handleSelect(unit.id)}
                       className={`mb-2 w-full rounded-2xl border px-4 py-4 text-left transition ${
                         selected
-                          ? "border-neutral-300 bg-neutral-100"
+                          ? "border-primary bg-muted/30"
                           : active
-                            ? "border-neutral-300 bg-neutral-50"
-                            : "border-neutral-200 bg-white hover:bg-neutral-50"
+                            ? "border-ring bg-muted/20"
+                            : "border-border bg-card hover:bg-muted/10"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="text-sm font-medium text-neutral-900">
+                          <div className="text-sm font-medium text-foreground">
                             {unit.label}
                           </div>
 
                           {!unit.isEmptyOption ? (
-                            <div className="mt-1 text-xs leading-5 text-neutral-500">
+                            <div className="mt-1 text-xs leading-5 text-muted-foreground">
                               Rent: {formatCurrency(unit.rentAmount, currencyCode)}
                               {" • "}
-                              Deposit:{" "}
-                              {formatCurrency(unit.depositAmount, currencyCode)}
+                              Deposit: {formatCurrency(unit.depositAmount, currencyCode)}
                             </div>
                           ) : (
-                            <div className="mt-1 text-xs leading-5 text-neutral-500">
+                            <div className="mt-1 text-xs leading-5 text-muted-foreground">
                               Create tenant without assigning a unit now.
                             </div>
                           )}
                         </div>
 
                         {selected ? (
-                          <span className="shrink-0 text-sm font-medium text-neutral-700">
+                          <span className="shrink-0 text-sm font-medium text-primary">
                             ✓
                           </span>
                         ) : null}

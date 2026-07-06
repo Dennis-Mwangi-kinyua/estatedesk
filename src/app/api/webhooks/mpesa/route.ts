@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { buildMpesaTransactionKey } from "@/lib/payments/transaction-reference";
 
@@ -70,7 +71,9 @@ export async function POST(request: Request) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return Response.json({ ok: false, error: "Duplicate M-Pesa receipt" }, { status: 409 });
     }
-    throw error;
+
+    logServerError("mpesa.webhook.update", error, { paymentId: payment.id });
+    return Response.json({ ok: false, error: "Unable to process callback." }, { status: 500 });
   }
 
   return Response.json({ ok: true, matched: true });

@@ -62,7 +62,7 @@ export async function buildVacancyDetailSitemapXml() {
   const urls = units
     .map((unit) =>
       buildUrlEntry({
-        loc: `${APP_URL}/vacancies/${vacancyPublicSlug({ id: unit.id, propertyName: unit.property.name, houseNo: unit.houseNo })}`,
+        loc: `${APP_URL}/vacancies/${vacancyPublicSlug({ propertyName: unit.property.name, houseNo: unit.houseNo })}`,
         lastmod: formatDate(unit.updatedAt),
         changefreq: "weekly",
         priority: "0.6",

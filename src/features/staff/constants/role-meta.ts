@@ -147,7 +147,7 @@ export const DIRECTORY_META = {
     shortLabel: "TN",
     description:
       "Access tenant records, occupancy details, and tenant management tools.",
-    href: "/tenants",
+    href: "/dashboard/org/tenants",
   },
 } as const;
 

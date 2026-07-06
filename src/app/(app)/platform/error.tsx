@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { reportClientError } from "@/lib/errors/report-client-error";
 
 export default function PlatformError({
   error,
@@ -12,10 +13,9 @@ export default function PlatformError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Platform route error", {
-      message: error.message,
+    reportClientError({
+      context: "platform",
       digest: error.digest,
-      stack: error.stack,
     });
   }, [error]);
 
@@ -30,11 +30,11 @@ export default function PlatformError({
         </h1>
         <p className="mt-3 text-sm leading-7 text-neutral-600">
           A server-side error occurred while loading this platform page. Try
-          again, or use the digest below when checking production logs.
+          again, or share the reference below with support.
         </p>
         {error.digest ? (
           <p className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-xs font-mono text-neutral-700">
-            Digest: {error.digest}
+            Reference: {error.digest}
           </p>
         ) : null}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">

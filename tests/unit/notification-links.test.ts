@@ -37,7 +37,7 @@ describe("notification deep links", () => {
     );
     assert.equal(
       getDefaultNotificationActionUrl("ISSUE_CREATED", "caretaker"),
-      "/dashboard/caretaker/issues",
+      "/dashboard/caretaker/today",
     );
   });
 

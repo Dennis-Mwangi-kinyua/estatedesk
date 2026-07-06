@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getUserSession } from "@/lib/auth/session";
 import { sendTestPushToUser } from "@/lib/push/send-test-push";
+import { safeApiErrorResponse } from "@/lib/errors/server-error-log";
 import { isWebPushConfigured } from "@/lib/push/web-push";
 
 export const dynamic = "force-dynamic";
@@ -45,12 +46,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Test alert could not be sent.",
-      },
+      safeApiErrorResponse("push.test", error, "Test alert could not be sent."),
       { status: 400 },
     );
   }

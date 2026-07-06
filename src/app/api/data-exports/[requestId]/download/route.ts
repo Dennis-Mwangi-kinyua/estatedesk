@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { safeApiErrorResponse } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { buildOrganizationCsvZip } from "@/lib/data-export/org-export";
@@ -76,7 +77,14 @@ export async function GET(_request: Request, context: RouteContext) {
       );
     }
 
-    throw error;
+    return NextResponse.json(
+      safeApiErrorResponse(
+        "dataExports.download",
+        error,
+        "Could not prepare the data export.",
+      ),
+      { status: 500 },
+    );
   }
 
   await writeAuditLog({

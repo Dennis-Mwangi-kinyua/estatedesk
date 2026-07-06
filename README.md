@@ -55,6 +55,21 @@ EstateDesk is designed as a connected operating system for property revenue, ser
 - Caretaker assignment and field operations support
 - Notifications, email/SMS hooks, platform messages, and audit logs
 
+### Caretaker field operations portal
+
+Caretakers get a mobile-first workspace scoped to assigned properties, buildings, and units:
+
+- **Today's work** — prioritized queue for inspections, meter readings, and open issues with SLA badges
+- **Issues** — report, start, progress notes, completion reports with photo evidence, printable work orders
+- **Water bills** — period meter capture with photo evidence; offline queue sync when connectivity returns
+- **Inspections** — checklist completion, on-site GPS check-in, arrival photos, printable reports
+- **Units & tenants** — 360° unit profiles, QR codes, call/SMS/WhatsApp contact actions
+- **Handover** — bilingual (English/Swahili) shift notes pre-filled from open issue summaries
+- **Vendors** — approved supplier directory with WhatsApp dispatch requests to office
+- **Search, calendar, documents, broadcasts, move-outs** — scoped field lookup and coordination tools
+- **Offline-first** — meter readings and issues (with photos via IndexedDB) queue locally and sync from the header
+- **PWA-ready** — installable shell with push notifications for urgent assignments
+
 ## Tech Stack
 
 - Next.js `16.x` (App Router)
@@ -178,6 +193,8 @@ Key models include:
 ## Project Structure
 
 - `src/app` — Next.js App Router pages, layouts, metadata, and route handlers
+- `src/app/(app)/dashboard/caretaker` — caretaker field operations portal (thin pages, `_lib/`, `_components/`)
+- `src/app/print` — authenticated print views for inspections and issue work orders (noindex)
 - `src/components` — shared UI components
 - `src/features` — domain feature modules, server actions, and business logic
 - `src/hooks` — reusable React hooks
@@ -232,6 +249,8 @@ See `docs/LOAD_TESTING.md` for the 500, 1,000, 2,500, and 5,000 RPM stages.
 - Preserve existing backup routes while refactoring critical flows.
 - Document new environment variables in `.env.example`.
 - Update `SITEMAPS.md` if you add new marketing or public pages.
+- Keep caretaker routes out of submitted sitemaps; they are login-required and disallowed in `robots.ts`.
+- Add modular route entries to `tests/unit/module-structure.test.ts` for new caretaker or print pages.
 
 ## Additional Documentation
 
@@ -239,8 +258,11 @@ For deeper architecture, data model, developer workflows, and operational guidan
 
 - `docs/PROJECT_DOCUMENTATION.md`
 - `docs/PRODUCT_DOCUMENTATION.md`
+- `docs/ENVIRONMENT.md`
+- `docs/API.md`
 - `docs/OPERATIONS.md`
 - `docs/LAUNCH_READINESS.md`
+- `docs/PRE_LAUNCH_STATUS.md`
 
 ## Product and Market Context
 

@@ -1,3 +1,4 @@
+import { resolveVacancyUnitIdFromSlug } from "@/lib/public-vacancy-resolve";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -35,11 +36,14 @@ export async function GET(request: Request, context: RouteContext) {
   const rateLimitResponse = await enforceRateLimit(request);
   if (rateLimitResponse) return rateLimitResponse;
 
-  const { id } = await context.params;
+  const { id: slug } = await context.params;
+  const unitId = await resolveVacancyUnitIdFromSlug(decodeURIComponent(slug));
+
+  if (!unitId) return new Response("Not found", { status: 404 });
 
   const unit = await prisma.unit.findFirst({
     where: {
-      id,
+      id: unitId,
       isActive: true,
       deletedAt: null,
       status: "VACANT",

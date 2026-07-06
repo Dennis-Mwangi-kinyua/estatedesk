@@ -2,6 +2,7 @@ import "server-only";
 
 import crypto from "node:crypto";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { throwSafeActionFailure } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 import { absoluteUrl } from "@/lib/seo";
@@ -164,7 +165,11 @@ async function finalizeEnvelope(envelopeId: string) {
     });
   } catch (error) {
     await prisma.leaseSignatureEnvelope.updateMany({ where: { id: envelopeId, status: "FINALIZING" }, data: { status: "PARTIALLY_SIGNED" } });
-    throw error;
+    throwSafeActionFailure(
+      "leaseSignatureFinalize",
+      error,
+      "Could not finalize the signed lease. Please try again.",
+    );
   }
 }
 

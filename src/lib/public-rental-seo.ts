@@ -199,6 +199,28 @@ export function locationLabel(location: string) {
   return getPublicRentalLocation(location)?.label ?? titleCaseSegment(location);
 }
 
+export function resolvePublicRentalLocationHref(place: string) {
+  const normalized = place.trim().toLowerCase();
+
+  const matched = PUBLIC_RENTAL_LOCATIONS.find(
+    (location) =>
+      location.label.toLowerCase() === normalized ||
+      location.slug === rentalLocationSlug(place) ||
+      location.aliases.some((alias) => alias.toLowerCase() === normalized),
+  );
+
+  if (matched) {
+    return `/vacancies/${matched.slug}`;
+  }
+
+  const slug = rentalLocationSlug(place);
+  if (slug && getPublicRentalLocation(slug)) {
+    return `/vacancies/${slug}`;
+  }
+
+  return `/vacancies?location=${encodeURIComponent(place)}`;
+}
+
 export function buildRentalLandingTitle(location: string, category: string) {
   return `${categoryLabel(category)} in ${locationLabel(location)}`;
 }

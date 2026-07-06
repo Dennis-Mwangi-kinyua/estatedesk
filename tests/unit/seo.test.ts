@@ -9,6 +9,7 @@ import {
   noIndexPageMetadata,
   publicPageMetadata,
 } from "../../src/lib/seo";
+import { marketCoverageItems } from "../../src/lib/seo-index";
 import { publicSiteIndexItems } from "../../src/lib/public-site-index";
 
 function assertRobotsObject(
@@ -61,6 +62,10 @@ describe("seo helpers", () => {
       metadata.alternates?.canonical,
       "https://app.example/water-billing-software",
     );
+    assert.deepEqual(metadata.alternates?.languages, {
+      "en-KE": "https://app.example/water-billing-software",
+      "x-default": "https://app.example/water-billing-software",
+    });
     assertRobotsObject(metadata.robots);
 
     assert.equal(metadata.openGraph?.url, "https://app.example/water-billing-software");
@@ -107,6 +112,9 @@ describe("seo helpers", () => {
     const publicPaths = publicSiteIndexItems.map((item) => item.path);
 
     assert.ok(publicPaths.includes("/property-management-markets"));
+    assert.ok(publicPaths.includes("/guides"));
+    assert.ok(publicPaths.includes("/guides/water-billing-workflow"));
+    assert.ok(marketCoverageItems.some((item) => item.href === "/guides"));
     assert.ok(publicPaths.includes("/terms"));
     assert.ok(publicPaths.includes("/login"));
     assert.ok(publicPaths.includes("/register"));

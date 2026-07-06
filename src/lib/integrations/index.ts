@@ -1,5 +1,9 @@
 export { integrationProviders } from "./providers";
-export { getIntegrationReadiness, getIntegrationReadinessReport } from "./readiness";
+export {
+  getIntegrationReadiness,
+  getIntegrationReadinessReport,
+  type IntegrationReadinessReport,
+} from "./readiness";
 export type {
   IntegrationCategory,
   IntegrationEnvRequirement,

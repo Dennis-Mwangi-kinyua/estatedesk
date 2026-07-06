@@ -1,181 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { memo, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { usePathname } from "next/navigation";
+import { LayoutGrid, X } from "lucide-react";
+import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import {
-  Bell,
-  Building,
-  Building2,
-  CreditCard,
-  FileText,
-  Home,
-  Lightbulb,
-  LayoutGrid,
-  Landmark,
-  LogOut,
-  Upload,
-  Receipt,
-  Send,
-  Settings,
-  ShieldCheck,
-  UserRound,
-  UserCheck,
-  Users,
-  Wrench,
-  X,
-} from "lucide-react";
-import { logoutAction } from "@/features/auth/actions/logout-action";
+  isActivePath,
+  SIDEBAR_LINKS,
+  type OrgRole,
+} from "./org-sidebar-links";
+import {
+  LogoutButton,
+  SidebarBrand,
+  SidebarNavItem,
+} from "./org-sidebar-parts";
 
-export type OrgRole =
-  | "ADMIN"
-  | "MANAGER"
-  | "OFFICE"
-  | "ACCOUNTANT"
-  | "CARETAKER"
-  | "TENANT";
-
-type SidebarLink = {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  roles: readonly OrgRole[];
-};
-
-const SIDEBAR_LINKS: readonly SidebarLink[] = [
-  {
-    label: "Overview",
-    href: "/dashboard/org",
-    icon: Home,
-    roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER"],
-  },
-  {
-    label: "Smart Insights",
-    href: "/dashboard/org/insights",
-    icon: Lightbulb,
-    roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
-  },
-  {
-    label: "My Profile",
-    href: "/dashboard/org/profile",
-    icon: UserRound,
-    roles: ["MANAGER", "OFFICE", "ACCOUNTANT"],
-  },
-  {
-    label: "Properties",
-    href: "/dashboard/org/properties",
-    icon: Building,
-    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
-  },
-  {
-    label: "Buildings",
-    href: "/dashboard/org/buildings",
-    icon: Building2,
-    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
-  },
-  {
-    label: "Units",
-    href: "/dashboard/org/units",
-    icon: Building2,
-    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
-  },
-  {
-    label: "Tenants",
-    href: "/dashboard/org/tenants",
-    icon: Users,
-    roles: ["ADMIN", "MANAGER", "OFFICE"],
-  },
-  {
-    label: "Verify Tenant",
-    href: "/dashboard/org/verify-tenant",
-    icon: UserCheck,
-    roles: ["ADMIN"],
-  },
-  {
-    label: "Leases",
-    href: "/dashboard/org/leases",
-    icon: FileText,
-    roles: ["ADMIN", "MANAGER", "OFFICE"],
-  },
-  {
-    label: "Payments",
-    href: "/dashboard/org/payments",
-    icon: CreditCard,
-    roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
-  },
-  {
-    label: "Accounting",
-    href: "/dashboard/org/accounting",
-    icon: Landmark,
-    roles: ["ADMIN", "MANAGER", "ACCOUNTANT"],
-  },
-  {
-    label: "Expenditures",
-    href: "/dashboard/org/expenditures",
-    icon: Receipt,
-    roles: ["ADMIN", "MANAGER", "ACCOUNTANT"],
-  },
-  {
-    label: "Charges",
-    href: "/dashboard/org/charges",
-    icon: Receipt,
-    roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
-  },
-  {
-    label: "Issues",
-    href: "/dashboard/org/issues",
-    icon: Wrench,
-    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
-  },
-  {
-    label: "Staff",
-    href: "/dashboard/org/staff",
-    icon: Users,
-    roles: ["ADMIN", "MANAGER"],
-  },
-  {
-    label: "Notifications",
-    href: "/dashboard/org/notifications",
-    icon: Bell,
-    roles: ["ADMIN", "MANAGER", "OFFICE"],
-  },
-  {
-    label: "Reports",
-    href: "/dashboard/org/reports",
-    icon: ShieldCheck,
-    roles: ["ADMIN", "MANAGER", "ACCOUNTANT"],
-  },
-  {
-    label: "Imports",
-    href: "/dashboard/org/imports",
-    icon: Upload,
-    roles: ["ADMIN", "MANAGER", "OFFICE"],
-  },
-  {
-    label: "Taxes",
-    href: "/dashboard/org/taxes",
-    icon: Receipt,
-    roles: ["ADMIN", "ACCOUNTANT"],
-  },
-  {
-    label: "Settings",
-    href: "/dashboard/org/settings",
-    icon: Settings,
-    roles: ["ADMIN"],
-  },
-  {
-    label: "Security",
-    href: "/dashboard/org/security",
-    icon: ShieldCheck,
-    roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
-  },
-  {
-    label: "Support",
-    href: "/dashboard/org/support",
-    icon: Send,
-    roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
-  },
-] as const;
+export type { OrgRole } from "./org-sidebar-links";
 
 type OrgDashboardSidebarProps = {
   organizationName: string;
@@ -183,144 +24,6 @@ type OrgDashboardSidebarProps = {
   setMobileOpen: (value: boolean) => void;
   role?: OrgRole;
 };
-
-function isActivePath(pathname: string, href: string) {
-  if (href === "/dashboard/org") {
-    return pathname === href;
-  }
-
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-type SidebarNavItemProps = {
-  item: SidebarLink;
-  pathname: string;
-  mobile?: boolean;
-  onNavigate?: () => void;
-};
-
-const SidebarNavItem = memo(function SidebarNavItem({
-  item,
-  pathname,
-  mobile = false,
-  onNavigate,
-}: SidebarNavItemProps) {
-  const Icon = item.icon;
-  const active = isActivePath(pathname, item.href);
-
-  if (mobile) {
-    return (
-      <Link
-        href={item.href}
-        onClick={onNavigate}
-        className={[
-          "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors duration-150",
-          active ? "ed-nav-item-active" : "ed-nav-item",
-        ].join(" ")}
-      >
-        <span
-          className={[
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
-            active
-              ? "ed-nav-icon-active"
-              : "ed-nav-icon",
-          ].join(" ")}
-        >
-          <Icon className="h-4 w-4" />
-        </span>
-
-        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-          <span className="truncate">{item.label}</span>
-          <Icon
-            className={
-            active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-current opacity-45"
-            }
-          />
-        </div>
-      </Link>
-    );
-  }
-
-  return (
-    <Link
-      href={item.href}
-      className={[
-        "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors",
-        active ? "ed-nav-item-active" : "ed-nav-item",
-      ].join(" ")}
-    >
-      <span
-        className={[
-          "flex h-9 w-9 items-center justify-center rounded-md",
-          active
-          ? "ed-nav-icon-active"
-          : "ed-nav-icon",
-        ].join(" ")}
-      >
-        <Icon className="h-4 w-4" />
-      </span>
-
-      <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-        <span className="truncate">{item.label}</span>
-        <Icon className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-current opacity-45"} />
-      </div>
-    </Link>
-  );
-});
-
-const SidebarBrand = memo(function SidebarBrand({
-  organizationName,
-}: {
-  organizationName: string;
-}) {
-  return (
-    <Link href="/dashboard/org" className="flex items-center gap-3">
-      <div className="ed-brand-mark flex h-10 w-10 items-center justify-center rounded-lg shadow-sm">
-        <Building2 className="h-5 w-5" />
-      </div>
-
-      <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
-          {organizationName}
-        </p>
-        <p className="text-xs text-slate-500 dark:text-slate-400">Organization workspace</p>
-      </div>
-    </Link>
-  );
-});
-
-const LogoutButton = memo(function LogoutButton({
-  mobile = false,
-  onClick,
-}: {
-  mobile?: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <form action={logoutAction} onSubmit={onClick}>
-      <button
-        type="submit"
-        className={[
-          "flex w-full items-center gap-3 rounded-lg text-sm font-medium transition-colors",
-          mobile
-            ? "px-4 py-3.5 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:bg-red-500/10"
-            : "px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:bg-red-500/10",
-        ].join(" ")}
-      >
-        <span
-          className={[
-            "flex items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300",
-            mobile ? "h-9 w-9 shrink-0" : "h-9 w-9",
-          ].join(" ")}
-        >
-          <LogOut className="h-4 w-4" />
-        </span>
-
-        <span className="truncate">Logout</span>
-      </button>
-    </form>
-  );
-});
 
 export function OrgDashboardSidebar({
   organizationName,
@@ -355,7 +58,8 @@ export function OrgDashboardSidebar({
           ))}
         </nav>
 
-        <div className="p-4">
+        <div className="space-y-2 p-4">
+          <InAppHelpNav workspace="org" orgRole={role} />
           <LogoutButton />
         </div>
       </aside>
@@ -415,7 +119,8 @@ export function OrgDashboardSidebar({
             </nav>
 
             <div className="shrink-0 border-t border-slate-200/80 px-3 pb-4 pt-3 [padding-bottom:max(1rem,env(safe-area-inset-bottom))] dark:border-white/10">
-              <div className="rounded-2xl bg-slate-50 p-2 dark:bg-slate-900">
+              <div className="space-y-2 rounded-2xl bg-slate-50 p-2 dark:bg-slate-900">
+                <InAppHelpNav workspace="org" orgRole={role} compact />
                 <LogoutButton mobile onClick={closeMobile} />
               </div>
             </div>
@@ -423,7 +128,10 @@ export function OrgDashboardSidebar({
         </div>
       </div>
 
-      <nav className="fixed bottom-3 left-3 right-3 z-[88] rounded-[28px] border border-slate-200/75 bg-white/82 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_18px_44px_rgba(15,23,42,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/82 lg:hidden">
+      <nav
+        aria-label="Mobile workspace navigation"
+        className="org-mobile-tabbar fixed bottom-0 left-0 right-0 z-[100] border-t border-border bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-10px_30px_rgba(15,23,42,0.12)] lg:hidden dark:shadow-[0_-10px_30px_rgba(0,0,0,0.35)]"
+      >
         <div className="grid grid-cols-5 gap-1">
           {[
             ...visibleLinks.slice(0, 4),
@@ -444,7 +152,7 @@ export function OrgDashboardSidebar({
                   key="more"
                   type="button"
                   onClick={() => setMobileOpen(true)}
-                  className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[11px] font-semibold text-slate-500 transition active:scale-95 dark:text-slate-400"
+                  className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[11px] font-semibold text-muted-foreground transition active:scale-95"
                 >
                   <Icon className="h-5 w-5" />
                   <span>More</span>

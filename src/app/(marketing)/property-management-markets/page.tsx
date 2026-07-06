@@ -1,8 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight, Building2, Globe2, SearchCheck, ShieldCheck } from "lucide-react";
+import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
+import { siteContentDepth } from "@/lib/content-depth/site-topics";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 import { marketCoverageItems, marketCoverageKeywords } from "@/lib/seo-index";
 
@@ -64,7 +66,7 @@ export default function PropertyManagementMarketsPage() {
   };
 
   return (
-    <main className="min-h-dvh bg-white text-neutral-950 dark:bg-[#0f1319] dark:text-[#f8fafc]">
+    <main className="ed-theme-page min-h-dvh bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -145,6 +147,8 @@ export default function PropertyManagementMarketsPage() {
           />
         </div>
       </section>
+
+      <ContentDepthStack {...siteContentDepth} />
 
       <PublicAccessFooter />
     </main>

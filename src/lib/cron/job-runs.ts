@@ -1,6 +1,8 @@
 import "server-only";
 
 import { CronJobStatus, Prisma } from "@prisma/client";
+import { safeClientMessage } from "@/lib/errors/client-safe-error";
+import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { sendSecurityAlert } from "@/lib/security/alerts";
 
@@ -63,6 +65,8 @@ export async function recordCronJobRun<T>({
     return result;
   } catch (error) {
     const finishedAt = new Date();
+    const clientSafeError = safeClientMessage(error, "Cron job failed.");
+    logServerError(`cron.${jobName}`, error, { endpoint, triggerSource });
 
     await prisma.cronJobRun.update({
       where: { id: jobRun.id },
@@ -70,7 +74,7 @@ export async function recordCronJobRun<T>({
         status: CronJobStatus.FAILED,
         finishedAt,
         durationMs: finishedAt.getTime() - startedAt.getTime(),
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: clientSafeError,
       },
     });
 
@@ -84,7 +88,7 @@ export async function recordCronJobRun<T>({
       metadata: {
         endpoint,
         triggerSource,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: clientSafeError,
       },
     });
 

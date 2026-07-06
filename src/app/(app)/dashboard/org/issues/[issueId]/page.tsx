@@ -1,6 +1,6 @@
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { getIssueDetailPageData } from "../_lib/queries";
+import { IssueDetailWorkspace } from "./_components/issue-detail-workspace";
 
 type PageProps = {
   params: Promise<{
@@ -12,21 +12,13 @@ export default async function IssueDetailsPage({ params }: PageProps) {
   const session = await requireManagementAccess();
   const { issueId } = await params;
 
-  const issue = await prisma.issueTicket.findFirst({
-    where: {
-      id: issueId,
-      orgId: session.activeOrgId!,
-    },
-  });
-
-  if (!issue) {
-    notFound();
+  if (!session.activeOrgId) {
+    return null;
   }
 
+  const data = await getIssueDetailPageData(issueId, session.activeOrgId);
+
   return (
-    <div>
-      <h1>{issue.title}</h1>
-      <p>{issue.description}</p>
-    </div>
+    <IssueDetailWorkspace data={data} orgRole={session.activeOrgRole} />
   );
 }

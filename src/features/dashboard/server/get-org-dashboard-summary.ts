@@ -1,6 +1,17 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { countOnlineUsersForOrg } from "@/lib/auth/presence";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
+import { PENDING_REVIEW_STATUSES } from "@/features/accounting-requests/_lib/constants";
+
+export type OrgDashboardActivityItem = {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  actorName: string;
+  createdAt: string;
+};
 
 export type OrgDashboardSummary = {
   totalProperties: number;
@@ -18,6 +29,7 @@ export type OrgDashboardSummary = {
   activeCaretakerAssignments: number;
   openIssues: number;
   urgentIssues: number;
+  pendingResolutionReports: number;
   unreadNotifications: number;
   totalPayments: number;
   pendingPayments: number;
@@ -28,11 +40,32 @@ export type OrgDashboardSummary = {
   vacancyRate: number;
   issuePressure: number;
   apartmentMix: number;
+  pendingFinanceRequests: number;
+  accountingInitialized: boolean;
+  openPayables: number;
+  waterPendingApproval: number;
+  moveOutQueueCount: number;
+  leaseExpiring30Days: number;
+  leaseExpiring60Days: number;
+  expenditureApprovalsPending: number;
+  pendingTaxCharges: number;
+  scheduledInspections: number;
+  overdueInspections: number;
+  vacancyInquiries: number;
+  unpostedPayments: number;
+  approvedExpendituresAwaitingPayment: number;
+  recentActivity: OrgDashboardActivityItem[];
 };
 
 export async function getOrgDashboardSummary(
   orgId: string,
 ): Promise<OrgDashboardSummary> {
+  const now = new Date();
+  const in30Days = new Date(now);
+  in30Days.setDate(in30Days.getDate() + 30);
+  const in60Days = new Date(now);
+  in60Days.setDate(in60Days.getDate() + 60);
+
   const [
     totalProperties,
     totalBuildings,
@@ -43,11 +76,30 @@ export async function getOrgDashboardSummary(
     membershipGroups,
     activeCaretakerAssignments,
     issueGroups,
+    pendingResolutionReports,
     unreadNotifications,
     totalPayments,
     paymentMethodGroups,
     pendingPayments,
-  ] = await Promise.all([
+    pendingFinanceRequests,
+    accountingAccountCount,
+    openPayables,
+    waterPendingApproval,
+    moveOutQueueCount,
+    leaseExpiring30Days,
+    leaseExpiring60Days,
+    expenditureApprovalsPending,
+    pendingTaxCharges,
+    scheduledInspections,
+    overdueInspections,
+    vacancyInquiries,
+    approvedExpendituresAwaitingPayment,
+    verifiedPaymentsForPosting,
+    postedPaymentJournals,
+    recentActivityRows,
+  ] = await retryTransientDatabaseOperation(
+    () =>
+      Promise.all([
     prisma.property.count({
       where: {
         orgId,
@@ -136,6 +188,13 @@ export async function getOrgDashboardSummary(
       },
     }),
 
+    prisma.issueResolutionReport.count({
+      where: {
+        orgId,
+        status: "SUBMITTED",
+      },
+    }),
+
     prisma.notification.count({
       where: {
         orgId,
@@ -175,7 +234,151 @@ export async function getOrgDashboardSummary(
         ],
       },
     }),
-  ]);
+
+    prisma.accountingRequest.count({
+      where: {
+        orgId,
+        status: { in: PENDING_REVIEW_STATUSES },
+      },
+    }),
+
+    prisma.accountingAccount.count({
+      where: { orgId, isActive: true },
+    }),
+
+    prisma.accountingVendorBill.count({
+      where: {
+        orgId,
+        status: { in: ["APPROVED", "PARTIAL"] },
+      },
+    }),
+
+    prisma.meterReading.count({
+      where: {
+        status: "SUBMITTED",
+        unit: {
+          property: {
+            orgId,
+            deletedAt: null,
+          },
+        },
+      },
+    }),
+
+    prisma.moveOutNotice.count({
+      where: {
+        lease: { orgId },
+        status: { notIn: ["CLOSED", "CANCELLED"] },
+      },
+    }),
+
+    prisma.lease.count({
+      where: {
+        orgId,
+        deletedAt: null,
+        status: "ACTIVE",
+        endDate: {
+          gte: now,
+          lte: in30Days,
+        },
+      },
+    }),
+
+    prisma.lease.count({
+      where: {
+        orgId,
+        deletedAt: null,
+        status: "ACTIVE",
+        endDate: {
+          gt: in30Days,
+          lte: in60Days,
+        },
+      },
+    }),
+
+    prisma.expenditure.count({
+      where: {
+        orgId,
+        status: "PENDING_APPROVAL",
+      },
+    }),
+
+    prisma.taxCharge.count({
+      where: {
+        orgId,
+        status: "PENDING",
+      },
+    }),
+
+    prisma.inspection.count({
+      where: {
+        status: "SCHEDULED",
+        notice: {
+          lease: { orgId },
+        },
+      },
+    }),
+
+    prisma.inspection.count({
+      where: {
+        status: "SCHEDULED",
+        scheduledAt: { lt: now },
+        notice: {
+          lease: { orgId },
+        },
+      },
+    }),
+
+    prisma.vacancyInquiry.count({
+      where: {
+        orgId,
+        status: "NEW",
+      },
+    }),
+
+    prisma.expenditure.count({
+      where: {
+        orgId,
+        status: "APPROVED",
+      },
+    }),
+
+    prisma.payment.findMany({
+      where: {
+        orgId,
+        verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
+      },
+      select: { id: true },
+      take: 500,
+    }),
+
+    prisma.accountingJournalEntry.findMany({
+      where: {
+        orgId,
+        sourceType: "PAYMENT",
+        sourceId: { not: null },
+      },
+      select: { sourceId: true },
+    }),
+
+    prisma.auditLog.findMany({
+      where: { orgId },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      select: {
+        id: true,
+        action: true,
+        entityType: true,
+        entityId: true,
+        createdAt: true,
+        actor: {
+          select: { fullName: true },
+        },
+      },
+    }),
+      ]),
+    { label: "org-dashboard-summary" },
+  );
 
   const totalUnits = unitGroups.reduce((sum, item) => sum + item._count._all, 0);
 
@@ -244,6 +447,26 @@ export async function getOrgDashboardSummary(
   const apartmentMix =
     totalUnits > 0 ? Math.round((totalApartments / totalUnits) * 100) : 0;
 
+  const postedPaymentIds = new Set(
+    postedPaymentJournals
+      .map((entry) => entry.sourceId)
+      .filter((id): id is string => Boolean(id)),
+  );
+  const unpostedPayments = verifiedPaymentsForPosting.filter(
+    (payment) => !postedPaymentIds.has(payment.id),
+  ).length;
+
+  const recentActivity: OrgDashboardActivityItem[] = recentActivityRows.map(
+    (entry) => ({
+      id: entry.id,
+      action: entry.action,
+      entityType: entry.entityType,
+      entityId: entry.entityId,
+      actorName: entry.actor.fullName,
+      createdAt: entry.createdAt.toISOString(),
+    }),
+  );
+
   return {
     totalProperties,
     totalBuildings,
@@ -260,6 +483,7 @@ export async function getOrgDashboardSummary(
     activeCaretakerAssignments,
     openIssues,
     urgentIssues,
+    pendingResolutionReports,
     unreadNotifications,
     totalPayments,
     pendingPayments,
@@ -270,6 +494,21 @@ export async function getOrgDashboardSummary(
     vacancyRate,
     issuePressure,
     apartmentMix,
+    pendingFinanceRequests,
+    accountingInitialized: accountingAccountCount > 0,
+    openPayables,
+    waterPendingApproval,
+    moveOutQueueCount,
+    leaseExpiring30Days,
+    leaseExpiring60Days,
+    expenditureApprovalsPending,
+    pendingTaxCharges,
+    scheduledInspections,
+    overdueInspections,
+    vacancyInquiries,
+    unpostedPayments,
+    approvedExpendituresAwaitingPayment,
+    recentActivity,
   };
 }
 

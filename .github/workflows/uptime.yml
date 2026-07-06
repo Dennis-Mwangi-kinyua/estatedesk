@@ -26,6 +26,9 @@ jobs:
       - name: Check readiness endpoint
         env:
           HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+          CRON_SECRET: ${{ secrets.PRODUCTION_CRON_SECRET }}
         run: |
           test -n "$HEALTHCHECK_URL"
-          curl --fail --silent --show-error --max-time 15 "$HEALTHCHECK_URL/api/health?deep=1"
+          curl --fail --silent --show-error --max-time 15 \
+            --header "Authorization: Bearer $CRON_SECRET" \
+            "$HEALTHCHECK_URL/api/health?deep=1"

@@ -13,7 +13,7 @@ import {
   type StaffRole,
 } from "@/features/staff/constants/role-meta";
 
-type AssignmentTargetType = "BUILDING";
+type AssignmentTargetType = "PROPERTY" | "BUILDING";
 
 export type CreateMembershipState = {
   ok: boolean;
@@ -66,6 +66,10 @@ function normalizeAssignmentTargetType(
 ): AssignmentTargetType | null {
   const upper = value.trim().toUpperCase();
 
+  if (upper === "PROPERTY") {
+    return "PROPERTY";
+  }
+
   if (upper === "BUILDING") {
     return "BUILDING";
   }
@@ -99,6 +103,10 @@ export async function createMembership(
     String(formData.get("assignmentTargetType") ?? ""),
   );
 
+  const assignmentPropertyId = String(
+    formData.get("assignmentPropertyId") ?? "",
+  ).trim();
+
   const assignmentBuildingId = String(
     formData.get("assignmentBuildingId") ?? "",
   ).trim();
@@ -114,55 +122,84 @@ export async function createMembership(
 
   const role = roleRaw;
 
-  if (!fullName) {
-    return fail("Full name is required.", 0, "fullName");
-  }
-
-  if (!username) {
-    return fail("Username is required.", 0, "username");
-  }
-
-  if (!/^[a-z0-9._-]{3,30}$/.test(username)) {
-    return fail(
-      "Username must be 3-30 characters and can only contain letters, numbers, dots, underscores, and hyphens.",
-      0,
-      "username",
-    );
-  }
-
-  if (!email) {
-    return fail("Email is required.", 0, "email");
-  }
-
-  if (phone && phone.length < 7) {
-    return fail("Phone number looks too short.", 0, "phone");
-  }
-
-  if (password.length < 8) {
-    return fail("Password must be at least 8 characters.", 1, "password");
-  }
-
-  if (password !== confirmPassword) {
-    return fail("Passwords do not match.", 1, "confirmPassword");
-  }
-
-  if (Number.isNaN(salaryAmount)) {
-    return fail("Salary must be a valid positive number.", 0, "salaryAmount");
-  }
-  if (!isSupportedCurrency(salaryCurrency)) {
-    return fail("Select a supported East African or UAE currency.", 0, "salaryCurrency");
-  }
-
   if (role === "CARETAKER" && !assignmentTargetType) {
     return fail(
-      "Please search and select an apartment/block for this caretaker.",
-      2,
+      "Please select a property or apartment/block for this caretaker.",
+      0,
       "assignmentTargetType",
     );
   }
 
   if (role !== "CARETAKER" && assignmentTargetType) {
-    return fail("Only caretakers can be mapped to apartments/blocks.", 2);
+    return fail("Only caretakers can be mapped to properties or apartments.", 0);
+  }
+
+  if (!fullName) {
+    return fail("Full name is required.", 1, "fullName");
+  }
+
+  if (!username) {
+    return fail("Username is required.", 1, "username");
+  }
+
+  if (!/^[a-z0-9._-]{3,30}$/.test(username)) {
+    return fail(
+      "Username must be 3-30 characters and can only contain letters, numbers, dots, underscores, and hyphens.",
+      1,
+      "username",
+    );
+  }
+
+  if (!email) {
+    return fail("Email is required.", 1, "email");
+  }
+
+  if (!phone) {
+    return fail("Phone is required.", 1, "phone");
+  }
+
+  if (phone.length < 7) {
+    return fail("Phone number looks too short.", 1, "phone");
+  }
+
+  if (!jobTitle) {
+    return fail("Job title is required.", 1, "jobTitle");
+  }
+
+  if (!educationLevel) {
+    return fail("Education level is required.", 1, "educationLevel");
+  }
+
+  if (salaryAmount === null) {
+    return fail("Salary is required.", 1, "salaryAmount");
+  }
+
+  if (Number.isNaN(salaryAmount)) {
+    return fail("Salary must be a valid positive number.", 1, "salaryAmount");
+  }
+
+  if (!isSupportedCurrency(salaryCurrency)) {
+    return fail("Select a supported East African or UAE currency.", 1, "salaryCurrency");
+  }
+
+  if (!nationalId) {
+    return fail("National ID / employee ID is required.", 1, "nationalId");
+  }
+
+  if (!emergencyContact) {
+    return fail("Emergency contact is required.", 1, "emergencyContact");
+  }
+
+  if (!staffProfileNotes) {
+    return fail("Staff profile notes are required.", 1, "staffProfileNotes");
+  }
+
+  if (password.length < 8) {
+    return fail("Password must be at least 8 characters.", 2, "password");
+  }
+
+  if (password !== confirmPassword) {
+    return fail("Passwords do not match.", 2, "confirmPassword");
   }
 
   const existingUser = await prisma.user.findFirst({
@@ -179,7 +216,7 @@ export async function createMembership(
   if (existingUser?.username === username) {
     return fail(
       "This username is already taken. Please use a different username.",
-      0,
+      1,
       "username",
     );
   }
@@ -187,15 +224,15 @@ export async function createMembership(
   if (existingUser?.email === email) {
     return fail(
       "This email address is already used by another user. Please use a different email.",
-      0,
+      1,
       "email",
     );
   }
 
-  if (phone && existingUser?.phone === phone) {
+  if (existingUser?.phone === phone) {
     return fail(
-      "This phone number is already used by another user. Leave the phone blank or use a different phone number.",
-      0,
+      "This phone number is already used by another user. Use a different phone number.",
+      1,
       "phone",
     );
   }
@@ -205,6 +242,7 @@ export async function createMembership(
       ? await resolveCaretakerAssignmentTarget({
           orgId,
           targetType: assignmentTargetType,
+          propertyId: assignmentPropertyId,
           buildingId: assignmentBuildingId,
         })
       : null;
@@ -212,7 +250,7 @@ export async function createMembership(
   if (role === "CARETAKER" && assignmentTargetType && !assignmentTarget?.ok) {
     return fail(
       assignmentTarget?.message ?? "Caretaker mapping is invalid.",
-      2,
+      0,
       assignmentTarget?.field,
     );
   }
@@ -227,12 +265,12 @@ export async function createMembership(
           fullName,
           username,
           email,
-          phone: phone || null,
+          phone,
           status: UserStatus.ACTIVE,
           passwordHash,
           mustChangePassword: true,
           emailVerified: verifiedAt,
-          phoneVerified: phone ? verifiedAt : null,
+          phoneVerified: verifiedAt,
         },
         select: {
           id: true,
@@ -251,27 +289,18 @@ export async function createMembership(
         },
       });
 
-      if (
-        salaryAmount !== null ||
-        educationLevel ||
-        jobTitle ||
-        nationalId ||
-        emergencyContact ||
-        staffProfileNotes
-      ) {
-        await tx.staffProfile.create({
-          data: {
-            membershipId: membership.id,
-            salaryAmount,
-            salaryCurrency,
-            educationLevel,
-            jobTitle,
-            nationalId,
-            emergencyContact,
-            notes: staffProfileNotes,
-          },
-        });
-      }
+      await tx.staffProfile.create({
+        data: {
+          membershipId: membership.id,
+          salaryAmount,
+          salaryCurrency,
+          educationLevel,
+          jobTitle,
+          nationalId,
+          emergencyContact,
+          notes: staffProfileNotes,
+        },
+      });
 
       if (role === "CARETAKER" && assignmentTarget?.ok) {
         await tx.caretakerAssignment.create({
@@ -295,7 +324,7 @@ export async function createMembership(
     ) {
       return fail(
         "A user with the same username, email, or phone already exists. Please change the duplicate value and try again.",
-        0,
+        1,
       );
     }
 
@@ -324,10 +353,12 @@ export async function createMembership(
 async function resolveCaretakerAssignmentTarget({
   orgId,
   targetType,
+  propertyId,
   buildingId,
 }: {
   orgId: string;
   targetType: AssignmentTargetType;
+  propertyId: string;
   buildingId: string;
 }): Promise<
   | {
@@ -342,6 +373,43 @@ async function resolveCaretakerAssignmentTarget({
       field: string;
     }
 > {
+  if (targetType === "PROPERTY") {
+    if (!propertyId) {
+      return {
+        ok: false,
+        message: "Property is required for caretaker mapping.",
+        field: "assignmentPropertyId",
+      };
+    }
+
+    const property = await prisma.property.findFirst({
+      where: {
+        id: propertyId,
+        orgId,
+        deletedAt: null,
+        isActive: true,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!property) {
+      return {
+        ok: false,
+        message: "Selected property was not found.",
+        field: "assignmentPropertyId",
+      };
+    }
+
+    return {
+      ok: true,
+      propertyId: property.id,
+      buildingId: null,
+      unitId: null,
+    };
+  }
+
   if (targetType !== "BUILDING" || !buildingId) {
     return {
       ok: false,

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import OperationsShowcase from "@/components/marketing/operations-showcase";
 import { publicPageMetadata } from "@/lib/seo";
+import { loginAction } from "./actions";
 import LoginForm from "./LoginForm";
 
 export const metadata = publicPageMetadata({
@@ -317,7 +318,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               </div>
 
               <div className="login-form-shell relative min-h-0 flex-1 overflow-hidden">
-          <LoginForm returnTo={returnTo} />
+          <LoginForm returnTo={returnTo} loginAction={loginAction} />
               </div>
             </section>
 

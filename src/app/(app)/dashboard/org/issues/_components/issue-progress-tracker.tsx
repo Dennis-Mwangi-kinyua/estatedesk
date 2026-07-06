@@ -38,7 +38,7 @@ export function IssueProgressTracker({ issue }: { issue: OrgIssue }) {
   ];
 
   return (
-    <div className="mt-5 rounded-[24px] bg-[#f7f7fa] p-4">
+    <div className="mt-5 rounded-[24px] bg-muted p-4">
       <div>
         <p className="text-[11px] uppercase tracking-wide text-neutral-500">
           Progress tracking

@@ -1,16 +1,14 @@
-import { CurrencySelect } from "@/components/forms/currency-select";
-import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
-import { createPlatformExpenditureAction } from "./actions";
+import { ExpendituresWorkspace } from "./_components/expenditures-workspace";
+import { getPlatformExpendituresPageData } from "./_lib/queries";
 
 export const dynamic = "force-dynamic";
-const field="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-slate-950";
-const categories=["SOFTWARE","MARKETING","STAFF","ADMINISTRATION","LEGAL","TAX","INSURANCE","TRANSPORT","OTHER"];
 
-export default async function PlatformExpendituresPage(){
-  await requirePlatformRole(["SUPER_ADMIN","PLATFORM_ADMIN"]);
-  const rows=await prisma.expenditure.findMany({where:{scope:"PLATFORM"},orderBy:{incurredAt:"desc"},take:200});
-  const totals=new Map<string,number>(); rows.filter(r=>r.status!=="VOIDED").forEach(r=>totals.set(r.currencyCode,(totals.get(r.currencyCode)??0)+Number(r.amount)));
-  const money=(n:number,c:string)=>new Intl.NumberFormat("en-KE",{style:"currency",currency:c}).format(n);
-  return <main className="space-y-6 p-5 lg:p-8"><header><p className="text-sm font-semibold text-emerald-600">Internal finance</p><h1 className="text-3xl font-bold">Platform expenditures</h1><p className="mt-2 text-slate-500">Track EstateDesk operating costs separately from customer organizations.</p></header><section className="flex flex-wrap gap-3">{[...totals].map(([c,n])=><div key={c} className="rounded-xl border bg-white p-4 dark:bg-slate-900"><p className="text-xs text-slate-500">Total · {c}</p><p className="mt-1 text-xl font-bold">{money(n,c)}</p></div>)}</section><form action={createPlatformExpenditureAction} className="rounded-xl border bg-white p-5 dark:bg-slate-900"><h2 className="font-bold">Record platform expenditure</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><label className="text-sm">Description<input name="description" required className={field}/></label><label className="text-sm">Category<select name="category" className={field}>{categories.map(c=><option key={c}>{c}</option>)}</select></label><label className="text-sm">Amount<input name="amount" type="number" min="0.01" step="0.01" required className={field}/></label><label className="text-sm">Currency<CurrencySelect name="currencyCode" defaultValue="KES" className={field}/></label><label className="text-sm">Date<input name="incurredAt" type="date" required defaultValue={new Date().toISOString().slice(0,10)} className={field}/></label><label className="text-sm">Payee<input name="payee" className={field}/></label><label className="text-sm">Reference<input name="reference" className={field}/></label><label className="text-sm">Payment method<select name="paymentMethod" className={field}><option>BANK</option><option>MPESA</option><option>CASH</option><option>CARD</option></select></label></div><label className="mt-4 block text-sm"><input name="paid" type="checkbox" className="mr-2"/>Already paid</label><button className="mt-4 rounded-lg bg-slate-950 px-4 py-2 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">Save expenditure</button></form><section className="overflow-hidden rounded-xl border bg-white dark:bg-slate-900"><div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b text-left"><th className="p-3">Date</th><th>Description</th><th>Payee</th><th>Category</th><th>Status</th><th>Amount</th></tr></thead><tbody>{rows.map(r=><tr key={r.id} className="border-b"><td className="p-3">{r.incurredAt.toLocaleDateString("en-KE")}</td><td>{r.description}</td><td>{r.payee??"—"}</td><td>{r.category}</td><td>{r.status}</td><td className="font-semibold">{money(Number(r.amount),r.currencyCode)}</td></tr>)}</tbody></table></div></section></main>;
+export default async function PlatformExpendituresPage() {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
+
+  const data = await getPlatformExpendituresPageData();
+  const defaultDate = new Date().toISOString().slice(0, 10);
+
+  return <ExpendituresWorkspace data={data} defaultDate={defaultDate} />;
 }

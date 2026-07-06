@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, HelpCircle, Layers3, Users } from "lucide-react";
+import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import OperationsShowcase from "@/components/marketing/operations-showcase";
+import { siteContentDepth } from "@/lib/content-depth/site-topics";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { faqJsonLd, marketingFaqItems } from "@/components/marketing/seo-faq";
 import { absoluteUrl } from "@/lib/seo";
@@ -119,7 +121,7 @@ export default function MarketingHomePage() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-neutral-950">
+    <main className="ed-theme-page min-h-screen bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -248,7 +250,7 @@ function HomepageSeoContent() {
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-[#10141a] py-10 text-[#f8fafc] sm:py-12 lg:py-14">
+      <section className="ed-theme-band-inverse border-y border-white/10 py-10 sm:py-12 lg:py-14">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:px-8">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#d1d5db]">
@@ -355,6 +357,8 @@ function HomepageSeoContent() {
           </div>
         </div>
       </section>
+
+      <ContentDepthStack {...siteContentDepth} />
 
       <section className="border-t border-neutral-200 bg-[#f7f9fc] py-10 sm:py-12 lg:py-14">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">

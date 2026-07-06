@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import clsx from "clsx";
 import {
   Home,
@@ -10,69 +10,47 @@ import {
   FileText,
   Users,
   Droplets,
+  Inbox,
   Bell,
   LogOut,
   ShieldCheck,
   UserRound,
+  ListTodo,
+  Building2,
+  Search,
+  Calendar,
+  DoorOpen,
+  FolderOpen,
+  Megaphone,
+  NotebookPen,
+  Truck,
 } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
+import { InAppHelpNav } from "@/components/help/in-app-help-nav";
+import { CARETAKER_NAV_ITEMS } from "@/app/(app)/dashboard/caretaker/_lib/i18n";
+import { CaretakerNavLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-nav-label";
 
-const navItems = [
-  {
-    href: "/dashboard/caretaker",
-    label: "Overview",
-    icon: Home,
-    tone: "blue",
-  },
-  {
-    href: "/dashboard/caretaker/issues",
-    label: "My Issues",
-    icon: Wrench,
-    tone: "amber",
-  },
-  {
-    href: "/dashboard/caretaker/inspections",
-    label: "My Inspections",
-    icon: ClipboardList,
-    tone: "indigo",
-  },
-  {
-    href: "/dashboard/caretaker/leases",
-    label: "My Leases",
-    icon: FileText,
-    tone: "emerald",
-  },
-  {
-    href: "/dashboard/caretaker/tenants",
-    label: "My Tenants",
-    icon: Users,
-    tone: "violet",
-  },
-  {
-    href: "/dashboard/caretaker/water-bills",
-    label: "My Water Bills",
-    icon: Droplets,
-    tone: "sky",
-  },
-  {
-    href: "/dashboard/caretaker/notifications",
-    label: "Notifications",
-    icon: Bell,
-    tone: "rose",
-  },
-  {
-    href: "/dashboard/caretaker/profile",
-    label: "My Profile",
-    icon: UserRound,
-    tone: "blue",
-  },
-  {
-    href: "/dashboard/security",
-    label: "Security",
-    icon: ShieldCheck,
-    tone: "emerald",
-  },
-] as const;
+const navIcons = {
+  "/dashboard/caretaker/today": ListTodo,
+  "/dashboard/caretaker/search": Search,
+  "/dashboard/caretaker/calendar": Calendar,
+  "/dashboard/caretaker": Home,
+  "/dashboard/caretaker/units": Building2,
+  "/dashboard/caretaker/issues": Wrench,
+  "/dashboard/caretaker/inspections": ClipboardList,
+  "/dashboard/caretaker/move-outs": DoorOpen,
+  "/dashboard/caretaker/leases": FileText,
+  "/dashboard/caretaker/tenants": Users,
+  "/dashboard/caretaker/water-bills": Droplets,
+  "/dashboard/caretaker/documents": FolderOpen,
+  "/dashboard/caretaker/broadcasts": Megaphone,
+  "/dashboard/caretaker/handover": NotebookPen,
+  "/dashboard/caretaker/vendors": Truck,
+  "/dashboard/caretaker/finance-requests": Inbox,
+  "/dashboard/caretaker/notifications": Bell,
+  "/dashboard/caretaker/profile": UserRound,
+  "/dashboard/caretaker/security": ShieldCheck,
+} as const;
 
 type Props = {
   fullName: string;
@@ -85,56 +63,57 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
     <aside className="hidden xl:block xl:w-72 xl:shrink-0 2xl:w-80">
       <div className="ed-shell-panel sticky top-0 h-dvh border-r">
         <div className="flex h-full flex-col">
-          <div className="shrink-0 border-b border-slate-200 px-5 py-5">
-            <Link href="/dashboard/caretaker" className="block">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="shrink-0 border-b border-border px-5 py-5">
+            <HoverPrefetchLink href="/dashboard/caretaker" className="block">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 EstateDesk
               </p>
 
-              <h2 className="mt-2 text-lg font-semibold tracking-tight text-slate-950 2xl:text-xl">
+              <h2 className="mt-2 text-lg font-semibold tracking-tight text-foreground 2xl:text-xl">
                 Caretaker Dashboard
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">{fullName}</p>
-            </Link>
+              <p className="mt-1 text-sm text-muted-foreground">{fullName}</p>
+            </HoverPrefetchLink>
           </div>
 
-          <div className="flex-1 px-3 py-4">
+          <div className="flex-1 overflow-y-auto px-3 py-4">
             <nav className="space-y-1">
-              {navItems.map((item) => {
+              {CARETAKER_NAV_ITEMS.map((item) => {
                 const active =
                   pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-                const Icon = item.icon;
+                const Icon = navIcons[item.href as keyof typeof navIcons] ?? Home;
 
                 return (
-                  <Link
+                  <HoverPrefetchLink
                     key={item.href}
                     href={item.href}
                     className={clsx(
                       "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150 active:scale-[0.99]",
-                      active
-                        ? "ed-nav-item-active"
-                        : "ed-nav-item"
+                      active ? "ed-nav-item-active" : "ed-nav-item",
                     )}
                   >
                     <span
                       className={clsx(
                         "flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition",
-                        active ? "ed-nav-icon-active" : "ed-nav-icon"
+                        active ? "ed-nav-icon-active" : "ed-nav-icon",
                       )}
                     >
                       <Icon className="h-[18px] w-[18px]" />
                     </span>
 
-                    <span className="truncate">{item.label}</span>
-                  </Link>
+                    <span className="truncate">
+                      <CaretakerNavLabel labelKey={item.labelKey} />
+                    </span>
+                  </HoverPrefetchLink>
                 );
               })}
             </nav>
           </div>
 
-          <div className="shrink-0 border-t border-slate-200 p-3">
+          <div className="shrink-0 space-y-2 border-t border-border p-3">
+            <InAppHelpNav workspace="caretaker" compact />
             <form action={logoutAction}>
               <button
                 type="submit"

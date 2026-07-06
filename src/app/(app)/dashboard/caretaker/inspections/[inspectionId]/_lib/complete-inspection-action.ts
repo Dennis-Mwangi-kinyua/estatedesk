@@ -1,0 +1,331 @@
+"use server";
+
+import {
+  NotificationChannel,
+  NotificationType,
+  NoticeStatus,
+  OrgRole,
+  Prisma,
+} from "@prisma/client";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
+import { requireUserSession } from "@/lib/auth/session";
+import { requireCurrentOrgId } from "@/lib/auth/org";
+import { notifyRecipients } from "@/lib/notifications/notify";
+import { encodePublicId } from "@/lib/public-id";
+import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
+import { recordVacatedTenancy } from "@/lib/tenants/identity";
+import { inspectionChecklistFields } from "../_lib/constants";
+import { uploadInspectionPhoto } from "./upload-inspection-photo";
+
+export async function completeInspectionAction(formData: FormData) {
+  const session = await requireUserSession();
+  const orgId = await requireCurrentOrgId();
+
+  if (session.activeOrgRole !== "CARETAKER") {
+    throw new Error("Only caretakers can complete inspections.");
+  }
+
+  const inspectionId = String(formData.get("inspectionId") ?? "").trim();
+
+  if (!inspectionId) {
+    throw new Error("Inspection id is required.");
+  }
+
+  const allocations = await prisma.caretakerAssignment.findMany({
+    where: {
+      orgId,
+      caretakerUserId: session.userId,
+      active: true,
+    },
+    select: {
+      propertyId: true,
+      buildingId: true,
+      unitId: true,
+    },
+  });
+
+  const propertyIds = allocations
+    .map((item) => item.propertyId)
+    .filter((value): value is string => Boolean(value));
+  const buildingIds = allocations
+    .map((item) => item.buildingId)
+    .filter((value): value is string => Boolean(value));
+  const unitIds = allocations
+    .map((item) => item.unitId)
+    .filter((value): value is string => Boolean(value));
+
+  const allocationFilters: Prisma.InspectionWhereInput[] = [
+    {
+      notice: {
+        lease: {
+          caretakerUserId: session.userId,
+        },
+      },
+    },
+  ];
+
+  if (unitIds.length > 0) {
+    allocationFilters.push({
+      notice: {
+        lease: {
+          unitId: { in: unitIds },
+        },
+      },
+    });
+  }
+
+  if (buildingIds.length > 0) {
+    allocationFilters.push({
+      notice: {
+        lease: {
+          unit: {
+            buildingId: { in: buildingIds },
+          },
+        },
+      },
+    });
+  }
+
+  if (propertyIds.length > 0) {
+    allocationFilters.push({
+      notice: {
+        lease: {
+          unit: {
+            propertyId: { in: propertyIds },
+          },
+        },
+      },
+    });
+  }
+
+  const inspection = await prisma.inspection.findFirst({
+    where: {
+      id: inspectionId,
+      AND: [
+        {
+          notice: {
+            lease: {
+              orgId,
+              deletedAt: null,
+            },
+          },
+        },
+        { OR: allocationFilters },
+      ],
+    },
+    include: {
+      notice: {
+        select: {
+          id: true,
+          tenant: {
+            select: {
+              id: true,
+              fullName: true,
+            },
+          },
+          lease: {
+            select: {
+              id: true,
+              unit: {
+                select: {
+                  id: true,
+                  houseNo: true,
+                  property: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!inspection) {
+    throw new Error("Inspection not found or not allocated to you.");
+  }
+
+  if (inspection.status === "COMPLETED") {
+    redirect(
+      `/dashboard/caretaker/inspections/${encodePublicId(
+        inspectionId,
+        "inspection",
+      )}`,
+    );
+  }
+
+  const summary = String(formData.get("summary") ?? "").trim();
+  const recommendations = String(formData.get("recommendations") ?? "").trim();
+
+  if (!summary) {
+    throw new Error("Inspection summary is required.");
+  }
+
+  const submittedAt = new Date();
+  const roomPhotos: Record<string, string> = {};
+  const checkInLatitude = String(formData.get("checkInLatitude") ?? "").trim();
+  const checkInLongitude = String(formData.get("checkInLongitude") ?? "").trim();
+  const checkInCapturedAt = String(formData.get("checkInCapturedAt") ?? "").trim();
+  const checkInPhoto = formData.get("checkInPhoto");
+
+  for (const field of inspectionChecklistFields) {
+    const photo = formData.get(`photo_${field.name}`);
+
+    if (photo instanceof File && photo.size > 0) {
+      if (!photo.type.startsWith("image/")) {
+        throw new Error(`Upload an image for ${field.label}.`);
+      }
+
+      if (photo.size > 5 * 1024 * 1024) {
+        throw new Error(`Photo for ${field.label} must be 5MB or smaller.`);
+      }
+
+      roomPhotos[field.name] = await uploadInspectionPhoto({
+        photo,
+        inspectionId: inspection.id,
+        roomKey: field.name,
+        unitId: inspection.notice.lease.unit.id,
+        orgId,
+        submittedByUserId: session.userId,
+      });
+    }
+  }
+
+  let checkInPhotoAssetId: string | undefined;
+
+  if (checkInPhoto instanceof File && checkInPhoto.size > 0) {
+    if (!checkInPhoto.type.startsWith("image/")) {
+      throw new Error("Upload an image for on-site check-in.");
+    }
+
+    checkInPhotoAssetId = await uploadInspectionPhoto({
+      photo: checkInPhoto,
+      inspectionId: inspection.id,
+      roomKey: "check_in",
+      unitId: inspection.notice.lease.unit.id,
+      orgId,
+      submittedByUserId: session.userId,
+    });
+  }
+
+  const checklist = {
+    cleanlinessOk: formData.get("cleanlinessOk") === "on",
+    wallsOk: formData.get("wallsOk") === "on",
+    doorsWindowsOk: formData.get("doorsWindowsOk") === "on",
+    plumbingOk: formData.get("plumbingOk") === "on",
+    electricalOk: formData.get("electricalOk") === "on",
+    keysReturned: formData.get("keysReturned") === "on",
+    meterReadingsTaken: formData.get("meterReadingsTaken") === "on",
+    damageObserved: formData.get("damageObserved") === "on",
+    summary,
+    recommendations,
+    roomPhotos,
+    checkIn:
+      checkInLatitude && checkInLongitude
+        ? {
+            latitude: Number(checkInLatitude),
+            longitude: Number(checkInLongitude),
+            capturedAt: checkInCapturedAt || submittedAt.toISOString(),
+            photoAssetId: checkInPhotoAssetId ?? null,
+          }
+        : null,
+    submittedAt: submittedAt.toISOString(),
+    submittedByUserId: session.userId,
+  };
+
+  const officeRecipients = await prisma.membership.findMany({
+    where: {
+      orgId,
+      role: {
+        in: [OrgRole.OFFICE, OrgRole.ADMIN],
+      },
+      user: {
+        deletedAt: null,
+      },
+    },
+    distinct: ["userId"],
+    select: {
+      userId: true,
+    },
+  });
+
+  await prisma.$transaction(async (tx) => {
+    await tx.inspection.update({
+      where: { id: inspection.id },
+      data: {
+        status: "COMPLETED",
+        checklist,
+        notes: summary,
+        completedAt: submittedAt,
+      },
+    });
+
+    await tx.moveOutNotice.update({
+      where: { id: inspection.notice.id },
+      data: {
+        status: NoticeStatus.INSPECTION_COMPLETED,
+      },
+    });
+
+    await recordVacatedTenancy(tx, {
+      tenantId: inspection.notice.tenant.id,
+      leaseId: inspection.notice.lease.id,
+      moveOutNoticeId: inspection.notice.id,
+      actorUserId: session.userId,
+      notes: summary,
+    });
+
+    await tx.auditLog.create({
+      data: {
+        orgId,
+        actorUserId: session.userId,
+        action: "INSPECTION_COMPLETED",
+        entityType: "Inspection",
+        entityId: inspection.id,
+        metadata: {
+          tenantName: inspection.notice.tenant.fullName,
+          propertyName: inspection.notice.lease.unit.property.name,
+          unit: inspection.notice.lease.unit.houseNo,
+          roomPhotoCount: Object.keys(roomPhotos).length,
+          checkInCaptured: Boolean(checkInLatitude && checkInLongitude),
+        },
+      },
+    });
+
+    await notifyRecipients({
+      db: tx,
+      orgId,
+      recipients: officeRecipients.map((recipient) => ({
+        userId: recipient.userId,
+      })),
+      channels: [NotificationChannel.IN_APP],
+      type: NotificationType.GENERAL,
+      title: "Inspection report submitted",
+      message: `Inspection report submitted for ${inspection.notice.tenant.fullName} at ${inspection.notice.lease.unit.property.name}, unit ${inspection.notice.lease.unit.houseNo}.`,
+    });
+  });
+
+  revalidatePath("/dashboard/caretaker/inspections");
+  revalidatePath(
+    `/dashboard/caretaker/inspections/${encodePublicId(
+      inspectionId,
+      "inspection",
+    )}`,
+  );
+  revalidatePath("/dashboard/org/notifications");
+  revalidatePath("/move-outs");
+  revalidatePath("/dashboard/org/move-outs");
+  revalidatePublicVacancies();
+
+  redirect(
+    `/dashboard/caretaker/inspections/${encodePublicId(
+      inspectionId,
+      "inspection",
+    )}`,
+  );
+}

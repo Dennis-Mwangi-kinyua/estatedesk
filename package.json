@@ -12,10 +12,12 @@
     "test:integration": "node --import tsx --test tests/integration/**/*.integration.ts",
     "load:test": "node scripts/load-test.mjs",
     "backup:database": "bash scripts/backup-database.sh",
+    "backup:validate": "bash scripts/validate-backup.sh",
     "restore:drill": "bash scripts/restore-drill.sh",
     "postinstall": "prisma generate",
     "seed": "tsx prisma/seed.ts",
-    "generate:web-push-keys": "node scripts/generate-web-push-keys.mjs"
+    "generate:web-push-keys": "node scripts/generate-web-push-keys.mjs",
+    "extension:package": "mkdir -p dist && rm -f dist/estatedesk-browser-extension.zip && cd extensions/estatedesk && zip -r ../../dist/estatedesk-browser-extension.zip ."
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1018.0",

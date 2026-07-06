@@ -19,6 +19,7 @@ import {
 import { getSessionHeartbeatBefore } from "@/lib/auth/presence";
 import { hashOpaqueToken, legacyHashOpaqueToken } from "@/lib/crypto/tokens";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
+import { isSecurityGatePathname } from "@/lib/auth/security-gate";
 import { prisma } from "@/lib/prisma";
 
 export type { OrgRole, PlatformRole, ScopeType };
@@ -130,24 +131,41 @@ async function readSessionTokenFromCookies() {
   };
 }
 
+function canMutateSessionCookies(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("Cookies can only be modified");
+}
+
 function setSessionCookie(
   cookieStore: Awaited<ReturnType<typeof cookies>>,
   token: string,
   maxAge = getSessionMaxAgeSeconds(),
 ) {
-  cookieStore.set(
-    getSessionCookieName(),
-    createSessionCookieValue(token),
-    getSessionCookieOptions(maxAge),
-  );
+  try {
+    cookieStore.set(
+      getSessionCookieName(),
+      createSessionCookieValue(token),
+      getSessionCookieOptions(maxAge),
+    );
+  } catch (error) {
+    if (!canMutateSessionCookies(error)) {
+      throw error;
+    }
+  }
 }
 
 function clearSessionCookie(cookieStore: Awaited<ReturnType<typeof cookies>>) {
-  cookieStore.set(getSessionCookieName(), "", {
-    ...getSessionCookieOptions(0),
-    expires: new Date(0),
-    maxAge: 0,
-  });
+  try {
+    cookieStore.set(getSessionCookieName(), "", {
+      ...getSessionCookieOptions(0),
+      expires: new Date(0),
+      maxAge: 0,
+    });
+  } catch (error) {
+    if (!canMutateSessionCookies(error)) {
+      throw error;
+    }
+  }
 }
 
 async function findSessionByToken(token: string) {
@@ -440,50 +458,60 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
     }
 
     const now = new Date();
+    const headerStore = await headers();
+    const pathname = (headerStore.get("x-estatedesk-pathname") ?? "").replace(
+      /\/+$/,
+      "",
+    );
+    const isSecurityGateRoute = isSecurityGatePathname(pathname);
     const remainingSeconds = Math.max(
       1,
       Math.floor((dbSession.expiresAt.getTime() - now.getTime()) / 1000),
     );
     const shouldRenewSession =
+      !isSecurityGateRoute &&
       remainingSeconds < getSessionMaxAgeSeconds() * SESSION_RENEWAL_THRESHOLD;
-    const shouldUpgradeCookie = !rawValue?.startsWith("v1.");
+    const shouldUpgradeCookie =
+      !isSecurityGateRoute && !rawValue?.startsWith("v1.");
 
-    if (shouldRenewSession) {
-      await retryTransientDatabaseOperation(
-        () =>
-          prisma.userSession.updateMany({
-            where: { tokenHash },
-            data: {
-              lastSeenAt: now,
-              expiresAt: getSessionExpiryDate(),
-            },
-          }),
-        { label: "getUserSession-renew" },
-      );
-    } else if (dbSession.lastSeenAt < getSessionHeartbeatBefore(now)) {
-      await retryTransientDatabaseOperation(
-        () =>
-          prisma.userSession.updateMany({
-            where: {
-              tokenHash,
-              lastSeenAt: {
-                lt: getSessionHeartbeatBefore(now),
+    if (!isSecurityGateRoute) {
+      if (shouldRenewSession) {
+        await retryTransientDatabaseOperation(
+          () =>
+            prisma.userSession.updateMany({
+              where: { tokenHash },
+              data: {
+                lastSeenAt: now,
+                expiresAt: getSessionExpiryDate(),
               },
-            },
-            data: {
-              lastSeenAt: now,
-            },
-          }),
-        { label: "getUserSession-heartbeat" },
-      );
-    }
+            }),
+          { label: "getUserSession-renew" },
+        );
+      } else if (dbSession.lastSeenAt < getSessionHeartbeatBefore(now)) {
+        await retryTransientDatabaseOperation(
+          () =>
+            prisma.userSession.updateMany({
+              where: {
+                tokenHash,
+                lastSeenAt: {
+                  lt: getSessionHeartbeatBefore(now),
+                },
+              },
+              data: {
+                lastSeenAt: now,
+              },
+            }),
+          { label: "getUserSession-heartbeat" },
+        );
+      }
 
-    if (shouldRenewSession || shouldUpgradeCookie) {
-      setSessionCookie(
-        cookieStore,
-        token,
-        shouldRenewSession ? getSessionMaxAgeSeconds() : remainingSeconds,
-      );
+      if (shouldRenewSession || shouldUpgradeCookie) {
+        setSessionCookie(
+          cookieStore,
+          token,
+          shouldRenewSession ? getSessionMaxAgeSeconds() : remainingSeconds,
+        );
+      }
     }
 
     const activeMembershipId = dbSession.activeMembershipId;

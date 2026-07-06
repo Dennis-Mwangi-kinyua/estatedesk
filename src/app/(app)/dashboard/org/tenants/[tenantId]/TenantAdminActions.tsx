@@ -40,7 +40,7 @@ type ActionConfig = {
 
 const toneClasses = {
   default: {
-    badge: "bg-neutral-100 text-neutral-700 border-neutral-200",
+    badge: "bg-neutral-100 text-foreground/80 border-neutral-200",
     button: "bg-neutral-900 text-white hover:bg-neutral-800",
   },
   warning: {
@@ -112,7 +112,7 @@ const ActionDialog = memo(function ActionDialog({
               {action.label}
             </span>
 
-            <h4 className="mt-3 text-lg font-semibold text-neutral-950">{action.title}</h4>
+            <h4 className="mt-3 text-lg font-semibold text-foreground">{action.title}</h4>
             <p className="mt-2 text-sm leading-6 text-neutral-600">{action.description}</p>
           </div>
 
@@ -120,7 +120,7 @@ const ActionDialog = memo(function ActionDialog({
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="rounded-xl px-2 py-1 text-sm text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-50"
+            className="rounded-xl px-2 py-1 text-sm text-muted-foreground hover:bg-neutral-100 hover:text-foreground disabled:opacity-50"
           >
             ✕
           </button>
@@ -136,7 +136,7 @@ const ActionDialog = memo(function ActionDialog({
             onChange={(e) => setReason(e.target.value)}
             rows={4}
             placeholder={action.placeholder}
-            className="mt-2 w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-neutral-400"
+            className="mt-2 w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-neutral-400"
           />
 
           {error ? (
@@ -150,7 +150,7 @@ const ActionDialog = memo(function ActionDialog({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="inline-flex items-center justify-center rounded-2xl border border-neutral-200 px-4 py-3 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-2xl border border-neutral-200 px-4 py-3 text-sm font-semibold text-foreground/80 hover:bg-neutral-50 disabled:opacity-50"
             >
               Cancel
             </button>
@@ -288,11 +288,11 @@ export const TenantAdminActions = memo(function TenantAdminActions({
 
   return (
     <>
-      <div className="rounded-[24px] border border-black/5 bg-white p-4 shadow-sm">
+      <div className="rounded-[24px] ed-theme-card border border-border bg-card p-4 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-neutral-950">Administrative actions</h3>
-            <p className="mt-1 text-sm text-neutral-500">
+            <h3 className="text-sm font-semibold text-foreground">Administrative actions</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
               Select an action from the dropdown to continue.
             </p>
           </div>
@@ -310,7 +310,7 @@ export const TenantAdminActions = memo(function TenantAdminActions({
           <select
             value={selectedKey}
             onChange={(e) => handleSelect(e.target.value)}
-            className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-neutral-400"
+            className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-neutral-400"
           >
             <option value="">Select administrative action</option>
             {actions.map((action) => (

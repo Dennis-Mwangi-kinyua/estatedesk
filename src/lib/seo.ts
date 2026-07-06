@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const SITE_NAME = "EstateDesk";
 export const SITE_DESCRIPTION =
-  "EstateDesk is property management software for landlords and property managers in Kenya, East Africa, Dubai, and global rental markets, helping teams manage tenants, leases, rent, water bills, caretakers, inspections, maintenance, vacant houses, and staff access online.";
+  "EstateDesk is property management software for landlords and property managers in Kenya, East Africa, Dubai, and global rental markets. Manage tenants, leases, rent, water bills, caretaker field operations, offline meter readings, maintenance SLAs, inspections, vacant houses, WhatsApp tenant contact, and staff access in one secure workspace.";
 export const DEFAULT_SITE_URL = "https://estatedesk.co.ke";
 
 export const PUBLIC_LOCALES = [
@@ -28,6 +28,11 @@ export const SEO_KEYWORDS = [
   "rent management system",
   "tenant management software Kenya",
   "caretaker management software",
+  "caretaker field operations software",
+  "property maintenance SLA software",
+  "offline meter reading app",
+  "Swahili property management software",
+  "WhatsApp tenant communication property management",
   "water billing software Kenya",
   "lease management software Kenya",
   "vacant houses Kenya",
@@ -78,10 +83,6 @@ export function publicPageMetadata({
 }): Metadata {
   const url = absoluteUrl(path);
   const resolvedTitle = title.includes(SITE_NAME) ? title : `${title} - ${SITE_NAME}`;
-  const languages = Object.fromEntries(
-    PUBLIC_LOCALES.map((locale) => [locale, url]),
-  );
-
   return {
     title: {
       absolute: resolvedTitle,
@@ -95,7 +96,7 @@ export function publicPageMetadata({
     alternates: {
       canonical: url,
       languages: {
-        ...languages,
+        "en-KE": url,
         "x-default": url,
       },
     },

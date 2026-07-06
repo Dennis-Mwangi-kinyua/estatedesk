@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { safeServerActionError } from "@/lib/errors/server-error-log";
 import { normalizeReferralCode } from "@/lib/marketing/referrals";
 
 const MARKETING_PATHS = [
@@ -52,16 +53,9 @@ function actionError(error: unknown, fallback: string): MarketingActionState {
     };
   }
 
-  if (error instanceof Error) {
-    return {
-      ok: false,
-      message: error.message || fallback,
-    };
-  }
-
   return {
     ok: false,
-    message: fallback,
+    message: safeServerActionError("platformMarketingAction", error, fallback),
   };
 }
 

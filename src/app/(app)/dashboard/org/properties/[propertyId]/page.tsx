@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { PropertyDetailsView } from "@/features/properties/components/property-details-view";
 import { getPropertyDetails } from "@/features/properties/queries/get-property-details";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { PropertyDetailsWorkspace } from "./_components/property-details-workspace";
 
 type PropertyDetailsPageProps = {
   params: Promise<{
@@ -20,5 +20,10 @@ export default async function PropertyDetailsPage({
     notFound();
   }
 
-  return <PropertyDetailsView property={property} />;
+  return (
+    <PropertyDetailsWorkspace
+      property={property}
+      orgRole={session.activeOrgRole}
+    />
+  );
 }

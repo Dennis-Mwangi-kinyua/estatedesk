@@ -2,9 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { TicketStatus } from "@prisma/client";
+import { TicketPriority, TicketStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { encodePublicId } from "@/lib/public-id";
 import { notifyInAppAndPush, notifyRecipients } from "@/lib/notifications/notify";
 import { getCurrentOrgContext } from "./_lib/queries";
 import {
@@ -12,7 +13,10 @@ import {
   canAssignCaretakerRole,
   normalizeIssueStatusFilter,
 } from "./_lib/helpers";
-import { ISSUE_PAGE_PATH } from "./_lib/types";
+import {
+  ISSUE_PAGE_PATH,
+  RESOLUTION_REPORTS_QUEUE_PATH,
+} from "./_lib/types";
 
 export async function assignCaretakerAction(formData: FormData) {
   const issueId = String(formData.get("issueId") ?? "");
@@ -69,6 +73,7 @@ export async function assignCaretakerAction(formData: FormData) {
     select: {
       id: true,
       title: true,
+      priority: true,
       reportedByUserId: true,
       unit: {
         select: {
@@ -107,14 +112,39 @@ export async function assignCaretakerAction(formData: FormData) {
       },
     });
 
-    await notifyRecipients({
-      db: tx,
-      orgId: membership.orgId,
-      recipients: [{ userId: caretakerMembership.user.id }],
-      type: "ISSUE_CREATED",
-      title: "Issue assigned to you",
-      message: `You have been assigned "${issue.title}" for ${issue.unit?.property.name ?? "a property"}${issue.unit?.houseNo ? ` / Unit ${issue.unit.houseNo}` : ""}.`,
-    });
+    const isUrgentAssignment =
+      issue.priority === TicketPriority.URGENT ||
+      issue.priority === TicketPriority.HIGH;
+    const caretakerIssueUrl = `/dashboard/caretaker/issues/${encodePublicId(
+      issue.id,
+      "issue",
+    )}`;
+    const assignmentMessage = `You have been assigned "${issue.title}" for ${issue.unit?.property.name ?? "a property"}${issue.unit?.houseNo ? ` / Unit ${issue.unit.houseNo}` : ""}.`;
+
+    if (isUrgentAssignment) {
+      await notifyInAppAndPush({
+        db: tx,
+        orgId: membership.orgId,
+        recipients: [{ userId: caretakerMembership.user.id }],
+        type: "ISSUE_CREATED",
+        title:
+          issue.priority === TicketPriority.URGENT
+            ? "Urgent issue assigned to you"
+            : "High-priority issue assigned to you",
+        message: assignmentMessage,
+        actionUrl: caretakerIssueUrl,
+      });
+    } else {
+      await notifyRecipients({
+        db: tx,
+        orgId: membership.orgId,
+        recipients: [{ userId: caretakerMembership.user.id }],
+        type: "ISSUE_CREATED",
+        title: "Issue assigned to you",
+        message: assignmentMessage,
+        actionUrl: caretakerIssueUrl,
+      });
+    }
 
     await notifyRecipients({
       db: tx,
@@ -234,6 +264,21 @@ export async function updateIssueStatusAction(formData: FormData) {
   redirect(buildIssuesHref(Number(page) || 1, issueId, activeFilter));
 }
 
+function getResolutionReportRedirectTarget(formData: FormData) {
+  const returnTo = String(formData.get("returnTo") ?? "");
+  if (returnTo === "queue") {
+    return RESOLUTION_REPORTS_QUEUE_PATH;
+  }
+
+  const page = String(formData.get("page") ?? "1");
+  const issueId = String(formData.get("issueId") ?? "");
+  const activeFilter = normalizeIssueStatusFilter(
+    String(formData.get("filter") ?? "all"),
+  );
+
+  return buildIssuesHref(Number(page) || 1, issueId, activeFilter);
+}
+
 export async function approveIssueResolutionReportAction(formData: FormData) {
   const reportId = String(formData.get("reportId") ?? "");
   const issueId = String(formData.get("issueId") ?? "");
@@ -242,16 +287,21 @@ export async function approveIssueResolutionReportAction(formData: FormData) {
     String(formData.get("filter") ?? "all"),
   );
   const officeNotes = String(formData.get("officeNotes") ?? "").trim();
+  const redirectTarget = getResolutionReportRedirectTarget(formData);
 
   if (!reportId || !issueId) {
-    redirect(ISSUE_PAGE_PATH);
+    redirect(
+      redirectTarget === RESOLUTION_REPORTS_QUEUE_PATH
+        ? RESOLUTION_REPORTS_QUEUE_PATH
+        : ISSUE_PAGE_PATH,
+    );
   }
 
   const membership = await getCurrentOrgContext();
   const session = await requireUserSession();
 
   if (!canAssignCaretakerRole(membership.role)) {
-    redirect(buildIssuesHref(Number(page) || 1, issueId, activeFilter));
+    redirect(redirectTarget);
   }
 
   const report = await prisma.issueResolutionReport.findFirst({
@@ -274,7 +324,7 @@ export async function approveIssueResolutionReportAction(formData: FormData) {
   });
 
   if (!report) {
-    redirect(buildIssuesHref(Number(page) || 1, issueId, activeFilter));
+    redirect(redirectTarget);
   }
 
   await prisma.$transaction(async (tx) => {
@@ -322,10 +372,11 @@ export async function approveIssueResolutionReportAction(formData: FormData) {
   });
 
   revalidatePath(ISSUE_PAGE_PATH);
+  revalidatePath(RESOLUTION_REPORTS_QUEUE_PATH);
   revalidatePath("/dashboard/tenant/issues");
   revalidatePath("/dashboard/caretaker/issues");
   revalidatePath("/dashboard/org/notifications");
-  redirect(buildIssuesHref(Number(page) || 1, issueId, activeFilter));
+  redirect(redirectTarget);
 }
 
 export async function rejectIssueResolutionReportAction(formData: FormData) {
@@ -336,16 +387,21 @@ export async function rejectIssueResolutionReportAction(formData: FormData) {
     String(formData.get("filter") ?? "all"),
   );
   const officeNotes = String(formData.get("officeNotes") ?? "").trim();
+  const redirectTarget = getResolutionReportRedirectTarget(formData);
 
   if (!reportId || !issueId) {
-    redirect(ISSUE_PAGE_PATH);
+    redirect(
+      redirectTarget === RESOLUTION_REPORTS_QUEUE_PATH
+        ? RESOLUTION_REPORTS_QUEUE_PATH
+        : ISSUE_PAGE_PATH,
+    );
   }
 
   const membership = await getCurrentOrgContext();
   const session = await requireUserSession();
 
   if (!canAssignCaretakerRole(membership.role)) {
-    redirect(buildIssuesHref(Number(page) || 1, issueId, activeFilter));
+    redirect(redirectTarget);
   }
 
   const report = await prisma.issueResolutionReport.findFirst({
@@ -367,7 +423,7 @@ export async function rejectIssueResolutionReportAction(formData: FormData) {
   });
 
   if (!report) {
-    redirect(buildIssuesHref(Number(page) || 1, issueId, activeFilter));
+    redirect(redirectTarget);
   }
 
   await prisma.$transaction(async (tx) => {
@@ -412,7 +468,8 @@ export async function rejectIssueResolutionReportAction(formData: FormData) {
   });
 
   revalidatePath(ISSUE_PAGE_PATH);
+  revalidatePath(RESOLUTION_REPORTS_QUEUE_PATH);
   revalidatePath("/dashboard/caretaker/issues");
   revalidatePath("/dashboard/org/notifications");
-  redirect(buildIssuesHref(Number(page) || 1, issueId, activeFilter));
+  redirect(redirectTarget);
 }

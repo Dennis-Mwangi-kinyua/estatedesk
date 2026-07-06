@@ -30,8 +30,8 @@ export function TenantDashboardOverview({
     <div className="xl:col-span-2 rounded-[30px] border border-neutral-200/80 bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-neutral-500">Overview</p>
-          <h2 className="text-lg font-semibold tracking-tight text-neutral-950">
+          <p className="text-sm font-medium text-muted-foreground">Overview</p>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
             Account snapshot
           </h2>
         </div>
@@ -61,31 +61,31 @@ export function TenantDashboardOverview({
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-[24px] bg-neutral-50 p-4">
-          <p className="text-sm font-medium text-neutral-500">Property</p>
-          <p className="mt-2 text-lg font-semibold text-neutral-950">
+          <p className="text-sm font-medium text-muted-foreground">Property</p>
+          <p className="mt-2 text-lg font-semibold text-foreground">
             {propertyName ?? "—"}
           </p>
-          <p className="mt-1 text-xs text-neutral-500">🏠 Assigned property</p>
+          <p className="mt-1 text-xs text-muted-foreground">🏠 Assigned property</p>
         </div>
 
         <div className="rounded-[24px] bg-neutral-50 p-4">
-          <p className="text-sm font-medium text-neutral-500">Building / Block</p>
-          <p className="mt-2 text-lg font-semibold text-neutral-950">
+          <p className="text-sm font-medium text-muted-foreground">Building / Block</p>
+          <p className="mt-2 text-lg font-semibold text-foreground">
             {buildingName ?? "—"}
           </p>
-          <p className="mt-1 text-xs text-neutral-500">🧱 Current block</p>
+          <p className="mt-1 text-xs text-muted-foreground">🧱 Current block</p>
         </div>
 
         <div className="rounded-[24px] bg-neutral-50 p-4">
-          <p className="text-sm font-medium text-neutral-500">Unit</p>
-          <p className="mt-2 text-lg font-semibold text-neutral-950">
+          <p className="text-sm font-medium text-muted-foreground">Unit</p>
+          <p className="mt-2 text-lg font-semibold text-foreground">
             {houseNo ?? "—"}
           </p>
-          <p className="mt-1 text-xs text-neutral-500">🚪 Occupied unit</p>
+          <p className="mt-1 text-xs text-muted-foreground">🚪 Occupied unit</p>
         </div>
 
         <div className="rounded-[24px] bg-neutral-50 p-4">
-          <p className="text-sm font-medium text-neutral-500">Lease Status</p>
+          <p className="text-sm font-medium text-muted-foreground">Lease Status</p>
           <div className="mt-2">
             <span
               className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium ${getStatusTone(
@@ -95,7 +95,7 @@ export function TenantDashboardOverview({
               📄 {leaseStatus ?? "—"}
             </span>
           </div>
-          <p className="mt-2 text-xs text-neutral-500">Current lease state</p>
+          <p className="mt-2 text-xs text-muted-foreground">Current lease state</p>
         </div>
       </div>
     </div>

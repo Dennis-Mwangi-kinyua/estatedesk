@@ -2,6 +2,9 @@
 
 import { NotificationChannel, NotificationType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
+import { resolveVacancyUnitIdFromSlug } from "@/lib/public-vacancy-resolve";
+import { vacancyPublicSlug } from "@/lib/public-vacancy-slug";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -28,24 +31,24 @@ function getClientIp(headerStore: Awaited<ReturnType<typeof headers>>) {
   return headerStore.get("x-real-ip") ?? "unknown";
 }
 
-export async function sendVacancyInquiryAction(unitId: string, formData: FormData) {
+export async function sendVacancyInquiryAction(publicSlug: string, formData: FormData) {
   const headerStore = await headers();
   const ipAddress = getClientIp(headerStore);
   const website = optionalText(formData.get("website"));
 
   if (website) {
-    redirect(`/vacancies/${unitId}?sent=1#enquire`);
+    redirect(`/vacancies/${publicSlug}?sent=1#enquire`);
   }
 
   const limiter = await checkRateLimit({
-    key: `vacancy-inquiry:${ipAddress}:${unitId}`,
+    key: `vacancy-inquiry:${ipAddress}:${publicSlug}`,
     limit: 5,
     windowMs: 60 * 60 * 1000,
   });
 
   if (!limiter.allowed) {
     redirect(
-      `/vacancies/${unitId}?error=${encodeURIComponent(
+      `/vacancies/${publicSlug}?error=${encodeURIComponent(
         "Too many enquiries. Please wait before sending another message.",
       )}#enquire`,
     );
@@ -55,6 +58,13 @@ export async function sendVacancyInquiryAction(unitId: string, formData: FormDat
   const phone = requiredText(formData.get("phone"), "Phone");
   const email = optionalText(formData.get("email"));
   const message = requiredText(formData.get("message"), "Message");
+  const unitId = await resolveVacancyUnitIdFromSlug(publicSlug);
+
+  if (!unitId) {
+    redirect(
+      `/vacancies/${publicSlug}?error=${encodeURIComponent("This vacancy is no longer available.")}`,
+    );
+  }
 
   const unit = await prisma.unit.findFirst({
     where: {
@@ -92,8 +102,15 @@ export async function sendVacancyInquiryAction(unitId: string, formData: FormDat
   });
 
   if (!unit) {
-    redirect(`/vacancies/${unitId}?error=${encodeURIComponent("This vacancy is no longer available.")}`);
+    redirect(
+      `/vacancies/${publicSlug}?error=${encodeURIComponent("This vacancy is no longer available.")}`,
+    );
   }
+
+  const canonicalSlug = vacancyPublicSlug({
+    propertyName: unit.property.name,
+    houseNo: unit.houseNo,
+  });
 
   await prisma.$transaction(async (tx) => {
     await tx.vacancyInquiry.create({
@@ -118,8 +135,12 @@ export async function sendVacancyInquiryAction(unitId: string, formData: FormDat
     });
   });
 
-  revalidatePath(`/vacancies/${unitId}`);
+  revalidatePublicVacancies({
+    unitId: unit.id,
+    propertyName: unit.property.name,
+    houseNo: unit.houseNo,
+  });
   revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/notifications");
-  redirect(`/vacancies/${unitId}?sent=1#enquire`);
+  redirect(`/vacancies/${canonicalSlug}?sent=1#enquire`);
 }

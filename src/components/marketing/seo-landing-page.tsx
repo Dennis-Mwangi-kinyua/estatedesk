@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, HelpCircle, Layers3, ListChecks } from "lucide-react";
+import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { type FaqItem, faqJsonLd } from "@/components/marketing/seo-faq";
+import { getLandingContentDepth } from "@/lib/content-depth/landing-depth";
 import { absoluteUrl } from "@/lib/seo";
 
 export type SeoLandingPageContent = {
@@ -26,6 +28,8 @@ export type SeoLandingPageContent = {
 };
 
 export function SeoLandingPage({ content }: { content: SeoLandingPageContent }) {
+  const contentDepth = getLandingContentDepth(content.path);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -83,7 +87,7 @@ export function SeoLandingPage({ content }: { content: SeoLandingPageContent }) 
   };
 
   return (
-    <main className="min-h-screen bg-[#f7f9fc] text-neutral-950 dark:bg-[#0f1319] dark:text-[#f8fafc]">
+    <main className="ed-theme-page min-h-screen bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -169,7 +173,7 @@ export function SeoLandingPage({ content }: { content: SeoLandingPageContent }) 
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-[#10141a] py-10 text-[#f8fafc] sm:py-12 lg:py-14">
+      <section className="ed-theme-band-inverse border-y border-white/10 py-10 sm:py-12 lg:py-14">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
           <div>
             <h2 className="text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
@@ -205,6 +209,8 @@ export function SeoLandingPage({ content }: { content: SeoLandingPageContent }) 
           </div>
         </div>
       </section>
+
+      {contentDepth ? <ContentDepthStack {...contentDepth} /> : null}
 
       <section className="bg-white py-10 dark:bg-[#0f1319] sm:py-12 lg:py-14">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">

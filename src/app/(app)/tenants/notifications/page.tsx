@@ -162,7 +162,7 @@ function FilterLink({
         "inline-flex h-10 shrink-0 items-center justify-center rounded-full border px-4 text-sm font-medium transition",
         active
           ? "border-neutral-950 bg-neutral-950 text-white"
-          : "border-black/10 bg-white text-neutral-700 hover:bg-neutral-50",
+          : "border-black/10 bg-white text-foreground/80 hover:bg-neutral-50",
       )}
     >
       {label}
@@ -194,8 +194,8 @@ export default async function TenantNotificationsPage({
 
   if (!tenant) {
     return (
-      <div className="min-h-screen bg-[#f5f5f7] p-4">
-        <div className="rounded-[28px] border border-black/5 bg-white p-8 text-center text-sm text-neutral-600">
+      <div className="ed-theme-page min-h-screen bg-background text-foreground p-4">
+        <div className="rounded-[28px] ed-theme-card border border-border bg-card p-8 text-center text-sm text-neutral-600">
           Tenant profile not found.
         </div>
       </div>
@@ -231,16 +231,16 @@ export default async function TenantNotificationsPage({
   ]);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] px-4 py-4 sm:px-6 sm:py-6">
+    <div className="ed-theme-page min-h-screen bg-background text-foreground px-4 py-4 sm:px-6 sm:py-6">
       <div className="mx-auto max-w-5xl space-y-4">
-        <section className="rounded-[32px] border border-black/5 bg-white p-5 shadow-sm sm:p-6">
+        <section className="rounded-[32px] ed-theme-card border border-border bg-card p-5 shadow-sm sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-medium text-neutral-700">
+              <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-medium text-foreground/80">
                 <Bell className="h-3.5 w-3.5" />
                 {tenant.fullName}
               </div>
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-neutral-950">
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
                 Notifications
               </h1>
               <p className="mt-2 text-sm leading-6 text-neutral-600">
@@ -264,7 +264,7 @@ export default async function TenantNotificationsPage({
               <p className="text-xs uppercase tracking-[0.16em] text-neutral-400">
                 Loaded
               </p>
-              <p className="mt-2 text-2xl font-semibold text-neutral-950">
+              <p className="mt-2 text-2xl font-semibold text-foreground">
                 {notifications.length}
               </p>
             </div>
@@ -272,7 +272,7 @@ export default async function TenantNotificationsPage({
               <p className="text-xs uppercase tracking-[0.16em] text-neutral-400">
                 Unread
               </p>
-              <p className="mt-2 text-2xl font-semibold text-neutral-950">
+              <p className="mt-2 text-2xl font-semibold text-foreground">
                 {unreadCount}
               </p>
             </div>
@@ -280,14 +280,14 @@ export default async function TenantNotificationsPage({
               <p className="text-xs uppercase tracking-[0.16em] text-neutral-400">
                 Filter
               </p>
-              <p className="mt-2 text-2xl font-semibold text-neutral-950">
+              <p className="mt-2 text-2xl font-semibold text-foreground">
                 {formatEnumLabel(activeFilter)}
               </p>
             </div>
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-black/5 bg-white p-4 shadow-sm sm:p-6">
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 shadow-sm sm:p-6">
           <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
             <FilterLink filter="all" activeFilter={activeFilter} label="All" />
             <FilterLink filter="unread" activeFilter={activeFilter} label="Unread" />
@@ -301,10 +301,10 @@ export default async function TenantNotificationsPage({
             {notifications.length === 0 ? (
               <div className="rounded-3xl border border-dashed border-black/10 bg-neutral-50 p-8 text-center">
                 <Inbox className="mx-auto h-6 w-6 text-neutral-400" />
-                <p className="mt-3 text-sm font-medium text-neutral-900">
+                <p className="mt-3 text-sm font-medium text-foreground">
                   No notifications found
                 </p>
-                <p className="mt-1 text-sm text-neutral-500">
+                <p className="mt-1 text-sm text-muted-foreground">
                   New updates will appear here as workflows move.
                 </p>
               </div>
@@ -316,7 +316,7 @@ export default async function TenantNotificationsPage({
                 return (
                   <article
                     key={notification.id}
-                    className="rounded-3xl border border-black/5 bg-neutral-50 p-4"
+                    className="rounded-3xl ed-theme-muted-panel border border-border p-4"
                   >
                     <div className="flex items-start gap-3">
                       <div
@@ -332,7 +332,7 @@ export default async function TenantNotificationsPage({
 
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-semibold text-neutral-950">
+                          <p className="text-sm font-semibold text-foreground">
                             {notification.title}
                           </p>
                           {!notification.readAt ? (
@@ -346,7 +346,7 @@ export default async function TenantNotificationsPage({
                           {notification.message}
                         </p>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                           <span>{formatEnumLabel(notification.type)}</span>
                           <span>•</span>
                           <span>{formatEnumLabel(notification.channel)}</span>
@@ -366,7 +366,7 @@ export default async function TenantNotificationsPage({
                             />
                             <button
                               type="submit"
-                              className="inline-flex h-9 items-center justify-center rounded-xl border border-black/10 bg-white px-3 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50"
+                              className="inline-flex h-9 items-center justify-center rounded-xl border border-black/10 bg-white px-3 text-xs font-medium text-foreground/80 transition hover:bg-neutral-50"
                             >
                               Mark read
                             </button>

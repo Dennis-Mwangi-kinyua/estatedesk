@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { PageShell, SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { Prisma } from "@prisma/client";
 import { ArrowLeft, CalendarDays, CheckCircle2, ClipboardCheck, Home, User2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -71,7 +72,7 @@ function getInspectionStatusClasses(status: string) {
     case "CANCELLED":
       return "border-rose-200 bg-rose-50 text-rose-700";
     default:
-      return "border-neutral-200 bg-neutral-100 text-neutral-700";
+      return "border-neutral-200 bg-neutral-100 text-foreground/80";
   }
 }
 
@@ -83,21 +84,7 @@ function getUnitLabel(inspection: Prisma.InspectionGetPayload<typeof tenantInspe
   }`;
 }
 
-function SurfaceCard({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <section
-      className={`rounded-[28px] border border-black/5 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] ${className}`}
-    >
-      {children}
-    </section>
-  );
-}
+
 
 export default async function TenantInspectionReportPage({
   params,
@@ -149,12 +136,11 @@ export default async function TenantInspectionReportPage({
     : [];
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7]">
-      <div className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-6 xl:px-8">
-        <div className="space-y-4 sm:space-y-6">
+    <PageShell>
+        <div className="mx-auto w-full max-w-5xl space-y-4 sm:space-y-6">
           <Link
             href="/dashboard/tenant/inspections"
-            className="inline-flex items-center gap-2 text-sm font-medium text-neutral-600 transition hover:text-neutral-900"
+            className="inline-flex items-center gap-2 text-sm font-medium text-neutral-600 transition hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to inspections
@@ -163,13 +149,13 @@ export default async function TenantInspectionReportPage({
           <SurfaceCard className="p-5 sm:p-6 lg:p-7">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-500">
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   Inspection Report
                 </p>
-                <h1 className="mt-2 text-[28px] font-semibold tracking-tight text-neutral-950 sm:text-[32px]">
+                <h1 className="mt-2 text-[28px] font-semibold tracking-tight text-foreground sm:text-[32px]">
                   {getUnitLabel(inspection)}
                 </h1>
-                <p className="mt-2 text-sm leading-6 text-neutral-500">
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
                   Review your move-out inspection details, assigned inspector,
                   completion date, and any notes recorded for this inspection.
                 </p>
@@ -187,60 +173,60 @@ export default async function TenantInspectionReportPage({
 
           <div className="grid gap-4 md:grid-cols-2">
             <SurfaceCard className="p-5 sm:p-6">
-              <h2 className="text-lg font-semibold text-neutral-950">
+              <h2 className="text-lg font-semibold text-foreground">
                 Inspection details
               </h2>
 
               <div className="mt-4 space-y-4">
                 <div className="flex items-start gap-3">
-                  <CalendarDays className="mt-0.5 h-4 w-4 text-neutral-500" />
+                  <CalendarDays className="mt-0.5 h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-neutral-500">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
                       Scheduled at
                     </p>
-                    <p className="text-sm font-medium text-neutral-900">
+                    <p className="text-sm font-medium text-foreground">
                       {formatDateTime(inspection.scheduledAt)}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-neutral-500" />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-neutral-500">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
                       Completed at
                     </p>
-                    <p className="text-sm font-medium text-neutral-900">
+                    <p className="text-sm font-medium text-foreground">
                       {formatDateTime(inspection.completedAt)}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Home className="mt-0.5 h-4 w-4 text-neutral-500" />
+                  <Home className="mt-0.5 h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-neutral-500">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
                       Move-out date
                     </p>
-                    <p className="text-sm font-medium text-neutral-900">
+                    <p className="text-sm font-medium text-foreground">
                       {formatDate(inspection.notice.moveOutDate)}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <User2 className="mt-0.5 h-4 w-4 text-neutral-500" />
+                  <User2 className="mt-0.5 h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-neutral-500">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
                       Inspector
                     </p>
-                    <p className="text-sm font-medium text-neutral-900">
+                    <p className="text-sm font-medium text-foreground">
                       {inspection.inspector.fullName}
                     </p>
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-muted-foreground">
                       {inspection.inspector.email ?? "—"}
                     </p>
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-muted-foreground">
                       {inspection.inspector.phone ?? "—"}
                     </p>
                   </div>
@@ -249,11 +235,11 @@ export default async function TenantInspectionReportPage({
             </SurfaceCard>
 
             <SurfaceCard className="p-5 sm:p-6">
-              <h2 className="text-lg font-semibold text-neutral-950">
+              <h2 className="text-lg font-semibold text-foreground">
                 Notes
               </h2>
 
-              <div className="mt-4 rounded-[20px] bg-[#fafafa] p-4 text-sm leading-6 text-neutral-700">
+              <div className="mt-4 ed-theme-muted-panel rounded-[20px] p-4 text-sm leading-6 text-foreground/80">
                 {inspection.notes?.trim()
                   ? inspection.notes
                   : "No inspection notes were recorded for this report."}
@@ -263,8 +249,8 @@ export default async function TenantInspectionReportPage({
 
           <SurfaceCard className="p-5 sm:p-6">
             <div className="flex items-center gap-3">
-              <ClipboardCheck className="h-5 w-5 text-neutral-700" />
-              <h2 className="text-lg font-semibold text-neutral-950">
+              <ClipboardCheck className="h-5 w-5 text-foreground/80" />
+              <h2 className="text-lg font-semibold text-foreground">
                 Checklist
               </h2>
             </div>
@@ -274,7 +260,7 @@ export default async function TenantInspectionReportPage({
                 {checklistItems.map((item, index) => (
                   <div
                     key={index}
-                    className="rounded-[18px] border border-black/5 bg-[#fafafa] p-4 text-sm text-neutral-700"
+                    className="rounded-[18px] ed-theme-card border border-border bg-muted/35 p-4 text-sm text-foreground/80"
                   >
                     <pre className="whitespace-pre-wrap break-words font-sans">
                       {JSON.stringify(item, null, 2)}
@@ -283,13 +269,12 @@ export default async function TenantInspectionReportPage({
                 ))}
               </div>
             ) : (
-              <div className="mt-4 rounded-[20px] bg-[#fafafa] p-4 text-sm text-neutral-700">
+              <div className="mt-4 ed-theme-muted-panel rounded-[20px] p-4 text-sm text-foreground/80">
                 No checklist items were attached to this inspection.
               </div>
             )}
           </SurfaceCard>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }

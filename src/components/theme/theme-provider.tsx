@@ -8,9 +8,16 @@ import {
   useMemo,
   useState,
 } from "react";
+import {
+  THEME_STORAGE_KEY,
+  buildThemeCookie,
+  isThemePreference,
+  resolveTheme,
+  type ResolvedTheme,
+  type ThemePreference,
+} from "@/lib/theme/preference";
 
-export type Theme = "light" | "dark" | "system";
-type ResolvedTheme = "light" | "dark";
+export type Theme = ThemePreference;
 
 type ThemeContextValue = {
   theme: Theme;
@@ -18,7 +25,6 @@ type ThemeContextValue = {
   setTheme: (theme: Theme) => void;
 };
 
-const STORAGE_KEY = "theme";
 const THEME_CLASSES: ResolvedTheme[] = ["light", "dark"];
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
@@ -37,9 +43,9 @@ function getStoredTheme(): Theme {
   if (typeof window === "undefined") return "system";
 
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
 
-    if (stored === "light" || stored === "dark" || stored === "system") {
+    if (isThemePreference(stored)) {
       return stored;
     }
   } catch {
@@ -75,12 +81,14 @@ function applyTheme(theme: Theme, resolvedTheme: ResolvedTheme) {
 
   try {
     if (theme === "system") {
-      window.localStorage.removeItem(STORAGE_KEY);
+      window.localStorage.removeItem(THEME_STORAGE_KEY);
     } else {
-      window.localStorage.setItem(STORAGE_KEY, theme);
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
     }
+
+    document.cookie = buildThemeCookie(theme);
   } catch {
-    // Theme still applies even when localStorage is unavailable.
+    // Theme still applies even when storage is unavailable.
   }
 }
 
@@ -99,7 +107,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return () => media.removeEventListener("change", handleChange);
   }, []);
 
-  const resolvedTheme = theme === "system" ? systemTheme : theme;
+  const resolvedTheme = resolveTheme(theme, systemTheme === "dark");
 
   useEffect(() => {
     disableTransitionsTemporarily();

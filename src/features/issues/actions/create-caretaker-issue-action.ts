@@ -6,8 +6,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { getCaretakerIssueHref } from "@/app/(app)/dashboard/caretaker/_lib/paths";
+import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { uploadIssuePhoto } from "./upload-issue-photo";
 
 const createCaretakerIssueSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -50,19 +53,71 @@ export async function createCaretakerIssueAction(formData: FormData) {
     priority: formValueToString(formData.get("priority")) ?? "MEDIUM",
   });
 
-  await prisma.issueTicket.create({
+  let propertyId = parsed.propertyId;
+  let unitId = parsed.unitId;
+
+  if (unitId) {
+    const allowedUnitIds = await getCaretakerAllowedUnitIds({
+      orgId,
+      caretakerUserId: userId,
+      membershipScope: session.membershipScope,
+    });
+
+    if (!allowedUnitIds.includes(unitId)) {
+      redirect("/dashboard/caretaker/issues/new");
+    }
+
+    const unit = await prisma.unit.findFirst({
+      where: {
+        id: unitId,
+        deletedAt: null,
+        property: {
+          orgId,
+          deletedAt: null,
+        },
+      },
+      select: {
+        propertyId: true,
+      },
+    });
+
+    if (!unit) {
+      redirect("/dashboard/caretaker/issues/new");
+    }
+
+    propertyId = unit.propertyId;
+  }
+
+  const photo = formData.get("photo");
+  let photoAssetId: string | undefined;
+
+  if (photo instanceof File && photo.size > 0) {
+    photoAssetId = await uploadIssuePhoto({
+      photo,
+      unitId,
+      orgId,
+      submittedByUserId: userId,
+    });
+  }
+
+  const issue = await prisma.issueTicket.create({
     data: {
       orgId,
       reportedByUserId: userId,
       title: parsed.title,
       description: parsed.description,
       priority: parsed.priority,
-      propertyId: parsed.propertyId,
-      unitId: parsed.unitId,
+      propertyId,
+      unitId,
+      photoAssetId,
       status: "OPEN",
+    },
+    select: {
+      id: true,
     },
   });
 
   revalidatePath("/dashboard/caretaker/issues");
-  redirect("/dashboard/caretaker/issues");
+  revalidatePath(getCaretakerIssueHref(issue.id));
+  redirect(getCaretakerIssueHref(issue.id));
 }

@@ -1,4 +1,4 @@
-import { APP_URL, XML_HEADERS, buildUrlEntry, wrapUrlset } from '@/lib/sitemap-utils'
+import { APP_URL, XML_HEADERS, buildUrlEntry, formatDate, wrapUrlset } from '@/lib/sitemap-utils'
 import { publicSiteIndexItems } from '@/lib/public-site-index'
 
 async function renderSitemapXml() {
@@ -6,6 +6,7 @@ async function renderSitemapXml() {
     .map((e) =>
       buildUrlEntry({
         loc: `${APP_URL}${e.path}`,
+        lastmod: e.lastmod ? formatDate(e.lastmod) : undefined,
         changefreq: e.changefreq,
         priority: e.priority,
       }),

@@ -62,7 +62,7 @@ export function TenantHeader({
                 </p>
                 <div className="mt-1 flex items-center gap-2">
                   <span className="text-lg">{activeItem.emoji}</span>
-                  <h1 className="truncate text-xl font-semibold tracking-tight text-neutral-950">
+                  <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">
                     {activeItem.label}
                   </h1>
                 </div>
@@ -73,10 +73,10 @@ export function TenantHeader({
               <HeaderThemeToggle />
 
               <div className="ed-soft-button hidden rounded-[22px] border px-4 py-3 text-right shadow-sm sm:block">
-              <p className="max-w-[200px] truncate text-sm font-semibold text-neutral-950">
+              <p className="max-w-[200px] truncate text-sm font-semibold text-foreground">
                 {fullName}
               </p>
-              <p className="text-xs text-neutral-500">{orgName}</p>
+              <p className="text-xs text-muted-foreground">{orgName}</p>
               </div>
             </div>
           </div>
@@ -87,10 +87,10 @@ export function TenantHeader({
                 👋
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-neutral-950">
+                <p className="truncate text-sm font-semibold text-foreground">
                   {fullName}
                 </p>
-                <p className="mt-0.5 truncate text-xs text-neutral-500">
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">
                   {orgName}
                 </p>
               </div>
@@ -115,7 +115,7 @@ export function TenantHeader({
                   <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">
                     Menu
                   </p>
-                  <h2 className="mt-1 text-xl font-semibold text-neutral-950">
+                  <h2 className="mt-1 text-xl font-semibold text-foreground">
                     Tenant Portal
                   </h2>
                 </div>
@@ -131,10 +131,10 @@ export function TenantHeader({
               </div>
 
               <div className="ios-card mt-4 rounded-[24px] p-4">
-                <p className="truncate text-sm font-semibold text-neutral-950">
+                <p className="truncate text-sm font-semibold text-foreground">
                   {fullName}
                 </p>
-                <p className="mt-1 text-xs text-neutral-500">{orgName}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{orgName}</p>
               </div>
 
               <nav className="mt-4 space-y-2">

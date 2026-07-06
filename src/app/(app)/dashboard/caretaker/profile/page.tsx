@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
-import { StaffSelfProfileView } from "@/features/staff/components/staff-self-profile-view";
+import { ProfileWorkspace } from "./_components/profile-workspace";
+import { getCaretakerProfileData } from "./_lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -17,48 +17,14 @@ export default async function CaretakerStaffProfilePage() {
     redirect("/dashboard/caretaker");
   }
 
-  const member = await prisma.membership.findFirst({
-    where: {
-      orgId: session.activeOrgId,
-      userId: session.userId,
-      role: "CARETAKER",
-      employmentEndedAt: null,
-    },
-    select: {
-      role: true,
-      employmentStartedAt: true,
-      org: {
-        select: {
-          name: true,
-        },
-      },
-      staffProfile: {
-        select: {
-          salaryAmount: true,
-          salaryCurrency: true,
-          educationLevel: true,
-          jobTitle: true,
-          nationalId: true,
-          emergencyContact: true,
-          notes: true,
-        },
-      },
-      user: {
-        select: {
-          fullName: true,
-          username: true,
-          email: true,
-          phone: true,
-          status: true,
-          lastLoginAt: true,
-        },
-      },
-    },
+  const data = await getCaretakerProfileData({
+    orgId: session.activeOrgId,
+    userId: session.userId,
   });
 
-  if (!member) {
+  if (data.ok && !data.member) {
     redirect("/dashboard/caretaker");
   }
 
-  return <StaffSelfProfileView title="My caretaker profile" member={member} />;
+  return <ProfileWorkspace data={data} />;
 }

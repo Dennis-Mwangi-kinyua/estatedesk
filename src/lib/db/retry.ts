@@ -55,10 +55,29 @@ export function isTransientDatabaseError(error: unknown) {
   const code = String(value.code ?? value.cause?.code ?? "");
   const message = String(value.message ?? value.cause?.message ?? "");
 
+  const transientCodes = new Set([
+    "ETIMEDOUT",
+    "ECONNRESET",
+    "ECONNREFUSED",
+    "EPIPE",
+    "P1001", // Can't reach database server
+    "P1002", // Database server timed out
+    "P1008", // Operations timed out
+    "P1017", // Server closed the connection
+    "P2024", // Connection pool timeout
+    "P2028", // Transaction start timeout / interactive transaction errors
+  ]);
+
+  const normalizedMessage = message.toLowerCase();
+
   return (
-    code === "ETIMEDOUT" ||
+    transientCodes.has(code) ||
     message.includes("Connection terminated") ||
-    message.toLowerCase().includes("timeout")
+    normalizedMessage.includes("timeout") ||
+    normalizedMessage.includes("can't reach database server") ||
+    normalizedMessage.includes("connection closed") ||
+    normalizedMessage.includes("connection terminated unexpectedly") ||
+    normalizedMessage.includes("unable to start a transaction")
   );
 }
 

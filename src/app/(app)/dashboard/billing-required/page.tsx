@@ -15,7 +15,7 @@ export default async function BillingRequiredPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7] p-4">
+    <div className="ed-theme-page flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
       <section className="ios-panel w-full max-w-xl rounded-[30px] p-6 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
           Billing required

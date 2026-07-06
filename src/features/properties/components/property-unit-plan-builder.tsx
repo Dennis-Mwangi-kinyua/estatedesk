@@ -1,6 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import {
+  buttonDangerClassName,
+  buttonPrimaryClassName,
+  buttonSecondaryClassName,
+  emptyStateClassName,
+  fieldClassName,
+  infoPanelClassName,
+  labelClassName,
+  textareaClassName,
+} from "./_lib/wizard-ui";
 
 type UnitTypeOption = {
   value: string;
@@ -108,39 +118,39 @@ export function PropertyUnitPlanBuilder({
         <button
           type="button"
           onClick={() => addRow("APARTMENT")}
-          className="inline-flex h-10 items-center justify-center rounded-xl border border-neutral-200 px-4 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+          className={buttonSecondaryClassName}
         >
           Add apartment
         </button>
         <button
           type="button"
           onClick={() => addRow("BEDSITTER")}
-          className="inline-flex h-10 items-center justify-center rounded-xl border border-neutral-200 px-4 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+          className={buttonSecondaryClassName}
         >
           Add bedsitter
         </button>
         <button
           type="button"
           onClick={() => addRow("STUDIO")}
-          className="inline-flex h-10 items-center justify-center rounded-xl border border-neutral-200 px-4 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+          className={buttonSecondaryClassName}
         >
           Add studio
         </button>
         <button
           type="button"
           onClick={() => addRow("SINGLE_ROOM")}
-          className="inline-flex h-10 items-center justify-center rounded-xl border border-neutral-200 px-4 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+          className={buttonSecondaryClassName}
         >
           Add single room
         </button>
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 px-4 py-10 text-center">
-          <h3 className="text-sm font-semibold text-neutral-900">
+        <div className={emptyStateClassName}>
+          <h3 className="text-sm font-semibold text-foreground">
             No unit mix added yet
           </h3>
-          <p className="mt-2 text-sm text-neutral-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Add unit types and quantities now so the property automatically creates
             units that appear on the units page.
           </p>
@@ -148,7 +158,7 @@ export function PropertyUnitPlanBuilder({
           <button
             type="button"
             onClick={() => addRow("APARTMENT")}
-            className="mt-4 inline-flex h-11 items-center justify-center rounded-2xl bg-neutral-950 px-5 text-sm font-medium text-white transition hover:bg-neutral-800"
+            className={`mt-4 ${buttonPrimaryClassName}`}
           >
             Add first unit mix
           </button>
@@ -164,14 +174,14 @@ export function PropertyUnitPlanBuilder({
             return (
               <div
                 key={row.id}
-                className="rounded-3xl border border-neutral-200 bg-neutral-50/70 p-4 sm:p-5"
+                className={`${infoPanelClassName} sm:p-5`}
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                       Unit mix {index + 1}
                     </p>
-                    <h3 className="mt-1 text-base font-semibold text-neutral-950">
+                    <h3 className="mt-1 text-base font-semibold text-foreground">
                       {unitTypeLabel(row.unitType, row.bedrooms)}
                     </h3>
                   </div>
@@ -179,7 +189,7 @@ export function PropertyUnitPlanBuilder({
                   <button
                     type="button"
                     onClick={() => removeRow(row.id)}
-                    className="inline-flex h-10 items-center justify-center rounded-xl border border-red-200 px-4 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                    className={buttonDangerClassName}
                   >
                     Remove
                   </button>
@@ -187,7 +197,7 @@ export function PropertyUnitPlanBuilder({
 
                 <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                   <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-neutral-700">
+                    <span className={labelClassName}>
                       Unit type <span className="text-red-500">*</span>
                     </span>
                     <select
@@ -196,7 +206,7 @@ export function PropertyUnitPlanBuilder({
                       onChange={(event) =>
                         updateRow(row.id, "unitType", event.target.value)
                       }
-                      className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                      className={fieldClassName}
                     >
                       {UNIT_TYPE_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -207,7 +217,7 @@ export function PropertyUnitPlanBuilder({
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-neutral-700">
+                    <span className={labelClassName}>
                       Bedrooms {supportsBedrooms ? <span className="text-red-500">*</span> : null}
                     </span>
                     {supportsBedrooms ? (
@@ -217,7 +227,7 @@ export function PropertyUnitPlanBuilder({
                         onChange={(event) =>
                           updateRow(row.id, "bedrooms", event.target.value)
                         }
-                        className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                        className={fieldClassName}
                       >
                         <option value="1">1 bedroom</option>
                         <option value="2">2 bedrooms</option>
@@ -227,7 +237,7 @@ export function PropertyUnitPlanBuilder({
                     ) : (
                       <>
                         <input type="hidden" name="unitPlanBedrooms[]" value="" />
-                        <div className="flex h-12 items-center rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-500">
+                        <div className="flex h-11 items-center rounded-2xl border border-border bg-background px-4 text-sm text-muted-foreground">
                           Not applicable for this unit type
                         </div>
                       </>
@@ -235,7 +245,7 @@ export function PropertyUnitPlanBuilder({
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-neutral-700">
+                    <span className={labelClassName}>
                       Bathrooms
                     </span>
                     <input
@@ -249,12 +259,12 @@ export function PropertyUnitPlanBuilder({
                         updateRow(row.id, "bathrooms", event.target.value)
                       }
                       placeholder="Optional"
-                      className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                      className={fieldClassName}
                     />
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-neutral-700">
+                    <span className={labelClassName}>
                       Quantity <span className="text-red-500">*</span>
                     </span>
                     <input
@@ -267,12 +277,12 @@ export function PropertyUnitPlanBuilder({
                       onChange={(event) =>
                         updateRow(row.id, "quantity", event.target.value)
                       }
-                      className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                      className={fieldClassName}
                     />
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-neutral-700">
+                    <span className={labelClassName}>
                       Default rent ({currencyCode}) <span className="text-red-500">*</span>
                     </span>
                     <input
@@ -286,12 +296,12 @@ export function PropertyUnitPlanBuilder({
                         updateRow(row.id, "defaultRentAmount", event.target.value)
                       }
                       placeholder="0.00"
-                      className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                      className={fieldClassName}
                     />
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-neutral-700">
+                    <span className={labelClassName}>
                       Default deposit ({currencyCode})
                     </span>
                     <input
@@ -309,12 +319,12 @@ export function PropertyUnitPlanBuilder({
                         )
                       }
                       placeholder="Optional"
-                      className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                      className={fieldClassName}
                     />
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-neutral-700">
+                    <span className={labelClassName}>
                       House number prefix
                     </span>
                     <input
@@ -326,12 +336,12 @@ export function PropertyUnitPlanBuilder({
                         updateRow(row.id, "houseNoPrefix", event.target.value)
                       }
                       placeholder="A, B, SH, OF"
-                      className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                      className={fieldClassName}
                     />
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-neutral-700">
+                    <span className={labelClassName}>
                       Start number
                     </span>
                     <input
@@ -344,12 +354,12 @@ export function PropertyUnitPlanBuilder({
                       onChange={(event) =>
                         updateRow(row.id, "startNumber", event.target.value)
                       }
-                      className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                      className={fieldClassName}
                     />
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-neutral-700">
+                    <span className={labelClassName}>
                       Label
                     </span>
                     <input
@@ -361,12 +371,12 @@ export function PropertyUnitPlanBuilder({
                         updateRow(row.id, "label", event.target.value)
                       }
                       placeholder="Optional custom label"
-                      className="h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                      className={fieldClassName}
                     />
                   </label>
 
                   <label className="block md:col-span-2 xl:col-span-3">
-                    <span className="mb-2 block text-sm font-medium text-neutral-700">
+                    <span className={labelClassName}>
                       Notes
                     </span>
                     <textarea
@@ -377,7 +387,7 @@ export function PropertyUnitPlanBuilder({
                         updateRow(row.id, "notes", event.target.value)
                       }
                       placeholder="Optional internal note for this unit mix"
-                      className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+                      className={textareaClassName}
                     />
                   </label>
                 </div>

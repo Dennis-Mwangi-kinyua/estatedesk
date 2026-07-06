@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { DeferredLink } from "@/components/navigation/app-links";
 import {
   X,
   Home,
@@ -9,39 +9,82 @@ import {
   FileText,
   Users,
   Droplets,
+  Inbox,
   Bell,
   LogOut,
+  ShieldCheck,
   UserRound,
+  ListTodo,
+  Building2,
+  Search,
+  Calendar,
+  DoorOpen,
+  FolderOpen,
+  Megaphone,
+  NotebookPen,
+  Truck,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { logoutAction } from "@/features/auth/actions/logout-action";
+import { CARETAKER_NAV_ITEMS } from "@/app/(app)/dashboard/caretaker/_lib/i18n";
+import { CaretakerNavLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-nav-label";
 
-const navItems = [
-  { href: "/dashboard/caretaker", label: "Overview", icon: Home },
-  { href: "/dashboard/caretaker/issues", label: "Issues", icon: Wrench },
-  { href: "/dashboard/caretaker/inspections", label: "Inspections", icon: ClipboardList },
-  { href: "/dashboard/caretaker/leases", label: "Leases", icon: FileText },
-  { href: "/dashboard/caretaker/tenants", label: "Tenants", icon: Users },
-  { href: "/dashboard/caretaker/water-bills", label: "Water Bills", icon: Droplets },
-  { href: "/dashboard/caretaker/notifications", label: "Notifications", icon: Bell },
-  { href: "/dashboard/caretaker/profile", label: "My Profile", icon: UserRound },
-];
+const navIcons = {
+  "/dashboard/caretaker/today": ListTodo,
+  "/dashboard/caretaker/search": Search,
+  "/dashboard/caretaker/calendar": Calendar,
+  "/dashboard/caretaker": Home,
+  "/dashboard/caretaker/units": Building2,
+  "/dashboard/caretaker/issues": Wrench,
+  "/dashboard/caretaker/inspections": ClipboardList,
+  "/dashboard/caretaker/move-outs": DoorOpen,
+  "/dashboard/caretaker/leases": FileText,
+  "/dashboard/caretaker/tenants": Users,
+  "/dashboard/caretaker/water-bills": Droplets,
+  "/dashboard/caretaker/documents": FolderOpen,
+  "/dashboard/caretaker/broadcasts": Megaphone,
+  "/dashboard/caretaker/handover": NotebookPen,
+  "/dashboard/caretaker/vendors": Truck,
+  "/dashboard/caretaker/finance-requests": Inbox,
+  "/dashboard/caretaker/notifications": Bell,
+  "/dashboard/caretaker/profile": UserRound,
+  "/dashboard/caretaker/security": ShieldCheck,
+} as const;
 
 type Props = {
   fullName: string;
   open: boolean;
   onClose: () => void;
+  returnFocusRef?: React.RefObject<HTMLButtonElement | null>;
 };
 
 export function CaretakerMobileSidebar({
   fullName,
   open,
   onClose,
+  returnFocusRef,
 }: Props) {
   const pathname = usePathname();
   const hasMountedRef = useRef(false);
+  const drawerRef = useRef<HTMLElement>(null);
+
+  const handleClose = useCallback(() => {
+    const active = document.activeElement;
+    if (
+      active instanceof HTMLElement &&
+      drawerRef.current?.contains(active)
+    ) {
+      active.blur();
+    }
+
+    onClose();
+
+    requestAnimationFrame(() => {
+      returnFocusRef?.current?.focus({ preventScroll: true });
+    });
+  }, [onClose, returnFocusRef]);
 
   useEffect(() => {
     if (!open) return;
@@ -60,59 +103,64 @@ export function CaretakerMobileSidebar({
       return;
     }
 
-    onClose();
-  }, [pathname, onClose]);
+    handleClose();
+  }, [pathname, handleClose]);
 
   return (
     <div
       className={clsx(
         "fixed inset-0 z-50 xl:hidden",
-        open ? "pointer-events-auto" : "pointer-events-none"
+        open ? "pointer-events-auto" : "pointer-events-none",
       )}
-      aria-hidden={!open}
-      inert={!open}
+      inert={!open ? true : undefined}
     >
       <button
         type="button"
-        onClick={onClose}
+        onClick={handleClose}
         aria-label="Close menu overlay"
         className={clsx(
           "absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-200",
-          open ? "opacity-100" : "opacity-0"
+          open ? "opacity-100" : "opacity-0",
         )}
       />
 
       <aside
+        ref={drawerRef}
+        id="caretaker-mobile-drawer"
+        data-caretaker-mobile-drawer
+        role="dialog"
+        aria-modal="true"
+        aria-label="Caretaker navigation"
         className={clsx(
           "ed-shell-panel absolute left-0 top-0 flex h-full w-[88%] max-w-[360px] flex-col border-r shadow-2xl transition-transform duration-300",
-          open ? "translate-x-0" : "-translate-x-full"
+          open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="shrink-0 border-b border-neutral-200/80 px-4 py-4 sm:px-5">
+        <div className="shrink-0 border-b border-border px-4 py-4 sm:px-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                   EstateDesk
                 </p>
-                <span className="h-1 w-1 rounded-full bg-neutral-300" />
-                <span className="text-xs font-medium text-neutral-500">
+                <span className="h-1 w-1 rounded-full bg-border" />
+                <span className="text-xs font-medium text-muted-foreground">
                   Caretaker
                 </span>
               </div>
 
-              <h2 className="mt-2 text-lg font-semibold tracking-tight text-neutral-900">
+              <h2 className="mt-2 text-lg font-semibold tracking-tight text-foreground">
                 Navigation
               </h2>
 
-              <p className="mt-1 truncate text-sm text-neutral-500">
+              <p className="mt-1 truncate text-sm text-muted-foreground">
                 {fullName}
               </p>
             </div>
 
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               aria-label="Close menu"
               className="ios-button ed-soft-button inline-flex h-11 w-11 shrink-0 items-center justify-center border shadow-sm"
             >
@@ -122,54 +170,52 @@ export function CaretakerMobileSidebar({
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-4">
-          <div className="mb-5 rounded-2xl border border-neutral-200 bg-neutral-50/80 p-4">
-            <p className="text-xs font-medium text-neutral-500">Workspace</p>
-            <p className="mt-1 text-sm font-semibold text-neutral-900">
+          <div className="mb-5 rounded-2xl border border-border bg-muted/10 p-4">
+            <p className="text-xs font-medium text-muted-foreground">Workspace</p>
+            <p className="mt-1 text-sm font-semibold text-foreground">
               Caretaker dashboard
             </p>
-            <p className="mt-2 text-xs leading-5 text-neutral-500">
+            <p className="mt-2 text-xs leading-5 text-muted-foreground">
               Access issues, inspections, tenants, leases, and billing in one
               organized workspace.
             </p>
           </div>
 
           <nav className="space-y-1.5">
-            {navItems.map((item) => {
+            {CARETAKER_NAV_ITEMS.map((item) => {
               const active =
                 pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-              const Icon = item.icon;
+              const Icon = navIcons[item.href as keyof typeof navIcons] ?? Home;
 
               return (
-                <Link
+                <DeferredLink
                   key={item.href}
                   href={item.href}
                   className={clsx(
                     "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition active:scale-[0.99]",
-                    active
-                      ? "ed-nav-item-active"
-                      : "ed-nav-item"
+                    active ? "ed-nav-item-active" : "ed-nav-item",
                   )}
                 >
                   <span
                     className={clsx(
                       "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition",
-                      active
-                        ? "ed-nav-icon-active"
-                        : "ed-nav-icon"
+                      active ? "ed-nav-icon-active" : "ed-nav-icon",
                     )}
                   >
                     <Icon className="h-4 w-4" />
                   </span>
 
-                  <span className="truncate">{item.label}</span>
-                </Link>
+                  <span className="truncate">
+                    <CaretakerNavLabel labelKey={item.labelKey} />
+                  </span>
+                </DeferredLink>
               );
             })}
           </nav>
         </div>
 
-        <div className="shrink-0 border-t border-neutral-200/80 px-3 py-4">
+        <div className="shrink-0 border-t border-border px-3 py-4">
           <form action={logoutAction}>
             <button
               type="submit"

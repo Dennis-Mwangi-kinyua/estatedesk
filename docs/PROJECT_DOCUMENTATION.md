@@ -15,6 +15,8 @@
 - [Prisma and Database](#prisma-and-database)
 - [Deployment Notes](#deployment-notes)
 - [Key Files and Paths](#key-files-and-paths)
+- [Caretaker Field Operations Portal](#caretaker-field-operations-portal)
+- [SEO, Sitemaps, and Crawlers](#seo-sitemaps-and-crawlers)
 - [Maintenance and Conventions](#maintenance-and-conventions)
 
 ## Purpose
@@ -141,6 +143,8 @@ The repository follows a feature-oriented layout:
 
 ## Environment Variables
 
+See `docs/ENVIRONMENT.md` for the full grouped reference. Runtime validation lives in `src/lib/config/env.ts`.
+
 Important variables are defined in `.env.example` and include:
 
 - `DATABASE_URL`, `DIRECT_URL` - PostgreSQL connection
@@ -230,6 +234,78 @@ The seed command is configured as `tsx prisma/seed.ts`.
 - `src/features` - core business feature implementations
 - `src/components` - UI primitives and shared components
 
+## Caretaker Field Operations Portal
+
+Caretaker workflows live under `src/app/(app)/dashboard/caretaker` and follow the same modular pattern as org and tenant dashboards: thin `page.tsx` files, `_lib/queries.ts`, and `_components/*-workspace.tsx` shells.
+
+### Route map
+
+| Area | Path | Purpose |
+| --- | --- | --- |
+| Today's work | `/dashboard/caretaker/today` | Prioritized inspections, meter readings, and issues with SLA badges |
+| Issues | `/dashboard/caretaker/issues` | Scoped issue board, detail lifecycle, completion reports |
+| New issue | `/dashboard/caretaker/issues/new` | Field reporting with optional photo evidence |
+| Water bills | `/dashboard/caretaker/water-bills` | Period readings, bill visibility, meter entry |
+| Inspections | `/dashboard/caretaker/inspections` | Move-out checklists, GPS check-in, printable reports |
+| Units | `/dashboard/caretaker/units` | Assigned unit list and 360° unit profiles with QR codes |
+| Tenants | `/dashboard/caretaker/tenants` | Tenant contact with call/SMS/WhatsApp actions |
+| Handover | `/dashboard/caretaker/handover` | Bilingual shift notes with open-issue prefill |
+| Vendors | `/dashboard/caretaker/vendors` | Approved suppliers and dispatch requests |
+| Search / calendar / documents / broadcasts / move-outs | respective routes | Scoped lookup and coordination |
+
+Authenticated print routes (noindex, disallowed in `robots.ts`):
+
+- `/print/inspections/[inspectionId]` — inspection report PDF/print view
+- `/print/issues/[issueId]` — caretaker issue work order
+
+### Shared caretaker infrastructure
+
+| Module | Path | Role |
+| --- | --- | --- |
+| Access scope | `src/lib/caretaker/access.ts` | Property/building/unit assignment guards |
+| Paths | `src/app/(app)/dashboard/caretaker/_lib/paths.ts` | Server-only public ID href helpers |
+| Client paths | `src/app/(app)/dashboard/caretaker/_lib/paths.client.ts` | Client-safe href helpers (no `node:crypto`) |
+| Offline queue | `src/app/(app)/dashboard/caretaker/_lib/offline-queue.ts` | LocalStorage queue for meter readings and issues |
+| Offline photos | `src/app/(app)/dashboard/caretaker/_lib/offline-photo-store.ts` | IndexedDB photo blobs for offline sync |
+| SLA helpers | `src/lib/issues/sla.ts` | Shared SLA state used by caretaker and org issue views |
+| Contact links | `src/app/(app)/dashboard/caretaker/_lib/contact.ts` | `tel:`, `sms:`, `mailto:`, and `wa.me` helpers |
+| i18n | `src/app/(app)/dashboard/caretaker/_lib/i18n.ts` | English/Swahili labels for nav, Today, and issues |
+
+### Offline sync flow
+
+1. Client forms detect `!navigator.onLine` and enqueue meter/issue payloads locally.
+2. Optional photos are stored in IndexedDB and attached as base64 payloads during sync.
+3. `syncOfflineQueueAction` validates caretaker unit scope, writes Prisma records, and uploads photo assets.
+4. The header offline panel exposes queue count, sync, and clear actions.
+
+### Tests
+
+Caretaker-specific unit tests:
+
+- `tests/unit/caretaker-sla.test.ts`
+- `tests/unit/caretaker-contact.test.ts`
+- `tests/unit/handover-prefill.test.ts`
+
+Modular route layout is enforced by `tests/unit/module-structure.test.ts`, including `print/issues/[issueId]`.
+
+## SEO, Sitemaps, and Crawlers
+
+Public discovery is centralized in:
+
+- `src/lib/seo.ts` — site metadata, keywords, canonical URLs, and robots helpers
+- `src/lib/public-site-index.ts` — manifest of indexable marketing pages
+- `src/app/sitemap-index.xml/route.ts` — submitted sitemap index
+- `src/app/robots.ts` — crawl rules; blocks dashboards, API, print, and invite routes
+- `src/app/llms.txt/route.ts` — LLM/crawler discovery index for public pages and product themes
+
+See `SITEMAPS.md` for validation commands and Search Console submission steps.
+
+**Indexing policy**
+
+- Index: marketing, pricing, guides, vacancies, and auth entry pages.
+- Noindex + disallow: all `/dashboard/*`, `/platform/*`, `/api/*`, `/print/*`, staff/tenant workspace shortcuts, and utility/system pages.
+- LLM crawlers (`GPTBot`, `Google-Extended`, `CCBot`) receive the same private-route disallow list as generic crawlers.
+
 ## Maintenance and Conventions
 
 - Keep all organization-scoped queries wrapped in membership validation
@@ -237,6 +313,8 @@ The seed command is configured as `tsx prisma/seed.ts`.
 - Favor server actions for form and submit handling where possible
 - Preserve backup routes in `backup-routes` for in-progress refactors
 - Use `SITEMAPS.md` for sitemap and SEO-related page guidance
+- Never import server-only path helpers (`_lib/paths.ts`, `@/lib/public-id`) from `"use client"` caretaker components; use `paths.client.ts` instead
+- Add caretaker modular route entries to `tests/unit/module-structure.test.ts` when introducing new pages
 - Keep `components.json` aligned with Tailwind and shadcn conventions
 
 ---

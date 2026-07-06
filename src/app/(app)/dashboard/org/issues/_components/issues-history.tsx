@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { DeferredLink } from "@/components/navigation/app-links";
 import type { IssueStatusFilter, OrgIssue } from "../_lib/types";
 import {
   buildIssuesHref,
@@ -26,14 +26,14 @@ export function IssuesHistory({
           const selected = selectedIssueId === issue.id;
 
           return (
-            <Link
+            <DeferredLink
               key={issue.id}
               href={buildIssuesHref(currentPage, issue.id, activeFilter)}
               className={[
                 "block rounded-[24px] border p-4 transition",
                 selected
                   ? "border-neutral-900 bg-white shadow-sm"
-                  : "border-black/5 bg-[#fafafa]",
+                  : "border-border bg-muted/70",
               ].join(" ")}
             >
               <div className="flex items-start justify-between gap-3">
@@ -89,14 +89,14 @@ export function IssuesHistory({
                   </p>
                 </div>
               </div>
-            </Link>
+            </DeferredLink>
           );
         })}
       </div>
 
-      <div className="mt-5 hidden overflow-hidden rounded-[28px] border border-black/5 bg-white lg:block">
+      <div className="mt-5 hidden overflow-hidden rounded-[28px] border border-border bg-white lg:block">
         <table className="min-w-full text-sm">
-          <thead className="border-b border-neutral-200 bg-[#fcfcfd]">
+          <thead className="border-b border-neutral-200 bg-muted/50">
             <tr className="text-left text-neutral-500">
               <th className="px-5 py-4 font-medium">Issue</th>
               <th className="px-5 py-4 font-medium">Unit</th>
@@ -119,12 +119,12 @@ export function IssuesHistory({
                   }`}
                 >
                   <td className="px-5 py-4">
-                    <Link
+                    <DeferredLink
                       href={buildIssuesHref(currentPage, issue.id, activeFilter)}
                       className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
                     >
                       {issue.title}
-                    </Link>
+                    </DeferredLink>
                     <p className="mt-1 text-neutral-500">{issue.description}</p>
                   </td>
                   <td className="px-5 py-4 text-neutral-600">

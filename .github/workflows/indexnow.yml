@@ -1,0 +1,78 @@
+name: IndexNow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  submit-urls:
+    if: ${{ vars.PRODUCTION_INDEXNOW_ENABLED == 'true' }}
+    name: Submit production URLs to IndexNow
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Submit core and vacancy URLs
+        env:
+          APP_URL: ${{ secrets.PRODUCTION_APP_URL }}
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: |
+          if [ -z "$APP_URL" ]; then
+            echo "PRODUCTION_APP_URL secret is not configured."
+            exit 1
+          fi
+
+          if [ -z "$INDEXNOW_KEY" ]; then
+            echo "INDEXNOW_KEY secret is not configured."
+            exit 1
+          fi
+
+          python3 <<'PY'
+          import json
+          import os
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          base_url = os.environ["APP_URL"].rstrip("/")
+          host = urllib.parse.urlparse(base_url).netloc
+          key = os.environ["INDEXNOW_KEY"]
+          key_location = f"{base_url}/api/indexnow/key"
+
+          urls = [
+              f"{base_url}/",
+              f"{base_url}/vacancies",
+              f"{base_url}/pricing",
+              f"{base_url}/services",
+              f"{base_url}/property-management-markets",
+              f"{base_url}/sitemap-index.xml",
+          ]
+          urls.extend(f"{base_url}/vacancies?page={page}" for page in range(1, 4))
+
+          payload = {
+              "host": host,
+              "key": key,
+              "keyLocation": key_location,
+              "urlList": urls,
+          }
+
+          request = urllib.request.Request(
+              "https://api.indexnow.org/indexnow",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json; charset=utf-8"},
+              method="POST",
+          )
+
+          try:
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  print(f"IndexNow response: {response.status}")
+          except urllib.error.HTTPError as error:
+              print(f"IndexNow response: {error.code}")
+              if error.code >= 500:
+                  raise
+          PY

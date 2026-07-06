@@ -117,3 +117,18 @@ export const APP_PLANS = {
 export type AppPlan = keyof typeof APP_PLANS;
 
 export const APP_PLAN_ORDER = ["FREE", "PRO", "PLUS", "ENTERPRISE"] as const;
+
+const TRIAL_ELIGIBLE_PLANS = new Set<AppPlan>(["PRO", "PLUS"]);
+
+export function formatBillingPlanLabel(plan: string) {
+  const key = plan.toUpperCase() as AppPlan;
+  return APP_PLANS[key]?.name ?? plan.replaceAll("_", " ");
+}
+
+export function resolveInitialSubscriptionStatus(plan: AppPlan) {
+  return TRIAL_ELIGIBLE_PLANS.has(plan) ? "TRIALING" : "ACTIVE";
+}
+
+export function planSupportsTrial(plan: string) {
+  return TRIAL_ELIGIBLE_PLANS.has(plan.toUpperCase() as AppPlan);
+}

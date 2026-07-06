@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 export type VacancyInquiryAlert = {
   id: string;
@@ -16,7 +17,9 @@ export type VacancyInquiryAlert = {
 export async function getVacancyInquiryAlerts(
   orgId: string,
 ): Promise<VacancyInquiryAlert[]> {
-  const inquiries = await prisma.vacancyInquiry.findMany({
+  const inquiries = await retryTransientDatabaseOperation(
+    () =>
+      prisma.vacancyInquiry.findMany({
     where: {
       orgId,
       status: "NEW",
@@ -45,7 +48,9 @@ export async function getVacancyInquiryAlerts(
       createdAt: "desc",
     },
     take: 5,
-  });
+      }),
+    { label: "org-vacancy-inquiry-alerts" },
+  );
 
   return inquiries.map((inquiry) => ({
     id: inquiry.id,

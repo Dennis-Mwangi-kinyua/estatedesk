@@ -1,4 +1,4 @@
-import { TicketPriority, TicketStatus } from "@prisma/client";
+import { Prisma, TicketPriority, TicketStatus } from "@prisma/client";
 import {
   ISSUE_PAGE_PATH,
   ORG_ASSIGNMENT_ROLES,
@@ -83,6 +83,41 @@ export function getIssueFilterLabel(filter: IssueStatusFilter) {
   }
 }
 
+export function buildIssueFilterWhere(
+  orgId: string,
+  filter: IssueStatusFilter,
+): Prisma.IssueTicketWhereInput {
+  const base: Prisma.IssueTicketWhereInput = { orgId };
+
+  switch (filter) {
+    case "new":
+      return {
+        ...base,
+        status: TicketStatus.OPEN,
+        assignedToUserId: null,
+      };
+    case "progress":
+      return {
+        ...base,
+        status: TicketStatus.IN_PROGRESS,
+      };
+    case "resolved":
+      return {
+        ...base,
+        status: {
+          in: [TicketStatus.RESOLVED, TicketStatus.CLOSED],
+        },
+      };
+    case "cancelled":
+      return {
+        ...base,
+        status: TicketStatus.CANCELLED,
+      };
+    default:
+      return base;
+  }
+}
+
 export function filterIssuesByStatus(
   issues: OrgIssue[],
   filter: IssueStatusFilter,
@@ -128,7 +163,10 @@ export function canAssignCaretakerRole(role: string) {
   );
 }
 
-export function getIssueUnitLabel(issue: Pick<OrgIssue, "property" | "unit">) {
+export function getIssueUnitLabel(issue: {
+  property?: { name: string } | null;
+  unit?: { houseNo: string; property?: { name: string } | null } | null;
+}) {
   if (issue.unit?.property?.name && issue.unit.houseNo) {
     return `${issue.unit.property.name} • Unit ${issue.unit.houseNo}`;
   }

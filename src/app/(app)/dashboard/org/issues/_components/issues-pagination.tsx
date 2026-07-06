@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { DeferredLink } from "@/components/navigation/app-links";
 import type { IssueStatusFilter } from "../_lib/types";
 import { buildIssuesHref } from "../_lib/helpers";
 
@@ -31,12 +31,12 @@ function PaginationLink({
       : "border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50";
 
   return (
-    <Link
+    <DeferredLink
       href={buildIssuesHref(page, selectedIssueId, activeFilter)}
       className={`inline-flex items-center rounded-[16px] border px-3 py-2 text-sm font-medium ${active}`}
     >
       {children}
-    </Link>
+    </DeferredLink>
   );
 }
 

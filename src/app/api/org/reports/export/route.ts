@@ -1,3 +1,4 @@
+import { safeApiErrorResponse } from "@/lib/errors/server-error-log";
 import { csvResponse } from "@/lib/csv";
 import { DataExportTooLargeError } from "@/lib/data-export/limits";
 import { requireManagementAccess } from "@/lib/permissions/guards";
@@ -50,7 +51,14 @@ export async function GET(request: Request) {
       );
     }
 
-    throw error;
+    return Response.json(
+      safeApiErrorResponse(
+        "org.reports.export",
+        error,
+        "Could not generate the report export.",
+      ),
+      { status: 500 },
+    );
   }
 
   const fileName = `estatedesk-${kind}-${period ?? "current"}.csv`;

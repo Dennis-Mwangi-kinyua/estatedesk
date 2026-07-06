@@ -66,13 +66,13 @@ export default async function TenantDashboardPage() {
         <section className="ios-panel rounded-[28px] p-4 sm:p-5">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Tenant account
               </p>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight text-neutral-950 sm:text-3xl">
+              <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 No active house linked
               </h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
                 Your account is still available, but your previous lease has
                 been closed. Current property activity is hidden until an
                 organization assigns a new house, creates a new tenant profile,
@@ -98,10 +98,10 @@ export default async function TenantDashboardPage() {
         <section className="ios-panel rounded-[28px] p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-base font-semibold text-neutral-950">
+              <h2 className="text-base font-semibold text-foreground">
                 Previous houses
               </h2>
-              <p className="mt-1 text-sm text-neutral-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 These are historical tenancy records. They do not expose current
                 unit activity after move-out.
               </p>
@@ -113,21 +113,21 @@ export default async function TenantDashboardPage() {
 
           <div className="mt-4 grid gap-3 lg:grid-cols-2">
             {history.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-neutral-200 bg-white p-5 text-sm text-neutral-500">
+              <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-sm text-muted-foreground">
                 No previous house history has been recorded yet.
               </div>
             ) : (
               history.map((record) => (
                 <article
                   key={record.id}
-                  className="rounded-2xl border border-neutral-200 bg-white p-4"
+                  className="rounded-2xl border border-border bg-card p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-neutral-950">
+                      <p className="truncate text-sm font-semibold text-foreground">
                         {record.propertyName ?? record.org.name}
                       </p>
-                      <p className="mt-1 text-xs text-neutral-500">
+                      <p className="mt-1 text-xs text-muted-foreground">
                         Unit {record.unitHouseNo ?? "—"}
                         {record.buildingName ? ` • ${record.buildingName}` : ""}
                       </p>
@@ -226,8 +226,8 @@ function HistoryStat({
     <div className="ios-card rounded-[24px] p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-medium text-neutral-500">{label}</p>
-          <p className="mt-1 text-xl font-bold text-neutral-950">{value}</p>
+          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+          <p className="mt-1 text-xl font-bold text-foreground">{value}</p>
         </div>
         <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-neutral-950 text-white">
           <Icon className="h-[18px] w-[18px]" />
@@ -240,8 +240,8 @@ function HistoryStat({
 function HistoryMiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl bg-neutral-50 px-3 py-2 ring-1 ring-neutral-200">
-      <p className="truncate text-[11px] font-medium text-neutral-500">{label}</p>
-      <p className="mt-1 truncate text-xs font-bold text-neutral-950">{value}</p>
+      <p className="truncate text-[11px] font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 truncate text-xs font-bold text-foreground">{value}</p>
     </div>
   );
 }

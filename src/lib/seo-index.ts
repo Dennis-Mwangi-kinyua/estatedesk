@@ -10,7 +10,7 @@ export const marketCoverageItems = [
     title: "Property management software in Kenya",
     href: "/property-management-software-kenya",
     description:
-      "For landlords, agents, caretakers, and property managers handling rent, tenants, water billing, maintenance, inspections, vacancies, and reports in Kenya.",
+      "In-depth guide for landlords, agents, caretakers, and property managers handling rent, tenants, water billing, maintenance, inspections, vacancies, reports, and Kenyan rental workflows with practical scenarios and problem-solving content.",
     keywords: [
       "property management software Kenya",
       "landlord software Kenya",
@@ -82,12 +82,28 @@ export const marketCoverageItems = [
     title: "EstateDesk services",
     href: "/services",
     description:
-      "A feature overview for tenant management, leases, rent, water billing, inspections, maintenance, staff permissions, and reporting.",
+      "Feature overview plus workflow scenarios for tenant management, leases, rent, water billing, caretaker field operations, offline meter capture, maintenance SLAs, inspections, vendor dispatch, staff permissions, reporting, and connected rental operations.",
     keywords: [
       "property management services software",
       "tenant management software",
       "lease management software",
       "caretaker management software",
+      "caretaker field operations software",
+      "offline meter reading app",
+      "property maintenance SLA software",
+    ],
+  },
+  {
+    title: "Property management guides",
+    href: "/guides",
+    description:
+      "Long-form EstateDesk guides on rent tracking, water billing, caretaker workflows, tenant issues, vacancy marketing, diaspora landlords, move-outs, and Kenya rental operations.",
+    keywords: [
+      "property management guides",
+      "rent tracking guide",
+      "water billing guide Kenya",
+      "caretaker workflow guide",
+      "tenant maintenance guide",
     ],
   },
   {

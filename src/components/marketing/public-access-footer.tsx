@@ -8,6 +8,7 @@ const footerLinks = [
   { href: "/landlord-software", label: "Landlords" },
   { href: "/rent-tracking-software", label: "Rent tracking" },
   { href: "/water-billing-software", label: "Water billing" },
+  { href: "/guides", label: "Guides" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
   { href: "/security", label: "Security" },

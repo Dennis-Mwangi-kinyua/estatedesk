@@ -5,6 +5,7 @@ import { hash } from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { safeServerActionError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { requireCurrentOrgId } from "@/lib/auth/org";
@@ -188,10 +189,13 @@ export async function createCaretakerAction(
       }
     }
 
-    const message =
-      error instanceof Error ? error.message : "Failed to create caretaker.";
-
-    return { error: message };
+    return {
+      error: safeServerActionError(
+        "createCaretakerAction",
+        error,
+        "Failed to create caretaker.",
+      ),
+    };
   }
 
   revalidatePath("/staff");

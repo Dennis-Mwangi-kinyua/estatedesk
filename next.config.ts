@@ -2,6 +2,47 @@ import type { NextConfig } from "next";
 
 const isProduction = process.env.NODE_ENV === "production";
 
+function vacancyImageRemotePatterns() {
+  const patterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
+    {
+      protocol: "https",
+      hostname: "**.amazonaws.com",
+      pathname: "/**",
+    },
+  ];
+
+  const publicBaseUrl = process.env.S3_PUBLIC_BASE_URL?.trim();
+  if (publicBaseUrl) {
+    try {
+      const { hostname } = new URL(publicBaseUrl);
+      patterns.push({
+        protocol: "https",
+        hostname,
+        pathname: "/**",
+      });
+    } catch {
+      // Ignore invalid S3_PUBLIC_BASE_URL values at build time.
+    }
+  }
+
+  const bucket = process.env.S3_BUCKET ?? process.env.S3_BUCKET_NAME;
+  const region = process.env.S3_REGION?.trim();
+  if (bucket && region) {
+    patterns.push({
+      protocol: "https",
+      hostname: `${bucket}.s3.${region}.amazonaws.com`,
+      pathname: "/**",
+    });
+    patterns.push({
+      protocol: "https",
+      hostname: `s3.${region}.amazonaws.com`,
+      pathname: `/${bucket}/**`,
+    });
+  }
+
+  return patterns;
+}
+
 const cspDirectives = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -46,6 +87,7 @@ const SECURITY_HEADERS = [
       "camera=()",
       "microphone=()",
       "geolocation=(self)",
+      "display-capture=()",
       "payment=()",
       "usb=()",
       "fullscreen=(self)",
@@ -81,8 +123,13 @@ const PUBLIC_FAST_EDGE_CACHE_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg"],
+  images: {
+    remotePatterns: vacancyImageRemotePatterns(),
+  },
   experimental: {
     cpus: 1,
+    optimizePackageImports: ["lucide-react", "react-icons"],
   },
   async redirects() {
     return [
@@ -202,6 +249,18 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/contact",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/guides",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/guides/:path*",
+        headers: PUBLIC_EDGE_CACHE_HEADERS,
+      },
+      {
+        source: "/property-management-markets",
         headers: PUBLIC_EDGE_CACHE_HEADERS,
       },
       {

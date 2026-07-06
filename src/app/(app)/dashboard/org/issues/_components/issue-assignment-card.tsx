@@ -16,7 +16,7 @@ export function IssueAssignmentCard({
   caretakers: CaretakerOption[];
 }) {
   return (
-    <div className="w-full max-w-md rounded-[28px] border border-black/5 bg-[#fbfbfd] p-4 sm:p-5">
+    <div className="w-full max-w-md rounded-[28px] border border-border bg-muted p-4 sm:p-5">
       <div className="flex items-center gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm">
           <UserCheck className="h-5 w-5 text-neutral-700" />

@@ -3,7 +3,7 @@ import { ShieldAlert } from "lucide-react";
 
 export default function AccessDeniedPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7] p-4">
+    <div className="ed-theme-page flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
       <section className="ios-panel w-full max-w-xl overflow-hidden rounded-[32px] p-6 text-center">
         <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-[36px] bg-neutral-950 text-white shadow-xl">
           <div className="relative">

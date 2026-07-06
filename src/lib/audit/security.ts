@@ -3,6 +3,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { headers } from "next/headers";
+import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import type { AppSession } from "@/lib/auth/session";
 
@@ -82,7 +83,7 @@ export async function auditDeniedAccess(input: {
       },
     });
   } catch (error) {
-    console.error("Failed to write denied access audit log:", error);
+    logServerError("audit.deniedAccess", error);
   }
 }
 
@@ -157,7 +158,11 @@ export async function writeAuditLog(input: {
       },
     });
   } catch (error) {
-    console.error("Failed to write audit log:", error);
+    logServerError("audit.write", error, {
+      action: input.action,
+      entityType: input.entityType,
+      entityId: input.entityId,
+    });
   }
 }
 

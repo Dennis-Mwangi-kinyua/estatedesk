@@ -25,6 +25,9 @@ const ORG_STAFF_ROUTES: Partial<Record<NotificationType, string>> = {
   MOVE_OUT_CLOSED: "/dashboard/org/notifications",
   ISSUE_CREATED: "/dashboard/org/issues",
   ISSUE_RESOLVED: "/dashboard/org/issues",
+  ACCOUNTING_REQUEST_SUBMITTED: "/dashboard/org/accounting/requests",
+  ACCOUNTING_REQUEST_APPROVED: "/dashboard/org/finance-requests",
+  ACCOUNTING_REQUEST_REJECTED: "/dashboard/org/finance-requests",
   GENERAL: "/dashboard/org/notifications",
 };
 
@@ -36,8 +39,11 @@ const CARETAKER_ROUTES: Partial<Record<NotificationType, string>> = {
   PAYMENT_VERIFIED: "/dashboard/caretaker/notifications",
   INSPECTION_SCHEDULED: "/dashboard/caretaker/inspections",
   MOVE_OUT_CLOSED: "/dashboard/caretaker/notifications",
-  ISSUE_CREATED: "/dashboard/caretaker/issues",
+  ISSUE_CREATED: "/dashboard/caretaker/today",
   ISSUE_RESOLVED: "/dashboard/caretaker/issues",
+  ACCOUNTING_REQUEST_SUBMITTED: "/dashboard/caretaker/notifications",
+  ACCOUNTING_REQUEST_APPROVED: "/dashboard/caretaker/finance-requests",
+  ACCOUNTING_REQUEST_REJECTED: "/dashboard/caretaker/finance-requests",
   GENERAL: "/dashboard/caretaker/notifications",
 };
 

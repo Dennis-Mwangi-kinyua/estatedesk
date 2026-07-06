@@ -1,3 +1,4 @@
+import { guidePublicIndexItems } from "@/lib/guides";
 import { absoluteUrl } from "@/lib/seo";
 
 export type PublicSiteIndexItem = {
@@ -6,9 +7,10 @@ export type PublicSiteIndexItem = {
   description: string;
   priority: string;
   changefreq: "daily" | "weekly" | "monthly";
+  lastmod?: string;
 };
 
-export const publicSiteIndexItems = [
+export const publicSiteIndexItems: readonly PublicSiteIndexItem[] = [
   {
     title: "Home",
     path: "/",
@@ -41,6 +43,14 @@ export const publicSiteIndexItems = [
     priority: "0.9",
     changefreq: "weekly",
   },
+  ...guidePublicIndexItems.map((item) => ({
+    title: item.title,
+    path: item.path,
+    description: item.description,
+    priority: item.priority,
+    changefreq: item.changefreq,
+    lastmod: item.lastmod,
+  })),
   {
     title: "Pricing",
     path: "/pricing",
@@ -185,7 +195,7 @@ export const publicSiteIndexItems = [
     priority: "0.5",
     changefreq: "monthly",
   },
-] as const satisfies readonly PublicSiteIndexItem[];
+];
 
 export function publicSiteIndexWithUrls() {
   return publicSiteIndexItems.map((item) => ({

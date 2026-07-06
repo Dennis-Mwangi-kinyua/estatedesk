@@ -3,6 +3,7 @@ import { PushNotificationSettingsPanel } from "@/components/pwa/push-notificatio
 
 type StaffSelfProfileViewProps = {
   title?: string;
+  variant?: "default" | "org";
   member: {
     role: string;
     employmentStartedAt: Date;
@@ -50,73 +51,162 @@ function formatMoney(amount: Prisma.Decimal | null | undefined, currency: string
 
 export function StaffSelfProfileView({
   title = "My staff profile",
+  variant = "default",
   member,
 }: StaffSelfProfileViewProps) {
   const profile = member.staffProfile;
+  const isOrg = variant === "org";
+  const shellClassName = isOrg
+    ? "overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm"
+    : "rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950";
+  const textMutedClassName = isOrg
+    ? "text-muted-foreground"
+    : "text-slate-500 dark:text-slate-400";
+  const textBodyClassName = isOrg
+    ? "text-muted-foreground"
+    : "text-slate-600 dark:text-slate-300";
+  const textTitleClassName = isOrg
+    ? "text-foreground"
+    : "text-slate-950 dark:text-white";
+  const infoBoxClassName = isOrg
+    ? "rounded-2xl border border-border bg-muted/10 p-4"
+    : "rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-900";
+  const infoLabelClassName = isOrg
+    ? "text-xs font-medium uppercase tracking-wide text-muted-foreground"
+    : "text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500";
+  const infoValueClassName = isOrg
+    ? "mt-1 break-words text-sm font-semibold text-foreground"
+    : "mt-1 break-words text-sm font-semibold text-slate-800 dark:text-slate-100";
 
   return (
-    <div className="space-y-5 text-slate-950 dark:text-slate-100">
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:p-6">
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+    <div className={`space-y-5 ${isOrg ? "text-card-foreground" : "text-slate-950 dark:text-slate-100"}`}>
+      <section className={`${shellClassName} p-5 sm:p-6`}>
+        <p className={`text-sm font-medium ${textMutedClassName}`}>
           {member.org.name}
         </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+        <h1 className={`mt-1 text-2xl font-semibold tracking-tight sm:text-3xl ${textTitleClassName}`}>
           {title}
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+        <p className={`mt-2 max-w-2xl text-sm leading-6 ${textBodyClassName}`}>
           View the profile details your organisation has recorded for your
           employment account.
         </p>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:p-6">
-          <h2 className="text-base font-semibold text-slate-950 dark:text-white">
+        <div className={`${shellClassName} p-5 sm:p-6`}>
+          <h2 className={`text-base font-semibold ${textTitleClassName}`}>
             Profile details
           </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Info label="Full name" value={member.user.fullName} />
-            <Info label="Username" value={member.user.username ?? "Not captured"} />
-            <Info label="Role" value={member.role} />
-            <Info label="Job title" value={profile?.jobTitle ?? "Not captured"} />
+            <Info
+              label="Full name"
+              value={member.user.fullName}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
+            />
+            <Info
+              label="Username"
+              value={member.user.username ?? "Not captured"}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
+            />
+            <Info
+              label="Role"
+              value={member.role}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
+            />
+            <Info
+              label="Job title"
+              value={profile?.jobTitle ?? "Not captured"}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
+            />
             <Info
               label="Education level"
               value={profile?.educationLevel ?? "Not captured"}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
             />
             <Info
               label="Salary"
               value={formatMoney(profile?.salaryAmount, profile?.salaryCurrency ?? "KES")}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
             />
             <Info
               label="National / employee ID"
               value={profile?.nationalId ?? "Not captured"}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
             />
             <Info
               label="Emergency contact"
               value={profile?.emergencyContact ?? "Not captured"}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
             />
           </div>
 
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-900">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+          <div className={infoBoxClassName}>
+            <p className={infoLabelClassName}>
               Notes
             </p>
-            <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
+            <p className={`mt-2 text-sm leading-6 ${isOrg ? "text-foreground" : "text-slate-700 dark:text-slate-200"}`}>
               {profile?.notes ?? "No staff profile notes have been captured."}
             </p>
           </div>
         </div>
 
-        <aside className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:p-6">
-          <h2 className="text-base font-semibold text-slate-950 dark:text-white">
+        <aside className={`${shellClassName} p-5 sm:p-6`}>
+          <h2 className={`text-base font-semibold ${textTitleClassName}`}>
             Account
           </h2>
           <div className="mt-4 space-y-3">
-            <Info label="Email" value={member.user.email ?? "Not captured"} />
-            <Info label="Phone" value={member.user.phone ?? "Not captured"} />
-            <Info label="Status" value={member.user.status} />
-            <Info label="Started" value={formatDate(member.employmentStartedAt)} />
-            <Info label="Last login" value={formatDate(member.user.lastLoginAt)} />
+            <Info
+              label="Email"
+              value={member.user.email ?? "Not captured"}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
+            />
+            <Info
+              label="Phone"
+              value={member.user.phone ?? "Not captured"}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
+            />
+            <Info
+              label="Status"
+              value={member.user.status}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
+            />
+            <Info
+              label="Started"
+              value={formatDate(member.employmentStartedAt)}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
+            />
+            <Info
+              label="Last login"
+              value={formatDate(member.user.lastLoginAt)}
+              labelClassName={infoLabelClassName}
+              valueClassName={infoValueClassName}
+              boxClassName={infoBoxClassName}
+            />
           </div>
         </aside>
       </section>
@@ -126,13 +216,25 @@ export function StaffSelfProfileView({
   );
 }
 
-function Info({ label, value }: { label: string; value: string }) {
+function Info({
+  label,
+  value,
+  labelClassName,
+  valueClassName,
+  boxClassName,
+}: {
+  label: string;
+  value: string;
+  labelClassName: string;
+  valueClassName: string;
+  boxClassName: string;
+}) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-900">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+    <div className={boxClassName}>
+      <p className={labelClassName}>
         {label}
       </p>
-      <p className="mt-1 break-words text-sm font-semibold text-slate-800 dark:text-slate-100">
+      <p className={valueClassName}>
         {value}
       </p>
     </div>

@@ -20,7 +20,7 @@ export function OrgDashboardHeader({
   onMenuClick,
 }: OrgDashboardHeaderProps) {
   return (
-    <header className="ed-shell-panel fixed left-0 right-0 top-0 z-[90] border-b lg:left-72">
+    <header className="ed-shell-panel fixed left-0 right-0 top-0 z-[110] border-b bg-card/95 shadow-sm backdrop-blur-xl lg:left-72">
       <div className="flex h-[76px] items-center justify-between gap-3 px-3 pt-safe sm:px-6 lg:h-16 lg:px-8 lg:pt-0">
         <div className="flex min-w-0 items-center gap-3">
           <button

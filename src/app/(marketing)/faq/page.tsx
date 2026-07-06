@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, HelpCircle, Search } from "lucide-react";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
+import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import {
   faqJsonLd,
   marketingFaqItems,
@@ -9,6 +10,7 @@ import {
   regionalFaqItems,
   searchIntentFaqItems,
 } from "@/components/marketing/seo-faq";
+import { guideTopicLink, sharedWorkflowScenarios } from "@/lib/content-depth/site-topics";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 
 export const metadata = publicPageMetadata({
@@ -131,14 +133,14 @@ export default function FaqPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f7f9fc] text-neutral-950">
+    <main className="ed-theme-page min-h-screen bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <PublicAccessHeader active="faq" />
 
-      <section className="border-b border-neutral-200 bg-white">
+      <section className="border-b border-neutral-200 bg-white dark:border-white/10 dark:bg-[#0b0f16]">
         <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-end lg:px-8 lg:py-16">
           <div className="min-w-0">
             <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-600">
@@ -238,6 +240,23 @@ export default function FaqPage() {
           ))}
         </div>
       </section>
+
+      <ContentDepthStack
+        scenarios={[...sharedWorkflowScenarios]}
+        scenariosTitle="Workflow scenarios behind the FAQ"
+        guidesTitle="Long-form guides and product paths"
+        guides={[
+          guideTopicLink("kenya-rental-operations"),
+          guideTopicLink("rent-tracking-workflow"),
+          guideTopicLink("tenant-issue-tracking"),
+          {
+            title: "Property management guides hub",
+            href: "/guides",
+            description:
+              "Browse all EstateDesk workflow guides for rent, water billing, caretakers, vacancies, and move-outs.",
+          },
+        ]}
+      />
 
       <PublicAccessFooter />
     </main>

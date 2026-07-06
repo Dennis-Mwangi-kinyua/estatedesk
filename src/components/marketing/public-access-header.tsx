@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
+  BookOpen,
   Building2,
   Home,
   LogIn,
@@ -18,7 +19,7 @@ import {
 import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 
 type PublicAccessHeaderProps = {
-  active?: "home" | "vacancies" | "services" | "pricing" | "contact" | "faq";
+  active?: "home" | "vacancies" | "services" | "pricing" | "contact" | "faq" | "guides";
   loginHref?: string;
   showPricing?: boolean;
 };
@@ -27,6 +28,7 @@ const publicLinks = [
   { href: "/vacancies", label: "Vacancies", key: "vacancies", icon: Home },
   { href: "/services", label: "Services", key: "services", icon: Search },
   { href: "/pricing", label: "Pricing", key: "pricing", icon: WalletCards },
+  { href: "/guides", label: "Guides", key: "guides", icon: BookOpen },
   { href: "/faq", label: "FAQ", key: "faq", icon: MessageCircleQuestion },
   { href: "/contact", label: "Contact", key: "contact", icon: Mail },
 ] as const;

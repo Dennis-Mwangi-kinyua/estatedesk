@@ -1,21 +1,24 @@
 import { cache } from "react";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { TicketStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import {
   HISTORY_PAGE_SIZE,
   ORG_ISSUE_ROLES,
+  STAGE_BOARD_COLUMN_LIMIT,
   orgIssueArgs,
   orgMembershipArgs,
   type CaretakerOption,
+  type IssueDetailPageData,
   type OrgIssuesPageData,
   type IssuesSearchParams,
+  type OrgIssue,
 } from "./types";
 import {
+  buildIssueFilterWhere,
   canAssignCaretakerRole,
   clampPage,
-  filterIssuesByStatus,
-  getNewIssueCount,
   normalizeIssueStatusFilter,
 } from "./helpers";
 
@@ -71,6 +74,50 @@ export const getCurrentOrgContext = cache(async function getCurrentOrgContext() 
   return fallbackMembership;
 });
 
+async function loadStageBoardIssues(
+  orgId: string,
+  activeFilter: ReturnType<typeof normalizeIssueStatusFilter>,
+): Promise<OrgIssue[]> {
+  const issueQuery = {
+    orderBy: [{ createdAt: "desc" as const }],
+    ...orgIssueArgs,
+  };
+
+  if (activeFilter !== "all") {
+    return prisma.issueTicket.findMany({
+      where: buildIssueFilterWhere(orgId, activeFilter),
+      ...issueQuery,
+      take: STAGE_BOARD_COLUMN_LIMIT * 4,
+    });
+  }
+
+  const [newIssues, progressIssues, resolvedIssues, cancelledIssues] =
+    await Promise.all([
+      prisma.issueTicket.findMany({
+        where: buildIssueFilterWhere(orgId, "new"),
+        ...issueQuery,
+        take: STAGE_BOARD_COLUMN_LIMIT,
+      }),
+      prisma.issueTicket.findMany({
+        where: buildIssueFilterWhere(orgId, "progress"),
+        ...issueQuery,
+        take: STAGE_BOARD_COLUMN_LIMIT,
+      }),
+      prisma.issueTicket.findMany({
+        where: buildIssueFilterWhere(orgId, "resolved"),
+        ...issueQuery,
+        take: STAGE_BOARD_COLUMN_LIMIT,
+      }),
+      prisma.issueTicket.findMany({
+        where: buildIssueFilterWhere(orgId, "cancelled"),
+        ...issueQuery,
+        take: STAGE_BOARD_COLUMN_LIMIT,
+      }),
+    ]);
+
+  return [...newIssues, ...progressIssues, ...resolvedIssues, ...cancelledIssues];
+}
+
 export async function getOrgIssuesPageData(
   searchParamsPromise?: Promise<IssuesSearchParams>,
 ): Promise<OrgIssuesPageData> {
@@ -79,45 +126,126 @@ export async function getOrgIssuesPageData(
   const requestedPage = Number(resolvedSearchParams.page ?? "1");
   const canAssignCaretaker = canAssignCaretakerRole(membership.role);
   const activeFilter = normalizeIssueStatusFilter(resolvedSearchParams.status);
+  const filterWhere = buildIssueFilterWhere(membership.orgId, activeFilter);
 
-  const [issues, caretakerMemberships] = await Promise.all([
-    prisma.issueTicket.findMany({
-      where: {
-        orgId: membership.orgId,
-      },
-      orderBy: [{ createdAt: "desc" }],
-      ...orgIssueArgs,
-      take: 100,
+  const [
+    totalFiltered,
+    totalIssues,
+    newIssues,
+    inProgressIssues,
+    resolvedIssues,
+    cancelledIssues,
+    issues,
+    selectedIssueById,
+    caretakers,
+  ] = await Promise.all([
+    prisma.issueTicket.count({ where: filterWhere }),
+    prisma.issueTicket.count({ where: { orgId: membership.orgId } }),
+    prisma.issueTicket.count({
+      where: buildIssueFilterWhere(membership.orgId, "new"),
     }),
-    prisma.membership.findMany({
+    prisma.issueTicket.count({
       where: {
         orgId: membership.orgId,
-        role: "CARETAKER",
-        org: {
-          deletedAt: null,
-          status: "ACTIVE",
-        },
-        user: {
-          deletedAt: null,
-        },
+        status: TicketStatus.IN_PROGRESS,
       },
-      select: {
-        userId: true,
-        user: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
+    }),
+    prisma.issueTicket.count({
+      where: buildIssueFilterWhere(membership.orgId, "resolved"),
+    }),
+    prisma.issueTicket.count({
+      where: {
+        orgId: membership.orgId,
+        status: TicketStatus.CANCELLED,
+      },
+    }),
+    loadStageBoardIssues(membership.orgId, activeFilter),
+    resolvedSearchParams.issueId
+      ? prisma.issueTicket.findFirst({
+          where: {
+            id: resolvedSearchParams.issueId,
+            orgId: membership.orgId,
           },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
+          ...orgIssueArgs,
+        })
+      : Promise.resolve(null),
+    loadCaretakerOptions(membership.orgId),
   ]);
 
-  const caretakers: CaretakerOption[] = Array.from(
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / HISTORY_PAGE_SIZE));
+  const currentPage = clampPage(requestedPage, totalPages);
+  const historyStart = (currentPage - 1) * HISTORY_PAGE_SIZE;
+
+  const paginatedIssues = await prisma.issueTicket.findMany({
+    where: filterWhere,
+    orderBy: [{ createdAt: "desc" }],
+    ...orgIssueArgs,
+    skip: historyStart,
+    take: HISTORY_PAGE_SIZE,
+  });
+
+  const historyEnd = Math.min(historyStart + HISTORY_PAGE_SIZE, totalFiltered);
+
+  const selectedIssue =
+    selectedIssueById ??
+    paginatedIssues.find(
+      (issue) => issue.id === resolvedSearchParams.issueId,
+    ) ??
+    paginatedIssues[0] ??
+    null;
+
+  return {
+    membership,
+    issues,
+    totalFiltered,
+    caretakers,
+    canAssignCaretaker,
+    selectedIssue,
+    paginatedIssues,
+    currentPage,
+    totalPages,
+    historyStart,
+    historyEnd,
+    stats: {
+      totalIssues,
+      newIssues,
+      inProgressIssues,
+      resolvedIssues,
+      cancelledIssues,
+    },
+    activeFilter,
+  };
+}
+
+async function loadCaretakerOptions(orgId: string): Promise<CaretakerOption[]> {
+  const caretakerMemberships = await prisma.membership.findMany({
+    where: {
+      orgId,
+      role: "CARETAKER",
+      org: {
+        deletedAt: null,
+        status: "ACTIVE",
+      },
+      user: {
+        deletedAt: null,
+      },
+    },
+    select: {
+      userId: true,
+      user: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return Array.from(
     new Map(
       caretakerMemberships.map((item) => [
         item.userId,
@@ -129,46 +257,37 @@ export async function getOrgIssuesPageData(
       ]),
     ).values(),
   );
+}
 
-  const filteredIssues = filterIssuesByStatus(issues, activeFilter);
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredIssues.length / HISTORY_PAGE_SIZE),
-  );
-  const currentPage = clampPage(requestedPage, totalPages);
-  const historyStart = (currentPage - 1) * HISTORY_PAGE_SIZE;
-  const historyEnd = historyStart + HISTORY_PAGE_SIZE;
-  const paginatedIssues = filteredIssues.slice(historyStart, historyEnd);
+export async function getIssueDetailPageData(
+  issueId: string,
+  orgId: string,
+): Promise<IssueDetailPageData> {
+  const membership = await getCurrentOrgContext();
 
-  const latestIssue = filteredIssues[0] ?? null;
-  const selectedIssue =
-    filteredIssues.find((issue) => issue.id === resolvedSearchParams.issueId) ??
-    latestIssue;
+  if (membership.orgId !== orgId) {
+    notFound();
+  }
+
+  const [issue, caretakers] = await Promise.all([
+    prisma.issueTicket.findFirst({
+      where: {
+        id: issueId,
+        orgId,
+      },
+      ...orgIssueArgs,
+    }),
+    loadCaretakerOptions(orgId),
+  ]);
+
+  if (!issue) {
+    notFound();
+  }
 
   return {
     membership,
-    issues: filteredIssues,
+    issue,
     caretakers,
-    canAssignCaretaker,
-    selectedIssue,
-    paginatedIssues,
-    currentPage,
-    totalPages,
-    historyStart,
-    historyEnd,
-    stats: {
-      totalIssues: issues.length,
-      newIssues: getNewIssueCount(issues),
-      inProgressIssues: issues.filter(
-        (issue) => issue.status === "IN_PROGRESS",
-      ).length,
-      resolvedIssues: issues.filter(
-        (issue) => issue.status === "RESOLVED" || issue.status === "CLOSED",
-      ).length,
-      cancelledIssues: issues.filter(
-        (issue) => issue.status === "CANCELLED",
-      ).length,
-    },
-    activeFilter,
+    canAssignCaretaker: canAssignCaretakerRole(membership.role),
   };
 }

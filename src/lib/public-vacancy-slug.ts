@@ -1,7 +1,7 @@
-import { decodePublicId, encodePublicId } from "./public-id";
+import { decodePublicId, isEncodedPublicId } from "./public-id";
 
 const VACANCY_SCOPE = "public-vacancy";
-const TOKEN_SEPARATOR = "--";
+const LEGACY_TOKEN_SEPARATOR = "--";
 
 function slugify(value: string) {
   return value
@@ -14,27 +14,56 @@ function slugify(value: string) {
 }
 
 export function vacancyPublicSlug(input: {
-  id: string;
   propertyName: string;
   houseNo: string;
 }) {
-  const label =
-    slugify(`${input.propertyName} unit ${input.houseNo}`) || "vacancy";
-
-  return `${label}${TOKEN_SEPARATOR}${encodePublicId(
-    input.id,
-    VACANCY_SCOPE
-  )}`;
+  return slugify(`${input.propertyName} unit ${input.houseNo}`) || "vacancy";
 }
 
-export function vacancyIdFromPublicSlug(value: string) {
-  const token = value.includes(TOKEN_SEPARATOR)
-    ? value.slice(value.lastIndexOf(TOKEN_SEPARATOR) + TOKEN_SEPARATOR.length)
-    : value;
+export function stripLegacyVacancySlug(slug: string) {
+  if (!slug.includes(LEGACY_TOKEN_SEPARATOR)) return slug;
+
+  return slug.slice(0, slug.lastIndexOf(LEGACY_TOKEN_SEPARATOR));
+}
+
+export function isLegacyVacancySlug(slug: string) {
+  if (!slug.includes(LEGACY_TOKEN_SEPARATOR)) return false;
+
+  const token = slug.slice(
+    slug.lastIndexOf(LEGACY_TOKEN_SEPARATOR) + LEGACY_TOKEN_SEPARATOR.length,
+  );
+
+  return isEncodedPublicId(token);
+}
+
+export function vacancyIdFromLegacySlug(slug: string) {
+  if (!isLegacyVacancySlug(slug)) return null;
+
+  const token = slug.slice(
+    slug.lastIndexOf(LEGACY_TOKEN_SEPARATOR) + LEGACY_TOKEN_SEPARATOR.length,
+  );
 
   try {
     return decodePublicId(token, VACANCY_SCOPE);
   } catch {
-    return value;
+    return null;
   }
+}
+
+export function isRawDatabaseId(value: string) {
+  return /^c[a-z0-9]{20,}$/i.test(value);
+}
+
+export function vacancyOgImagePath(publicSlug: string) {
+  return `/api/og/vacancy/${encodeURIComponent(publicSlug)}`;
+}
+
+/** @deprecated Use resolveVacancyUnitIdFromSlug for lookups. */
+export function vacancyIdFromPublicSlug(value: string) {
+  const legacyId = vacancyIdFromLegacySlug(value);
+  if (legacyId) return legacyId;
+
+  if (isRawDatabaseId(value)) return value;
+
+  return stripLegacyVacancySlug(value);
 }

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { BadgeCheck, FileSignature } from "lucide-react";
+import { auditSensitivePageView } from "@/lib/audit/sensitive-pages";
 import { getLeaseSigningContext, recordLeaseSignatureView } from "@/lib/leases/signing";
 import { storage } from "@/lib/storage";
 import { declineLeaseAction, signLeaseAction } from "./actions";
@@ -18,6 +19,7 @@ export default async function SignLeasePage({ params }: { params: Promise<{ toke
   const session = await getUserSession();
   if (!session) return <main className="grid min-h-screen place-items-center bg-neutral-100 p-4"><section className="max-w-md rounded-2xl border bg-white p-7"><h1 className="text-2xl font-bold">Login verification required</h1><p className="mt-3 text-sm text-neutral-600">Sign in to the EstateDesk account assigned to this request. You will return here automatically.</p><Link href={`/login?returnTo=${encodeURIComponent(`/sign-lease/${token}`)}`} className="mt-5 inline-flex rounded-lg bg-neutral-950 px-4 py-2 text-sm font-bold text-white">Sign in</Link></section></main>;
   if (!signer.userId || signer.userId !== session.userId) return <main className="grid min-h-screen place-items-center bg-neutral-100 p-4"><section className="max-w-md rounded-2xl border bg-white p-7"><h1 className="text-2xl font-bold">Wrong account</h1><p className="mt-3 text-sm text-neutral-600">This signing request belongs to another authenticated user.</p></section></main>;
+  await auditSensitivePageView(session, `/sign-lease/${token}`);
   const headerStore = await headers();
   await recordLeaseSignatureView(signer.id, signer.envelopeId, headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ?? headerStore.get("x-real-ip"), headerStore.get("user-agent"));
   const { envelope } = signer;

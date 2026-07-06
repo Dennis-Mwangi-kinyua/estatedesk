@@ -1,3 +1,4 @@
+import { safeApiErrorResponse } from "@/lib/errors/server-error-log";
 import { csvResponse } from "@/lib/csv";
 import { DataExportTooLargeError } from "@/lib/data-export/limits";
 import { requireOrgRole } from "@/lib/permissions/guards";
@@ -43,6 +44,13 @@ export async function GET(request: Request) {
       );
     }
 
-    throw error;
+    return Response.json(
+      safeApiErrorResponse(
+        "org.reports.reconciliation",
+        error,
+        "Could not generate the reconciliation report.",
+      ),
+      { status: 500 },
+    );
   }
 }

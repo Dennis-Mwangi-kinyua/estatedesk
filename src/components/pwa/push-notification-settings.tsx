@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { safeClientMessage } from "@/lib/errors/client-safe-error";
 import { BellRing, BellOff, Send, Smartphone } from "lucide-react";
 import {
   ensureServiceWorkerRegistration,
@@ -24,9 +25,12 @@ type PushConfig = {
 
 export function PushNotificationSettings({
   pushConfig,
+  variant = "default",
 }: {
   pushConfig: PushConfig;
+  variant?: "default" | "theme";
 }) {
+  const isTheme = variant === "theme";
   const [state, setState] = useState<PushSettingsState>("checking");
   const [pending, setPending] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -166,11 +170,7 @@ export function PushNotificationSettings({
 
       setMessage("Test alert sent. Check this device for the notification.");
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Test alert could not be sent.",
-      );
+      setMessage(safeClientMessage(error, "Test alert could not be sent."));
     } finally {
       setTesting(false);
     }
@@ -208,17 +208,36 @@ export function PushNotificationSettings({
       ? "On iPhone or iPad, add EstateDesk to your Home Screen first, then enable alerts from this profile."
       : null;
 
+  const shellClassName = isTheme
+    ? "p-5 sm:p-6"
+    : "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:p-6";
+  const titleClassName = isTheme
+    ? "text-base font-semibold text-foreground"
+    : "text-base font-semibold text-slate-950 dark:text-white";
+  const bodyClassName = isTheme
+    ? "mt-1 text-sm leading-6 text-muted-foreground"
+    : "mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300";
+  const mutedTextClassName = isTheme
+    ? "text-sm text-muted-foreground"
+    : "text-sm text-slate-500 dark:text-slate-400";
+  const messageClassName = isTheme
+    ? "mt-3 text-sm text-muted-foreground"
+    : "mt-3 text-sm text-slate-600 dark:text-slate-300";
+  const secondaryButtonClassName = isTheme
+    ? "inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted/30 disabled:opacity-60"
+    : "inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:opacity-60 dark:border-white/15 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800";
+
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:p-6">
+    <section className={shellClassName}>
       <div className="flex items-start gap-3">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-200">
           <Smartphone className="h-5 w-5" />
         </div>
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-slate-950 dark:text-white">
+          <h2 className={titleClassName}>
             App alerts
           </h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+          <p className={bodyClassName}>
             Receive payment, issue, inspection, and workflow alerts on this device.
           </p>
         </div>
@@ -246,7 +265,7 @@ export function PushNotificationSettings({
               type="button"
               onClick={disablePushNotifications}
               disabled={pending || testing}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:opacity-60 dark:border-white/15 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
+              className={secondaryButtonClassName}
             >
               <BellOff className="h-4 w-4" />
               {pending ? "Updating..." : "Disable alerts"}
@@ -267,13 +286,13 @@ export function PushNotificationSettings({
         ) : null}
 
         {state === "unsupported" ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className={mutedTextClassName}>
             This browser does not support push alerts.
           </p>
         ) : null}
 
         {state === "disabled" ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className={mutedTextClassName}>
             Push alerts are not configured for this environment yet.
           </p>
         ) : null}
@@ -285,12 +304,12 @@ export function PushNotificationSettings({
         ) : null}
 
         {state === "checking" ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">Checking alert support...</p>
+          <p className={mutedTextClassName}>Checking alert support...</p>
         ) : null}
       </div>
 
       {message ? (
-        <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">{message}</p>
+        <p className={messageClassName}>{message}</p>
       ) : null}
     </section>
   );

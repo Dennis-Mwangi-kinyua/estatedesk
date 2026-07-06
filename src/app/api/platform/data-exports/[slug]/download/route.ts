@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { safeApiErrorResponse } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { buildOrganizationCsvZip } from "@/lib/data-export/org-export";
 import { DataExportTooLargeError } from "@/lib/data-export/limits";
@@ -44,7 +45,14 @@ export async function GET(_request: Request, context: RouteContext) {
       );
     }
 
-    throw error;
+    return NextResponse.json(
+      safeApiErrorResponse(
+        "platform.dataExports.download",
+        error,
+        "Could not prepare the organization export.",
+      ),
+      { status: 500 },
+    );
   }
 
   await writeAuditLog({

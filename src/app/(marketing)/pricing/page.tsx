@@ -11,7 +11,9 @@ import {
   WalletCards,
   X,
 } from "lucide-react";
+import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
+import { siteContentDepth } from "@/lib/content-depth/site-topics";
 import { APP_PLAN_ORDER, APP_PLANS } from "@/lib/billing/plans";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 
@@ -122,14 +124,14 @@ export default function PricingPage() {
   };
 
   return (
-    <main className="min-h-dvh bg-[#f5f7fb] text-neutral-950">
+    <main className="ed-theme-page min-h-dvh bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }}
       />
       <PublicAccessHeader active="pricing" />
 
-      <section className="border-b border-neutral-200 bg-[linear-gradient(180deg,#ffffff_0%,#f5f7fb_100%)]">
+      <section className="border-b border-neutral-200 bg-[linear-gradient(180deg,#ffffff_0%,#f5f7fb_100%)] dark:border-white/10">
         <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6 lg:px-8 lg:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-600">
@@ -318,6 +320,15 @@ export default function PricingPage() {
           </div>
         </div>
       </section>
+
+      <ContentDepthStack
+        {...siteContentDepth}
+        editorialTitle="How pricing fits real property operations"
+        editorial={[
+          ...siteContentDepth.editorial ?? [],
+          "EstateDesk pricing pages are intentionally connected to workflow depth. Free works for small landlords establishing property and tenant records. Pro and Plus support growing rent, water billing, issue, inspection, and reporting needs. Custom and Enterprise plans exist for larger organizations that need rollout guidance, governance, and operational alignment across teams in Kenya, East Africa, Dubai, and remote landlord markets.",
+        ]}
+      />
 
       <section className="border-t border-neutral-200 bg-[#f8fafc] py-12 sm:py-14 lg:py-16">
         <div className="mx-auto max-w-4xl px-5 text-center sm:px-6 lg:px-8">

@@ -10,6 +10,8 @@ import {
   createDocumentIdentity,
   type DocumentIdentityType,
 } from "@/lib/documents/identity";
+import { ClientSafeError } from "@/lib/errors/client-safe-error";
+import { logServerError } from "@/lib/errors/server-error-log";
 
 type DocumentDb = PrismaClient | Prisma.TransactionClient;
 
@@ -106,9 +108,14 @@ export async function issueDocumentRecord(input: IssueDocumentInput) {
         continue;
       }
 
-      throw error;
+      logServerError("documents.issueRecord", error, {
+        orgId: input.orgId,
+        documentType: input.documentType,
+        entityId: input.entityId,
+      });
+      throw new ClientSafeError("Unable to issue the document right now.");
     }
   }
 
-  throw new Error("Unable to allocate a unique document identity.");
+  throw new ClientSafeError("Unable to allocate a unique document identity.");
 }

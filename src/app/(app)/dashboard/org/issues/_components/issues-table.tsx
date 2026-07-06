@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { DeferredLink } from "@/components/navigation/app-links";
+import { IssueSlaBadge } from "@/components/issues/issue-sla-badge";
 import type { OrgIssue } from "../_lib/types";
 import {
   buildIssuesHref,
@@ -20,9 +21,9 @@ export function IssuesTable({
   currentPage,
 }: IssuesTableProps) {
   return (
-    <div className="mt-5 hidden overflow-hidden rounded-[24px] border border-black/5 bg-white lg:block">
+    <div className="mt-5 hidden overflow-hidden rounded-[24px] border border-border bg-white lg:block">
       <table className="min-w-full text-sm">
-        <thead className="border-b border-neutral-200 bg-[#fcfcfd]">
+        <thead className="border-b border-neutral-200 bg-muted/50">
           <tr className="text-left text-neutral-500">
             <th className="px-5 py-4 font-medium">Issue</th>
             <th className="px-5 py-4 font-medium">Unit</th>
@@ -47,12 +48,12 @@ export function IssuesTable({
               >
                 <td className="px-5 py-4">
                   <div>
-                    <Link
+                    <DeferredLink
                       href={buildIssuesHref(currentPage, issue.id)}
                       className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
                     >
                       {issue.title}
-                    </Link>
+                    </DeferredLink>
                     <p className="mt-1 text-neutral-500">{issue.description}</p>
                   </div>
                 </td>
@@ -62,13 +63,20 @@ export function IssuesTable({
                 </td>
 
                 <td className="px-5 py-4">
-                  <span
-                    className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${getPriorityClasses(
-                      issue.priority,
-                    )}`}
-                  >
-                    {issue.priority}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${getPriorityClasses(
+                        issue.priority,
+                      )}`}
+                    >
+                      {issue.priority}
+                    </span>
+                    <IssueSlaBadge
+                      createdAt={issue.createdAt}
+                      priority={issue.priority}
+                      status={issue.status}
+                    />
+                  </div>
                 </td>
 
                 <td className="px-5 py-4">

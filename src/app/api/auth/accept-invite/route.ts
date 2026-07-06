@@ -2,7 +2,9 @@ import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import type { OrgRole, PlatformRole } from "@prisma/client";
+import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { setUserSession } from "@/lib/auth/session";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
 import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
@@ -47,7 +49,35 @@ function isJsonRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function getClientIp(request: Request) {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0]?.trim() || "unknown";
+
+  return request.headers.get("x-real-ip")?.trim() || "unknown";
+}
+
 export async function POST(request: Request) {
+  const rateLimit = await checkRateLimit({
+    key: `accept-invite:${getClientIp(request)}`,
+    limit: 10,
+    windowMs: 60_000,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Too many attempts. Please try again shortly.",
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+        },
+      },
+    );
+  }
+
   const body = (await request.json().catch(() => ({}))) as AcceptInviteBody;
   const token = readToken(body);
 
@@ -217,7 +247,14 @@ export async function POST(request: Request) {
       );
     }
 
-    throw error;
+    logServerError("accept-invite.transaction", error, { invitationId: invitation.id });
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Unable to accept invitation right now. Please try again shortly.",
+      },
+      { status: 500 },
+    );
   }
 
   await setUserSession({

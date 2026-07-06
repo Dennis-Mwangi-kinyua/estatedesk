@@ -1,5 +1,5 @@
+import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -36,13 +36,8 @@ async function getQueuedNotificationsCount() {
       },
     });
   } catch (error) {
-    console.error("Failed to load queued notifications count:", error);
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return 0;
-    }
-
-    throw error;
+    logServerError("platformReports.queuedNotifications", error);
+    return 0;
   }
 }
 
@@ -75,7 +70,7 @@ export default async function PlatformReportsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f6f4ef] text-stone-900">
+    <div className="ed-theme-page min-h-screen bg-background text-foreground text-stone-900">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
         <section className="overflow-hidden rounded-[32px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(249,247,242,0.96)_100%)] p-6 shadow-[0_18px_50px_rgba(28,25,23,0.06)] lg:p-7">
           <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr] xl:items-end">

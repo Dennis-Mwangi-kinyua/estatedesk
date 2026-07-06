@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import { HiOutlineArrowLeftOnRectangle } from "react-icons/hi2";
 import { tenantNavItems } from "./tenant-nav";
 import { isTenantRouteActive } from "./tenant-route";
 import { logoutAction } from "@/features/auth/actions/logout-action";
+import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 
 type TenantSidebarProps = {
   fullName: string;
@@ -31,7 +32,7 @@ export function TenantSidebar({ fullName, hasActiveLease }: TenantSidebarProps) 
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
                 Tenant Portal
               </p>
-              <h2 className="truncate text-sm font-semibold tracking-tight text-neutral-950 xl:text-[15px]">
+              <h2 className="truncate text-sm font-semibold tracking-tight text-foreground xl:text-[15px]">
                 {fullName}
               </h2>
             </div>
@@ -66,7 +67,7 @@ export function TenantSidebar({ fullName, hasActiveLease }: TenantSidebarProps) 
             const isActive = isTenantRouteActive(pathname, item.href);
 
             return (
-              <Link
+              <HoverPrefetchLink
                 key={item.href}
                 href={item.href}
                   className={`group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200 active:scale-[0.99] ${
@@ -88,14 +89,15 @@ export function TenantSidebar({ fullName, hasActiveLease }: TenantSidebarProps) 
                 <span className="min-w-0 truncate">{item.label}</span>
 
                 {isActive ? (
-                  <span className="ml-auto h-2 w-2 rounded-full bg-white/90" />
+                  <span className="ml-auto h-2 w-2 rounded-full bg-card/90" />
                 ) : null}
-              </Link>
+              </HoverPrefetchLink>
             );
           })}
         </nav>
 
-        <div className="mt-4 border-t border-neutral-200/70 pt-4">
+        <div className="mt-4 space-y-2 border-t border-neutral-200/70 pt-4">
+          <InAppHelpNav workspace="tenant" compact />
           <form action={logoutAction}>
             <button
               type="submit"

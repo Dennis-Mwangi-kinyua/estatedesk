@@ -44,10 +44,10 @@ export function TenantFooter() {
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate text-[11px] font-semibold tracking-tight text-neutral-900">
+                  <p className="truncate text-[11px] font-semibold tracking-tight text-foreground">
                     EstateDesk
                   </p>
-                  <p className="truncate text-[10px] text-neutral-500">
+                  <p className="truncate text-[10px] text-muted-foreground">
                     Secure mobile access
                   </p>
                 </div>
@@ -62,19 +62,19 @@ export function TenantFooter() {
         </div>
       </div>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-30 hidden border-t border-white/60 bg-white/78 backdrop-blur-2xl lg:block lg:left-[300px] xl:left-[320px]">
+      <footer className="fixed bottom-0 left-0 right-0 z-30 hidden border-t border-white/60 bg-card/90 backdrop-blur-2xl lg:block lg:left-[300px] xl:left-[320px]">
         <div className="px-4 py-2 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-xs font-semibold tracking-tight text-neutral-900">
+              <p className="text-xs font-semibold tracking-tight text-foreground">
                 EstateDesk
               </p>
-              <p className="text-[11px] text-neutral-500">
+              <p className="text-[11px] text-muted-foreground">
                 Secure tenant access
               </p>
             </div>
 
-            <div className="flex items-center gap-3 text-[11px] text-neutral-500">
+            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
               <span>© 2026 EstateDesk</span>
               <span className="text-neutral-300">•</span>
               <span>Privacy-first</span>

@@ -1,4 +1,5 @@
 import { TrustPage } from "@/components/marketing/trust-page";
+import { trustContentDepth } from "@/lib/content-depth/marketing-depth";
 import { publicPageMetadata } from "@/lib/seo";
 
 export const metadata = publicPageMetadata({
@@ -45,6 +46,7 @@ export default function DataProcessingPage() {
           ],
         },
       ]}
+      contentDepth={trustContentDepth}
     />
   );
 }

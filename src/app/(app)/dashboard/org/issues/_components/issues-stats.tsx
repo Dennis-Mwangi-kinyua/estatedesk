@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { DeferredLink } from "@/components/navigation/app-links";
 import type { ReactNode } from "react";
 import { CheckCircle2, Clock3, ListTodo, XCircle } from "lucide-react";
 import type {
@@ -27,15 +27,15 @@ function StatButton({
   const active = filter === activeFilter;
 
   return (
-    <Link
+    <DeferredLink
       href={buildIssuesHref(1, undefined, filter)}
       className={[
         "rounded-[24px] border p-4 shadow-sm transition active:scale-[0.99]",
         active
-          ? "border-neutral-950 bg-neutral-950 text-white"
+          ? "border-primary bg-primary text-primary-foreground"
           : accent
-            ? "border-amber-200 bg-amber-50 text-neutral-950 hover:bg-amber-100"
-            : "border-black/5 bg-white text-neutral-950 hover:bg-neutral-50",
+            ? "border-amber-200 bg-amber-50 text-foreground hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/30 dark:hover:bg-amber-950/50"
+            : "border-border bg-card text-foreground hover:bg-muted/30",
       ].join(" ")}
     >
       <div className="flex items-start justify-between gap-3">
@@ -43,7 +43,7 @@ function StatButton({
           <p
             className={[
               "text-xs font-medium uppercase tracking-[0.16em]",
-              active ? "text-white/70" : "text-neutral-500",
+              active ? "text-primary-foreground/70" : "text-muted-foreground",
             ].join(" ")}
           >
             {label}
@@ -53,13 +53,15 @@ function StatButton({
         <div
           className={[
             "flex h-10 w-10 items-center justify-center rounded-2xl",
-            active ? "bg-white/10 text-white" : "bg-black/[0.04] text-neutral-800",
+            active
+              ? "bg-primary-foreground/10 text-primary-foreground"
+              : "bg-muted/30 text-foreground",
           ].join(" ")}
         >
           {icon}
         </div>
       </div>
-    </Link>
+    </DeferredLink>
   );
 }
 

@@ -25,37 +25,37 @@ export function TenantDashboardStats({
   return (
     <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
       <div className="rounded-[26px] border border-neutral-200/80 bg-white p-4 shadow-sm">
-        <p className="text-sm font-medium text-neutral-500">Monthly Rent</p>
-        <p className="mt-2 text-xl font-semibold tracking-tight text-neutral-950 sm:text-2xl">
+        <p className="text-sm font-medium text-muted-foreground">Monthly Rent</p>
+        <p className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
           {formatCurrency(monthlyRent as never)}
         </p>
-        <p className="mt-1 text-xs text-neutral-500">📅 Due day {dueDay ?? "—"}</p>
+        <p className="mt-1 text-xs text-muted-foreground">📅 Due day {dueDay ?? "—"}</p>
       </div>
 
       <div className="rounded-[26px] border border-neutral-200/80 bg-white p-4 shadow-sm">
-        <p className="text-sm font-medium text-neutral-500">Water Bill</p>
-        <p className="mt-2 text-xl font-semibold tracking-tight text-neutral-950 sm:text-2xl">
+        <p className="text-sm font-medium text-muted-foreground">Water Bill</p>
+        <p className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
           {formatCurrency(latestWaterBill?.total as never)}
         </p>
-        <p className="mt-1 text-xs text-neutral-500">💧 {latestWaterBill?.period ?? "No recent bill"}</p>
+        <p className="mt-1 text-xs text-muted-foreground">💧 {latestWaterBill?.period ?? "No recent bill"}</p>
       </div>
 
       <div className="rounded-[26px] border border-neutral-200/80 bg-white p-4 shadow-sm">
-        <p className="text-sm font-medium text-neutral-500">Last Payment</p>
-        <p className="mt-2 text-xl font-semibold tracking-tight text-neutral-950 sm:text-2xl">
+        <p className="text-sm font-medium text-muted-foreground">Last Payment</p>
+        <p className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
           {formatCurrency(lastPayment?.amount as never)}
         </p>
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           ✅ {lastPayment ? formatDate(lastPayment.paidAt ?? lastPayment.createdAt) : "No payment yet"}
         </p>
       </div>
 
       <div className="rounded-[26px] border border-neutral-200/80 bg-white p-4 shadow-sm">
-        <p className="text-sm font-medium text-neutral-500">Open Issues</p>
-        <p className="mt-2 text-xl font-semibold tracking-tight text-neutral-950 sm:text-2xl">
+        <p className="text-sm font-medium text-muted-foreground">Open Issues</p>
+        <p className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
           {openIssuesCount}
         </p>
-        <p className="mt-1 text-xs text-neutral-500">🧰 Requests in progress</p>
+        <p className="mt-1 text-xs text-muted-foreground">🧰 Requests in progress</p>
       </div>
     </section>
   );

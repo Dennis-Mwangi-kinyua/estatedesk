@@ -65,6 +65,9 @@ model User {
   platformMessagesSent      PlatformMessage[]
   onboardingRequestsHandled OnboardingRequest[]     @relation("OnboardingRequestHandledBy")
   submittedRentalReturns    RentalIncomeReturn[]    @relation("RentalReturnSubmittedBy")
+  accountingRequestsSubmitted AccountingRequest[]   @relation("AccountingRequestSubmittedBy")
+  accountingRequestsReviewed  AccountingRequest[]   @relation("AccountingRequestReviewedBy")
+  accountingRequestEvents     AccountingRequestEvent[] @relation("AccountingRequestEventActor")
   tenant                    Tenant?
   tenantActionLogs          TenantActionLog[]       @relation("TenantActionActor")
   tenantTransfersApproved   TenantTransferRequest[] @relation("TenantTransferReviewedBy")
@@ -156,6 +159,7 @@ model Organization {
   apiKeys                 ApiKey[]
   accountingAccounts      AccountingAccount[]
   accountingPeriods       AccountingPeriod[]
+  accountingRequests      AccountingRequest[]
   bankAccounts            AccountingBankAccount[]
   budgets                 AccountingBudget[]
   journalEntries          AccountingJournalEntry[]
@@ -1755,6 +1759,57 @@ model AccountingBudgetLine {
   @@index([accountId])
 }
 
+/// Worker-submitted finance ticket routed to accountants for approval.
+model AccountingRequest {
+  id                String                  @id @default(cuid())
+  orgId             String
+  requestNumber     String
+  type              AccountingRequestType   @default(OTHER)
+  status            AccountingRequestStatus @default(SUBMITTED)
+  title             String
+  description       String
+  amount            Decimal                 @db.Decimal(14, 2)
+  currencyCode      String                  @default("KES")
+  propertyId        String?
+  vendorName        String?
+  payeeName         String?
+  reference         String?
+  attachmentKey     String?
+  submittedByUserId String
+  reviewedByUserId  String?
+  reviewedAt        DateTime?
+  reviewerFeedback  String?
+  internalNotes     String?
+  vendorBillId      String?
+  cancelledAt       DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  org               Organization            @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  submittedBy       User                    @relation("AccountingRequestSubmittedBy", fields: [submittedByUserId], references: [id])
+  reviewedBy        User?                   @relation("AccountingRequestReviewedBy", fields: [reviewedByUserId], references: [id])
+  events            AccountingRequestEvent[]
+
+  @@unique([orgId, requestNumber])
+  @@index([orgId, status, createdAt])
+  @@index([submittedByUserId, createdAt])
+  @@index([orgId, submittedByUserId, status])
+}
+
+/// Status history and feedback trail for an accounting request.
+model AccountingRequestEvent {
+  id          String                  @id @default(cuid())
+  requestId   String
+  actorUserId String?
+  status      AccountingRequestStatus
+  message     String?
+  createdAt   DateTime                @default(now())
+  request     AccountingRequest       @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  actor       User?                   @relation("AccountingRequestEventActor", fields: [actorUserId], references: [id])
+
+  @@index([requestId, createdAt])
+  @@index([actorUserId, createdAt])
+}
+
 /// Auditable expenditure register for platform, organization, and tenant-linked costs.
 model Expenditure {
   id               String              @id @default(cuid())
@@ -2565,7 +2620,27 @@ enum NotificationType {
   MOVE_OUT_CLOSED
   ISSUE_CREATED
   ISSUE_RESOLVED
+  ACCOUNTING_REQUEST_SUBMITTED
+  ACCOUNTING_REQUEST_APPROVED
+  ACCOUNTING_REQUEST_REJECTED
   GENERAL
+}
+
+enum AccountingRequestType {
+  REIMBURSEMENT
+  VENDOR_PAYMENT
+  PETTY_CASH
+  ADVANCE
+  OTHER
+}
+
+enum AccountingRequestStatus {
+  SUBMITTED
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  PAID
+  CANCELLED
 }
 
 enum AssetType {

@@ -66,5 +66,9 @@ export default async function OrgStaffProfilePage() {
     redirect("/dashboard/org");
   }
 
-  return <StaffSelfProfileView member={member} />;
+  return (
+    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+      <StaffSelfProfileView member={member} variant="org" />
+    </div>
+  );
 }

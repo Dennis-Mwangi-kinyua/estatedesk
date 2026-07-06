@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "EstateDesk",
+  "description": "Quick access, unread badges, and share-to-report for EstateDesk property management.",
+  "version": "1.0.0",
+  "icons": {
+    "192": "icons/icon-192.png",
+    "512": "icons/icon-512.png"
+  },
+  "action": {
+    "default_title": "EstateDesk",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "192": "icons/icon-192.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["alarms", "contextMenus", "storage", "tabs"],
+  "host_permissions": [
+    "https://estatedesk.co.ke/*",
+    "http://localhost:3000/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://estatedesk.co.ke/*",
+        "http://localhost:3000/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
