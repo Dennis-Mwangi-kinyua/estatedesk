@@ -6,6 +6,7 @@ import { requireUserSession } from "@/lib/auth/session";
 import { queueDuePaymentNotifications } from "@/lib/ledger";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { recordVacatedTenancy } from "@/lib/tenants/identity";
+import { postWaterBillAccrual } from "@/lib/accounting/billing";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 
 async function requireOrgReviewer() {
@@ -146,7 +147,7 @@ export async function approveMeterReading(formData: FormData) {
       },
     });
 
-    await tx.waterBill.upsert({
+    const waterBill = await tx.waterBill.upsert({
       where: {
         unitId_period: {
           unitId: reading.unitId,
@@ -176,7 +177,14 @@ export async function approveMeterReading(formData: FormData) {
         status: "ISSUED",
         notes: `Generated from approved meter reading for ${reading.unit.property.name} / Unit ${reading.unit.houseNo}.`,
       },
+      select: { id: true },
     });
+
+    try {
+      await postWaterBillAccrual(tx, waterBill.id, session.userId);
+    } catch {
+      // Accrual posting is best-effort until accounting is initialized.
+    }
 
     await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ tenantId: activeLease.tenantId, userId: activeLease.tenant.userId }], type: "WATER_BILL_ISSUED", title: "Water bill issued", message: `Your water bill for ${reading.period} has been issued for ${reading.unit.property.name} / Unit ${reading.unit.houseNo}.` });
 

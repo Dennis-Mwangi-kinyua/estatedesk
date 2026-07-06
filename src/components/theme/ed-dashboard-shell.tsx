@@ -2,10 +2,22 @@ import type { ReactNode } from "react";
 
 export function PageShell({ children }: { children: ReactNode }) {
   return (
-    <div className="ed-theme-page min-h-screen bg-background text-foreground">
-      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 xl:px-8">
-        {children}
-      </div>
+    <div className="mx-auto w-full max-w-7xl space-y-6 pb-24">
+      {children}
+    </div>
+  );
+}
+
+export function TenantWorkspace({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={["mx-auto w-full max-w-7xl space-y-6 pb-24", className].join(" ")}>
+      {children}
     </div>
   );
 }

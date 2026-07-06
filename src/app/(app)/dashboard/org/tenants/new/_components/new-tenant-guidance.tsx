@@ -27,7 +27,7 @@ export function NewTenantGuidance({
         <h2 className="text-sm font-semibold text-foreground">Current selection</h2>
         <div className="mt-3 space-y-2 text-sm text-muted-foreground">
           <p>
-            <span className="font-medium text-foreground">Step:</span> {step} of 4
+            <span className="font-medium text-foreground">Step:</span> {step} of 5
           </p>
           <p>
             <span className="font-medium text-foreground">Unit:</span>{" "}

@@ -9,8 +9,8 @@ export function StepPreview({ preview }: { preview: PreviewData | null }) {
   return (
     <div className={stepPanelClassName}>
       <SectionTitle
-        title="Preview before save"
-        description="Review the tenant profile and account details before you create it."
+        title="Review before save"
+        description="Confirm the tenant profile, login account, and assignment details before creating the record."
       />
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -43,6 +43,26 @@ export function StepPreview({ preview }: { preview: PreviewData | null }) {
             <p>
               <span className="font-medium text-foreground">Notes:</span>{" "}
               {preview?.notes || "—"}
+            </p>
+          </div>
+        </InfoCard>
+
+        <InfoCard title="Login account">
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <p>
+              <span className="font-medium text-foreground">Username:</span>{" "}
+              <span className="font-mono text-foreground">
+                {preview?.username || "—"}
+              </span>
+            </p>
+            <p>
+              <span className="font-medium text-foreground">Password:</span>{" "}
+              <span className="font-mono text-foreground">
+                {preview?.password || "—"}
+              </span>
+            </p>
+            <p className="text-xs leading-5">
+              The tenant must change this password on first sign-in.
             </p>
           </div>
         </InfoCard>
@@ -92,25 +112,11 @@ export function StepPreview({ preview }: { preview: PreviewData | null }) {
             </p>
           </div>
         </InfoCard>
+      </div>
 
-        <InfoCard title="Account details preview">
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p>
-              <span className="font-medium text-foreground">
-                Suggested username:
-              </span>{" "}
-              {preview?.usernamePreview || "—"}
-            </p>
-            <p>
-              <span className="font-medium text-foreground">Password:</span>{" "}
-              Temporary password will be generated on save
-            </p>
-            <p className="text-xs leading-5 text-muted-foreground">
-              If the suggested username is already taken, the saved username may
-              be adjusted automatically.
-            </p>
-          </div>
-        </InfoCard>
+      <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/70 px-4 py-3 text-sm leading-6 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200">
+        Saving will create the tenant profile, next of kin record, login account,
+        and unit assignment (if selected).
       </div>
     </div>
   );

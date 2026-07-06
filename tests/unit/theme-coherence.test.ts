@@ -16,6 +16,16 @@ describe("theme coherence", () => {
     assert.match(GLOBALS_CSS, /color:\s*var\(--foreground\)/);
   });
 
+  it("routes tenant portal through the org dashboard shell theme", () => {
+    const layout = readFileSync(
+      join(ROOT, "src/app/(app)/dashboard/tenant/layout.tsx"),
+      "utf8",
+    );
+
+    assert.match(layout, /TenantDashboardShell/);
+    assert.match(layout, /org-theme-content/);
+  });
+
   it("routes tenant dashboards through the shared theme shell", () => {
     const shell = readFileSync(
       join(ROOT, "src/components/theme/ed-dashboard-shell.tsx"),
@@ -32,7 +42,7 @@ describe("theme coherence", () => {
 
     assert.match(shell, /ed-theme-card/);
     assert.match(shell, /ed-theme-muted-panel/);
-    assert.match(lease, /PageShell/);
+    assert.match(lease, /PageShell|TenantWorkspace/);
     assert.match(notices, /PageShell/);
     assert.doesNotMatch(lease, /bg-\[#fafafa\]/);
     assert.doesNotMatch(notices, /border-black\/5/);

@@ -11,6 +11,7 @@ import { createTenantAction } from "@/features/tenants/actions/create-tenant-act
 import { FormActionsDesktop, FormActionsMobile } from "./_components/form-actions";
 import { NewTenantGuidance } from "./_components/new-tenant-guidance";
 import { NewTenantHeader } from "./_components/new-tenant-header";
+import { StepAccountDetails } from "./_components/step-account-details";
 import { StepChip } from "./_components/step-chip";
 import { StepNextOfKin } from "./_components/step-next-of-kin";
 import { StepPreview } from "./_components/step-preview";
@@ -20,9 +21,15 @@ import { TenantSuccessView } from "./_components/tenant-success-view";
 import { ErrorNotice, panelShellClassName, WarningNotice } from "./_components/ui-primitives";
 import { buildPreview } from "./_lib/build-preview";
 import { initialCreateTenantActionState, stepItems } from "./_lib/constants";
-import { getNextStep, getPreviousStep } from "./_lib/helpers";
+import {
+  buildUsernamePreview,
+  generateClientPassword,
+  getNextStep,
+  getPreviousStep,
+} from "./_lib/helpers";
 import type { NewTenantFormProps, PreviewData, Step } from "./_lib/types";
 import {
+  validateStepFour,
   validateStepOne,
   validateStepThree,
   validateStepTwo,
@@ -44,11 +51,26 @@ export function NewTenantForm({
   const [stepError, setStepError] = useState<string | null>(null);
   const [selectedUnitId, setSelectedUnitId] = useState<string>("");
   const [preview, setPreview] = useState<PreviewData | null>(null);
+  const [accountUsername, setAccountUsername] = useState("");
+  const [accountPassword, setAccountPassword] = useState("");
+  const [accountConfirmPassword, setAccountConfirmPassword] = useState("");
 
   const selectedUnit = useMemo(
     () => availableUnits.find((unit) => unit.id === selectedUnitId) ?? null,
     [availableUnits, selectedUnitId],
   );
+
+  function suggestUsername(form: HTMLFormElement) {
+    const fullName = String(new FormData(form).get("fullName") ?? "").trim();
+    if (!fullName) return;
+    setAccountUsername((current) => current || buildUsernamePreview(fullName));
+  }
+
+  function handleGeneratePassword() {
+    const password = generateClientPassword(10);
+    setAccountPassword(password);
+    setAccountConfirmPassword(password);
+  }
 
   function handleNext(event: MouseEvent<HTMLButtonElement>) {
     const form = event.currentTarget.form;
@@ -76,14 +98,19 @@ export function NewTenantForm({
         setStepError(error);
         return;
       }
+      suggestUsername(form);
     }
 
-    setStepError(null);
-
-    if (step === 3) {
+    if (step === 4) {
+      const error = validateStepFour(form);
+      if (error) {
+        setStepError(error);
+        return;
+      }
       setPreview(buildPreview(form, selectedUnit));
     }
 
+    setStepError(null);
     setStep((current) => getNextStep(current));
     setTimeout(() => {
       form.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -114,7 +141,7 @@ export function NewTenantForm({
         <section className={panelShellClassName}>
           <div className="border-b border-border bg-muted/10 px-4 py-4 sm:px-6">
             <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-              <div className="flex min-w-max gap-3 sm:grid sm:min-w-0 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="flex min-w-max gap-3 sm:grid sm:min-w-0 sm:grid-cols-2 lg:grid-cols-5">
                 {stepItems.map((item) => (
                   <StepChip
                     key={item.id}
@@ -164,6 +191,19 @@ export function NewTenantForm({
               </section>
 
               <section className={step === 4 ? "block" : "hidden"}>
+                <StepAccountDetails
+                  isPending={isPending}
+                  username={accountUsername}
+                  password={accountPassword}
+                  confirmPassword={accountConfirmPassword}
+                  onUsernameChange={setAccountUsername}
+                  onPasswordChange={setAccountPassword}
+                  onConfirmPasswordChange={setAccountConfirmPassword}
+                  onGeneratePassword={handleGeneratePassword}
+                />
+              </section>
+
+              <section className={step === 5 ? "block" : "hidden"}>
                 <StepPreview preview={preview} />
               </section>
 

@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { postRentChargeAccrual, postWaterBillAccrual } from "@/lib/accounting/billing";
 import { ensureAccountingFoundation, postJournalEntry } from "@/lib/accounting/engine";
 import { postVerifiedPayment } from "@/lib/accounting/payments";
+import { ensureAccountingSettings } from "@/lib/accounting/settings";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
 
@@ -27,6 +29,87 @@ async function accountingSession() {
   return requireOrgRole(["ADMIN", "MANAGER", "ACCOUNTANT"]);
 }
 
+export async function updateAccountingSettingsAction(formData: FormData) {
+  const session = await accountingSession();
+  const orgId = session.activeOrgId!;
+  const recognitionMode = text(formData, "recognitionMode");
+  const fiscalYearStartMonth = Number(text(formData, "fiscalYearStartMonth"));
+  const autoPostPayments = formData.get("autoPostPayments") === "on";
+  const autoPostBilling = formData.get("autoPostBilling") === "on";
+  const ownerStatementEmailEnabled = formData.get("ownerStatementEmailEnabled") === "on";
+  const ownerStatementEmailDayOfMonth = Number(text(formData, "ownerStatementEmailDayOfMonth"));
+
+  if (!["CASH", "ACCRUAL"].includes(recognitionMode)) {
+    throw new Error("Recognition mode must be cash or accrual.");
+  }
+
+  if (!Number.isInteger(fiscalYearStartMonth) || fiscalYearStartMonth < 1 || fiscalYearStartMonth > 12) {
+    throw new Error("Fiscal year start month must be between 1 and 12.");
+  }
+
+  if (
+    !Number.isInteger(ownerStatementEmailDayOfMonth) ||
+    ownerStatementEmailDayOfMonth < 1 ||
+    ownerStatementEmailDayOfMonth > 28
+  ) {
+    throw new Error("Owner statement send day must be between 1 and 28.");
+  }
+
+  await ensureAccountingSettings(prisma, orgId, {
+    recognitionMode: recognitionMode as "CASH" | "ACCRUAL",
+    fiscalYearStartMonth,
+    autoPostPayments,
+    autoPostBilling,
+    ownerStatementEmailEnabled,
+    ownerStatementEmailDayOfMonth,
+  });
+
+  revalidatePath(PATH);
+  revalidatePath(`${PATH}/settings`);
+  redirect(`${PATH}/settings?message=Accounting settings saved`);
+}
+
+export async function syncAccrualsAction() {
+  const session = await accountingSession();
+  const orgId = session.activeOrgId!;
+
+  await prisma.$transaction(
+    async (tx) => {
+      await ensureAccountingFoundation(tx, orgId);
+
+      const [rentCharges, waterBills] = await Promise.all([
+        tx.rentCharge.findMany({
+          where: { orgId, journalEntryId: null, balance: { gt: 0 } },
+          select: { id: true },
+          orderBy: { createdAt: "asc" },
+        }),
+        tx.waterBill.findMany({
+          where: {
+            orgId,
+            journalEntryId: null,
+            status: { in: ["ISSUED", "PAYMENT_PENDING", "DISPUTED"] },
+          },
+          select: { id: true },
+          orderBy: { createdAt: "asc" },
+        }),
+      ]);
+
+      for (const charge of rentCharges) {
+        await postRentChargeAccrual(tx, charge.id, session.userId);
+      }
+
+      for (const bill of waterBills) {
+        await postWaterBillAccrual(tx, bill.id, session.userId);
+      }
+    },
+    { timeout: 120_000 },
+  );
+
+  revalidatePath(PATH);
+  revalidatePath(`${PATH}/receivables`);
+  redirect(`${PATH}?message=Outstanding billing accruals synced to the ledger`);
+}
+
 export async function initializeAccountingAction() {
   const session = await accountingSession();
   await prisma.$transaction(
@@ -43,8 +126,31 @@ export async function initializeAccountingAction() {
       for (const payment of verifiedPayments) {
         await postVerifiedPayment(tx, payment.id, session.userId);
       }
+
+      const [rentCharges, waterBills] = await Promise.all([
+        tx.rentCharge.findMany({
+          where: { orgId: session.activeOrgId!, journalEntryId: null, balance: { gt: 0 } },
+          select: { id: true },
+        }),
+        tx.waterBill.findMany({
+          where: {
+            orgId: session.activeOrgId!,
+            journalEntryId: null,
+            status: { in: ["ISSUED", "PAYMENT_PENDING", "DISPUTED"] },
+          },
+          select: { id: true },
+        }),
+      ]);
+
+      for (const charge of rentCharges) {
+        await postRentChargeAccrual(tx, charge.id, session.userId);
+      }
+
+      for (const bill of waterBills) {
+        await postWaterBillAccrual(tx, bill.id, session.userId);
+      }
     },
-    { timeout: 60_000 },
+    { timeout: 120_000 },
   );
   revalidatePath(PATH);
   redirect(`${PATH}?message=Accounting ledger initialized and verified payments imported`);

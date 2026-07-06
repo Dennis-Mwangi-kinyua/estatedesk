@@ -1,6 +1,14 @@
 import { randomBytes } from "node:crypto";
 import type { Prisma } from "@prisma/client";
 
+export function normalizeUsername(value: string) {
+  return value.trim().toLowerCase();
+}
+
+export function isValidUsername(username: string) {
+  return /^[a-z0-9._-]{3,30}$/.test(username);
+}
+
 export function slugifyUsernameBase(fullName: string) {
   const normalized = fullName
     .normalize("NFKD")

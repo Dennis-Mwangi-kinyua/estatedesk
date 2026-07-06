@@ -22,19 +22,28 @@ export const stepItems: StepItem[] = [
   },
   {
     id: 4,
-    title: "Preview",
-    description: "Review before save",
+    title: "Login account",
+    description: "Username and password",
+  },
+  {
+    id: 5,
+    title: "Review",
+    description: "Confirm before save",
   },
 ];
 
 export const TENANT_SETUP_GUIDANCE = [
   {
-    title: "Preview before save",
-    text: "Step 4 shows the tenant profile, next of kin, unit assignment, and account details before you commit.",
+    title: "Set login credentials",
+    text: "Step 4 lets you choose the tenant username and password before anything is saved.",
+  },
+  {
+    title: "Review before save",
+    text: "Step 5 shows the full tenant profile, login account, next of kin, and unit assignment for final confirmation.",
   },
   {
     title: "After saving",
-    text: "The tenant profile, next of kin, and login account are created. Username and password are shown once.",
+    text: "The tenant profile, next of kin, and login account are created. Credentials are shown once on the success screen.",
   },
   {
     title: "Unit assignment",

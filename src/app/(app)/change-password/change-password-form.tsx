@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { ExternalLink, KeyRound, ShieldCheck } from "lucide-react";
+import { PasswordField } from "@/components/auth/password-field";
 import {
   changeInitialPasswordAction,
   type ChangePasswordState,
@@ -39,55 +40,37 @@ export function ChangePasswordForm({
 
       {requirePasswordChange ? (
         <>
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-900 dark:text-slate-100">
-              Temporary password
-            </span>
-            <div className={fieldShellClassName}>
-              <KeyRound className="h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" />
-              <input
-                name="currentPassword"
-                type="password"
-                autoComplete="current-password"
-                className="h-full min-w-0 flex-1 bg-transparent text-sm text-slate-950 caret-slate-950 outline-none placeholder:text-slate-400 dark:text-slate-50 dark:caret-slate-50 dark:placeholder:text-slate-500"
-                required
-              />
-            </div>
-          </label>
+          <PasswordField
+            label="Temporary password"
+            name="currentPassword"
+            autoComplete="current-password"
+            required
+            icon={KeyRound}
+            shellClassName={fieldShellClassName}
+            disabled={pending}
+          />
 
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-900 dark:text-slate-100">
-              New password
-            </span>
-            <div className={fieldShellClassName}>
-              <ShieldCheck className="h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" />
-              <input
-                name="newPassword"
-                type="password"
-                minLength={8}
-                autoComplete="new-password"
-                className="h-full min-w-0 flex-1 bg-transparent text-sm text-slate-950 caret-slate-950 outline-none placeholder:text-slate-400 dark:text-slate-50 dark:caret-slate-50 dark:placeholder:text-slate-500"
-                required
-              />
-            </div>
-          </label>
+          <PasswordField
+            label="New password"
+            name="newPassword"
+            autoComplete="new-password"
+            required
+            minLength={8}
+            icon={ShieldCheck}
+            shellClassName={fieldShellClassName}
+            disabled={pending}
+          />
 
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-900 dark:text-slate-100">
-              Confirm new password
-            </span>
-            <div className={fieldShellClassName}>
-              <ShieldCheck className="h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" />
-              <input
-                name="confirmPassword"
-                type="password"
-                minLength={8}
-                autoComplete="new-password"
-                className="h-full min-w-0 flex-1 bg-transparent text-sm text-slate-950 caret-slate-950 outline-none placeholder:text-slate-400 dark:text-slate-50 dark:caret-slate-50 dark:placeholder:text-slate-500"
-                required
-              />
-            </div>
-          </label>
+          <PasswordField
+            label="Confirm new password"
+            name="confirmPassword"
+            autoComplete="new-password"
+            required
+            minLength={8}
+            icon={ShieldCheck}
+            shellClassName={fieldShellClassName}
+            disabled={pending}
+          />
         </>
       ) : null}
 

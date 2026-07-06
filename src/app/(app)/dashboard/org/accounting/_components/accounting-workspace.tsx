@@ -18,6 +18,7 @@ import { AccountingRecentSection } from "./accounting-recent-section";
 import { AccountingSyncPayments } from "./accounting-sync-payments";
 import { AccountingTabShell } from "./accounting-tab-shell";
 import { AccountingTrialBalance } from "./accounting-trial-balance";
+import { AccountingSubNav } from "./accounting-sub-nav";
 import { AccountingVendorBillForm } from "./accounting-vendor-bill-form";
 import { AccountingVendorForm } from "./accounting-vendor-form";
 
@@ -41,6 +42,7 @@ export function AccountingWorkspace({
 
   return (
     <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+      <AccountingSubNav />
       <AccountingHeader
         data={data}
         message={message}
@@ -65,7 +67,7 @@ export function AccountingWorkspace({
                 activeEntry={entry}
                 expense={<AccountingExpenseForm data={data} />}
                 bill={<AccountingVendorBillForm data={data} />}
-                journal={<AccountingJournalForm data={data} />}
+                journal={<AccountingJournalForm />}
               />
             }
             payables={

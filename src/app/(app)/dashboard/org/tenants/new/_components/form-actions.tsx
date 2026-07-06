@@ -19,7 +19,7 @@ export function FormActionsDesktop({
   return (
     <div className="hidden border-t border-border pt-6 sm:block">
       <div className="flex items-center justify-between gap-4">
-        <div className="text-sm text-muted-foreground">Step {step} of 4</div>
+        <div className="text-sm text-muted-foreground">Step {step} of 5</div>
 
         <div className="flex gap-3">
           {step > 1 ? (
@@ -37,7 +37,7 @@ export function FormActionsDesktop({
             </Link>
           )}
 
-          {step < 4 ? (
+          {step < 5 ? (
             <button
               type="button"
               onClick={onNext}
@@ -52,7 +52,7 @@ export function FormActionsDesktop({
               disabled={isPending}
               className={buttonPrimaryClassName}
             >
-              {isPending ? "Creating tenant..." : "Save tenant and create account"}
+              {isPending ? "Creating tenant..." : "Create tenant and account"}
             </button>
           )}
         </div>
@@ -75,7 +75,7 @@ export function FormActionsMobile({
   return (
     <div className="border-t border-border pt-4 sm:hidden">
       <div className="space-y-3">
-        <div className="text-center text-sm text-muted-foreground">Step {step} of 4</div>
+        <div className="text-center text-sm text-muted-foreground">Step {step} of 5</div>
 
         <div className="grid grid-cols-2 gap-3">
           {step > 1 ? (
@@ -93,7 +93,7 @@ export function FormActionsMobile({
             </Link>
           )}
 
-          {step < 4 ? (
+          {step < 5 ? (
             <button
               type="button"
               onClick={onNext}
@@ -108,7 +108,7 @@ export function FormActionsMobile({
               disabled={isPending}
               className={buttonPrimaryClassName}
             >
-              {isPending ? "Creating..." : "Save tenant"}
+              {isPending ? "Creating..." : "Create tenant"}
             </button>
           )}
         </div>

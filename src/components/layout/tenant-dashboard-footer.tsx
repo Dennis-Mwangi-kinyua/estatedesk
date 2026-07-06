@@ -1,0 +1,40 @@
+import { DeferredLink } from "@/components/navigation/app-links";
+
+type TenantDashboardFooterProps = {
+  organizationName: string;
+};
+
+export function TenantDashboardFooter({
+  organizationName,
+}: TenantDashboardFooterProps) {
+  return (
+    <footer className="fixed bottom-0 left-0 right-0 z-[85] border-t border-white/60 bg-white/78 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/78 lg:left-72">
+      <div className="flex h-10 items-center justify-between px-4 sm:px-6 lg:px-8">
+        <p className="truncate text-[11px] text-neutral-500 dark:text-neutral-400">
+          © {new Date().getFullYear()} {organizationName}
+        </p>
+
+        <nav aria-label="Footer navigation" className="flex items-center gap-1">
+          <DeferredLink
+            href="/dashboard/tenant/profile"
+            className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
+          >
+            Profile
+          </DeferredLink>
+          <DeferredLink
+            href="/dashboard/tenant/payments"
+            className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
+          >
+            Payments
+          </DeferredLink>
+          <DeferredLink
+            href="/dashboard/security"
+            className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
+          >
+            Security
+          </DeferredLink>
+        </nav>
+      </div>
+    </footer>
+  );
+}

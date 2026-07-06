@@ -8,6 +8,7 @@ import {
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { notifyRecipients } from "@/lib/notifications/notify";
+import { postRentChargeAccrual } from "@/lib/accounting/billing";
 export {
   addMonthsToPeriod,
   daysPastDue,
@@ -116,6 +117,12 @@ export async function allocateRentPayment({
         balance: true,
       },
     });
+
+    try {
+      await postRentChargeAccrual(db, charge.id);
+    } catch {
+      // Accrual posting is best-effort until accounting is initialized.
+    }
 
     const balance = new Prisma.Decimal(charge.balance);
     if (balance.lte(0)) {

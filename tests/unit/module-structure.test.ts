@@ -53,7 +53,13 @@ const MODULAR_ROUTES: ModularRoute[] = [
     name: "tenant lease",
     page: "src/app/(app)/dashboard/tenant/lease/page.tsx",
     lib: ["queries.ts", "helpers.ts", "types.ts"],
-    components: ["lease-workspace.tsx", "lease-section.tsx"],
+    components: [
+      "lease-workspace.tsx",
+      "lease-header.tsx",
+      "lease-stats.tsx",
+      "active-lease-panel.tsx",
+      "lease-history-section.tsx",
+    ],
     maxPageLines: 40,
   },
   {

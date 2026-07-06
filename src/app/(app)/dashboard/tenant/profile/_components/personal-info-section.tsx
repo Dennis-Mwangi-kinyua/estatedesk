@@ -5,31 +5,35 @@ import {
   statusTone,
   yesNoTone,
 } from "../_lib/helpers";
-import type { getTenantProfileData } from "../_lib/queries";
+import type { TenantProfileRecord } from "../_lib/types";
 import { InfoRow } from "./info-row";
-import { SummaryTile } from "./summary-tile";
+import { panelShellClassName } from "./profile-ui";
 
-type PersonalInfoSectionProps = {
-  tenant: NonNullable<Awaited<ReturnType<typeof getTenantProfileData>>["tenant"]>;
-};
-
-export function PersonalInfoSection({ tenant }: PersonalInfoSectionProps) {
+export function PersonalInfoSection({ tenant }: { tenant: TenantProfileRecord }) {
   return (
-    <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-      <div className="xl:col-span-2 rounded-[28px] border border-neutral-200/80 bg-white/90 p-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)] backdrop-blur sm:p-5">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">Personal Information</p>
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">
-            Account and identity details
-          </h2>
-        </div>
+    <section className={panelShellClassName}>
+      <div className="border-b border-border px-5 py-4 sm:px-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          Identity
+        </p>
+        <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">
+          Personal information
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Contact and identity details on file with the property office.
+        </p>
+      </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <InfoRow label="Full Name" value={tenant.fullName} />
+      <div className="grid gap-0 divide-y divide-border sm:grid-cols-2 sm:divide-y-0">
+        <div className="divide-y divide-border sm:col-span-2 sm:grid sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+          <InfoRow label="Full name" value={tenant.fullName} />
           <InfoRow
-            label="Tenant Type"
+            label="Tenant type"
             value={tenant.type === "COMPANY" ? "Company" : "Individual"}
           />
+          {tenant.companyName ? (
+            <InfoRow label="Company name" value={tenant.companyName} />
+          ) : null}
           <InfoRow
             label="Phone"
             value={tenant.phone ?? ""}
@@ -54,71 +58,47 @@ export function PersonalInfoSection({ tenant }: PersonalInfoSectionProps) {
             maskedValue={maskText(tenant.kraPin, 1, 2)}
             reveal
           />
-
-          <div className="rounded-[22px] border border-neutral-200/80 bg-white/90 p-4 shadow-[0_4px_18px_rgba(15,23,42,0.04)] backdrop-blur">
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
-              Status
-            </p>
-            <div className="mt-2">
-              <span
-                className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium ${statusTone(
-                  tenant.status,
-                )}`}
-              >
-                {tenant.status}
-              </span>
-            </div>
-          </div>
-
-          <div className="rounded-[22px] border border-neutral-200/80 bg-white/90 p-4 shadow-[0_4px_18px_rgba(15,23,42,0.04)] backdrop-blur">
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
-              Data Consent
-            </p>
-            <div className="mt-2">
-              <span
-                className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium ${yesNoTone(
-                  tenant.dataConsent,
-                )}`}
-              >
-                {tenant.dataConsent ? "Granted" : "Not granted"}
-              </span>
-            </div>
-          </div>
-
-          <div className="rounded-[22px] border border-neutral-200/80 bg-white/90 p-4 shadow-[0_4px_18px_rgba(15,23,42,0.04)] backdrop-blur sm:col-span-2">
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
-              Marketing Consent
-            </p>
-            <div className="mt-2">
-              <span
-                className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium ${yesNoTone(
-                  tenant.marketingConsent,
-                )}`}
-              >
-                {tenant.marketingConsent ? "Granted" : "Not granted"}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
-      <div className="rounded-[28px] border border-neutral-200/80 bg-white/90 p-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)] backdrop-blur sm:p-5">
-        <p className="text-sm font-medium text-muted-foreground">Quick Summary</p>
-        <h2 className="text-lg font-semibold tracking-tight text-foreground">
-          Profile snapshot
-        </h2>
-
-        <div className="mt-4 space-y-3">
-          <SummaryTile label="Profile Name" value={tenant.fullName} />
-          <SummaryTile
-            label="Tenant Category"
-            value={tenant.type === "COMPANY" ? "Company" : "Individual"}
-          />
-          <SummaryTile label="Profile Status" value={tenant.status} />
-          <SummaryTile
-            label="Data Consent"
-            value={tenant.dataConsent ? "Granted" : "Not granted"}
-          />
+      <div className="border-t border-border px-5 py-4 sm:px-6">
+        <div className="flex flex-wrap gap-3">
+          <div className="rounded-2xl border border-border bg-muted/10 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Status
+            </p>
+            <span
+              className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusTone(
+                tenant.status,
+              )}`}
+            >
+              {tenant.status}
+            </span>
+          </div>
+          <div className="rounded-2xl border border-border bg-muted/10 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Data consent
+            </p>
+            <span
+              className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${yesNoTone(
+                tenant.dataConsent,
+              )}`}
+            >
+              {tenant.dataConsent ? "Granted" : "Not granted"}
+            </span>
+          </div>
+          <div className="rounded-2xl border border-border bg-muted/10 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Marketing consent
+            </p>
+            <span
+              className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${yesNoTone(
+                tenant.marketingConsent,
+              )}`}
+            >
+              {tenant.marketingConsent ? "Granted" : "Not granted"}
+            </span>
+          </div>
         </div>
       </div>
     </section>

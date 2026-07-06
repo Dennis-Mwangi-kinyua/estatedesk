@@ -7,6 +7,7 @@ import { ManualPaymentForm } from "@/app/(app)/dashboard/tenant/payments/_compon
 import { PaymentsHeader } from "@/app/(app)/dashboard/tenant/payments/_components/payments-header";
 import { PaymentsStats } from "@/app/(app)/dashboard/tenant/payments/_components/payments-stats";
 import { RecentPayments } from "@/app/(app)/dashboard/tenant/payments/_components/recent-payments";
+import { TaxChargesSection } from "@/app/(app)/dashboard/tenant/payments/_components/tax-charges-section";
 import { getTenantPaymentsData } from "@/app/(app)/dashboard/tenant/payments/_lib/queries";
 
 export default async function TenantPaymentsPage() {
@@ -41,6 +42,7 @@ export default async function TenantPaymentsPage() {
         <PaymentsStats data={data} />
         <LedgerCard data={data} />
         <RecentPayments data={data} />
+        <TaxChargesSection taxCharges={data.taxCharges} />
       </div>
     </PageShell>
   );

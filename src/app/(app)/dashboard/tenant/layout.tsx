@@ -1,9 +1,9 @@
 import { ReactNode } from "react";
+import { TenantDashboardShell } from "@/components/layout/tenant-dashboard-shell";
 import { getCurrentTenantShell } from "@/lib/tenant/get-current-tenant";
+import { getTenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";
+import { requireUserSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { TenantHeader } from "./tenant-header";
-import { TenantSidebar } from "./tenant-sidebar";
-import { TenantFooter } from "./tenant-footer";
 import { requireActiveSubscription } from "@/lib/billing/subscription-access";
 import { SubscriptionWarning } from "@/components/billing/subscription-warning";
 import { UnreadNotificationAlertsPanel } from "@/components/notifications/unread-notification-alerts-panel";
@@ -21,51 +21,46 @@ export default async function TenantLayout({
 
   if (!tenant) {
     return (
-      <div className="p-6">
-        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
+      <div className="org-theme-content mx-auto max-w-3xl p-6">
+        <div className="ed-theme-card rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
           No tenant profile is linked to your account.
         </div>
       </div>
     );
   }
 
-  const activeLease = await prisma.lease.findFirst({
-    where: {
-      orgId: tenant.org.id,
-      tenantId: tenant.id,
-      status: "ACTIVE",
-      deletedAt: null,
-    },
-    select: {
-      id: true,
-    },
-  });
-  const access = await requireActiveSubscription(tenant.org.id);
+  const session = await requireUserSession();
+  const [activeLease, portalContext, access] = await Promise.all([
+    prisma.lease.findFirst({
+      where: {
+        orgId: tenant.org.id,
+        tenantId: tenant.id,
+        status: "ACTIVE",
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+      },
+    }),
+    getTenantPortalContext(session.userId, tenant.org.id),
+    requireActiveSubscription(tenant.org.id),
+  ]);
   const hasActiveLease = Boolean(activeLease);
 
   return (
-    <div className="app-mobile-canvas min-h-screen">
-      <TenantSidebar fullName={tenant.fullName} hasActiveLease={hasActiveLease} />
-      <TenantHeader
-        fullName={tenant.fullName}
-        orgName={tenant.org.name}
-        hasActiveLease={hasActiveLease}
+    <TenantDashboardShell
+      organizationName={tenant.org.name}
+      userName={tenant.fullName}
+      hasActiveLease={hasActiveLease}
+      unreadNotificationCount={portalContext.unreadNotificationCount}
+    >
+      <SubscriptionWarning access={access} />
+      <UnreadNotificationAlertsPanel
+        audience="tenant"
+        orgId={tenant.org.id}
+        tenantId={tenant.id}
       />
-      <TenantFooter />
-
-      <div className="min-h-screen lg:pl-[300px] xl:pl-[320px]">
-        <main className="px-3 pb-32 pt-[104px] sm:px-5 lg:px-8 lg:pb-24 lg:pt-24">
-          <div className="app-content-shell">
-            <SubscriptionWarning access={access} />
-            <UnreadNotificationAlertsPanel
-              audience="tenant"
-              orgId={tenant.org.id}
-              tenantId={tenant.id}
-            />
-            {children}
-          </div>
-        </main>
-      </div>
-    </div>
+      {children}
+    </TenantDashboardShell>
   );
 }

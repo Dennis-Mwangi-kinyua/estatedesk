@@ -31,7 +31,7 @@ describe("accessibility baseline", () => {
     assert.match(login, /id="email"/);
     assert.match(login, /htmlFor="password"/);
     assert.match(login, /id="password"/);
-    assert.match(login, /aria-label=\{showPassword \? "Hide password" : "Show password"\}/);
+    assert.match(login, /aria-label=\{showPassword \? "Hide password" : "View password"\}/);
     assert.match(login, /role="alert"/);
   });
 

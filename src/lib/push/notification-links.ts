@@ -12,7 +12,7 @@ const TENANT_ROUTES: Partial<Record<NotificationType, string>> = {
   MOVE_OUT_CLOSED: "/dashboard/tenant/notices",
   ISSUE_CREATED: "/dashboard/tenant/issues",
   ISSUE_RESOLVED: "/dashboard/tenant/issues",
-  GENERAL: "/tenants/notifications",
+  GENERAL: "/dashboard/tenant/notifications",
 };
 
 const ORG_STAFF_ROUTES: Partial<Record<NotificationType, string>> = {
@@ -67,7 +67,7 @@ export function getDefaultNotificationActionUrl(
   audience: NotificationAudience = "default",
 ) {
   if (audience === "tenant") {
-    return TENANT_ROUTES[type] ?? "/tenants/notifications";
+    return TENANT_ROUTES[type] ?? "/dashboard/tenant/notifications";
   }
 
   if (audience === "caretaker") {

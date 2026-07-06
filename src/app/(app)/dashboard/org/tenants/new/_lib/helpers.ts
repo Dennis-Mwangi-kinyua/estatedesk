@@ -19,31 +19,27 @@ export function formatStatus(value: string) {
 }
 
 export function getNextStep(step: Step): Step {
-  switch (step) {
-    case 1:
-      return 2;
-    case 2:
-      return 3;
-    case 3:
-      return 4;
-    case 4:
-    default:
-      return 4;
-  }
+  if (step >= 5) return 5;
+  return (step + 1) as Step;
 }
 
 export function getPreviousStep(step: Step): Step {
-  switch (step) {
-    case 4:
-      return 3;
-    case 3:
-      return 2;
-    case 2:
-      return 1;
-    case 1:
-    default:
-      return 1;
+  if (step <= 1) return 1;
+  return (step - 1) as Step;
+}
+
+export function generateClientPassword(length = 10) {
+  const alphabet =
+    "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+
+  let password = "";
+  for (let index = 0; index < length; index += 1) {
+    password += alphabet[bytes[index] % alphabet.length];
   }
+
+  return password;
 }
 
 export function buildUsernamePreview(fullName: string) {

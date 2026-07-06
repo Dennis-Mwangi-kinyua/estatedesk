@@ -104,6 +104,25 @@ export async function getFinancialSummary(
   const liabilities = sumByType("LIABILITY");
   const equity = sumByType("EQUITY");
 
+  const balanceSheet = {
+    assets: rows.filter((row) => row.type === "ASSET"),
+    liabilities: rows.filter((row) => row.type === "LIABILITY"),
+    equity: rows.filter((row) => row.type === "EQUITY"),
+    totalAssets: assets,
+    totalLiabilities: liabilities,
+    totalEquity: equity,
+    totalLiabilitiesAndEquity: liabilities + equity,
+    balanced: Math.abs(assets - (liabilities + equity)) < 0.01,
+  };
+
+  const profitAndLoss = {
+    income: rows.filter((row) => row.type === "INCOME"),
+    expenses: rows.filter((row) => row.type === "EXPENSE"),
+    totalIncome: income,
+    totalExpenses: expenses,
+    netIncome: income - expenses,
+  };
+
   return {
     rows,
     income,
@@ -121,9 +140,12 @@ export async function getFinancialSummary(
       receivables: balanceForKey("TENANT_RECEIVABLES"),
       payables: balanceForKey("ACCOUNTS_PAYABLE"),
       deposits: balanceForKey("TENANT_DEPOSITS"),
+      ownerPayable: balanceForKey("OWNER_PAYABLE"),
       taxPayable: balanceForKey("TAX_PAYABLE"),
       rentIncome: balanceForKey("RENT_INCOME"),
       waterIncome: balanceForKey("WATER_INCOME"),
     },
+    balanceSheet,
+    profitAndLoss,
   };
 }

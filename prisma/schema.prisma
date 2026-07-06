@@ -160,7 +160,9 @@ model Organization {
   accountingAccounts      AccountingAccount[]
   accountingPeriods       AccountingPeriod[]
   accountingRequests      AccountingRequest[]
+  accountingSettings      AccountingSettings?
   bankAccounts            AccountingBankAccount[]
+  bankReconciliations     AccountingBankReconciliation[]
   budgets                 AccountingBudget[]
   journalEntries          AccountingJournalEntry[]
   taxCodes                AccountingTaxCode[]
@@ -1176,6 +1178,8 @@ model RentCharge {
   lease              Lease                    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
   org                Organization             @relation(fields: [orgId], references: [id], onDelete: Cascade)
   rentalReturnItems  RentalIncomeReturnItem[]
+  journalEntryId     String?                  @unique
+  accrualJournal     AccountingJournalEntry?  @relation("RentChargeAccrual", fields: [journalEntryId], references: [id], onDelete: SetNull)
 
   @@unique([leaseId, period, chargeType])
   @@index([orgId])
@@ -1343,7 +1347,9 @@ model WaterBill {
   payments    Payment[]    @relation("PaymentToWaterBill")
   org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  unit        Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit           Unit                    @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  journalEntryId String?                 @unique
+  accrualJournal AccountingJournalEntry? @relation("WaterBillAccrual", fields: [journalEntryId], references: [id], onDelete: SetNull)
 
   @@unique([unitId, period])
   @@index([orgId])
@@ -1517,10 +1523,28 @@ model Receipt {
   document   DocumentRecord? @relation(fields: [documentId], references: [id], onDelete: SetNull)
 }
 
+/// Organization-level accounting configuration and recognition policy.
+model AccountingSettings {
+  id                   String                    @id @default(cuid())
+  orgId                String                    @unique
+  recognitionMode      AccountingRecognitionMode @default(ACCRUAL)
+  fiscalYearStartMonth Int                       @default(1)
+  autoPostPayments              Boolean                   @default(true)
+  autoPostBilling               Boolean                   @default(true)
+  ownerStatementEmailEnabled    Boolean                   @default(false)
+  ownerStatementEmailDayOfMonth Int                       @default(5)
+  ownerStatementLastSentAt      DateTime?
+  initializedAt                 DateTime?
+  createdAt                     DateTime                  @default(now())
+  updatedAt                     DateTime                  @updatedAt
+  org                           Organization              @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
 /// Organization-scoped chart of accounts for the double-entry general ledger.
 model AccountingAccount {
   id            String                     @id @default(cuid())
   orgId         String
+  parentId      String?
   code          String
   name          String
   type          AccountingAccountType
@@ -1532,6 +1556,8 @@ model AccountingAccount {
   createdAt     DateTime                   @default(now())
   updatedAt     DateTime                   @updatedAt
   org           Organization               @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  parent        AccountingAccount?         @relation("AccountingAccountHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children      AccountingAccount[]        @relation("AccountingAccountHierarchy")
   journalLines  AccountingJournalLine[]
   bankAccounts  AccountingBankAccount[]
   budgetLines   AccountingBudgetLine[]
@@ -1540,6 +1566,7 @@ model AccountingAccount {
   @@unique([orgId, code])
   @@unique([orgId, systemKey])
   @@index([orgId, type, isActive])
+  @@index([orgId, parentId])
 }
 
 /// Lockable fiscal period. Posted entries cannot be added to a closed period.
@@ -1552,6 +1579,7 @@ model AccountingPeriod {
   status         AccountingPeriodStatus   @default(OPEN)
   closedAt       DateTime?
   closedByUserId String?
+  closeNotes     String?
   createdAt      DateTime                 @default(now())
   updatedAt      DateTime                 @updatedAt
   org            Organization             @relation(fields: [orgId], references: [id], onDelete: Cascade)
@@ -1585,6 +1613,8 @@ model AccountingJournalEntry {
   lines           AccountingJournalLine[]
   reversalOf      AccountingJournalEntry? @relation("JournalReversal", fields: [reversalOfId], references: [id])
   reversedBy      AccountingJournalEntry? @relation("JournalReversal")
+  rentChargeAccrual RentCharge?           @relation("RentChargeAccrual")
+  waterBillAccrual  WaterBill?            @relation("WaterBillAccrual")
 
   @@unique([orgId, entryNumber])
   @@unique([orgId, sourceType, sourceId])
@@ -1618,25 +1648,66 @@ model AccountingJournalLine {
 }
 
 model AccountingBankAccount {
-  id                  String                    @id @default(cuid())
+  id                  String                         @id @default(cuid())
   orgId               String
   ledgerAccountId     String
   name                String
   type                AccountingBankAccountType
   institutionName     String?
   accountNumberMasked String?
-  currencyCode        String                    @default("KES")
-  openingBalance      Decimal                   @default(0) @db.Decimal(14, 2)
+  currencyCode        String                         @default("KES")
+  openingBalance      Decimal                        @default(0) @db.Decimal(14, 2)
   openingBalanceDate  DateTime?
-  isDefault           Boolean                   @default(false)
-  isActive            Boolean                   @default(true)
-  createdAt           DateTime                  @default(now())
-  updatedAt           DateTime                  @updatedAt
-  org                 Organization              @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  ledgerAccount       AccountingAccount         @relation(fields: [ledgerAccountId], references: [id])
+  lastReconciledAt    DateTime?
+  isDefault           Boolean                        @default(false)
+  isActive            Boolean                        @default(true)
+  createdAt           DateTime                       @default(now())
+  updatedAt           DateTime                       @updatedAt
+  org                 Organization                   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  ledgerAccount       AccountingAccount              @relation(fields: [ledgerAccountId], references: [id])
+  reconciliations     AccountingBankReconciliation[]
 
   @@unique([orgId, name])
   @@index([orgId, type, isActive])
+}
+
+/// GL bank reconciliation session comparing statement balance to ledger.
+model AccountingBankReconciliation {
+  id                String                             @id @default(cuid())
+  orgId             String
+  bankAccountId     String
+  periodEnd         DateTime
+  statementBalance  Decimal                            @db.Decimal(14, 2)
+  glBalance         Decimal                            @db.Decimal(14, 2)
+  status            AccountingBankReconciliationStatus @default(DRAFT)
+  notes             String?
+  completedAt       DateTime?
+  completedByUserId String?
+  createdAt         DateTime                           @default(now())
+  updatedAt         DateTime                           @updatedAt
+  org               Organization                       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  bankAccount       AccountingBankAccount              @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  items             AccountingBankReconciliationItem[]
+
+  @@index([orgId, bankAccountId, periodEnd])
+  @@index([orgId, status, periodEnd])
+}
+
+/// Statement line or cleared GL item within a bank reconciliation.
+model AccountingBankReconciliationItem {
+  id               String                       @id @default(cuid())
+  reconciliationId String
+  journalLineId    String?
+  description      String?
+  statementDate    DateTime?
+  statementRef     String?
+  amount           Decimal                      @db.Decimal(14, 2)
+  isCleared        Boolean                      @default(false)
+  createdAt        DateTime                     @default(now())
+  reconciliation   AccountingBankReconciliation @relation(fields: [reconciliationId], references: [id], onDelete: Cascade)
+
+  @@index([reconciliationId])
+  @@index([journalLineId])
 }
 
 model AccountingVendor {
@@ -1730,16 +1801,18 @@ model AccountingVendorBillLine {
 }
 
 model AccountingBudget {
-  id        String                 @id @default(cuid())
-  orgId     String
-  periodId  String
-  name      String
-  status    AccountingBudgetStatus @default(DRAFT)
-  createdAt DateTime               @default(now())
-  updatedAt DateTime               @updatedAt
-  org       Organization           @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  period    AccountingPeriod       @relation(fields: [periodId], references: [id])
-  lines     AccountingBudgetLine[]
+  id               String                 @id @default(cuid())
+  orgId            String
+  periodId         String
+  name             String
+  status           AccountingBudgetStatus @default(DRAFT)
+  approvedAt       DateTime?
+  approvedByUserId String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  org              Organization           @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  period           AccountingPeriod       @relation(fields: [periodId], references: [id])
+  lines            AccountingBudgetLine[]
 
   @@unique([orgId, periodId, name])
   @@index([orgId, status])
@@ -2429,10 +2502,17 @@ enum AccountingJournalStatus {
   VOIDED
 }
 
+enum AccountingRecognitionMode {
+  CASH
+  ACCRUAL
+}
+
 enum AccountingSourceType {
   MANUAL
   PAYMENT
   PAYMENT_REVERSAL
+  RENT_CHARGE_ACCRUAL
+  WATER_BILL_ACCRUAL
   VENDOR_BILL
   BILL_PAYMENT
   OPENING_BALANCE
@@ -2470,6 +2550,11 @@ enum AccountingBudgetStatus {
   DRAFT
   APPROVED
   CLOSED
+}
+
+enum AccountingBankReconciliationStatus {
+  DRAFT
+  COMPLETED
 }
 
 enum ExpenditureScope {

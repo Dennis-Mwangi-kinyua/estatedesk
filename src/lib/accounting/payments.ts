@@ -1,28 +1,67 @@
 import "server-only";
 
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { PaymentTargetType, Prisma, PrismaClient } from "@prisma/client";
 import { postJournalEntry, reverseJournalEntry } from "@/lib/accounting/engine";
+import { getAccountingSettings, usesAccrualRecognition } from "@/lib/accounting/settings";
 
 type AccountingDb = PrismaClient | Prisma.TransactionClient;
+
+function cashSystemKey(method: string) {
+  return method.startsWith("MPESA") ? "MPESA" : method === "CASH" ? "CASH" : "BANK";
+}
+
+function incomeSystemKey(targetType: PaymentTargetType) {
+  switch (targetType) {
+    case "DEPOSIT":
+      return "TENANT_DEPOSITS";
+    case "RENT":
+      return "RENT_INCOME";
+    case "WATER":
+      return "WATER_INCOME";
+    default:
+      return "OTHER_INCOME";
+  }
+}
+
+function creditSystemKey(
+  targetType: PaymentTargetType,
+  settings: Awaited<ReturnType<typeof getAccountingSettings>>,
+) {
+  if (targetType === "DEPOSIT") {
+    return "TENANT_DEPOSITS";
+  }
+
+  if (usesAccrualRecognition(settings)) {
+    return "TENANT_RECEIVABLES";
+  }
+
+  return incomeSystemKey(targetType);
+}
 
 export async function postVerifiedPayment(db: AccountingDb, paymentId: string, userId?: string | null) {
   const payment = await db.payment.findUniqueOrThrow({
     where: { id: paymentId },
     include: {
-      rentCharge: { include: { lease: { select: { unitId: true } } } },
-      waterBill: { select: { unitId: true } },
+      rentCharge: { include: { lease: { select: { unitId: true, tenantId: true } } } },
+      waterBill: { select: { unitId: true, tenantId: true } },
     },
   });
+
+  const settings = await getAccountingSettings(db, payment.orgId);
+  if (!settings.autoPostPayments) {
+    return null;
+  }
+
   const unitId = payment.waterBill?.unitId ?? payment.rentCharge?.lease.unitId ?? null;
-  const unit = unitId ? await db.unit.findUnique({ where: { id: unitId }, select: { propertyId: true } }) : null;
-  const cashKey = payment.method.startsWith("MPESA") ? "MPESA" : payment.method === "CASH" ? "CASH" : "BANK";
-  const creditKey = payment.targetType === "DEPOSIT"
-    ? "TENANT_DEPOSITS"
-    : payment.targetType === "RENT"
-      ? "RENT_INCOME"
-      : payment.targetType === "WATER"
-        ? "WATER_INCOME"
-        : "OTHER_INCOME";
+  const tenantId =
+    payment.payerTenantId ??
+    payment.waterBill?.tenantId ??
+    payment.rentCharge?.lease.tenantId ??
+    null;
+  const unit = unitId
+    ? await db.unit.findUnique({ where: { id: unitId }, select: { propertyId: true } })
+    : null;
+
   return postJournalEntry({
     db,
     orgId: payment.orgId,
@@ -33,16 +72,48 @@ export async function postVerifiedPayment(db: AccountingDb, paymentId: string, u
     sourceId: payment.id,
     userId,
     lines: [
-      { systemKey: cashKey, debit: payment.amount, propertyId: unit?.propertyId, unitId, tenantId: payment.payerTenantId },
-      { systemKey: creditKey, credit: payment.amount, propertyId: unit?.propertyId, unitId, tenantId: payment.payerTenantId },
+      {
+        systemKey: cashSystemKey(payment.method),
+        debit: payment.amount,
+        propertyId: unit?.propertyId,
+        unitId,
+        tenantId,
+      },
+      {
+        systemKey: creditSystemKey(payment.targetType, settings),
+        credit: payment.amount,
+        propertyId: unit?.propertyId,
+        unitId,
+        tenantId,
+      },
     ],
   });
 }
 
 export async function reversePaymentPosting(db: AccountingDb, paymentId: string, reason: string, userId?: string | null) {
-  const original = await db.accountingJournalEntry.findUnique({
-    where: { orgId_sourceType_sourceId: { orgId: (await db.payment.findUniqueOrThrow({ where: { id: paymentId }, select: { orgId: true } })).orgId, sourceType: "PAYMENT", sourceId: paymentId } },
+  const payment = await db.payment.findUniqueOrThrow({
+    where: { id: paymentId },
+    select: { orgId: true },
   });
+
+  const original = await db.accountingJournalEntry.findUnique({
+    where: {
+      orgId_sourceType_sourceId: {
+        orgId: payment.orgId,
+        sourceType: "PAYMENT",
+        sourceId: paymentId,
+      },
+    },
+  });
+
   if (!original) return null;
-  return reverseJournalEntry({ db, orgId: original.orgId, sourceEntryId: original.id, sourceId: paymentId, reason, userId });
+
+  return reverseJournalEntry({
+    db,
+    orgId: original.orgId,
+    sourceEntryId: original.id,
+    sourceId: paymentId,
+    reason,
+    userId,
+  });
 }

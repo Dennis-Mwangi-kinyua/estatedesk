@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BadgeCheck, Ban, Building2, CalendarDays, FileCheck2, Fingerprint } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { readLeaseSnapshot } from "@/lib/documents/lease-snapshot";
 import { readReceiptSnapshot } from "@/lib/documents/receipt-snapshot";
 import { publicPageMetadata } from "@/lib/seo";
 
@@ -75,6 +76,9 @@ export default async function VerifyDocumentPage({
   const receipt = document.documentType === "RECEIPT"
     ? readReceiptSnapshot(document.metadata)
     : null;
+  const lease = document.documentType === "LEASE"
+    ? readLeaseSnapshot(document.metadata)
+    : null;
   const receiptDetails = receipt ? [
     ["Payer", receipt.payerName],
     ["Amount", new Intl.NumberFormat("en-KE", { style: "currency", currency: receipt.currencyCode }).format(receipt.amount)],
@@ -83,6 +87,56 @@ export default async function VerifyDocumentPage({
     ["Payment period", receipt.periods.join(", ") || "Not specified"],
     ["Payment method", formatLabel(receipt.paymentMethod)],
   ] : [];
+  const leaseDetails = lease
+    ? [
+        ["Tenant", lease.tenantName],
+        [
+          "Tenant registration",
+          lease.tenantBelongsToOrg
+            ? `Confirmed with ${lease.organizationName}`
+            : "Not currently confirmed",
+        ],
+        ["Tenant ID", lease.tenantId],
+        ["Tenant phone", lease.tenantPhone],
+        ["Tenant email", lease.tenantEmail ?? "Not supplied"],
+        ["National ID", lease.tenantNationalIdMasked ?? "Not supplied"],
+        [
+          "Property / unit",
+          [lease.propertyName, lease.buildingName, `Unit ${lease.unitName}`]
+            .filter(Boolean)
+            .join(" / "),
+        ],
+        ["Lease status", formatLabel(lease.leaseStatus)],
+        [
+          "Lease period",
+          `${new Intl.DateTimeFormat("en-KE", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(lease.startDate))}${
+            lease.endDate
+              ? ` to ${new Intl.DateTimeFormat("en-KE", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(lease.endDate))}`
+              : " onwards"
+          }`,
+        ],
+        [
+          "Monthly rent",
+          new Intl.NumberFormat("en-KE", {
+            style: "currency",
+            currency: lease.currencyCode,
+            maximumFractionDigits: 0,
+          }).format(lease.monthlyRent),
+        ],
+        [
+          "Deposit",
+          lease.deposit == null
+            ? "Not recorded"
+            : new Intl.NumberFormat("en-KE", {
+                style: "currency",
+                currency: lease.currencyCode,
+                maximumFractionDigits: 0,
+              }).format(lease.deposit),
+        ],
+        ["Rent due day", `Day ${lease.dueDay}`],
+        ["Contract file", lease.contractFileName],
+      ]
+    : [];
 
   return (
     <main className="min-h-screen bg-neutral-50 px-4 py-10 text-neutral-950 sm:px-6 sm:py-16">
@@ -122,6 +176,24 @@ export default async function VerifyDocumentPage({
             );
           })}
         </section>
+
+        {lease && leaseDetails.length > 0 ? (
+          <section className="mt-6">
+            <h2 className="text-base font-semibold">Lease details</h2>
+            <p className="mt-2 text-sm leading-6 text-neutral-600">
+              Scan results confirm the tenant named on this lease and their
+              registration with the issuing organisation.
+            </p>
+            <div className="mt-3 grid gap-px overflow-hidden rounded-lg border border-neutral-200 bg-neutral-200 sm:grid-cols-2">
+              {leaseDetails.map(([label, value]) => (
+                <div key={label} className="bg-white p-4">
+                  <p className="text-xs font-medium text-neutral-500">{label}</p>
+                  <p className="mt-2 break-words text-sm font-semibold">{value}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         {receipt && receiptDetails.length > 0 ? (
           <section className="mt-6">

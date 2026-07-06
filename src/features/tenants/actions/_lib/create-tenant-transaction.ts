@@ -2,7 +2,7 @@ import { hash } from "bcryptjs";
 import { Prisma, TenantStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ensureTenantIdentity } from "@/lib/tenants/identity";
-import { generateUniqueUsername } from "./credentials";
+import { normalizeUsername } from "./credentials";
 
 type CreateTenantTransactionInput = {
   orgId: string;
@@ -22,7 +22,8 @@ type CreateTenantTransactionInput = {
   dueDay: number | null;
   monthlyRent: Prisma.Decimal | null;
   deposit: Prisma.Decimal | null;
-  generatedPassword: string;
+  username: string;
+  password: string;
 };
 
 export async function executeCreateTenantTransaction(
@@ -48,26 +49,37 @@ export async function executeCreateTenantTransaction(
       );
     }
 
+    const username = normalizeUsername(input.username);
+
     const duplicateUser = await tx.user.findFirst({
       where: {
         OR: [
+          { username },
           { phone: input.phone },
           ...(input.email ? [{ email: input.email }] : []),
         ],
       },
       select: {
         id: true,
+        username: true,
+        phone: true,
+        email: true,
       },
     });
 
     if (duplicateUser) {
+      if (duplicateUser.username === username) {
+        throw new Error(
+          "This username is already taken. Please choose a different username.",
+        );
+      }
+
       throw new Error(
         "A user account with the same phone or email already exists.",
       );
     }
 
-    const username = await generateUniqueUsername(tx, input.fullName);
-    const passwordHash = await hash(input.generatedPassword, 10);
+    const passwordHash = await hash(input.password, 10);
 
     const user = await tx.user.create({
       data: {

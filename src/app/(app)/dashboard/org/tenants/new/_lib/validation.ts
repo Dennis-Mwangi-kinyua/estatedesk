@@ -69,3 +69,32 @@ export function validateStepThree(form: HTMLFormElement): string | null {
 
   return null;
 }
+
+export function validateStepFour(form: HTMLFormElement): string | null {
+  const data = new FormData(form);
+  const username = String(data.get("username") ?? "").trim().toLowerCase();
+  const password = String(data.get("password") ?? "");
+  const confirmPassword = String(data.get("confirmPassword") ?? "");
+
+  if (!username) {
+    focusField(form, "username");
+    return "Username is required.";
+  }
+
+  if (!/^[a-z0-9._-]{3,30}$/.test(username)) {
+    focusField(form, "username");
+    return "Username must be 3–30 characters and can only contain letters, numbers, dots, underscores, and hyphens.";
+  }
+
+  if (password.length < 8) {
+    focusField(form, "password");
+    return "Password must be at least 8 characters.";
+  }
+
+  if (password !== confirmPassword) {
+    focusField(form, "confirmPassword");
+    return "Password and confirmation do not match.";
+  }
+
+  return null;
+}

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { buildAccountCredentialsMessage } from "@/lib/notifications/account-credentials-message";
 import {
   sendMetaWhatsappTemplate,
   sendMetaWhatsappText,
@@ -14,20 +15,6 @@ type SendAccountCredentialsInput = {
   role: string;
   loginUrl?: string;
 };
-
-function buildMessage(input: SendAccountCredentialsInput) {
-  return [
-    `Hello ${input.fullName}, your EstateDesk ${input.role} account has been created.`,
-    "",
-    `Username: ${input.username}`,
-    `Temporary password: ${input.password}`,
-    input.loginUrl ? `Login: ${input.loginUrl}` : null,
-    "",
-    "For your security, you will be asked to change this password the first time you sign in.",
-  ]
-    .filter(Boolean)
-    .join("\n");
-}
 
 async function sendWhatsapp(phone: string, body: string, input: SendAccountCredentialsInput) {
   if (
@@ -70,7 +57,13 @@ async function sendEmail(email: string, subject: string, body: string) {
 }
 
 export async function sendAccountCredentials(input: SendAccountCredentialsInput) {
-  const body = buildMessage(input);
+  const body = buildAccountCredentialsMessage({
+    fullName: input.fullName,
+    username: input.username,
+    password: input.password,
+    role: input.role,
+    loginUrl: input.loginUrl,
+  });
   const subject = `Your EstateDesk ${input.role} account`;
 
   const tasks: Promise<void>[] = [];

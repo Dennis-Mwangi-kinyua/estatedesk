@@ -24,6 +24,12 @@ export function PaymentsHeader({ data }: { data: TenantPaymentsPageData }) {
             Track your recent rent, water, service charge, and garbage payments
             in one place.
           </p>
+          <a
+            href="/dashboard/tenant/payments/statement"
+            className="mt-4 inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-card px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
+          >
+            Export statement (CSV)
+          </a>
         </div>
 
         {latestPayment ? (

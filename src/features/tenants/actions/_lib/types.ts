@@ -5,5 +5,8 @@ export type CreateTenantActionState = {
     tenantName: string;
     username: string;
     password: string;
+    email: string | null;
+    phone: string;
+    loginUrl: string;
   };
 };

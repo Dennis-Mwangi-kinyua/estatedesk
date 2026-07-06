@@ -1,4 +1,5 @@
 import { getFinancialSummary } from "@/lib/accounting/reports";
+import { getAccountingSettings } from "@/lib/accounting/settings";
 import { prisma } from "@/lib/prisma";
 
 export async function getAccountingPageData(orgId: string) {
@@ -7,6 +8,7 @@ export async function getAccountingPageData(orgId: string) {
 
   const [
     org,
+    settings,
     accounts,
     vendors,
     journals,
@@ -21,6 +23,7 @@ export async function getAccountingPageData(orgId: string) {
       where: { id: orgId },
       select: { currencyCode: true, name: true },
     }),
+    getAccountingSettings(prisma, orgId),
     prisma.accountingAccount.findMany({
       where: { orgId, isActive: true },
       orderBy: { code: "asc" },
@@ -113,6 +116,7 @@ export async function getAccountingPageData(orgId: string) {
 
   return {
     org,
+    settings,
     accounts,
     expenseAccounts,
     liabilityAccounts,

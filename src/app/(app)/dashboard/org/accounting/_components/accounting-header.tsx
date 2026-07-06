@@ -44,6 +44,9 @@ export function AccountingHeader({
                   {currentPeriod.name} · {currentPeriod.status}
                 </span>
               ) : null}
+              <span className="inline-flex rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                {data.settings.recognitionMode} books
+              </span>
             </div>
 
             <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">

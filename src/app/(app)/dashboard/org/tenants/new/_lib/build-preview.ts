@@ -26,6 +26,8 @@ export function buildPreview(
   const dueDay = String(data.get("dueDay") ?? "").trim();
   const monthlyRent = String(data.get("monthlyRent") ?? "").trim();
   const deposit = String(data.get("deposit") ?? "").trim();
+  const username = String(data.get("username") ?? "").trim().toLowerCase();
+  const password = String(data.get("password") ?? "");
 
   return {
     fullName,
@@ -44,6 +46,7 @@ export function buildPreview(
     dueDay: dueDay || "5",
     monthlyRent: monthlyRent || "Use selected unit rent",
     deposit: deposit || "Use selected unit deposit",
-    usernamePreview: buildUsernamePreview(fullName),
+    username: username || buildUsernamePreview(fullName),
+    password,
   };
 }

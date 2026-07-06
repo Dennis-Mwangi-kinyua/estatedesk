@@ -16,6 +16,7 @@
     "restore:drill": "bash scripts/restore-drill.sh",
     "postinstall": "prisma generate",
     "seed": "tsx prisma/seed.ts",
+    "qa:tenant-portal": "tsx scripts/tenant-portal-visual-qa.ts",
     "generate:web-push-keys": "node scripts/generate-web-push-keys.mjs",
     "extension:package": "mkdir -p dist && rm -f dist/estatedesk-browser-extension.zip && cd extensions/estatedesk && zip -r ../../dist/estatedesk-browser-extension.zip ."
   },
@@ -61,6 +62,7 @@
     "dotenv": "^17.3.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "playwright": "^1.49.0",
     "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",

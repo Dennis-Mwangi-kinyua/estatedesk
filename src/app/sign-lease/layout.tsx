@@ -14,7 +14,6 @@ export default async function SignLeaseLayout({
     return <div className="min-h-screen">{children}</div>;
   }
 
-  const viewerLabel = session.email ?? session.fullName ?? session.userId;
   let orgLabel: string | null = null;
 
   if (session.activeOrgId) {
@@ -27,7 +26,7 @@ export default async function SignLeaseLayout({
 
   return (
     <div className="app-sensitive-surface relative min-h-screen">
-      <SensitiveDataWatermark viewerLabel={viewerLabel} orgLabel={orgLabel} />
+      <SensitiveDataWatermark orgLabel={orgLabel} />
       {children}
     </div>
   );

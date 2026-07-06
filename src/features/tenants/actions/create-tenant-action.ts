@@ -7,7 +7,10 @@ import { safeServerActionError } from "@/lib/errors/server-error-log";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
 import { getAuthorizedOrgContext } from "./_lib/authorization";
-import { generatePassword } from "./_lib/credentials";
+import {
+  isValidUsername,
+  normalizeUsername,
+} from "./_lib/credentials";
 import { executeCreateTenantTransaction } from "./_lib/create-tenant-transaction";
 import {
   toNonNegativeDecimal,
@@ -58,6 +61,14 @@ export async function createTenantAction(
       "Next of kin phone",
     );
     const nextOfKinEmail = toOptionalString(formData.get("nextOfKinEmail"));
+    const username = normalizeUsername(
+      toRequiredString(formData.get("username"), "Username"),
+    );
+    const password = toRequiredString(formData.get("password"), "Password");
+    const confirmPassword = toRequiredString(
+      formData.get("confirmPassword"),
+      "Confirm password",
+    );
 
     if (!ALLOWED_STATUSES.includes(statusRaw as TenantStatus)) {
       throw new Error("Please choose a valid tenant status.");
@@ -97,7 +108,19 @@ export async function createTenantAction(
       );
     }
 
-    const generatedPassword = generatePassword(10);
+    if (!isValidUsername(username)) {
+      throw new Error(
+        "Username must be 3–30 characters and can only contain letters, numbers, dots, underscores, and hyphens.",
+      );
+    }
+
+    if (password.length < 8) {
+      throw new Error("Password must be at least 8 characters.");
+    }
+
+    if (password !== confirmPassword) {
+      throw new Error("Password and confirmation do not match.");
+    }
 
     const result = await executeCreateTenantTransaction({
       orgId,
@@ -117,7 +140,8 @@ export async function createTenantAction(
       dueDay,
       monthlyRent,
       deposit,
-      generatedPassword,
+      username,
+      password,
     });
 
     revalidatePath("/dashboard/org/tenants");
@@ -132,12 +156,14 @@ export async function createTenantAction(
     await sendAccountCredentials({
       fullName,
       username: result.username,
-      password: generatedPassword,
+      password,
       email,
       phone,
       role: "TENANT",
       loginUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`,
     });
+
+    const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`;
 
     return {
       status: "success",
@@ -145,7 +171,10 @@ export async function createTenantAction(
       credentials: {
         tenantName: result.tenantName,
         username: result.username,
-        password: generatedPassword,
+        password,
+        email,
+        phone,
+        loginUrl,
       },
     };
   } catch (error) {

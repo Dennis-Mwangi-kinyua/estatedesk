@@ -19,6 +19,11 @@ export async function getTenantDashboardData(tenantId: string, unitId?: string) 
         verificationStatus: true,
         createdAt: true,
         paidAt: true,
+        receipt: {
+          select: {
+            id: true,
+          },
+        },
       },
     }),
 

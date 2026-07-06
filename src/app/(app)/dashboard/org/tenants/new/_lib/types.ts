@@ -7,7 +7,7 @@ export type AvailableUnit = {
   depositAmount: number | null;
 };
 
-export type Step = 1 | 2 | 3 | 4;
+export type Step = 1 | 2 | 3 | 4 | 5;
 
 export type ActionState = {
   status: "idle" | "error" | "success";
@@ -16,6 +16,9 @@ export type ActionState = {
     tenantName: string;
     username: string;
     password: string;
+    email: string | null;
+    phone: string;
+    loginUrl: string;
   };
 };
 
@@ -36,7 +39,8 @@ export type PreviewData = {
   dueDay: string;
   monthlyRent: string;
   deposit: string;
-  usernamePreview: string;
+  username: string;
+  password: string;
 };
 
 export type NewTenantFormProps = {

@@ -23,7 +23,7 @@ function notificationsHub(audience: NotificationAlertAudience) {
     case "caretaker":
       return "/dashboard/caretaker/notifications";
     case "tenant":
-      return "/tenants/notifications";
+      return "/dashboard/tenant/notifications";
     default:
       return "/dashboard/org/notifications";
   }

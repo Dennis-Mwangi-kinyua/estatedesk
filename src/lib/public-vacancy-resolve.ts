@@ -1,12 +1,17 @@
 import "server-only";
 
-import { getVacancyListingsCached } from "@/lib/public-vacancy-listings";
+import { unstable_cache } from "next/cache";
+import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
+import { PUBLIC_VACANCIES_CACHE_TAG } from "@/lib/public-vacancy-cache";
+import { PUBLIC_VACANCY_REVALIDATE_SECONDS } from "@/lib/public-vacancy-listings";
 import {
   isRawDatabaseId,
-  stripLegacyVacancySlug,
   vacancyIdFromLegacySlug,
-  vacancyPublicSlug,
 } from "@/lib/public-vacancy-slug";
+import {
+  resolveVacancyUnitIdFromSlugIndex,
+  type VacancySlugIndexEntry,
+} from "@/lib/public-vacancy-slug-index";
 import { prisma } from "@/lib/prisma";
 
 const publicVacancyUnitWhere = {
@@ -37,6 +42,42 @@ async function resolveVacancyUnitIdFromRawDatabaseId(id: string) {
   return unit?.id ?? null;
 }
 
+async function queryVacancySlugIndex(): Promise<VacancySlugIndexEntry[]> {
+  const units = await retryTransientDatabaseOperation(
+    () =>
+      prisma.unit.findMany({
+        where: publicVacancyUnitWhere,
+        select: {
+          id: true,
+          houseNo: true,
+          property: { select: { name: true } },
+        },
+      }),
+    {
+      attempts: 2,
+      delayMs: 250,
+      label: "public-vacancy-slug-index",
+    },
+  );
+
+  return units.map((unit) => ({
+    id: unit.id,
+    propertyName: unit.property.name,
+    houseNo: unit.houseNo,
+  }));
+}
+
+function getVacancySlugIndexCached() {
+  return unstable_cache(
+    () => queryVacancySlugIndex(),
+    ["public-vacancy-slug-index"],
+    {
+      revalidate: PUBLIC_VACANCY_REVALIDATE_SECONDS,
+      tags: [PUBLIC_VACANCIES_CACHE_TAG],
+    },
+  )();
+}
+
 export async function resolveVacancyUnitIdFromSlug(slug: string) {
   const legacyId = vacancyIdFromLegacySlug(slug);
   if (legacyId) return legacyId;
@@ -45,22 +86,6 @@ export async function resolveVacancyUnitIdFromSlug(slug: string) {
     return resolveVacancyUnitIdFromRawDatabaseId(slug);
   }
 
-  const canonicalSlug = stripLegacyVacancySlug(slug);
-  const listings = await getVacancyListingsCached({
-    query: "",
-    location: "",
-    sort: "location",
-  });
-
-  const matches = listings.filter(
-    (listing) =>
-      vacancyPublicSlug({
-        propertyName: listing.property.name,
-        houseNo: listing.houseNo,
-      }) === canonicalSlug,
-  );
-
-  if (matches.length === 1) return matches[0].id;
-
-  return matches[0]?.id ?? null;
+  const index = await getVacancySlugIndexCached();
+  return resolveVacancyUnitIdFromSlugIndex(slug, index);
 }

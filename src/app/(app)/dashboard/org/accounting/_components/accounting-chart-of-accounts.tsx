@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatMoney } from "../_lib/helpers";
 import type { AccountingPageData } from "../_lib/types";
 import { panelShellClassName } from "./accounting-ui";
@@ -5,7 +6,8 @@ import { panelShellClassName } from "./accounting-ui";
 const TYPE_ORDER = ["ASSET", "LIABILITY", "EQUITY", "INCOME", "EXPENSE"] as const;
 
 export function AccountingChartOfAccounts({ data }: { data: AccountingPageData }) {
-  const { org, summary } = data;
+  const { org, summary, accounts } = data;
+  const accountIdByCode = new Map(accounts.map((account) => [account.code, account.id]));
 
   if (!summary || summary.rows.length === 0) {
     return null;
@@ -18,13 +20,21 @@ export function AccountingChartOfAccounts({ data }: { data: AccountingPageData }
 
   return (
     <section className={panelShellClassName}>
-      <div className="border-b border-border px-5 py-4 sm:px-6">
-        <h2 className="text-lg font-semibold tracking-tight text-foreground">
-          Chart of accounts
-        </h2>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Active ledger accounts with year-to-date balances grouped by account type.
-        </p>
+      <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-end sm:justify-between sm:px-6">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            Chart of accounts
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Active ledger accounts with year-to-date balances grouped by account type.
+          </p>
+        </div>
+        <Link
+          href="/dashboard/org/accounting/coa"
+          className="text-sm font-semibold text-primary hover:text-primary/80"
+        >
+          Manage accounts
+        </Link>
       </div>
 
       <div className="divide-y divide-border">
@@ -39,9 +49,18 @@ export function AccountingChartOfAccounts({ data }: { data: AccountingPageData }
                   key={row.code}
                   className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-muted/10 px-4 py-3 text-sm"
                 >
-                  <span className="font-medium text-foreground">
-                    {row.code} · {row.name}
-                  </span>
+                  {accountIdByCode.get(row.code) ? (
+                    <Link
+                      href={`/dashboard/org/accounting/accounts/${accountIdByCode.get(row.code)}`}
+                      className="font-medium text-foreground hover:text-primary"
+                    >
+                      {row.code} · {row.name}
+                    </Link>
+                  ) : (
+                    <span className="font-medium text-foreground">
+                      {row.code} · {row.name}
+                    </span>
+                  )}
                   <span className="font-semibold text-foreground">
                     {formatMoney(row.balance, org.currencyCode)}
                   </span>

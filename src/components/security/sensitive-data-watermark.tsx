@@ -1,24 +1,22 @@
 "use client";
 
 type SensitiveDataWatermarkProps = {
-  viewerLabel: string;
   orgLabel?: string | null;
 };
 
-function buildWatermarkLabel(viewerLabel: string, orgLabel?: string | null) {
+function buildWatermarkLabel(orgLabel?: string | null) {
   const timestamp = new Date().toISOString().slice(0, 16).replace("T", " ");
   const org = orgLabel?.trim();
 
   return org
-    ? `EstateDesk confidential · ${viewerLabel} · ${org} · ${timestamp}`
-    : `EstateDesk confidential · ${viewerLabel} · ${timestamp}`;
+    ? `EstateDesk confidential · ${org} · ${timestamp}`
+    : `EstateDesk confidential · ${timestamp}`;
 }
 
 export function SensitiveDataWatermark({
-  viewerLabel,
   orgLabel,
 }: SensitiveDataWatermarkProps) {
-  const label = buildWatermarkLabel(viewerLabel, orgLabel);
+  const label = buildWatermarkLabel(orgLabel);
 
   return (
     <div

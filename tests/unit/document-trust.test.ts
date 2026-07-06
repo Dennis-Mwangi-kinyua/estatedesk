@@ -5,18 +5,26 @@ import {
   documentVerificationPath,
   hashDocumentContent,
 } from "../../src/lib/documents/identity";
+import { generateVerifiedLeasePdf } from "../../src/lib/documents/lease-verification-pdf";
 import { generateReceiptPdf } from "../../src/lib/documents/receipt-pdf";
+import { PDFDocument } from "pdf-lib";
 
 describe("document trust", () => {
   it("creates readable, type-specific serial numbers and opaque verification codes", () => {
-    const identity = createDocumentIdentity(
+    const receiptIdentity = createDocumentIdentity(
       "RECEIPT",
       new Date("2026-06-30T12:00:00.000Z"),
       Uint8Array.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
     );
+    const leaseIdentity = createDocumentIdentity(
+      "LEASE",
+      new Date("2026-06-30T12:00:00.000Z"),
+      Uint8Array.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
+    );
 
-    assert.equal(identity.serialNumber, "ED-RCT-2026-ABCDEFGHJK");
-    assert.match(identity.verificationCode, /^[A-Za-z0-9_-]{32}$/);
+    assert.equal(receiptIdentity.serialNumber, "ED-RCT-2026-ABCDEFGHJK");
+    assert.equal(leaseIdentity.serialNumber, "ED-LSE-2026-ABCDEFGHJK");
+    assert.match(receiptIdentity.verificationCode, /^[A-Za-z0-9_-]{32}$/);
     assert.equal(
       documentVerificationPath("abc/123"),
       "/verify-document/abc%2F123",
@@ -52,6 +60,47 @@ describe("document trust", () => {
 
     assert.equal(Buffer.from(first).subarray(0, 5).toString(), "%PDF-");
     assert.ok(first.byteLength > 5_000);
+    assert.equal(hashDocumentContent(first), hashDocumentContent(second));
+  });
+
+  it("generates a verified lease PDF with a certificate page and stable hash", async () => {
+    const contract = await PDFDocument.create();
+    contract.addPage();
+    const contractBytes = await contract.save();
+
+    const input = {
+      serialNumber: "ED-LSE-2026-ABCDEFGHJK",
+      verificationUrl: "https://estatedesk.co.ke/verify-document/lease-code",
+      issuedAt: new Date("2026-06-30T09:00:00.000Z"),
+      organizationName: "EstateDesk Demo",
+      organizationAddress: "Nairobi, Kenya",
+      tenantName: "Test Tenant",
+      tenantId: "tenant_123",
+      tenantPhone: "+254700000000",
+      tenantEmail: "tenant@example.com",
+      tenantNationalIdMasked: "****1234",
+      tenantStatus: "ACTIVE",
+      tenantBelongsToOrg: true,
+      propertyName: "Sunset Apartments",
+      buildingName: "Block A",
+      unitName: "A1",
+      leaseId: "lease_123",
+      leaseStatus: "ACTIVE",
+      startDate: new Date("2026-01-01T00:00:00.000Z"),
+      endDate: null,
+      monthlyRent: 25_000,
+      deposit: 50_000,
+      dueDay: 5,
+      currencyCode: "KES",
+      sourceContractHash: "abc123",
+      contractFileName: "lease-a1.pdf",
+    };
+
+    const first = await generateVerifiedLeasePdf(contractBytes, input);
+    const second = await generateVerifiedLeasePdf(contractBytes, input);
+
+    assert.equal(Buffer.from(first).subarray(0, 5).toString(), "%PDF-");
+    assert.ok(first.byteLength > contractBytes.byteLength);
     assert.equal(hashDocumentContent(first), hashDocumentContent(second));
   });
 });

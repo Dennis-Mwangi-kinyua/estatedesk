@@ -10,6 +10,10 @@ import {
   CalendarDays,
   FolderOpen,
 } from "lucide-react";
+import {
+  isPdfLeaseAsset,
+  tenantLeaseDownloadPath,
+} from "../lease/_lib/download";
 
 const tenantDocumentsArgs = Prisma.validator<Prisma.TenantDefaultArgs>()({
   include: {
@@ -43,6 +47,7 @@ type TenantDocumentItem = {
   mimeType: string | null;
   createdAt: Date;
   url: string | null;
+  downloadUrl: string | null;
   category: "Profile Image" | "Lease Document";
   subtitle: string;
 };
@@ -130,6 +135,7 @@ export default async function TenantDocumentsPage() {
           mimeType: tenant.profileImage.mimeType,
           createdAt: tenant.profileImage.createdAt,
           url: getDocumentUrl(tenant.profileImage),
+          downloadUrl: getDocumentUrl(tenant.profileImage),
           category: "Profile Image",
           subtitle: "Tenant profile file",
         },
@@ -138,14 +144,18 @@ export default async function TenantDocumentsPage() {
 
   const leaseDocuments: TenantDocumentItem[] =
     tenant?.leases
-      ?.filter((lease) => lease.contractDocument)
+      ?.filter(
+        (lease) =>
+          lease.contractDocument && isPdfLeaseAsset(lease.contractDocument),
+      )
       .map((lease) => ({
         id: lease.contractDocument!.id,
         title: lease.contractDocument!.fileName,
         type: lease.contractDocument!.assetType,
-        mimeType: lease.contractDocument!.mimeType,
+        mimeType: lease.contractDocument!.mimeType ?? "application/pdf",
         createdAt: lease.contractDocument!.createdAt,
-        url: getDocumentUrl(lease.contractDocument!),
+        url: tenantLeaseDownloadPath(lease.id, { view: true }),
+        downloadUrl: tenantLeaseDownloadPath(lease.id),
         category: "Lease Document" as const,
         subtitle: `${lease.unit.property.name} • Unit ${lease.unit.houseNo}${
           lease.unit.building?.name ? ` • ${lease.unit.building.name}` : ""
@@ -235,93 +245,98 @@ export default async function TenantDocumentsPage() {
               My Documents
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Tap a card to open a document when a file link is available.
+              Open a lease PDF to preview it, or download it to save a copy on
+              your device.
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {documents.map((doc) => {
-              const cardContent = (
-                <div className="rounded-[26px] border border-white/80 bg-white/68 p-4 shadow-[0_10px_36px_rgba(15,23,42,0.06)] backdrop-blur-xl transition hover:bg-white/85 hover:shadow-[0_16px_44px_rgba(15,23,42,0.08)]">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 items-start gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center ed-theme-muted-panel rounded-[20px] text-foreground/80 shadow-sm">
-                        {getDocumentIcon(doc.mimeType)}
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-foreground">
-                          {doc.title}
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {doc.category}
-                        </p>
-                      </div>
-                    </div>
-
-                    {doc.url ? (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-foreground/80 shadow-sm">
-                        <Download className="h-4 w-4" />
-                      </div>
-                    ) : null}
+            {documents.map((doc) => (
+              <div
+                key={doc.id}
+                className="rounded-[26px] border border-white/80 bg-white/68 p-4 shadow-[0_10px_36px_rgba(15,23,42,0.06)] backdrop-blur-xl"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center ed-theme-muted-panel rounded-[20px] text-foreground/80 shadow-sm">
+                    {getDocumentIcon(doc.mimeType)}
                   </div>
 
-                  <div className="mt-4 space-y-3">
-                    <div className="rounded-[20px] bg-card/90 px-3 py-3 ring-1 ring-white/70">
-                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                        Related To
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-foreground">
-                        {doc.subtitle}
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="rounded-[20px] bg-card/90 px-3 py-3 ring-1 ring-white/70">
-                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                          Type
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-foreground">
-                          {doc.type}
-                        </p>
-                      </div>
-
-                      <div className="rounded-[20px] bg-card/90 px-3 py-3 ring-1 ring-white/70">
-                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                          Added
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-foreground">
-                          {formatDate(doc.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="rounded-[20px] bg-card/90 px-3 py-3 ring-1 ring-white/70">
-                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                        File Format
-                      </p>
-                      <p className="mt-1 truncate text-sm font-semibold text-foreground">
-                        {doc.mimeType ?? "Unknown type"}
-                      </p>
-                    </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {doc.title}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {doc.category}
+                    </p>
                   </div>
                 </div>
-              );
 
-              return doc.url ? (
-                <a
-                  key={doc.id}
-                  href={doc.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block"
-                >
-                  {cardContent}
-                </a>
-              ) : (
-                <div key={doc.id}>{cardContent}</div>
-              );
-            })}
+                <div className="mt-4 space-y-3">
+                  <div className="rounded-[20px] bg-card/90 px-3 py-3 ring-1 ring-white/70">
+                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                      Related To
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-foreground">
+                      {doc.subtitle}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-[20px] bg-card/90 px-3 py-3 ring-1 ring-white/70">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                        Type
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {doc.type}
+                      </p>
+                    </div>
+
+                    <div className="rounded-[20px] bg-card/90 px-3 py-3 ring-1 ring-white/70">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                        Added
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {formatDate(doc.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[20px] bg-card/90 px-3 py-3 ring-1 ring-white/70">
+                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                      File Format
+                    </p>
+                    <p className="mt-1 truncate text-sm font-semibold text-foreground">
+                      {doc.mimeType ?? "Unknown type"}
+                    </p>
+                  </div>
+                </div>
+
+                {doc.url || doc.downloadUrl ? (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {doc.url ? (
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-4 text-sm font-semibold text-foreground transition hover:bg-neutral-50"
+                      >
+                        <FileText className="h-4 w-4" />
+                        Open
+                      </a>
+                    ) : null}
+                    {doc.downloadUrl ? (
+                      <a
+                        href={doc.downloadUrl}
+                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-4 text-sm font-semibold text-white transition hover:bg-neutral-800"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download PDF
+                      </a>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            ))}
           </div>
         </SurfaceCard>
       </div>

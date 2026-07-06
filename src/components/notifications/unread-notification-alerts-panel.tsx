@@ -18,7 +18,7 @@ type UnreadNotificationAlertsPanelProps = {
 const NOTIFICATIONS_PATHS = new Set([
   "/dashboard/org/notifications",
   "/dashboard/caretaker/notifications",
-  "/tenants/notifications",
+  "/dashboard/tenant/notifications",
 ]);
 
 export async function UnreadNotificationAlertsPanel({

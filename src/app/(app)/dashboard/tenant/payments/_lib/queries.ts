@@ -4,6 +4,7 @@ import {
   filterTenantPayments,
   getPaymentCategory,
 } from "@/app/(app)/dashboard/tenant/payments/_lib/helpers";
+import { getTenantTaxCharges } from "@/app/(app)/dashboard/tenant/payments/_lib/tax-charges";
 import {
   tenantPaymentsArgs,
   type TenantPaymentsPageData,
@@ -27,7 +28,10 @@ export async function getTenantPaymentsData(
     return null;
   }
 
-  const tenantLedger = await getTenantLedger(userId, orgId);
+  const [tenantLedger, taxCharges] = await Promise.all([
+    getTenantLedger(userId, orgId),
+    getTenantTaxCharges(tenant.id, orgId),
+  ]);
   const payments = tenant.payments ?? [];
   const filteredPayments = filterTenantPayments(payments);
 
@@ -80,5 +84,6 @@ export async function getTenantPaymentsData(
     totalGarbagePaid,
     latestPayment: filteredPayments[0] ?? null,
     activeLease: tenant.leases[0] ?? null,
+    taxCharges,
   };
 }

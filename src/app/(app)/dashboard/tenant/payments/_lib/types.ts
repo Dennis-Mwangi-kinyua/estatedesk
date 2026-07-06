@@ -57,6 +57,12 @@ export type TenantPaymentsResult = Prisma.TenantGetPayload<
 >;
 export type PaymentItem = TenantPaymentsResult["payments"][number];
 
+export type TenantTaxChargeItem = Awaited<
+  ReturnType<
+    typeof import("./tax-charges").getTenantTaxCharges
+  >
+>[number];
+
 export type TenantPaymentsPageData = {
   tenant: TenantPaymentsResult;
   tenantLedger: Awaited<
@@ -73,4 +79,5 @@ export type TenantPaymentsPageData = {
   totalGarbagePaid: number;
   latestPayment: PaymentItem | null;
   activeLease: TenantPaymentsResult["leases"][number] | null;
+  taxCharges: TenantTaxChargeItem[];
 };

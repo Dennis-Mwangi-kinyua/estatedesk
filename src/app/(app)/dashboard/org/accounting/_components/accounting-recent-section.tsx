@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { WalletCards } from "lucide-react";
 import { formatDate, formatMoney } from "../_lib/helpers";
 import type { AccountingPageData } from "../_lib/types";
@@ -7,10 +8,18 @@ export function AccountingRecentSection({ data }: { data: AccountingPageData }) 
   return (
     <div className="space-y-5">
       <section className="rounded-2xl border border-border bg-muted/5 p-5">
-        <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground">
-          <WalletCards className="h-5 w-5 text-primary" />
-          Recent journals
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground">
+            <WalletCards className="h-5 w-5 text-primary" />
+            Recent journals
+          </h2>
+          <Link
+            href="/dashboard/org/accounting/journals"
+            className="text-sm font-semibold text-primary hover:text-primary/80"
+          >
+            Open register
+          </Link>
+        </div>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           Latest posted journal entries across payments, expenses, and manual adjustments.
         </p>

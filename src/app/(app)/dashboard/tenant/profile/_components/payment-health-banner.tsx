@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   formatLedgerCurrency,
   formatLedgerDate,
@@ -12,6 +13,9 @@ type PaymentHealthBannerProps = {
 };
 
 export function PaymentHealthBanner({ paymentHealth }: PaymentHealthBannerProps) {
+  const showPayNow =
+    paymentHealth.tone !== "settled" && Number(paymentHealth.deficit ?? 0) > 0;
+
   return (
     <section
       className={`rounded-[26px] border p-4 shadow-sm sm:rounded-[28px] sm:p-5 ${paymentHealthTone(
@@ -36,6 +40,15 @@ export function PaymentHealthBanner({ paymentHealth }: PaymentHealthBannerProps)
               : ""}
           </p>
         </div>
+
+        {showPayNow ? (
+          <Link
+            href="/dashboard/tenant/payments"
+            className="inline-flex min-h-10 items-center justify-center rounded-2xl bg-neutral-950 px-4 text-sm font-semibold text-white transition hover:bg-neutral-800"
+          >
+            Pay now
+          </Link>
+        ) : null}
       </div>
     </section>
   );

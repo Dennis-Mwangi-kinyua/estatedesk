@@ -4,7 +4,9 @@ import { buildRetentionReport } from "@/lib/data-retention/report";
 import { queueDuePaymentNotifications } from "@/lib/ledger";
 import { dispatchQueuedNotifications } from "@/lib/notifications/dispatch";
 import { sendSecurityAlert } from "@/lib/security/alerts";
+import { runScheduledOwnerStatementDelivery } from "@/lib/accounting/owner-statement-delivery";
 import { processLeaseSigningLifecycle } from "@/lib/leases/signing";
+import { prisma } from "@/lib/prisma";
 import { recordCronJobRun } from "./job-runs";
 
 export async function runNotificationCron(input?: {
@@ -30,6 +32,24 @@ export async function runNotificationCron(input?: {
     toCounts: (result) => ({
       processedCount: result.processed,
       successCount: result.sent,
+      failedCount: result.failed,
+    }),
+  });
+}
+
+export async function runOwnerStatementCron(input?: {
+  triggerSource?: "cron" | "manual";
+  actorUserId?: string;
+}) {
+  return recordCronJobRun({
+    jobName: "owner-statements",
+    endpoint: "/api/cron/owner-statements",
+    triggerSource: input?.triggerSource ?? "cron",
+    actorUserId: input?.actorUserId,
+    run: async () => runScheduledOwnerStatementDelivery(prisma),
+    toCounts: (result) => ({
+      processedCount: result.orgsProcessed + result.skipped,
+      successCount: result.emailsSent,
       failedCount: result.failed,
     }),
   });
