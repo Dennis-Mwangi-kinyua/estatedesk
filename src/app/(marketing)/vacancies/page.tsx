@@ -19,7 +19,6 @@ import {
   getVacancyListingsCached,
   getVacancyListingsCountCached,
   isPublicVacancyDatabaseError,
-  PUBLIC_VACANCY_REVALIDATE_SECONDS,
 } from "@/lib/public-vacancy-listings";
 import { vacancyListPaginationMetadata } from "@/lib/seo/vacancy-list-pagination-metadata";
 import {
@@ -37,7 +36,7 @@ import {
   PUBLIC_VACANCY_LIST_PAGE_SIZE,
 } from "@/lib/vacancy-pagination";
 
-export const revalidate = PUBLIC_VACANCY_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 type PageProps = {
   searchParams?: Promise<{

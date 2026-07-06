@@ -61,7 +61,7 @@ const DEFAULT_CURRENCY = process.env.DEFAULT_CURRENCY || "KES";
 const PUBLIC_VACANCY_ATTEMPTS = 2;
 const PUBLIC_VACANCY_DELAY_MS = 250;
 
-export const revalidate = PUBLIC_VACANCY_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return publicRentalLocationPaths().map(({ location }) => ({ location }));

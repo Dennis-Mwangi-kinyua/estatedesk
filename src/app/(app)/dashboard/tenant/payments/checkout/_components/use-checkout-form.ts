@@ -2,12 +2,10 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import type { PaymentInstructions } from "@/lib/payments/instructions";
-import {
-  type TenantPaymentCheckoutSummary,
-  getTenantPaymentCheckoutSummary,
-  getTenantPaymentInstructions,
-  startTenantPayment,
-} from "../actions";
+import { getTenantPaymentInstructions } from "../_lib/get-instructions";
+import { getTenantPaymentCheckoutSummary } from "../_lib/get-summary";
+import { startTenantPayment } from "../_lib/start-payment";
+import type { TenantPaymentCheckoutSummary } from "../_lib/types";
 import { METHOD_LABELS } from "../_lib/constants";
 
 export function useCheckoutForm(searchParams: {
