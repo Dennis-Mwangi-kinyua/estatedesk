@@ -32,7 +32,7 @@ export function TrustPage({
   contentDepth,
 }: TrustPageProps) {
   return (
-    <main className="ed-theme-page min-h-screen bg-background text-foreground">
+    <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <PublicAccessHeader />
       <section className="border-b border-slate-200 bg-slate-50 py-10 dark:border-white/10 dark:bg-slate-950">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">

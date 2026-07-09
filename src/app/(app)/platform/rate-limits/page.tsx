@@ -10,6 +10,11 @@ import {
   formatDateTime,
   formatNumber,
 } from "../_components/control-plane";
+import {
+  clearExpiredRateLimitBucketsAction,
+  clearRateLimitScopeAction,
+  resetRateLimitBucketAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -98,9 +103,10 @@ function bucketStatus(resetAt: Date) {
 }
 
 export default async function PlatformRateLimitsPage() {
-  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/dashboard",
   });
+  const canMutate = session.platformRole === "SUPER_ADMIN";
 
   const now = new Date();
   const [totalBuckets, activeBuckets, expiredBuckets, topBuckets, scopes] =
@@ -133,46 +139,60 @@ export default async function PlatformRateLimitsPage() {
     ]);
 
   const groupedScopes = Array.from(
-    scopes.reduce(
-      (map, bucket) => {
-        const scope = bucketScope(bucket.key);
-        const current = map.get(scope) ?? {
-          scope,
-          buckets: 0,
-          active: 0,
-          totalHits: 0,
-          latest: null as Date | null,
-        };
+    scopes
+      .reduce(
+        (map, bucket) => {
+          const scope = bucketScope(bucket.key);
+          const current = map.get(scope) ?? {
+            scope,
+            buckets: 0,
+            active: 0,
+            totalHits: 0,
+            latest: null as Date | null,
+          };
 
-        current.buckets += 1;
-        current.totalHits += bucket.count;
-        if (bucket.resetAt > now) current.active += 1;
-        if (!current.latest || bucket.updatedAt > current.latest) {
-          current.latest = bucket.updatedAt;
-        }
+          current.buckets += 1;
+          current.totalHits += bucket.count;
+          if (bucket.resetAt > now) current.active += 1;
+          if (!current.latest || bucket.updatedAt > current.latest) {
+            current.latest = bucket.updatedAt;
+          }
 
-        map.set(scope, current);
-        return map;
-      },
-      new Map<
-        string,
-        {
-          scope: string;
-          buckets: number;
-          active: number;
-          totalHits: number;
-          latest: Date | null;
-        }
-      >(),
-    ).values(),
+          map.set(scope, current);
+          return map;
+        },
+        new Map<
+          string,
+          {
+            scope: string;
+            buckets: number;
+            active: number;
+            totalHits: number;
+            latest: Date | null;
+          }
+        >(),
+      )
+      .values(),
   ).sort((a, b) => b.totalHits - a.totalHits);
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Rate limits"
-        title="Abuse controls"
-        description="Live visibility into persistent rate-limit buckets, active throttles, and the policies protecting login, public APIs, and tenant administration flows."
+        eyebrow="Developer portal"
+        title="Rate limits"
+        description="Live visibility into persistent rate-limit buckets plus super-admin ops to reset individual keys, clear a scope, or purge expired windows."
+        action={
+          canMutate ? (
+            <form action={clearExpiredRateLimitBucketsAction}>
+              <button
+                type="submit"
+                className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50"
+              >
+                Clear expired buckets
+              </button>
+            </form>
+          ) : undefined
+        }
       />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -181,6 +201,13 @@ export default async function PlatformRateLimitsPage() {
         <StatCard label="Expired windows" value={formatNumber(expiredBuckets)} />
         <StatCard label="Configured policies" value={formatNumber(policies.length)} />
       </section>
+
+      {!canMutate ? (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
+          Bucket reset and scope clear actions require a super admin. You can still
+          inspect live activity.
+        </div>
+      ) : null}
 
       <Surface
         title="Configured policies"
@@ -232,6 +259,9 @@ export default async function PlatformRateLimitsPage() {
                 <th className="px-4 py-3 font-medium">Active</th>
                 <th className="px-4 py-3 font-medium">Recorded hits</th>
                 <th className="px-4 py-3 font-medium">Latest activity</th>
+                {canMutate ? (
+                  <th className="px-4 py-3 font-medium">Ops</th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -252,10 +282,26 @@ export default async function PlatformRateLimitsPage() {
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                     {formatDateTime(scope.latest)}
                   </td>
+                  {canMutate ? (
+                    <td className="px-4 py-3">
+                      <form action={clearRateLimitScopeAction}>
+                        <input type="hidden" name="scope" value={scope.scope} />
+                        <button
+                          type="submit"
+                          className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-500/30 dark:bg-slate-950 dark:text-red-300"
+                        >
+                          Clear scope
+                        </button>
+                      </form>
+                    </td>
+                  ) : null}
                 </tr>
               ))}
               {groupedScopes.length === 0 ? (
-                <EmptyRow colSpan={5} label="No persistent rate-limit buckets found." />
+                <EmptyRow
+                  colSpan={canMutate ? 6 : 5}
+                  label="No persistent rate-limit buckets found."
+                />
               ) : null}
             </tbody>
           </table>
@@ -264,7 +310,7 @@ export default async function PlatformRateLimitsPage() {
 
       <Surface
         title="Hottest buckets"
-        description="Highest-count persistent buckets, useful for spotting repeated login attempts, API bursts, or stuck clients."
+        description="Highest-count persistent buckets. Super admins can reset a bucket to immediately unthrottle a client."
       >
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
@@ -276,11 +322,17 @@ export default async function PlatformRateLimitsPage() {
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Reset</th>
                 <th className="px-4 py-3 font-medium">Updated</th>
+                {canMutate ? (
+                  <th className="px-4 py-3 font-medium">Ops</th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
               {topBuckets.map((bucket) => (
-                <tr key={bucket.key} className="border-t border-neutral-100 align-top dark:border-white/10">
+                <tr
+                  key={bucket.key}
+                  className="border-t border-neutral-100 align-top dark:border-white/10"
+                >
                   <td className="max-w-md px-4 py-3">
                     <p className="break-all font-mono text-xs text-slate-700 dark:text-slate-200">
                       {bucket.key}
@@ -303,10 +355,26 @@ export default async function PlatformRateLimitsPage() {
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                     {formatDateTime(bucket.updatedAt)}
                   </td>
+                  {canMutate ? (
+                    <td className="px-4 py-3">
+                      <form action={resetRateLimitBucketAction}>
+                        <input type="hidden" name="key" value={bucket.key} />
+                        <button
+                          type="submit"
+                          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
+                        >
+                          Reset
+                        </button>
+                      </form>
+                    </td>
+                  ) : null}
                 </tr>
               ))}
               {topBuckets.length === 0 ? (
-                <EmptyRow colSpan={6} label="No rate-limit activity found." />
+                <EmptyRow
+                  colSpan={canMutate ? 7 : 6}
+                  label="No rate-limit activity found."
+                />
               ) : null}
             </tbody>
           </table>

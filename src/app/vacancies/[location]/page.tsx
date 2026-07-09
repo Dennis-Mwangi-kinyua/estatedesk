@@ -116,7 +116,7 @@ async function getVacancyUnit(slug: string) {
 
 function VacancyTemporarilyUnavailable() {
   return (
-    <main className="ed-theme-page min-h-screen bg-background text-foreground">
+    <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <PublicAccessHeader active="vacancies" />
 
       <section className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
@@ -554,7 +554,7 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
   };
 
   return (
-    <main className="ed-theme-page min-h-screen bg-background text-foreground">
+    <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <PublicAccessHeader active="vacancies" />
       <VacancyDetailBreadcrumb place={place} houseNo={unit.houseNo} locationHref={locationHref} />
 

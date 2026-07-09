@@ -136,6 +136,43 @@ model RateLimitBucket {
   @@index([resetAt])
 }
 
+/// Singleton platform-wide kill switches and developer control-plane state.
+model PlatformControl {
+  id                    String    @id @default("global")
+  maintenanceMode       Boolean   @default(false)
+  maintenanceMessage    String?
+  incidentMode          Boolean   @default(false)
+  incidentMessage       String?
+  publicSignupDisabled  Boolean   @default(false)
+  publicApiDisabled     Boolean   @default(false)
+  webhooksDisabled      Boolean   @default(false)
+  cronDisabled          Boolean   @default(false)
+  tenantPortalsDisabled Boolean   @default(false)
+  orgDashboardsDisabled Boolean   @default(false)
+  globalFeatures        Json?
+  notes                 String?
+  lastBackupAt          DateTime?
+  lastBackupNote        String?
+  lastBackupStatus      String?
+  updatedByUserId       String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+/// Inbound webhook samples for developer debugging.
+model PlatformWebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String
+  path        String
+  statusCode  Int
+  summary     String?
+  payload     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([provider, createdAt])
+  @@index([createdAt])
+}
+
 /// Tenant organization / property management company boundary.
 model Organization {
   id                      String                    @id @default(cuid())

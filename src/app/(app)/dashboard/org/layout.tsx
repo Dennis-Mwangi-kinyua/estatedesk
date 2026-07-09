@@ -5,6 +5,11 @@ import { requireActiveSubscription } from "@/lib/billing/subscription-access";
 import { SubscriptionWarning } from "@/components/billing/subscription-warning";
 import { prisma } from "@/lib/prisma";
 import { UnreadNotificationAlertsPanel } from "@/components/notifications/unread-notification-alerts-panel";
+import {
+  clearSupportSessionCookie,
+  getActiveSupportSession,
+} from "@/lib/platform/support-session";
+import { setUserSession } from "@/lib/auth/session";
 
 const roleLabels: Record<string, string> = {
   ADMIN: "Organization Admin",
@@ -49,12 +54,40 @@ export default async function OrgLayout({
   const organizationName = membership?.org.name ?? "EstateDesk";
   const userRole = roleLabels[membership?.role ?? shellRole] ?? "Organization Staff";
 
+  let supportSession = await getActiveSupportSession(session.userId);
+  if (supportSession && supportSession.orgId !== session.activeOrgId) {
+    supportSession = null;
+  }
+  if (
+    supportSession &&
+    supportSession.expiresAtUnix <= Math.floor(Date.now() / 1000)
+  ) {
+    await clearSupportSessionCookie();
+    await setUserSession({
+      userId: session.userId,
+      activeMembershipId: null,
+      replaceExistingSessions: false,
+    });
+    supportSession = null;
+  }
+
   return (
     <OrgDashboardShell
       organizationName={organizationName}
       userName={session.fullName}
       userRole={userRole}
       role={shellRole}
+      supportSession={
+        supportSession
+          ? {
+              orgId: supportSession.orgId,
+              orgSlug: supportSession.orgSlug,
+              orgName: supportSession.orgName,
+              reason: supportSession.reason,
+              expiresAtUnix: supportSession.expiresAtUnix,
+            }
+          : null
+      }
     >
       <SubscriptionWarning access={access} />
       <UnreadNotificationAlertsPanel

@@ -766,4 +766,141 @@ export const guideArticles = [
       },
     ],
   },
+  {
+    slug: "platform-website-control",
+    category: "Platform",
+    title: "Website control center for platform operators",
+    summary:
+      "How super admins use kill switches, incident banners, nuclear session tools, and timed org support sessions without breaking audit trails.",
+    readingMinutes: 7,
+    publishedAt: "2026-07-09",
+    keywords: [
+      "platform control plane",
+      "maintenance mode",
+      "incident mode",
+      "support session",
+    ],
+    sections: [
+      {
+        heading: "Admin mode vs Developer mode",
+        paragraphs: [
+          "EstateDesk platform operators work in one shell with two modes. Administration covers organizations, users, billing, onboarding, and support. Developer mode focuses on health, APIs, jobs, flags, rate limits, data, backups, and website control.",
+          "Switch modes from the sidebar toggle or Alt+Shift+A / Alt+Shift+D. The shell remembers your last path in each mode.",
+        ],
+      },
+      {
+        heading: "Kill switches and incident banners",
+        paragraphs: [
+          "Website Control can enable maintenance mode (blocks tenant and org workspaces), disable public signup, public APIs, webhooks, and cron, and surface a public incident banner without fully locking the product.",
+          "Prefer incident mode for communications-only events. Prefer maintenance mode when dashboards must not accept work.",
+        ],
+      },
+      {
+        heading: "Timed support sessions",
+        paragraphs: [
+          "From Support Access or Website Control, enter an organization as ADMIN with a reason and 1–8 hour duration. A banner in the org workspace shows remaining time, extend, and leave controls.",
+          "Leaving support clears the timed cookie and returns your session to the platform shell. All enter, extend, and leave events are audit-logged.",
+        ],
+      },
+      {
+        heading: "Nuclear tools and confirmation phrases",
+        paragraphs: [
+          "Revoking all sessions, API keys, clearing rate limits, purging failed notifications, and forcing features across every organization require explicit confirmation phrases. These tools are super-admin only.",
+          "After host-level backup or restore drills, record checkpoints on the Backups page so compliance evidence lives next to operational status.",
+        ],
+      },
+    ],
+    takeaways: [
+      "Use Developer mode for engineering ops and Administration for customer operations.",
+      "Incident mode communicates; maintenance mode blocks.",
+      "Support sessions are timed, reason-captured, and leaveable.",
+      "Nuclear actions need typed confirmation and produce audit + security alerts.",
+    ],
+    relatedGuideSlugs: ["org-api-integration-guide", "kenya-rental-operations"],
+    relatedLinks: [
+      {
+        title: "Website control",
+        href: "/platform/control",
+        description: "Super-admin kill switches and nuclear ops.",
+      },
+      {
+        title: "Support access",
+        href: "/platform/support-access",
+        description: "Timed organization support entry.",
+      },
+    ],
+    faq: [
+      {
+        question: "Who can open Website Control?",
+        answer: "Only SUPER_ADMIN. Platform admins can use Developer health tools and Support Access without nuclear credentials tools.",
+      },
+      {
+        question: "Do global feature overrides rewrite every org?",
+        answer: "Global overrides win over org settings at read time. Force-all-orgs also rewrites OrganizationSettings.features when confirmed.",
+      },
+    ],
+  },
+  {
+    slug: "platform-admin-operations",
+    category: "Platform",
+    title: "Platform administration operations guide",
+    summary:
+      "Day-to-day administration of organizations, onboarding, billing views, messaging, and support access inside the EstateDesk platform shell.",
+    readingMinutes: 6,
+    publishedAt: "2026-07-09",
+    keywords: [
+      "platform admin",
+      "organization onboarding",
+      "support access",
+      "billing oversight",
+    ],
+    sections: [
+      {
+        heading: "Core administration loop",
+        paragraphs: [
+          "Start from the platform dashboard for onboarding alerts and portfolio metrics. Use Organizations for create, archive, and status changes; Users and Admins for access; Onboarding for new company requests.",
+          "Billing and subscriptions pages provide portfolio visibility. Plan overrides for emergencies live under Developer Website Control for super admins.",
+        ],
+      },
+      {
+        heading: "Supporting a customer safely",
+        paragraphs: [
+          "Open Support Access, pick the organization, capture a reason, choose a duration, and enter as support. Work inside the org shell with the amber banner visible, then leave support when finished.",
+          "Do not share temporary passwords over unsecured channels. Prefer force password change from platform user tools when needed.",
+        ],
+      },
+      {
+        heading: "Messages, broadcasts, and marketing",
+        paragraphs: [
+          "Platform messages and broadcasts reach operators and orgs according to each tool's scope. Marketing tracks marketers and referral attribution for growth operations.",
+          "Audit Logs and Security remain dual-mode so both admins and developers can investigate access events without switching context awkwardly.",
+        ],
+      },
+    ],
+    takeaways: [
+      "Admin mode owns customer lifecycle; Developer mode owns engineering control.",
+      "Support Access is the safe path into a live org workspace.",
+      "Security and audit tools are available in both modes.",
+    ],
+    relatedGuideSlugs: ["platform-website-control"],
+    relatedLinks: [
+      {
+        title: "Platform dashboard",
+        href: "/platform",
+        description: "Administration home.",
+      },
+      {
+        title: "Support access",
+        href: "/platform/support-access",
+        description: "Timed support entry.",
+      },
+    ],
+    faq: [
+      {
+        question: "Can platform admins create super admins?",
+        answer: "No. Only an existing super admin can create another super admin.",
+      },
+    ],
+  }
+
 ] satisfies readonly GuideArticle[];

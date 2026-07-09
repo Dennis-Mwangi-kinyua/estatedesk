@@ -9,6 +9,7 @@ import { PwaInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { ServiceWorkerUpdatePrompt } from "@/components/pwa/service-worker-update-prompt";
 import { SkipToMain } from "@/components/layout/skip-to-main";
+import { IncidentBanner } from "@/components/marketing/incident-banner";
 import { ThemeInitScript } from "@/components/theme/theme-init-script";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -100,8 +101,12 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  userScalable: true,
   viewportFit: "cover",
-  themeColor: "#0f766e",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0f766e" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1220" },
+  ],
 };
 
 const structuredData = [
@@ -231,7 +236,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
-      <body className="min-h-screen bg-background">
+      <body className="ed-mobile-first min-h-dvh bg-background antialiased">
         <SkipToMain />
         <ThemeProvider>
           <MarketingAnalytics />
@@ -241,7 +246,8 @@ export default async function RootLayout({
           <ServiceWorkerUpdatePrompt />
           <PwaAppBadgeSync />
           <PwaInstallPrompt />
-          <div id="main-content" className="min-h-screen w-full">
+          <div id="main-content" className="ed-mobile-first-root min-h-dvh w-full min-w-0">
+            <IncidentBanner />
             {children}
           </div>
           <ThemeToggle />

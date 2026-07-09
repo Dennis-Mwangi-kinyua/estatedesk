@@ -116,7 +116,7 @@ export function LandlordDashboardShell({
   const currentYear = useMemo(() => new Date().getFullYear(), []);
 
   return (
-    <div className="app-mobile-canvas min-h-screen">
+    <div className="app-mobile-canvas ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden">
       <aside className="ed-shell-panel fixed inset-y-0 left-0 z-[100] hidden w-72 border-r p-4 lg:block">
         <HoverPrefetchLink href="/dashboard/landlord" className="flex items-center gap-3">
           <div className="ed-brand-mark flex h-10 w-10 items-center justify-center rounded-lg shadow-sm">

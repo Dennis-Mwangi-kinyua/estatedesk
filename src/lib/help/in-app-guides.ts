@@ -63,6 +63,16 @@ export const inAppGuideTopics = {
     workspaces: ["org"],
     orgRoles: ["ADMIN"],
   },
+  platformControl: {
+    slug: "platform-website-control",
+    label: "Website control center",
+    workspaces: ["platform"],
+  },
+  platformAdminOps: {
+    slug: "platform-admin-operations",
+    label: "Platform administration ops",
+    workspaces: ["platform"],
+  },
 } as const;
 
 export type InAppGuideTopic = keyof typeof inAppGuideTopics;
@@ -108,7 +118,9 @@ export function listGuideTopicsForWorkspace(
   orgRole?: OrgRole | null,
 ) {
   if (workspace === "platform") {
-    return Object.keys(inAppGuideTopics) as InAppGuideTopic[];
+    return (Object.keys(inAppGuideTopics) as InAppGuideTopic[]).filter((topic) =>
+      (inAppGuideTopics[topic].workspaces as readonly HelpWorkspace[]).includes("platform"),
+    );
   }
 
   return (Object.keys(inAppGuideTopics) as InAppGuideTopic[]).filter((topic) =>

@@ -19,7 +19,9 @@ function addDays(date: Date, days: number) {
 }
 
 export async function approveDataExportRequestAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
+  const session = await requirePlatformRole(["SUPER_ADMIN"], {
+    redirectTo: "/platform/developer?error=super-admin-only",
+  });
   const requestId = readString(formData, "requestId");
   const reviewerNotes = readString(formData, "reviewerNotes") || null;
 
@@ -66,7 +68,9 @@ export async function approveDataExportRequestAction(formData: FormData) {
 }
 
 export async function rejectDataExportRequestAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
+  const session = await requirePlatformRole(["SUPER_ADMIN"], {
+    redirectTo: "/platform/developer?error=super-admin-only",
+  });
   const requestId = readString(formData, "requestId");
   const reviewerNotes = readString(formData, "reviewerNotes") || null;
 

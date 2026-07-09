@@ -138,7 +138,8 @@ export async function getSettingsPageData(
     { label: "getSettingsPageData-find-organization" },
   );
 
-  const features = org.settings?.features;
+  const { resolveOrgFeatures, getFeatureFlag } = await import("@/lib/org/features");
+  const features = await resolveOrgFeatures(org.settings?.features);
   const notificationDefaults = org.settings?.notificationDefaults;
 
   return {
@@ -160,10 +161,10 @@ export async function getSettingsPageData(
       renewalDate: formatDate(org.subscription?.currentPeriodEnd),
     },
     preferences: {
-      tenantPortal: getBoolean(features, "tenantPortal"),
-      issueTracking: getBoolean(features, "issueTracking"),
-      waterBilling: getBoolean(features, "waterBilling"),
-      taxTracking: getBoolean(features, "taxTracking"),
+      tenantPortal: getFeatureFlag(features, "tenantPortal"),
+      issueTracking: getFeatureFlag(features, "issueTracking"),
+      waterBilling: getFeatureFlag(features, "waterBilling"),
+      taxTracking: getFeatureFlag(features, "taxTracking"),
       smsNotifications: getBoolean(notificationDefaults, "smsNotifications"),
       emailNotifications: getBoolean(notificationDefaults, "emailNotifications"),
     },

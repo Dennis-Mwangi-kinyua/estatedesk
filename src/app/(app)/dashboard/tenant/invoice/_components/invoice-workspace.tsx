@@ -5,7 +5,7 @@ import type { TenantInvoicePageData } from "../_lib/types";
 
 export function InvoiceWorkspace({ data }: { data: TenantInvoicePageData }) {
   return (
-    <div className="ed-theme-page min-h-screen bg-background text-foreground">
+    <div className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 xl:px-8">
         <div className="space-y-4 sm:space-y-6">
           <InvoiceHeader data={data} />

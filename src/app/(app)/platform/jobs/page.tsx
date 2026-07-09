@@ -12,8 +12,8 @@ export default async function JobsPage({
 }: {
   searchParams: JobsSearchParams;
 }) {
-  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
-    redirectTo: "/dashboard",
+  await requirePlatformRole(["SUPER_ADMIN"], {
+    redirectTo: "/platform/developer?error=super-admin-only",
   });
 
   const resolved = await searchParams;

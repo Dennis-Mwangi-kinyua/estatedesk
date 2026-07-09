@@ -1,6 +1,6 @@
 import {
+  Code2,
   CreditCard,
-  FileClock,
   Plus,
   SlidersHorizontal,
   Users,
@@ -38,7 +38,7 @@ export function PlatformDashboardAside({
           <ActionLink href="/platform/onboarding?status=NEW" label="New onboarding" icon={SlidersHorizontal} />
           <ActionLink href="/platform/users" label="Platform users" icon={Users} />
           <ActionLink href="/platform/billing" label="Billing center" icon={CreditCard} />
-          <ActionLink href="/platform/audit-logs" label="Audit logs" icon={FileClock} />
+          <ActionLink href="/platform/developer" label="Developer portal" icon={Code2} />
         </div>
       </Panel>
 

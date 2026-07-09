@@ -138,7 +138,7 @@ export default async function ContactPage({
     "h-12 w-full rounded-2xl border border-slate-200/85 bg-white/90 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-200/70 dark:border-white/[0.16] dark:bg-[#171b22] dark:text-[#f8fafc] dark:placeholder:text-[#9ca3af] dark:focus:border-white/40 dark:focus:ring-white/10";
 
   return (
-    <main className="ed-theme-page min-h-screen bg-background text-foreground">
+    <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <PublicAccessHeader active="contact" />
 
       <section className="relative border-b border-slate-200/80 dark:border-white/10">

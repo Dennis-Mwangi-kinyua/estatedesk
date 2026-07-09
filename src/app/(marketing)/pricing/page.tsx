@@ -124,7 +124,7 @@ export default function PricingPage() {
   };
 
   return (
-    <main className="ed-theme-page min-h-dvh bg-background text-foreground">
+    <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }}

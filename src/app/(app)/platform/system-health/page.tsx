@@ -44,8 +44,8 @@ export default async function SystemHealthPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="System health"
-        title="Operational status"
+        eyebrow="Developer portal"
+        title="System health"
         description="Live health indicators for the database-backed control plane, notification queue, payment failures, and KRA integration errors."
       />
 

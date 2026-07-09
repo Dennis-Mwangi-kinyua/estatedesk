@@ -34,23 +34,23 @@ export function labelize(value: string | null | undefined) {
 export function toneForStatus(value: string | null | undefined) {
   const status = (value ?? "").toLowerCase();
 
-  if (["active", "sent", "success", "verified", "paid", "enabled"].includes(status)) {
-    return "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200";
+  if (["active", "sent", "success", "verified", "paid", "enabled", "ready"].includes(status)) {
+    return "border-emerald-500/25 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200";
   }
 
-  if (["pending", "queued", "trialing", "initiated", "partial", "draft"].includes(status)) {
-    return "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200";
+  if (["pending", "queued", "trialing", "initiated", "partial", "draft", "check"].includes(status)) {
+    return "border-amber-500/25 bg-amber-500/10 text-amber-900 dark:text-amber-100";
   }
 
   if (
-    ["failed", "rejected", "disabled", "suspended", "cancelled", "expired", "past_due"].includes(
+    ["failed", "rejected", "disabled", "suspended", "cancelled", "expired", "past_due", "misconfigured"].includes(
       status,
     )
   ) {
-    return "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200";
+    return "border-red-500/25 bg-red-500/10 text-red-800 dark:text-red-200";
   }
 
-  return "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200";
+  return "border-border bg-muted/50 text-muted-foreground";
 }
 
 export function PageHeader({
@@ -65,20 +65,20 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:p-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+    <div className="ios-panel rounded-xl border border-border bg-card/90 p-3 shadow-sm backdrop-blur-sm sm:p-6">
+      <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="min-w-0">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-xs">
           {eyebrow}
         </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+        <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-foreground sm:mt-2 sm:text-2xl lg:text-3xl">
           {title}
         </h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-300">
+        <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground sm:mt-2">
           {description}
         </p>
       </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
+      {action ? <div className="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto">{action}</div> : null}
       </div>
     </div>
   );
@@ -94,14 +94,14 @@ export function StatCard({
   note?: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+    <div className="ios-card rounded-xl border border-border bg-card/90 p-3 shadow-sm sm:p-4">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:text-xs">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+      <p className="mt-1.5 text-xl font-semibold tracking-tight text-foreground sm:mt-2 sm:text-2xl">
         {value}
       </p>
-      {note ? <p className="mt-1 text-xs text-slate-500 dark:text-slate-300">{note}</p> : null}
+      {note ? <p className="mt-1 text-[11px] text-muted-foreground sm:text-xs">{note}</p> : null}
     </div>
   );
 }
@@ -116,10 +116,12 @@ export function Surface({
   children: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950">
-      <div className="border-b border-slate-100 px-4 py-4 dark:border-white/10">
-        <h2 className="text-base font-semibold text-slate-950 dark:text-white">{title}</h2>
-        {description ? <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-300">{description}</p> : null}
+    <section className="ios-panel overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm">
+      <div className="border-b border-border px-4 py-4">
+        <h2 className="text-base font-semibold text-foreground">{title}</h2>
+        {description ? (
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
+        ) : null}
       </div>
       {children}
     </section>
@@ -130,7 +132,7 @@ export function Badge({ children, tone }: { children: ReactNode; tone?: string }
   return (
     <span
       className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
-        tone ?? "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
+        tone ?? "border-border bg-muted/60 text-muted-foreground"
       }`}
     >
       {children}
@@ -140,7 +142,10 @@ export function Badge({ children, tone }: { children: ReactNode; tone?: string }
 
 export function AdminLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className="font-semibold text-slate-950 underline-offset-4 hover:underline dark:text-white">
+    <Link
+      href={href}
+      className="font-semibold text-foreground underline-offset-4 hover:underline"
+    >
       {children}
     </Link>
   );

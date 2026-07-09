@@ -8,7 +8,7 @@ export function ReportIssueWorkspace({ data }: { data: ReportIssuePageData }) {
   const { leaseUnits, errorMessage, sharedTitle, sharedDescription } = data;
 
   return (
-    <div className="ed-theme-page min-h-screen bg-background text-foreground">
+    <div className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <div className="mx-auto w-full max-w-4xl px-4 py-4 sm:px-6 sm:py-6 xl:px-8">
         <div className="space-y-4 sm:space-y-6">
           <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:p-6 lg:p-7">

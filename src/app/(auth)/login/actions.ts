@@ -2,12 +2,16 @@
 
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { prisma } from "@/lib/prisma";
 import { ActiveSessionLimitError, setUserSession } from "@/lib/auth/session";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
+import {
+  parsePlatformModeCookie,
+  PLATFORM_MODE_COOKIE_NAME,
+} from "@/app/(app)/platform/_lib/nav";
 import {
   isTransientDatabaseError,
   retryTransientDatabaseOperation,
@@ -15,6 +19,13 @@ import {
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendSecurityAlert } from "@/lib/security/alerts";
 import { isLoginTimingEnabled } from "@/lib/dev/background-refresh";
+
+async function getPreferredPlatformMode() {
+  const cookieStore = await cookies();
+  return parsePlatformModeCookie(
+    cookieStore.get(PLATFORM_MODE_COOKIE_NAME)?.value,
+  );
+}
 
 const loginSchema = z.object({
   email: z
@@ -270,7 +281,8 @@ export async function loginAction(
             platformRole: user.platformRole,
             activeOrgRole: null,
             activeOrgId: null,
-            hasTenantProfile: false,
+            preferredPlatformMode: await getPreferredPlatformMode(),
+              hasTenantProfile: false,
           }),
       );
 
@@ -382,6 +394,7 @@ export async function loginAction(
               platformRole: user.platformRole,
               activeOrgRole: primaryMembership?.role ?? null,
               activeOrgId: primaryMembership?.orgId ?? null,
+              preferredPlatformMode: await getPreferredPlatformMode(),
               hasTenantProfile: Boolean(tenant),
             }),
     );

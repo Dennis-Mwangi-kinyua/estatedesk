@@ -121,7 +121,8 @@ export async function getSettingsPageData(
     },
   });
 
-  const features = org.settings?.features;
+  const { resolveOrgFeatures, getFeatureFlag } = await import("@/lib/org/features");
+  const features = await resolveOrgFeatures(org.settings?.features);
   const notificationDefaults = org.settings?.notificationDefaults;
 
   return {
@@ -145,10 +146,10 @@ export async function getSettingsPageData(
     },
 
     preferences: {
-      tenantPortal: getBoolean(features, "tenantPortal"),
-      issueTracking: getBoolean(features, "issueTracking"),
-      waterBilling: getBoolean(features, "waterBilling"),
-      taxTracking: getBoolean(features, "taxTracking"),
+      tenantPortal: getFeatureFlag(features, "tenantPortal", getBoolean(org.settings?.features, "tenantPortal")),
+      issueTracking: getFeatureFlag(features, "issueTracking", getBoolean(org.settings?.features, "issueTracking")),
+      waterBilling: getFeatureFlag(features, "waterBilling", getBoolean(org.settings?.features, "waterBilling")),
+      taxTracking: getFeatureFlag(features, "taxTracking", getBoolean(org.settings?.features, "taxTracking")),
       smsNotifications: getBoolean(notificationDefaults, "smsNotifications"),
       emailNotifications: getBoolean(notificationDefaults, "emailNotifications"),
     },

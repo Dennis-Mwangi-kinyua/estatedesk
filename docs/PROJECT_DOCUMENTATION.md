@@ -38,6 +38,7 @@ EstateDesk enables:
 - notices, move-outs, and service accountability
 - role-based dashboards and permissioned access
 - platform administration and referral tracking
+- dual-mode platform shell: **Administration** and **Developer** portals for super/platform admins
 
 The platform is designed for production use in Kenya, with mobile money friendliness, caretaker workflows, and utility billing awareness.
 
@@ -155,6 +156,66 @@ Important variables are defined in `.env.example` and include:
 - `WHATSAPP_*` - optional WhatsApp messaging integration settings
 
 Use `.env` for local development and never check secrets into source control.
+
+## Platform Admin & Developer Portal
+
+Platform operators (`SUPER_ADMIN`, `PLATFORM_ADMIN`) share `/platform` with a mode toggle:
+
+| Mode | Home | Purpose |
+| --- | --- | --- |
+| Administration | `/platform` | Orgs, users, billing, onboarding, marketing, messages, reports, settings |
+| Developer | `/platform/developer` | System health, API explorer, feature flags, rate limits, integrations |
+
+**Mode memory**
+
+- Preferred mode is stored in `localStorage` (`estatedesk.platform.mode`) and cookie (`estatedesk_platform_mode`)
+- Last path per mode is restored when switching (not always the mode home)
+- Login/post-password-change redirects platform admins using the mode cookie
+- Dual-mode routes (`/platform/help`, `/platform/security`, `/platform/audit-logs`) keep the sticky preferred mode
+- Keyboard: `Alt+Shift+A` (admin), `Alt+Shift+D` (developer)
+
+**Super-admin-only tools** (page + mutations): API keys, jobs/queues, data management, backups. Platform admins are redirected to the developer home with `?error=super-admin-only`. Rate-limit **reset** ops are also super-admin-only; inspection is available to platform admins.
+
+Key paths:
+
+- `src/app/(app)/platform/_lib/nav.ts` — mode/nav config
+- `src/app/(app)/platform/_components/platform-shell.tsx` — shell + toggle
+- `src/app/(app)/platform/developer/page.tsx` — developer hub
+- `src/app/(app)/platform/control/` — **website control center** (super admin): kill switches, nuclear ops, org support entry
+- `src/lib/platform/control.ts` — `PlatformControl` singleton helpers
+- `src/app/(app)/platform/api-explorer/page.tsx` — API/webhook catalog
+- `src/app/(app)/platform/feature-flags/` — editable org feature matrix
+
+### Website control center (super admin)
+
+`/platform/control` can enable maintenance mode, **incident banners**, disable public signup/API/webhooks/cron, shut org or tenant portals, force global feature overrides, revoke all sessions/API keys, clear rate limits, run all crons, force user status, override org billing, enter an org as support admin, and soft-delete/restore organizations. Kill switches are enforced in org guards, public API, M-Pesa webhooks, cron routes, and registration.
+
+### Support access (timed)
+
+`/platform/support-access` lets SUPER_ADMIN and PLATFORM_ADMIN open a **timed** org ADMIN session (1–8h) with a required reason. The org shell shows an amber banner with extend/leave. Cookie: `estatedesk_support_session` (signed).
+
+### Global feature overrides
+
+`src/lib/org/features.ts` merges org `OrganizationSettings.features` with `PlatformControl.globalFeatures`. Settings pages and flag matrix use the resolved map so force ON/OFF actually affects product reads.
+
+### Backups operator actions
+
+`/platform/backups` records checkpoints and restore-drill outcomes on `PlatformControl` (plus audit/security alerts). Host dump/restore still uses `scripts/backup-database.sh` and `scripts/restore-drill.sh`.
+
+### Help
+
+Platform help includes `platform-website-control` and `platform-admin-operations` guides under `/platform/help`.
+
+## Mobile-first UI
+
+EstateDesk is mobile-first across marketing, auth, org/tenant/caretaker/landlord dashboards, and the platform control plane:
+
+- Root body uses `ed-mobile-first` with `viewport-fit=cover` and safe-area support
+- Dashboard shells use `min-h-dvh`, bottom tab/nav offsets, and touch-friendly targets
+- Global CSS collapses dense multi-column grids, forces table horizontal scroll, and sizes form controls for phones (16px inputs to avoid iOS zoom)
+- Progressive enhancement via Tailwind `sm` / `md` / `lg` / `xl` utilities
+
+Key files: `src/app/globals.css` (`.ed-mobile-first` foundation), shell components under `src/components/layout/`, platform shell under `src/app/(app)/platform/`.
 
 ## Developer Setup
 

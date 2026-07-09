@@ -149,6 +149,14 @@ function requestMessage(status?: string): RequestMessage | null {
     };
   }
 
+  if (status === "disabled") {
+    return {
+      tone: "warning",
+      title: "New access requests paused",
+      text: "Public onboarding is temporarily disabled by platform control. Please try again later or contact EstateDesk support.",
+    };
+  }
+
   return null;
 }
 
@@ -162,7 +170,7 @@ export default async function RegisterPage({
   const referralCode = (params.ref ?? params.referral ?? "").trim();
 
   return (
-    <main className="ed-theme-page min-h-screen bg-background text-foreground">
+    <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <RegisterStatusToast message={message} />
       <header className="sticky top-0 z-30 border-b border-neutral-200/80 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">

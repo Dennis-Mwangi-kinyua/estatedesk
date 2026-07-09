@@ -62,6 +62,50 @@ export async function requireOrgMembership(
     deny(options?.redirectTo ?? "/login");
   }
 
+  // Platform operators retain access during website maintenance / surface kills.
+  const isPlatformOperator =
+    session.platformRole === "SUPER_ADMIN" ||
+    session.platformRole === "PLATFORM_ADMIN";
+
+  if (!isPlatformOperator) {
+    const { getPlatformControl, defaultMaintenanceMessage } = await import(
+      "@/lib/platform/control"
+    );
+    const control = await getPlatformControl();
+    const role = session.activeOrgRole;
+    const isFieldPortal =
+      role === "TENANT" || role === "CARETAKER" || role === "LANDLORD";
+    const isOrgWorkspace =
+      role === "ADMIN" ||
+      role === "MANAGER" ||
+      role === "OFFICE" ||
+      role === "ACCOUNTANT";
+
+    if (control.maintenanceMode) {
+      redirect(
+        `/maintenance?message=${encodeURIComponent(defaultMaintenanceMessage(control))}`,
+      );
+    }
+
+    if (control.orgDashboardsDisabled && isOrgWorkspace) {
+      redirect(
+        `/maintenance?message=${encodeURIComponent(
+          control.maintenanceMessage?.trim() ||
+            "Organization workspaces are temporarily disabled by platform control.",
+        )}`,
+      );
+    }
+
+    if (control.tenantPortalsDisabled && isFieldPortal) {
+      redirect(
+        `/maintenance?message=${encodeURIComponent(
+          control.maintenanceMessage?.trim() ||
+            "Tenant and field portals are temporarily disabled by platform control.",
+        )}`,
+      );
+    }
+  }
+
   const org = await retryTransientDatabaseOperation(
     () =>
       prisma.organization.findUnique({

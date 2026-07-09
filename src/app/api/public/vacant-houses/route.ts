@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getPlatformControl } from "@/lib/platform/control";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,18 @@ async function enforceRateLimit(request: Request, token: string | null) {
 }
 
 export async function GET(request: Request) {
+  const control = await getPlatformControl();
+  if (control.publicApiDisabled || control.maintenanceMode) {
+    return NextResponse.json(
+      {
+        error: control.maintenanceMode
+          ? "EstateDesk is in maintenance mode."
+          : "Public API is temporarily disabled by platform control.",
+      },
+      { status: 503 },
+    );
+  }
+
   const token = getBearerToken(request);
   const rateLimitResponse = await enforceRateLimit(request, token);
 

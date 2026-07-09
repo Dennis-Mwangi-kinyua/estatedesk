@@ -25,7 +25,7 @@ const footerHighlights = [
 
 export function PublicAccessFooter() {
   return (
-    <footer className="shrink-0 border-t border-neutral-200/80 bg-white/92 text-neutral-950 backdrop-blur-2xl dark:border-white/10 dark:bg-[#0b0f16]/95 dark:text-[#f8fafc]">
+    <footer className="shrink-0 border-t border-neutral-200/80 bg-white/92 pb-safe text-neutral-950 backdrop-blur-2xl dark:border-white/10 dark:bg-[#0b0f16]/95 dark:text-[#f8fafc]">
       <div className="mx-auto grid max-w-[1536px] gap-3 px-3 py-3 sm:px-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center lg:px-8">
         <div className="flex min-w-0 items-center gap-3">
           <Link

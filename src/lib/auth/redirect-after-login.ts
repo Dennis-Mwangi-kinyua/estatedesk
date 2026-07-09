@@ -5,13 +5,23 @@ type RedirectInput = {
   activeOrgRole: OrgRole | null;
   activeOrgId: string | null;
   hasTenantProfile: boolean;
+  /** Restored from the platform mode cookie when present. */
+  preferredPlatformMode?: "admin" | "developer" | null;
 };
 
 export function getRedirectAfterLogin(input: RedirectInput): string {
-  const { platformRole, activeOrgRole, activeOrgId, hasTenantProfile } = input;
+  const {
+    platformRole,
+    activeOrgRole,
+    activeOrgId,
+    hasTenantProfile,
+    preferredPlatformMode,
+  } = input;
 
   if (platformRole === "SUPER_ADMIN" || platformRole === "PLATFORM_ADMIN") {
-    return "/platform";
+    return preferredPlatformMode === "developer"
+      ? "/platform/developer"
+      : "/platform";
   }
 
   if (activeOrgRole === "TENANT" || hasTenantProfile) {

@@ -60,7 +60,7 @@ export function HeaderThemeToggle({ className = "" }: { className?: string }) {
 export function ThemeToggle() {
   return (
     <ThemeToggleButton
-      className="ios-button ed-soft-button fixed bottom-4 right-4 z-[140] hidden h-11 w-11 items-center justify-center border shadow-[0_12px_30px_rgba(15,23,42,0.18)] backdrop-blur-xl transition print:hidden lg:inline-flex"
+      className="ios-button ed-soft-button fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-[140] hidden h-11 w-11 items-center justify-center border shadow-[0_12px_30px_rgba(15,23,42,0.18)] backdrop-blur-xl transition print:hidden lg:inline-flex"
     />
   );
 }

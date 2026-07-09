@@ -44,8 +44,8 @@ function errorMessage(error: unknown) {
 }
 
 export async function retryFailedNotificationAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
-    redirectTo: "/dashboard",
+  const session = await requirePlatformRole(["SUPER_ADMIN"], {
+    redirectTo: "/platform/developer?error=super-admin-only",
   });
   const returnTo = readReturnTo(formData);
   const notificationId = readString(formData, "notificationId");
@@ -86,8 +86,8 @@ export async function retryFailedNotificationAction(formData: FormData) {
 }
 
 export async function retryAllFailedNotificationsAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
-    redirectTo: "/dashboard",
+  const session = await requirePlatformRole(["SUPER_ADMIN"], {
+    redirectTo: "/platform/developer?error=super-admin-only",
   });
   const returnTo = readReturnTo(formData);
 
@@ -120,8 +120,8 @@ export async function retryAllFailedNotificationsAction(formData: FormData) {
 }
 
 export async function runNotificationsJobAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
-    redirectTo: "/dashboard",
+  const session = await requirePlatformRole(["SUPER_ADMIN"], {
+    redirectTo: "/platform/developer?error=super-admin-only",
   });
   const returnTo = readReturnTo(formData);
 
@@ -148,8 +148,8 @@ export async function runNotificationsJobAction(formData: FormData) {
 }
 
 export async function runRetentionJobAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
-    redirectTo: "/dashboard",
+  const session = await requirePlatformRole(["SUPER_ADMIN"], {
+    redirectTo: "/platform/developer?error=super-admin-only",
   });
   const returnTo = readReturnTo(formData);
 
@@ -180,8 +180,8 @@ export async function runRetentionJobAction(formData: FormData) {
 }
 
 export async function queueKraRetryAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
-    redirectTo: "/dashboard",
+  const session = await requirePlatformRole(["SUPER_ADMIN"], {
+    redirectTo: "/platform/developer?error=super-admin-only",
   });
   const returnTo = readReturnTo(formData);
   const attemptId = readString(formData, "attemptId");

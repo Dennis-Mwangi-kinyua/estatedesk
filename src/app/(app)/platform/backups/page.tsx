@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { getPlatformControl } from "@/lib/platform/control";
 import {
   Badge,
   EmptyRow,
@@ -10,6 +11,10 @@ import {
   formatDateTime,
   formatNumber,
 } from "../_components/control-plane";
+import {
+  markRestoreDrillAction,
+  recordBackupCheckpointAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -52,10 +57,17 @@ function checkpointTone(status: BackupCheckpoint["status"]) {
   return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-300/30 dark:bg-amber-300/10 dark:text-amber-100";
 }
 
-export default async function PlatformBackupsPage() {
-  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
-    redirectTo: "/dashboard",
+export default async function PlatformBackupsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ ok?: string }>;
+}) {
+  await requirePlatformRole(["SUPER_ADMIN"], {
+    redirectTo: "/platform/developer?error=super-admin-only",
   });
+
+  const params = searchParams ? await searchParams : {};
+  const control = await getPlatformControl();
 
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -150,10 +162,21 @@ export default async function PlatformBackupsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Backups"
+        eyebrow="Developer portal"
         title="Backup and recovery"
-        description="Platform-level backup readiness, recovery checkpoints, export activity, and storage footprint for the EstateDesk control plane."
+        description="Platform-level backup readiness, recovery checkpoints, export activity, and operator-recorded restore drills. Run dump/restore scripts from the host; record outcomes here for audit."
       />
+
+      {params.ok === "checkpoint" ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+          Backup checkpoint recorded.
+        </div>
+      ) : null}
+      {params.ok === "restore-drill" ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+          Restore drill recorded.
+        </div>
+      ) : null}
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Organizations covered" value={formatNumber(organizations)} />
@@ -163,11 +186,67 @@ export default async function PlatformBackupsPage() {
         <StatCard label="Approved exports in 7d" value={formatNumber(approvedExports)} />
         <StatCard label="Pending exports" value={formatNumber(pendingExports)} />
         <StatCard
-          label="Latest checkpoint"
-          value={latestAudit ? formatDateTime(latestAudit.createdAt) : "-"}
-          note={latestAudit?.org?.name ?? "Platform scope"}
+          label="Operator checkpoint"
+          value={control.lastBackupStatus ?? (latestAudit ? "Signal only" : "-")}
+          note={
+            control.lastBackupAt
+              ? formatDateTime(control.lastBackupAt)
+              : latestAudit
+                ? formatDateTime(latestAudit.createdAt)
+                : undefined
+          }
+        />
+        <StatCard
+          label="Checkpoint note"
+          value={control.lastBackupNote?.slice(0, 40) ?? "-"}
+          note={control.lastBackupNote && control.lastBackupNote.length > 40 ? "…" : undefined}
         />
       </section>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Surface
+          title="Record backup checkpoint"
+          description="After running scripts/backup-database.sh or provider PITR snapshot, record status for the control plane."
+        >
+          <form action={recordBackupCheckpointAction} className="space-y-3 p-4">
+            <select
+              name="status"
+              defaultValue="Ready"
+              className="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm"
+            >
+              <option value="Ready">Ready</option>
+              <option value="Review">Review</option>
+              <option value="Failed">Failed</option>
+            </select>
+            <textarea
+              name="note"
+              rows={3}
+              placeholder="e.g. Nightly dump validated, SHA256 checked"
+              className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+            />
+            <button className="h-11 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground">
+              Record checkpoint
+            </button>
+          </form>
+        </Surface>
+
+        <Surface
+          title="Record restore drill"
+          description="After scripts/restore-drill.sh, log completion for compliance evidence."
+        >
+          <form action={markRestoreDrillAction} className="space-y-3 p-4">
+            <textarea
+              name="note"
+              rows={3}
+              placeholder="Restore drill notes / ticket ID"
+              className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+            />
+            <button className="h-11 w-full rounded-xl border border-border bg-card text-sm font-semibold">
+              Mark restore drill complete
+            </button>
+          </form>
+        </Surface>
+      </div>
 
       <Surface
         title="Recovery checkpoints"

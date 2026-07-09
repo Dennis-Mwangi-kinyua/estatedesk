@@ -69,6 +69,7 @@ export function PublicAccessHeader({
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-[100] shrink-0 border-b border-slate-200/80 bg-white/95 shadow-[0_14px_34px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#0d1117]/95 dark:shadow-[0_14px_34px_rgba(0,0,0,0.22)]">
+        {/* Incident banner is rendered via IncidentBannerSlot from server parents when needed. */}
         <div className="mx-auto flex h-16 max-w-[1536px] items-center justify-between gap-3 px-3 sm:px-6 lg:px-8">
           <div className="flex w-full items-center justify-between gap-2 lg:contents">
             <Link

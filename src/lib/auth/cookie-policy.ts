@@ -1,5 +1,6 @@
 const SESSION_COOKIE_BASE_NAME = "estatedesk_session";
 const PLATFORM_UNLOCK_COOKIE_BASE_NAME = "estatedesk_platform_api_keys_unlocked";
+const SUPPORT_SESSION_COOKIE_BASE_NAME = "estatedesk_support_session";
 const REDIRECT_MARKER_COOKIE_NAME = "__Host-redirect_change_pw";
 const LEGACY_REDIRECT_MARKER_COOKIE_NAME = "__redirect_change_pw";
 
@@ -38,6 +39,10 @@ export function getSessionCookieName() {
 
 export function getPlatformUnlockCookieName() {
   return prefixedCookieName(PLATFORM_UNLOCK_COOKIE_BASE_NAME, "__Secure-");
+}
+
+export function getSupportSessionCookieName() {
+  return prefixedCookieName(SUPPORT_SESSION_COOKIE_BASE_NAME, "__Secure-");
 }
 
 export function getRedirectMarkerCookieName() {

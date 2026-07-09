@@ -5,7 +5,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { cookies } from "next/headers";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
+import {
+  parsePlatformModeCookie,
+  PLATFORM_MODE_COOKIE_NAME,
+} from "@/app/(app)/platform/_lib/nav";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 export type ChangePasswordState = {
@@ -103,11 +108,17 @@ export async function changeInitialPasswordAction(
     };
   }
 
+  const cookieStore = await cookies();
+  const preferredPlatformMode = parsePlatformModeCookie(
+    cookieStore.get(PLATFORM_MODE_COOKIE_NAME)?.value,
+  );
+
   const destination = getRedirectAfterLogin({
     platformRole: session.platformRole,
     activeOrgRole: session.activeOrgRole,
     activeOrgId: session.activeOrgId,
     hasTenantProfile: session.activeOrgRole === "TENANT",
+    preferredPlatformMode,
   });
 
   revalidatePath("/", "layout");

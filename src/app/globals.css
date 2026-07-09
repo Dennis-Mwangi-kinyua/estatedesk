@@ -1453,6 +1453,31 @@ html.light,
 }
 
 @layer utilities {
+  /* Inherit themed canvas/card surfaces instead of hard flat white. */
+  :where(.platform-theme-content, .org-theme-content, .ed-theme-page, .app-mobile-canvas)
+    :where(.bg-white, .bg-white\/90, .bg-white\/95) {
+    background-color: color-mix(in oklch, var(--card) 94%, var(--background)) !important;
+  }
+
+  :where(.platform-theme-content, .org-theme-content, .ed-theme-page, .app-mobile-canvas)
+    :where(.bg-neutral-50, .bg-slate-50, .bg-gray-50, .bg-zinc-50, .bg-stone-50) {
+    background-color: color-mix(in oklch, var(--muted) 88%, var(--background)) !important;
+  }
+
+  .platform-shell-admin,
+  .platform-shell-developer {
+    background:
+      radial-gradient(circle at 12% -8%, color-mix(in oklch, var(--primary) 10%, transparent), transparent 20rem),
+      var(--background) !important;
+  }
+
+  .platform-shell-developer {
+    background:
+      radial-gradient(circle at 88% -10%, color-mix(in oklch, #7c3aed 12%, transparent), transparent 22rem),
+      radial-gradient(circle at 12% -8%, color-mix(in oklch, var(--primary) 8%, transparent), transparent 20rem),
+      var(--background) !important;
+  }
+
   .dark :where(.platform-theme-content, .org-theme-content, .ed-theme-page) :where(.bg-white, .bg-white\/90, .bg-white\/95, .bg-background, .bg-background\/80, .bg-background\/90) {
     background-color: var(--card) !important;
   }
@@ -1611,4 +1636,259 @@ html.light,
 .app-sensitive-surface :is(button, a, label, summary) {
   -webkit-user-select: none;
   user-select: none;
+}
+
+/* =============================================================================
+   Site-wide mobile-first foundation
+   Applied via body.ed-mobile-first — phone layout is the default, desktop is progressive.
+   ============================================================================= */
+
+.ed-mobile-first,
+.ed-mobile-first-root,
+.ed-mobile-surface {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ed-mobile-first {
+  --ed-gutter: max(0.75rem, env(safe-area-inset-left, 0px));
+  --ed-gutter-right: max(0.75rem, env(safe-area-inset-right, 0px));
+  --ed-touch: 2.75rem;
+  --ed-radius-mobile: 1rem;
+}
+
+.ed-mobile-first :where(main, section, article, form, nav, div, header, footer, li, td, th) {
+  min-width: 0;
+}
+
+.ed-mobile-first :where(img, video, canvas) {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Readable type scale on small screens without fighting sm+/lg+ utilities */
+.ed-mobile-first {
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ed-mobile-first :where(h1, h2, h3, h4) {
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.ed-mobile-first :where(p, li, dd, label, td, th, span) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Touch-friendly interactive controls (except icon-only square buttons) */
+@media (max-width: 767px) {
+  .ed-mobile-first :where(
+    button:not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]):not([class*="w-8"]):not([class*="w-9"]):not([class*="w-10"]),
+    [role="button"],
+    a.button,
+    input[type="submit"],
+    input[type="button"]
+  ) {
+    min-height: var(--ed-touch);
+  }
+
+  .ed-mobile-first :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]), select, textarea) {
+    min-height: var(--ed-touch);
+    width: 100%;
+    max-width: 100%;
+    font-size: 1rem; /* prevents iOS zoom on focus */
+    border-radius: 0.75rem;
+  }
+
+  .ed-mobile-first textarea {
+    min-height: 6.5rem;
+  }
+
+  /* Dense multi-column grids collapse to a single column on phones */
+  .ed-mobile-first :where(
+    .grid.grid-cols-3,
+    .grid.grid-cols-4,
+    .grid.grid-cols-5,
+    .grid.grid-cols-6,
+    .grid.grid-cols-7,
+    .grid.grid-cols-8
+  ):not(.ed-keep-cols) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Tables: force horizontal scroll instead of page blowout */
+  .ed-mobile-first :where(
+    .platform-theme-content,
+    .org-theme-content,
+    .ed-theme-page,
+    .ed-mobile-content,
+    .app-content-shell,
+    main,
+    section,
+    article
+  )
+    :has(> table) {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  .ed-mobile-first table {
+    max-width: none;
+  }
+
+  .ed-mobile-first table.min-w-full {
+    min-width: 36rem;
+  }
+
+  .ed-mobile-first :where(th, td) {
+    white-space: nowrap;
+  }
+
+  .ed-mobile-first th {
+    font-size: 0.75rem;
+  }
+
+  .ed-mobile-first td {
+    font-size: 0.8125rem;
+  }
+
+  /* Prefer card-like spacing on phone for dashboard content */
+  .ed-mobile-first .ed-mobile-content,
+  .ed-mobile-first .app-content-shell,
+  .ed-mobile-first .platform-theme-content,
+  .ed-mobile-first .org-theme-content {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .ed-mobile-first .ed-mobile-content > .space-y-6,
+  .ed-mobile-first .platform-theme-content > .space-y-6,
+  .ed-mobile-first .org-theme-content > .space-y-6 {
+    --tw-space-y-reverse: 0;
+  }
+
+  /* Page headers stack full-width on phone */
+  .ed-mobile-first :where(header, .page-header) .flex.lg\:flex-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Sticky safe areas for fixed chrome */
+  .ed-mobile-first :where(header.fixed, header.sticky, .fixed.top-0, .sticky.top-0) {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .ed-mobile-first :where(.fixed.bottom-0, .sticky.bottom-0, .org-mobile-tabbar) {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Marketing / public pages: comfortable gutters */
+  .ed-mobile-first .ed-theme-page {
+    overflow-x: hidden;
+  }
+
+  .ed-mobile-first .ed-theme-page :where(section, article) {
+    padding-inline: clamp(0.75rem, 4vw, 1.25rem);
+  }
+
+  /* Dialogs / sheets almost full-bleed on phone */
+  .ed-mobile-first :where([data-slot="dialog-content"], [data-slot="sheet-content"], [role="dialog"]) {
+    max-width: min(100vw - 1rem, 32rem) !important;
+    width: min(100vw - 1rem, 32rem);
+    margin-inline: auto;
+    border-radius: var(--ed-radius-mobile);
+  }
+
+  /* Avoid horizontal scroll traps from absolute decorative layers */
+  .ed-mobile-first :where(.overflow-hidden) {
+    max-width: 100%;
+  }
+
+  /* Compact code blocks */
+  .ed-mobile-first :where(pre, code) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  /* Metric / card rows: 2 columns max on small phones when using xl multi-col */
+  .ed-mobile-first :where(.grid.xl\:grid-cols-4, .grid.xl\:grid-cols-3).sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 389px) {
+  .ed-mobile-first :where(.grid.sm\:grid-cols-2, .grid.grid-cols-2):not(.ed-keep-cols) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ed-mobile-first {
+    --ed-gutter: max(0.625rem, env(safe-area-inset-left, 0px));
+  }
+}
+
+/* Tablet: progressive enhancement already mostly via Tailwind sm/md.
+   Keep tables scrollable, restore multi-col metrics. */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .ed-mobile-first table.min-w-full {
+    min-width: 40rem;
+  }
+}
+
+/* Platform drawer / mobile shell polish */
+@media (max-width: 1023px) {
+  .ed-mobile-first .platform-theme-content {
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+
+  .ed-mobile-first .platform-theme-content :where(h1) {
+    font-size: clamp(1.35rem, 5.5vw, 1.75rem);
+    line-height: 1.2;
+  }
+}
+
+/* Auth pages: single column first, stack marketing panes under form on small screens */
+@media (max-width: 767px) {
+  .ed-mobile-first .ed-mobile-surface :where(.lg\:grid-cols-2, .md\:grid-cols-2, .xl\:grid-cols-2) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ed-mobile-first *,
+  .ed-mobile-first *::before,
+  .ed-mobile-first *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Utility helpers for intentional exceptions */
+.ed-keep-cols {
+  /* opt-out of forced single-column collapse */
+}
+
+.ed-keep-row {
+  flex-wrap: nowrap !important;
+}
+
+.ed-touch-target {
+  min-height: var(--ed-touch, 2.75rem);
+  min-width: var(--ed-touch, 2.75rem);
 }

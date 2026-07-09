@@ -41,8 +41,8 @@ export default async function PlatformApiKeysPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
-    redirectTo: "/dashboard",
+  const session = await requirePlatformRole(["SUPER_ADMIN"], {
+    redirectTo: "/platform/developer?error=super-admin-only",
   });
 
   const params = await searchParams;

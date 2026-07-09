@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { buildMpesaTransactionKey } from "@/lib/payments/transaction-reference";
+import { getPlatformControl } from "@/lib/platform/control";
 
 type CallbackItem = { Name?: string; Value?: string | number };
 
@@ -9,11 +10,53 @@ function callbackValue(items: CallbackItem[], name: string) {
   return items.find((item) => item.Name === name)?.Value;
 }
 
+async function recordWebhookSample(input: {
+  statusCode: number;
+  summary: string;
+  payload?: unknown;
+}) {
+  try {
+    const { prisma: db } = await import("@/lib/prisma");
+    await db.platformWebhookEvent.create({
+      data: {
+        provider: "mpesa",
+        path: "/api/webhooks/mpesa",
+        statusCode: input.statusCode,
+        summary: input.summary,
+        payload:
+          input.payload && typeof input.payload === "object"
+            ? (input.payload as object)
+            : undefined,
+      },
+    });
+  } catch {
+    // Optional debug table may be missing before migration.
+  }
+}
+
 export async function POST(request: Request) {
+  const control = await getPlatformControl();
+  if (control.webhooksDisabled) {
+    await recordWebhookSample({
+      statusCode: 503,
+      summary: "Rejected — webhooks disabled by platform control",
+    });
+    return Response.json(
+      { ok: false, error: "Webhooks disabled by platform control" },
+      { status: 503 },
+    );
+  }
+
   const expectedSecret = process.env.MPESA_CALLBACK_SECRET?.trim();
   if (expectedSecret) {
     const supplied = new URL(request.url).searchParams.get("secret");
-    if (supplied !== expectedSecret) return new Response("Unauthorized", { status: 401 });
+    if (supplied !== expectedSecret) {
+      await recordWebhookSample({
+        statusCode: 401,
+        summary: "Unauthorized callback secret",
+      });
+      return new Response("Unauthorized", { status: 401 });
+    }
   }
 
   const payload = (await request.json().catch(() => null)) as {
@@ -29,6 +72,11 @@ export async function POST(request: Request) {
   } | null;
   const callback = payload?.Body?.stkCallback;
   if (!callback?.CheckoutRequestID || typeof callback.ResultCode !== "number") {
+    await recordWebhookSample({
+      statusCode: 400,
+      summary: "Invalid STK callback payload",
+      payload,
+    });
     return Response.json({ ok: false, error: "Invalid callback payload" }, { status: 400 });
   }
 
@@ -36,7 +84,17 @@ export async function POST(request: Request) {
     where: { checkoutRequestId: callback.CheckoutRequestID },
     select: { id: true, verificationStatus: true },
   });
-  if (!payment) return Response.json({ ok: true, matched: false });
+  if (!payment) {
+    await recordWebhookSample({
+      statusCode: 200,
+      summary: `Unmatched STK callback ${callback.CheckoutRequestID}`,
+      payload: {
+        CheckoutRequestID: callback.CheckoutRequestID,
+        ResultCode: callback.ResultCode,
+      },
+    });
+    return Response.json({ ok: true, matched: false });
+  }
 
   const items = callback.CallbackMetadata?.Item ?? [];
   const receipt = String(callbackValue(items, "MpesaReceiptNumber") ?? "").toUpperCase();
@@ -75,6 +133,16 @@ export async function POST(request: Request) {
     logServerError("mpesa.webhook.update", error, { paymentId: payment.id });
     return Response.json({ ok: false, error: "Unable to process callback." }, { status: 500 });
   }
+
+  await recordWebhookSample({
+    statusCode: 200,
+    summary: `Matched STK callback ${callback.CheckoutRequestID} result=${callback.ResultCode}`,
+    payload: {
+      CheckoutRequestID: callback.CheckoutRequestID,
+      ResultCode: callback.ResultCode,
+      paymentId: payment.id,
+    },
+  });
 
   return Response.json({ ok: true, matched: true });
 }

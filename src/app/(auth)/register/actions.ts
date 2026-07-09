@@ -33,6 +33,12 @@ export async function createOnboardingRequestAction(formData: FormData) {
     redirect("/register?request=sent#request-access");
   }
 
+  const { getPlatformControl } = await import("@/lib/platform/control");
+  const control = await getPlatformControl();
+  if (control.publicSignupDisabled || control.maintenanceMode) {
+    redirect("/register?request=disabled#request-access");
+  }
+
   const parsed = onboardingRequestSchema.safeParse({
     fullName: formData.get("fullName"),
     companyName: formData.get("companyName"),

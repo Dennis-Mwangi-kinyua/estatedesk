@@ -7,5 +7,9 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div>{children}</div>;
+  return (
+    <div className="ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden">
+      {children}
+    </div>
+  );
 }

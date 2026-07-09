@@ -18,6 +18,7 @@ export {
   getScopedCookieOptions,
   getSessionCookieName,
   getSessionCookieOptions,
+  getSupportSessionCookieName,
   hasValidSessionCookieShape,
 } from "@/lib/auth/cookie-policy";
 
@@ -124,4 +125,66 @@ export function createRedirectMarkerCookieValue() {
 export function hasValidRedirectMarkerCookie(value: string | undefined | null) {
   if (!value) return false;
   return verifySignedPayload(value, "redirect-marker") !== null;
+}
+
+export type SupportSessionCookiePayload = {
+  userId: string;
+  orgId: string;
+  orgSlug: string;
+  orgName: string;
+  membershipId: string;
+  reason: string;
+  expiresAtUnix: number;
+};
+
+export function createSupportSessionCookieValue(input: SupportSessionCookiePayload) {
+  const payload = [
+    input.expiresAtUnix,
+    input.userId,
+    input.orgId,
+    encodeURIComponent(input.orgSlug),
+    encodeURIComponent(input.orgName),
+    input.membershipId,
+    encodeURIComponent(input.reason),
+  ].join(":");
+  return signPayload(payload, "platform-support-session");
+}
+
+export function parseSupportSessionCookieValue(
+  value: string | undefined | null,
+): SupportSessionCookiePayload | null {
+  if (!value) return null;
+
+  const payload = verifySignedPayload(value, "platform-support-session");
+  if (!payload) return null;
+
+  const parts = payload.split(":");
+  if (parts.length < 7) return null;
+
+  const [
+    expiresAtRaw,
+    userId,
+    orgId,
+    orgSlugEnc,
+    orgNameEnc,
+    membershipId,
+    ...reasonParts
+  ] = parts;
+  const expiresAtUnix = Number(expiresAtRaw);
+  const reason = decodeURIComponent(reasonParts.join(":"));
+
+  if (!userId || !orgId || !membershipId || !Number.isFinite(expiresAtUnix)) {
+    return null;
+  }
+  if (expiresAtUnix <= Math.floor(Date.now() / 1000)) return null;
+
+  return {
+    userId,
+    orgId,
+    orgSlug: decodeURIComponent(orgSlugEnc),
+    orgName: decodeURIComponent(orgNameEnc),
+    membershipId,
+    reason,
+    expiresAtUnix,
+  };
 }
