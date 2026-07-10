@@ -1,6 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight, Building2, CreditCard, Phone, UserRound } from "lucide-react";
-import type { PaymentInstructions } from "@/lib/payments/instructions";
+import { WorkspaceDetailPanel } from "@/components/help/workspace-detail-panel";
+import {
+  getBankAccountForMethod,
+  hasAnyPaymentInstructions,
+  listAvailablePaymentMethods,
+  type PaymentInstructions,
+} from "@/lib/payments/instructions";
+import { getPaymentMethodDefinition } from "@/lib/payments/methods-catalog";
 
 const panelShellClassName =
   "overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm";
@@ -43,7 +52,10 @@ function ContactField({
 function OfficeFields({
   org,
   caretakerContact,
-}: Pick<PortalOfficeContactProps, "org" | "caretakerContact">) {
+  includeCaretaker = true,
+}: Pick<PortalOfficeContactProps, "org" | "caretakerContact"> & {
+  includeCaretaker?: boolean;
+}) {
   const hasCaretaker = Boolean(
     caretakerContact?.fullName ||
       caretakerContact?.phone ||
@@ -56,7 +68,7 @@ function OfficeFields({
       <ContactField label="Phone" value={org.phone} />
       <ContactField label="Email" value={org.email} />
       <ContactField label="Address" value={org.address} />
-      {hasCaretaker && caretakerContact ? (
+      {includeCaretaker && hasCaretaker && caretakerContact ? (
         <>
           <ContactField label="Caretaker" value={caretakerContact.fullName} />
           <ContactField label="Caretaker phone" value={caretakerContact.phone} />
@@ -68,7 +80,7 @@ function OfficeFields({
 }
 
 function PaymentFields({ instructions }: { instructions: PaymentInstructions }) {
-  if (!instructions.mpesaEnabled && !instructions.bankEnabled) {
+  if (!hasAnyPaymentInstructions(instructions)) {
     return (
       <p className="text-sm text-muted-foreground">
         Payment instructions have not been published yet.
@@ -76,22 +88,166 @@ function PaymentFields({ instructions }: { instructions: PaymentInstructions }) 
     );
   }
 
+  const available = listAvailablePaymentMethods(instructions);
+
   return (
     <>
-      {instructions.mpesaEnabled ? (
-        <>
-          <ContactField label="M-Pesa name" value={instructions.mpesaBusinessName} />
-          <ContactField label="Paybill" value={instructions.mpesaPaybill} />
-          <ContactField label="Till" value={instructions.mpesaTillNumber} />
-          <ContactField label="M-Pesa account" value={instructions.mpesaAccountNumber} />
-        </>
+      {available.map((method) => {
+        if (method.id === "mpesa") {
+          return (
+            <div key={method.id} className="contents">
+              <ContactField label="M-Pesa name" value={instructions.mpesaBusinessName} />
+              <ContactField label="Paybill" value={instructions.mpesaPaybill} />
+              <ContactField label="Till" value={instructions.mpesaTillNumber} />
+              <ContactField
+                label="M-Pesa account"
+                value={instructions.mpesaAccountNumber}
+              />
+            </div>
+          );
+        }
+
+        if (method.id === "kcb") {
+          return (
+            <div key={method.id} className="contents">
+              <ContactField
+                label="KCB paybill name"
+                value={instructions.kcbBusinessName || instructions.kcbAccountName}
+              />
+              <ContactField label="KCB paybill" value={instructions.kcbPaybill} />
+              <ContactField
+                label="KCB account"
+                value={instructions.kcbAccountNumber}
+              />
+            </div>
+          );
+        }
+
+        if (method.id === "airtel-money") {
+          return (
+            <div key={method.id} className="contents">
+              <ContactField
+                label="Airtel name"
+                value={instructions.airtelBusinessName}
+              />
+              <ContactField label="Airtel number" value={instructions.airtelNumber} />
+            </div>
+          );
+        }
+
+        const account = getBankAccountForMethod(instructions, method.id);
+        if (!account) return null;
+        const label =
+          account.businessName ||
+          getPaymentMethodDefinition(method.id)?.name ||
+          method.name;
+
+        return (
+          <div key={method.id} className="contents">
+            <ContactField label="Bank" value={label} />
+            <ContactField label="Account name" value={account.accountName} />
+            <ContactField label="Account number" value={account.accountNumber} />
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+function buildSummary({
+  org,
+  hasPaymentInstructions,
+  hasCaretaker,
+}: {
+  org: PortalOfficeContactProps["org"];
+  hasPaymentInstructions: boolean;
+  hasCaretaker: boolean;
+}) {
+  const parts = [org.name];
+
+  if (org.phone) parts.push("phone");
+  if (hasPaymentInstructions) parts.push("payment methods");
+  if (hasCaretaker) parts.push("caretaker");
+
+  if (parts.length === 1) {
+    return "Office contact details for your property team.";
+  }
+
+  return `${parts.slice(1).join(", ")} for ${org.name}.`;
+}
+
+function OfficeContactDetails({
+  org,
+  paymentInstructions,
+  caretakerContact,
+  showPaymentsLink = true,
+  separateCaretakerSection = false,
+}: {
+  org: PortalOfficeContactProps["org"];
+  paymentInstructions: PaymentInstructions;
+  caretakerContact: PortalOfficeContactProps["caretakerContact"];
+  showPaymentsLink?: boolean;
+  separateCaretakerSection?: boolean;
+}) {
+  const hasOrgContact = Boolean(org.phone || org.email || org.address);
+  const hasPaymentInstructions = hasAnyPaymentInstructions(paymentInstructions);
+  const hasCaretaker = Boolean(
+    caretakerContact?.fullName ||
+      caretakerContact?.phone ||
+      caretakerContact?.email,
+  );
+
+  return (
+    <>
+      {hasOrgContact || hasCaretaker ? (
+        <section className={`${panelShellClassName} p-4 sm:p-5`}>
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            <Building2 className="h-3.5 w-3.5" />
+            Office
+          </div>
+          <div className="mt-3 space-y-2.5">
+            <OfficeFields
+              org={org}
+              caretakerContact={caretakerContact}
+              includeCaretaker={!separateCaretakerSection}
+            />
+          </div>
+        </section>
       ) : null}
-      {instructions.bankEnabled ? (
-        <>
-          <ContactField label="Bank" value={instructions.bankName} />
-          <ContactField label="Account name" value={instructions.bankAccountName} />
-          <ContactField label="Account number" value={instructions.bankAccountNumber} />
-        </>
+
+      {separateCaretakerSection && hasCaretaker && caretakerContact ? (
+        <section className={`${panelShellClassName} p-4 sm:p-5`}>
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            <UserRound className="h-3.5 w-3.5" />
+            On-site caretaker
+          </div>
+          <div className="mt-3 grid gap-3">
+            <ContactField label="Name" value={caretakerContact.fullName} />
+            <ContactField label="Phone" value={caretakerContact.phone} />
+            <ContactField label="Email" value={caretakerContact.email} />
+          </div>
+        </section>
+      ) : null}
+
+      {hasPaymentInstructions ? (
+        <section className={`${panelShellClassName} p-4 sm:p-5`}>
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            <CreditCard className="h-3.5 w-3.5" />
+            Payment instructions
+          </div>
+          <div className="mt-3 space-y-2.5">
+            <PaymentFields instructions={paymentInstructions} />
+          </div>
+          {showPaymentsLink ? (
+            <Link
+              href="/dashboard/tenant/payments"
+              className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary transition hover:text-primary/80"
+            >
+              Open payments
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : null}
+        </section>
       ) : null}
     </>
   );
@@ -105,8 +261,7 @@ export function PortalOfficeContact({
 }: PortalOfficeContactProps) {
   const instructions = paymentInstructions;
   const hasOrgContact = Boolean(org.phone || org.email || org.address);
-  const hasPaymentInstructions =
-    instructions.mpesaEnabled || instructions.bankEnabled;
+  const hasPaymentInstructions = hasAnyPaymentInstructions(instructions);
   const hasCaretaker = Boolean(
     caretakerContact?.fullName ||
       caretakerContact?.phone ||
@@ -117,116 +272,53 @@ export function PortalOfficeContact({
     return null;
   }
 
-  if (layout === "compact") {
-    return (
-      <section className={panelShellClassName}>
-        <div className="border-b border-border px-4 py-3 sm:px-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Property office
-          </p>
-          <h2 className="mt-1 text-sm font-semibold text-foreground">
-            Contact & payments
-          </h2>
-        </div>
-
-        <div className="space-y-4 px-4 py-4 sm:px-5">
-          {hasOrgContact || hasCaretaker ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                <Building2 className="h-3.5 w-3.5" />
-                Office
-              </div>
-              <div className="space-y-2.5">
-                <OfficeFields org={org} caretakerContact={caretakerContact} />
-              </div>
-            </div>
-          ) : null}
-
-          {hasPaymentInstructions ? (
-            <div className="space-y-3 border-t border-border pt-4">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                <CreditCard className="h-3.5 w-3.5" />
-                Payments
-              </div>
-              <div className="space-y-2.5">
-                <PaymentFields instructions={instructions} />
-              </div>
-              <Link
-                href="/dashboard/tenant/payments"
-                className="inline-flex items-center gap-1 text-xs font-medium text-primary transition hover:text-primary/80"
-              >
-                Open payments
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          ) : null}
-        </div>
-      </section>
-    );
-  }
+  const title =
+    layout === "compact" ? "Contact & payments" : "Contact & payment details";
+  const description = buildSummary({
+    org,
+    hasPaymentInstructions,
+    hasCaretaker,
+  });
 
   return (
-    <section className={panelShellClassName}>
-      <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Property office
-          </p>
-          <h2 className="mt-1 text-base font-semibold tracking-tight text-foreground">
-            Contact & payment details
-          </h2>
+    <WorkspaceDetailPanel
+      eyebrow="Property office"
+      title={title}
+      description={description}
+      actionLabel="View details"
+      icon={Building2}
+      triggerClassName={panelShellClassName}
+    >
+      {layout === "strip" ? (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-muted/10 px-4 py-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Phone className="h-4 w-4" />
+              Reach your property office for tenancy and billing support.
+            </div>
+            <Link
+              href="/dashboard/tenant/payments"
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-background px-3 text-xs font-medium text-foreground transition hover:bg-muted/30"
+            >
+              View payments
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          <OfficeContactDetails
+            org={org}
+            paymentInstructions={instructions}
+            caretakerContact={caretakerContact}
+            showPaymentsLink={false}
+            separateCaretakerSection
+          />
         </div>
-        <Link
-          href="/dashboard/tenant/payments"
-          className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-background px-3 text-xs font-medium text-foreground transition hover:bg-muted/30"
-        >
-          View payments
-          <ArrowUpRight className="h-3.5 w-3.5" />
-        </Link>
-      </div>
-
-      <div className="grid divide-y divide-border md:grid-cols-3 md:divide-x md:divide-y-0">
-        {hasOrgContact ? (
-          <div className="space-y-3 px-5 py-4 sm:px-6">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              <Phone className="h-3.5 w-3.5" />
-              Office contact
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-1">
-              <ContactField label="Organisation" value={org.name} />
-              <ContactField label="Phone" value={org.phone} />
-              <ContactField label="Email" value={org.email} />
-              <ContactField label="Address" value={org.address} />
-            </div>
-          </div>
-        ) : null}
-
-        {hasCaretaker && caretakerContact ? (
-          <div className="space-y-3 px-5 py-4 sm:px-6">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              <UserRound className="h-3.5 w-3.5" />
-              On-site caretaker
-            </div>
-            <div className="grid gap-3">
-              <ContactField label="Name" value={caretakerContact.fullName} />
-              <ContactField label="Phone" value={caretakerContact.phone} />
-              <ContactField label="Email" value={caretakerContact.email} />
-            </div>
-          </div>
-        ) : null}
-
-        {hasPaymentInstructions ? (
-          <div className="space-y-3 px-5 py-4 sm:px-6">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              <CreditCard className="h-3.5 w-3.5" />
-              Payment instructions
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-1">
-              <PaymentFields instructions={instructions} />
-            </div>
-          </div>
-        ) : null}
-      </div>
-    </section>
+      ) : (
+        <OfficeContactDetails
+          org={org}
+          paymentInstructions={instructions}
+          caretakerContact={caretakerContact}
+        />
+      )}
+    </WorkspaceDetailPanel>
   );
 }
