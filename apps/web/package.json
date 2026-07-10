@@ -1,0 +1,28 @@
+{
+  "name": "@estatedesk/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "WATCHPACK_POLLING=true next dev --webpack",
+    "build": "prisma generate --schema ../../prisma/schema.prisma && next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test --test-force-exit ../../tests/**/*.test.ts",
+    "test:integration": "node --import tsx --test ../../tests/integration/**/*.integration.ts",
+    "qa:tenant-portal": "tsx ../../scripts/tenant-portal-visual-qa.ts"
+  },
+  "dependencies": {
+    "@estatedesk/auth-sdk": "*",
+    "@estatedesk/config": "*",
+    "@estatedesk/contracts": "*",
+    "@estatedesk/db-kit": "*",
+    "@estatedesk/events": "*",
+    "@estatedesk/notifications": "*",
+    "@estatedesk/public-vacancy": "*",
+    "@estatedesk/service-client": "*",
+    "next": "^16.2.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  }
+}
