@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { tenantVisibleWaterBillWhere } from "@/lib/water-bills/status";
 
 export async function getTenantDashboardData(tenantId: string, unitId?: string) {
   const [recentPayments, waterBills, notifications] = await Promise.all([
@@ -30,6 +31,7 @@ export async function getTenantDashboardData(tenantId: string, unitId?: string) 
     prisma.waterBill.findMany({
       where: {
         tenantId,
+        ...tenantVisibleWaterBillWhere(),
       },
       orderBy: {
         createdAt: "desc",

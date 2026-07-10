@@ -3,6 +3,10 @@
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { getCurrentPeriod } from "@/lib/ledger";
+import {
+  isPayableWaterBillStatus,
+  tenantVisibleWaterBillWhere,
+} from "@/lib/water-bills/status";
 import { buildPaymentReference } from "./reference";
 import type { TenantPaymentCheckoutSummary } from "./types";
 
@@ -123,10 +127,14 @@ export async function getTenantPaymentCheckoutSummary({
         id,
         orgId: session.activeOrgId,
         tenantId: tenant.id,
+        ...tenantVisibleWaterBillWhere(),
       },
       select: {
         period: true,
         total: true,
+        amountPaid: true,
+        balance: true,
+        status: true,
         unit: {
           select: {
             houseNo: true,
@@ -138,9 +146,13 @@ export async function getTenantPaymentCheckoutSummary({
       },
     });
 
-    if (!bill) return null;
+    if (!bill || !isPayableWaterBillStatus(bill.status)) return null;
 
     const unitLabel = bill.unit.houseNo;
+    const outstanding =
+      Number(bill.balance ?? 0) > 0
+        ? Number(bill.balance)
+        : Math.max(Number(bill.total) - Number(bill.amountPaid ?? 0), 0);
     return {
       friendlyReference: buildPaymentReference({
         source,
@@ -150,7 +162,35 @@ export async function getTenantPaymentCheckoutSummary({
       description: `Water bill for ${bill.period}`,
       propertyName: bill.unit.property.name,
       unitLabel,
-      amount: Number(bill.total),
+      amount: outstanding,
+    };
+  }
+
+  if (source === "period_bill") {
+    const { getPeriodBillForTenant } = await import("@/lib/billing/period-bill");
+    const periodBill = await getPeriodBillForTenant({
+      db: prisma,
+      orgId: session.activeOrgId,
+      tenantId: tenant.id,
+      period: id,
+    });
+
+    if (!periodBill) return null;
+
+    const lineText = periodBill.lines
+      .map((l) => `${l.label} ${l.balance.toFixed(0)}`)
+      .join(" + ");
+
+    return {
+      friendlyReference: buildPaymentReference({
+        source,
+        period: periodBill.period,
+        unitLabel: periodBill.unitHouseNo,
+      }),
+      description: `${periodBill.period} bill (${lineText})`,
+      propertyName: periodBill.propertyName,
+      unitLabel: periodBill.unitHouseNo,
+      amount: periodBill.balance,
     };
   }
 

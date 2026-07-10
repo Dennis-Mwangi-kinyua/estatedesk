@@ -1,4 +1,5 @@
 import { BillStatus, Prisma } from "@prisma/client";
+import { tenantVisibleWaterBillWhere } from "@/lib/water-bills/status";
 
 export type TenantWaterBillsPageProps = {
   searchParams?: Promise<{
@@ -9,6 +10,7 @@ export type TenantWaterBillsPageProps = {
 export const tenantWaterBillsArgs = Prisma.validator<Prisma.TenantDefaultArgs>()({
   include: {
     waterBills: {
+      where: tenantVisibleWaterBillWhere(),
       orderBy: {
         dueDate: "desc",
       },

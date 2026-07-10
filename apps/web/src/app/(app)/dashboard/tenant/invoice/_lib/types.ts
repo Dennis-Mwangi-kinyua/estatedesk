@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { tenantVisibleWaterBillWhere } from "@/lib/water-bills/status";
 
 export const tenantInvoiceArgs = Prisma.validator<Prisma.TenantDefaultArgs>()({
   include: {
@@ -37,6 +38,7 @@ export const tenantInvoiceArgs = Prisma.validator<Prisma.TenantDefaultArgs>()({
       },
     },
     waterBills: {
+      where: tenantVisibleWaterBillWhere(),
       orderBy: {
         dueDate: "desc",
       },
@@ -57,13 +59,22 @@ export const tenantInvoiceArgs = Prisma.validator<Prisma.TenantDefaultArgs>()({
 
 export type TenantInvoiceResult = Prisma.TenantGetPayload<typeof tenantInvoiceArgs>;
 
+export type CombinedBillLine = {
+  kind: "RENT" | "WATER" | "OTHER";
+  label: string;
+  amountDue: number;
+  amountPaid: number;
+  balance: number;
+};
+
 export type CombinedBill = {
   id: string;
-  source: "RENT_CHARGE" | "WATER_BILL";
-  typeLabel: "Rent" | "Water Bill" | "Service Charge" | "Garbage";
+  source: "RENT_CHARGE" | "WATER_BILL" | "PERIOD_BILL";
+  typeLabel: "Rent" | "Water Bill" | "Service Charge" | "Garbage" | "Rent + Water";
   period: string;
   dueDate: Date;
   amountDue: number;
+  amountPaid?: number;
   balance: number;
   status: string;
   rawStatus: string;
@@ -71,6 +82,8 @@ export type CombinedBill = {
   receiptUrl: string | null;
   payNowHref: string | null;
   isPaid: boolean;
+  /** Line items when source is PERIOD_BILL (rent + water combined). */
+  lines?: CombinedBillLine[];
 };
 
 export type TenantInvoicePageData = {

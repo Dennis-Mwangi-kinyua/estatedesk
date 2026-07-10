@@ -4,7 +4,8 @@ import {
   getWaterBillOutstandingAmount,
   isOutstandingWaterBillStatus,
   isPayableWaterBillStatus,
-} from "../../src/lib/water-bills/status";
+  isTenantVisibleWaterBillStatus,
+} from "../../apps/web/src/lib/water-bills/status";
 
 describe("water bill status helpers", () => {
   it("treats issued bills as payable and outstanding", () => {
@@ -13,7 +14,9 @@ describe("water bill status helpers", () => {
     assert.equal(getWaterBillOutstandingAmount("ISSUED", 1200), 1200);
   });
 
-  it("keeps pending approval bills visible but not payable", () => {
+  it("hides pending approval bills from tenant views and blocks payment", () => {
+    assert.equal(isTenantVisibleWaterBillStatus("PENDING_APPROVAL"), false);
+    assert.equal(isTenantVisibleWaterBillStatus("ISSUED"), true);
     assert.equal(isPayableWaterBillStatus("PENDING_APPROVAL"), false);
     assert.equal(isOutstandingWaterBillStatus("PENDING_APPROVAL"), false);
     assert.equal(getWaterBillOutstandingAmount("PENDING_APPROVAL", 1200), 0);
