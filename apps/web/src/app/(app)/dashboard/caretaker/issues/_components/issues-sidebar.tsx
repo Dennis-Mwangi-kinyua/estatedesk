@@ -5,6 +5,7 @@ import {
   Home,
   Plus,
 } from "lucide-react";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { QuickLinkCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import { ISSUES_QUICK_ACTIONS, ISSUES_WORKFLOW } from "../_lib/constants";
@@ -23,7 +24,11 @@ const QUICK_ACTION_ICONS = {
 
 export function IssuesSidebar() {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Quick actions"
+      description="Useful shortcuts for logging and tracking field issues."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Quick actions</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -76,6 +81,6 @@ export function IssuesSidebar() {
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

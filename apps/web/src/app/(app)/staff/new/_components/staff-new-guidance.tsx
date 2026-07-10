@@ -1,8 +1,12 @@
 import { STAFF_SETUP_GUIDANCE } from "../_lib/constants";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 
 export function StaffNewGuidance() {
   return (
-    <aside className="space-y-3">
+    <WorkspaceGuidePanel
+      title="Staff onboarding"
+      description="Pick the operational role before entering profile details. Caretakers map to a property or apartment/block in the first step."
+    >
       {STAFF_SETUP_GUIDANCE.map((item) => (
         <div
           key={item.title}
@@ -12,6 +16,6 @@ export function StaffNewGuidance() {
           <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.text}</p>
         </div>
       ))}
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

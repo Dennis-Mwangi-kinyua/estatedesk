@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { panelShellClassName } from "./member-detail-ui";
 import { getMemberDetailGuidance } from "../_lib/constants";
 import type { MemberDetailWorkspaceProps } from "./member-detail-workspace";
@@ -16,7 +17,11 @@ export function MemberDetailGuidance({
   );
 
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Profile actions"
+      description={`Manage ${member.user.fullName}'s ${meta.label.toLowerCase()} record, assignments, and employment status.`}
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Profile actions</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -44,6 +49,6 @@ export function MemberDetailGuidance({
           ))}
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import {
   ROLE_META,
   type StaffRole,
@@ -15,7 +16,15 @@ export function RoleMembersGuidance({ role }: RoleMembersGuidanceProps) {
   const guidance = getRoleDirectoryGuidance(role);
 
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title={`${meta.label} operations`}
+      description={
+        role === "CARETAKER"
+          ? "Caretakers work from mapped properties and apartments. Keep assignments current so field work stays in scope."
+          : `${meta.label} members shape how this part of the organisation runs day to day.`
+      }
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">
           {meta.label} operations
@@ -46,6 +55,6 @@ export function RoleMembersGuidance({ role }: RoleMembersGuidanceProps) {
           ))}
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

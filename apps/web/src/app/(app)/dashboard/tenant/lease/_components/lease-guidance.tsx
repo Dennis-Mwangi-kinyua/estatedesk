@@ -1,11 +1,16 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { TENANT_LEASE_GUIDANCE } from "../_lib/constants";
 import { panelShellClassName } from "./leases-ui";
 
 export function LeaseGuidance() {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Quick actions"
+      description="Common tenant tasks related to your lease, payments, and records."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4 sm:p-5`}>
         <h2 className="text-sm font-semibold text-foreground">Quick actions</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -48,6 +53,6 @@ export function LeaseGuidance() {
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

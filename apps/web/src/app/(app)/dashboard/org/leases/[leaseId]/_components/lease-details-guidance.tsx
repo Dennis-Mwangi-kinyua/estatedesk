@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { panelShellClassName } from "../../_components/leases-ui";
@@ -28,7 +29,11 @@ export function LeaseDetailsGuidance({
   tenantId: string;
 }) {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Related desks"
+      description="Charges, payments, and tenant records stay connected through the active lease."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Related desks</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -85,6 +90,6 @@ export function LeaseDetailsGuidance({
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { ShieldCheck } from "lucide-react";
 import { panelShellClassName } from "./profile-ui";
 
@@ -25,7 +26,11 @@ const LINKS = [
 
 export function ProfileGuidance() {
   return (
-    <section className={`${panelShellClassName} p-4 sm:p-5`}>
+    <WorkspaceGuidePanel
+      title="Account tools"
+      description="Security, documents, and payment records linked to your profile."
+      triggerClassName={panelShellClassName}
+    >
       <div className="flex items-start gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border bg-muted/20 text-muted-foreground">
           <ShieldCheck className="h-4 w-4" />
@@ -57,6 +62,6 @@ export function ProfileGuidance() {
           </div>
         ))}
       </div>
-    </section>
+    </WorkspaceGuidePanel>
   );
 }

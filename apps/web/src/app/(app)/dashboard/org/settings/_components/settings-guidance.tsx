@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { SETTINGS_GUIDANCE, SETTINGS_WORKFLOW_STEPS } from "../_lib/constants";
@@ -17,7 +18,11 @@ export function SettingsGuidance({
   ).slice(0, 4);
 
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Recommended next steps"
+      description="Common setup paths for a new or growing organization workspace."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Recommended next steps</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -97,6 +102,6 @@ export function SettingsGuidance({
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

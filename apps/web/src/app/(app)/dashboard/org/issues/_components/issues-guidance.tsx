@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { ISSUE_LIFECYCLE_STAGES, ISSUE_RAISING_CHANNELS } from "../_lib/constants";
@@ -6,7 +7,11 @@ import { panelShellClassName } from "./issues-ui";
 
 export function IssuesGuidance({ orgRole }: { orgRole?: OrgRole | null }) {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="How to raise issues"
+      description="Maintenance tickets can start from the office desk, tenant dashboard, or caretaker follow-up queue."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">How to raise issues</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -83,6 +88,6 @@ export function IssuesGuidance({ orgRole }: { orgRole?: OrgRole | null }) {
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

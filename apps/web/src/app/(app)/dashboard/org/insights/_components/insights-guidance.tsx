@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { INSIGHTS_GUIDANCE } from "../_lib/constants";
@@ -6,7 +7,11 @@ import { panelShellClassName } from "./insights-ui";
 
 export function InsightsGuidance({ orgRole }: { orgRole?: OrgRole | null }) {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Act on signals"
+      description="Jump directly into the workspace that resolves the highest-priority recommendation."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Act on signals</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -50,6 +55,6 @@ export function InsightsGuidance({ orgRole }: { orgRole?: OrgRole | null }) {
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

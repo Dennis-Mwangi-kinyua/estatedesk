@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { panelShellClassName } from "@/app/(app)/dashboard/org/properties/_components/properties-ui";
@@ -33,7 +34,11 @@ export function InspectionDetailsGuidance({
   orgRole?: OrgRole | null;
 }) {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="After inspection"
+      description="Move-out inspections close the tenancy loop. Use these desks to align deposit decisions, repairs, and handover records."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">After inspection</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -77,6 +82,6 @@ export function InspectionDetailsGuidance({
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

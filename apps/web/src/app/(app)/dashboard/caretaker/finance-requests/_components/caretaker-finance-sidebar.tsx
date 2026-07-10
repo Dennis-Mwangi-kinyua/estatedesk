@@ -1,4 +1,5 @@
 import { Bell, Droplets, Home, Wrench } from "lucide-react";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import {
   FocusTaskCard,
   panelShellClassName,
@@ -18,7 +19,11 @@ const QUICK_ACTION_ICONS = {
 
 export function CaretakerFinanceSidebar() {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Quick actions"
+      description="Jump to related caretaker workflows after submitting spend tickets."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Quick actions</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -61,6 +66,6 @@ export function CaretakerFinanceSidebar() {
           ))}
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

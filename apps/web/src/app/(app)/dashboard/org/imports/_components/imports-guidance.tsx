@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { IMPORT_GUIDANCE } from "../_lib/constants";
@@ -6,7 +7,11 @@ import { panelShellClassName } from "./imports-ui";
 
 export function ImportsGuidance({ orgRole }: { orgRole?: OrgRole | null }) {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="After importing"
+      description="CSV imports create portfolio records in one transaction. Use these desks to verify structure before billing and collections begin."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">After importing</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -50,6 +55,6 @@ export function ImportsGuidance({ orgRole }: { orgRole?: OrgRole | null }) {
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

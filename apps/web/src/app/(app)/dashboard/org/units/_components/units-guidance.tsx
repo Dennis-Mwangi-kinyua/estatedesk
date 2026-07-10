@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { UNITS_GUIDANCE } from "../_lib/constants";
@@ -15,7 +16,11 @@ export function UnitsGuidance({
   const { vacantUnits } = data;
 
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Portfolio navigation"
+      description="Units sit inside properties and buildings. Use these desks to keep inventory, vacancies, and tenant assignments aligned."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Portfolio navigation</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -77,6 +82,6 @@ export function UnitsGuidance({
           </div>
         </section>
       )}
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

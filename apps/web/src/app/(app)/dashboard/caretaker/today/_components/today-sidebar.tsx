@@ -1,9 +1,13 @@
 import { QuickLinkCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { Building2, Droplets, Wrench } from "lucide-react";
 
 export function TodaySidebar() {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Field shortcuts"
+      description="Jump directly to the tools you use most while moving between buildings."
+    >
       <section className="overflow-hidden rounded-3xl border border-border bg-card p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-foreground">Field shortcuts</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -32,6 +36,6 @@ export function TodaySidebar() {
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

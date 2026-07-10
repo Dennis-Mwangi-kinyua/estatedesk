@@ -1,10 +1,15 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { SUPPORT_GUIDANCE } from "../_lib/constants";
 import { panelShellClassName } from "./support-ui";
 
 export function SupportGuidance() {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Before you send"
+      description="Clear subjects and concrete details help platform administrators respond faster."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Before you send</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -45,6 +50,6 @@ export function SupportGuidance() {
           ))}
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

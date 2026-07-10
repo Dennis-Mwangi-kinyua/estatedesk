@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { CHARGES_GUIDANCE } from "../_lib/constants";
@@ -6,7 +7,11 @@ import { panelShellClassName } from "./charges-ui";
 
 export function ChargesGuidance({ orgRole }: { orgRole?: OrgRole | null }) {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="How charges appear"
+      description="Rent charges are tied to active leases. Once leases are live and billing periods are issued, charges show up here automatically."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">How charges appear</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -50,6 +55,6 @@ export function ChargesGuidance({ orgRole }: { orgRole?: OrgRole | null }) {
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

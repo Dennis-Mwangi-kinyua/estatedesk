@@ -1,4 +1,5 @@
 import { Droplets, Home, Users, Wrench } from "lucide-react";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import {
   FocusTaskCard,
@@ -16,7 +17,11 @@ const QUICK_ACTION_ICONS = {
 
 export function ReadSidebar() {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Quick actions"
+      description="Jump between meter capture and related caretaker workflows."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Quick actions</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -68,6 +73,6 @@ export function ReadSidebar() {
           ))}
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

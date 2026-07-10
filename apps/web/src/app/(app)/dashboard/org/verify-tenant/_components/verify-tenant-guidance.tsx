@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { panelShellClassName } from "../../tenants/_components/tenants-ui";
@@ -22,7 +23,11 @@ const VERIFY_TENANT_GUIDANCE = [
 
 export function VerifyTenantGuidance({ orgRole }: { orgRole?: OrgRole | null }) {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Before onboarding"
+      description="Search across organisations, review lease and payment history, then onboard from the tenant desk."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Before onboarding</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -66,6 +71,6 @@ export function VerifyTenantGuidance({ orgRole }: { orgRole?: OrgRole | null }) 
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

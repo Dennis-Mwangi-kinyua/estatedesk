@@ -1,6 +1,7 @@
 "use client";
 
 import { TENANT_SETUP_GUIDANCE } from "../_lib/constants";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { formatCurrency } from "../_lib/helpers";
 import type { AvailableUnit, Step } from "../_lib/types";
 import { panelShellClassName } from "./ui-primitives";
@@ -15,7 +16,11 @@ export function NewTenantGuidance({
   currencyCode: string;
 }) {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Tenant onboarding"
+      description="Step 4 lets you choose the tenant username and password before anything is saved."
+      triggerClassName={panelShellClassName}
+    >
       {TENANT_SETUP_GUIDANCE.map((item) => (
         <section key={item.title} className={`${panelShellClassName} p-4`}>
           <h2 className="text-sm font-semibold text-foreground">{item.title}</h2>
@@ -41,6 +46,6 @@ export function NewTenantGuidance({
           </p>
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

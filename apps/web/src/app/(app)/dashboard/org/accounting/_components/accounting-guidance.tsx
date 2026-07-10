@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { ACCOUNTING_GUIDANCE } from "../_lib/constants";
@@ -6,7 +7,12 @@ import { panelShellClassName } from "./accounting-ui";
 
 export function AccountingGuidance({ orgRole }: { orgRole?: OrgRole | null }) {
   return (
-    <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+    <WorkspaceGuidePanel
+      title="Connected workflows"
+      description="Accounting stays aligned when expenditures, payments, and rent charges feed the same ledger."
+      className="lg:sticky lg:top-4 lg:self-start"
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Connected workflows</h2>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
@@ -45,6 +51,6 @@ export function AccountingGuidance({ orgRole }: { orgRole?: OrgRole | null }) {
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }

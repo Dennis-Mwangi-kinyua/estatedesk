@@ -1,11 +1,16 @@
 import Link from "next/link";
+import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { TENANT_OVERVIEW_GUIDANCE } from "../_lib/constants";
 import { panelShellClassName } from "./tenant-dashboard-ui";
 
 export function TenantDashboardGuidance() {
   return (
-    <aside className="space-y-4">
+    <WorkspaceGuidePanel
+      title="Workspace guide"
+      description="Common tasks for managing your tenancy, payments, and property requests."
+      triggerClassName={panelShellClassName}
+    >
       <section className={`${panelShellClassName} p-4 sm:p-5`}>
         <h2 className="text-sm font-semibold text-foreground">Workspace guide</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -48,6 +53,6 @@ export function TenantDashboardGuidance() {
           />
         </div>
       </section>
-    </aside>
+    </WorkspaceGuidePanel>
   );
 }
