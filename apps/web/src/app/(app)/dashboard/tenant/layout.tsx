@@ -4,15 +4,29 @@ import { getCurrentTenantShell } from "@/lib/tenant/get-current-tenant";
 import { getTenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";
 import { requireUserSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { requireActiveSubscription } from "@/lib/billing/subscription-access";
+import {
+  getSubscriptionAccessState,
+  type SubscriptionAccessState,
+} from "@/lib/billing/subscription-access";
 import { SubscriptionWarning } from "@/components/billing/subscription-warning";
 import { UnreadNotificationAlertsPanel } from "@/components/notifications/unread-notification-alerts-panel";
+import { emptyPaymentInstructions } from "@/lib/payments/instructions";
+import { redirect } from "next/navigation";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 export const dynamic = "force-dynamic";
 
 type TenantLayoutProps = {
   children: ReactNode;
 };
+
+function isNextRedirectError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  return String((error as { digest?: string }).digest ?? "").startsWith("NEXT_REDIRECT");
+}
 
 export default async function TenantLayout({
   children,
@@ -30,31 +44,67 @@ export default async function TenantLayout({
   }
 
   const session = await requireUserSession();
-  const [activeLease, portalContext, access] = await Promise.all([
-    prisma.lease.findFirst({
-      where: {
-        orgId: tenant.org.id,
-        tenantId: tenant.id,
-        status: "ACTIVE",
-        deletedAt: null,
-      },
-      select: {
-        id: true,
-      },
-    }),
+
+  const emptyPortal: Awaited<ReturnType<typeof getTenantPortalContext>> = {
+    tenant: null,
+    paymentHealth: null,
+    paymentInstructions: emptyPaymentInstructions,
+    unreadNotificationCount: 0,
+    pendingLeaseSignatures: [],
+    caretakerContact: null,
+    leaseDocuments: [],
+  };
+
+  const [activeLeaseResult, portalResult, accessResult] = await Promise.allSettled([
+    retryTransientDatabaseOperation(
+      () =>
+        prisma.lease.findFirst({
+          where: {
+            orgId: tenant.org.id,
+            tenantId: tenant.id,
+            status: "ACTIVE",
+            deletedAt: null,
+          },
+          select: { id: true },
+        }),
+      { label: "tenant-layout-active-lease" },
+    ),
     getTenantPortalContext(session.userId, tenant.org.id),
-    requireActiveSubscription(tenant.org.id),
+    getSubscriptionAccessState(tenant.org.id),
   ]);
-  const hasActiveLease = Boolean(activeLease);
+
+  if (activeLeaseResult.status === "rejected") {
+    console.warn("[TenantLayout] activeLease lookup failed", activeLeaseResult.reason);
+  }
+  if (portalResult.status === "rejected") {
+    console.warn("[TenantLayout] portal context failed", portalResult.reason);
+  }
+  if (accessResult.status === "rejected") {
+    if (isNextRedirectError(accessResult.reason)) throw accessResult.reason;
+    console.warn("[TenantLayout] subscription access failed", accessResult.reason);
+  }
+
+  const activeLease =
+    activeLeaseResult.status === "fulfilled" ? activeLeaseResult.value : null;
+  const portalContext =
+    portalResult.status === "fulfilled" ? portalResult.value : emptyPortal;
+
+  const access: SubscriptionAccessState | null =
+    accessResult.status === "fulfilled" ? accessResult.value : null;
+
+  // Only hard-block when we successfully loaded a blocked subscription state.
+  if (access?.status === "blocked") {
+    redirect("/dashboard/billing-required");
+  }
 
   return (
     <TenantDashboardShell
       organizationName={tenant.org.name}
       userName={tenant.fullName}
-      hasActiveLease={hasActiveLease}
+      hasActiveLease={Boolean(activeLease)}
       unreadNotificationCount={portalContext.unreadNotificationCount}
     >
-      <SubscriptionWarning access={access} />
+      {access ? <SubscriptionWarning access={access} /> : null}
       <UnreadNotificationAlertsPanel
         audience="tenant"
         orgId={tenant.org.id}
