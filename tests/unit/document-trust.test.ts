@@ -4,9 +4,13 @@ import {
   createDocumentIdentity,
   documentVerificationPath,
   hashDocumentContent,
-} from "../../src/lib/documents/identity";
-import { generateVerifiedLeasePdf } from "../../src/lib/documents/lease-verification-pdf";
-import { generateReceiptPdf } from "../../src/lib/documents/receipt-pdf";
+} from "../../apps/web/src/lib/documents/identity";
+import {
+  createInvoiceSnapshot,
+  readInvoiceSnapshot,
+} from "../../apps/web/src/lib/documents/invoice-snapshot";
+import { generateVerifiedLeasePdf } from "../../apps/web/src/lib/documents/lease-verification-pdf";
+import { generateReceiptPdf } from "../../apps/web/src/lib/documents/receipt-pdf";
 import { PDFDocument } from "pdf-lib";
 
 describe("document trust", () => {
@@ -29,6 +33,45 @@ describe("document trust", () => {
       documentVerificationPath("abc/123"),
       "/verify-document/abc%2F123",
     );
+  });
+
+  it("round-trips invoice snapshots for public verification fallback", () => {
+    const pdfData = {
+      serialNumber: "ED-INV-2026-ABCDEFGHJK",
+      verificationCode: "verify-code-123",
+      verificationUrl: "https://estatedesk.co.ke/verify-document/verify-code-123",
+      status: "UNPAID",
+      issuedAt: new Date("2026-07-10T08:00:00.000Z"),
+      dueDate: new Date("2026-07-16T21:00:00.000Z"),
+      period: "2026-07",
+      organizationName: "EstateDesk Demo",
+      tenantName: "Test Tenant",
+      propertyName: "Sunset Apartments",
+      unitName: "A1",
+      currencyCode: "KES",
+      amountDue: 18_300,
+      amountPaid: 0,
+      balance: 18_300,
+      lines: [
+        {
+          label: "Rent",
+          amountDue: 15_000,
+          amountPaid: 0,
+          balance: 15_000,
+        },
+      ],
+    };
+
+    const metadata = {
+      invoiceSnapshot: createInvoiceSnapshot(pdfData),
+    };
+    const restored = readInvoiceSnapshot(metadata);
+
+    assert.ok(restored);
+    assert.equal(restored?.serialNumber, pdfData.serialNumber);
+    assert.equal(restored?.period, pdfData.period);
+    assert.equal(restored?.issuedAt.toISOString(), pdfData.issuedAt.toISOString());
+    assert.equal(restored?.lines[0]?.label, "Rent");
   });
 
   it("hashes document bytes with SHA-256", () => {

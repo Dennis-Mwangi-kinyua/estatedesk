@@ -5,18 +5,30 @@ import { revalidatePath } from "next/cache";
 import { throwSafeActionFailure } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/permissions/guards";
-import { parsePaymentInstructions } from "@/lib/payments/instructions";
 import {
-  buildBankTransactionKey,
-  buildMpesaTransactionKey,
-  isUniqueConstraintError,
-  normalizeTransactionReference,
-} from "@/lib/payments/transaction-reference";
+  getBankAccountForMethod,
+  isPaymentMethodAvailable,
+  parsePaymentInstructions,
+} from "@/lib/payments/instructions";
+import {
+  buildCheckoutTransactionKey,
+  getCheckoutSettlementMode,
+  isBankCheckoutMethod,
+  isGatewayCheckoutMethod,
+  isMpesaStkConfigured,
+  mapCheckoutMethodToPaymentMethod,
+  requiresAccountNameForCheckout,
+  requiresPhoneForCheckout,
+  requiresTransactionIdForCheckout,
+  validateCheckoutTransactionId,
+} from "@/lib/payments/method-flow";
+import { isUniqueConstraintError } from "@/lib/payments/transaction-reference";
+import { requestMpesaStkPush } from "@/lib/mpesa/client";
 import { processAdvanceRentPayment } from "./handlers/advance-rent-payment";
+import { processPeriodBillPayment } from "./handlers/period-bill-payment";
 import { processRentChargePayment } from "./handlers/rent-charge-payment";
 import { processWaterBillPayment } from "./handlers/water-bill-payment";
 import type { PaymentHandlerContext } from "./payment-handler-context";
-import { mapPaymentMethod } from "./reference";
 import type { StartPaymentInput } from "./types";
 
 export async function startTenantPayment(input: StartPaymentInput) {
@@ -63,48 +75,84 @@ export async function startTenantPayment(input: StartPaymentInput) {
     throw new Error("Tenant profile not found.");
   }
 
-  const paymentMethod = mapPaymentMethod(method);
-  const paidAt = new Date();
-  const transactionId = normalizeTransactionReference(input.transactionId ?? "");
-
-  const isBankPayment = method !== "mpesa" && method !== "airtel-money";
-
-  if ((method === "mpesa" || isBankPayment) && !transactionId) {
-    throw new Error("Transaction ID is required for manual M-Pesa and bank payments.");
-  }
-
-  if (method === "mpesa" && !/^[A-Z0-9]{10}$/.test(transactionId)) {
-    throw new Error("Enter the 10-character M-Pesa transaction code.");
-  }
-
-  if (isBankPayment && (transactionId.length < 4 || transactionId.length > 100)) {
-    throw new Error("Enter a valid bank transaction ID.");
-  }
-
   const settings = await prisma.organizationSettings.findUnique({
     where: { orgId: session.activeOrgId },
     select: { customFields: true },
   });
   const instructions = parsePaymentInstructions(settings?.customFields);
-  const transactionReferenceKey =
-    method === "mpesa"
-      ? buildMpesaTransactionKey(transactionId)
-      : isBankPayment
-        ? buildBankTransactionKey({
-            bankName: method || instructions.bankName,
-            accountNumber: instructions.bankAccountNumber,
-            reference: transactionId,
-          })
-        : null;
+
+  if (!isPaymentMethodAvailable(instructions, method)) {
+    throw new Error(
+      "This payment method is not available for your organization.",
+    );
+  }
+
+  const settlementMode = getCheckoutSettlementMode(method);
+  const isGateway = isGatewayCheckoutMethod(method);
+
+  if (isGateway && method === "mpesa-stk" && !isMpesaStkConfigured()) {
+    throw new Error(
+      "M-Pesa STK is not configured on this server. Use Manual M-Pesa instead.",
+    );
+  }
+
+  if (requiresPhoneForCheckout(method) && !phoneNumber?.trim()) {
+    throw new Error("Phone number is required for this payment method.");
+  }
+
+  if (requiresAccountNameForCheckout(method) && !accountName?.trim()) {
+    throw new Error("Sender / account name is required for bank transfers.");
+  }
+
+  let transactionId = "";
+  if (requiresTransactionIdForCheckout(method)) {
+    const validated = validateCheckoutTransactionId(
+      method,
+      input.transactionId ?? "",
+    );
+    if (!validated.ok) {
+      throw new Error(validated.error);
+    }
+    transactionId = validated.transactionId;
+  }
+
+  if (isBankCheckoutMethod(method) && method !== "manual-bank") {
+    const bankAccount = getBankAccountForMethod(instructions, method);
+    if (!bankAccount) {
+      throw new Error(
+        "Bank account details are incomplete for this organization.",
+      );
+    }
+  }
+
+  const paymentMethod = mapCheckoutMethodToPaymentMethod(method);
+  const paidAt = new Date();
+  const transactionReferenceKey = transactionId
+    ? buildCheckoutTransactionKey({
+        method,
+        transactionId,
+        instructions,
+      })
+    : null;
+
+  if (requiresTransactionIdForCheckout(method) && !transactionReferenceKey) {
+    throw new Error("Could not build a transaction reference for this payment.");
+  }
+
+  const proofMessage = input.proofMessage?.trim() || "";
+  let paymentId: string | null = null;
+  let paymentAmount = Number(input.amount ?? 0);
 
   try {
-    await prisma.$transaction(async (tx) => {
+    paymentId = await prisma.$transaction(async (tx) => {
       const ctx: PaymentHandlerContext = {
         tx,
         orgId: session.activeOrgId!,
         userId: session.userId!,
         tenant,
         paymentMethod,
+        checkoutMethod: method,
+        settlementMode,
         paidAt,
         transactionId,
         transactionReferenceKey,
@@ -112,28 +160,96 @@ export async function startTenantPayment(input: StartPaymentInput) {
         accountName,
         source,
         sourceId: id,
+        proofMessage: proofMessage || undefined,
       };
 
       if (source === "rent_charge") {
-        await processRentChargePayment(ctx);
-        return;
+        const result = await processRentChargePayment(ctx, {
+          amount:
+            input.amount != null && Number.isFinite(Number(input.amount))
+              ? Number(input.amount)
+              : undefined,
+        });
+        paymentAmount = Number(input.amount ?? paymentAmount);
+        return result.id;
       }
 
       if (source === "advance_rent") {
-        await processAdvanceRentPayment(ctx, {
+        const result = await processAdvanceRentPayment(ctx, {
           amount: Number(input.amount ?? 0),
           months: Number(input.months ?? 1),
         });
-        return;
+        paymentAmount = Number(input.amount ?? 0);
+        return result.id;
       }
 
       if (source === "water_bill") {
-        await processWaterBillPayment(ctx);
-        return;
+        const result = await processWaterBillPayment(ctx, {
+          amount:
+            input.amount != null && Number.isFinite(Number(input.amount))
+              ? Number(input.amount)
+              : undefined,
+        });
+        return result.id;
+      }
+
+      if (source === "period_bill") {
+        const result = await processPeriodBillPayment(ctx, {
+          amount:
+            input.amount != null && Number.isFinite(Number(input.amount))
+              ? Number(input.amount)
+              : undefined,
+        });
+        return result.id;
       }
 
       throw new Error("Unsupported payment source.");
     });
+
+    // Gateway STK: prompt phone after payment row exists.
+    if (isGateway && method === "mpesa-stk" && paymentId) {
+      const payment = await prisma.payment.findUnique({
+        where: { id: paymentId },
+        select: { amount: true, reference: true },
+      });
+      const amount = Number(payment?.amount ?? paymentAmount);
+      const stk = await requestMpesaStkPush({
+        amount,
+        phone: phoneNumber!.trim(),
+        accountReference: payment?.reference ?? id.slice(0, 12),
+        transactionDesc: "EstateDesk bill",
+      });
+
+      if (!stk.checkoutRequestId) {
+        await prisma.payment.update({
+          where: { id: paymentId },
+          data: {
+            gatewayStatus: "FAILED",
+            verificationStatus: "REJECTED",
+            notes: "STK push failed: no CheckoutRequestID returned.",
+          },
+        });
+        throw new Error(
+          stk.customerMessage ||
+            stk.responseDescription ||
+            "Could not start M-Pesa STK push.",
+        );
+      }
+
+      await prisma.payment.update({
+        where: { id: paymentId },
+        data: {
+          checkoutRequestId: stk.checkoutRequestId,
+          merchantRequestId: stk.merchantRequestId || null,
+          gatewayStatus: "PENDING",
+          notes: stk.customerMessage || "STK push sent. Waiting for confirmation.",
+        },
+      });
+
+      params.set("status", "stk_sent");
+    } else {
+      params.set("status", settlementMode === "manual" ? "pending" : "processing");
+    }
   } catch (error) {
     if (isUniqueConstraintError(error)) {
       throw new Error("That transaction ID has already been submitted.");
@@ -152,5 +268,5 @@ export async function startTenantPayment(input: StartPaymentInput) {
   revalidatePath("/dashboard/org/charges");
   revalidatePath("/dashboard/org/notifications");
 
-  redirect(`/dashboard/tenant/payments?${params.toString()}&status=pending`);
+  redirect(`/dashboard/tenant/payments?${params.toString()}`);
 }

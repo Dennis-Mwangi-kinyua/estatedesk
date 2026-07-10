@@ -179,19 +179,19 @@ export function OrgDashboardRolePanel({
         </p>
       </div>
 
-      <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6">
+      <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-2 xl:grid-cols-4 xl:p-6">
         {actions.map((action) => (
           <DeferredLink
             key={action.title}
             href={action.href}
-            className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-sm ${
+            className={`flex min-h-[8.5rem] flex-col rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-sm ${
               action.accent
                 ? "border-amber-200 bg-amber-50/70 hover:border-amber-300 dark:border-amber-500/30 dark:bg-amber-500/10"
                 : "border-border bg-muted/10 hover:border-border/80 hover:bg-muted/15"
             }`}
           >
             <p className="text-sm font-semibold text-foreground">{action.title}</p>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            <p className="mt-1 line-clamp-3 flex-1 text-sm leading-6 text-muted-foreground">
               {action.description}
             </p>
             <span className="mt-3 inline-flex text-sm font-medium text-primary">

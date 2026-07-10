@@ -24,9 +24,10 @@ Every external provider should be integrated behind a contract before live API c
 
 1. Replace the M-Pesa STK stub with a Daraja adapter once Safaricom credentials are approved.
 2. Add the M-Pesa callback route and reconcile payments by `checkoutRequestId`.
-3. Connect eTIMS/KRA invoice submission to `RentalIncomeReturn`, `TaxCharge`, and `KraSubmissionAttempt`.
-4. Add bank reconciliation import/API jobs using the existing `Payment.reconciliationStatus` fields.
-5. Add WhatsApp inbound webhook routing for payment reminders, maintenance tickets, and tenant replies.
+3. Register KCB Buni Instant Payment Notification (`POST /api/webhooks/kcb-ipn`) with production callback + signature secret; match credits to org KCB methods.
+4. Connect eTIMS/KRA invoice submission to `RentalIncomeReturn`, `TaxCharge`, and `KraSubmissionAttempt`.
+5. Add bank reconciliation import/API jobs using the existing `Payment.reconciliationStatus` fields.
+6. Add WhatsApp inbound webhook routing for payment reminders, maintenance tickets, and tenant replies.
 
 ## Approval-Gated Work
 
@@ -42,6 +43,7 @@ Every external provider should be integrated behind a contract before live API c
 Use these folders as providers become available:
 
 - `src/lib/mpesa` for Daraja STK and callbacks.
+- `src/lib/kcb` for KCB Buni Instant Payment Notification parsing and payment matching.
 - `src/lib/integrations` for shared contracts, readiness, and provider factories.
 - `src/lib/cron/jobs.ts` for scheduled sync/reconciliation jobs.
 - `src/app/api` for external webhooks and callback routes.

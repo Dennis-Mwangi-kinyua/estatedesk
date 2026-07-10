@@ -29,26 +29,32 @@ export function StatCard({
         : "text-foreground";
 
   const content = (
-    <div className="flex items-start justify-between gap-4">
-      <div className="min-w-0">
-        <p className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-xs">
+    <div className="flex h-full min-h-[7.5rem] flex-col justify-between gap-3 sm:min-h-[8rem]">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11px] font-semibold uppercase leading-snug tracking-[0.08em] text-muted-foreground sm:text-xs">
           {label}
         </p>
-        <p className={`mt-2 text-2xl font-semibold ${valueClassName}`}>{value}</p>
-        {note ? (
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">{note}</p>
+        {Icon ? (
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground sm:h-10 sm:w-10 sm:rounded-2xl">
+            <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+          </div>
         ) : null}
       </div>
-      {Icon ? (
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-muted/20 text-muted-foreground">
-          <Icon className="h-5 w-5" />
-        </div>
-      ) : null}
+      <div className="min-w-0">
+        <p className={`text-2xl font-semibold tracking-tight sm:text-3xl ${valueClassName}`}>
+          {value}
+        </p>
+        {note ? (
+          <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground sm:text-sm sm:leading-6">
+            {note}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 
   const className =
-    "rounded-2xl border border-border bg-muted/10 px-4 py-4 transition hover:border-border/80 hover:bg-muted/15";
+    "rounded-2xl border border-border bg-muted/10 px-3.5 py-3.5 transition hover:border-border/80 hover:bg-muted/15 sm:px-4 sm:py-4";
 
   if (href) {
     return (

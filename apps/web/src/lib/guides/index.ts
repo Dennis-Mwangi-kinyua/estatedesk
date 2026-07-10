@@ -1,8 +1,10 @@
 import { guideArticles } from "@/lib/guides/articles";
 import type { GuideArticle, GuidePublicIndexItem } from "@/lib/guides/types";
+import { isPublicGuideArticle } from "@/lib/guides/types";
 
 export { guideArticles } from "@/lib/guides/articles";
 export type { GuideArticle, GuideSection, GuidePublicIndexItem } from "@/lib/guides/types";
+export { isPublicGuideArticle } from "@/lib/guides/types";
 
 const GUIDE_HUB_PATH = "/guides";
 
@@ -16,6 +18,14 @@ export function getGuidePath(slug: string) {
 
 export function getAllGuides() {
   return guideArticles;
+}
+
+/**
+ * Public marketing guides only.
+ * Never includes privatePlatform or privateInApp workspace help.
+ */
+export function getPublicGuides() {
+  return guideArticles.filter((guide) => isPublicGuideArticle(guide));
 }
 
 export function getGuideBySlug(slug: string) {
@@ -40,7 +50,7 @@ export const guideHubPublicIndexItem: GuidePublicIndexItem = {
 
 export const guidePublicIndexItems: GuidePublicIndexItem[] = [
   guideHubPublicIndexItem,
-  ...guideArticles.map((guide) => ({
+  ...getPublicGuides().map((guide) => ({
     title: guide.title,
     path: getGuidePath(guide.slug),
     description: guide.summary,
@@ -51,5 +61,5 @@ export const guidePublicIndexItems: GuidePublicIndexItem[] = [
 ];
 
 export const guideCategories = Array.from(
-  new Set(guideArticles.map((guide) => guide.category)),
+  new Set(getPublicGuides().map((guide) => guide.category)),
 ).sort();

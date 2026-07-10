@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, it } from "node:test";
-import manifest from "../../src/app/manifest";
+import manifest from "../../apps/web/src/app/manifest";
 
 const originalAppUrl = process.env.APP_URL;
 const originalPublicAppUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -54,7 +54,7 @@ describe("PWA manifest", () => {
 describe("service worker", () => {
   it("precaches offline fallbacks and uses resilient install logic", () => {
     const serviceWorker = readFileSync(
-      resolve(process.cwd(), "public/sw.js"),
+      resolve(process.cwd(), "apps/web/public/sw.js"),
       "utf8",
     );
 
@@ -72,11 +72,11 @@ describe("service worker", () => {
 describe("push test delivery", () => {
   it("exposes a server helper and API route for test alerts", () => {
     const helper = readFileSync(
-      resolve(process.cwd(), "src/lib/push/send-test-push.ts"),
+      resolve(process.cwd(), "apps/web/src/lib/push/send-test-push.ts"),
       "utf8",
     );
     const route = readFileSync(
-      resolve(process.cwd(), "src/app/api/push/test/route.ts"),
+      resolve(process.cwd(), "apps/web/src/app/api/push/test/route.ts"),
       "utf8",
     );
 

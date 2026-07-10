@@ -105,12 +105,35 @@ export async function approveMeterReading(formData: FormData) {
     throw new Error("Submitted meter reading not found");
   }
 
-  const activeLease = await prisma.lease.findFirst({
+  // Prefer the tenant already linked on the pending water bill for this period
+  // (set when the caretaker submitted the reading), then fall back to active lease.
+  const pendingBill = await prisma.waterBill.findFirst({
+    where: {
+      unitId: reading.unitId,
+      period: reading.period,
+      orgId: membership.orgId,
+      status: { in: ["PENDING_APPROVAL", "ISSUED"] },
+    },
+    select: {
+      tenantId: true,
+      tenant: {
+        select: {
+          id: true,
+          fullName: true,
+          userId: true,
+          deletedAt: true,
+        },
+      },
+    },
+  });
+
+  let activeLease = await prisma.lease.findFirst({
     where: {
       orgId: membership.orgId,
       unitId: reading.unitId,
       deletedAt: null,
       status: "ACTIVE",
+      ...(pendingBill?.tenantId ? { tenantId: pendingBill.tenantId } : {}),
     },
     select: {
       id: true,
@@ -126,7 +149,45 @@ export async function approveMeterReading(formData: FormData) {
   });
 
   if (!activeLease) {
-    throw new Error("Cannot approve reading without an active tenant lease for this unit");
+    activeLease = await prisma.lease.findFirst({
+      where: {
+        orgId: membership.orgId,
+        unitId: reading.unitId,
+        deletedAt: null,
+        status: { in: ["ACTIVE", "PENDING"] },
+      },
+      orderBy: [{ status: "asc" }, { startDate: "desc" }],
+      select: {
+        id: true,
+        tenantId: true,
+        tenant: {
+          select: {
+            id: true,
+            fullName: true,
+            userId: true,
+          },
+        },
+      },
+    });
+  }
+
+  if (!activeLease?.tenant && pendingBill?.tenant && !pendingBill.tenant.deletedAt) {
+    // Synthetic lease-shaped payload for bill issuance from the bill's tenant
+    activeLease = {
+      id: "from-water-bill",
+      tenantId: pendingBill.tenantId,
+      tenant: {
+        id: pendingBill.tenant.id,
+        fullName: pendingBill.tenant.fullName,
+        userId: pendingBill.tenant.userId,
+      },
+    };
+  }
+
+  if (!activeLease?.tenant) {
+    throw new Error(
+      "Cannot approve reading without a tenant linked to this unit (active lease or pending water bill).",
+    );
   }
 
   const ratePerUnit = Number(reading.unit.property.waterRatePerUnit ?? 0);
@@ -160,6 +221,8 @@ export async function approveMeterReading(formData: FormData) {
         ratePerUnit,
         fixedCharge,
         total,
+        amountPaid: 0,
+        balance: total,
         dueDate,
         status: "ISSUED",
         notes: `Generated from approved meter reading for ${reading.unit.property.name} / Unit ${reading.unit.houseNo}.`,
@@ -173,6 +236,8 @@ export async function approveMeterReading(formData: FormData) {
         ratePerUnit,
         fixedCharge,
         total,
+        amountPaid: 0,
+        balance: total,
         dueDate,
         status: "ISSUED",
         notes: `Generated from approved meter reading for ${reading.unit.property.name} / Unit ${reading.unit.houseNo}.`,
@@ -194,6 +259,11 @@ export async function approveMeterReading(formData: FormData) {
   revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/notifications");
   revalidatePath("/dashboard/org/water-bills");
+  revalidatePath("/dashboard/org/water-bills/readings");
+  revalidatePath(`/dashboard/org/water-bills/readings/${readingId}`);
+  revalidatePath("/dashboard/tenant/invoice");
+  revalidatePath("/dashboard/tenant/water-bills");
+  revalidatePath("/dashboard/tenant");
 }
 
 export async function rejectMeterReading(formData: FormData) {
@@ -274,6 +344,8 @@ export async function rejectMeterReading(formData: FormData) {
   revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/notifications");
   revalidatePath("/dashboard/org/water-bills");
+  revalidatePath("/dashboard/org/water-bills/readings");
+  revalidatePath(`/dashboard/org/water-bills/readings/${readingId}`);
 }
 
 export async function markNotificationReadAction(formData: FormData) {

@@ -14,6 +14,8 @@ export function InvoiceWorkspace({ data }: { data: TenantInvoicePageData }) {
             bills={data.bills}
             totalBilled={data.totalBilled}
             totalBalance={data.totalBalance}
+            organizationName={data.organizationName}
+            tenantName={data.tenantName}
           />
         </div>
       </div>

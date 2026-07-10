@@ -14,6 +14,7 @@ export default async function TenantsPage({ searchParams }: TenantsPageProps) {
     caretakerUserId: session.userId,
     membershipScope: session.membershipScope,
     page: Number(resolvedSearchParams.page ?? "1"),
+    query: resolvedSearchParams.q ?? "",
   });
 
   return <TenantsWorkspace data={data} />;

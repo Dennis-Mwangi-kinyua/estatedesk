@@ -9,7 +9,7 @@ import {
   isNavItemActive,
   isSuperAdminOnlyPath,
   resolvePlatformMode,
-} from "../../src/app/(app)/platform/_lib/nav";
+} from "../../apps/web/src/app/(app)/platform/_lib/nav";
 
 describe("platform nav mode", () => {
   it("resolves admin mode for administration routes", () => {

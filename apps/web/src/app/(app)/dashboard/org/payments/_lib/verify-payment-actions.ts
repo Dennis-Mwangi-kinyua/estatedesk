@@ -15,7 +15,11 @@ import { postVerifiedPayment } from "@/lib/accounting/payments";
 import { issueDocumentRecord } from "@/lib/documents/registry";
 import { createReceiptSnapshot } from "@/lib/documents/receipt-snapshot";
 import { prisma } from "@/lib/prisma";
-import { allocateRentPayment, getCurrentPeriod } from "@/lib/ledger";
+import {
+  allocateCombinedPeriodPayment,
+  allocateRentPayment,
+  getCurrentPeriod,
+} from "@/lib/ledger";
 import { notifyRecipients } from "@/lib/notifications/notify";
 
 export async function verifyTenantPaymentAction(formData: FormData) {
@@ -50,6 +54,10 @@ export async function verifyTenantPaymentAction(formData: FormData) {
           select: {
             id: true,
             period: true,
+            total: true,
+            amountPaid: true,
+            balance: true,
+            status: true,
           },
         },
         receipt: {
@@ -135,7 +143,35 @@ export async function verifyTenantPaymentAction(formData: FormData) {
       throw new Error("Receipt identity is incomplete.");
     }
 
-    if (payment.rentCharge) {
+    const isCombined =
+      payment.targetType === "COMBINED" ||
+      metadata.combined === true ||
+      metadata.source === "period_bill";
+
+    if (isCombined) {
+      const leaseId =
+        getString(metadata, "leaseId") || payment.rentCharge?.leaseId || null;
+      const period =
+        getString(metadata, "period") ||
+        payment.rentCharge?.period ||
+        payment.waterBill?.period ||
+        getCurrentPeriod();
+
+      if (!leaseId) {
+        throw new Error("This combined bill payment is missing lease metadata.");
+      }
+
+      await allocateCombinedPeriodPayment({
+        db: tx,
+        orgId: session.activeOrgId!,
+        paymentId: payment.id,
+        leaseId,
+        period,
+        amount: payment.amount,
+        waterBillId:
+          payment.waterBill?.id ?? getString(metadata, "waterBillId") ?? null,
+      });
+    } else if (payment.rentCharge) {
       const balance = new Prisma.Decimal(payment.rentCharge.balance);
       const paymentAmount = new Prisma.Decimal(payment.amount);
       const allocationAmount = paymentAmount.gt(balance) ? balance : paymentAmount;
@@ -174,10 +210,37 @@ export async function verifyTenantPaymentAction(formData: FormData) {
         },
       });
 
+      // Remainder of a rent-linked payment can still reduce water for same period.
+      let remainder = paymentAmount.sub(allocationAmount);
+      if (remainder.gt(0) && payment.waterBill) {
+        const waterBalance = new Prisma.Decimal(
+          payment.waterBill.balance != null &&
+            Number(payment.waterBill.balance) > 0
+            ? payment.waterBill.balance
+            : payment.waterBill.total,
+        );
+        if (waterBalance.gt(0)) {
+          const waterApply = remainder.lt(waterBalance) ? remainder : waterBalance;
+          const nextWaterPaid = new Prisma.Decimal(
+            payment.waterBill.amountPaid ?? 0,
+          ).add(waterApply);
+          const nextWaterBalance = waterBalance.sub(waterApply);
+          await tx.waterBill.update({
+            where: { id: payment.waterBill.id },
+            data: {
+              amountPaid: nextWaterPaid,
+              balance: nextWaterBalance.lt(0) ? new Prisma.Decimal(0) : nextWaterBalance,
+              status: nextWaterBalance.lte(0) ? "PAID_VERIFIED" : "ISSUED",
+            },
+          });
+          remainder = remainder.sub(waterApply);
+        }
+      }
+
       await tx.payment.update({
         where: { id: payment.id },
         data: {
-          unappliedAmount: paymentAmount.sub(allocationAmount),
+          unappliedAmount: remainder,
           coveredPeriods: [payment.rentCharge.period],
         },
       });
@@ -199,13 +262,33 @@ export async function verifyTenantPaymentAction(formData: FormData) {
         startPeriod,
         months,
       });
-    }
+    } else if (payment.waterBill) {
+      const waterBalance = new Prisma.Decimal(
+        payment.waterBill.balance != null && Number(payment.waterBill.balance) > 0
+          ? payment.waterBill.balance
+          : payment.waterBill.total,
+      );
+      const paymentAmount = new Prisma.Decimal(payment.amount);
+      const apply = paymentAmount.gt(waterBalance) ? waterBalance : paymentAmount;
+      const nextPaid = new Prisma.Decimal(payment.waterBill.amountPaid ?? 0).add(
+        apply,
+      );
+      const nextBalance = waterBalance.sub(apply);
 
-    if (payment.waterBill) {
       await tx.waterBill.update({
         where: { id: payment.waterBill.id },
         data: {
-          status: "PAID_VERIFIED",
+          amountPaid: nextPaid,
+          balance: nextBalance.lt(0) ? new Prisma.Decimal(0) : nextBalance,
+          status: nextBalance.lte(0) ? "PAID_VERIFIED" : "ISSUED",
+        },
+      });
+
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          unappliedAmount: paymentAmount.sub(apply),
+          coveredPeriods: [payment.waterBill.period],
         },
       });
     }

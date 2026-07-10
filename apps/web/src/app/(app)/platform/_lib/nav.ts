@@ -103,6 +103,12 @@ export const developerNavItems: readonly PlatformNavItem[] = [
     description: "Ops hub, integrations, and tooling overview",
   },
   {
+    href: "/platform/developer/docs",
+    label: "System Docs",
+    icon: "BookOpen",
+    description: "Private deep-dive: architecture, payments, ops",
+  },
+  {
     href: "/platform/control",
     label: "Website Control",
     icon: "Zap",

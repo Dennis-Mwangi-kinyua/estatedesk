@@ -28,8 +28,9 @@ export function buildPaymentReference({
   return `${prefix}-${period}-${unit}`;
 }
 
+import { mapCheckoutMethodToPaymentMethod } from "@/lib/payments/method-flow";
+
+/** @deprecated Prefer mapCheckoutMethodToPaymentMethod */
 export function mapPaymentMethod(method: string) {
-  if (method === "mpesa") return "MPESA_MANUAL" as const;
-  if (method === "cash") return "CASH" as const;
-  return "BANK" as const;
+  return mapCheckoutMethodToPaymentMethod(method);
 }

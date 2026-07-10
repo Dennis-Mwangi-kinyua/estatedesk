@@ -2,6 +2,16 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import type { PaymentInstructions } from "@/lib/payments/instructions";
+import { isPaymentMethodAvailable } from "@/lib/payments/instructions";
+import {
+  isBankCheckoutMethod,
+  isGatewayCheckoutMethod,
+  isMobileMoneyCheckoutMethod,
+  requiresAccountNameForCheckout,
+  requiresPhoneForCheckout,
+  requiresTransactionIdForCheckout,
+  validateCheckoutTransactionId,
+} from "@/lib/payments/method-flow";
 import { getTenantPaymentInstructions } from "../_lib/get-instructions";
 import { getTenantPaymentCheckoutSummary } from "../_lib/get-summary";
 import { startTenantPayment } from "../_lib/start-payment";
@@ -20,6 +30,7 @@ export function useCheckoutForm(searchParams: {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [accountName, setAccountName] = useState("");
   const [transactionId, setTransactionId] = useState("");
+  const [proofMessage, setProofMessage] = useState("");
   const [amount, setAmount] = useState(amountParam ?? "");
   const [months, setMonths] = useState(monthsParam ?? "1");
   const [error, setError] = useState("");
@@ -35,16 +46,14 @@ export function useCheckoutForm(searchParams: {
     return METHOD_LABELS[method] ?? method;
   }, [method]);
 
-  const isMobileMoney = method === "mpesa" || method === "airtel-money";
-  const isBank = Boolean(method) && !isMobileMoney;
-  const mpesaUnavailable =
-    method === "mpesa" &&
+  const isMobileMoney = Boolean(method && isMobileMoneyCheckoutMethod(method));
+  const isKcbPaybill = method === "kcb";
+  const isBank = Boolean(method && isBankCheckoutMethod(method));
+  const isGateway = Boolean(method && isGatewayCheckoutMethod(method));
+  const methodUnavailable =
+    Boolean(method) &&
     paymentInstructions !== null &&
-    !paymentInstructions.mpesaEnabled;
-  const bankUnavailable =
-    isBank &&
-    paymentInstructions !== null &&
-    !paymentInstructions.bankEnabled;
+    !isPaymentMethodAvailable(paymentInstructions, method!);
 
   useEffect(() => {
     let active = true;
@@ -58,6 +67,16 @@ export function useCheckoutForm(searchParams: {
           setPaymentInstructions(instructions);
           setCheckoutSummary(summary);
           setInstructionsError("");
+          // Prefill amount for full bill; tenant may lower it for a partial payment.
+          if (
+            summary?.amount != null &&
+            (source === "period_bill" ||
+              source === "rent_charge" ||
+              source === "water_bill") &&
+            !amountParam
+          ) {
+            setAmount(String(Math.round(summary.amount)));
+          }
         }
       })
       .catch(() => {
@@ -75,33 +94,33 @@ export function useCheckoutForm(searchParams: {
     setError("");
 
     if (!source || !id || !method) {
-      setError("Missing payment details.");
+      setError("Missing payment details. Go back and choose a payment method.");
       return;
     }
 
-    if (isMobileMoney && !phoneNumber.trim()) {
-      setError("Phone number is required for mobile money.");
+    if (methodUnavailable) {
+      setError(
+        `${methodLabel} is not configured for this organization yet. Contact your property manager.`,
+      );
       return;
     }
 
-    if (mpesaUnavailable) {
-      setError("M-Pesa is not configured for this organization yet.");
+    if (requiresPhoneForCheckout(method) && !phoneNumber.trim()) {
+      setError("Phone number is required for this payment method.");
       return;
     }
 
-    if (bankUnavailable) {
-      setError("Bank payments are not configured for this organization yet.");
+    if (requiresAccountNameForCheckout(method) && !accountName.trim()) {
+      setError("Sender / account name is required for bank transfers.");
       return;
     }
 
-    if (isBank && !accountName.trim()) {
-      setError("Account name is required for bank payments.");
-      return;
-    }
-
-    if ((method === "mpesa" || isBank) && !transactionId.trim()) {
-      setError("Transaction ID is required for manual M-Pesa and bank payments.");
-      return;
+    if (requiresTransactionIdForCheckout(method)) {
+      const validated = validateCheckoutTransactionId(method, transactionId);
+      if (!validated.ok) {
+        setError(validated.error);
+        return;
+      }
     }
 
     if (source === "advance_rent") {
@@ -119,18 +138,62 @@ export function useCheckoutForm(searchParams: {
       }
     }
 
+    const supportsPartialAmount =
+      source === "period_bill" ||
+      source === "rent_charge" ||
+      source === "water_bill" ||
+      source === "advance_rent";
+
+    if (
+      supportsPartialAmount &&
+      source !== "advance_rent" &&
+      amount.trim()
+    ) {
+      const parsedAmount = Number(amount);
+      if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+        setError("Enter a valid payment amount.");
+        return;
+      }
+      if (
+        checkoutSummary?.amount != null &&
+        parsedAmount > checkoutSummary.amount + 0.001
+      ) {
+        setError(
+          `Amount cannot exceed the outstanding balance (${checkoutSummary.amount}).`,
+        );
+        return;
+      }
+    }
+
     startTransition(async () => {
       try {
+        const parsedAmount = Number(amount);
+        const amountToSend =
+          supportsPartialAmount && Number.isFinite(parsedAmount) && parsedAmount > 0
+            ? parsedAmount
+            : source === "period_bill" ||
+                source === "rent_charge" ||
+                source === "water_bill"
+              ? checkoutSummary?.amount ?? undefined
+              : undefined;
+
         await startTenantPayment({
           source,
           id,
           method,
-          phoneNumber: isMobileMoney ? phoneNumber.trim() : undefined,
-          accountName: isBank ? accountName.trim() : undefined,
-          transactionId:
-            method === "mpesa" || isBank ? transactionId.trim() : undefined,
-          amount: source === "advance_rent" ? Number(amount) : undefined,
-          months: source === "advance_rent" ? Number.parseInt(months, 10) : undefined,
+          phoneNumber: requiresPhoneForCheckout(method)
+            ? phoneNumber.trim()
+            : undefined,
+          accountName: requiresAccountNameForCheckout(method)
+            ? accountName.trim()
+            : undefined,
+          transactionId: requiresTransactionIdForCheckout(method)
+            ? transactionId.trim()
+            : undefined,
+          proofMessage: proofMessage.trim() || undefined,
+          amount: amountToSend,
+          months:
+            source === "advance_rent" ? Number.parseInt(months, 10) : undefined,
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to start payment.");
@@ -139,25 +202,32 @@ export function useCheckoutForm(searchParams: {
   };
 
   const canSubmit =
-    Boolean(source && id && method) &&
-    !isPending &&
-    !mpesaUnavailable &&
-    !bankUnavailable;
+    Boolean(source && id && method) && !isPending && !methodUnavailable;
 
   return {
     source,
     method,
     methodLabel,
     isMobileMoney,
+    isKcbPaybill,
     isBank,
-    mpesaUnavailable,
-    bankUnavailable,
+    isGateway,
+    mpesaUnavailable:
+      (method === "mpesa" ||
+        method === "manual-mpesa" ||
+        method === "mpesa-stk") &&
+      methodUnavailable,
+    kcbUnavailable: isKcbPaybill && methodUnavailable,
+    bankUnavailable: isBank && methodUnavailable,
+    methodUnavailable,
     phoneNumber,
     setPhoneNumber,
     accountName,
     setAccountName,
     transactionId,
     setTransactionId,
+    proofMessage,
+    setProofMessage,
     amount,
     setAmount,
     months,

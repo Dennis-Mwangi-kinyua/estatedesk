@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { getSensitivePageCategory } from "../../src/lib/audit/sensitive-page-rules";
+import { getSensitivePageCategory } from "../../apps/web/src/lib/audit/sensitive-page-rules";
 
 describe("sensitive page rules", () => {
   it("matches tenant and payment routes", () => {

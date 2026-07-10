@@ -1572,6 +1572,219 @@ html.light,
   }
 }
 
+/* Invoice viewer: dark dashboard canvas + floating light paper document. */
+.ed-invoice-viewer {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.dark .ed-invoice-viewer {
+  background-color: transparent;
+  color: inherit;
+}
+
+/* Public document verification always renders as a high-contrast light page. */
+.ed-verify-document-page {
+  color-scheme: light;
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.dark .ed-verify-document-page {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.ed-invoice-paper {
+  color-scheme: light;
+  isolation: isolate;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+/* Match the signed-in invoice body to its header when dark mode is active. */
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper,
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper-body,
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper-header {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper {
+  color-scheme: dark;
+  border-color: #334155 !important;
+  box-shadow:
+    0 0 0 1px rgba(148, 163, 184, 0.18),
+    0 28px 56px -24px rgba(0, 0, 0, 0.62),
+    0 12px 24px -12px rgba(0, 0, 0, 0.42);
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
+  color: #f8fafc !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.text-slate-600, .text-slate-500, .text-slate-400, .text-slate-300) {
+  color: #cbd5e1 !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.text-slate-100) {
+  color: #f1f5f9 !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.text-emerald-100) {
+  color: #d1fae5 !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.text-emerald-900, .text-emerald-950, .text-emerald-800, .text-emerald-700, .text-emerald-600) {
+  color: #6ee7b7 !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.bg-white, .bg-white\/70) {
+  background-color: #172033 !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper .ed-invoice-qr {
+  background-color: #ffffff !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.bg-slate-50, .bg-slate-50\/70) {
+  background-color: #111c2f !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.bg-emerald-50) {
+  background-color: #132e2a !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.bg-sky-50) {
+  background-color: #102a3a !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.border-slate-200, .border-emerald-100, .border-emerald-200, .border-sky-200) {
+  border-color: #334155 !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.text-sky-800, .text-sky-100) {
+  color: #bae6fd !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.text-amber-100) {
+  color: #fef3c7 !important;
+}
+
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.hover\:bg-slate-100:hover) {
+  background-color: #1e293b !important;
+}
+
+.dark .ed-verify-document-page :where(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
+  color: #0f172a !important;
+}
+
+.dark .ed-verify-document-page :where(.text-slate-600, .text-slate-500) {
+  color: #475569 !important;
+}
+
+.dark .ed-verify-document-page :where(.text-emerald-900, .text-emerald-800, .text-emerald-950) {
+  color: #064e3b !important;
+}
+
+.dark .ed-verify-document-page :where(.text-red-900, .text-red-800) {
+  color: #7f1d1d !important;
+}
+
+.dark .ed-verify-document-page :where(.text-amber-900) {
+  color: #78350f !important;
+}
+
+.dark .ed-verify-document-page :where(.bg-white) {
+  background-color: #ffffff !important;
+}
+
+.dark .ed-verify-document-page :where(.bg-emerald-50) {
+  background-color: #ecfdf5 !important;
+}
+
+.dark .ed-verify-document-page :where(.bg-red-50) {
+  background-color: #fef2f2 !important;
+}
+
+.dark .ed-verify-document-page :where(.bg-amber-50) {
+  background-color: #fffbeb !important;
+}
+
+.dark .ed-verify-document-page :where(.bg-emerald-100) {
+  background-color: #d1fae5 !important;
+}
+
+.dark .ed-verify-document-page :where(.bg-red-100) {
+  background-color: #fee2e2 !important;
+}
+
+.dark .ed-verify-document-page :where(.text-emerald-700) {
+  color: #047857 !important;
+}
+
+.dark .ed-verify-document-page :where(.text-red-700) {
+  color: #b91c1c !important;
+}
+
+.dark .ed-verify-document-page :where(.border-slate-200, .border-emerald-100, .border-emerald-200, .border-red-200, .border-amber-200) {
+  border-color: #e2e8f0 !important;
+}
+
+.dark .ed-verify-document-page .ed-invoice-toolbar .ed-invoice-action--link {
+  color: #475569 !important;
+}
+
+.dark .ed-verify-document-page .ed-invoice-toolbar .ed-invoice-action--link:hover {
+  color: #0f172a !important;
+}
+
+.dark .ed-verify-document-page .ed-invoice-toolbar .ed-invoice-action--ghost {
+  border-color: #cbd5e1 !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+}
+
+.dark .ed-verify-document-page .ed-invoice-toolbar .ed-invoice-action--ghost:hover {
+  background-color: #f8fafc !important;
+}
+
+.dark .ed-verify-document-page .ed-invoice-toolbar .ed-invoice-action--water {
+  border-color: #bae6fd !important;
+  background-color: #f0f9ff !important;
+  color: #075985 !important;
+}
+
+.dark :where(.org-theme-content) .ed-invoice-toolbar .ed-invoice-action--link {
+  color: #94a3b8 !important;
+}
+
+.dark :where(.org-theme-content) .ed-invoice-toolbar .ed-invoice-action--link:hover {
+  color: #f1f5f9 !important;
+}
+
+.dark :where(.org-theme-content) .ed-invoice-toolbar .ed-invoice-action--ghost {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: #f1f5f9 !important;
+  box-shadow: none !important;
+}
+
+.dark :where(.org-theme-content) .ed-invoice-toolbar .ed-invoice-action--ghost:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark :where(.org-theme-content) .ed-invoice-toolbar .ed-invoice-action--water {
+  border-color: rgba(56, 189, 248, 0.25) !important;
+  background-color: rgba(14, 165, 233, 0.12) !important;
+  color: #bae6fd !important;
+}
+
+.dark :where(.org-theme-content) .ed-invoice-toolbar .ed-invoice-action--water:hover {
+  background-color: rgba(14, 165, 233, 0.18) !important;
+}
+
 @media print {
   html.dark,
   html.dark body {

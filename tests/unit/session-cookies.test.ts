@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 const originalAuthSecret = process.env.AUTH_SECRET;
 
 async function loadCookiesModule() {
-  return import("../../src/lib/auth/cookies");
+  return import("../../apps/web/src/lib/auth/cookies");
 }
 
 describe("session cookie hardening", () => {
@@ -73,7 +73,7 @@ describe("session cookie hardening", () => {
   });
 
   it("uses unprefixed cookie names outside production", async () => {
-    const policyModule = await import("../../src/lib/auth/cookie-policy");
+    const policyModule = await import("../../apps/web/src/lib/auth/cookie-policy");
 
     assert.equal(policyModule.getSessionCookieName(), "estatedesk_session");
     assert.equal(

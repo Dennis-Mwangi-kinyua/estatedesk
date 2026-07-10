@@ -37,7 +37,9 @@ export async function reverseVerifiedPaymentAction(formData: FormData) {
             },
           },
         },
-        waterBill: { select: { id: true } },
+        waterBill: {
+          select: { id: true, total: true, amountPaid: true, balance: true },
+        },
         receipt: { select: { documentId: true } },
         payerTenant: { select: { id: true, userId: true } },
       },
@@ -71,9 +73,27 @@ export async function reverseVerifiedPaymentAction(formData: FormData) {
     await tx.paymentAllocation.deleteMany({ where: { paymentId: payment.id } });
 
     if (payment.waterBill) {
+      const allocationTotal = payment.allocations.reduce(
+        (sum, row) => sum + Number(row.amount),
+        0,
+      );
+      const waterPortion = Math.max(Number(payment.amount) - allocationTotal, 0);
+      const currentPaid = Number(
+        (payment.waterBill as { amountPaid?: unknown }).amountPaid ?? 0,
+      );
+      const total = Number(
+        (payment.waterBill as { total?: unknown }).total ?? 0,
+      );
+      const nextPaid = Math.max(currentPaid - waterPortion, 0);
+      const nextBalance = Math.max(total - nextPaid, 0);
+
       await tx.waterBill.update({
         where: { id: payment.waterBill.id },
-        data: { status: "ISSUED" },
+        data: {
+          amountPaid: nextPaid,
+          balance: nextBalance,
+          status: nextBalance <= 0 ? "PAID_VERIFIED" : "ISSUED",
+        },
       });
     }
 

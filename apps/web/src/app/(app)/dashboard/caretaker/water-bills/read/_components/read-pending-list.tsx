@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Home } from "lucide-react";
 import {
   panelShellClassName,
   SectionIntro,
@@ -16,7 +16,7 @@ export function ReadPendingList({
     <section className={panelShellClassName}>
       <SectionIntro
         eyebrow="Pending readings"
-        title="Apartments without submitted readings"
+        title="Units without submitted readings"
         action={
           data.pendingUnits.length > 0 ? (
             <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
@@ -30,11 +30,12 @@ export function ReadPendingList({
         {data.pendingUnits.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-muted/10 px-4 py-8 text-center">
             <p className="text-sm text-muted-foreground">
-              All occupied apartments already have readings for {data.period}.
+              All occupied units in your assignment already have readings for{" "}
+              {data.period}.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 xl:grid-cols-2">
             {data.pendingUnits.map((unit) => (
               <Link
                 key={unit.id}
@@ -43,20 +44,32 @@ export function ReadPendingList({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground">
-                      {unit.propertyName} · {unit.buildingName ?? "No building"}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {unit.tenantName}
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-600 text-xs font-bold text-white dark:bg-sky-500">
+                        <Home className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-base font-semibold text-foreground">
+                          Unit {unit.houseNo}
+                        </p>
+                        <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                          {unit.tenantName}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="mt-2 truncate text-xs text-muted-foreground">
+                      {[unit.propertyName, unit.buildingName]
+                        .filter(Boolean)
+                        .join(" · ") || "Assigned unit"}
                     </p>
                   </div>
 
                   <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-                    House {unit.houseNo}
+                    Due
                   </span>
                 </div>
 
-                <div className="mt-4 grid grid-cols-3 gap-3">
+                <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
                   <div className="rounded-2xl border border-border bg-background p-3">
                     <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                       Previous
@@ -73,7 +86,7 @@ export function ReadPendingList({
                   </div>
                   <div className="rounded-2xl border border-border bg-background p-3">
                     <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                      Units used
+                      Used
                     </p>
                     <p className="mt-1 text-lg font-semibold text-foreground">—</p>
                   </div>
@@ -84,7 +97,7 @@ export function ReadPendingList({
                     Not yet submitted for approval
                   </p>
                   <span className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
-                    Enter readings
+                    Enter reading
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                   </span>
                 </div>

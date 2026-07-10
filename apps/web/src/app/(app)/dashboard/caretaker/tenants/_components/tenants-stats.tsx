@@ -11,30 +11,30 @@ export function TenantsStats({
   >;
 }) {
   return (
-    <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
       <StatCard
-        label="Total tenants"
+        label="Total"
         value={data.totalTenants}
-        note="Assigned to your scope"
+        note="In your scope"
         icon={Users}
       />
       <StatCard
         label="Active"
         value={data.activeTenants}
-        note="Currently in occupancy"
+        note="Currently occupying"
         icon={BadgeCheck}
         highlight={data.activeTenants > 0 ? "success" : "default"}
       />
       <StatCard
         label="Inactive"
         value={data.inactiveTenants}
-        note="No active lease link"
+        note="Not active now"
         icon={UserRound}
       />
       <StatCard
         label="Flagged"
         value={data.blacklistedTenants}
-        note="Requires caution"
+        note="Handle carefully"
         icon={Ban}
         highlight={data.blacklistedTenants > 0 ? "warning" : "default"}
       />

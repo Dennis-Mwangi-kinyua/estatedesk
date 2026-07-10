@@ -7,9 +7,9 @@ const ROOT = join(import.meta.dirname, "..", "..");
 
 describe("middleware wiring", () => {
   it("delegates to proxy security middleware", () => {
-    const middleware = readFileSync(join(ROOT, "middleware.ts"), "utf8");
+    const middleware = readFileSync(join(ROOT, "apps/web/middleware.ts"), "utf8");
     const healthRoute = readFileSync(
-      join(ROOT, "src/app/api/health/route.ts"),
+      join(ROOT, "apps/web/src/app/api/health/route.ts"),
       "utf8",
     );
 

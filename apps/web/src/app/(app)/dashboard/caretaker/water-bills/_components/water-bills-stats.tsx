@@ -25,7 +25,7 @@ export function WaterBillsStats({
       <StatCard
         label="Pending reading"
         value={data.pendingUnits.length}
-        note="Occupied apartments that still need meter entry"
+        note="Occupied units that still need meter entry"
         icon={AlertCircle}
         highlight={data.pendingUnits.length > 0 ? "warning" : "default"}
         href="/dashboard/caretaker/water-bills/read"

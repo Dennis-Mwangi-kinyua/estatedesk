@@ -6,15 +6,15 @@ import { describe, it } from "node:test";
 describe("PWA badge API", () => {
   it("exposes an authenticated badge-count route backed by unread-count helpers", () => {
     const route = readFileSync(
-      resolve(process.cwd(), "src/app/api/pwa/badge-count/route.ts"),
+      resolve(process.cwd(), "apps/web/src/app/api/pwa/badge-count/route.ts"),
       "utf8",
     );
     const unreadCount = readFileSync(
-      resolve(process.cwd(), "src/lib/notifications/unread-count.ts"),
+      resolve(process.cwd(), "services/notifications/src/lib/unread-count.ts"),
       "utf8",
     );
     const badgeSync = readFileSync(
-      resolve(process.cwd(), "src/components/pwa/pwa-app-badge-sync.tsx"),
+      resolve(process.cwd(), "apps/web/src/components/pwa/pwa-app-badge-sync.tsx"),
       "utf8",
     );
 

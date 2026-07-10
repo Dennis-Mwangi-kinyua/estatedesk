@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
+import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { addDays, parseInteger } from "./helpers";
 import { notifyOrgReviewers } from "./notify-org-reviewers";
@@ -24,7 +24,7 @@ export async function quickSubmitMeterReading(
   const fieldErrors: QuickMeterReadingState["fieldErrors"] = {};
 
   if (!unitId) {
-    fieldErrors.unitId = "Choose a house.";
+    fieldErrors.unitId = "Choose a unit.";
   }
 
   if (!period) {
@@ -75,7 +75,7 @@ export async function quickSubmitMeterReading(
     };
   }
 
-  const allowedUnitIds = await getCaretakerManagedBuildingUnitIds({
+  const allowedUnitIds = await getCaretakerAllowedUnitIds({
     orgId: session.activeOrgId!,
     caretakerUserId: session.userId,
     membershipScope: session.membershipScope,
@@ -243,6 +243,8 @@ export async function quickSubmitMeterReading(
         ratePerUnit,
         fixedCharge,
         total,
+        amountPaid: 0,
+        balance: total,
         dueDate,
         status: "PENDING_APPROVAL",
         notes: `Draft generated from submitted meter reading for ${unit.property.name} / Unit ${unit.houseNo}. Awaiting organization verification approval.`,
@@ -256,6 +258,8 @@ export async function quickSubmitMeterReading(
         ratePerUnit,
         fixedCharge,
         total,
+        amountPaid: 0,
+        balance: total,
         dueDate,
         status: "PENDING_APPROVAL",
         notes: `Draft generated from submitted meter reading for ${unit.property.name} / Unit ${unit.houseNo}. Awaiting organization verification approval.`,
@@ -279,7 +283,7 @@ export async function quickSubmitMeterReading(
     : [...(prevState.submittedUnitIds ?? []), unit.id];
 
   return {
-    success: `House ${unit.houseNo} submitted for verification approval.`,
+    success: `Unit ${unit.houseNo} submitted for verification approval.`,
     submittedUnitIds,
     submittedUnitId: unit.id,
     submittedHouseNo: unit.houseNo,

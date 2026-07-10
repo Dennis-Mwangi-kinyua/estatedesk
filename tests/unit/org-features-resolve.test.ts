@@ -4,7 +4,7 @@ import {
   applyGlobalFeatureOverrides,
   getFeatureFlag,
   parseFeatureMap,
-} from "../../src/lib/org/features";
+} from "../../apps/web/src/lib/org/features";
 
 describe("org feature resolution", () => {
   it("parses org feature maps", () => {

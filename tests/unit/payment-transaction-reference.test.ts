@@ -4,7 +4,7 @@ import {
   buildBankTransactionKey,
   buildMpesaTransactionKey,
   normalizeTransactionReference,
-} from "../../src/lib/payments/transaction-reference";
+} from "../../apps/web/src/lib/payments/transaction-reference";
 
 test("normalizes transaction references consistently", () => {
   assert.equal(normalizeTransactionReference(" qab 12cd34e "), "QAB12CD34E");

@@ -1,0 +1,19 @@
+{
+  "name": "@estatedesk/notifications",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./notify": "./src/lib/notify.ts",
+    "./dispatch": "./src/lib/dispatch.ts",
+    "./email": "./src/lib/email.ts",
+    "./account-credentials": "./src/lib/account-credentials.ts",
+    "./account-credentials-message": "./src/lib/account-credentials-message.ts",
+    "./owner-statement-email": "./src/lib/owner-statement-email.ts",
+    "./push-action-url": "./src/lib/push-action-url.ts",
+    "./unread-alert": "./src/lib/unread-alert.ts",
+    "./unread-count": "./src/lib/unread-count.ts",
+    "./unread-count-query": "./src/lib/unread-count-query.ts"
+  }
+}

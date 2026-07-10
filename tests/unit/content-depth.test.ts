@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { getLandingContentDepth } from "../../src/lib/content-depth/landing-depth";
+import { getLandingContentDepth } from "../../apps/web/src/lib/content-depth/landing-depth";
 import {
   trustContentDepth,
   vacancyContentDepth,
-} from "../../src/lib/content-depth/marketing-depth";
-import { siteContentDepth } from "../../src/lib/content-depth/site-topics";
+} from "../../apps/web/src/lib/content-depth/marketing-depth";
+import { siteContentDepth } from "../../apps/web/src/lib/content-depth/site-topics";
 
 describe("content depth", () => {
   it("provides shared site-wide depth sections", () => {

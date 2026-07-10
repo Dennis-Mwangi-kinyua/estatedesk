@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildShareTargetQuery } from "../../src/lib/pwa/share-target";
+import { buildShareTargetQuery } from "../../apps/web/src/lib/pwa/share-target";
 
 describe("share target helpers", () => {
   it("builds issue draft query params from shared title and text", () => {

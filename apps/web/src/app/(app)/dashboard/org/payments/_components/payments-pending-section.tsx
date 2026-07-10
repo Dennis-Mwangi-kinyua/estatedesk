@@ -11,6 +11,7 @@ import {
   getTransactionMessage,
   panelShellClassName,
 } from "./payments-ui";
+import { getCheckoutMethodLabel } from "../_lib/helpers";
 import { formatLedgerCurrency, formatLedgerDate } from "@/lib/ledger";
 
 export function PaymentsPendingSection({
@@ -96,7 +97,7 @@ export function PaymentsPendingSection({
                         payment.payerType}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {formatStatus(payment.method)}
+                      {getCheckoutMethodLabel(payment.method, payment.callbackRaw)}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {formatStatus(payment.targetType)}

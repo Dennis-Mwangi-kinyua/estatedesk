@@ -163,6 +163,15 @@ Sends a test push notification in supported environments.
 
 M-Pesa callback endpoint. Configure `MPESA_CALLBACK_URL` to point at this route when the integration is live.
 
+### `POST /api/webhooks/kcb-ipn`
+
+KCB Buni Instant Payment Notification receiver. KCB POSTs account credit events here after registration with Buni.
+
+- Auth: `Signature` / `x-kcb-signature` HMAC (or shared secret) via `KCB_BUNI_IPN_SIGNATURE_SECRET`; optional `?secret=` fallback
+- Response: `{ "transactionID", "statusCode", "statusMessage" }` (`statusCode` 0 = accepted)
+- Matched payments stay `verificationStatus: PENDING` until the organization confirms and issues a receipt
+- Unmatched notifications are logged to platform webhook samples and still acknowledged so KCB does not retry forever
+
 ## Legal and marketing utilities
 
 | Route | Purpose |

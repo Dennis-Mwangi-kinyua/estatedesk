@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { parseJournalLinesPayload } from "../../src/lib/accounting/journal-lines";
+import { parseJournalLinesPayload } from "../../apps/web/src/lib/accounting/journal-lines";
 
 describe("parseJournalLinesPayload", () => {
   it("accepts balanced multi-line journals", () => {

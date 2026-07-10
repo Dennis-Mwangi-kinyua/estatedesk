@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { Prisma, UnitType } from "@prisma/client";
 import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
-import { PUBLIC_VACANCIES_CACHE_TAG } from "@/lib/public-vacancy-cache";
+import { PUBLIC_VACANCIES_CACHE_TAG } from "./cache";
 import { prisma } from "@/lib/prisma";
 
 export const PUBLIC_VACANCY_REVALIDATE_SECONDS = 300;

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { vacancyShareHref } from "../../src/lib/vacancy-share";
+import { vacancyShareHref } from "../../apps/web/src/lib/vacancy-share";
 
 describe("vacancyShareHref", () => {
   const url = "https://estatedesk.co.ke/vacancies/test-unit--abc123";

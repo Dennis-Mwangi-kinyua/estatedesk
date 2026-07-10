@@ -118,7 +118,17 @@ export function CommunicationFeedPanel({
                     <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span>{formatEnumLabel(notification.type)}</span>
                       <span>•</span>
-                      <span>{formatEnumLabel(notification.channel)}</span>
+                      {(notification.channels?.length
+                        ? notification.channels
+                        : [notification.channel]
+                      ).map((channel) => (
+                        <span
+                          key={channel}
+                          className="rounded-full border border-border bg-muted/20 px-2 py-0.5 text-[10px] font-medium text-foreground"
+                        >
+                          {formatEnumLabel(channel)}
+                        </span>
+                      ))}
                       <span>•</span>
                       <span>
                         {formatDateTime(notification.createdAt, membership.org.timezone)}

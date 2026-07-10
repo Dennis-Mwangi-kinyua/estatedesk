@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { TicketPriority, TicketStatus } from "@prisma/client";
-import { getIssueSlaState } from "../../src/lib/issues/sla";
+import { getIssueSlaState } from "../../apps/web/src/lib/issues/sla";
 
 describe("caretaker issue SLA", () => {
   it("returns overdue state after the SLA window passes", () => {

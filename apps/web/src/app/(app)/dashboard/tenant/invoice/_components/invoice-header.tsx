@@ -15,8 +15,9 @@ export function InvoiceHeader({ data }: { data: TenantInvoicePageData }) {
             Bills &amp; Invoices
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            View all your bills in one place, including rent, water, service
-            charge, and garbage.
+            View every bill from {data.organizationName} — rent, water readings,
+            service charge, and garbage. Meter readings show previous/current
+            readings and units consumed. Pay all together or water only once approved.
           </p>
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
             <InAppGuideLink topic="rent" workspace="tenant" />

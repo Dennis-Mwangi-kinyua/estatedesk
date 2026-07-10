@@ -64,21 +64,26 @@ export function QuickMeterReadingPopup({
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-end bg-black/45 p-3 sm:items-center sm:justify-center sm:p-6">
-          <div className="w-full max-w-lg rounded-3xl border border-border bg-card p-5 text-card-foreground shadow-2xl sm:p-6">
+        <div className="fixed inset-0 z-50 flex items-end bg-black/50 p-3 backdrop-blur-md sm:items-center sm:justify-center sm:p-6 supports-[backdrop-filter]:bg-black/40">
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="relative z-10 w-full max-w-lg rounded-3xl border border-border bg-card p-5 text-card-foreground shadow-2xl sm:p-6"
+          >
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
                   Meter reading
                 </p>
                 <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-                  {activeUnit ? `House ${activeUnit.houseNo}` : "All readings done"}
+                  {activeUnit ? `Unit ${activeUnit.houseNo}` : "All readings done"}
                 </h2>
                 {activeUnit ? (
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    {activeUnit.propertyName} ·{" "}
-                    {activeUnit.buildingName ?? "No building"} ·{" "}
-                    {activeUnit.tenantName}
+                    {activeUnit.tenantName} · {activeUnit.propertyName}
+                    {activeUnit.buildingName
+                      ? ` · ${activeUnit.buildingName}`
+                      : ""}
                   </p>
                 ) : null}
               </div>
@@ -111,7 +116,7 @@ export function QuickMeterReadingPopup({
 
             {!activeUnit ? (
               <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-5 text-sm text-sky-800 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200">
-                Every pending house for {period} has been submitted for
+                Every pending unit for {period} has been submitted for
                 verification approval.
               </div>
             ) : (
@@ -124,7 +129,7 @@ export function QuickMeterReadingPopup({
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
-                    House number
+                    Unit
                   </label>
                   <select
                     name="unitId"
@@ -135,8 +140,9 @@ export function QuickMeterReadingPopup({
                   >
                     {remainingUnits.map((unit) => (
                       <option key={unit.id} value={unit.id}>
-                        House {unit.houseNo} - {unit.propertyName} -{" "}
-                        {unit.buildingName ?? "No building"}
+                        Unit {unit.houseNo} · {unit.tenantName} ·{" "}
+                        {unit.propertyName}
+                        {unit.buildingName ? ` · ${unit.buildingName}` : ""}
                       </option>
                     ))}
                   </select>
@@ -230,7 +236,7 @@ export function QuickMeterReadingPopup({
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-xs text-muted-foreground">
-                    {remainingUnits.length} houses left for {period}
+                    {remainingUnits.length} unit{remainingUnits.length === 1 ? "" : "s"} left for {period}
                   </p>
                   <button
                     type="submit"

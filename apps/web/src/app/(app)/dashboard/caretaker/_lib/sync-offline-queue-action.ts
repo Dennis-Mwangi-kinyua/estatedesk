@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { safeServerActionError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
-import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
+import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { saveImagePayloadAsset } from "@/lib/uploads/image-payload";
 import type {
@@ -26,7 +26,7 @@ export async function syncOfflineQueueAction(
   const syncedIds: string[] = [];
   const errors: Array<{ id: string; message: string }> = [];
 
-  const allowedUnitIds = await getCaretakerManagedBuildingUnitIds({
+  const allowedUnitIds = await getCaretakerAllowedUnitIds({
     orgId,
     caretakerUserId: session.userId,
     membershipScope: session.membershipScope,

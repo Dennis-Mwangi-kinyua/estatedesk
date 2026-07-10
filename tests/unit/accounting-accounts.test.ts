@@ -4,7 +4,7 @@ import {
   canDeactivateAccount,
   normalBalanceForAccountType,
   validateAccountCode,
-} from "../../src/lib/accounting/accounts";
+} from "../../apps/web/src/lib/accounting/accounts";
 
 describe("accounting accounts helpers", () => {
   it("maps normal balances by account type", () => {

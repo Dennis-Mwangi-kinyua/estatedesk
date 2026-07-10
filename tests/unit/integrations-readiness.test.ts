@@ -4,7 +4,7 @@ import {
   getIntegrationReadiness,
   getIntegrationReadinessReport,
   integrationProviders,
-} from "../../src/lib/integrations";
+} from "../../apps/web/src/lib/integrations";
 
 describe("integration readiness", () => {
   it("keeps every roadmap provider visible in the readiness report", () => {
@@ -12,6 +12,7 @@ describe("integration readiness", () => {
 
     assert.ok(report.integrations.length >= 10);
     assert.ok(report.integrations.some((item) => item.id === "ke-mpesa-daraja"));
+    assert.ok(report.integrations.some((item) => item.id === "ke-kcb-buni-ipn"));
     assert.ok(report.integrations.some((item) => item.id === "ae-dld-ejari"));
     assert.equal(
       report.totals.ready +

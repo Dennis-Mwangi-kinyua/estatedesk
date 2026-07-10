@@ -1,0 +1,16 @@
+{
+  "name": "@estatedesk/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./health": "./src/health.ts",
+    "./public-vacancy": "./src/public-vacancy.ts",
+    "./mpesa": "./src/mpesa.ts",
+    "./events": "./src/events.ts"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
+  }
+}

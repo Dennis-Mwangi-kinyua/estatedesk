@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   buildSmartInsights,
   type SmartInsightSnapshot,
-} from "../../src/features/insights/lib/smart-insights";
+} from "../../apps/web/src/features/insights/lib/smart-insights";
 
 function healthySnapshot(): SmartInsightSnapshot {
   return {

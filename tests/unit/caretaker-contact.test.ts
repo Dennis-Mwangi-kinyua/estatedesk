@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { contactHref } from "../../src/app/(app)/dashboard/caretaker/_lib/contact";
+import { contactHref } from "../../apps/web/src/app/(app)/dashboard/caretaker/_lib/contact";
 
 describe("caretaker contact links", () => {
   it("builds Kenya WhatsApp deep links", () => {

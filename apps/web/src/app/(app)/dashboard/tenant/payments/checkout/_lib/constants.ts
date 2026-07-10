@@ -1,22 +1,7 @@
+import { METHOD_LABELS as CATALOG_LABELS } from "@/lib/payments/methods-catalog";
+
 export const METHOD_LABELS: Record<string, string> = {
-  mpesa: "M-Pesa",
-  "airtel-money": "Airtel Money",
-  kcb: "KCB Bank Kenya",
-  equity: "Equity Bank",
-  coop: "Co-operative Bank",
-  absa: "Absa Bank Kenya",
-  stanbic: "Stanbic Bank Kenya",
-  ncba: "NCBA Bank",
-  family: "Family Bank",
-  "i-and-m": "I&M Bank",
-  dtb: "Diamond Trust Bank",
-  "standard-chartered": "Standard Chartered Kenya",
-  prime: "Prime Bank",
-  sidian: "Sidian Bank",
-  kingdom: "Kingdom Bank",
-  "gulf-african": "Gulf African Bank",
-  ecobank: "Ecobank Kenya",
-  "credit-bank": "Credit Bank",
-  uba: "United Bank for Africa",
-  spire: "Spire Bank",
+  ...CATALOG_LABELS,
+  "kcb-transfer": "KCB Bank Transfer",
+  "bank-other": "Bank transfer",
 };

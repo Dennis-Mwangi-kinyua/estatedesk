@@ -30,7 +30,7 @@ export function ReadingDetailHeader({
           <div className="max-w-3xl">
             <p className="text-sm text-muted-foreground">Meter reading</p>
             <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              House {reading.unit.houseNo}
+              Unit {reading.unit.houseNo}
             </h1>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
               {reading.unit.property.name} ·{" "}

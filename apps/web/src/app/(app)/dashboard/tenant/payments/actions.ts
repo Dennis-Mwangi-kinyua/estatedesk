@@ -31,12 +31,25 @@ function readAmount(formData: FormData) {
 }
 
 function extractMpesaCode(message: string) {
-  const normalized = message.toUpperCase();
+  const normalized = message.toUpperCase().replace(/\s+/g, " ").trim();
+  const compact = normalized.replace(/\s+/g, "");
+
+  // Tenants often paste only the 10-character code (e.g. QAB12CD34E).
+  if (/^[A-Z0-9]{10}$/.test(compact)) {
+    return compact;
+  }
+
   const match =
     normalized.match(/\b([A-Z0-9]{10})\s+CONFIRMED\b/) ??
     normalized.match(/\b([A-Z0-9]{10})\b/);
 
   return match?.[1] ?? "";
+}
+
+function rejectManualPayment(message: string): never {
+  redirect(
+    `/dashboard/tenant/payments?error=${encodeURIComponent(message)}&messageType=error`,
+  );
 }
 
 function extractPaidAt(message: string) {
@@ -86,19 +99,33 @@ export async function submitManualRentMpesaAction(formData: FormData) {
   const session = await requireTenantAccess();
 
   if (!session.userId || !session.activeOrgId) {
-    throw new Error("Missing tenant session context.");
+    rejectManualPayment("Missing tenant session context. Sign in again and retry.");
   }
 
-  const amount = readAmount(formData);
+  let amount: number;
+  try {
+    amount = readAmount(formData);
+  } catch (error) {
+    rejectManualPayment(
+      error instanceof Error ? error.message : "Enter a valid payment amount.",
+    );
+  }
+
   const transactionMessage = readString(formData, "transactionMessage");
-  const transactionCode = normalizeTransactionReference(extractMpesaCode(transactionMessage));
+  const transactionCode = normalizeTransactionReference(
+    extractMpesaCode(transactionMessage),
+  );
 
-  if (transactionMessage.length < 20) {
-    throw new Error("Paste the full M-Pesa transaction message.");
+  if (!transactionMessage) {
+    rejectManualPayment(
+      "Paste the M-Pesa confirmation message or the 10-character transaction code.",
+    );
   }
 
-  if (!transactionCode) {
-    throw new Error("Could not find the M-Pesa transaction code in that message.");
+  if (!transactionCode || !/^[A-Z0-9]{10}$/.test(transactionCode)) {
+    rejectManualPayment(
+      "Could not find a valid 10-character M-Pesa code (e.g. QAB12CD34E). Paste the full SMS or just the code.",
+    );
   }
 
   const transactionReferenceKey = buildMpesaTransactionKey(transactionCode);
@@ -163,19 +190,23 @@ export async function submitManualRentMpesaAction(formData: FormData) {
         payerName: tenant.fullName,
         method: "MPESA_MANUAL",
         amount,
-        targetType: "RENT",
+        // Combined period bill: verify allocates rent first, then water.
+        targetType: "COMBINED",
         gatewayStatus: "PENDING",
         verificationStatus: "PENDING",
-        reference: `RENT-${period}-${normalizeReferencePart(unitLabel) || "UNIT"}`,
+        reference: `BILL-${period}-${normalizeReferencePart(unitLabel) || "UNIT"}`,
         externalReference: transactionCode,
         transactionReferenceKey,
         paidAt,
-        notes: "Tenant pasted M-Pesa rent transaction message awaiting organization verification.",
+        notes:
+          "Tenant pasted M-Pesa message for combined rent + water bill. Awaiting organization verification.",
         callbackRaw: {
-          source: "manual_mpesa_message",
+          source: "period_bill",
+          combined: true,
           transactionCode,
           transactionMessage,
           leaseId: activeLease.id,
+          period,
           startPeriod: period,
           months: 1,
           submittedAt: new Date().toISOString(),
@@ -188,8 +219,8 @@ export async function submitManualRentMpesaAction(formData: FormData) {
       orgId: session.activeOrgId!,
       recipients: [{ tenantId: tenant.id, userId: tenant.userId }],
       type: "GENERAL",
-      title: "Rent payment submitted",
-      message: `Your rent payment ${transactionCode} has been submitted and is awaiting verification.`,
+      title: "Bill payment submitted",
+      message: `Your rent + water bill payment ${transactionCode} has been submitted and is awaiting verification.`,
     });
 
     await notifyRecipients({
@@ -198,14 +229,26 @@ export async function submitManualRentMpesaAction(formData: FormData) {
       recipients: await getPaymentReviewRecipients(tx, session.activeOrgId!),
       channels: ["IN_APP"],
       type: "GENERAL",
-      title: "Rent payment needs verification",
-      message: `${tenant.fullName} submitted rent payment ${transactionCode} for ${activeLease.unit.property.name} / Unit ${activeLease.unit.houseNo}.`,
+      title: "Bill payment needs verification",
+      message: `${tenant.fullName} submitted combined bill payment ${transactionCode} for ${activeLease.unit.property.name} / Unit ${activeLease.unit.houseNo}.`,
     });
     });
   } catch (error) {
     if (isUniqueConstraintError(error)) {
-      throw new Error("That M-Pesa transaction code has already been submitted.");
+      rejectManualPayment("That M-Pesa transaction code has already been submitted.");
     }
+
+    if (error instanceof Error) {
+      const known = [
+        "Tenant profile not found.",
+        "No active lease found for rent payment submission.",
+        "That transaction code has already been submitted.",
+      ];
+      if (known.includes(error.message)) {
+        rejectManualPayment(error.message);
+      }
+    }
+
     throwSafeActionFailure(
       "tenantRentPaymentSubmission",
       error,

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { shouldAuditSensitivePageView } from "../../src/lib/audit/sensitive-page-audit";
+import { shouldAuditSensitivePageView } from "../../apps/web/src/lib/audit/sensitive-page-audit";
 
 describe("sensitive page audit", () => {
   it("audits detail pages and high-risk routes", () => {

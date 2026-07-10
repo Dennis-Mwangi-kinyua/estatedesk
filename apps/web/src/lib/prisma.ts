@@ -11,7 +11,8 @@ const globalForPrisma = globalThis as unknown as {
   prismaSchemaVersion?: string;
 };
 
-const PRISMA_SCHEMA_VERSION = "accounting-requests-v2";
+/** Bump when schema/client changes so the dev global cache is recreated. */
+const PRISMA_SCHEMA_VERSION = "stability-pool-v1";
 
 const DATABASE_URL = getDatabaseUrl();
 
@@ -26,23 +27,24 @@ function hasAccountingRequestDelegate(client: PrismaClient) {
 }
 
 function createPrismaClient() {
-  const poolMax = readPositiveInt(process.env.PRISMA_POOL_MAX, 15);
+  // Neon free/pooler is sensitive to large pools. Keep defaults conservative.
+  const poolMax = readPositiveInt(process.env.PRISMA_POOL_MAX, 5);
   const connectionTimeoutMillis = readPositiveInt(
     process.env.PRISMA_CONNECTION_TIMEOUT_MS,
-    30_000,
+    20_000,
   );
   const idleTimeoutMillis = readPositiveInt(
     process.env.PRISMA_IDLE_TIMEOUT_MS,
-    60_000,
+    20_000,
   );
-  const queryTimeout = readPositiveInt(process.env.PRISMA_QUERY_TIMEOUT_MS, 60_000);
+  const queryTimeout = readPositiveInt(process.env.PRISMA_QUERY_TIMEOUT_MS, 30_000);
 
   const adapter = new PrismaPg({
     connectionString: DATABASE_URL,
     connectionTimeoutMillis,
     idleTimeoutMillis,
     keepAlive: true,
-    keepAliveInitialDelayMillis: 30_000,
+    keepAliveInitialDelayMillis: 10_000,
     max: poolMax,
     query_timeout: queryTimeout,
   });

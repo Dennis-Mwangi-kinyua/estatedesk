@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { parseBankStatement } from "../../src/lib/payments/bank-statement";
+import { parseBankStatement } from "../../apps/web/src/lib/payments/bank-statement";
 
 test("parses and normalizes bank statement rows", () => {
   const [row] = parseBankStatement(

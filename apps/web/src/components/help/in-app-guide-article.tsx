@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, CalendarDays, Clock3 } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarDays, Clock3, Lock } from "lucide-react";
 import type { HelpWorkspace } from "@/lib/help/help-workspace";
 import { getInAppHelpArticlePath, getInAppHelpHubPath } from "@/lib/help/help-workspace";
 import type { GuideArticle } from "@/lib/guides/types";
@@ -45,9 +45,17 @@ export function InAppGuideArticle({
           Back to workspace help
         </Link>
 
-        <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-          <BookOpen className="h-3.5 w-3.5" />
-          {guide.category}
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <BookOpen className="h-3.5 w-3.5" />
+            {guide.category}
+          </div>
+          {guide.privateInApp || guide.privatePlatform ? (
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+              <Lock className="h-3 w-3" />
+              Role-private
+            </div>
+          ) : null}
         </div>
 
         <h1 className="mt-5 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">

@@ -13,8 +13,24 @@ export function getCaretakerMeterEntryHref(unitId: string, period = CURRENT_PERI
   )}?period=${period}`;
 }
 
-export function getCaretakerTenantHref(tenantId: string) {
-  return `/dashboard/caretaker/tenants/${encodePublicId(tenantId, "tenant")}`;
+/**
+ * Tenant detail URL uses a human slug (e.g. jane-doe), not a DB/public id.
+ * Pass `{ slug }` when known; falls back to encoded id only if slug is missing.
+ */
+export function getCaretakerTenantHref(
+  tenant: string | { id: string; slug?: string | null },
+) {
+  if (typeof tenant === "string") {
+    // Legacy call sites that still pass raw id — prefer encoding until migrated.
+    return `/dashboard/caretaker/tenants/${encodePublicId(tenant, "tenant")}`;
+  }
+
+  const slug = tenant.slug?.trim();
+  if (slug) {
+    return `/dashboard/caretaker/tenants/${encodeURIComponent(slug)}`;
+  }
+
+  return `/dashboard/caretaker/tenants/${encodePublicId(tenant.id, "tenant")}`;
 }
 
 export function getCaretakerIssueHref(issueId: string) {

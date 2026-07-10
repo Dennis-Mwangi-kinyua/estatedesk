@@ -8,13 +8,13 @@ import type { TenantTaxChargeItem } from "@/app/(app)/dashboard/tenant/payments/
 function getTaxStatusClasses(status: string) {
   switch (status) {
     case "PAID":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700";
+      return "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/35 dark:bg-emerald-500/15 dark:text-emerald-200";
     case "OVERDUE":
-      return "border-rose-200 bg-rose-50 text-rose-700";
+      return "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-500/35 dark:bg-rose-500/15 dark:text-rose-200";
     case "PARTIALLY_PAID":
-      return "border-amber-200 bg-amber-50 text-amber-700";
+      return "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/35 dark:bg-amber-500/15 dark:text-amber-200";
     default:
-      return "border-neutral-200 bg-neutral-100 text-foreground/80";
+      return "border-border bg-muted text-foreground dark:bg-muted/50";
   }
 }
 
@@ -33,7 +33,7 @@ export function TaxChargesSection({
         <h2 className="text-[22px] font-semibold tracking-tight text-foreground">
           Tax charges
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-foreground/75">
           Statutory tax assessments linked to your tenancy.
         </p>
       </div>
@@ -49,7 +49,7 @@ export function TaxChargesSection({
                 <p className="text-sm font-semibold text-foreground">
                   {charge.taxType} • {charge.period}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-1 text-xs text-foreground/70">
                   {charge.taxAuthority}
                   {charge.assessmentRef ? ` • ${charge.assessmentRef}` : ""}
                 </p>
@@ -64,25 +64,25 @@ export function TaxChargesSection({
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
               <div>
-                <p className="text-muted-foreground">Due</p>
+                <p className="text-foreground/65">Due</p>
                 <p className="mt-1 font-semibold text-foreground">
                   {formatMoney(charge.amountDue)}
                 </p>
               </div>
               <div>
-                <p className="text-muted-foreground">Paid</p>
+                <p className="text-foreground/65">Paid</p>
                 <p className="mt-1 font-semibold text-foreground">
                   {formatMoney(charge.amountPaid)}
                 </p>
               </div>
               <div>
-                <p className="text-muted-foreground">Balance</p>
+                <p className="text-foreground/65">Balance</p>
                 <p className="mt-1 font-semibold text-foreground">
                   {formatMoney(charge.balance)}
                 </p>
               </div>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="mt-2 text-xs text-foreground/70">
               Due {formatDate(charge.dueDate)}
             </p>
           </div>
@@ -92,7 +92,7 @@ export function TaxChargesSection({
       <div className="mt-5 hidden overflow-hidden rounded-[24px] border border-border bg-card lg:block">
         <table className="min-w-full text-sm">
           <thead className="border-b border-border bg-muted/30">
-            <tr className="text-left text-muted-foreground">
+            <tr className="text-left text-foreground/70">
               <th className="px-5 py-4 font-medium">Period</th>
               <th className="px-5 py-4 font-medium">Tax type</th>
               <th className="px-5 py-4 font-medium">Authority</th>
@@ -107,25 +107,25 @@ export function TaxChargesSection({
             {taxCharges.map((charge) => (
               <tr
                 key={charge.id}
-                className="border-b border-neutral-100 last:border-0"
+                className="border-b border-border last:border-0"
               >
                 <td className="px-5 py-4 font-medium text-foreground">
                   {charge.period}
                 </td>
-                <td className="px-5 py-4 text-neutral-600">{charge.taxType}</td>
-                <td className="px-5 py-4 text-neutral-600">
+                <td className="px-5 py-4 text-foreground/80">{charge.taxType}</td>
+                <td className="px-5 py-4 text-foreground/80">
                   {charge.taxAuthority}
                 </td>
                 <td className="px-5 py-4 font-semibold text-foreground">
                   {formatMoney(charge.amountDue)}
                 </td>
-                <td className="px-5 py-4 text-neutral-600">
+                <td className="px-5 py-4 text-foreground/80">
                   {formatMoney(charge.amountPaid)}
                 </td>
-                <td className="px-5 py-4 text-neutral-600">
+                <td className="px-5 py-4 text-foreground/80">
                   {formatMoney(charge.balance)}
                 </td>
-                <td className="px-5 py-4 text-neutral-600">
+                <td className="px-5 py-4 text-foreground/80">
                   {formatDate(charge.dueDate)}
                 </td>
                 <td className="px-5 py-4">

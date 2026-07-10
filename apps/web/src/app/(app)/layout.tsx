@@ -48,11 +48,20 @@ export default async function AppLayout({
   let orgLabel: string | null = null;
 
   if (session.activeOrgId) {
-    const organization = await prisma.organization.findUnique({
-      where: { id: session.activeOrgId },
-      select: { name: true },
-    });
-    orgLabel = organization?.name ?? null;
+    try {
+      const organization = await prisma.organization.findUnique({
+        where: { id: session.activeOrgId },
+        select: { name: true },
+      });
+      orgLabel = organization?.name ?? null;
+    } catch (error) {
+      // Watermark label is non-critical — never block the app shell on a DB blip.
+      if (isDevDebugLoggingEnabled()) {
+        // eslint-disable-next-line no-console
+        console.warn("[AppLayout] organization lookup failed", error);
+      }
+      orgLabel = null;
+    }
   } else if (
     session.platformRole === "PLATFORM_ADMIN" ||
     session.platformRole === "SUPER_ADMIN"
@@ -61,7 +70,15 @@ export default async function AppLayout({
   }
 
   if (pathname) {
-    await auditSensitivePageView(session, pathname);
+    try {
+      await auditSensitivePageView(session, pathname);
+    } catch (error) {
+      // Audit is best-effort — never block authenticated pages on logging failures.
+      if (isDevDebugLoggingEnabled()) {
+        // eslint-disable-next-line no-console
+        console.warn("[AppLayout] auditSensitivePageView failed", error);
+      }
+    }
   }
 
   return (

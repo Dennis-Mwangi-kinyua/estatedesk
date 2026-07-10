@@ -24,7 +24,7 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
           <h2 className="text-[22px] font-semibold tracking-tight text-foreground">
             Recent Payments
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-foreground/75">
             Last {filteredPayments.length} payment records
           </p>
         </div>
@@ -44,7 +44,7 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
                   <p className="text-sm font-semibold text-foreground">
                     {getPaymentTitle(payment)}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-xs text-foreground/70">
                     {getPaymentSubtitle(payment)}
                   </p>
                 </div>
@@ -74,7 +74,7 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
 
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-[16px] border border-border/60 bg-card px-3 py-3">
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-wide text-foreground/65">
                     Method
                   </p>
                   <p className="mt-1 text-sm font-semibold text-foreground">
@@ -83,7 +83,7 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
                 </div>
 
                 <div className="rounded-[16px] border border-border/60 bg-card px-3 py-3">
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-wide text-foreground/65">
                     Date
                   </p>
                   <p className="mt-1 text-sm font-semibold text-foreground">
@@ -94,7 +94,7 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
 
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <div className="rounded-[16px] border border-border/60 bg-card px-3 py-3">
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-wide text-foreground/65">
                     Reference
                   </p>
                   <p className="mt-1 truncate text-sm font-semibold text-foreground">
@@ -103,7 +103,7 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
                 </div>
 
                 <div className="rounded-[16px] border border-border/60 bg-card px-3 py-3">
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-wide text-foreground/65">
                     Category
                   </p>
                   <p className="mt-1 text-sm font-semibold text-foreground">
@@ -116,7 +116,7 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
                 <div className="mt-3">
                   <Link
                     href={receiptHref}
-                    className="inline-flex items-center gap-2 rounded-[18px] border border-black/10 bg-card px-4 py-3 text-sm font-medium text-neutral-800"
+                    className="inline-flex items-center gap-2 rounded-[18px] border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition hover:bg-muted/40"
                   >
                     <ReceiptText className="h-4 w-4" />
                     Download Receipt
@@ -131,7 +131,7 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
       <div className="mt-5 hidden overflow-hidden rounded-[24px] ed-theme-card border border-border bg-card lg:block">
         <table className="min-w-full text-sm">
           <thead className="border-b border-border bg-muted/30">
-            <tr className="text-left text-muted-foreground">
+            <tr className="text-left text-foreground/70">
               <th className="px-5 py-4 font-medium">Payment</th>
               <th className="px-5 py-4 font-medium">Category</th>
               <th className="px-5 py-4 font-medium">Method</th>
@@ -149,24 +149,24 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
               return (
                 <tr
                   key={payment.id}
-                  className="border-b border-neutral-100 last:border-0"
+                  className="border-b border-border last:border-0"
                 >
                   <td className="px-5 py-4">
                     <div>
                       <p className="font-semibold text-foreground">
                         {getPaymentTitle(payment)}
                       </p>
-                      <p className="mt-1 text-muted-foreground">
+                      <p className="mt-1 text-sm text-foreground/70">
                         {getPaymentSubtitle(payment)}
                       </p>
                     </div>
                   </td>
 
-                  <td className="px-5 py-4 text-neutral-600">
+                  <td className="px-5 py-4 text-foreground/80">
                     {getPaymentCategory(payment)}
                   </td>
 
-                  <td className="px-5 py-4 text-neutral-600">
+                  <td className="px-5 py-4 text-foreground/80">
                     {getPaymentMethodLabel(payment.method)}
                   </td>
 
@@ -194,7 +194,7 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
                     </span>
                   </td>
 
-                  <td className="px-5 py-4 text-neutral-600">
+                  <td className="px-5 py-4 text-foreground/80">
                     {formatDate(payment.paidAt || payment.createdAt)}
                   </td>
 
@@ -208,7 +208,7 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
                         <ArrowUpRight className="h-4 w-4" />
                       </Link>
                     ) : (
-                      <span className="text-neutral-400">—</span>
+                      <span className="text-foreground/50">—</span>
                     )}
                   </td>
                 </tr>

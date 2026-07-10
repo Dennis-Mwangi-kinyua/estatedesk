@@ -1,5 +1,5 @@
 import type { ContentDepthSections } from "@/lib/content-depth/types";
-import { getGuidePath } from "@/lib/guides";
+import { getGuidePath, getPublicGuides, isPublicGuideArticle } from "@/lib/guides";
 import { guideArticles } from "@/lib/guides/articles";
 
 export const sharedWorkflowScenarios = [
@@ -62,7 +62,7 @@ export const sharedProblemsSolved = [
   },
 ] as const;
 
-export const sharedLongFormGuides = guideArticles.map((guide) => ({
+export const sharedLongFormGuides = getPublicGuides().map((guide) => ({
   title: guide.title,
   href: getGuidePath(guide.slug),
   description: guide.summary,
@@ -71,8 +71,8 @@ export const sharedLongFormGuides = guideArticles.map((guide) => ({
 export function guideTopicLink(slug: string) {
   const guide = guideArticles.find((entry) => entry.slug === slug);
 
-  if (!guide) {
-    throw new Error(`Missing guide article for slug: ${slug}`);
+  if (!guide || !isPublicGuideArticle(guide)) {
+    throw new Error(`Missing public guide article for slug: ${slug}`);
   }
 
   return {

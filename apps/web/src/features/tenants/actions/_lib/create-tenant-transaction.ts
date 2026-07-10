@@ -108,11 +108,15 @@ export async function executeCreateTenantTransaction(
       },
     });
 
+    const { allocateTenantSlug } = await import("@/lib/tenants/slug");
+    const tenantSlug = await allocateTenantSlug(tx, input.orgId, input.fullName);
+
     const tenant = await tx.tenant.create({
       data: {
         orgId: input.orgId,
         userId: user.id,
         fullName: input.fullName,
+        slug: tenantSlug,
         phone: input.phone,
         email: input.email,
         nationalId: input.nationalId,
@@ -130,6 +134,7 @@ export async function executeCreateTenantTransaction(
       },
       select: {
         id: true,
+        slug: true,
         fullName: true,
       },
     });

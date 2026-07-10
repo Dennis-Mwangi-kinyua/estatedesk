@@ -5,7 +5,7 @@ import {
   buildVacancyPagination,
   paginateItems,
   parsePositiveInt,
-} from "../../src/lib/vacancy-pagination";
+} from "../../apps/web/src/lib/vacancy-pagination";
 
 describe("vacancy pagination helpers", () => {
   it("parses positive integers with a fallback", () => {

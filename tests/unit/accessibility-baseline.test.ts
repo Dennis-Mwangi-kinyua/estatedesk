@@ -11,13 +11,13 @@ function read(relativePath: string) {
 
 describe("accessibility baseline", () => {
   it("respects reduced-motion preferences globally", () => {
-    const css = read("src/app/globals.css");
+    const css = read("apps/web/src/app/globals.css");
     assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   });
 
   it("exposes a skip link and main landmark target", () => {
-    const layout = read("src/app/layout.tsx");
-    const skip = read("src/components/layout/skip-to-main.tsx");
+    const layout = read("apps/web/src/app/layout.tsx");
+    const skip = read("apps/web/src/components/layout/skip-to-main.tsx");
 
     assert.match(layout, /SkipToMain/);
     assert.match(layout, /id="main-content"/);
@@ -25,7 +25,7 @@ describe("accessibility baseline", () => {
   });
 
   it("keeps login fields labeled and password toggle announced", () => {
-    const login = read("src/app/(auth)/login/LoginForm.tsx");
+    const login = read("apps/web/src/app/(auth)/login/LoginForm.tsx");
 
     assert.match(login, /htmlFor="email"/);
     assert.match(login, /id="email"/);
@@ -36,7 +36,7 @@ describe("accessibility baseline", () => {
   });
 
   it("uses focus-visible styles on shared buttons", () => {
-    const button = read("src/components/ui/button.tsx");
+    const button = read("apps/web/src/components/ui/button.tsx");
     assert.match(button, /focus-visible:ring/);
   });
 

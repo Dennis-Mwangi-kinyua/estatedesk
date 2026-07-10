@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { generateOwnerStatementPdf } from "../../src/lib/documents/owner-statement-pdf";
+import { generateOwnerStatementPdf } from "../../apps/web/src/lib/documents/owner-statement-pdf";
 
 describe("owner statement pdf", () => {
   it("generates a valid PDF document", async () => {

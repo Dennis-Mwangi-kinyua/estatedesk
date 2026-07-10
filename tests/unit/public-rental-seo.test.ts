@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { resolvePublicRentalLocationHref } from "../../src/lib/public-rental-seo";
+import { resolvePublicRentalLocationHref } from "../../apps/web/src/lib/public-rental-seo";
 
 describe("public rental SEO helpers", () => {
   it("maps known locations to location landing pages", () => {

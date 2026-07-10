@@ -6,10 +6,32 @@ import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
 import {
   decodePublicId,
-  encodePublicId,
   isEncodedPublicId,
 } from "@/lib/public-id";
+import { ensureTenantSlug } from "@/lib/tenants/slug";
 import { TENANT_DETAIL_LOAD_ERROR_MESSAGE } from "./helpers";
+
+const tenantDetailSelect = {
+  id: true,
+  orgId: true,
+  slug: true,
+  fullName: true,
+  email: true,
+  phone: true,
+  status: true,
+  type: true,
+  nationalId: true,
+  notes: true,
+  createdAt: true,
+  nextOfKin: {
+    select: {
+      name: true,
+      relationship: true,
+      phone: true,
+      email: true,
+    },
+  },
+} as const;
 
 export async function getCaretakerTenantDetailData({
   orgId,
@@ -20,9 +42,10 @@ export async function getCaretakerTenantDetailData({
   orgId: string;
   caretakerUserId: string;
   membershipScope: MembershipScope;
+  /** URL segment: preferred human slug, or legacy encoded public id. */
   publicTenantId: string;
 }) {
-  const tenantId = decodePublicId(publicTenantId, "tenant");
+  const rawParam = decodeURIComponent(publicTenantId).trim();
 
   try {
     const allowedUnitIds = await retryTransientDatabaseOperation(
@@ -44,38 +67,27 @@ export async function getCaretakerTenantDetailData({
       };
     }
 
-    const tenant = await retryTransientDatabaseOperation(
+    const scopeFilter = {
+      orgId,
+      deletedAt: null as null,
+      leases: {
+        some: {
+          deletedAt: null as null,
+          unitId: { in: allowedUnitIds },
+        },
+      },
+    };
+
+    // 1) Prefer slug match (canonical URL)
+    let tenant = await retryTransientDatabaseOperation(
       () =>
         prisma.tenant.findFirst({
           where: {
-            id: tenantId,
-            orgId,
-            deletedAt: null,
-            leases: {
-              some: {
-                deletedAt: null,
-                unitId: { in: allowedUnitIds },
-              },
-            },
+            ...scopeFilter,
+            slug: rawParam,
           },
           select: {
-            id: true,
-            fullName: true,
-            email: true,
-            phone: true,
-            status: true,
-            type: true,
-            nationalId: true,
-            notes: true,
-            createdAt: true,
-            nextOfKin: {
-              select: {
-                name: true,
-                relationship: true,
-                phone: true,
-                email: true,
-              },
-            },
+            ...tenantDetailSelect,
             leases: {
               where: {
                 deletedAt: null,
@@ -114,8 +126,68 @@ export async function getCaretakerTenantDetailData({
             },
           },
         }),
-      { label: "caretaker tenant detail load" },
+      { label: "caretaker tenant detail by slug" },
     );
+
+    // 2) Legacy encoded public id or raw cuid
+    if (!tenant) {
+      let decodedId = rawParam;
+      try {
+        decodedId = decodePublicId(rawParam, "tenant");
+      } catch {
+        decodedId = rawParam;
+      }
+
+      tenant = await retryTransientDatabaseOperation(
+        () =>
+          prisma.tenant.findFirst({
+            where: {
+              ...scopeFilter,
+              id: decodedId,
+            },
+            select: {
+              ...tenantDetailSelect,
+              leases: {
+                where: {
+                  deletedAt: null,
+                  unitId: { in: allowedUnitIds },
+                },
+                orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+                select: {
+                  id: true,
+                  status: true,
+                  startDate: true,
+                  endDate: true,
+                  monthlyRent: true,
+                  deposit: true,
+                  unit: {
+                    select: {
+                      id: true,
+                      houseNo: true,
+                      rentAmount: true,
+                      status: true,
+                      property: {
+                        select: {
+                          id: true,
+                          name: true,
+                          location: true,
+                        },
+                      },
+                      building: {
+                        select: {
+                          id: true,
+                          name: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        { label: "caretaker tenant detail by id" },
+      );
+    }
 
     if (!tenant) {
       return {
@@ -125,6 +197,13 @@ export async function getCaretakerTenantDetailData({
         redirectTo: null,
       };
     }
+
+    const slug = await ensureTenantSlug(prisma, tenant);
+
+    // Always land on the slug URL (never show encoded DB id in the address bar)
+    const canonicalPath = `/dashboard/caretaker/tenants/${encodeURIComponent(slug)}`;
+    const redirectTo =
+      rawParam !== slug || isEncodedPublicId(rawParam) ? canonicalPath : null;
 
     const issues = await retryTransientDatabaseOperation(
       () =>
@@ -166,10 +245,6 @@ export async function getCaretakerTenantDetailData({
       { label: "caretaker tenant detail issues" },
     );
 
-    const redirectTo = !isEncodedPublicId(publicTenantId)
-      ? `/dashboard/caretaker/tenants/${encodePublicId(tenant.id, "tenant")}`
-      : null;
-
     const activeLease =
       tenant.leases.find((lease) => lease.status === "ACTIVE") ??
       tenant.leases[0] ??
@@ -182,7 +257,7 @@ export async function getCaretakerTenantDetailData({
     return {
       ok: true as const,
       redirectTo,
-      tenant,
+      tenant: { ...tenant, slug },
       activeLease,
       issues,
       openIssues,

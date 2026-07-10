@@ -11,18 +11,18 @@ import {
   wrapSitemapIndex,
   wrapUrlset,
   xmlEscape,
-} from "../../src/lib/sitemap-utils";
-import { GET as getSitemapIndex } from "../../src/app/sitemap-index.xml/route";
-import { GET as getStaticSitemap } from "../../src/app/sitemap.xml/route";
-import { GET as getPropertiesSitemap } from "../../src/app/sitemap-properties.xml/route";
-import { GET as getRentalLandingsSitemap } from "../../src/app/sitemap-rental-landings.xml/route";
-import { GET as getUnitsSitemap } from "../../src/app/sitemap-units.xml/route";
-import { GET as getVacanciesSitemap } from "../../src/app/sitemap-vacancies.xml/route";
-import { publicSiteIndexItems } from "../../src/lib/public-site-index";
+} from "../../apps/web/src/lib/sitemap-utils";
+import { GET as getSitemapIndex } from "../../apps/web/src/app/sitemap-index.xml/route";
+import { GET as getStaticSitemap } from "../../apps/web/src/app/sitemap.xml/route";
+import { GET as getPropertiesSitemap } from "../../apps/web/src/app/sitemap-properties.xml/route";
+import { GET as getRentalLandingsSitemap } from "../../apps/web/src/app/sitemap-rental-landings.xml/route";
+import { GET as getUnitsSitemap } from "../../apps/web/src/app/sitemap-units.xml/route";
+import { GET as getVacanciesSitemap } from "../../apps/web/src/app/sitemap-vacancies.xml/route";
+import { publicSiteIndexItems } from "../../apps/web/src/lib/public-site-index";
 import {
   PUBLIC_RENTAL_LOCATIONS,
   publicRentalLocationPaths,
-} from "../../src/lib/public-rental-seo";
+} from "../../apps/web/src/lib/public-rental-seo";
 
 describe("sitemap utilities", () => {
   it("escapes XML-sensitive characters", () => {
@@ -88,7 +88,7 @@ describe("sitemap utilities", () => {
   });
 
   it("keeps marketing pages covered by the public indexing manifest", () => {
-    const marketingRoot = path.join(process.cwd(), "src", "app", "(marketing)");
+    const marketingRoot = path.join(process.cwd(), "apps/web", "src", "app", "(marketing)");
     const marketingPaths = fs
       .readdirSync(marketingRoot, { withFileTypes: true })
       .filter((item) => item.isDirectory() && fs.existsSync(path.join(marketingRoot, item.name, "page.tsx")))

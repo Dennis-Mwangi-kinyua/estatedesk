@@ -13,7 +13,7 @@ export function formatCurrency(value: unknown) {
   return new Intl.NumberFormat("en-KE", {
     style: "currency",
     currency: "KES",
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 0,
   }).format(amount);
 }
 
@@ -34,13 +34,25 @@ export function formatDate(value: Date | string | null | undefined) {
 export function statusClasses(status: string) {
   switch (status) {
     case "ACTIVE":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200";
+      return "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200";
     case "BLACKLISTED":
-      return "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200";
+      return "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200";
     case "INACTIVE":
-      return "border-border bg-muted/20 text-muted-foreground";
+      return "border-border bg-muted/30 text-muted-foreground";
     default:
-      return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200";
+      return "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200";
+  }
+}
+
+export function leaseStatusClasses(status: string) {
+  switch (status) {
+    case "ACTIVE":
+      return "border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200";
+    case "ENDED":
+    case "TERMINATED":
+      return "border-border bg-muted/30 text-muted-foreground";
+    default:
+      return "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200";
   }
 }
 
@@ -58,10 +70,52 @@ export function contactHref(kind: "phone" | "sms" | "email", value: string | nul
   return `tel:${value}`;
 }
 
-export function buildTenantsPageHref(page: number) {
-  if (page <= 1) {
-    return "/dashboard/caretaker/tenants";
-  }
+export function tenantInitials(fullName: string) {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
+}
 
-  return `/dashboard/caretaker/tenants?page=${page}`;
+type LeaseLike = {
+  status: string;
+  monthlyRent?: unknown;
+  unit?: {
+    houseNo?: string | null;
+    rentAmount?: unknown;
+    property?: { name?: string | null } | null;
+    building?: { name?: string | null } | null;
+  } | null;
+};
+
+export function getCurrentLease<T extends LeaseLike>(leases: T[]): T | null {
+  return leases.find((lease) => lease.status === "ACTIVE") ?? leases[0] ?? null;
+}
+
+export function formatUnitLocation(lease: LeaseLike | null | undefined) {
+  if (!lease?.unit) return "No unit assigned";
+  return (
+    [
+      lease.unit.property?.name,
+      lease.unit.building?.name,
+      lease.unit.houseNo ? `Unit ${lease.unit.houseNo}` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ") || "No unit assigned"
+  );
+}
+
+export function formatTenantRent(lease: LeaseLike | null | undefined) {
+  if (!lease) return "—";
+  if (lease.monthlyRent != null) return formatCurrency(lease.monthlyRent);
+  if (lease.unit?.rentAmount != null) return formatCurrency(lease.unit.rentAmount);
+  return "—";
+}
+
+export function buildTenantsPageHref(page: number, query = "") {
+  const params = new URLSearchParams();
+  if (page > 1) params.set("page", String(page));
+  if (query.trim()) params.set("q", query.trim());
+  const qs = params.toString();
+  return qs ? `/dashboard/caretaker/tenants?${qs}` : "/dashboard/caretaker/tenants";
 }

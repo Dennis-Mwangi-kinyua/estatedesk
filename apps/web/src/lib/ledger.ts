@@ -182,6 +182,314 @@ export async function allocateRentPayment({
   };
 }
 
+/**
+ * Apply a verified payment to a period's rent (+ other lease charges) then water.
+ * Used for combined period bills and partial payments that reduce the combined balance.
+ *
+ * Allocation order: RENT charges for the period (open balance first), then other
+ * non-waived lease charges for that period, then water bill for the unit/period.
+ */
+export async function allocateCombinedPeriodPayment({
+  db,
+  orgId,
+  paymentId,
+  leaseId,
+  period,
+  amount,
+  waterBillId,
+}: {
+  db: LedgerDb;
+  orgId: string;
+  paymentId: string;
+  leaseId: string;
+  period: string;
+  amount: Prisma.Decimal | number | string;
+  waterBillId?: string | null;
+}) {
+  const paymentAmount = new Prisma.Decimal(amount);
+  if (paymentAmount.lte(0)) {
+    throw new Error("Payment amount must be greater than zero.");
+  }
+
+  const lease = await db.lease.findFirst({
+    where: {
+      id: leaseId,
+      orgId,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      dueDay: true,
+      monthlyRent: true,
+      unitId: true,
+      tenantId: true,
+      unit: {
+        select: {
+          serviceCharge: true,
+          garbageFee: true,
+        },
+      },
+    },
+  });
+
+  if (!lease) {
+    throw new Error("Lease not found for combined bill allocation.");
+  }
+
+  let remaining = paymentAmount;
+  const coveredPeriods = new Set<string>();
+  let primaryRentChargeId: string | null = null;
+  let appliedWaterBillId: string | null = null;
+
+  // Ensure a rent charge exists for the period so rent+water can form one bill.
+  const rentCharge = await db.rentCharge.upsert({
+    where: {
+      leaseId_period_chargeType: {
+        leaseId: lease.id,
+        period,
+        chargeType: "RENT",
+      },
+    },
+    update: {},
+    create: {
+      orgId,
+      leaseId: lease.id,
+      period,
+      amountDue: lease.monthlyRent,
+      amountPaid: 0,
+      balance: lease.monthlyRent,
+      dueDate: dueDateForPeriod(period, lease.dueDay),
+      chargeType: "RENT",
+      status: "UNPAID",
+    },
+    select: {
+      id: true,
+      period: true,
+      amountPaid: true,
+      balance: true,
+      status: true,
+    },
+  });
+
+  try {
+    await postRentChargeAccrual(db, rentCharge.id);
+  } catch {
+    // Accrual posting is best-effort until accounting is initialized.
+  }
+
+  const recurringCharges = [
+    {
+      chargeType: "SERVICE_CHARGE" as const,
+      amount: lease.unit.serviceCharge,
+      description: "Monthly service charge",
+    },
+    {
+      chargeType: "OTHER" as const,
+      amount: lease.unit.garbageFee,
+      description: "Monthly garbage fee",
+    },
+  ];
+
+  for (const recurring of recurringCharges) {
+    const amount = new Prisma.Decimal(recurring.amount ?? 0);
+    if (amount.lte(0)) continue;
+
+    await db.rentCharge.upsert({
+      where: {
+        leaseId_period_chargeType: {
+          leaseId: lease.id,
+          period,
+          chargeType: recurring.chargeType,
+        },
+      },
+      update: {},
+      create: {
+        orgId,
+        leaseId: lease.id,
+        period,
+        amountDue: amount,
+        amountPaid: 0,
+        balance: amount,
+        dueDate: dueDateForPeriod(period, lease.dueDay),
+        chargeType: recurring.chargeType,
+        description: recurring.description,
+        status: "UNPAID",
+      },
+    });
+  }
+
+  const openCharges = await db.rentCharge.findMany({
+    where: {
+      orgId,
+      leaseId: lease.id,
+      period,
+      status: { in: ["UNPAID", "PARTIAL", "OVERDUE"] },
+      balance: { gt: 0 },
+    },
+    orderBy: [{ chargeType: "asc" }, { dueDate: "asc" }],
+    select: {
+      id: true,
+      period: true,
+      chargeType: true,
+      amountPaid: true,
+      balance: true,
+    },
+  });
+
+  // Prefer RENT first, then other charge types for the same period.
+  openCharges.sort((a, b) => {
+    if (a.chargeType === "RENT" && b.chargeType !== "RENT") return -1;
+    if (b.chargeType === "RENT" && a.chargeType !== "RENT") return 1;
+    return 0;
+  });
+
+  for (const charge of openCharges) {
+    if (remaining.lte(0)) break;
+
+    const balance = new Prisma.Decimal(charge.balance);
+    if (balance.lte(0)) continue;
+
+    const allocationAmount = remaining.lt(balance) ? remaining : balance;
+    const nextPaid = new Prisma.Decimal(charge.amountPaid).add(allocationAmount);
+    const nextBalance = balance.sub(allocationAmount);
+
+    await db.paymentAllocation.upsert({
+      where: {
+        paymentId_rentChargeId: {
+          paymentId,
+          rentChargeId: charge.id,
+        },
+      },
+      update: {
+        amount: { increment: allocationAmount },
+      },
+      create: {
+        orgId,
+        paymentId,
+        rentChargeId: charge.id,
+        period: charge.period,
+        amount: allocationAmount,
+      },
+    });
+
+    await db.rentCharge.update({
+      where: { id: charge.id },
+      data: {
+        amountPaid: nextPaid,
+        balance: nextBalance,
+        status: nextBalance.lte(0) ? "PAID" : "PARTIAL",
+      },
+    });
+
+    if (charge.chargeType === "RENT" || !primaryRentChargeId) {
+      primaryRentChargeId = charge.id;
+    }
+    coveredPeriods.add(charge.period);
+    remaining = remaining.sub(allocationAmount);
+  }
+
+  // Apply remainder to water bill for the period (explicit id or unit+period).
+  if (remaining.gt(0)) {
+    const waterBill = waterBillId
+      ? await db.waterBill.findFirst({
+          where: {
+            id: waterBillId,
+            orgId,
+            tenantId: lease.tenantId,
+            status: { notIn: ["CANCELLED", "PENDING_APPROVAL"] },
+          },
+          select: {
+            id: true,
+            period: true,
+            total: true,
+            amountPaid: true,
+            balance: true,
+            status: true,
+          },
+        })
+      : await db.waterBill.findFirst({
+          where: {
+            orgId,
+            unitId: lease.unitId,
+            tenantId: lease.tenantId,
+            period,
+            status: { notIn: ["CANCELLED", "PENDING_APPROVAL"] },
+          },
+          select: {
+            id: true,
+            period: true,
+            total: true,
+            amountPaid: true,
+            balance: true,
+            status: true,
+          },
+        });
+
+    if (waterBill) {
+      const waterBalance = new Prisma.Decimal(
+        waterBill.balance != null && Number(waterBill.balance) > 0
+          ? waterBill.balance
+          : waterBill.status === "PAID_VERIFIED"
+            ? 0
+            : waterBill.total,
+      );
+
+      if (waterBalance.gt(0)) {
+        const allocationAmount = remaining.lt(waterBalance)
+          ? remaining
+          : waterBalance;
+        const nextPaid = new Prisma.Decimal(waterBill.amountPaid ?? 0).add(
+          allocationAmount,
+        );
+        const nextBalance = waterBalance.sub(allocationAmount);
+        const fullyPaid = nextBalance.lte(0);
+
+        await db.waterBill.update({
+          where: { id: waterBill.id },
+          data: {
+            amountPaid: nextPaid,
+            balance: nextBalance.lt(0) ? new Prisma.Decimal(0) : nextBalance,
+            status: fullyPaid
+              ? "PAID_VERIFIED"
+              : waterBill.status === "PAID_PENDING_VERIFICATION"
+                ? "ISSUED"
+                : waterBill.status === "PAID_VERIFIED"
+                  ? "PAID_VERIFIED"
+                  : "ISSUED",
+          },
+        });
+
+        appliedWaterBillId = waterBill.id;
+        coveredPeriods.add(waterBill.period);
+        remaining = remaining.sub(allocationAmount);
+      }
+    }
+  }
+
+  await db.payment.update({
+    where: { id: paymentId },
+    data: {
+      unappliedAmount: remaining,
+      coveredPeriods: [...coveredPeriods],
+      ...(primaryRentChargeId ? { rentChargeId: primaryRentChargeId } : {}),
+      ...(appliedWaterBillId ? { waterBillId: appliedWaterBillId } : {}),
+      targetType:
+        primaryRentChargeId && appliedWaterBillId
+          ? "COMBINED"
+          : appliedWaterBillId && !primaryRentChargeId
+            ? "WATER"
+            : "RENT",
+    },
+  });
+
+  return {
+    coveredPeriods: [...coveredPeriods],
+    unappliedAmount: remaining,
+    rentChargeId: primaryRentChargeId,
+    waterBillId: appliedWaterBillId,
+  };
+}
+
 function isRecognizedPayment(payment: {
   gatewayStatus: string;
   verificationStatus: string;

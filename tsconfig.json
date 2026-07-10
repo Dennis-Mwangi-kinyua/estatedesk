@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["node"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -13,26 +14,39 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    },
-    "ignoreDeprecations": "5.0"
+      "@/*": ["./apps/web/src/*"],
+      "@estatedesk/config": ["./packages/config/src/index.ts"],
+      "@estatedesk/config/*": ["./packages/config/src/*"],
+      "@estatedesk/contracts": ["./packages/contracts/src/index.ts"],
+      "@estatedesk/contracts/*": ["./packages/contracts/src/*"],
+      "@estatedesk/db-kit": ["./packages/db-kit/src/index.ts"],
+      "@estatedesk/db-kit/*": ["./packages/db-kit/src/*"],
+      "@estatedesk/auth-sdk": ["./packages/auth-sdk/src/index.ts"],
+      "@estatedesk/auth-sdk/*": ["./packages/auth-sdk/src/*"],
+      "@estatedesk/service-client": ["./packages/service-client/src/index.ts"],
+      "@estatedesk/service-client/*": ["./packages/service-client/src/*"],
+      "@estatedesk/events": ["./packages/events/src/index.ts"],
+      "@estatedesk/events/*": ["./packages/events/src/*"],
+      "@estatedesk/public-vacancy": ["./services/public-vacancy/src/index.ts"],
+      "@estatedesk/public-vacancy/*": ["./services/public-vacancy/src/*"],
+      "@estatedesk/notifications": ["./services/notifications/src/index.ts"],
+      "@estatedesk/notifications/*": ["./services/notifications/src/lib/*"]
+    }
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "apps/web/**/*.ts",
+    "apps/web/**/*.tsx",
+    "apps/web/next-env.d.ts",
+    "packages/**/*.ts",
+    "services/**/*.ts",
+    "tests/**/*.ts",
+    "prisma/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "backup-routes"
+    "backup-routes",
+    "apps/web/.next"
   ]
 }

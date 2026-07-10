@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   matchStatementRowsToGlLines,
   scoreGlStatementMatch,
-} from "../../src/lib/accounting/bank-statement-gl-policy";
+} from "../../apps/web/src/lib/accounting/bank-statement-gl-policy";
 
 describe("GL bank statement matching", () => {
   it("scores exact amount and reference matches highly", () => {

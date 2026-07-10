@@ -1,4 +1,5 @@
 import type { PaymentMethod, Prisma } from "@prisma/client";
+import type { PaymentSettlementMode } from "@/lib/payments/methods-catalog";
 
 export type PaymentHandlerContext = {
   tx: Prisma.TransactionClient;
@@ -9,6 +10,10 @@ export type PaymentHandlerContext = {
     fullName: string;
   };
   paymentMethod: PaymentMethod;
+  /** Checkout method id (e.g. mpesa-stk, manual-mpesa, kcb). */
+  checkoutMethod: string;
+  /** gateway = auto-settle on success; manual = pending org verification. */
+  settlementMode: PaymentSettlementMode;
   paidAt: Date;
   transactionId: string;
   transactionReferenceKey: string | null;
@@ -16,4 +21,8 @@ export type PaymentHandlerContext = {
   accountName?: string;
   source: string;
   sourceId: string;
+  proofMessage?: string;
+  /** Populated for STK after Daraja responds. */
+  checkoutRequestId?: string | null;
+  merchantRequestId?: string | null;
 };

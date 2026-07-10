@@ -34,18 +34,26 @@ export type PeriodBill = {
   waterBillId: string | null;
 };
 
-function waterOutstanding(bill: {
-  status: string;
-  total: Prisma.Decimal | number;
-  amountPaid?: Prisma.Decimal | number | null;
-  balance?: Prisma.Decimal | number | null;
-}) {
+function waterOutstanding(
+  bill: {
+    status: string;
+    total: Prisma.Decimal | number;
+    amountPaid?: Prisma.Decimal | number | null;
+    balance?: Prisma.Decimal | number | null;
+  },
+  options?: { showPendingWater?: boolean },
+) {
   if (bill.status === "PAID_VERIFIED" || bill.status === "CANCELLED") {
     return {
       amountDue: toLedgerNumber(bill.total),
       amountPaid: toLedgerNumber(bill.total),
       balance: 0,
     };
+  }
+
+  if (bill.status === "PENDING_APPROVAL" && options?.showPendingWater) {
+    const total = toLedgerNumber(bill.total);
+    return { amountDue: total, amountPaid: 0, balance: 0 };
   }
 
   if (!isPayableWaterBillStatus(bill.status as never)) {
@@ -73,11 +81,14 @@ export async function getPeriodBillForTenant({
   orgId,
   tenantId,
   period,
+  showPendingWater = false,
 }: {
   db: Db;
   orgId: string;
   tenantId: string;
   period: string;
+  /** Invoice UI: include water bills awaiting org approval (not payable). */
+  showPendingWater?: boolean;
 }): Promise<PeriodBill | null> {
   const lease = await db.lease.findFirst({
     where: {
@@ -95,6 +106,8 @@ export async function getPeriodBillForTenant({
       unit: {
         select: {
           houseNo: true,
+          serviceCharge: true,
+          garbageFee: true,
           property: { select: { name: true } },
         },
       },
@@ -124,7 +137,9 @@ export async function getPeriodBillForTenant({
       tenantId,
       unitId: lease.unitId,
       period,
-      ...tenantVisibleWaterBillWhere(),
+      ...(showPendingWater
+        ? { status: { not: "CANCELLED" as const } }
+        : tenantVisibleWaterBillWhere()),
     },
     select: {
       id: true,
@@ -133,6 +148,9 @@ export async function getPeriodBillForTenant({
       balance: true,
       status: true,
       dueDate: true,
+      unitsUsed: true,
+      ratePerUnit: true,
+      fixedCharge: true,
     },
   });
 
@@ -149,7 +167,11 @@ export async function getPeriodBillForTenant({
       label:
         charge.chargeType === "RENT"
           ? "Rent"
-          : charge.chargeType.replaceAll("_", " ").toLowerCase(),
+          : charge.chargeType === "SERVICE_CHARGE"
+            ? "Service charge"
+            : charge.chargeType === "OTHER"
+              ? "Garbage fee"
+              : charge.chargeType.replaceAll("_", " ").toLowerCase(),
       amountDue,
       amountPaid,
       balance,
@@ -174,12 +196,42 @@ export async function getPeriodBillForTenant({
     });
   }
 
+  // Unit-level service and garbage fees are recurring monthly charges. Surface
+  // them even before their RentCharge rows are materialized by the pay flow.
+  if (!lease.rentCharges.some((charge) => charge.chargeType === "SERVICE_CHARGE")) {
+    const serviceCharge = toLedgerNumber(lease.unit.serviceCharge ?? 0);
+    if (serviceCharge > 0) {
+      lines.push({
+        kind: "OTHER",
+        id: `pending-service-charge-${period}`,
+        label: "Service charge",
+        amountDue: serviceCharge,
+        amountPaid: 0,
+        balance: serviceCharge,
+      });
+    }
+  }
+
+  if (!lease.rentCharges.some((charge) => charge.chargeType === "OTHER")) {
+    const garbageFee = toLedgerNumber(lease.unit.garbageFee ?? 0);
+    if (garbageFee > 0) {
+      lines.push({
+        kind: "OTHER",
+        id: `pending-garbage-fee-${period}`,
+        label: "Garbage fee",
+        amountDue: garbageFee,
+        amountPaid: 0,
+        balance: garbageFee,
+      });
+    }
+  }
+
   let rentChargeId: string | null =
     lease.rentCharges.find((c) => c.chargeType === "RENT")?.id ?? null;
   let waterBillId: string | null = null;
 
   if (waterBill) {
-    const w = waterOutstanding(waterBill);
+    const w = waterOutstanding(waterBill, { showPendingWater });
     waterBillId = waterBill.id;
     lines.push({
       kind: "WATER",

@@ -10,8 +10,8 @@ test(
     process.env.DATABASE_URL = databaseUrl;
     process.env.DIRECT_URL = databaseUrl;
     const [{ prisma }, { allocateRentPayment }] = await Promise.all([
-      import("../../src/lib/prisma"),
-      import("../../src/lib/ledger"),
+      import("../../apps/web/src/lib/prisma"),
+      import("../../apps/web/src/lib/ledger"),
     ]);
     const suffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const org = await prisma.organization.create({

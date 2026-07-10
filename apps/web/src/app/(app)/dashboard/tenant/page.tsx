@@ -2,6 +2,7 @@ import { getCurrentTenantWithActiveLease } from "@/lib/tenant/get-current-tenant
 import { getTenantDashboardData } from "@/lib/tenant/get-tenant-dashboard-data";
 import { getTenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";
 import { requireUserSession } from "@/lib/auth/session";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
 import { TenantDashboardInactive } from "./_components/tenant-dashboard-inactive";
 import { TenantDashboardWorkspace } from "./_components/tenant-dashboard-workspace";
@@ -23,22 +24,26 @@ export default async function TenantDashboardPage() {
   const unit = activeLease?.unit;
 
   if (!activeLease) {
-    const history = await prisma.tenantHistoryRecord.findMany({
-      where: {
-        tenantId: tenant.id,
-      },
-      orderBy: {
-        moveOutDate: "desc",
-      },
-      take: 12,
-      include: {
-        org: {
-          select: {
-            name: true,
+    const history = await retryTransientDatabaseOperation(
+      () =>
+        prisma.tenantHistoryRecord.findMany({
+          where: {
+            tenantId: tenant.id,
           },
-        },
-      },
-    });
+          orderBy: {
+            moveOutDate: "desc",
+          },
+          take: 12,
+          include: {
+            org: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        }),
+      { label: "tenant-dashboard-history" },
+    );
 
     return <TenantDashboardInactive history={history} />;
   }

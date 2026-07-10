@@ -40,6 +40,22 @@ export function getTransactionMessage(value: Prisma.JsonValue | null | undefined
   return typeof message === "string" ? message : "";
 }
 
+/** Prefer human checkout method label stored on submission metadata. */
+export function getCheckoutMethodLabel(
+  method: string,
+  callbackRaw: Prisma.JsonValue | null | undefined,
+) {
+  if (callbackRaw && typeof callbackRaw === "object" && !Array.isArray(callbackRaw)) {
+    const label = (callbackRaw as Record<string, unknown>).methodLabel;
+    if (typeof label === "string" && label.trim()) return label;
+    const checkoutMethod = (callbackRaw as Record<string, unknown>).checkoutMethod;
+    if (typeof checkoutMethod === "string" && checkoutMethod.trim()) {
+      return formatStatus(checkoutMethod.replace(/-/g, "_"));
+    }
+  }
+  return formatStatus(method);
+}
+
 export function formatPeriodLabel(period: string) {
   const [year, month] = period.split("-");
   if (!year || !month) return period;

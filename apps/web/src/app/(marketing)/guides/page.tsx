@@ -3,7 +3,7 @@ import { ArrowRight, BookOpen, Layers3 } from "lucide-react";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import {
-  getAllGuides,
+  getPublicGuides,
   getGuideHubPath,
   getGuidePath,
   guideCategories,
@@ -29,7 +29,7 @@ export const metadata = publicPageMetadata({
 });
 
 export default function GuidesHubPage() {
-  const guides = getAllGuides();
+  const guides = getPublicGuides();
   const guidesByCategory = guideCategories.map((category) => ({
     category,
     guides: guides.filter((guide) => guide.category === category),

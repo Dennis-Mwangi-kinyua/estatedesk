@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import { join } from "node:path";
 
 const ROOT = join(import.meta.dirname, "..", "..");
-const GLOBALS_CSS = readFileSync(join(ROOT, "src/app/globals.css"), "utf8");
+const GLOBALS_CSS = readFileSync(join(ROOT, "apps/web/src/app/globals.css"), "utf8");
 
 describe("theme coherence", () => {
   it("defines semantic page and card utilities", () => {
@@ -18,7 +18,7 @@ describe("theme coherence", () => {
 
   it("routes tenant portal through the org dashboard shell theme", () => {
     const layout = readFileSync(
-      join(ROOT, "src/app/(app)/dashboard/tenant/layout.tsx"),
+      join(ROOT, "apps/web/src/app/(app)/dashboard/tenant/layout.tsx"),
       "utf8",
     );
 
@@ -28,15 +28,15 @@ describe("theme coherence", () => {
 
   it("routes tenant dashboards through the shared theme shell", () => {
     const shell = readFileSync(
-      join(ROOT, "src/components/theme/ed-dashboard-shell.tsx"),
+      join(ROOT, "apps/web/src/components/theme/ed-dashboard-shell.tsx"),
       "utf8",
     );
     const lease = readFileSync(
-      join(ROOT, "src/app/(app)/dashboard/tenant/lease/_components/lease-workspace.tsx"),
+      join(ROOT, "apps/web/src/app/(app)/dashboard/tenant/lease/_components/lease-workspace.tsx"),
       "utf8",
     );
     const notices = readFileSync(
-      join(ROOT, "src/app/(app)/dashboard/tenant/notices/page.tsx"),
+      join(ROOT, "apps/web/src/app/(app)/dashboard/tenant/notices/page.tsx"),
       "utf8",
     );
 
@@ -79,11 +79,11 @@ describe("theme coherence", () => {
 
   it("uses platform dark-mode classes on platform expenditures", () => {
     const workspace = readFileSync(
-      join(ROOT, "src/app/(app)/platform/expenditures/_components/expenditures-workspace.tsx"),
+      join(ROOT, "apps/web/src/app/(app)/platform/expenditures/_components/expenditures-workspace.tsx"),
       "utf8",
     );
     const helpers = readFileSync(
-      join(ROOT, "src/app/(app)/platform/expenditures/_lib/helpers.ts"),
+      join(ROOT, "apps/web/src/app/(app)/platform/expenditures/_lib/helpers.ts"),
       "utf8",
     );
 
@@ -96,11 +96,11 @@ describe("theme coherence", () => {
 
   it("uses platform dark-mode classes on audit logs", () => {
     const workspace = readFileSync(
-      join(ROOT, "src/app/(app)/platform/audit-logs/_components/audit-logs-workspace.tsx"),
+      join(ROOT, "apps/web/src/app/(app)/platform/audit-logs/_components/audit-logs-workspace.tsx"),
       "utf8",
     );
     const filters = readFileSync(
-      join(ROOT, "src/app/(app)/platform/audit-logs/_components/audit-logs-filters.tsx"),
+      join(ROOT, "apps/web/src/app/(app)/platform/audit-logs/_components/audit-logs-filters.tsx"),
       "utf8",
     );
 

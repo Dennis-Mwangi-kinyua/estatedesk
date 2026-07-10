@@ -46,6 +46,13 @@ const endpoints: EndpointDoc[] = [
     group: "webhook",
   },
   {
+    method: "POST",
+    path: "/api/webhooks/kcb-ipn",
+    auth: "KCB_BUNI_IPN_SIGNATURE_SECRET (Signature header or ?secret=)",
+    purpose: "KCB Buni Instant Payment Notification (account credit)",
+    group: "webhook",
+  },
+  {
     method: "GET/POST",
     path: "/api/cron/notifications",
     auth: "CRON_SECRET",

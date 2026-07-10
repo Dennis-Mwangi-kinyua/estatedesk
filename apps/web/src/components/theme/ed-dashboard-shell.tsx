@@ -69,13 +69,13 @@ export function StatCard({
       <div
         className={[
           "flex items-center gap-2",
-          tone === "accent" ? "text-primary-foreground/80" : "text-muted-foreground",
+          tone === "accent" ? "text-primary-foreground/85" : "text-foreground/70",
         ].join(" ")}
       >
         <div
           className={[
             "flex h-8 w-8 items-center justify-center rounded-full sm:h-9 sm:w-9",
-            tone === "accent" ? "bg-primary-foreground/15" : "bg-card shadow-sm",
+            tone === "accent" ? "bg-primary-foreground/15" : "bg-card text-foreground shadow-sm",
           ].join(" ")}
         >
           {icon}
@@ -87,7 +87,7 @@ export function StatCard({
 
       <p
         className={[
-          "mt-3 text-[15px] font-semibold sm:text-[16px]",
+          "mt-3 text-[15px] font-semibold tabular-nums sm:text-[16px]",
           tone === "accent" ? "text-primary-foreground" : "text-foreground",
         ].join(" ")}
       >

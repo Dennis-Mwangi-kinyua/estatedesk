@@ -3,9 +3,9 @@ import "server-only";
 import type { OrgRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { AppSession } from "@/lib/auth/session";
-import { buildPersonalUnreadNotificationWhere } from "@/lib/notifications/unread-count-query";
+import { buildPersonalUnreadNotificationWhere } from "./unread-count-query";
 
-export { buildPersonalUnreadNotificationWhere } from "@/lib/notifications/unread-count-query";
+export { buildPersonalUnreadNotificationWhere } from "./unread-count-query";
 
 export async function getPersonalUnreadNotificationCount(input: {
   orgId: string;

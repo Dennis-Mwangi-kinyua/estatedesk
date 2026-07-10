@@ -1,6 +1,6 @@
 import "server-only";
 
-import { buildAccountCredentialsMessage } from "@/lib/notifications/account-credentials-message";
+import { buildAccountCredentialsMessage } from "./account-credentials-message";
 import {
   sendMetaWhatsappTemplate,
   sendMetaWhatsappText,

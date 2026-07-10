@@ -25,7 +25,7 @@ export function ReadStats({
       <StatCard
         label="Assigned units"
         value={data.totalUnits}
-        note="Occupied apartments in your scope"
+        note="Occupied units in your assignment"
         icon={Droplets}
       />
     </section>

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { fiscalYearRange } from "../../src/lib/accounting/year-end-close-policy";
+import { fiscalYearRange } from "../../apps/web/src/lib/accounting/year-end-close-policy";
 
 describe("year-end close policy", () => {
   it("builds fiscal year ranges from start month", () => {

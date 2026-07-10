@@ -1,6 +1,7 @@
 import type { GuideArticle } from "@/lib/guides/types";
+import { workspacePrivateGuides } from "@/lib/guides/workspace-private";
 
-export const guideArticles = [
+const coreGuideArticles = [
   {
     slug: "rent-tracking-workflow",
     category: "Billing",
@@ -769,6 +770,7 @@ export const guideArticles = [
   {
     slug: "platform-website-control",
     category: "Platform",
+    privatePlatform: true,
     title: "Website control center for platform operators",
     summary:
       "How super admins use kill switches, incident banners, nuclear session tools, and timed org support sessions without breaking audit trails.",
@@ -843,6 +845,7 @@ export const guideArticles = [
   {
     slug: "platform-admin-operations",
     category: "Platform",
+    privatePlatform: true,
     title: "Platform administration operations guide",
     summary:
       "Day-to-day administration of organizations, onboarding, billing views, messaging, and support access inside the EstateDesk platform shell.",
@@ -901,6 +904,11 @@ export const guideArticles = [
         answer: "No. Only an existing super admin can create another super admin.",
       },
     ],
-  }
+  },
+] as const satisfies readonly GuideArticle[];
 
-] satisfies readonly GuideArticle[];
+/** Public SEO guides + platform-private + role workspace-private help. */
+export const guideArticles = [
+  ...coreGuideArticles,
+  ...workspacePrivateGuides,
+] as GuideArticle[];

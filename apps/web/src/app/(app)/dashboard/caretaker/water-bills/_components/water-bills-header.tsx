@@ -38,7 +38,7 @@ export function WaterBillsHeader({
 
             <div className="mt-4">
               <StatusBadge
-                label={`${pendingCount} apartment${pendingCount === 1 ? "" : "s"} still need submission`}
+                label={`${pendingCount} unit${pendingCount === 1 ? "" : "s"} still need submission`}
                 tone="red"
                 pulse={pendingCount > 0}
               />

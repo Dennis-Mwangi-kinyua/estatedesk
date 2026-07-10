@@ -6,7 +6,7 @@ import {
   isPdfLeaseAsset,
   sanitizeDownloadFilename,
   tenantLeaseDownloadPath,
-} from "../../src/app/(app)/dashboard/tenant/lease/_lib/download";
+} from "../../apps/web/src/app/(app)/dashboard/tenant/lease/_lib/download";
 
 describe("tenant lease download helpers", () => {
   it("builds download and inline view paths", () => {

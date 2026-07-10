@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Lock, Shield } from "lucide-react";
 import type { HelpWorkspace } from "@/lib/help/help-workspace";
 import {
   getHelpWorkspaceLabel,
@@ -7,11 +7,24 @@ import {
 } from "@/lib/help/help-workspace";
 import {
   getInAppGuideTopic,
-  listGuideTopicsForWorkspace,
+  listUniqueGuideTopicsForWorkspace,
+  resolveGuideSlugForWorkspace,
   type InAppGuideTopic,
 } from "@/lib/help/in-app-guides";
 import { getGuideBySlug } from "@/lib/guides";
 import type { OrgRole } from "@prisma/client";
+
+const workspaceIntro: Record<HelpWorkspace, string> = {
+  org: "Guides for property office staff: portfolio, payments, water approvals, tenants, and roles. They do not include platform engineering secrets or other companies' data.",
+  tenant:
+    "Guides for your tenancy only: bills, payments, maintenance, and lease info. You will not see staff tools or other tenants' information.",
+  caretaker:
+    "Guides for field work on units assigned to you: readings, issues, and inspections. Billing approval and org settings stay with the office.",
+  landlord:
+    "Guides for owner-facing portfolio review. Day-to-day office billing controls remain with your property team.",
+  platform:
+    "Guides for EstateDesk platform operators (administration and support). Deep engineering system docs live under Developer → System Docs.",
+};
 
 export function InAppGuideHub({
   workspace,
@@ -20,7 +33,7 @@ export function InAppGuideHub({
   workspace: HelpWorkspace;
   orgRole?: OrgRole | null;
 }) {
-  const topics = listGuideTopicsForWorkspace(workspace, orgRole);
+  const topics = listUniqueGuideTopicsForWorkspace(workspace, orgRole);
 
   const isOrg = workspace === "org";
   const pageClassName = isOrg
@@ -33,16 +46,26 @@ export function InAppGuideHub({
   return (
     <div className={pageClassName}>
       <section className={cardClassName}>
-        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-          <BookOpen className="h-3.5 w-3.5" />
-          Workspace help
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <BookOpen className="h-3.5 w-3.5" />
+            Workspace help
+          </div>
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+            <Lock className="h-3 w-3" />
+            Private to your role
+          </div>
         </div>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Help for your role
+          Help for {getHelpWorkspaceLabel(workspace).toLowerCase()}
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-          These guides are scoped to the {getHelpWorkspaceLabel(workspace).toLowerCase()}.
-          They explain workflows you can access in this protected dashboard.
+          {workspaceIntro[workspace]}
+        </p>
+        <p className="mt-3 inline-flex items-start gap-2 text-xs leading-5 text-muted-foreground">
+          <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          Not published on the public website, sitemaps, or search. Other roles cannot open
+          these URLs from their own help hub.
         </p>
       </section>
 
@@ -63,13 +86,14 @@ function GuideHubCard({
   workspace: HelpWorkspace;
 }) {
   const mapping = getInAppGuideTopic(topic);
-  const guide = getGuideBySlug(mapping.slug);
+  const slug = resolveGuideSlugForWorkspace(topic, workspace);
+  const guide = getGuideBySlug(slug);
 
   if (!guide) return null;
 
   return (
     <Link
-      href={getInAppHelpArticlePath(workspace, mapping.slug)}
+      href={getInAppHelpArticlePath(workspace, slug)}
       className={
         workspace === "org"
           ? "overflow-hidden rounded-3xl border border-border bg-card p-5 text-card-foreground shadow-sm transition hover:bg-muted/20"
@@ -85,6 +109,7 @@ function GuideHubCard({
       <p className="mt-2 text-sm leading-6 text-muted-foreground">{guide.summary}</p>
       <p className="mt-4 text-xs font-medium text-muted-foreground">
         {guide.readingMinutes} min read
+        {guide.privateInApp || guide.privatePlatform ? " · private" : ""}
       </p>
     </Link>
   );

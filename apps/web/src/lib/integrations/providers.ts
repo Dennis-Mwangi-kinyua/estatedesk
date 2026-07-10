@@ -38,6 +38,31 @@ export const integrationProviders = [
     nextAction: "Activate Daraja app credentials and replace STK stub with live adapter.",
   },
   {
+    id: "ke-kcb-buni-ipn",
+    name: "KCB Buni Instant Payment Notification",
+    category: "payments",
+    region: "KE",
+    phase: 1,
+    approvalRequired: true,
+    env: [
+      { key: "KCB_BUNI_ENVIRONMENT", label: "Environment (uat|production)", requiredForLive: true },
+      {
+        key: "KCB_BUNI_IPN_SIGNATURE_SECRET",
+        label: "IPN signature secret",
+        requiredForLive: true,
+      },
+      {
+        key: "KCB_BUNI_IPN_CALLBACK_URL",
+        label: "Public callback URL registered with KCB",
+        requiredForLive: true,
+      },
+    ],
+    localFoundation:
+      "Org KCB paybill/account methods, pending BANK payments, webhook matching, org verification + receipts.",
+    nextAction:
+      "Register HTTPS callback with buni@kcbgroup.com and set KCB_BUNI_IPN_SIGNATURE_SECRET from Buni docs.",
+  },
+  {
     id: "ae-aani",
     name: "UAE Aani/instant payments",
     category: "payments",

@@ -15,6 +15,8 @@ function incomeSystemKey(targetType: PaymentTargetType) {
     case "DEPOSIT":
       return "TENANT_DEPOSITS";
     case "RENT":
+    case "COMBINED":
+      // Combined period bills are primarily rent-led; water portion still reduces water balance.
       return "RENT_INCOME";
     case "WATER":
       return "WATER_INCOME";

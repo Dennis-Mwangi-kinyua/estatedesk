@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { resolveVacancyUnitIdFromSlugIndex } from "../../src/lib/public-vacancy-slug-index";
-import { vacancyPublicSlug } from "../../src/lib/public-vacancy-slug";
+import { resolveVacancyUnitIdFromSlugIndex } from "../../apps/web/src/lib/public-vacancy-slug-index";
+import { vacancyPublicSlug } from "../../apps/web/src/lib/public-vacancy-slug";
 
 describe("public vacancy resolve", () => {
   it("resolves a unit id from the full slug index", () => {

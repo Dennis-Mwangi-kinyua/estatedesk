@@ -30,7 +30,7 @@ export function BillDetailHeader({
           <div className="max-w-3xl">
             <p className="text-sm text-muted-foreground">Tenant bill</p>
             <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              House {bill.unit.houseNo}
+              Unit {bill.unit.houseNo}
             </h1>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
               {bill.unit.property.name} ·{" "}

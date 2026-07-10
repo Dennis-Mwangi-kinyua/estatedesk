@@ -4,7 +4,7 @@ import {
   buildMonthlyPeriods,
   nextPeriodStatus,
   periodMonthLabel,
-} from "../../src/lib/accounting/period-policy";
+} from "../../apps/web/src/lib/accounting/period-policy";
 
 describe("accounting periods helpers", () => {
   it("labels period months", () => {

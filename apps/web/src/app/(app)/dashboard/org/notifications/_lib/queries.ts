@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { requireUserSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { collapseNotificationFeedRows } from "@/app/(app)/dashboard/org/notifications/_lib/helpers";
 import {
   ALLOWED_ROLES,
   type ApprovalQueueItem,
@@ -157,44 +158,15 @@ export async function loadNotificationsPageData(
     where: approvalQueueWhere,
   });
 
+  const { orgMeterReadingDetailSelect } = await import(
+    "@/app/(app)/dashboard/org/water-bills/_lib/reading-select"
+  );
+
   const approvalQueue = await prisma.meterReading.findMany({
     where: approvalQueueWhere,
     orderBy: { createdAt: "asc" },
     take: 8,
-    select: {
-      id: true,
-      period: true,
-      prevReading: true,
-      currentReading: true,
-      unitsUsed: true,
-      createdAt: true,
-      submittedBy: {
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-        },
-      },
-      photoAsset: {
-        select: {
-          key: true,
-          fileName: true,
-        },
-      },
-      unit: {
-        select: {
-          id: true,
-          houseNo: true,
-          property: {
-            select: {
-              name: true,
-              waterRatePerUnit: true,
-              waterFixedCharge: true,
-            },
-          },
-        },
-      },
-    },
+    select: orgMeterReadingDetailSelect,
   });
 
   const moveOutQueue = await prisma.moveOutNotice.findMany({
@@ -281,10 +253,12 @@ export async function loadNotificationsPageData(
     },
   });
 
-  const notifications = await prisma.notification.findMany({
+  // Fetch a wider raw window — each send fans out into multiple channel rows
+  // (IN_APP + SMS + EMAIL + …). We collapse those into one feed event below.
+  const rawNotifications = await prisma.notification.findMany({
     where: getNotificationWhereForFilter(filter, membership),
     orderBy: { createdAt: "desc" },
-    take: 18,
+    take: 80,
     select: {
       id: true,
       title: true,
@@ -314,6 +288,8 @@ export async function loadNotificationsPageData(
       },
     },
   });
+
+  const notifications = collapseNotificationFeedRows(rawNotifications, 18);
 
   const recentPayments = await prisma.payment.findMany({
     where: {

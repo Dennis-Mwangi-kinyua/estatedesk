@@ -33,6 +33,7 @@ export const dynamic = "force-dynamic";
 
 const toolIcons: Record<string, LucideIcon> = {
   "/platform/developer": Code2,
+  "/platform/developer/docs": BookOpen,
   "/platform/control": Settings,
   "/platform/system-health": Activity,
   "/platform/api-explorer": Webhook,
@@ -117,6 +118,13 @@ export default async function DeveloperPortalPage({
         description="Full engineering control of the EstateDesk website: kill switches, APIs, jobs, flags, data, and super-admin nuclear ops. Switch back to Administration with the mode toggle or Alt+Shift+A."
         action={
           <div className="flex flex-wrap gap-2">
+            <Link
+              href="/platform/developer/docs"
+              className="inline-flex items-center gap-2 rounded-xl border border-violet-300 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-900 transition hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-100 dark:hover:bg-violet-500/25"
+            >
+              <BookOpen className="h-4 w-4" />
+              System docs
+            </Link>
             {isSuperAdmin ? (
               <Link
                 href="/platform/control"
@@ -301,6 +309,7 @@ export default async function DeveloperPortalPage({
                 ["Admin dashboard, orgs, users, billing, onboarding", "Yes", "Yes"],
                 ["Support Access (timed org entry)", "Yes", "Yes"],
                 ["Developer home, health, API explorer, flags, rate limits", "Yes", "Yes"],
+                ["System Docs (private deep documentation)", "Yes", "Yes"],
                 ["Website Control (kill switches, nuclear ops)", "No", "Yes"],
                 ["API keys vault", "No", "Yes"],
                 ["Jobs & queues", "No", "Yes"],

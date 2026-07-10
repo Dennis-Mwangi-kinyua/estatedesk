@@ -5,7 +5,7 @@ import {
   canCreateOrgIssue,
   resolveIssueCreatePath,
   resolveShareTargetPath,
-} from "../../src/lib/issues/share-routing";
+} from "../../apps/web/src/lib/issues/share-routing";
 
 describe("share routing", () => {
   it("builds shared draft query params for issue forms", () => {

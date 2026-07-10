@@ -110,7 +110,7 @@ export function IssueDetailSections({
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-3">
                       <Link
-                        href={getCaretakerTenantHref(activeTenant.id)}
+                        href={getCaretakerTenantHref(activeTenant)}
                         className="text-sm font-semibold text-primary transition hover:text-primary/80"
                       >
                         View tenant record

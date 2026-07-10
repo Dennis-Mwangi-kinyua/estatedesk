@@ -77,7 +77,7 @@ export function MeterReadingCard({
         </div>
 
         <StatusBadge
-          label={`House ${houseNo}`}
+          label={`Unit ${houseNo}`}
           tone={
             status === "NOT_SUBMITTED"
               ? "red"
@@ -168,7 +168,7 @@ export function IssuedBillCard({
           </p>
         </div>
 
-        <StatusBadge label={`House ${houseNo}`} tone="violet" />
+        <StatusBadge label={`Unit ${houseNo}`} tone="violet" />
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3">

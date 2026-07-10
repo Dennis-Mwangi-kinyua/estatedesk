@@ -13,14 +13,14 @@
     "qa:tenant-portal": "tsx ../../scripts/tenant-portal-visual-qa.ts"
   },
   "dependencies": {
-    "@estatedesk/auth-sdk": "*",
-    "@estatedesk/config": "*",
-    "@estatedesk/contracts": "*",
-    "@estatedesk/db-kit": "*",
-    "@estatedesk/events": "*",
-    "@estatedesk/notifications": "*",
-    "@estatedesk/public-vacancy": "*",
-    "@estatedesk/service-client": "*",
+    "@estatedesk/auth-sdk": "file:../../packages/auth-sdk",
+    "@estatedesk/config": "file:../../packages/config",
+    "@estatedesk/contracts": "file:../../packages/contracts",
+    "@estatedesk/db-kit": "file:../../packages/db-kit",
+    "@estatedesk/events": "file:../../packages/events",
+    "@estatedesk/notifications": "file:../../services/notifications",
+    "@estatedesk/public-vacancy": "file:../../services/public-vacancy",
+    "@estatedesk/service-client": "file:../../packages/service-client",
     "next": "^16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4"

@@ -4,7 +4,7 @@ import { TicketPriority, TicketStatus } from "@prisma/client";
 import {
   buildHandoverPrefill,
   buildHandoverPrefillByLocale,
-} from "../../src/app/(app)/dashboard/caretaker/handover/_lib/handover-prefill";
+} from "../../apps/web/src/app/(app)/dashboard/caretaker/handover/_lib/handover-prefill";
 
 const sampleIssues = [
   {

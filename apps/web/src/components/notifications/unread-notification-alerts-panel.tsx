@@ -3,10 +3,7 @@ import {
   getUnreadNotificationAlert,
   type NotificationAlertAudience,
 } from "@/lib/notifications/unread-alert";
-import {
-  UnreadNotificationBanner,
-  UnreadNotificationPopup,
-} from "@/components/notifications/unread-notification-alerts";
+import { UnreadNotificationAlerts } from "@/components/notifications/unread-notification-alerts";
 
 type UnreadNotificationAlertsPanelProps = {
   audience: NotificationAlertAudience;
@@ -28,7 +25,10 @@ export async function UnreadNotificationAlertsPanel({
   tenantId,
 }: UnreadNotificationAlertsPanelProps) {
   const headerStore = await headers();
-  const pathname = (headerStore.get("x-estatedesk-pathname") ?? "").replace(/\/+$/, "");
+  const pathname = (headerStore.get("x-estatedesk-pathname") ?? "").replace(
+    /\/+$/,
+    "",
+  );
 
   if (NOTIFICATIONS_PATHS.has(pathname)) {
     return null;
@@ -47,10 +47,5 @@ export async function UnreadNotificationAlertsPanel({
 
   const scope = [audience, orgId, userId ?? "", tenantId ?? ""].join(":");
 
-  return (
-    <>
-      <UnreadNotificationPopup scope={scope} alert={alert} />
-      <UnreadNotificationBanner alert={alert} />
-    </>
-  );
+  return <UnreadNotificationAlerts scope={scope} alert={alert} />;
 }

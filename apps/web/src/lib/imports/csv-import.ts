@@ -231,12 +231,16 @@ export async function importCsv({
     }
 
     if (kind === "tenants") {
+      const { allocateTenantSlug } = await import("@/lib/tenants/slug");
       for (const row of rows) {
+        const fullName = required(row, "fullName");
+        const tenantSlug = await allocateTenantSlug(tx, orgId, fullName);
         const tenant = await tx.tenant.create({
           data: {
             orgId,
             type: row.companyName ? TenantType.COMPANY : TenantType.INDIVIDUAL,
-            fullName: required(row, "fullName"),
+            fullName,
+            slug: tenantSlug,
             companyName: row.companyName || null,
             phone: required(row, "phone"),
             email: row.email || null,

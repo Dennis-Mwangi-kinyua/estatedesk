@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache";
 import { APP_URL, buildUrlEntry, wrapUrlset } from "@/lib/sitemap-utils";
 import { PUBLIC_VACANCY_LIST_PAGE_SIZE } from "@/lib/vacancy-pagination";
 import { buildVacancyPageHref } from "@/lib/vacancy-pagination";
-import { getVacancyListingsCountCached } from "@/lib/public-vacancy-listings";
+import { getVacancyListingsCountCached } from "./listings";
 
 async function buildVacancyListPagesXml() {
   const total = await getVacancyListingsCountCached();

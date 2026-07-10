@@ -24,7 +24,7 @@ export function WaterBillsPendingSection({
     <section className={panelShellClassName}>
       <SectionIntro
         eyebrow="Needs submission"
-        title="Apartments pending readings"
+        title="Units pending readings"
         action={
           <span className="rounded-full border border-border bg-muted/20 px-3 py-1 text-xs font-medium text-muted-foreground">
             {data.pendingUnits.length} pending
@@ -37,7 +37,7 @@ export function WaterBillsPendingSection({
           <ErrorStateCard message={data.errorMessage} />
         ) : data.pendingUnits.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-muted/10 p-6 text-sm text-muted-foreground">
-            All occupied apartments have readings submitted for {CURRENT_PERIOD}.
+            All occupied units in your assignment have readings for {CURRENT_PERIOD}.
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">

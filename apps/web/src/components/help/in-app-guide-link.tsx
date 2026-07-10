@@ -4,6 +4,7 @@ import { BookOpen } from "lucide-react";
 import {
   canAccessGuideTopic,
   getInAppGuideTopic,
+  resolveGuideSlugForWorkspace,
   type InAppGuideTopic,
 } from "@/lib/help/in-app-guides";
 import {
@@ -31,7 +32,8 @@ export function InAppGuideLink({
   }
 
   const guide = getInAppGuideTopic(topic);
-  const href = getInAppHelpArticlePath(workspace, guide.slug);
+  const slug = resolveGuideSlugForWorkspace(topic, workspace);
+  const href = getInAppHelpArticlePath(workspace, slug);
 
   if (variant === "card") {
     return (

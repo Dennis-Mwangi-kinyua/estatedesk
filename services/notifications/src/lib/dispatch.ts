@@ -4,7 +4,7 @@ import { NotificationChannel, NotificationStatus } from "@prisma/client";
 import { safeClientMessage } from "@/lib/errors/client-safe-error";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
-import { resolvePushActionUrl } from "@/lib/notifications/push-action-url";
+import { resolvePushActionUrl } from "./push-action-url";
 import { sendWebPushNotification } from "@/lib/push/web-push";
 import { sendMetaWhatsappText } from "@/lib/whatsapp/meta";
 

@@ -5,11 +5,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { PrismaClient, OrgRole } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { normalizeDatabaseUrlSslMode } from "../src/lib/config/env";
+import { normalizeDatabaseUrlSslMode } from "../apps/web/src/lib/config/env";
 import {
   createSessionCookieValue,
   getSessionCookieName,
-} from "../src/lib/auth/cookies";
+} from "../apps/web/src/lib/auth/cookies";
 
 function hashSessionToken(token: string) {
   const secret =

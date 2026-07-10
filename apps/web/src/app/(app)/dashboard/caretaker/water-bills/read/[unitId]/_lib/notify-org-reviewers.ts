@@ -35,6 +35,6 @@ export async function notifyOrgReviewers({
     recipients: reviewers.map(({ userId }) => ({ userId })),
     type: "GENERAL",
     title: "Meter reading submitted",
-    message: `House ${houseNo} at ${propertyName} has a ${period} water reading waiting for verification approval.`,
+    message: `Unit ${houseNo} at ${propertyName} has a ${period} water reading waiting for verification approval.`,
   });
 }

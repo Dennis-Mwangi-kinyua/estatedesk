@@ -8,9 +8,9 @@ import {
   getSiteUrl,
   noIndexPageMetadata,
   publicPageMetadata,
-} from "../../src/lib/seo";
-import { marketCoverageItems } from "../../src/lib/seo-index";
-import { publicSiteIndexItems } from "../../src/lib/public-site-index";
+} from "../../apps/web/src/lib/seo";
+import { marketCoverageItems } from "../../apps/web/src/lib/seo-index";
+import { publicSiteIndexItems } from "../../apps/web/src/lib/public-site-index";
 
 function assertRobotsObject(
   value: ReturnType<typeof publicPageMetadata>["robots"],

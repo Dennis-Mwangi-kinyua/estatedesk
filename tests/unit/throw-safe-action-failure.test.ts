@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { Prisma } from "@prisma/client";
-import { ClientSafeError } from "../../src/lib/errors/client-safe-error";
-import { throwSafeActionFailure } from "../../src/lib/errors/throw-safe-action-failure";
+import { ClientSafeError } from "../../apps/web/src/lib/errors/client-safe-error";
+import { throwSafeActionFailure } from "../../apps/web/src/lib/errors/throw-safe-action-failure";
 
 describe("throwSafeActionFailure", () => {
   it("rethrows client-safe validation errors", () => {

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { cookies } from "next/headers";
 import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
 import { WebVitalsReporter } from "@/components/monitoring/web-vitals-reporter";
@@ -8,15 +7,16 @@ import { PwaAppBadgeSync } from "@/components/pwa/pwa-app-badge-sync";
 import { PwaInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { ServiceWorkerUpdatePrompt } from "@/components/pwa/service-worker-update-prompt";
+import { InlineScript } from "@/components/layout/inline-script";
 import { SkipToMain } from "@/components/layout/skip-to-main";
 import { IncidentBanner } from "@/components/marketing/incident-banner";
-import { ThemeInitScript } from "@/components/theme/theme-init-script";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { APP_PLANS } from "@/lib/billing/plans";
 import { SEO_KEYWORDS, SITE_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/seo";
 import {
   THEME_COOKIE_NAME,
+  THEME_INIT_SCRIPT,
   getServerResolvedTheme,
 } from "@/lib/theme/preference";
 import "./globals.css";
@@ -70,10 +70,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/icons/icon-144.png", sizes: "144x144", type: "image/png" },
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
+    shortcut: ["/favicon.ico"],
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   robots: {
@@ -228,12 +230,11 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <ThemeInitScript />
-        <Script
+        <InlineScript id="estatedesk-theme-init" html={THEME_INIT_SCRIPT} />
+        <InlineScript
           id="estatedesk-structured-data"
-          type="application/ld+json"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          scriptType="application/ld+json"
+          html={JSON.stringify(structuredData)}
         />
       </head>
       <body className="ed-mobile-first min-h-dvh bg-background antialiased">

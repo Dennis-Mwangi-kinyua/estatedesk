@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   aggregateOwnerStatementRows,
   ownerStatementTotals,
-} from "../../src/lib/accounting/owner-statement-policy";
+} from "../../apps/web/src/lib/accounting/owner-statement-policy";
 
 describe("owner statement policy", () => {
   it("aggregates income, expenses, and distributions by property", () => {

@@ -5,7 +5,7 @@ import {
   readNotificationActionUrl,
   resolveNotificationActionUrl,
   resolveNotificationAudience,
-} from "../../src/lib/push/notification-links";
+} from "../../apps/web/src/lib/push/notification-links";
 
 describe("notification deep links", () => {
   it("maps tenant notifications to tenant dashboard routes", () => {

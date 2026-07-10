@@ -30,7 +30,7 @@ export const READ_GUIDANCE = [
   {
     title: "Use quick entry in the field",
     description:
-      "Quick meter entry lets you submit one house and jump to the next pending unit.",
+      "Quick meter entry lets you submit one unit and jump to the next pending unit.",
   },
   {
     title: "Wait for office approval",

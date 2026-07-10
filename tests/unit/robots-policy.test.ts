@@ -6,7 +6,7 @@ import { join } from "node:path";
 const ROOT = join(import.meta.dirname, "..", "..");
 
 function readRobotsSource() {
-  return readFileSync(join(ROOT, "src/app/robots.ts"), "utf8");
+  return readFileSync(join(ROOT, "apps/web/src/app/robots.ts"), "utf8");
 }
 
 describe("robots crawl policy", () => {

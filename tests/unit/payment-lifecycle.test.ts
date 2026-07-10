@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { chargeAfterPaymentReversal } from "../../src/lib/payments/lifecycle";
-import { buildMpesaTransactionKey } from "../../src/lib/payments/transaction-reference";
+import { chargeAfterPaymentReversal } from "../../apps/web/src/lib/payments/lifecycle";
+import { buildMpesaTransactionKey } from "../../apps/web/src/lib/payments/transaction-reference";
 
 test("payment lifecycle preserves uniqueness and unwinds a full allocation", () => {
   const key = buildMpesaTransactionKey("qab12cd34e");

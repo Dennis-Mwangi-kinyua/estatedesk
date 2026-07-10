@@ -41,3 +41,11 @@ export function hashDocumentContent(content: Uint8Array) {
 export function documentVerificationPath(verificationCode: string) {
   return `/verify-document/${encodeURIComponent(verificationCode)}`;
 }
+
+export function verifiedDocumentDownloadPath(
+  verificationCode: string,
+  options?: { view?: boolean },
+) {
+  const path = `/verify-document/${encodeURIComponent(verificationCode)}/download`;
+  return options?.view ? `${path}?view=1` : path;
+}

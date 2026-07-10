@@ -11,9 +11,16 @@ import { requireUserSession } from "@/lib/auth/session";
 import { createInvitation } from "@/lib/invitations/create-invitation";
 import { writeAuditLog } from "@/lib/audit/security";
 import {
+  emptyBankAccountDetails,
+  type OrgBankAccountDetails,
   type PaymentInstructions,
   mergePaymentInstructions,
 } from "@/lib/payments/instructions";
+import {
+  isBankCatalogMethod,
+  isKnownPaymentMethodId,
+  PAYMENT_METHOD_CATALOG,
+} from "@/lib/payments/methods-catalog";
 
 const SETTINGS_PATH = "/dashboard/org/settings";
 
@@ -143,19 +150,94 @@ export async function updatePaymentInstructionsAction(formData: FormData) {
     },
   });
 
+  const enabledMethods = formData
+    .getAll("enabledMethods")
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .filter((value) => isKnownPaymentMethodId(value) || value === "kcb-transfer");
+
+  const uniqueEnabled = [...new Set(enabledMethods)];
+  const mpesaEnabled = uniqueEnabled.includes("mpesa");
+  const kcbPaybillEnabled = uniqueEnabled.includes("kcb");
+
+  const bankAccounts: Record<string, OrgBankAccountDetails> = {};
+  for (const method of PAYMENT_METHOD_CATALOG) {
+    if (!isBankCatalogMethod(method.id) && method.id !== "kcb") continue;
+    if (method.id === "kcb") continue; // structured kcb paybill fields below
+    if (!uniqueEnabled.includes(method.id)) continue;
+
+    const account: OrgBankAccountDetails = {
+      businessName: readString(formData, `bank_${method.id}_businessName`),
+      accountName: readString(formData, `bank_${method.id}_accountName`),
+      accountNumber: readString(formData, `bank_${method.id}_accountNumber`),
+      branch: readString(formData, `bank_${method.id}_branch`),
+      instructions: readString(formData, `bank_${method.id}_instructions`),
+    };
+
+    if (!account.accountName || !account.accountNumber) {
+      throw new Error(
+        `Enter account name and account number for ${method.name} before enabling it.`,
+      );
+    }
+
+    bankAccounts[method.id] = account;
+  }
+
+  // Preserve any non-catalog accounts still enabled (legacy kcb-transfer)
+  for (const methodId of uniqueEnabled) {
+    if (bankAccounts[methodId] || methodId === "mpesa" || methodId === "kcb" || methodId === "airtel-money") {
+      continue;
+    }
+    if (!methodId.startsWith("bank_") && methodId !== "kcb-transfer" && methodId !== "bank-other") {
+      continue;
+    }
+    bankAccounts[methodId] = {
+      ...emptyBankAccountDetails,
+      businessName: readString(formData, `bank_${methodId}_businessName`),
+      accountName: readString(formData, `bank_${methodId}_accountName`),
+      accountNumber: readString(formData, `bank_${methodId}_accountNumber`),
+      branch: readString(formData, `bank_${methodId}_branch`),
+      instructions: readString(formData, `bank_${methodId}_instructions`),
+    };
+  }
+
+  const airtelBusinessName = readString(formData, "airtelBusinessName");
+  const airtelNumber = readString(formData, "airtelNumber");
+  const airtelInstructions = readString(formData, "airtelInstructions");
+
+  const methodNotes: Record<string, string> = {};
+  if (uniqueEnabled.includes("airtel-money")) {
+    methodNotes["airtel-money"] = airtelInstructions;
+    methodNotes["airtel-money.number"] = airtelNumber;
+    methodNotes["airtel-money.name"] = airtelBusinessName;
+  }
+
   const paymentInstructions: PaymentInstructions = {
-    mpesaEnabled: readBoolean(formData, "mpesaEnabled"),
+    enabledMethods: uniqueEnabled,
+    mpesaEnabled,
     mpesaBusinessName: readString(formData, "mpesaBusinessName"),
     mpesaPaybill: readString(formData, "mpesaPaybill"),
     mpesaTillNumber: readString(formData, "mpesaTillNumber"),
     mpesaAccountNumber: readString(formData, "mpesaAccountNumber"),
     mpesaInstructions: readString(formData, "mpesaInstructions"),
-    bankEnabled: readBoolean(formData, "bankEnabled"),
-    bankName: readString(formData, "bankName"),
-    bankAccountName: readString(formData, "bankAccountName"),
-    bankAccountNumber: readString(formData, "bankAccountNumber"),
-    bankBranch: readString(formData, "bankBranch"),
-    bankInstructions: readString(formData, "bankInstructions"),
+    kcbPaybillEnabled,
+    kcbBusinessName: readString(formData, "kcbBusinessName"),
+    kcbPaybill: readString(formData, "kcbPaybill"),
+    kcbAccountNumber: readString(formData, "kcbAccountNumber"),
+    kcbAccountName: readString(formData, "kcbAccountName"),
+    kcbInstructions: readString(formData, "kcbInstructions"),
+    bankAccounts,
+    // Legacy single-bank fields kept in sync with first enabled bank for older readers
+    bankEnabled: Object.keys(bankAccounts).length > 0,
+    bankName: Object.values(bankAccounts)[0]?.businessName ?? "",
+    bankAccountName: Object.values(bankAccounts)[0]?.accountName ?? "",
+    bankAccountNumber: Object.values(bankAccounts)[0]?.accountNumber ?? "",
+    bankBranch: Object.values(bankAccounts)[0]?.branch ?? "",
+    bankInstructions: Object.values(bankAccounts)[0]?.instructions ?? "",
+    methodNotes,
+    airtelBusinessName,
+    airtelNumber,
+    airtelInstructions,
   };
 
   if (
@@ -167,13 +249,17 @@ export async function updatePaymentInstructionsAction(formData: FormData) {
   }
 
   if (
-    paymentInstructions.bankEnabled &&
-    (!paymentInstructions.bankName ||
-      !paymentInstructions.bankAccountName ||
-      !paymentInstructions.bankAccountNumber)
+    paymentInstructions.kcbPaybillEnabled &&
+    (!paymentInstructions.kcbPaybill || !paymentInstructions.kcbAccountNumber)
   ) {
     throw new Error(
-      "Bank name, account name, and account number are required before enabling bank payments.",
+      "Enter the KCB paybill number and account number before enabling KCB paybill.",
+    );
+  }
+
+  if (uniqueEnabled.includes("airtel-money") && !paymentInstructions.airtelNumber) {
+    throw new Error(
+      "Enter the Airtel Money business / till number before enabling Airtel Money.",
     );
   }
 
@@ -193,6 +279,7 @@ export async function updatePaymentInstructionsAction(formData: FormData) {
 
   revalidatePath(SETTINGS_PATH);
   revalidatePath("/dashboard/tenant/payments");
+  revalidatePath("/dashboard/tenant/payments/new");
   revalidatePath("/dashboard/tenant/payments/checkout");
 }
 

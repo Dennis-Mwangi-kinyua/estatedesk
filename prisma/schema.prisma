@@ -819,6 +819,8 @@ model Tenant {
   userId           String?                 @unique
   type             TenantType              @default(INDIVIDUAL)
   fullName         String
+  /// URL-safe public identifier (org-scoped), e.g. jane-doe or jane-doe-3
+  slug             String?
   companyName      String?
   kraPin           String?
   phone            String
@@ -856,9 +858,11 @@ model Tenant {
 
   @@unique([orgId, phone])
   @@unique([orgId, email])
+  @@unique([orgId, slug])
   @@index([orgId])
   @@index([status])
   @@index([fullName])
+  @@index([slug])
   @@index([nationalId])
   @@index([archivedAt])
   @@index([blacklistedAt])
@@ -1376,6 +1380,10 @@ model WaterBill {
   ratePerUnit Decimal      @db.Decimal(10, 2)
   fixedCharge Decimal      @default(0) @db.Decimal(10, 2)
   total       Decimal      @db.Decimal(12, 2)
+  /// Running verified amount applied (supports partial payments on combined bills).
+  amountPaid  Decimal      @default(0) @db.Decimal(12, 2)
+  /// Remaining amount due after verified payments.
+  balance     Decimal      @default(0) @db.Decimal(12, 2)
   dueDate     DateTime
   status      BillStatus   @default(ISSUED)
   notes       String?
@@ -2489,6 +2497,8 @@ enum PaymentTargetType {
   DEPOSIT
   TAX
   OTHER
+  /// Single payment covering rent + water (and optional other lines) for a period.
+  COMBINED
 }
 
 enum GatewayStatus {

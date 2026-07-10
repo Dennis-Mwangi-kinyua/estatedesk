@@ -4,7 +4,7 @@ import {
   hasOrgRole,
   hasPlatformRole,
   tenantPathRequiresActiveLease,
-} from "../../src/lib/permissions/access";
+} from "../../apps/web/src/lib/permissions/access";
 
 describe("permission access helpers", () => {
   it("checks platform role allowlists", () => {

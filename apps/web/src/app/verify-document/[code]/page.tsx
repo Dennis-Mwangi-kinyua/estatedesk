@@ -1,9 +1,23 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { BadgeCheck, Ban, Building2, CalendarDays, FileCheck2, Fingerprint } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import {
+  BadgeCheck,
+  Ban,
+  Building2,
+  CalendarDays,
+  FileCheck2,
+  Hash,
+} from "lucide-react";
+import { InvoiceDocumentDisplay } from "@/components/documents/invoice-document-display";
+import { verifiedDocumentDownloadPath } from "@/lib/documents/identity";
 import { readLeaseSnapshot } from "@/lib/documents/lease-snapshot";
 import { readReceiptSnapshot } from "@/lib/documents/receipt-snapshot";
+import { createDocumentVerificationQrDataUrl } from "@/lib/documents/verification-qr";
+import {
+  isVerifiedDocumentAccessible,
+  loadVerifiedPeriodInvoiceByCode,
+} from "@/lib/documents/tenant-period-invoice";
+import { prisma } from "@/lib/prisma";
 import { publicPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +31,7 @@ export async function generateMetadata({
 
   return publicPageMetadata({
     title: "Verify Document",
-    description: "Verify the current status and origin of an EstateDesk document.",
+    description: "Verify and view an EstateDesk document.",
     path: `/verify-document/${code}`,
   });
 }
@@ -41,6 +55,49 @@ function formatDate(value: Date) {
   }).format(value);
 }
 
+function ValidityBanner({
+  valid,
+  statusLabel,
+  revocationReason,
+}: {
+  valid: boolean;
+  statusLabel: string;
+  revocationReason?: string | null;
+}) {
+  return (
+    <div
+      className={`rounded-2xl border px-4 py-4 sm:px-5 ${
+        valid
+          ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+          : "border-red-200 bg-red-50 text-red-900"
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+            valid ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
+          }`}
+        >
+          {valid ? <BadgeCheck className="h-5 w-5" /> : <Ban className="h-5 w-5" />}
+        </span>
+        <div>
+          <p className="text-sm font-semibold">
+            {valid ? "Verified EstateDesk invoice" : "This invoice is not currently valid"}
+          </p>
+          <p
+            className={`mt-1 text-sm ${valid ? "text-emerald-800" : "text-red-800"}`}
+          >
+            Registry status: {statusLabel}
+          </p>
+          {!valid && revocationReason ? (
+            <p className="mt-2 text-sm">Reason: {revocationReason}</p>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default async function VerifyDocumentPage({
   params,
 }: {
@@ -55,20 +112,74 @@ export default async function VerifyDocumentPage({
   if (!document) notFound();
 
   const expired = document.expiresAt ? document.expiresAt <= new Date() : false;
-  const valid =
-    !expired && ["ISSUED", "COMPLETED"].includes(document.status);
+  const valid = isVerifiedDocumentAccessible(document);
+  const statusLabel = expired ? "Expired" : formatLabel(document.status);
 
-  await prisma.documentEvent.create({
-    data: {
-      orgId: document.orgId,
-      documentId: document.id,
-      eventType: "VERIFIED",
-      metadata: { result: valid ? "VALID" : "NOT_VALID" },
-    },
-  });
+  try {
+    await prisma.documentEvent.create({
+      data: {
+        orgId: document.orgId,
+        documentId: document.id,
+        eventType: "VERIFIED",
+        metadata: { result: valid ? "VALID" : "NOT_VALID" },
+      },
+    });
+  } catch {
+    // Verification audit is best-effort — never block public document viewing.
+  }
+
+  if (document.documentType === "INVOICE" && document.entityType === "PeriodBill") {
+    const invoiceContext = await loadVerifiedPeriodInvoiceByCode(code);
+    const verificationQrDataUrl = invoiceContext
+      ? await createDocumentVerificationQrDataUrl(invoiceContext.pdfData.verificationUrl)
+      : null;
+
+    return (
+      <main className="ed-verify-document-page ed-invoice-viewer ed-mobile-first ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden px-3 py-4 sm:px-6 sm:py-10">
+        <div className="mx-auto w-full min-w-0 max-w-5xl space-y-4 sm:space-y-5">
+          <header className="space-y-2">
+            <p className="text-sm font-semibold text-slate-600">
+              EstateDesk document verification
+            </p>
+            <ValidityBanner
+              valid={valid}
+              statusLabel={statusLabel}
+              revocationReason={document.revocationReason}
+            />
+          </header>
+
+          {invoiceContext && verificationQrDataUrl && valid ? (
+            <InvoiceDocumentDisplay
+              data={invoiceContext.pdfData}
+              verificationQrDataUrl={verificationQrDataUrl}
+              downloadHref={verifiedDocumentDownloadPath(code)}
+              openPdfHref={verifiedDocumentDownloadPath(code, { view: true })}
+              verificationNote="This invoice was opened from a verified EstateDesk QR code. You can review the full bill below or download the PDF."
+            />
+          ) : (
+            <section className="ed-invoice-paper rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+              <h1 className="text-lg font-semibold text-slate-900">{document.title}</h1>
+              <p className="mt-2 text-sm text-slate-600">
+                Serial number: {document.serialNumber}
+              </p>
+              <p className="mt-1 text-sm text-slate-600">
+                Issued by {document.org.name} on {formatDate(document.issuedAt)}
+              </p>
+              {!invoiceContext ? (
+                <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  This invoice is registered with EstateDesk, but the live billing details are
+                  temporarily unavailable. Try again shortly or contact the issuing organisation.
+                </p>
+              ) : null}
+            </section>
+          )}
+        </div>
+      </main>
+    );
+  }
 
   const details = [
-    { label: "Serial number", value: document.serialNumber, icon: Fingerprint },
+    { label: "Serial number", value: document.serialNumber, icon: Hash },
     { label: "Document type", value: formatLabel(document.documentType), icon: FileCheck2 },
     { label: "Issued by", value: document.org.name, icon: Building2 },
     { label: "Issued at", value: formatDate(document.issuedAt), icon: CalendarDays },
@@ -139,7 +250,7 @@ export default async function VerifyDocumentPage({
     : [];
 
   return (
-    <main className="min-h-screen bg-neutral-50 px-4 py-10 text-neutral-950 sm:px-6 sm:py-16">
+    <main className="ed-verify-document-page min-h-screen bg-slate-100 px-4 py-10 text-slate-900 sm:px-6 sm:py-16">
       <div className="mx-auto max-w-2xl">
         <header className="border-b border-neutral-200 pb-6">
           <p className="text-sm font-semibold text-neutral-500">EstateDesk document verification</p>
@@ -152,7 +263,7 @@ export default async function VerifyDocumentPage({
                 {valid ? "Document is valid" : "Document is not currently valid"}
               </h1>
               <p className="mt-2 text-sm leading-6 text-neutral-600">
-                Current registry status: {expired ? "Expired" : formatLabel(document.status)}
+                Current registry status: {statusLabel}
               </p>
               {!valid && document.revocationReason ? (
                 <p className="mt-2 text-sm leading-6 text-red-700">
@@ -163,7 +274,7 @@ export default async function VerifyDocumentPage({
           </div>
         </header>
 
-        <section className="grid gap-px overflow-hidden rounded-lg border border-neutral-200 bg-neutral-200 sm:grid-cols-2 mt-6">
+        <section className="mt-6 grid gap-px overflow-hidden rounded-lg border border-neutral-200 bg-neutral-200 sm:grid-cols-2">
           {details.map((detail) => {
             const Icon = detail.icon;
             return (
@@ -222,16 +333,6 @@ export default async function VerifyDocumentPage({
         <section className="mt-6 border-t border-neutral-200 pt-5">
           <h2 className="text-base font-semibold">{document.title}</h2>
           <p className="mt-2 text-sm text-neutral-600">Version {document.version}</p>
-          {document.contentHash ? (
-            <div className="mt-4">
-              <p className="text-xs font-medium text-neutral-500">SHA-256 fingerprint</p>
-              <code className="mt-1 block break-all rounded-md bg-neutral-100 p-3 text-xs text-neutral-700">
-                {document.contentHash}
-              </code>
-            </div>
-          ) : (
-            <p className="mt-4 text-xs text-neutral-500">The artifact fingerprint will be registered on first secure download.</p>
-          )}
         </section>
       </div>
     </main>

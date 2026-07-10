@@ -5,7 +5,7 @@ import {
   isRawDatabaseId,
   stripLegacyVacancySlug,
   vacancyPublicSlug,
-} from "../../src/lib/public-vacancy-slug";
+} from "../../apps/web/src/lib/public-vacancy-slug";
 
 describe("public vacancy slug", () => {
   it("builds human-readable slugs without database ids", () => {

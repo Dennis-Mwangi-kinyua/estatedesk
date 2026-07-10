@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { getAuditActivityHref } from "../../src/app/(app)/dashboard/org/_lib/activity-links";
+import { getAuditActivityHref } from "../../apps/web/src/app/(app)/dashboard/org/_lib/activity-links";
 
 describe("getAuditActivityHref", () => {
   it("maps known entity types to org desk routes", () => {

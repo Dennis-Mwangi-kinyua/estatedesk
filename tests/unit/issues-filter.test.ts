@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { TicketStatus } from "@prisma/client";
 import { describe, it } from "node:test";
-import { buildIssueFilterWhere } from "../../src/app/(app)/dashboard/org/issues/_lib/helpers";
+import { buildIssueFilterWhere } from "../../apps/web/src/app/(app)/dashboard/org/issues/_lib/helpers";
 
 describe("buildIssueFilterWhere", () => {
   const orgId = "org_test_123";

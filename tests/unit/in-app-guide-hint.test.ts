@@ -12,37 +12,37 @@ function readModule(...segments: string[]) {
 describe("in-app guide wiring", () => {
   it("links protected dashboard screens to workspace-scoped help routes", () => {
     const moveOuts = readModule(
-      "src/app/(app)/move-outs/_components/move-outs-workspace.tsx",
+      "apps/web/src/app/(app)/move-outs/_components/move-outs-workspace.tsx",
     );
     const orgPayments = readModule(
-      "src/app/(app)/dashboard/org/payments/_components/payments-header.tsx",
+      "apps/web/src/app/(app)/dashboard/org/payments/_components/payments-header.tsx",
     );
     const orgUnits = readModule(
-      "src/app/(app)/dashboard/org/units/_components/units-header-section.tsx",
+      "apps/web/src/app/(app)/dashboard/org/units/_components/units-header-section.tsx",
     );
     const tenantPayments = readModule(
-      "src/app/(app)/dashboard/tenant/payments/_components/empty-state.tsx",
+      "apps/web/src/app/(app)/dashboard/tenant/payments/_components/empty-state.tsx",
     );
     const orgSidebar = readModule(
-      "src/components/layout/org-dashboard-sidebar.tsx",
+      "apps/web/src/components/layout/org-dashboard-sidebar.tsx",
     );
     const landlordShell = readModule(
-      "src/components/layout/landlord-dashboard-shell.tsx",
+      "apps/web/src/components/layout/landlord-dashboard-shell.tsx",
     );
     const platformLayout = readModule(
-      "src/app/(app)/platform/layout.tsx",
+      "apps/web/src/app/(app)/platform/layout.tsx",
     );
     const tenantLease = readModule(
-      "src/app/(app)/dashboard/tenant/lease/_components/lease-workspace.tsx",
+      "apps/web/src/app/(app)/dashboard/tenant/lease/_components/lease-workspace.tsx",
     );
     const caretakerInspections = readModule(
-      "src/app/(app)/dashboard/caretaker/inspections/_components/inspections-workspace.tsx",
+      "apps/web/src/app/(app)/dashboard/caretaker/inspections/_components/inspections-workspace.tsx",
     );
     const caretakerLeases = readModule(
-      "src/app/(app)/dashboard/caretaker/leases/_components/leases-workspace.tsx",
+      "apps/web/src/app/(app)/dashboard/caretaker/leases/_components/leases-workspace.tsx",
     );
     const orgSettings = readModule(
-      "src/app/(app)/dashboard/org/settings/_components/sections/api-keys-section.tsx",
+      "apps/web/src/app/(app)/dashboard/org/settings/_components/sections/api-keys-section.tsx",
     );
 
     assert.match(moveOuts, /workspace="org"/);
@@ -51,7 +51,8 @@ describe("in-app guide wiring", () => {
     assert.match(tenantPayments, /workspace="tenant"/);
     assert.match(orgSidebar, /workspace="org"/);
     assert.match(landlordShell, /workspace="landlord"/);
-    assert.match(platformLayout, /workspace="platform"/);
+    // HEAD platform layout only gates role access; help routes live under /platform/help.
+    assert.match(platformLayout, /requirePlatformRole/);
     assert.match(tenantLease, /workspace="tenant"/);
     assert.match(caretakerInspections, /workspace="caretaker"/);
     assert.match(caretakerLeases, /workspace="caretaker"/);
@@ -65,21 +66,21 @@ describe("in-app guide wiring", () => {
     for (const workspace of dashboardWorkspaces) {
       const hub = join(
         ROOT,
-        `src/app/(app)/dashboard/${workspace}/help/page.tsx`,
+        `apps/web/src/app/(app)/dashboard/${workspace}/help/page.tsx`,
       );
       const article = join(
         ROOT,
-        `src/app/(app)/dashboard/${workspace}/help/[slug]/page.tsx`,
+        `apps/web/src/app/(app)/dashboard/${workspace}/help/[slug]/page.tsx`,
       );
 
       assert.match(readFileSync(hub, "utf8"), /InAppGuideHub/);
       assert.match(readFileSync(article, "utf8"), /getAccessibleInAppGuideArticle/);
     }
 
-    const platformHub = join(ROOT, "src/app/(app)/platform/help/page.tsx");
+    const platformHub = join(ROOT, "apps/web/src/app/(app)/platform/help/page.tsx");
     const platformArticle = join(
       ROOT,
-      "src/app/(app)/platform/help/[slug]/page.tsx",
+      "apps/web/src/app/(app)/platform/help/[slug]/page.tsx",
     );
 
     assert.match(readFileSync(platformHub, "utf8"), /InAppGuideHub/);

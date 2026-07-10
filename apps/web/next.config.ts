@@ -1,6 +1,11 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 
 const isProduction = process.env.NODE_ENV === "production";
+
+/** Monorepo root (estatedesk-main) — keeps Next resolving hoisted node_modules correctly. */
+const monorepoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 function vacancyImageRemotePatterns() {
   const patterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
@@ -123,7 +128,19 @@ const PUBLIC_FAST_EDGE_CACHE_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  // App lives in apps/web; dependencies are hoisted to the repo root.
+  outputFileTracingRoot: monorepoRoot,
   serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg"],
+  transpilePackages: [
+    "@estatedesk/config",
+    "@estatedesk/contracts",
+    "@estatedesk/db-kit",
+    "@estatedesk/auth-sdk",
+    "@estatedesk/service-client",
+    "@estatedesk/events",
+    "@estatedesk/public-vacancy",
+    "@estatedesk/notifications",
+  ],
   images: {
     remotePatterns: vacancyImageRemotePatterns(),
   },

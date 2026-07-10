@@ -4,6 +4,10 @@ import { defineConfig } from "prisma/config";
 const fallbackDatasourceUrl = "postgresql://user:password@localhost:5432/estatedesk";
 const legacyPgSslModes = new Set(["prefer", "require", "verify-ca"]);
 
+/**
+ * Prefer libpq-compat over forcing sslmode=verify-full. Explicit verify-full
+ * against Neon pooler URLs often times out under node-pg / PrismaPg.
+ */
 function normalizeDatabaseUrlSslMode(databaseUrl: string) {
   try {
     const parsed = new URL(databaseUrl);
@@ -19,7 +23,7 @@ function normalizeDatabaseUrlSslMode(databaseUrl: string) {
       legacyPgSslModes.has(sslMode) &&
       !usesLibpqCompatibility
     ) {
-      parsed.searchParams.set("sslmode", "verify-full");
+      parsed.searchParams.set("uselibpqcompat", "true");
       return parsed.toString();
     }
   } catch {

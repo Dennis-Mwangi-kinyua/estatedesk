@@ -1,7 +1,7 @@
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import {
-  getCaretakerManagedBuildingUnitIds,
+  getCaretakerAllowedUnitIds,
   type MembershipScope,
 } from "@/lib/caretaker/access";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
@@ -35,7 +35,7 @@ export async function getCaretakerWaterBillsData({
   try {
     const allowedUnitIds = await retryTransientDatabaseOperation(
       () =>
-        getCaretakerManagedBuildingUnitIds({
+        getCaretakerAllowedUnitIds({
           orgId,
           caretakerUserId,
           membershipScope,

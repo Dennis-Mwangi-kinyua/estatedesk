@@ -36,8 +36,9 @@ export function ReadHeader({
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-              Select an apartment, enter previous and current meter readings,
-              then submit to office for approval. Period{" "}
+              Read meters unit by unit for every occupied unit assigned to you —
+              not just whole buildings. Enter previous and current values, then
+              submit to office for approval. Period{" "}
               <span className="font-medium text-foreground">{data.period}</span>.
             </p>
 

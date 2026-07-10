@@ -2,16 +2,16 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
-import { PUBLIC_VACANCIES_CACHE_TAG } from "@/lib/public-vacancy-cache";
-import { PUBLIC_VACANCY_REVALIDATE_SECONDS } from "@/lib/public-vacancy-listings";
+import { PUBLIC_VACANCIES_CACHE_TAG } from "./cache";
+import { PUBLIC_VACANCY_REVALIDATE_SECONDS } from "./listings";
 import {
   isRawDatabaseId,
   vacancyIdFromLegacySlug,
-} from "@/lib/public-vacancy-slug";
+} from "./slug";
 import {
   resolveVacancyUnitIdFromSlugIndex,
   type VacancySlugIndexEntry,
-} from "@/lib/public-vacancy-slug-index";
+} from "./slug-index";
 import { prisma } from "@/lib/prisma";
 
 const publicVacancyUnitWhere = {

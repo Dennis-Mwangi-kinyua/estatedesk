@@ -9,6 +9,10 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+.env.example
+.env
+.env copy
+
 
 # testing
 /coverage
@@ -19,11 +23,8 @@
 
 # production
 /build
-/dist
 backup-*.sql
 *.dump
-/backups/*.dump
-/backups/*.sha256
 
 # misc
 .DS_Store
@@ -35,8 +36,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (never commit — may contain secrets)
+# env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel

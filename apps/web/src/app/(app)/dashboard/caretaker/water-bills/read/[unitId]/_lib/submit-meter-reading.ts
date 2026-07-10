@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
+import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { encodePublicId } from "@/lib/public-id";
 import { parseInteger } from "./helpers";
@@ -33,7 +33,7 @@ export async function submitMeterReading(
     return { error: "Missing billing period." };
   }
 
-  const allowedUnitIds = await getCaretakerManagedBuildingUnitIds({
+  const allowedUnitIds = await getCaretakerAllowedUnitIds({
     orgId: session.activeOrgId!,
     caretakerUserId: session.userId,
     membershipScope: session.membershipScope,
@@ -41,7 +41,7 @@ export async function submitMeterReading(
 
   if (!allowedUnitIds.includes(unitId)) {
     return {
-      error: "You can only submit water readings for units under apartments you manage.",
+      error: "You can only submit water readings for units assigned to you.",
     };
   }
 

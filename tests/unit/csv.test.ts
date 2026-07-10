@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildCsv, parseCsv } from "../../src/lib/csv";
+import { buildCsv, parseCsv } from "../../apps/web/src/lib/csv";
 
 describe("csv utilities", () => {
   it("parses quoted commas, escaped quotes, and blank lines", () => {

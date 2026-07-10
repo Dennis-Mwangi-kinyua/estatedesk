@@ -4,7 +4,7 @@ import {
   buildAccountCredentialsEmailHref,
   buildAccountCredentialsMessage,
   buildAccountCredentialsWhatsAppHref,
-} from "../../src/lib/notifications/account-credentials-message";
+} from "../../apps/web/src/lib/notifications/account-credentials-message";
 
 const sampleInput = {
   fullName: "Jane Wanjiku",

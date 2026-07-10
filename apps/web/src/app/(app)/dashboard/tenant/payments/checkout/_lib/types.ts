@@ -5,6 +5,8 @@ export type StartPaymentInput = {
   phoneNumber?: string;
   accountName?: string;
   transactionId?: string;
+  /** Optional full SMS / bank message for org review. */
+  proofMessage?: string;
   amount?: number;
   months?: number;
 };

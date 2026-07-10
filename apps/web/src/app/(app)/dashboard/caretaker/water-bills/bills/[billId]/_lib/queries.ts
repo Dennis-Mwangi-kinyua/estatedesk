@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import {
-  getCaretakerManagedBuildingUnitIds,
+  getCaretakerAllowedUnitIds,
   type MembershipScope,
 } from "@/lib/caretaker/access";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
@@ -31,7 +31,7 @@ export async function getCaretakerBillDetailData({
   try {
     const allowedUnitIds = await retryTransientDatabaseOperation(
       () =>
-        getCaretakerManagedBuildingUnitIds({
+        getCaretakerAllowedUnitIds({
           orgId,
           caretakerUserId,
           membershipScope,

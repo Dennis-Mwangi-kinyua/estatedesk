@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
-import { publicVacancyImageUrl } from "../../src/lib/public-vacancy-image";
+import { publicVacancyImageUrl } from "../../services/public-vacancy/src/image";
 
 const originalPublicBaseUrl = process.env.S3_PUBLIC_BASE_URL;
 const originalBucket = process.env.S3_BUCKET;

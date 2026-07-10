@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   previousCalendarMonthRange,
   shouldSendOwnerStatementsToday,
-} from "../../src/lib/accounting/owner-statement-policy";
+} from "../../apps/web/src/lib/accounting/owner-statement-policy";
 
 describe("owner statement schedule", () => {
   it("returns the previous calendar month range", () => {

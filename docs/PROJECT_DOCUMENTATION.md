@@ -1,383 +1,385 @@
 # EstateDesk Project Documentation
 
-## Table of Contents
-
-- [Purpose](#purpose)
-- [Platform Scope](#platform-scope)
-- [Tech Stack](#tech-stack)
-- [Architecture Overview](#architecture-overview)
-- [Core Domain Modules](#core-domain-modules)
-- [Data Model Summary](#data-model-summary)
-- [Multi-Tenancy and Authorization](#multi-tenancy-and-authorization)
-- [Project Structure](#project-structure)
-- [Environment Variables](#environment-variables)
-- [Developer Setup](#developer-setup)
-- [Prisma and Database](#prisma-and-database)
-- [Deployment Notes](#deployment-notes)
-- [Key Files and Paths](#key-files-and-paths)
-- [Caretaker Field Operations Portal](#caretaker-field-operations-portal)
-- [SEO, Sitemaps, and Crawlers](#seo-sitemaps-and-crawlers)
-- [Maintenance and Conventions](#maintenance-and-conventions)
-
-## Purpose
-
-EstateDesk is a multi-tenant property operations SaaS platform built to help Kenyan landlords, property managers, accountants, caretakers, office staff, and tenants manage portfolio workflows in one connected workspace.
-
-This documentation explains the application architecture, data model, developer workflows, and operational assumptions that guide the codebase.
-
-## Platform Scope
-
-EstateDesk enables:
-
-- organization and portfolio management
-- property, building, and unit structure
-- tenant profiles, leases, and occupancy
-- rent, water, and utility billing
-- payment tracking, receipts, and verification
-- issues, inspections, and field operations
-- notices, move-outs, and service accountability
-- role-based dashboards and permissioned access
-- platform administration and referral tracking
-- dual-mode platform shell: **Administration** and **Developer** portals for super/platform admins
-
-The platform is designed for production use in Kenya, with mobile money friendliness, caretaker workflows, and utility billing awareness.
-
-## Tech Stack
-
-- Next.js `16.x` with the App Router
-- React `19.x`
-- TypeScript `5.x`
-- Prisma `7.x` and PostgreSQL
-- Tailwind CSS `4.x`
-- `react-hook-form`, `zod`, and `framer-motion`
-- Radix UI / shadcn UI patterns
-- AWS S3-compatible storage via `@aws-sdk/client-s3`
-- Rate limiting and security middleware through `proxy.ts`
-
-## Architecture Overview
-
-EstateDesk is built as a server-rendered React application with server actions and API route handlers.
-
-The main flow is:
-
-1. User interacts with UI in `src/app`
-2. UI calls server actions or route handlers
-3. Authorization and tenancy are enforced in `src/lib/auth`
-4. Business logic runs in `src/features` and `src/lib`
-5. Prisma handles database access and migrations
-
-The system is organized into feature modules rather than a monolithic service package.
-
-## Core Domain Modules
-
-Key business domains in the codebase include:
-
-- `organizations`
-- `properties`, `buildings`, `units`
-- `tenants`, `leases`, `tenant transfers`
-- `rentCharges`, `payments`, `payment allocations`
-- `water`, `meter readings`, `water bills`
-- `issues`, `inspections`, `notices`
-- `caretaker assignments`, `landlord profiles`
-- `subscriptions`, `apiKeys`, `platformMessages`
-- `auditLogs`, `userSessions`, `platformPermissions`
-
-Each domain typically contains:
-
-- UI pages and components under `src/app` or `src/features`
-- action handlers in `src/features/*/actions`
-- Prisma operations via `src/lib/prisma`
-- shared helpers and validation in `src/lib`
-
-## Data Model Summary
-
-The Prisma schema defines a hardened production-ready data model. The most important tables are:
-
-- `User`: platform users with authentication, platform roles, and verification state.
-- `Organization`: tenant companies that own properties and workflows.
-- `Membership`: links users to organizations and active membership context.
-- `Property`, `Building`, `Unit`: portfolio structure.
-- `Tenant`, `Lease`: occupancy, contract, payment, and tenant lifecycle.
-- `RentCharge`, `Payment`, `PaymentAllocation`: billing and receipt tracking.
-- `MeterReading`, `WaterBill`: utility billing and usage workflows.
-- `IssueTicket`, `Inspection`: service and maintenance operations.
-- `Notification`: in-app and external notification records.
-- `ApiKey`, `Subscription`: platform access and subscription management.
-- `AuditLog`: sensitive action auditing.
-
-The model is designed for strong indexing, organizational isolation, and query performance.
-
-## Multi-Tenancy and Authorization
-
-EstateDesk enforces strict tenancy and RBAC patterns:
-
-- every business record belongs to an `Organization`
-- users must be members of the target organization to access data
-- active organization context is resolved from `UserSession`
-- no client-provided org identifier is trusted without server validation
-- authorization is enforced at the server boundary
-- platform roles and permissions are separated from organization roles
-
-This means every query and mutation should be scoped by organization and user membership where relevant.
-
-## Project Structure
-
-The repository follows a feature-oriented layout:
-
-- `src/app` - Next.js App Router pages, layouts, route handlers, static marketing pages, and API entrypoints
-- `src/components` - shared reusable UI components and presentation primitives
-- `src/features` - domain feature modules with actions, API logic, and feature-specific UI
-- `src/hooks` - custom React hooks
-- `src/lib` - shared libraries such as Prisma client, authentication, validation, and utility helpers
-- `public` - static assets and images
-- `prisma` - Prisma schema, migrations, and seed script
-- `scripts` - helper scripts like route scaffolding
-- `proxy.ts` - custom middleware for request filtering, security headers, and rate limiting
-- `backup-routes` - archived route implementations and route-level backups
-
-### Recommended pattern
-
-- Keep domain logic inside `src/features` with small UI components in `src/components`
-- Keep auth and org validation in `src/lib/auth`
-- Use server actions for form handling and route handlers for REST-style API endpoints
-- Keep `src/app` focused on page routing and layout composition
-
-## Environment Variables
-
-See `docs/ENVIRONMENT.md` for the full grouped reference. Runtime validation lives in `src/lib/config/env.ts`.
-
-Important variables are defined in `.env.example` and include:
-
-- `DATABASE_URL`, `DIRECT_URL` - PostgreSQL connection
-- `NEXT_PUBLIC_APP_URL`, `APP_URL` - public app URL and server base URL
-- `AUTH_SECRET`, `CRON_SECRET` - secrets for auth and scheduled tasks
-- `PLATFORM_API_KEYS_PAGE_PASSWORD` - admin protection for API keys page
-- `S3_BUCKET`, `S3_REGION`, `S3_ENDPOINT`, `S3_PUBLIC_BASE_URL`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` - storage settings
-- `WHATSAPP_*` - optional WhatsApp messaging integration settings
-
-Use `.env` for local development and never check secrets into source control.
-
-## Platform Admin & Developer Portal
-
-Platform operators (`SUPER_ADMIN`, `PLATFORM_ADMIN`) share `/platform` with a mode toggle:
-
-| Mode | Home | Purpose |
-| --- | --- | --- |
-| Administration | `/platform` | Orgs, users, billing, onboarding, marketing, messages, reports, settings |
-| Developer | `/platform/developer` | System health, API explorer, feature flags, rate limits, integrations |
-
-**Mode memory**
-
-- Preferred mode is stored in `localStorage` (`estatedesk.platform.mode`) and cookie (`estatedesk_platform_mode`)
-- Last path per mode is restored when switching (not always the mode home)
-- Login/post-password-change redirects platform admins using the mode cookie
-- Dual-mode routes (`/platform/help`, `/platform/security`, `/platform/audit-logs`) keep the sticky preferred mode
-- Keyboard: `Alt+Shift+A` (admin), `Alt+Shift+D` (developer)
-
-**Super-admin-only tools** (page + mutations): API keys, jobs/queues, data management, backups. Platform admins are redirected to the developer home with `?error=super-admin-only`. Rate-limit **reset** ops are also super-admin-only; inspection is available to platform admins.
-
-Key paths:
-
-- `src/app/(app)/platform/_lib/nav.ts` — mode/nav config
-- `src/app/(app)/platform/_components/platform-shell.tsx` — shell + toggle
-- `src/app/(app)/platform/developer/page.tsx` — developer hub
-- `src/app/(app)/platform/control/` — **website control center** (super admin): kill switches, nuclear ops, org support entry
-- `src/lib/platform/control.ts` — `PlatformControl` singleton helpers
-- `src/app/(app)/platform/api-explorer/page.tsx` — API/webhook catalog
-- `src/app/(app)/platform/feature-flags/` — editable org feature matrix
-
-### Website control center (super admin)
-
-`/platform/control` can enable maintenance mode, **incident banners**, disable public signup/API/webhooks/cron, shut org or tenant portals, force global feature overrides, revoke all sessions/API keys, clear rate limits, run all crons, force user status, override org billing, enter an org as support admin, and soft-delete/restore organizations. Kill switches are enforced in org guards, public API, M-Pesa webhooks, cron routes, and registration.
-
-### Support access (timed)
-
-`/platform/support-access` lets SUPER_ADMIN and PLATFORM_ADMIN open a **timed** org ADMIN session (1–8h) with a required reason. The org shell shows an amber banner with extend/leave. Cookie: `estatedesk_support_session` (signed).
-
-### Global feature overrides
-
-`src/lib/org/features.ts` merges org `OrganizationSettings.features` with `PlatformControl.globalFeatures`. Settings pages and flag matrix use the resolved map so force ON/OFF actually affects product reads.
-
-### Backups operator actions
-
-`/platform/backups` records checkpoints and restore-drill outcomes on `PlatformControl` (plus audit/security alerts). Host dump/restore still uses `scripts/backup-database.sh` and `scripts/restore-drill.sh`.
-
-### Help
-
-Platform help includes `platform-website-control` and `platform-admin-operations` guides under `/platform/help`.
-
-## Mobile-first UI
-
-EstateDesk is mobile-first across marketing, auth, org/tenant/caretaker/landlord dashboards, and the platform control plane:
-
-- Root body uses `ed-mobile-first` with `viewport-fit=cover` and safe-area support
-- Dashboard shells use `min-h-dvh`, bottom tab/nav offsets, and touch-friendly targets
-- Global CSS collapses dense multi-column grids, forces table horizontal scroll, and sizes form controls for phones (16px inputs to avoid iOS zoom)
-- Progressive enhancement via Tailwind `sm` / `md` / `lg` / `xl` utilities
-
-Key files: `src/app/globals.css` (`.ed-mobile-first` foundation), shell components under `src/components/layout/`, platform shell under `src/app/(app)/platform/`.
-
-## Developer Setup
-
-### Prerequisites
-
-- Node.js `20.x` or later
-- npm `10.x` or later
-- PostgreSQL database
-- `git`
-
-### Local Installation
-
-```bash
-cd /home/baba-nyakio/Desktop/estatedesk-main
-npm install
-cp .env.example .env
-# edit .env with your database and secret values
-```
-
-### Database Setup
-
-```bash
-npx prisma generate
-npx prisma migrate dev --name init
-npm run seed
-```
-
-### Run Locally
-
-```bash
-npm run dev
-```
-
-The app runs at `http://localhost:3000` by default.
-
-### Build for Production
-
-```bash
-npm run build
-npm run start
-```
-
-### Linting
-
-```bash
-npm run lint
-```
-
-## Prisma and Database
-
-`prisma.config.ts` resolves the datasource from `DIRECT_URL`, `DATABASE_URL`, or a fallback local connection.
-
-The schema is located at `prisma/schema.prisma` and migrations are stored under `prisma/migrations`.
-
-The seed command is configured as `tsx prisma/seed.ts`.
-
-## Deployment Notes
-
-- Make sure `PRIMARY_URL` or `APP_URL` matches the deployed domain
-- Ensure PostgreSQL credentials are secure and connection strings are set in environment variables
-- Run `npx prisma migrate deploy` in production before starting the app
-- Generate Prisma client during build or install via `npm run build`
-- Configure S3-compatible storage values for file upload support
-- If using WhatsApp integration, configure `WHATSAPP_PROVIDER`, account IDs, access tokens, and templates
-
-## Key Files and Paths
-
-- `README.md` - project overview and getting started
-- `docs/PROJECT_DOCUMENTATION.md` - developer and architecture documentation
-- `.env.example` - environment variable template
-- `prisma/schema.prisma` - database schema and model definitions
-- `prisma.config.ts` - Prisma configuration and datasource logic
-- `proxy.ts` - security middleware, rate limiting, and request filtering
-- `src/lib/prisma.ts` - Prisma client export
-- `src/lib/auth` - auth/session/org validation helpers
-- `src/app` - Next.js App Router pages, API routes, and route handlers
-- `src/features` - core business feature implementations
-- `src/components` - UI primitives and shared components
-
-## Caretaker Field Operations Portal
-
-Caretaker workflows live under `src/app/(app)/dashboard/caretaker` and follow the same modular pattern as org and tenant dashboards: thin `page.tsx` files, `_lib/queries.ts`, and `_components/*-workspace.tsx` shells.
-
-### Route map
-
-| Area | Path | Purpose |
-| --- | --- | --- |
-| Today's work | `/dashboard/caretaker/today` | Prioritized inspections, meter readings, and issues with SLA badges |
-| Issues | `/dashboard/caretaker/issues` | Scoped issue board, detail lifecycle, completion reports |
-| New issue | `/dashboard/caretaker/issues/new` | Field reporting with optional photo evidence |
-| Water bills | `/dashboard/caretaker/water-bills` | Period readings, bill visibility, meter entry |
-| Inspections | `/dashboard/caretaker/inspections` | Move-out checklists, GPS check-in, printable reports |
-| Units | `/dashboard/caretaker/units` | Assigned unit list and 360° unit profiles with QR codes |
-| Tenants | `/dashboard/caretaker/tenants` | Tenant contact with call/SMS/WhatsApp actions |
-| Handover | `/dashboard/caretaker/handover` | Bilingual shift notes with open-issue prefill |
-| Vendors | `/dashboard/caretaker/vendors` | Approved suppliers and dispatch requests |
-| Search / calendar / documents / broadcasts / move-outs | respective routes | Scoped lookup and coordination |
-
-Authenticated print routes (noindex, disallowed in `robots.ts`):
-
-- `/print/inspections/[inspectionId]` — inspection report PDF/print view
-- `/print/issues/[issueId]` — caretaker issue work order
-
-### Shared caretaker infrastructure
-
-| Module | Path | Role |
-| --- | --- | --- |
-| Access scope | `src/lib/caretaker/access.ts` | Property/building/unit assignment guards |
-| Paths | `src/app/(app)/dashboard/caretaker/_lib/paths.ts` | Server-only public ID href helpers |
-| Client paths | `src/app/(app)/dashboard/caretaker/_lib/paths.client.ts` | Client-safe href helpers (no `node:crypto`) |
-| Offline queue | `src/app/(app)/dashboard/caretaker/_lib/offline-queue.ts` | LocalStorage queue for meter readings and issues |
-| Offline photos | `src/app/(app)/dashboard/caretaker/_lib/offline-photo-store.ts` | IndexedDB photo blobs for offline sync |
-| SLA helpers | `src/lib/issues/sla.ts` | Shared SLA state used by caretaker and org issue views |
-| Contact links | `src/app/(app)/dashboard/caretaker/_lib/contact.ts` | `tel:`, `sms:`, `mailto:`, and `wa.me` helpers |
-| i18n | `src/app/(app)/dashboard/caretaker/_lib/i18n.ts` | English/Swahili labels for nav, Today, and issues |
-
-### Offline sync flow
-
-1. Client forms detect `!navigator.onLine` and enqueue meter/issue payloads locally.
-2. Optional photos are stored in IndexedDB and attached as base64 payloads during sync.
-3. `syncOfflineQueueAction` validates caretaker unit scope, writes Prisma records, and uploads photo assets.
-4. The header offline panel exposes queue count, sync, and clear actions.
-
-### Tests
-
-Caretaker-specific unit tests:
-
-- `tests/unit/caretaker-sla.test.ts`
-- `tests/unit/caretaker-contact.test.ts`
-- `tests/unit/handover-prefill.test.ts`
-
-Modular route layout is enforced by `tests/unit/module-structure.test.ts`, including `print/issues/[issueId]`.
-
-## SEO, Sitemaps, and Crawlers
-
-Public discovery is centralized in:
-
-- `src/lib/seo.ts` — site metadata, keywords, canonical URLs, and robots helpers
-- `src/lib/public-site-index.ts` — manifest of indexable marketing pages
-- `src/app/sitemap-index.xml/route.ts` — submitted sitemap index
-- `src/app/robots.ts` — crawl rules; blocks dashboards, API, print, and invite routes
-- `src/app/llms.txt/route.ts` — LLM/crawler discovery index for public pages and product themes
-
-See `SITEMAPS.md` for validation commands and Search Console submission steps.
-
-**Indexing policy**
-
-- Index: marketing, pricing, guides, vacancies, and auth entry pages.
-- Noindex + disallow: all `/dashboard/*`, `/platform/*`, `/api/*`, `/print/*`, staff/tenant workspace shortcuts, and utility/system pages.
-- LLM crawlers (`GPTBot`, `Google-Extended`, `CCBot`) receive the same private-route disallow list as generic crawlers.
-
-## Maintenance and Conventions
-
-- Keep all organization-scoped queries wrapped in membership validation
-- Keep UI logic separate from server-side mutations and database operations
-- Favor server actions for form and submit handling where possible
-- Preserve backup routes in `backup-routes` for in-progress refactors
-- Use `SITEMAPS.md` for sitemap and SEO-related page guidance
-- Never import server-only path helpers (`_lib/paths.ts`, `@/lib/public-id`) from `"use client"` caretaker components; use `paths.client.ts` instead
-- Add caretaker modular route entries to `tests/unit/module-structure.test.ts` when introducing new pages
-- Keep `components.json` aligned with Tailwind and shadcn conventions
+**Last updated:** 2026-07-10  
+**Product:** Multi-tenant property operations SaaS (Kenya-first, multi-market)  
+**Primary app:** `apps/web` (Next.js App Router)  
+**Private deep system docs (in-app):** `/platform/developer/docs` · source `apps/web/src/lib/platform/system-docs.ts`
 
 ---
 
-For new contributors and maintainers, this document is the primary reference for understanding how EstateDesk is structured and how to work with it effectively.
+## Table of Contents
+
+1. [Purpose](#purpose)
+2. [Product scope](#product-scope)
+3. [Tech stack](#tech-stack)
+4. [Architecture (current)](#architecture-current)
+5. [Repository layout](#repository-layout)
+6. [Core domains](#core-domains)
+7. [Billing & payments (current product rules)](#billing--payments-current-product-rules)
+8. [Data model (summary)](#data-model-summary)
+9. [Multi-tenancy & authorization](#multi-tenancy--authorization)
+10. [Developer setup](#developer-setup)
+11. [Database & Prisma](#database--prisma)
+12. [SEO & public discovery](#seo--public-discovery)
+13. [QA & operations](#qa--operations)
+14. [Environment variables](#environment-variables)
+15. [Deployment](#deployment)
+16. [Key paths](#key-paths)
+17. [Roadmap notes](#roadmap-notes)
+
+---
+
+## Purpose
+
+EstateDesk is a multi-tenant property operations platform for landlords, property managers, office staff, accountants, caretakers, and tenants.
+
+It centralizes portfolio structure, occupancy, rent and utility billing, payments, issues, inspections, notices, and role-based workspaces — with Kenya-ready workflows (M-Pesa, water meters, caretaker field ops).
+
+---
+
+## Product scope
+
+| Persona | Primary workspace |
+| --- | --- |
+| Org admin / manager / office / accountant | `/dashboard/org/**` |
+| Tenant | `/dashboard/tenant/**` |
+| Caretaker | `/dashboard/caretaker/**` |
+| Landlord | `/dashboard/landlord/**` |
+| Platform admin | `/platform/**` |
+| Public / SEO | `/`, `/vacancies/**`, marketing landings, guides |
+
+Major capabilities:
+
+- Organizations, memberships, subscriptions  
+- Properties, buildings, units, vacancies  
+- Tenants, leases, online lease signing  
+- **Combined period bills (rent + water)**, full or partial pay  
+- Payment methods: **instant STK gateway** (auto-settle) vs **manual M-Pesa/bank** (org verifies)  
+- Meter readings → water bill approval  
+- Issues, inspections, move-outs, notices  
+- Accounting (org-level), taxes/KRA hooks  
+- Notifications (in-app / push / channel fan-out)  
+- Platform control plane (kill switches, support access)
+
+---
+
+## Tech stack
+
+| Layer | Choice |
+| --- | --- |
+| Framework | Next.js **16.x** (App Router), React **19.x** |
+| Language | TypeScript **5.x** |
+| Data | Prisma **7.x** + PostgreSQL (Neon in prod/dev) |
+| UI | Tailwind CSS **4.x**, Radix/shadcn patterns, lucide icons |
+| Forms | react-hook-form + zod |
+| Storage | S3-compatible (`@aws-sdk/client-s3`) |
+| Payments | M-Pesa Daraja STK + manual proof + bank/KCB paybill rails |
+| Package management | npm **workspaces** monorepo |
+
+---
+
+## Architecture (current)
+
+### Runtime model
+
+**Modular monorepo / modular monolith — not full microservices.**
+
+| Layer | Role |
+| --- | --- |
+| `apps/web` | **Only primary deployable** — UI + BFF + domain logic |
+| `packages/*` | Shared libraries (config, contracts, auth-sdk, db-kit, events) |
+| `services/*` | Domain packages: most are **stubs**; **notifications** + **public-vacancy** are **in-process libraries** |
+| `prisma/` | **Single shared schema** (one database) |
+
+`npm run dev` / `npm run build` always target `@estatedesk/web`.
+
+Migration path is documented in `docs/architecture/SERVICES.md` (Phase 1 = current).  
+**Do not extract more services until product + DB stability are solid.**
+
+### Request flow
+
+1. Browser hits App Router pages under `apps/web/src/app`  
+2. Auth session + org/tenant context resolved server-side  
+3. Server Actions / route handlers run business logic  
+4. Prisma (with Neon pooler adapter) reads/writes Postgres  
+5. Side effects: notifications, accounting posts, receipts, webhooks  
+
+### Resilience (2026-07)
+
+- Prisma pool defaults tuned for Neon (small pool)  
+- SSL URL normalization (`uselibpqcompat` for `sslmode=require`)  
+- Tenant portal context + layout **soft-fail** optional queries on transient DB errors  
+- Transient DB **retries** via `@estatedesk/db-kit`  
+
+---
+
+## Repository layout
+
+```text
+estatedesk-main/
+├── apps/web/                 # Next.js application (source of truth)
+│   ├── src/app/              # Routes: marketing, auth, dashboards, API, sitemaps
+│   ├── src/components/       # Shared UI
+│   ├── src/features/         # Domain actions & feature UI
+│   ├── src/lib/              # Prisma, auth, payments, SEO, billing, …
+│   ├── public/               # Icons, SW, static assets
+│   └── middleware / proxy    # Security & edge concerns
+├── packages/                 # Shared packages
+├── services/                 # Domain packages (stubs + a few libraries)
+├── prisma/                   # schema.prisma + migrations + seed
+├── docs/                     # Project docs (this file and siblings)
+├── tests/                    # Unit + integration tests
+├── scripts/                  # Backup, modularize helpers, QA scripts
+└── package.json              # Workspace root
+```
+
+Source paths in application code are under **`apps/web/src/...`**. Older docs may say `src/` at repo root; prefer the monorepo paths above.
+
+---
+
+## Core domains
+
+| Domain | Highlights |
+| --- | --- |
+| Portfolio | Property, Building, Unit, vacancy marketing |
+| Occupancy | Tenant (slug URLs), Lease, signatures, move-outs |
+| Billing | RentCharge balances; WaterBill `amountPaid`/`balance` |
+| Payments | Payment + PaymentAllocation; combined period bills |
+| Water ops | MeterReading approval queue; WR refs |
+| Field ops | Issues, inspections, caretaker unit scope |
+| Accounting | Chart of accounts, journals, accruals (org) |
+| Platform | Control center, support access, webhooks log |
+| Notifications | Fan-out channels; unread alerts UI |
+
+---
+
+## Billing & payments (current product rules)
+
+### Combined period bill
+
+- Invoice groups **rent + water** for the same `YYYY-MM` into one bill.  
+- Tenant may pay **full balance** or a **partial amount**.  
+- On verification/settlement, allocation order is **rent (and other lease charges) first, then water**.  
+
+### Pay Now (eCitizen-style)
+
+1. **Pay Now** → `/dashboard/tenant/payments/new?source=period_bill&id=PERIOD&amount=…`  
+2. Method chooser:
+   - **Instant gateways** (e.g. M-Pesa STK) — bill auto-reduces on success  
+   - **Manual M-Pesa / bank** — paste code/SMS; status **pending** until org verifies  
+3. Checkout collects phone/code/proof as required by method  
+
+### Settlement modes
+
+| Mode | Methods | Result |
+| --- | --- | --- |
+| Gateway | `mpesa-stk` (Daraja env required) | STK callback → `settleGatewayPayment` → SUCCESS + VERIFIED + allocate |
+| Manual | `manual-mpesa`, `manual-bank`, org paybill/bank catalog | PENDING until org verify action allocates |
+
+Key code:
+
+- `apps/web/src/lib/billing/period-bill.ts`  
+- `apps/web/src/lib/ledger.ts` (`allocateCombinedPeriodPayment`)  
+- `apps/web/src/lib/payments/settle-payment.ts`  
+- `apps/web/src/app/(app)/dashboard/tenant/payments/checkout/**`  
+- `apps/web/src/app/api/webhooks/mpesa/route.ts`  
+
+---
+
+## Data model summary
+
+Critical models (see `prisma/schema.prisma`):
+
+- **Identity:** User, UserSession, Membership, Organization  
+- **Portfolio:** Property, Building, Unit  
+- **Occupancy:** Tenant (`slug`), Lease, LeaseSignature*  
+- **Charges:** RentCharge (`amountDue`/`amountPaid`/`balance`/`PARTIAL`)  
+- **Water:** MeterReading, WaterBill (`total`/`amountPaid`/`balance`)  
+- **Payments:** Payment (`targetType` includes `COMBINED`), PaymentAllocation, Receipt  
+- **Ops:** IssueTicket, Inspection, MoveOutNotice, Notification  
+- **Platform:** PlatformControl, PlatformWebhookEvent, Subscription  
+
+Indexes emphasize `orgId` + status/period filters for multi-tenant queries.
+
+---
+
+## Multi-tenancy & authorization
+
+- Every business row is **organization-scoped**.  
+- Session carries `userId`, `activeOrgId`, platform role.  
+- Guards: `requireUserSession`, `requireTenantAccess`, org role checks, caretaker unit allow-lists.  
+- Never trust client-supplied org IDs without membership validation.  
+- Support access: timed platform cookie for supervised org admin sessions.  
+
+---
+
+## Developer setup
+
+### Prerequisites
+
+- Node.js 20+  
+- npm 10+  
+- Postgres (local or Neon)  
+- git  
+
+### Install & run
+
+```bash
+cd /path/to/estatedesk-main
+npm install
+cp .env.example .env   # if needed — fill secrets
+npx prisma generate
+npx prisma migrate deploy
+npm run seed           # optional demo data
+npm run dev            # apps/web on :3000
+```
+
+### Scripts (root)
+
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Next dev (webpack) |
+| `npm run build` | Prisma generate + Next build |
+| `npm run test` | Unit tests |
+| `npm run test:integration` | Integration tests |
+| `npm run seed` | Seed database |
+| `npm run backup:database` | DB dump |
+
+---
+
+## Database & Prisma
+
+- Schema: `prisma/schema.prisma`  
+- Migrations: `prisma/migrations/`  
+- Client: `apps/web/src/lib/prisma.ts` (PrismaPg adapter)  
+- Env: prefer pooler URL; `getDatabaseUrl()` normalizes SSL for Neon  
+
+```bash
+npx prisma migrate status
+npx prisma migrate deploy
+npx prisma generate
+```
+
+If a migration was applied manually and Prisma marks it failed, use  
+`npx prisma migrate resolve --applied <name>` after verifying schema.
+
+---
+
+## SEO & public discovery
+
+EstateDesk is **index-ready** for public marketing and vacancy discovery.
+
+| Asset | Role |
+| --- | --- |
+| `/robots.txt` | Allow public; disallow dashboards/API |
+| `/sitemap-index.xml` | **Submit this** to Google/Bing |
+| `/sitemap.xml` | ~34 core marketing URLs |
+| `/sitemap-rental-landings.xml` | 700+ location/category landings |
+| `/sitemap-vacancies.xml` | Vacant unit pages |
+| `/llms.txt` | LLM/crawler discovery |
+| Root layout metadata | Canonical, OG, Twitter, verification tags |
+| JSON-LD | Organization, WebSite, SoftwareApplication, FAQ |
+
+**Full indexing** requires Google Search Console / Bing submission — see **`docs/SEO_INDEXING.md`**.
+
+Private app shells use `privatePageMetadata` (`noindex`).
+
+---
+
+## QA & operations
+
+| Doc | Purpose |
+| --- | --- |
+| `docs/QA_REPORT.md` | Latest smoke + automated QA (2026-07-10) |
+| `docs/SEO_INDEXING.md` | SEO checklist + GSC steps |
+| `docs/PRE_LAUNCH_STATUS.md` | Launch matrix |
+| `docs/OPERATIONS.md` | Ops runbook |
+| `docs/production-deploy-checklist.md` | Deploy checklist |
+| `SITEMAPS.md` | Sitemap operator guide |
+
+### Quick automated SEO suite
+
+```bash
+node --import tsx --test \
+  tests/unit/seo.test.ts \
+  tests/unit/sitemap-utils.test.ts \
+  tests/unit/public-rental-seo.test.ts \
+  tests/unit/guides.test.ts \
+  tests/unit/accessibility-baseline.test.ts
+```
+
+---
+
+## Environment variables
+
+Full reference: **`docs/ENVIRONMENT.md`**.
+
+Critical groups:
+
+- **Database:** `DATABASE_URL`, `DIRECT_URL`  
+- **App URL:** `NEXT_PUBLIC_APP_URL` / `APP_URL` (must be production host in prod)  
+- **Auth:** `AUTH_SECRET`  
+- **M-Pesa Daraja (STK):** `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, `MPESA_SHORTCODE`, `MPESA_PASSKEY`, `MPESA_CALLBACK_URL`  
+- **SEO verification:** `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`, `NEXT_PUBLIC_BING_SITE_VERIFICATION`  
+- **S3 / web-push / WhatsApp:** optional integrations  
+
+Runtime helpers: `packages/config` + `apps/web/src/lib/config/env.ts`.
+
+---
+
+## Deployment
+
+- Vercel (or similar): **Root Directory = `apps/web`**, install from monorepo root.  
+- `prisma generate` runs on install/build.  
+- Set production env vars; never point public URL to localhost.  
+- Apex host preferred: `estatedesk.co.ke` (www redirect configured).  
+- Details: `docs/architecture/DEPLOY.md`, `docs/production-deploy-checklist.md`.  
+
+---
+
+## Key paths
+
+| Concern | Path |
+| --- | --- |
+| Org dashboard | `apps/web/src/app/(app)/dashboard/org/` |
+| Tenant dashboard | `apps/web/src/app/(app)/dashboard/tenant/` |
+| Tenant payments / checkout | `.../tenant/payments/` |
+| Org payment verify | `.../org/payments/_lib/verify-payment-actions.ts` |
+| Combined bill helpers | `apps/web/src/lib/billing/period-bill.ts`, `apps/web/src/lib/ledger.ts` |
+| Payment method catalog | `apps/web/src/lib/payments/methods-catalog.ts` |
+| Prisma client | `apps/web/src/lib/prisma.ts` |
+| SEO helpers | `apps/web/src/lib/seo.ts` |
+| Sitemaps | `apps/web/src/app/sitemap-*.xml/` |
+| Platform control | `apps/web/src/app/(app)/platform/control/` |
+| Notifications lib | `services/notifications/src/lib/` |
+
+---
+
+## Roadmap notes
+
+| Priority | Focus |
+| --- | --- |
+| Now | Product stability, payments E2E, Neon reliability, GSC sitemap submit |
+| Next | Workers for cron/notifications; optional payments webhook isolation |
+| Later | Real process boundaries only where load/team isolation requires it |
+
+**Not recommended now:** full microservices, DB-per-service, or rewrites of working Next routes into remote APIs without a clear operational need.
+
+---
+
+## Related documentation
+
+| Doc | Description |
+| --- | --- |
+| `docs/PRODUCT_DOCUMENTATION.md` | Product vision & personas |
+| `docs/QA_REPORT.md` | Latest QA results |
+| `docs/SEO_INDEXING.md` | SEO & indexing ops |
+| `docs/ENVIRONMENT.md` | Env var reference |
+| `docs/API.md` | API notes |
+| `docs/architecture/SERVICES.md` | Services migration map |
+| `SITEMAPS.md` | Sitemap testing & submission |
+| `README.md` | Repo entrypoint |
+
+---
+
+*This document reflects the monorepo as of 2026-07-10. Update the date and sections when major domain rules or deploy topology change.*

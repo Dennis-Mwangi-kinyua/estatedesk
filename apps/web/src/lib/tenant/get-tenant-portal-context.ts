@@ -6,6 +6,7 @@ import {
   parsePaymentInstructions,
   type PaymentInstructions,
 } from "@/lib/payments/instructions";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 const tokenHash = (token: string) =>
   crypto.createHash("sha256").update(token).digest("hex");
@@ -146,6 +147,20 @@ export async function getTenantPortalContext(
 
   const activeOrgId = orgId ?? tenant.orgId;
 
+  // Optional portal widgets must not take down the whole tenant shell when one
+  // query flakes (Neon pooler timeouts often surface as empty Prisma errors).
+  async function softQuery<T>(label: string, run: () => Promise<T>, fallback: T): Promise<T> {
+    try {
+      return await retryTransientDatabaseOperation(run, {
+        label: `portal-${label}`,
+        attempts: 2,
+      });
+    } catch (error) {
+      console.warn(`[getTenantPortalContext] ${label} failed`, error);
+      return fallback;
+    }
+  }
+
   const [
     paymentLedger,
     settings,
@@ -153,95 +168,120 @@ export async function getTenantPortalContext(
     pendingSigners,
     caretakerContact,
     leaseDocuments,
+    activeLeases,
   ] = await Promise.all([
-    activeOrgId ? getTenantLedger(userId, activeOrgId) : Promise.resolve(null),
-    prisma.organizationSettings.findUnique({
-      where: { orgId: tenant.orgId },
-      select: { customFields: true },
-    }),
-    prisma.notification.count({
-      where: {
-        orgId: tenant.orgId,
-        readAt: null,
-        OR: [{ tenantId: tenant.id }, { userId }],
-      },
-    }),
-    prisma.leaseSignatureSigner.findMany({
-      where: {
-        userId,
-        status: "PENDING",
-        envelope: {
-          orgId: tenant.orgId,
-          status: { in: ["PENDING", "PARTIALLY_SIGNED"] },
-          expiresAt: { gt: new Date() },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: {
-        id: true,
-        role: true,
-        envelopeId: true,
-        envelope: {
+    softQuery(
+      "paymentLedger",
+      () =>
+        activeOrgId
+          ? getTenantLedger(userId, activeOrgId)
+          : Promise.resolve(null),
+      null,
+    ),
+    softQuery(
+      "organizationSettings",
+      () =>
+        prisma.organizationSettings.findUnique({
+          where: { orgId: tenant.orgId },
+          select: { customFields: true },
+        }),
+      null,
+    ),
+    softQuery(
+      "unreadNotificationCount",
+      () =>
+        prisma.notification.count({
+          where: {
+            orgId: tenant.orgId,
+            readAt: null,
+            OR: [{ tenantId: tenant.id }, { userId }],
+          },
+        }),
+      0,
+    ),
+    softQuery(
+      "pendingLeaseSignatures",
+      () =>
+        prisma.leaseSignatureSigner.findMany({
+          where: {
+            userId,
+            status: "PENDING",
+            envelope: {
+              orgId: tenant.orgId,
+              status: { in: ["PENDING", "PARTIALLY_SIGNED"] },
+              expiresAt: { gt: new Date() },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 5,
           select: {
-            expiresAt: true,
-            lease: {
+            id: true,
+            role: true,
+            envelopeId: true,
+            envelope: {
               select: {
-                id: true,
-                unit: {
+                expiresAt: true,
+                lease: {
                   select: {
-                    houseNo: true,
-                    property: { select: { name: true } },
+                    id: true,
+                    unit: {
+                      select: {
+                        houseNo: true,
+                        property: { select: { name: true } },
+                      },
+                    },
                   },
                 },
               },
             },
           },
-        },
-      },
-    }),
-    resolveCaretakerContact({
-      orgId: tenant.orgId,
-      leaseId: options?.leaseId,
-      unitId: options?.unitId,
-      propertyId: options?.propertyId,
-      buildingId: options?.buildingId,
-    }),
-    prisma.documentRecord.findMany({
-      where: {
-        orgId: tenant.orgId,
-        documentType: "LEASE",
-        entityType: "Lease",
-      },
-      orderBy: { issuedAt: "desc" },
-      take: 10,
-      select: {
-        entityId: true,
-        serialNumber: true,
-        verificationCode: true,
-        metadata: true,
-      },
-    }),
-  ]);
-
-  const activeLeases = await prisma.lease.findMany({
-    where: {
-      tenantId: tenant.id,
-      orgId: tenant.orgId,
-      deletedAt: null,
-      status: "ACTIVE",
-    },
-    select: { id: true },
-  });
-  const activeLeaseIds = new Set(activeLeases.map((lease) => lease.id));
-
-  const leaseDocDetails = await Promise.all(
-    leaseDocuments
-      .filter((doc) => activeLeaseIds.has(doc.entityId))
-      .map(async (doc) => {
-        const lease = await prisma.lease.findUnique({
-          where: { id: doc.entityId },
+        }),
+      [],
+    ),
+    softQuery(
+      "caretakerContact",
+      () =>
+        resolveCaretakerContact({
+          orgId: tenant.orgId,
+          leaseId: options?.leaseId,
+          unitId: options?.unitId,
+          propertyId: options?.propertyId,
+          buildingId: options?.buildingId,
+        }),
+      null,
+    ),
+    softQuery(
+      "leaseDocuments",
+      () =>
+        prisma.documentRecord.findMany({
+          where: {
+            orgId: tenant.orgId,
+            documentType: "LEASE",
+            entityType: "Lease",
+          },
+          orderBy: { issuedAt: "desc" },
+          take: 10,
           select: {
+            entityId: true,
+            serialNumber: true,
+            verificationCode: true,
+            metadata: true,
+          },
+        }),
+      [],
+    ),
+    softQuery(
+      "activeLeases",
+      () =>
+        prisma.lease.findMany({
+          where: {
+            tenantId: tenant.id,
+            orgId: tenant.orgId,
+            deletedAt: null,
+            status: "ACTIVE",
+          },
+          select: {
+            id: true,
             unit: {
               select: {
                 houseNo: true,
@@ -249,19 +289,29 @@ export async function getTenantPortalContext(
               },
             },
           },
-        });
+        }),
+      [],
+    ),
+  ]);
 
-        if (!lease) return null;
+  const activeLeaseIds = new Set(activeLeases.map((lease) => lease.id));
+  const leaseById = new Map(activeLeases.map((lease) => [lease.id, lease]));
 
-        return {
-          leaseId: doc.entityId,
-          serialNumber: doc.serialNumber,
-          verificationCode: doc.verificationCode,
-          propertyName: lease.unit.property.name,
-          unitName: lease.unit.houseNo,
-        };
-      }),
-  );
+  // Prefer already-loaded lease unit info — avoid N+1 queries that stress the pool.
+  const leaseDocDetails = leaseDocuments
+    .filter((doc) => activeLeaseIds.has(doc.entityId))
+    .map((doc) => {
+      const lease = leaseById.get(doc.entityId);
+      if (!lease) return null;
+      return {
+        leaseId: doc.entityId,
+        serialNumber: doc.serialNumber,
+        verificationCode: doc.verificationCode,
+        propertyName: lease.unit.property.name,
+        unitName: lease.unit.houseNo,
+      };
+    })
+    .filter((doc): doc is NonNullable<typeof doc> => doc !== null);
 
   return {
     tenant,
@@ -278,9 +328,7 @@ export async function getTenantPortalContext(
       expiresAt: signer.envelope.expiresAt,
     })),
     caretakerContact,
-    leaseDocuments: leaseDocDetails.filter(
-      (doc): doc is NonNullable<typeof doc> => doc !== null,
-    ),
+    leaseDocuments: leaseDocDetails,
   };
 }
 

@@ -5,7 +5,7 @@ import {
   rentalLocationSlug,
 } from "@/lib/public-rental-seo";
 import { APP_URL, buildUrlEntry, formatDate, wrapUrlset } from "@/lib/sitemap-utils";
-import { vacancyPublicSlug } from "@/lib/public-vacancy-slug";
+import { vacancyPublicSlug } from "./slug";
 
 function categorySlug(type: string) {
   switch (type) {

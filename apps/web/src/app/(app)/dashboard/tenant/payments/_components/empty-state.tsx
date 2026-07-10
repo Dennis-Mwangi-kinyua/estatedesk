@@ -7,7 +7,7 @@ export function EmptyState() {
       <h1 className="text-xl font-semibold tracking-tight text-foreground">
         My Payments
       </h1>
-      <p className="mt-2 text-sm text-muted-foreground">
+      <p className="mt-2 text-sm text-foreground/75">
         No payment records found for your account.
       </p>
 

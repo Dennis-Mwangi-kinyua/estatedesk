@@ -4,7 +4,7 @@ import {
   buildVacancyInquiriesPageHref,
   formatInquiryStatus,
   inquiryStatusClasses,
-} from "../../src/app/(app)/dashboard/org/vacancy-inquiries/_lib/helpers";
+} from "../../apps/web/src/app/(app)/dashboard/org/vacancy-inquiries/_lib/helpers";
 
 describe("buildVacancyInquiriesPageHref", () => {
   it("returns the base path when no filters are active", () => {

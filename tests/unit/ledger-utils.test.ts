@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import ledgerUtils from "../../src/lib/ledger-utils";
+import ledgerUtils from "../../apps/web/src/lib/ledger-utils";
 
 const {
   addMonthsToPeriod,

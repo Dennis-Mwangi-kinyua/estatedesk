@@ -33,7 +33,7 @@ export function ReadWorkspace({ data }: { data: CaretakerMeterReadPageData }) {
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Meter reading capture for assigned occupied units" />
+      <CaretakerWorkspaceFooter note="Meter readings per assigned unit · building or single-unit scope" />
     </div>
   );
 }

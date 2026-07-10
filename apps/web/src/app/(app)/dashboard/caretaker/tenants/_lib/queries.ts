@@ -1,4 +1,4 @@
-import { TenantStatus } from "@prisma/client";
+import { Prisma, TenantStatus } from "@prisma/client";
 import { getPagination } from "@/lib/db/pagination";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
@@ -17,6 +17,7 @@ const emptyTenantPage = {
   totalPages: 1,
   showingFrom: 0,
   showingTo: 0,
+  query: "",
 } as const;
 
 export async function getCaretakerTenantsData(args: {
@@ -24,7 +25,10 @@ export async function getCaretakerTenantsData(args: {
   caretakerUserId: string;
   membershipScope: Parameters<typeof getCaretakerAllowedUnitIds>[0]["membershipScope"];
   page?: number;
+  query?: string;
 }) {
+  const query = (args.query ?? "").trim();
+
   try {
     const allowedUnitIds = await retryTransientDatabaseOperation(
       () =>
@@ -41,20 +45,45 @@ export async function getCaretakerTenantsData(args: {
         ok: true as const,
         ...emptyTenantPage,
         tenants: [],
+        query,
       };
     }
 
-    const tenantWhere = {
+    const textFilter = query
+      ? ({ contains: query, mode: "insensitive" } as const)
+      : null;
+
+    const tenantWhere: Prisma.TenantWhereInput = {
       orgId: args.orgId,
       deletedAt: null,
       leases: {
         some: {
           deletedAt: null,
-          unitId: {
-            in: allowedUnitIds,
-          },
+          unitId: { in: allowedUnitIds },
         },
       },
+      ...(textFilter
+        ? {
+            OR: [
+              { fullName: textFilter },
+              { phone: { contains: query } },
+              { email: textFilter },
+              {
+                leases: {
+                  some: {
+                    deletedAt: null,
+                    unitId: { in: allowedUnitIds },
+                    OR: [
+                      { unit: { houseNo: textFilter } },
+                      { unit: { property: { name: textFilter } } },
+                      { unit: { building: { name: textFilter } } },
+                    ],
+                  },
+                },
+              },
+            ],
+          }
+        : {}),
     };
 
     const { page, skip, take } = getPagination({
@@ -73,37 +102,24 @@ export async function getCaretakerTenantsData(args: {
         Promise.all([
           prisma.tenant.count({ where: tenantWhere }),
           prisma.tenant.count({
-            where: {
-              ...tenantWhere,
-              status: TenantStatus.ACTIVE,
-            },
+            where: { ...tenantWhere, status: TenantStatus.ACTIVE },
           }),
           prisma.tenant.count({
-            where: {
-              ...tenantWhere,
-              status: TenantStatus.INACTIVE,
-            },
+            where: { ...tenantWhere, status: TenantStatus.INACTIVE },
           }),
           prisma.tenant.count({
-            where: {
-              ...tenantWhere,
-              status: TenantStatus.BLACKLISTED,
-            },
+            where: { ...tenantWhere, status: TenantStatus.BLACKLISTED },
           }),
           prisma.tenant.findMany({
             where: tenantWhere,
-            orderBy: {
-              createdAt: "desc",
-            },
+            orderBy: [{ fullName: "asc" }],
             skip,
             take,
             include: {
               leases: {
                 where: {
                   deletedAt: null,
-                  unitId: {
-                    in: allowedUnitIds,
-                  },
+                  unitId: { in: allowedUnitIds },
                 },
                 orderBy: [{ status: "asc" }, { createdAt: "desc" }],
                 include: {
@@ -114,16 +130,10 @@ export async function getCaretakerTenantsData(args: {
                       rentAmount: true,
                       status: true,
                       property: {
-                        select: {
-                          id: true,
-                          name: true,
-                        },
+                        select: { id: true, name: true },
                       },
                       building: {
-                        select: {
-                          id: true,
-                          name: true,
-                        },
+                        select: { id: true, name: true },
                       },
                     },
                   },
@@ -151,6 +161,7 @@ export async function getCaretakerTenantsData(args: {
       totalPages,
       showingFrom,
       showingTo,
+      query,
     };
   } catch (error) {
     logServerError("caretaker.tenants.load", error);
@@ -160,6 +171,7 @@ export async function getCaretakerTenantsData(args: {
       errorMessage: TENANTS_LOAD_ERROR_MESSAGE,
       ...emptyTenantPage,
       tenants: [],
+      query,
     };
   }
 }

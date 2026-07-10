@@ -1,7 +1,7 @@
 import {
   stripLegacyVacancySlug,
   vacancyPublicSlug,
-} from "@/lib/public-vacancy-slug";
+} from "./slug";
 
 export type VacancySlugIndexEntry = {
   id: string;

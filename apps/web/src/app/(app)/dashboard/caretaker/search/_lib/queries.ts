@@ -95,6 +95,7 @@ export async function getCaretakerSearchResults({
               orderBy: { fullName: "asc" },
               select: {
                 id: true,
+                slug: true,
                 fullName: true,
                 phone: true,
                 status: true,

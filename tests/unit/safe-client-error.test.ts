@@ -5,7 +5,7 @@ import {
   ClientSafeError,
   isInternalErrorMessage,
   safeClientMessage,
-} from "../../src/lib/errors/client-safe-error";
+} from "../../apps/web/src/lib/errors/client-safe-error";
 
 describe("safe client error helpers", () => {
   it("returns explicit client-safe errors", () => {

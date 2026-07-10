@@ -37,7 +37,7 @@ import {
   SubscriptionStatus,
 } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { normalizeDatabaseUrlSslMode } from "../src/lib/config/env";
+import { normalizeDatabaseUrlSslMode } from "../apps/web/src/lib/config/env";
 
 const connectionString = process.env.DATABASE_URL
   ? normalizeDatabaseUrlSslMode(process.env.DATABASE_URL)
@@ -522,6 +522,7 @@ async function main() {
       userId: tenantUser.id,
       type: TenantType.INDIVIDUAL,
       fullName: "Faith Wanjiku",
+      slug: "faith-wanjiku",
       phone: "+254700000008",
       email: "faith.tenant@gmail.com",
       nationalId: "12345678",

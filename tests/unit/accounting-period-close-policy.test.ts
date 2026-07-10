@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildPeriodCloseLines } from "../../src/lib/accounting/period-close-policy";
+import { buildPeriodCloseLines } from "../../apps/web/src/lib/accounting/period-close-policy";
 
 describe("period close policy", () => {
   it("builds balanced closing lines to retained earnings", () => {

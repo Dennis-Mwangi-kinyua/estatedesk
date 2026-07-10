@@ -1,5 +1,5 @@
 import { revalidatePath, revalidateTag } from "next/cache";
-import { vacancyPublicSlug } from "@/lib/public-vacancy-slug";
+import { vacancyPublicSlug } from "./slug";
 
 export const PUBLIC_VACANCIES_CACHE_TAG = "public-vacancies";
 

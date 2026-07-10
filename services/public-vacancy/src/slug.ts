@@ -1,4 +1,4 @@
-import { decodePublicId, isEncodedPublicId } from "./public-id";
+import { decodePublicId, isEncodedPublicId } from "@/lib/public-id";
 
 const VACANCY_SCOPE = "public-vacancy";
 const LEGACY_TOKEN_SEPARATOR = "--";

@@ -86,7 +86,7 @@ export function SearchResults({
     primary: tenant.fullName,
     secondary: tenant.phone,
     status: tenant.status,
-    href: getCaretakerTenantHref(tenant.id),
+    href: getCaretakerTenantHref(tenant),
     date: tenant.updatedAt,
   }));
 

@@ -87,12 +87,12 @@ async function generateLegacyReceiptPdf(data: ReceiptPdfData) {
 
   page.drawRectangle({ x: 0, y: 770, width: 595.28, height: 71.89, color: ink });
   page.drawText("EstateDesk", { x, y: 805, size: 19, font: bold, color: rgb(1, 1, 1) });
-  page.drawText("VERIFIED PAYMENT RECEIPT", {
+  page.drawText("EstateDesk Receipt", {
     x,
     y: 784,
-    size: 9,
-    font: regular,
-    color: rgb(0.75, 0.78, 0.82),
+    size: 10,
+    font: bold,
+    color: rgb(1, 1, 1),
   });
 
   page.drawText(data.organizationName, { x, y: 730, size: 18, font: bold, color: ink });
@@ -224,7 +224,7 @@ async function generateEnhancedReceiptPdf(data: ReceiptPdfData) {
   const initials = data.organizationName.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "ED";
   page.drawText(initials, { x: 61, y: 791, size: 15, font: bold, color: rgb(1, 1, 1) });
   page.drawText(data.organizationName, { x: 110, y: 806, size: 17, font: bold, color: rgb(1, 1, 1) });
-  page.drawText("VERIFIED PAYMENT RECEIPT", { x: 110, y: 783, size: 9, font: regular, color: rgb(.75, .78, .82) });
+  page.drawText("EstateDesk Receipt", { x: 110, y: 783, size: 10, font: bold, color: rgb(1, 1, 1) });
   page.drawText(data.serialNumber, { x: 390, y: 783, size: 8, font: bold, color: rgb(1, 1, 1) });
 
   const issuer = [data.organizationAddress, data.organizationPhone, data.organizationEmail, data.kraPin ? `KRA PIN: ${data.kraPin}` : null].filter(Boolean).join("  |  ");

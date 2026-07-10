@@ -103,28 +103,42 @@ export async function POST(request: Request) {
   const transactionKey = receipt ? buildMpesaTransactionKey(receipt) : null;
 
   try {
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data:
-        callback.ResultCode === 0
-          ? {
-              gatewayStatus: "SUCCESS",
-              verificationStatus: "PENDING",
-              externalReference: receipt,
-              transactionReferenceKey: transactionKey,
-              phoneUsed: phone || undefined,
-              paidAt: new Date(),
-              callbackRaw: payload as Prisma.InputJsonValue,
-              notes: `Daraja confirmed KES ${amount}; awaiting allocation verification.`,
-            }
-          : {
-              gatewayStatus: "FAILED",
-              verificationStatus: "REJECTED",
-              reconciliationStatus: "DISPUTED",
-              reconciliationNotes: callback.ResultDesc ?? "Daraja payment failed.",
-              callbackRaw: payload as Prisma.InputJsonValue,
-            },
-    });
+    if (callback.ResultCode !== 0) {
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          gatewayStatus: "FAILED",
+          verificationStatus: "REJECTED",
+          reconciliationStatus: "DISPUTED",
+          reconciliationNotes: callback.ResultDesc ?? "Daraja payment failed.",
+          callbackRaw: payload as Prisma.InputJsonValue,
+        },
+      });
+    } else {
+      // Persist gateway success fields first, then auto-settle (allocate + receipt).
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          gatewayStatus: "SUCCESS",
+          externalReference: receipt,
+          transactionReferenceKey: transactionKey,
+          phoneUsed: phone || undefined,
+          paidAt: new Date(),
+          callbackRaw: payload as Prisma.InputJsonValue,
+          notes: `Daraja confirmed KES ${amount}. Auto-settling bill balances.`,
+        },
+      });
+
+      const { settleGatewayPayment } = await import(
+        "@/lib/payments/settle-payment"
+      );
+      await prisma.$transaction(async (tx) => {
+        await settleGatewayPayment({
+          db: tx,
+          paymentId: payment.id,
+        });
+      });
+    }
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return Response.json({ ok: false, error: "Duplicate M-Pesa receipt" }, { status: 409 });

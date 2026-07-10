@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { getGuideBySlug } from "../../src/lib/guides";
-import { getInAppHelpArticlePath, getInAppHelpHubPath } from "../../src/lib/help/help-workspace";
+import { getGuideBySlug } from "../../apps/web/src/lib/guides";
+import { getInAppHelpArticlePath, getInAppHelpHubPath } from "../../apps/web/src/lib/help/help-workspace";
 import {
   canAccessGuideSlug,
   canAccessGuideTopic,
   getInAppGuideTopic,
   inAppGuideTopics,
   listGuideTopicsForWorkspace,
-} from "../../src/lib/help/in-app-guides";
+} from "../../apps/web/src/lib/help/in-app-guides";
 
 describe("in-app guides", () => {
   it("maps every in-app topic to a published guide article", () => {
@@ -42,11 +42,12 @@ describe("in-app guides", () => {
     assert.equal(canAccessGuideTopic("caretaker", "org", "ADMIN"), false);
   });
 
-  it("exposes every guide topic to the platform workspace", () => {
-    assert.deepEqual(
-      listGuideTopicsForWorkspace("platform"),
-      Object.keys(inAppGuideTopics),
-    );
+  it("exposes platform-scoped guide topics to the platform workspace", () => {
+    // HEAD product filters platform workspace to topics that include "platform".
+    assert.deepEqual(listGuideTopicsForWorkspace("platform"), [
+      "platformControl",
+      "platformAdminOps",
+    ]);
   });
 
   it("keeps tenant and caretaker topics inside their workspaces", () => {

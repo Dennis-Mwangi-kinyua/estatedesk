@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { computeVariance } from "../../src/lib/accounting/budget-policy";
+import { computeVariance } from "../../apps/web/src/lib/accounting/budget-policy";
 
 describe("accounting budgets helpers", () => {
   it("computes variance and percentage", () => {

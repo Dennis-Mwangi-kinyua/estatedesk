@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import { GuideArticlePage } from "@/components/marketing/guide-article-page";
 import {
-  getAllGuides,
+  getPublicGuides,
   getGuideBySlug,
   getGuidePath,
+  isPublicGuideArticle,
 } from "@/lib/guides";
 import { publicPageMetadata } from "@/lib/seo";
 
@@ -14,7 +15,7 @@ type PageProps = {
 };
 
 export function generateStaticParams() {
-  return getAllGuides().map((guide) => ({
+  return getPublicGuides().map((guide) => ({
     slug: guide.slug,
   }));
 }
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const guide = getGuideBySlug(slug);
 
-  if (!guide) {
+  if (!guide || !isPublicGuideArticle(guide)) {
     return {};
   }
 
@@ -40,7 +41,7 @@ export default async function GuideArticleRoute({ params }: PageProps) {
   const { slug } = await params;
   const guide = getGuideBySlug(slug);
 
-  if (!guide) {
+  if (!guide || !isPublicGuideArticle(guide)) {
     notFound();
   }
 

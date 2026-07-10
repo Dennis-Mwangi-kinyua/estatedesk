@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { reconciliationVariance } from "../../src/lib/accounting/budget-policy";
+import { reconciliationVariance } from "../../apps/web/src/lib/accounting/budget-policy";
 
 describe("bank reconciliation helpers", () => {
   it("computes statement to GL variance", () => {

@@ -94,7 +94,10 @@ export type NotificationItem = {
   title: string;
   message: string;
   type: string;
+  /** Primary channel (prefer IN_APP). Prefer `channels` for display. */
   channel: string;
+  /** All delivery channels for this logical event (deduped). */
+  channels: string[];
   status: string;
   readAt: Date | null;
   createdAt: Date;

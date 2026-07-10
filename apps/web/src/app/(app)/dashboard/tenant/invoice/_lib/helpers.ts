@@ -10,6 +10,10 @@ import {
   isTenantVisibleWaterBillStatus,
 } from "@/lib/water-bills/status";
 import type { CombinedBill } from "./types";
+import {
+  tenantInvoiceDownloadPath,
+  tenantInvoiceViewPath,
+} from "./paths";
 
 export function formatMoney(value: number) {
   return new Intl.NumberFormat("en-KE", {
@@ -25,6 +29,10 @@ export function formatDate(value: Date | string) {
     month: "short",
     day: "numeric",
   }).format(new Date(value));
+}
+
+export function formatReadingStatus(status: string) {
+  return status.replaceAll("_", " ");
 }
 
 export function getChargeTypeLabel(type: ChargeType): CombinedBill["typeLabel"] | null {
@@ -86,6 +94,9 @@ export function getBillStatusBadgeClasses(bill: CombinedBill) {
     }
     if (bill.rawStatus === "PARTIAL" || (bill.amountPaid ?? 0) > 0) {
       return getChargeStatusClasses("PARTIAL");
+    }
+    if (bill.rawStatus === "PENDING APPROVAL") {
+      return getWaterBillStatusClasses("PENDING_APPROVAL");
     }
     return getChargeStatusClasses("UNPAID");
   }
@@ -182,6 +193,8 @@ export function buildCombinedBills(
       rawStatus: charge.status,
       description: charge.description,
       receiptUrl,
+      invoiceUrl: null,
+      invoiceViewUrl: null,
       isPaid,
       payNowHref: isPaid
         ? null
@@ -233,6 +246,8 @@ export function buildCombinedBills(
       rawStatus: bill.status,
       description: bill.notes,
       receiptUrl,
+      invoiceUrl: null,
+      invoiceViewUrl: null,
       isPaid: isFullyPaid || balance <= 0,
       payNowHref:
         isFullyPaid || !canPay || balance <= 0
@@ -298,6 +313,8 @@ export function buildCombinedBills(
         rawStatus: status,
         description: lines.map((l) => l.label).join(" + "),
         receiptUrl,
+        invoiceUrl: tenantInvoiceDownloadPath(period),
+        invoiceViewUrl: tenantInvoiceViewPath(period),
         isPaid,
         lines,
         payNowHref: canPay

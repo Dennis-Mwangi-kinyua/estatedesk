@@ -9,7 +9,7 @@ import {
   buildThemeCookie,
   getServerResolvedTheme,
   resolveTheme,
-} from "../../src/lib/theme/preference";
+} from "../../apps/web/src/lib/theme/preference";
 
 const ROOT = join(import.meta.dirname, "..", "..");
 
@@ -33,17 +33,19 @@ describe("theme initialization", () => {
     assert.match(buildThemeCookie("system"), /SameSite=Lax/);
   });
 
-  it("loads theme init before interaction via next/script", () => {
-    const initScript = readFileSync(
-      join(ROOT, "src/components/theme/theme-init-script.tsx"),
+  it("inlines theme init in the root layout head", () => {
+    const layout = readFileSync(join(ROOT, "apps/web/src/app/layout.tsx"), "utf8");
+    const inlineScript = readFileSync(
+      join(ROOT, "apps/web/src/components/layout/inline-script.tsx"),
       "utf8",
     );
-    const layout = readFileSync(join(ROOT, "src/app/layout.tsx"), "utf8");
 
-    assert.match(initScript, /from "next\/script"/);
-    assert.match(initScript, /strategy="beforeInteractive"/);
-    assert.match(initScript, /dangerouslySetInnerHTML/);
-    assert.doesNotMatch(initScript, /<script[\s>]/);
+    assert.match(layout, /THEME_INIT_SCRIPT/);
+    assert.match(layout, /InlineScript/);
+    assert.match(layout, /id="estatedesk-theme-init"/);
+    assert.match(inlineScript, /text\/plain/);
+    assert.match(inlineScript, /suppressHydrationWarning/);
+    assert.doesNotMatch(layout, /from "next\/script"/);
     assert.match(THEME_INIT_SCRIPT, /localStorage\.getItem/);
     assert.match(THEME_INIT_SCRIPT, /classList\.add\(resolvedTheme\)/);
     assert.match(layout, /getServerResolvedTheme/);

@@ -19,12 +19,12 @@ export function CheckoutWorkspace() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
         <button
           type="button"
           onClick={() => router.back()}
-          className="mb-4 inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-100"
+          className="mb-4 inline-flex items-center gap-2 rounded-2xl border border-border bg-card px-4 py-2 text-sm font-medium text-foreground/80 shadow-sm transition hover:bg-muted"
         >
           <ArrowLeft className="h-4 w-4" />
           Back

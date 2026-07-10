@@ -2,7 +2,7 @@
 
 This matrix tracks documentation and operational evidence that must be complete before commercial launch. It prevents polished templates from being mistaken for finished work.
 
-Last reviewed: 2026-07-04
+Last reviewed: 2026-07-10
 
 ## Summary
 
@@ -10,16 +10,23 @@ Last reviewed: 2026-07-04
 | --- | --- | --- |
 | Developer onboarding | Complete | `README.md`, `docs/PROJECT_DOCUMENTATION.md`, `docs/ENVIRONMENT.md` |
 | Product documentation | Complete | `docs/PRODUCT_DOCUMENTATION.md` |
+| Technical project documentation | Complete | `docs/PROJECT_DOCUMENTATION.md` (monorepo, payments, architecture Phase 1) |
 | Public guides and SEO content | Complete | `/guides`, tests in `tests/unit/guides.test.ts` |
+| SEO indexability (code) | Complete | `docs/SEO_INDEXING.md`; sitemaps/robots/meta verified 2026-07-10 |
+| Search Console submission | Operator pending | Submit `https://estatedesk.co.ke/sitemap-index.xml` in GSC/Bing |
 | API reference | Complete | `docs/API.md` |
 | Operations runbook | Complete | `docs/OPERATIONS.md`, `docs/production-deploy-checklist.md` |
-| Sitemap documentation | Complete | `SITEMAPS.md` |
+| Sitemap documentation | Complete | `SITEMAPS.md`, `docs/SEO_INDEXING.md` |
+| QA report (smoke + unit) | Complete | `docs/QA_REPORT.md` (2026-07-10) |
+| Payment product rules | Complete (manual E2E pending) | Combined bills + gateway/manual settlement |
+| DB migration health | Complete | `prisma migrate status` up to date (2026-07-10) |
 | In-app help links | Complete | Role-scoped protected routes at `/dashboard/{org,tenant,caretaker,landlord}/help` and `/platform/help` |
 | Theme coherence | Complete | Shared `ed-dashboard-shell` primitives and tenant/org surface migration |
 | Accessibility QA | In progress | Automated baseline in `tests/unit/accessibility-baseline.test.ts`; manual matrix in `docs/ACCESSIBILITY_QA.md` |
 | Kenya legal / privacy review | In progress | Counsel packet in `docs/KENYA_LEGAL_TECHNICAL_ALIGNMENT.md`; sign-off pending in `docs/KENYA_LEGAL_REVIEW.md` |
 | Backup restore drill | In progress | Backup captured and validated in `docs/RESTORE_DRILL_EVIDENCE.md`; disposable full restore still required |
 | Search Console automation | Partial | Manual GSC submission documented; automated workflows not yet in repo |
+| Full microservices cutover | Not started (by design) | Modular monorepo Phase 1 — `docs/architecture/SERVICES.md` |
 
 ## Launch blockers
 

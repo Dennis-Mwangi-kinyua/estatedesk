@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { getCaretakerManagedBuildingUnitIds } from "@/lib/caretaker/access";
+import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import {
   decodePublicId,
@@ -27,7 +27,7 @@ export default async function ReadSingleWaterBillPage({
   const currentPeriod = period ?? CURRENT_PERIOD;
   const session = await requireCaretakerAccess();
 
-  const allowedUnitIds = await getCaretakerManagedBuildingUnitIds({
+  const allowedUnitIds = await getCaretakerAllowedUnitIds({
     orgId: session.activeOrgId!,
     caretakerUserId: session.userId,
     membershipScope: session.membershipScope,

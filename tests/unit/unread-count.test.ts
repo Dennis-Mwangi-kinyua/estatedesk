@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildPersonalUnreadNotificationWhere } from "../../src/lib/notifications/unread-count-query";
+import { buildPersonalUnreadNotificationWhere } from "../../apps/web/src/lib/notifications/unread-count-query";
 
 describe("unread notification count", () => {
   it("scopes tenant unread notifications to tenant and user records", () => {
