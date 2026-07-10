@@ -1,15 +1,15 @@
 "use client";
 
-import type { ComponentType, ReactNode } from "react";
-import { BookOpen, ChevronRight } from "lucide-react";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+  type ComponentType,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
+import { BookOpen, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type WorkspaceDetailPanelProps = {
@@ -33,54 +33,125 @@ export function WorkspaceDetailPanel({
   triggerClassName,
   children,
 }: WorkspaceDetailPanelProps) {
-  return (
-    <aside className={className}>
-      <Sheet>
-        <SheetTrigger asChild>
-          <button
-            type="button"
-            className={cn(
-              "group w-full overflow-hidden rounded-3xl border border-border bg-card p-4 text-left text-card-foreground shadow-sm transition hover:border-primary/25 hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              triggerClassName,
-            )}
-          >
-            <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/30 text-muted-foreground transition group-hover:border-primary/20 group-hover:bg-primary/10 group-hover:text-primary">
-                <Icon className="h-4 w-4" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  {eyebrow}
-                </span>
-                <span className="mt-1 block text-sm font-semibold text-foreground">
+  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const titleId = useId();
+  const descriptionId = useId();
+
+  const close = useCallback(() => setOpen(false), []);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        close();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [close, open]);
+
+  const drawer =
+    open && mounted
+      ? createPortal(
+          <div className="fixed inset-0 z-[200] flex justify-end">
+            <button
+              type="button"
+              className="absolute inset-0 bg-black/40"
+              aria-label="Close panel"
+              onClick={close}
+            />
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              aria-describedby={description ? descriptionId : undefined}
+              className="workspace-detail-drawer relative z-[201] flex h-dvh max-h-dvh w-full max-w-xl flex-col border-l border-border bg-popover text-popover-foreground shadow-2xl"
+            >
+              <header className="shrink-0 border-b border-border px-5 py-4 pr-14">
+                <h2 id={titleId} className="text-lg font-semibold text-foreground">
                   {title}
-                </span>
+                </h2>
                 {description ? (
-                  <span className="mt-1 block line-clamp-2 text-sm leading-6 text-muted-foreground">
+                  <p
+                    id={descriptionId}
+                    className="mt-1 text-sm leading-6 text-muted-foreground"
+                  >
                     {description}
-                  </span>
+                  </p>
                 ) : null}
-                <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                  {actionLabel}
-                  <ChevronRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-                </span>
-              </span>
+                <button
+                  type="button"
+                  onClick={close}
+                  aria-label="Close"
+                  className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </header>
+              <div
+                data-workspace-drawer-scroll
+                className="workspace-detail-drawer-scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 py-4"
+              >
+                <div className="space-y-4 pb-8">{children}</div>
+              </div>
             </div>
-          </button>
-        </SheetTrigger>
-        <SheetContent
-          side="right"
-          className="flex h-full max-h-dvh w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-xl"
+          </div>,
+          document.body,
+        )
+      : null;
+
+  return (
+    <>
+      <aside className={className}>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className={cn(
+            "group w-full overflow-hidden rounded-3xl border border-border bg-card p-4 text-left text-card-foreground shadow-sm transition hover:border-primary/25 hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            triggerClassName,
+          )}
         >
-          <SheetHeader className="shrink-0 border-b border-border px-5 py-4 pr-14 text-left">
-            <SheetTitle className="text-lg">{title}</SheetTitle>
-            {description ? <SheetDescription>{description}</SheetDescription> : null}
-          </SheetHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 [-webkit-overflow-scrolling:touch]">
-            <div className="space-y-4 pb-6">{children}</div>
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/30 text-muted-foreground transition group-hover:border-primary/20 group-hover:bg-primary/10 group-hover:text-primary">
+              <Icon className="h-4 w-4" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                {eyebrow}
+              </span>
+              <span className="mt-1 block text-sm font-semibold text-foreground">
+                {title}
+              </span>
+              {description ? (
+                <span className="mt-1 block line-clamp-2 text-sm leading-6 text-muted-foreground">
+                  {description}
+                </span>
+              ) : null}
+              <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                {actionLabel}
+                <ChevronRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+              </span>
+            </span>
           </div>
-        </SheetContent>
-      </Sheet>
-    </aside>
+        </button>
+      </aside>
+      {drawer}
+    </>
   );
 }

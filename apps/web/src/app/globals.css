@@ -1800,12 +1800,26 @@ html.light,
     padding-inline: clamp(0.75rem, 4vw, 1.25rem);
   }
 
-  /* Dialogs / sheets almost full-bleed on phone */
-  .ed-mobile-first :where([data-slot="dialog-content"], [data-slot="sheet-content"], [role="dialog"]) {
+  /* Centered dialogs on phone — exclude full-height side drawers */
+  .ed-mobile-first
+    :where([data-slot="dialog-content"], [data-slot="sheet-content"]):not(
+      .workspace-detail-drawer
+    ):not([data-side="right"]):not([data-side="left"]) {
     max-width: min(100vw - 1rem, 32rem) !important;
     width: min(100vw - 1rem, 32rem);
     margin-inline: auto;
     border-radius: var(--ed-radius-mobile);
+  }
+
+  .ed-mobile-first .workspace-detail-drawer,
+  .ed-mobile-first [data-slot="sheet-content"][data-side="right"],
+  .ed-mobile-first [data-slot="sheet-content"][data-side="left"] {
+    width: 100% !important;
+    max-width: min(100vw, 36rem) !important;
+    margin-inline: 0 !important;
+    border-radius: 0 !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
   }
 
   /* Avoid horizontal scroll traps from absolute decorative layers */
@@ -1882,6 +1896,20 @@ html.light,
 /* Utility helpers for intentional exceptions */
 .ed-keep-cols {
   /* opt-out of forced single-column collapse */
+}
+
+/* Workspace guide / office detail drawers — reliable touch + wheel scroll */
+.workspace-detail-drawer-scroll,
+[data-workspace-drawer-scroll] {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+}
+
+[data-slot="sheet-content"] [data-workspace-drawer-scroll],
+[data-slot="sheet-content"] .workspace-detail-drawer-scroll {
+  min-height: 0;
 }
 
 .ed-keep-row {
