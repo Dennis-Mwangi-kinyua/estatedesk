@@ -28,13 +28,18 @@ type LandlordDashboardShellProps = {
 const navItems = [
   {
     label: "Overview",
-    href: "/dashboard/landlord#overview",
+    href: "/dashboard/landlord",
     icon: Home,
   },
   {
-    label: "Reports",
-    href: "/dashboard/landlord#reports",
+    label: "Statements",
+    href: "/dashboard/landlord/statements",
     icon: BarChart3,
+  },
+  {
+    label: "Payouts",
+    href: "/dashboard/landlord/payouts",
+    icon: Receipt,
   },
   {
     label: "Properties",
@@ -73,9 +78,13 @@ function LandlordNav({
     <nav className="space-y-2" aria-label="Landlord navigation">
       {navItems.map((item) => {
         const Icon = item.icon;
-        const itemHash = item.href.slice(item.href.indexOf("#"));
-        const active =
-          pathname === "/dashboard/landlord" && activeHash === itemHash;
+        const hashIndex = item.href.indexOf("#");
+        const hasHash = hashIndex >= 0;
+        const itemHash = hasHash ? item.href.slice(hashIndex) : "";
+        const pathOnly = hasHash ? item.href.slice(0, hashIndex) : item.href;
+        const active = hasHash
+          ? pathname === pathOnly && activeHash === itemHash
+          : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
         return (
           <HoverPrefetchLink

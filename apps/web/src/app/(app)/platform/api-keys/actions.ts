@@ -54,8 +54,8 @@ export async function isPlatformApiKeysUnlocked(userId: string) {
 }
 
 export async function unlockPlatformApiKeysPageAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
   });
 
   const configuredPassword = getPagePassword();
@@ -93,8 +93,8 @@ export async function unlockPlatformApiKeysPageAction(formData: FormData) {
 }
 
 async function requireUnlockedPlatformApiKeys() {
-  const session = await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
   });
 
   if (!(await isPlatformApiKeysUnlocked(session.userId))) {
@@ -111,8 +111,8 @@ export async function createVacantHousesApiKeyAction(
   const orgId = readString(formData, "orgId");
   const name = readString(formData, "name");
   const expiresAtRaw = readString(formData, "expiresAt");
-  const session = await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
   });
 
   if (!orgId) {
@@ -207,8 +207,8 @@ export async function togglePlatformApiKeyStatusAction(formData: FormData) {
     throw new Error("API key id is required.");
   }
 
-  const session = await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
   });
   const existing = await prisma.apiKey.findUnique({
     where: { id: apiKeyId },
@@ -258,8 +258,8 @@ export async function deletePlatformApiKeyAction(formData: FormData) {
     throw new Error("API key id is required.");
   }
 
-  const session = await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
   });
   const existing = await prisma.apiKey.findUnique({
     where: { id: apiKeyId },

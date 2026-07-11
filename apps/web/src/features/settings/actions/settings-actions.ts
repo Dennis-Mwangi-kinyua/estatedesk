@@ -283,25 +283,22 @@ export async function updatePaymentInstructionsAction(formData: FormData) {
   revalidatePath("/dashboard/tenant/payments/checkout");
 }
 
+/**
+ * Orgs may only update billing contact details.
+ * Plan changes are platform-controlled (Website Control / subscription override)
+ * or requested via requestPlanUpgradeAction.
+ */
 export async function updateBillingAction(formData: FormData) {
   const { orgId } = await ensureSettingsWriteAccess();
 
   const billingEmail = readOptionalString(formData, "billingEmail");
-  const plan = readString(formData, "subscriptionPlan") as
-    | "FREE"
-    | "PRO"
-    | "PLUS"
-    | "ENTERPRISE";
-
-  if (!["FREE", "PRO", "PLUS", "ENTERPRISE"].includes(plan)) {
-    throw new Error("Invalid subscription plan.");
-  }
 
   const existing = await prisma.subscription.findUnique({
     where: { orgId },
     select: {
       currentPeriodStart: true,
       currentPeriodEnd: true,
+      plan: true,
     },
   });
 
@@ -311,11 +308,10 @@ export async function updateBillingAction(formData: FormData) {
     where: { orgId },
     update: {
       billingEmail,
-      plan,
     },
     create: {
       orgId,
-      plan,
+      plan: "FREE",
       status: "ACTIVE",
       billingEmail,
       currentPeriodStart: existing?.currentPeriodStart ?? now,
@@ -326,9 +322,97 @@ export async function updateBillingAction(formData: FormData) {
   revalidatePath(SETTINGS_PATH);
 }
 
+export async function requestPlanUpgradeAction(formData: FormData) {
+  const { orgId } = await ensureSettingsWriteAccess();
+  const session = await requireUserSession();
+
+  const requestedPlan = readString(formData, "requestedPlan").toUpperCase() as
+    | "PRO"
+    | "PLUS"
+    | "ENTERPRISE";
+  const notes = readOptionalString(formData, "upgradeNotes");
+
+  if (!["PRO", "PLUS", "ENTERPRISE"].includes(requestedPlan)) {
+    throw new Error("Choose a valid plan to request (Pro, Plus, or Custom).");
+  }
+
+  const [org, subscription] = await Promise.all([
+    prisma.organization.findUnique({
+      where: { id: orgId },
+      select: { id: true, name: true, slug: true },
+    }),
+    prisma.subscription.findUnique({
+      where: { orgId },
+      select: { plan: true, status: true, metadata: true },
+    }),
+  ]);
+
+  if (!org) {
+    throw new Error("Organization not found.");
+  }
+
+  const metadata =
+    subscription?.metadata &&
+    typeof subscription.metadata === "object" &&
+    !Array.isArray(subscription.metadata)
+      ? (subscription.metadata as Record<string, unknown>)
+      : {};
+
+  const upgradeRequest = {
+    plan: requestedPlan,
+    notes: notes ?? null,
+    requestedAt: new Date().toISOString(),
+    requestedByUserId: session.userId,
+    requestedByName: session.fullName,
+    status: "PENDING",
+  };
+
+  const now = new Date();
+  await prisma.subscription.upsert({
+    where: { orgId },
+    update: {
+      metadata: {
+        ...metadata,
+        upgradeRequest,
+      } as Prisma.InputJsonValue,
+    },
+    create: {
+      orgId,
+      plan: "FREE",
+      status: "ACTIVE",
+      currentPeriodStart: now,
+      currentPeriodEnd: addMonths(now, 1),
+      metadata: { upgradeRequest } as Prisma.InputJsonValue,
+    },
+  });
+
+  await writeAuditLog({
+    orgId,
+    actorUserId: session.userId,
+    action: "SUBSCRIPTION_UPGRADE_REQUESTED",
+    entityType: "Subscription",
+    entityId: orgId,
+    metadata: {
+      orgName: org.name,
+      orgSlug: org.slug,
+      fromPlan: subscription?.plan ?? "FREE",
+      requestedPlan,
+      notes,
+    },
+  });
+
+  revalidatePath(SETTINGS_PATH);
+  revalidatePath("/platform/billing");
+  revalidatePath("/platform/subscriptions");
+  revalidatePath("/platform/onboarding");
+}
+
 export async function inviteMemberAction(formData: FormData) {
   const { orgId } = await ensureSettingsWriteAccess();
   const session = await requireUserSession();
+
+  const { assertCanCreateStaffUser } = await import("@/lib/billing/access");
+  await assertCanCreateStaffUser(orgId);
 
   const email = readString(formData, "email").toLowerCase();
   const role = readString(formData, "role") as

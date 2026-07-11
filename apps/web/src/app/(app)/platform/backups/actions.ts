@@ -14,8 +14,8 @@ function readString(formData: FormData, key: string) {
 }
 
 export async function recordBackupCheckpointAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
   });
 
   const note = readString(formData, "note") || "Manual backup checkpoint recorded";
@@ -51,8 +51,8 @@ export async function recordBackupCheckpointAction(formData: FormData) {
 }
 
 export async function markRestoreDrillAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
   });
 
   const note =

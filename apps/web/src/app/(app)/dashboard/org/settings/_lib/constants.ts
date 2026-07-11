@@ -30,7 +30,7 @@ export const SETTINGS_GUIDANCE = [
   {
     title: "Billing and plan",
     description:
-      "Review current plan, renewal date, and billing email before changing subscription tiers.",
+      "Review plan limits and billing email. Request upgrades for platform confirmation after payment — orgs cannot self-assign paid plans.",
     href: "/dashboard/org/settings/billing",
     actionLabel: "Open billing",
   },

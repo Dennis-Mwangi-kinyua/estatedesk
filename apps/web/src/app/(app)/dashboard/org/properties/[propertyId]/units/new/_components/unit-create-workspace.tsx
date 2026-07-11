@@ -14,6 +14,7 @@ import {
   panelShellClassName,
   StatCard,
 } from "../../../../_components/properties-ui";
+import { createUnitAction } from "../actions";
 
 export type UnitCreatePropertyData = {
   id: string;
@@ -81,7 +82,8 @@ export function UnitCreateWorkspace({
               </p>
             </div>
 
-            <form className="space-y-6">
+            <form action={createUnitAction} className="space-y-6">
+              <input type="hidden" name="propertyId" value={property.id} />
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-2">
                   <label
@@ -93,6 +95,7 @@ export function UnitCreateWorkspace({
                   <input
                     id="houseNo"
                     name="houseNo"
+                    required
                     className={fieldClassName}
                     placeholder="e.g. A1, B12, Shop 3"
                   />

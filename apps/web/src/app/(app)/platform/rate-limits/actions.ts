@@ -12,8 +12,8 @@ function readString(formData: FormData, key: string) {
 }
 
 export async function resetRateLimitBucketAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
   });
 
   const key = readString(formData, "key");
@@ -39,8 +39,8 @@ export async function resetRateLimitBucketAction(formData: FormData) {
 }
 
 export async function clearExpiredRateLimitBucketsAction() {
-  const session = await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
   });
 
   const result = await prisma.rateLimitBucket.deleteMany({
@@ -59,8 +59,8 @@ export async function clearExpiredRateLimitBucketsAction() {
 }
 
 export async function clearRateLimitScopeAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
   });
 
   const scope = readString(formData, "scope");

@@ -34,8 +34,8 @@ export default async function BillingRequiredPage() {
 
         <div className="mt-5 rounded-2xl border border-neutral-200 bg-white/80 p-4 text-left text-sm text-neutral-600">
           <p>
-            Contact the platform administrator to confirm payment or update your
-            subscription.
+            Pay the outstanding subscription fee, then ask a platform operator to
+            activate your plan. Organizations cannot self-assign paid plans.
           </p>
           <p className="mt-2">
             Trial ended: {access.trialEndsAt?.toLocaleDateString("en-KE") ?? "—"}
@@ -43,16 +43,34 @@ export default async function BillingRequiredPage() {
           <p>
             Grace ended: {access.graceEndsAt?.toLocaleDateString("en-KE") ?? "—"}
           </p>
+          <p className="mt-2">
+            Admins can open{" "}
+            <a
+              href="/dashboard/org/settings#billing"
+              className="font-semibold text-neutral-950 underline underline-offset-2"
+            >
+              Settings → Billing
+            </a>{" "}
+            to submit an upgrade request after payment.
+          </p>
         </div>
 
-        <form action={logoutAction} className="mt-5">
-          <button
-            type="submit"
-            className="ios-button inline-flex h-11 items-center justify-center rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white"
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+          <a
+            href="/contact"
+            className="ios-button inline-flex h-11 items-center justify-center rounded-2xl border border-neutral-300 bg-white px-5 text-sm font-semibold text-neutral-950"
           >
-            Logout
-          </button>
-        </form>
+            Contact support
+          </a>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="ios-button inline-flex h-11 w-full items-center justify-center rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white sm:w-auto"
+            >
+              Logout
+            </button>
+          </form>
+        </div>
       </section>
     </div>
   );

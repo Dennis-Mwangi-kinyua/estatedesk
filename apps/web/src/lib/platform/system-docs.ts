@@ -873,14 +873,15 @@ Org approveMeterReading / water-approval-queue
         bullets: [
           "Developer Home — ops snapshot (API keys, notification queues, failed payments, cron fails) + tool grid",
           "System Docs — this private deep documentation (you are here)",
-          "Website Control — kill switches / nuclear (SUPER_ADMIN)",
+          "Website Control — kill switches / nuclear (SUPER_ADMIN only)",
           "System Health — queues, payments, integrations",
           "API & Webhooks — catalog of external endpoints",
-          "API Keys — credentials vault (SUPER_ADMIN)",
+          "API Keys — credentials vault (platform operators)",
           "Feature Flags — org capabilities + global overrides",
-          "Jobs & Queues — cron runs (SUPER_ADMIN)",
-          "Rate Limits — buckets and resets",
-          "Data / Backups — exports, retention, drill evidence (SUPER_ADMIN)",
+          "Jobs & Queues — cron runs (platform operators)",
+          "Rate Limits — buckets and resets (platform operators)",
+          "Data / Backups — exports, retention, drill evidence (platform operators)",
+          "Site ops (dual mode) — orgs, users, admins, permissions, support, billing, subscriptions, broadcasts, settings",
           "Help — shorter platform operator guides",
           "Security / Audit Logs — dual-mode investigation",
         ],
@@ -889,7 +890,7 @@ Org approveMeterReading / water-approval-queue
       {
         heading: "Access matrix",
         paragraphs: [
-          "PLATFORM_ADMIN: developer home, health, API explorer, flags, rate limits, system docs, help, security, audit. SUPER_ADMIN: all of the above plus website control, API keys, jobs, data management, backups. Support Access is available to both platform roles under Admin mode.",
+          "PLATFORM_ADMIN and SUPER_ADMIN both get developer home, health, API explorer, flags, rate-limit ops, system docs, API keys, jobs, data, backups, and dual-mode site ops (orgs, users, admins, permissions, support, billing, subscriptions, broadcasts, settings, help, security, audit). Only Website Control (kill switches / nuclear ops) remains SUPER_ADMIN-only.",
         ],
       },
       {

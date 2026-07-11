@@ -104,17 +104,12 @@ export default async function DeveloperPortalPage({
 
   const accessRows = [
     {
-      tool: "Admin dashboard, orgs, users, billing, onboarding",
+      tool: "Site ops: orgs, users, admins, permissions, support, billing",
       platformAdmin: true,
       superAdmin: true,
     },
     {
-      tool: "Support Access (timed org entry)",
-      platformAdmin: true,
-      superAdmin: true,
-    },
-    {
-      tool: "Developer home, health, API explorer, flags, rate limits",
+      tool: "Developer home, health, API explorer, flags, rate-limit ops",
       platformAdmin: true,
       superAdmin: true,
     },
@@ -124,28 +119,28 @@ export default async function DeveloperPortalPage({
       superAdmin: true,
     },
     {
-      tool: "Website Control (kill switches, nuclear ops)",
-      platformAdmin: false,
-      superAdmin: true,
-    },
-    {
       tool: "API keys vault",
-      platformAdmin: false,
+      platformAdmin: true,
       superAdmin: true,
     },
     {
       tool: "Jobs & queues",
-      platformAdmin: false,
+      platformAdmin: true,
       superAdmin: true,
     },
     {
       tool: "Data management / backups",
-      platformAdmin: false,
+      platformAdmin: true,
       superAdmin: true,
     },
     {
-      tool: "Help · Website control / Admin ops guides",
+      tool: "Help · Security · Audit (dual mode)",
       platformAdmin: true,
+      superAdmin: true,
+    },
+    {
+      tool: "Website Control (kill switches, nuclear ops)",
+      platformAdmin: false,
       superAdmin: true,
     },
   ] as const;
@@ -171,9 +166,10 @@ export default async function DeveloperPortalPage({
     <div className="mx-auto w-full max-w-7xl space-y-4 sm:space-y-6">
       {params.error === "super-admin-only" ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50 sm:px-4">
-          That tool requires a <strong>super admin</strong>. Platform admins can use
-          health, feature flags, API explorer, rate-limit inspection, help, security,
-          and audit logs.
+          That tool requires a <strong>super admin</strong>. Platform admins can run
+          site ops (orgs, users, billing, support), API keys, jobs, data, backups,
+          flags, rate limits, health, help, security, and audit — only Website Control
+          stays super-admin only.
         </div>
       ) : null}
 
@@ -349,7 +345,8 @@ export default async function DeveloperPortalPage({
               </p>
               <p className="mt-1 text-xs leading-5 text-violet-800/80 dark:text-violet-200/80">
                 Health, APIs, flags, rate limits, dual-mode help/security/audit, and
-                super-admin-only keys/jobs/data/backups. Shortcut: Alt+Shift+D
+                site ops, keys, jobs, data, and backups. Website Control is
+                super-admin only. Shortcut: Alt+Shift+D
               </p>
             </div>
           </div>
@@ -358,7 +355,7 @@ export default async function DeveloperPortalPage({
 
       <Surface
         title="Access matrix"
-        description="Who can open which tools. SA-only rows need SUPER_ADMIN."
+        description="Platform admins get full site ops plus engineering tools. Only Website Control is SUPER_ADMIN-only."
       >
         {/* Mobile-first list (default). No table on small screens. */}
         <ul className="ed-access-matrix-list divide-y divide-border lg:hidden">

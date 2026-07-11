@@ -62,8 +62,8 @@ export default async function PlatformBackupsPage({
 }: {
   searchParams?: Promise<{ ok?: string }>;
 }) {
-  await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/dashboard",
   });
 
   const params = searchParams ? await searchParams : {};

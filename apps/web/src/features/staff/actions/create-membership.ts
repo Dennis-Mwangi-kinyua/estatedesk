@@ -6,6 +6,8 @@ import { hash } from "bcryptjs";
 import { OrgRole as PrismaOrgRole, Prisma, UserStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
+import { assertCanCreateStaffUser } from "@/lib/billing/access";
+import { requireOrgPermission } from "@/lib/permissions/guards";
 import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
 import { isSupportedCurrency } from "@/lib/currencies";
 import {
@@ -81,7 +83,17 @@ export async function createMembership(
   _previousState: CreateMembershipState,
   formData: FormData,
 ): Promise<CreateMembershipState> {
+  await requireOrgPermission("org.users.manage");
   const orgId = await requireCurrentOrgId();
+
+  try {
+    await assertCanCreateStaffUser(orgId);
+  } catch (error) {
+    return fail(
+      error instanceof Error ? error.message : "Staff user limit reached.",
+      0,
+    );
+  }
 
   const fullName = String(formData.get("fullName") ?? "").trim();
   const username = normalizeUsername(String(formData.get("username") ?? ""));

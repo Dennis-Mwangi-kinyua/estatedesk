@@ -32,13 +32,35 @@ export default async function OwnerStatementPrintPage({
     to?: string;
   }>;
 }) {
-  const session = await requireOrgRole(["ADMIN", "MANAGER", "ACCOUNTANT"]);
+  const session = await requireOrgRole([
+    "ADMIN",
+    "MANAGER",
+    "ACCOUNTANT",
+    "LANDLORD",
+  ]);
   const orgId = session.activeOrgId!;
   const resolved = (await searchParams) ?? {};
   const landlordId = resolved.landlordId;
 
   if (!landlordId) {
     notFound();
+  }
+
+  // Landlords may only print their own statement.
+  if (session.activeOrgRole === "LANDLORD") {
+    const ownProfile = await prisma.landlordProfile.findFirst({
+      where: {
+        id: landlordId,
+        orgId,
+        userId: session.userId,
+        deletedAt: null,
+        isActive: true,
+      },
+      select: { id: true },
+    });
+    if (!ownProfile) {
+      notFound();
+    }
   }
 
   const now = new Date();

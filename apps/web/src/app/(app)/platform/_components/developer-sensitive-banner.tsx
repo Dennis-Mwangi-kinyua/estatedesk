@@ -19,8 +19,9 @@ export function DeveloperSensitiveBanner({ isSuperAdmin }: { isSuperAdmin: boole
         <div className="flex items-start gap-2">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
-            You are in <strong>Developer mode</strong>. Super-admin-only tools (API keys,
-            jobs, data, backups) are hidden from platform admins.
+            You are in <strong>Developer mode</strong> with full site-ops access (orgs,
+            users, billing, support, API keys, jobs, data, backups). Only{" "}
+            <strong>Website Control</strong> remains super-admin only.
           </p>
         </div>
       </div>
@@ -33,12 +34,12 @@ export function DeveloperSensitiveBanner({ isSuperAdmin }: { isSuperAdmin: boole
         <div className="flex items-start gap-2">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
-            <strong>Developer mode</strong> — engineering and ops tooling. Use the mode
-            toggle or{" "}
+            <strong>Developer mode</strong> — engineering tools plus site administration
+            (orgs, users, billing, support). Use the mode toggle or{" "}
             <kbd className="rounded border border-violet-300 px-1 text-[11px]">
               Alt+Shift+A
             </kbd>{" "}
-            to return to Administration.
+            for Administration layout.
           </p>
         </div>
       </div>
@@ -52,8 +53,8 @@ export function DeveloperSensitiveBanner({ isSuperAdmin }: { isSuperAdmin: boole
         <div className="min-w-0">
           <p className="font-semibold">Sensitive super-admin tooling</p>
           <p className="mt-0.5 text-amber-900/90 dark:text-amber-50/90">
-            Actions on this page can revoke keys, run jobs, export data, or affect backups.
-            All changes are audit-logged.
+            Website Control can flip kill switches, run nuclear session tools, and take
+            over orgs. All changes are audit-logged.
           </p>
         </div>
       </div>

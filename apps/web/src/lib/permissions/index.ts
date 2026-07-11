@@ -1,9 +1,30 @@
-// src/lib/permissions/index.ts
+/**
+ * Organization permission surface.
+ *
+ * Canonical source: role-matrix.ts (OrgPermission + roleHasOrgPermission).
+ * Prefer requireOrgPermission() from guards.ts on server actions.
+ *
+ * Legacy AppPermission names are mapped for any remaining call sites.
+ */
+export {
+  ORG_PERMISSIONS,
+  ORG_ROLE_PERMISSIONS,
+  roleHasOrgPermission,
+  type OrgPermission,
+} from "@/lib/permissions/role-matrix";
+
+export {
+  requireOrgPermission,
+  requireOrgRole,
+  requireOrgMembership,
+  requireManagementAccess,
+  requirePlatformRole,
+} from "@/lib/permissions/guards";
+
 import type { OrgRole } from "@prisma/client";
+import { roleHasOrgPermission, type OrgPermission } from "@/lib/permissions/role-matrix";
 
-import { prisma } from "@/lib/prisma";
-import { requireUserSession } from "@/lib/auth/session";
-
+/** @deprecated Prefer OrgPermission from role-matrix. */
 export type AppPermission =
   | "properties.read"
   | "properties.write"
@@ -22,160 +43,45 @@ export type AppPermission =
   | "platform.read"
   | "platform.write";
 
-const allPermissions: AppPermission[] = [
-  "properties.read",
-  "properties.write",
-  "units.read",
-  "units.write",
-  "tenants.read",
-  "tenants.write",
-  "leases.read",
-  "leases.write",
-  "payments.read",
-  "payments.write",
-  "charges.read",
-  "charges.write",
-  "issues.read",
-  "issues.write",
-  "platform.read",
-  "platform.write",
-];
-
-const rolePermissionMap: Partial<Record<OrgRole, AppPermission[]>> = {
-  LANDLORD: allPermissions,
-
-  ADMIN: [
-    "properties.read",
-    "properties.write",
-    "units.read",
-    "units.write",
-    "tenants.read",
-    "tenants.write",
-    "leases.read",
-    "leases.write",
-    "payments.read",
-    "payments.write",
-    "charges.read",
-    "charges.write",
-    "issues.read",
-    "issues.write",
-    "platform.read",
-    "platform.write",
-  ],
-
-  MANAGER: [
-    "properties.read",
-    "properties.write",
-    "units.read",
-    "units.write",
-    "tenants.read",
-    "tenants.write",
-    "leases.read",
-    "leases.write",
-    "payments.read",
-    "payments.write",
-    "charges.read",
-    "charges.write",
-    "issues.read",
-    "issues.write",
-  ],
-
-  OFFICE: [
-    "properties.read",
-    "units.read",
-    "tenants.read",
-    "tenants.write",
-    "leases.read",
-    "charges.read",
-    "issues.read",
-    "issues.write",
-  ],
-
-  ACCOUNTANT: [
-    "properties.read",
-    "units.read",
-    "tenants.read",
-    "leases.read",
-    "payments.read",
-    "payments.write",
-    "charges.read",
-    "charges.write",
-  ],
-
-  CARETAKER: [
-    "properties.read",
-    "units.read",
-    "issues.read",
-    "issues.write",
-  ],
-
-  TENANT: [
-    "properties.read",
-    "units.read",
-    "leases.read",
-    "payments.read",
-    "charges.read",
-    "issues.read",
-    "issues.write",
-  ],
+const legacyToOrgPermission: Partial<Record<AppPermission, OrgPermission>> = {
+  "properties.write": "properties.manage",
+  "units.write": "properties.manage",
+  "tenants.write": "tenants.manage",
+  "leases.write": "leases.manage",
+  "payments.write": "payments.manage",
+  "charges.write": "payments.manage",
+  "issues.write": "maintenance.manage",
+  "properties.read": "properties.manage",
+  "units.read": "properties.manage",
+  "tenants.read": "tenants.manage",
+  "leases.read": "leases.manage",
+  "payments.read": "payments.manage",
+  "charges.read": "payments.manage",
+  "issues.read": "maintenance.manage",
+  "platform.read": "org.settings.manage",
+  "platform.write": "org.settings.manage",
 };
 
-function getSessionUserId(session: unknown): string {
-  const value = session as {
-    id?: string;
-    userId?: string;
-    user?: {
-      id?: string;
-    };
-  };
-
-  const userId = value.userId ?? value.user?.id ?? value.id;
-
-  if (!userId) {
-    throw new Error("Authenticated user id not found in session.");
+/**
+ * @deprecated Use roleHasOrgPermission with OrgPermission instead.
+ * LANDLORD is intentionally limited to reports.view (not full access).
+ */
+export function hasPermission(role: OrgRole | null | undefined, permission: AppPermission) {
+  if (!role) return false;
+  const mapped = legacyToOrgPermission[permission];
+  if (!mapped) return false;
+  // Read-style legacy perms: allow if role has the manage permission OR reports.view for reports-like access
+  if (permission.endsWith(".read") && roleHasOrgPermission(role, "reports.view")) {
+    if (
+      permission === "payments.read" ||
+      permission === "charges.read" ||
+      permission === "tenants.read" ||
+      permission === "leases.read" ||
+      permission === "properties.read" ||
+      permission === "units.read"
+    ) {
+      return roleHasOrgPermission(role, mapped) || role === "LANDLORD" || role === "ACCOUNTANT";
+    }
   }
-
-  return userId;
-}
-
-export async function hasPermission(
-  permission: AppPermission,
-  orgId?: string,
-): Promise<boolean> {
-  const session = await requireUserSession();
-  const userId = getSessionUserId(session);
-
-  const membership = await prisma.membership.findFirst({
-    where: {
-      userId,
-      ...(orgId ? { orgId } : {}),
-      org: {
-        deletedAt: null,
-      },
-      user: {
-        deletedAt: null,
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    select: {
-      role: true,
-    },
-  });
-
-  if (!membership) return false;
-
-  return (rolePermissionMap[membership.role] ?? []).includes(permission);
-}
-
-export async function requirePermission(
-  permission: AppPermission,
-  orgId?: string,
-): Promise<void> {
-  const allowed = await hasPermission(permission, orgId);
-
-  if (!allowed) {
-    throw new Error("Forbidden");
-  }
+  return roleHasOrgPermission(role, mapped);
 }

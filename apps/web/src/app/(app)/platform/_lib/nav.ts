@@ -46,8 +46,79 @@ export type PlatformNavItem = {
   dualMode?: boolean;
 };
 
+/**
+ * Site-admin capabilities available from both Administration and Developer.
+ * Keeps developer operators able to run the business plane without mode-switching.
+ */
+export const siteOpsNavItems: readonly PlatformNavItem[] = [
+  {
+    href: "/platform/organizations",
+    label: "Organizations",
+    icon: "Building2",
+    description: "Portfolio companies and workspace status",
+    dualMode: true,
+  },
+  {
+    href: "/platform/users",
+    label: "Platform Users",
+    icon: "Users",
+    description: "Accounts, roles, and access posture",
+    dualMode: true,
+  },
+  {
+    href: "/platform/admins",
+    label: "Platform Admins",
+    icon: "ShieldCheck",
+    description: "Operator accounts and admin provisioning",
+    dualMode: true,
+  },
+  {
+    href: "/platform/permissions",
+    label: "Permissions",
+    icon: "LockKeyhole",
+    description: "Access matrix and explicit grants",
+    dualMode: true,
+  },
+  {
+    href: "/platform/support-access",
+    label: "Support Access",
+    icon: "LifeBuoy",
+    description: "Timed org support entry with audit trail",
+    dualMode: true,
+  },
+  {
+    href: "/platform/billing",
+    label: "Billing",
+    icon: "CreditCard",
+    description: "Subscription plans and renewals",
+    dualMode: true,
+  },
+  {
+    href: "/platform/subscriptions",
+    label: "Subscriptions",
+    icon: "BriefcaseBusiness",
+    description: "Plan enforcement and changes",
+    dualMode: true,
+  },
+  {
+    href: "/platform/broadcasts",
+    label: "Broadcasts",
+    icon: "Bell",
+    description: "Platform-wide announcements",
+    dualMode: true,
+  },
+  {
+    href: "/platform/settings",
+    label: "Settings",
+    icon: "UserCog",
+    description: "Platform configuration",
+    dualMode: true,
+  },
+] as const;
+
 /** Routes that stay sticky with the user's preferred mode (not forced by path). */
 export const dualModeNavItems: readonly PlatformNavItem[] = [
+  ...siteOpsNavItems,
   {
     href: "/platform/help",
     label: "Help",
@@ -75,26 +146,20 @@ export const dualModeNavItems: readonly PlatformNavItem[] = [
 export const adminNavItems: readonly PlatformNavItem[] = [
   { href: "/platform", label: "Dashboard", icon: "Gauge" },
   { href: "/platform/search", label: "Global Search", icon: "Search" },
-  { href: "/platform/organizations", label: "Organizations", icon: "Building2" },
-  { href: "/platform/users", label: "Platform Users", icon: "Users" },
-  { href: "/platform/admins", label: "Platform Admins", icon: "ShieldCheck" },
-  { href: "/platform/permissions", label: "Permissions", icon: "LockKeyhole" },
-  { href: "/platform/support-access", label: "Support Access", icon: "LifeBuoy" },
-  { href: "/platform/billing", label: "Billing", icon: "CreditCard" },
-  { href: "/platform/subscriptions", label: "Subscriptions", icon: "BriefcaseBusiness" },
   { href: "/platform/payments", label: "Payments", icon: "ReceiptText" },
   { href: "/platform/expenditures", label: "Expenditures", icon: "ReceiptText" },
   { href: "/platform/payment-ops", label: "Payment Ops", icon: "RefreshCcw" },
   { href: "/platform/onboarding", label: "Onboarding", icon: "SlidersHorizontal" },
   { href: "/platform/marketing", label: "Marketing", icon: "BriefcaseBusiness" },
-  { href: "/platform/broadcasts", label: "Broadcasts", icon: "Bell" },
   { href: "/platform/messages", label: "Messages", icon: "Mail" },
   { href: "/platform/reports", label: "Reports", icon: "BarChart3" },
-  { href: "/platform/settings", label: "Settings", icon: "UserCog" },
   ...dualModeNavItems,
 ] as const;
 
-/** Engineering, ops, and integration tools for the developer portal. */
+/**
+ * Engineering + site-ops tools for the developer portal.
+ * Most tools are open to PLATFORM_ADMIN; only Website Control is SUPER_ADMIN-only.
+ */
 export const developerNavItems: readonly PlatformNavItem[] = [
   {
     href: "/platform/developer",
@@ -132,7 +197,6 @@ export const developerNavItems: readonly PlatformNavItem[] = [
     label: "API Keys",
     icon: "KeyRound",
     description: "Public and org-scoped API credentials",
-    superAdminOnly: true,
   },
   {
     href: "/platform/feature-flags",
@@ -145,7 +209,6 @@ export const developerNavItems: readonly PlatformNavItem[] = [
     label: "Jobs & Queues",
     icon: "Settings",
     description: "Background jobs, retries, and cron runs",
-    superAdminOnly: true,
   },
   {
     href: "/platform/rate-limits",
@@ -158,26 +221,24 @@ export const developerNavItems: readonly PlatformNavItem[] = [
     label: "Data",
     icon: "Database",
     description: "Exports, retention, and soft-deleted records",
-    superAdminOnly: true,
   },
   {
     href: "/platform/backups",
     label: "Backups",
     icon: "HardDrive",
     description: "Backup checkpoints and restore readiness",
-    superAdminOnly: true,
   },
   ...dualModeNavItems,
 ] as const;
 
-/** Paths that require SUPER_ADMIN (mutations and page access). */
-export const superAdminOnlyPaths = [
-  "/platform/control",
-  "/platform/api-keys",
-  "/platform/jobs",
-  "/platform/data-management",
-  "/platform/backups",
-] as const;
+/**
+ * Paths that still require SUPER_ADMIN (nuclear site control only).
+ * API keys, jobs, data, and backups are available to all platform operators.
+ */
+export const superAdminOnlyPaths = ["/platform/control"] as const;
+
+/** Roles allowed for ordinary platform operator tooling. */
+export const PLATFORM_OPERATOR_ROLES = ["SUPER_ADMIN", "PLATFORM_ADMIN"] as const;
 
 const DEVELOPER_EXCLUSIVE_HREFS = new Set(
   developerNavItems.filter((item) => !item.dualMode).map((item) => item.href),
@@ -314,7 +375,7 @@ export const modeMeta: Record<
     brandSubtitle: "Developer portal",
     headerTitle: "Developer Portal",
     headerDescription:
-      "System health, APIs, jobs, feature flags, rate limits, and data tooling",
+      "System health, APIs, jobs, site ops, feature flags, and control-plane tooling",
   },
 };
 

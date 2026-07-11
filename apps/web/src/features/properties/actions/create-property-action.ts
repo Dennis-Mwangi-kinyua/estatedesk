@@ -6,6 +6,11 @@ import { redirect } from "next/navigation";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import {
+  assertCanCreateProperty,
+  assertCanCreateUnit,
+} from "@/lib/billing/access";
+import { requireOrgPermission } from "@/lib/permissions/guards";
 import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
 import { getAuthorizedOrgId } from "./_lib/authorization";
 import { executeCreatePropertyTransaction } from "./_lib/create-property-transaction";
@@ -24,7 +29,7 @@ import {
 } from "./_lib/parse-unit-plans";
 
 export async function createPropertyAction(formData: FormData) {
-  const session = await requireUserSession();
+  const session = await requireOrgPermission("properties.manage");
   const orgId = await getAuthorizedOrgId(session.userId, session.activeOrgId);
 
   const name = toRequiredString(formData.get("name"), "Property name");
@@ -117,6 +122,21 @@ export async function createPropertyAction(formData: FormData) {
   }
 
   const parsedUnitPlans = parseUnitPlans(formData);
+  const plannedUnits = parsedUnitPlans.reduce(
+    (sum, plan) => sum + (plan.quantity ?? 0),
+    0,
+  );
+
+  try {
+    await assertCanCreateProperty(orgId);
+    if (plannedUnits > 0) {
+      await assertCanCreateUnit(orgId, plannedUnits);
+    }
+  } catch (error) {
+    redirectWithError(
+      error instanceof Error ? error.message : "Plan limit reached.",
+    );
+  }
 
   try {
     await executeCreatePropertyTransaction({

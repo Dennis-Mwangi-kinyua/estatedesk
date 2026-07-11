@@ -50,6 +50,12 @@ export type SettingsPageData = {
     status: "ACTIVE" | "TRIALING" | "PAST_DUE" | "CANCELLED" | "EXPIRED";
     billingEmail: string;
     renewalDate: string;
+    upgradeRequest: {
+      plan: string;
+      notes: string | null;
+      requestedAt: string | null;
+      status: string;
+    } | null;
   };
   preferences: {
     tenantPortal: boolean;
@@ -159,6 +165,19 @@ export async function getSettingsPageData(
       status: org.subscription?.status ?? "ACTIVE",
       billingEmail: org.subscription?.billingEmail ?? org.email ?? "",
       renewalDate: formatDate(org.subscription?.currentPeriodEnd),
+      upgradeRequest: (() => {
+        const meta = asObject(org.subscription?.metadata ?? null);
+        const raw = meta.upgradeRequest;
+        if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+        const req = raw as Record<string, unknown>;
+        return {
+          plan: typeof req.plan === "string" ? req.plan : "",
+          notes: typeof req.notes === "string" ? req.notes : null,
+          requestedAt:
+            typeof req.requestedAt === "string" ? req.requestedAt : null,
+          status: typeof req.status === "string" ? req.status : "PENDING",
+        };
+      })(),
     },
     preferences: {
       tenantPortal: getFeatureFlag(features, "tenantPortal"),
