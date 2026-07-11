@@ -13,6 +13,10 @@ function buildWatermarkLabel(orgLabel?: string | null) {
     : `EstateDesk confidential · ${timestamp}`;
 }
 
+/**
+ * Subtle anti-leak watermark over authenticated shells.
+ * Intentionally low-contrast and blurred so it does not compete with content.
+ */
 export function SensitiveDataWatermark({
   orgLabel,
 }: SensitiveDataWatermarkProps) {
@@ -21,17 +25,69 @@ export function SensitiveDataWatermark({
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-[90] overflow-hidden print:hidden"
+      className="ed-sensitive-watermark pointer-events-none fixed inset-0 z-[90] overflow-hidden print:hidden"
     >
-      <div
-        className="absolute inset-[-50%] grid grid-cols-2 gap-16 opacity-[0.08] dark:opacity-[0.12] sm:grid-cols-3 lg:grid-cols-4"
-        style={{ transform: "rotate(-24deg)" }}
-      >
-        {Array.from({ length: 24 }, (_, index) => (
-          <p
-            key={index}
-            className="select-none whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-950 dark:text-white"
-          >
+      <style>{`
+        .ed-sensitive-watermark__layer {
+          position: absolute;
+          inset: -55%;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 3.5rem 2.5rem;
+          transform: rotate(-22deg);
+          opacity: 0.045;
+          filter: blur(1.75px);
+          -webkit-filter: blur(1.75px);
+          user-select: none;
+        }
+
+        @media (min-width: 640px) {
+          .ed-sensitive-watermark__layer {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 4rem 3rem;
+            opacity: 0.04;
+            filter: blur(2px);
+            -webkit-filter: blur(2px);
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .ed-sensitive-watermark__layer {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+          }
+        }
+
+        .dark .ed-sensitive-watermark__layer {
+          opacity: 0.055;
+        }
+
+        .ed-sensitive-watermark__text {
+          margin: 0;
+          white-space: nowrap;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: rgb(15 23 42);
+          line-height: 1.2;
+        }
+
+        .dark .ed-sensitive-watermark__text {
+          color: rgb(248 250 252);
+        }
+
+        @media (prefers-reduced-transparency: reduce) {
+          .ed-sensitive-watermark__layer {
+            filter: none;
+            -webkit-filter: none;
+            opacity: 0.03;
+          }
+        }
+      `}</style>
+
+      <div className="ed-sensitive-watermark__layer">
+        {Array.from({ length: 28 }, (_, index) => (
+          <p key={index} className="ed-sensitive-watermark__text">
             {label}
           </p>
         ))}
