@@ -51,13 +51,13 @@ export function AccountingHeader({
               ) : null}
             </div>
 
-            <h1 className="mt-3 text-xl font-semibold tracking-tight text-foreground sm:mt-4 sm:text-3xl">
+            <h1 className="mt-3 text-xl font-semibold tracking-tight text-foreground sm:mt-4 sm:text-2xl lg:text-3xl">
               Accounting
             </h1>
 
-            <p className="mt-1.5 text-sm leading-6 text-muted-foreground sm:mt-2 sm:text-base">
-              Advanced bookkeeping for {org.name}: journals, aging, cash position,
-              period close, and statements in one mobile-first ledger.
+            <p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground sm:mt-2">
+              Professional general ledger for {org.name} — journals, aging, cash,
+              period close, and financial statements.
             </p>
 
             <div className="mt-2">

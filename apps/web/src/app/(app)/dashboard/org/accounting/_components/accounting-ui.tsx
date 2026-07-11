@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 export const panelShellClassName =
-  "overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm";
+  "overflow-hidden rounded-2xl border border-border/90 bg-card text-card-foreground shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:rounded-3xl sm:shadow-sm";
 
 export function SectionHeader({
   title,
@@ -16,17 +16,19 @@ export function SectionHeader({
   icon?: LucideIcon;
 }) {
   return (
-    <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-end sm:justify-between sm:px-6">
-      <div>
-        <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground">
-          {Icon ? <Icon className="h-5 w-5 text-primary" /> : null}
-          {title}
+    <div className="flex flex-col gap-2.5 border-b border-border px-4 py-3.5 sm:flex-row sm:items-end sm:justify-between sm:gap-3 sm:px-6 sm:py-4">
+      <div className="min-w-0">
+        <h2 className="flex items-center gap-2 text-base font-semibold tracking-tight text-foreground sm:text-lg">
+          {Icon ? <Icon className="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5" /> : null}
+          <span className="min-w-0">{title}</span>
         </h2>
         {description ? (
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm sm:leading-6">
+            {description}
+          </p>
         ) : null}
       </div>
-      {action}
+      {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   );
 }

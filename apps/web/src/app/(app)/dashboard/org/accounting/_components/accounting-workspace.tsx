@@ -15,7 +15,6 @@ import { AccountingGuidance } from "./accounting-guidance";
 import { AccountingHeader } from "./accounting-header";
 import { AccountingJournalForm } from "./accounting-journal-form";
 import { AccountingKpiStrip } from "./accounting-kpi-strip";
-import { AccountingMobileDock } from "./accounting-mobile-dock";
 import { AccountingPayablesSection } from "./accounting-payables-section";
 import { AccountingPostEntriesShell } from "./accounting-post-entries-shell";
 import { AccountingQuickActions } from "./accounting-quick-actions";
@@ -47,7 +46,7 @@ export function AccountingWorkspace({
   const entry = parseAccountingEntryType(activeEntry);
 
   return (
-    <div className="org-theme-content ed-mobile-first mx-auto w-full max-w-7xl space-y-4 px-3 pb-28 pt-3 sm:space-y-6 sm:px-6 sm:pb-24 sm:pt-4 lg:px-8">
+    <div className="org-theme-content ed-mobile-first mx-auto w-full max-w-7xl space-y-4 px-3 pb-8 pt-3 sm:space-y-6 sm:px-6 sm:pb-12 sm:pt-4 lg:px-8">
       <AccountingSubNav />
       <AccountingHeader
         data={data}
@@ -106,8 +105,6 @@ export function AccountingWorkspace({
           <AccountingGuidance orgRole={orgRole} />
         </div>
       </div>
-
-      <AccountingMobileDock />
     </div>
   );
 }

@@ -1,12 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, X } from "lucide-react";
+import { X } from "lucide-react";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import {
-  isActivePath,
   SIDEBAR_LINKS,
   type OrgRole,
 } from "./org-sidebar-links";
@@ -127,57 +125,6 @@ export function OrgDashboardSidebar({
           </div>
         </div>
       </div>
-
-      <nav
-        aria-label="Mobile workspace navigation"
-        className="org-mobile-tabbar fixed bottom-0 left-0 right-0 z-[100] border-t border-border bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-10px_30px_rgba(15,23,42,0.12)] lg:hidden dark:shadow-[0_-10px_30px_rgba(0,0,0,0.35)]"
-      >
-        <div className="grid grid-cols-5 gap-1">
-          {[
-            ...visibleLinks.slice(0, 4),
-            {
-              label: "More",
-              href: "#menu",
-              icon: LayoutGrid,
-              roles: [] as const,
-            },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isMore = item.href === "#menu";
-            const active = !isMore && isActivePath(pathname, item.href);
-
-            if (isMore) {
-              return (
-                <button
-                  key="more"
-                  type="button"
-                  onClick={() => setMobileOpen(true)}
-                  className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[11px] font-semibold text-muted-foreground transition active:scale-95"
-                >
-                  <Icon className="h-5 w-5" />
-                  <span>More</span>
-                </button>
-              );
-            }
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={[
-                  "flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[11px] font-semibold transition active:scale-95",
-                  active
-                    ? "ed-nav-item-active"
-                    : "ed-nav-item",
-                ].join(" ")}
-              >
-                <Icon className="h-5 w-5" />
-                <span className="max-w-full truncate px-1">{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
     </>
   );
 }

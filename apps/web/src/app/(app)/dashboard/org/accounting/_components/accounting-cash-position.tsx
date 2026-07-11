@@ -32,40 +32,32 @@ export function AccountingCashPosition({ data }: { data: AccountingPageData }) {
         </div>
       </div>
 
-      <div className="flex gap-2.5 overflow-x-auto px-4 py-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-6 xl:grid-cols-4">
-        <div className="min-w-[9.5rem] shrink-0 snap-start sm:min-w-0">
-          <StatCard
-            label="Total cash"
-            value={formatMoney(cashTotal, org.currencyCode)}
-            Icon={Wallet}
-            compact
-            highlight
-          />
-        </div>
-        <div className="min-w-[9.5rem] shrink-0 snap-start sm:min-w-0">
-          <StatCard
-            label="Bank"
-            value={formatMoney(controlBalances.bank, org.currencyCode)}
-            Icon={Landmark}
-            compact
-          />
-        </div>
-        <div className="min-w-[9.5rem] shrink-0 snap-start sm:min-w-0">
-          <StatCard
-            label="M-Pesa"
-            value={formatMoney(controlBalances.mpesa, org.currencyCode)}
-            Icon={Smartphone}
-            compact
-          />
-        </div>
-        <div className="min-w-[9.5rem] shrink-0 snap-start sm:min-w-0">
-          <StatCard
-            label="Cash on hand"
-            value={formatMoney(controlBalances.cash, org.currencyCode)}
-            Icon={Banknote}
-            compact
-          />
-        </div>
+      <div className="grid grid-cols-2 gap-2.5 px-4 py-4 sm:gap-3 sm:px-6 xl:grid-cols-4">
+        <StatCard
+          label="Total cash"
+          value={formatMoney(cashTotal, org.currencyCode)}
+          Icon={Wallet}
+          compact
+          highlight
+        />
+        <StatCard
+          label="Bank"
+          value={formatMoney(controlBalances.bank, org.currencyCode)}
+          Icon={Landmark}
+          compact
+        />
+        <StatCard
+          label="M-Pesa"
+          value={formatMoney(controlBalances.mpesa, org.currencyCode)}
+          Icon={Smartphone}
+          compact
+        />
+        <StatCard
+          label="Cash on hand"
+          value={formatMoney(controlBalances.cash, org.currencyCode)}
+          Icon={Banknote}
+          compact
+        />
       </div>
     </section>
   );

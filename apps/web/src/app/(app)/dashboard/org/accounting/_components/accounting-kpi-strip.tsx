@@ -63,21 +63,17 @@ export function AccountingKpiStrip({ data }: { data: AccountingPageData }) {
 
   return (
     <section aria-label="Accounting KPIs">
-      {/* Mobile: horizontal snap strip; sm+: responsive grid */}
-      <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
+      {/* True mobile-first grid — no sideways scroll */}
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
         {cards.map((card) => (
-          <div
+          <StatCard
             key={card.label}
-            className="min-w-[10.5rem] shrink-0 snap-start sm:min-w-0"
-          >
-            <StatCard
-              label={card.label}
-              value={card.value}
-              Icon={card.Icon}
-              compact
-              highlight={"highlight" in card ? Boolean(card.highlight) : false}
-            />
-          </div>
+            label={card.label}
+            value={card.value}
+            Icon={card.Icon}
+            compact
+            highlight={"highlight" in card ? Boolean(card.highlight) : false}
+          />
         ))}
       </div>
     </section>

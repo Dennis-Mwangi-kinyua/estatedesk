@@ -552,11 +552,9 @@ html.light,
     padding-bottom: max(6rem, env(safe-area-inset-bottom));
   }
 
+  /* Bottom tab bar removed — only need modest safe-area padding on phones */
   .org-mobile-main-offset {
-    padding-bottom: max(
-      6.5rem,
-      calc(env(safe-area-inset-bottom) + 5.75rem)
-    );
+    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
   }
 
   @media (min-width: 1024px) {
@@ -566,7 +564,7 @@ html.light,
   }
 
   .org-mobile-tabbar {
-    pointer-events: auto;
+    display: none !important;
   }
 
   :where(main, section, article, aside, div, form, nav, header, footer, li, td, th, span)[class*="bg-slate-900"]:not([class*="/"]),
