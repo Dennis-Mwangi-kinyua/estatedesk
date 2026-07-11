@@ -12,6 +12,8 @@ export async function getAccountingPageData(orgId: string) {
   const now = new Date();
   const fiscalYearStart = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
 
   const [
     org,
@@ -150,9 +152,13 @@ export async function getAccountingPageData(orgId: string) {
   ]);
 
   const isInitialized = accounts.length > 0;
-  const summary = isInitialized
-    ? await getFinancialSummary(prisma, orgId, fiscalYearStart, now)
-    : null;
+  const [summary, mtdSummary, priorMonthSummary] = isInitialized
+    ? await Promise.all([
+        getFinancialSummary(prisma, orgId, fiscalYearStart, now),
+        getFinancialSummary(prisma, orgId, monthStart, now),
+        getFinancialSummary(prisma, orgId, prevMonthStart, prevMonthEnd),
+      ])
+    : [null, null, null];
 
   const postedPaymentIds = new Set(
     postedPaymentJournals
@@ -247,5 +253,21 @@ export async function getAccountingPageData(orgId: string) {
     apAging,
     booksHealth,
     topExpenseAccounts,
+    comparative: {
+      mtd: mtdSummary
+        ? {
+            income: mtdSummary.income,
+            expenses: mtdSummary.expenses,
+            netIncome: mtdSummary.netIncome,
+          }
+        : null,
+      priorMonth: priorMonthSummary
+        ? {
+            income: priorMonthSummary.income,
+            expenses: priorMonthSummary.expenses,
+            netIncome: priorMonthSummary.netIncome,
+          }
+        : null,
+    },
   };
 }

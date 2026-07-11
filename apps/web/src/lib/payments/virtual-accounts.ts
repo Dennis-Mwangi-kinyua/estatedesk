@@ -165,3 +165,84 @@ export function matchTransferToVirtualAccount(
 export function bankRailLabel(rail: BankRail): string {
   return RAIL_LABELS[rail] ?? RAIL_LABELS.other;
 }
+
+/**
+ * Map org payment-instruction JSON into multi-bank virtual account endpoints.
+ */
+export function endpointsFromPaymentInstructions(instructions: {
+  mpesaPaybill?: string | null;
+  mpesaAccountName?: string | null;
+  kcbPaybillEnabled?: boolean | null;
+  kcbPaybill?: string | null;
+  kcbAccountNumber?: string | null;
+  bankAccounts?: Record<
+    string,
+    {
+      accountNumber?: string | null;
+      accountName?: string | null;
+      businessName?: string | null;
+    }
+  > | null;
+  bankAccountNumber?: string | null;
+  bankAccountName?: string | null;
+  bankName?: string | null;
+  virtualAccountPrefix?: string | null;
+}): VirtualAccountEndpoint[] {
+  const banks = instructions.bankAccounts ?? {};
+  return buildVirtualAccountEndpoints({
+    mpesaPaybill: instructions.mpesaPaybill,
+    mpesaAccountName: instructions.mpesaAccountName,
+    kcbPaybillEnabled: instructions.kcbPaybillEnabled,
+    kcbPaybill: instructions.kcbPaybill,
+    kcbAccountNumber: instructions.kcbAccountNumber,
+    equityAccountNumber:
+      banks.equity?.accountNumber ||
+      (instructions.bankName?.toLowerCase().includes("equity")
+        ? instructions.bankAccountNumber
+        : null),
+    equityAccountName: banks.equity?.accountName || banks.equity?.businessName,
+    coopAccountNumber: banks.coop?.accountNumber || banks["co-op"]?.accountNumber,
+    coopAccountName: banks.coop?.accountName || banks["co-op"]?.accountName,
+    imAccountNumber: banks.im?.accountNumber || banks["i&m"]?.accountNumber,
+    imAccountName: banks.im?.accountName,
+    familyAccountNumber: banks.family?.accountNumber,
+    virtualAccountPrefix: instructions.virtualAccountPrefix,
+  });
+}
+
+/**
+ * Suggest a settlement targetType / bank rail from transfer narration.
+ */
+export function classifyInboundTransfer(input: {
+  narration: string;
+  amount: number;
+  knownVirtualRefs: string[];
+  endpoints: VirtualAccountEndpoint[];
+}): {
+  matchedRef: string | null;
+  suggestedRail: BankRail | null;
+  confidence: "high" | "medium" | "low";
+} {
+  const matchedRef = matchTransferToVirtualAccount(
+    input.narration,
+    input.knownVirtualRefs,
+  );
+  const hay = input.narration.toLowerCase();
+  let suggestedRail: BankRail | null = null;
+  if (/mpesa|m-pesa|paybill|till/.test(hay)) suggestedRail = "mpesa_paybill";
+  else if (/equity/.test(hay)) suggestedRail = "equity";
+  else if (/\bkcb\b|kenya commercial/.test(hay)) suggestedRail = "kcb";
+  else if (/co-?op|cooperative/.test(hay)) suggestedRail = "coop";
+  else if (/i\s*&\s*m|imbank/.test(hay)) suggestedRail = "im";
+  else if (/family/.test(hay)) suggestedRail = "family";
+
+  if (!suggestedRail && input.endpoints.length === 1) {
+    suggestedRail = input.endpoints[0].rail;
+  }
+
+  return {
+    matchedRef,
+    suggestedRail,
+    confidence: matchedRef ? "high" : suggestedRail ? "medium" : "low",
+  };
+}

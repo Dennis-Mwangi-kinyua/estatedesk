@@ -169,17 +169,16 @@ export async function getPeriodBillForTenant({
     if (charge.chargeType === "RENT") {
       label = "Rent";
     } else if (charge.chargeType === "SERVICE_CHARGE") {
-      label = /security/i.test(description)
-        ? description.includes("service")
-          ? "Service charge + security"
-          : "Security fee"
-        : "Service charge";
+      label = "Service charge";
+    } else if (charge.chargeType === "SECURITY") {
+      label = "Security fee";
     } else if (charge.chargeType === "OTHER") {
-      label = /security/i.test(description)
-        ? "Security fee"
-        : /garbage|refuse|waste/i.test(description) || !description.trim()
+      label =
+        /garbage|refuse|waste/i.test(description) || !description.trim()
           ? "Garbage fee"
-          : description;
+          : /security/i.test(description)
+            ? "Security fee"
+            : description;
     } else {
       label = charge.chargeType.replaceAll("_", " ").toLowerCase();
     }
@@ -225,7 +224,6 @@ export async function getPeriodBillForTenant({
 
   if (!lease.rentCharges.some((charge) => charge.chargeType === "OTHER")) {
     const garbageFee = toLedgerNumber(lease.unit.garbageFee ?? 0);
-    const securityFee = toLedgerNumber(lease.unit.securityFee ?? 0);
     if (garbageFee > 0) {
       lines.push({
         kind: "OTHER",
@@ -236,22 +234,17 @@ export async function getPeriodBillForTenant({
         balance: garbageFee,
       });
     }
-    if (securityFee > 0 && garbageFee <= 0) {
-      lines.push({
-        kind: "OTHER",
-        id: `pending-security-fee-${period}`,
-        label: "Security fee",
-        amountDue: securityFee,
-        amountPaid: 0,
-        balance: securityFee,
-      });
-    } else if (
-      securityFee > 0 &&
-      garbageFee > 0 &&
-      !lease.rentCharges.some((c) => /security/i.test(c.description ?? ""))
-    ) {
-      // BOTH fees: surface security as its own display line (allocation may
-      // fold it into SERVICE_CHARGE when charges are materialized).
+  }
+
+  if (
+    !lease.rentCharges.some(
+      (charge) =>
+        charge.chargeType === "SECURITY" ||
+        /security/i.test(charge.description ?? ""),
+    )
+  ) {
+    const securityFee = toLedgerNumber(lease.unit.securityFee ?? 0);
+    if (securityFee > 0) {
       lines.push({
         kind: "OTHER",
         id: `pending-security-fee-${period}`,
@@ -261,19 +254,6 @@ export async function getPeriodBillForTenant({
         balance: securityFee,
       });
     }
-  } else if (
-    toLedgerNumber(lease.unit.securityFee ?? 0) > 0 &&
-    !lease.rentCharges.some((c) => /security/i.test(c.description ?? ""))
-  ) {
-    const securityFee = toLedgerNumber(lease.unit.securityFee ?? 0);
-    lines.push({
-      kind: "OTHER",
-      id: `pending-security-fee-${period}`,
-      label: "Security fee",
-      amountDue: securityFee,
-      amountPaid: 0,
-      balance: securityFee,
-    });
   }
 
   let rentChargeId: string | null =

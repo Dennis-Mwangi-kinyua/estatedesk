@@ -280,57 +280,37 @@ export async function allocateCombinedPeriodPayment({
     // Accrual posting is best-effort until accounting is initialized.
   }
 
-  // Unique (leaseId, period, chargeType) limits one row per type.
-  // SECURITY has no enum yet — map via description on OTHER/SERVICE_CHARGE.
+  // One row per chargeType per period (unique leaseId+period+chargeType).
   const garbageAmount = new Prisma.Decimal(lease.unit.garbageFee ?? 0);
   const securityAmount = new Prisma.Decimal(lease.unit.securityFee ?? 0);
   const serviceAmount = new Prisma.Decimal(lease.unit.serviceCharge ?? 0);
 
   const recurringCharges: Array<{
-    chargeType: "SERVICE_CHARGE" | "OTHER";
+    chargeType: "SERVICE_CHARGE" | "OTHER" | "SECURITY";
     amount: Prisma.Decimal;
     description: string;
   }> = [];
 
-  if (serviceAmount.gt(0) && securityAmount.gt(0) && garbageAmount.gt(0)) {
+  if (serviceAmount.gt(0)) {
     recurringCharges.push({
       chargeType: "SERVICE_CHARGE",
-      amount: serviceAmount.add(securityAmount),
-      description: "Monthly service charge + security fee",
+      amount: serviceAmount,
+      description: "Monthly service charge",
     });
+  }
+  if (garbageAmount.gt(0)) {
     recurringCharges.push({
       chargeType: "OTHER",
       amount: garbageAmount,
       description: "Monthly garbage fee",
     });
-  } else {
-    if (serviceAmount.gt(0)) {
-      recurringCharges.push({
-        chargeType: "SERVICE_CHARGE",
-        amount: serviceAmount,
-        description: "Monthly service charge",
-      });
-    } else if (securityAmount.gt(0) && garbageAmount.gt(0)) {
-      recurringCharges.push({
-        chargeType: "SERVICE_CHARGE",
-        amount: securityAmount,
-        description: "Monthly security fee",
-      });
-    }
-
-    if (garbageAmount.gt(0)) {
-      recurringCharges.push({
-        chargeType: "OTHER",
-        amount: garbageAmount,
-        description: "Monthly garbage fee",
-      });
-    } else if (securityAmount.gt(0)) {
-      recurringCharges.push({
-        chargeType: "OTHER",
-        amount: securityAmount,
-        description: "Monthly security fee",
-      });
-    }
+  }
+  if (securityAmount.gt(0)) {
+    recurringCharges.push({
+      chargeType: "SECURITY",
+      amount: securityAmount,
+      description: "Monthly security fee",
+    });
   }
 
   for (const recurring of recurringCharges) {

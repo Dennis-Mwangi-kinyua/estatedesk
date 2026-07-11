@@ -2,6 +2,7 @@ import Link from "next/link";
 import { encodePublicId } from "@/lib/public-id";
 import { computeRentRewards } from "@/lib/rewards/rent-rewards";
 import type { TenantDetailsData } from "../_lib/types";
+import { RentRewardsRedeem } from "./rent-rewards-redeem";
 import {
   DetailItem,
   SectionHeader,
@@ -67,10 +68,10 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
         <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="RentRewards"
-            description="Loyalty points for early and on-time rent payments."
+            description="Loyalty points for early and on-time rent payments. Redeem digital vouchers."
           />
           <div className="mt-4 grid gap-3">
-            <DetailItem label="Points" value={String(rewards.points)} />
+            <DetailItem label="Earned points" value={String(rewards.points)} />
             <DetailItem label="Tier" value={rewards.tier} />
             <DetailItem label="Early payments" value={String(rewards.earlyPayments)} />
             <DetailItem label="On-time payments" value={String(rewards.onTimePayments)} />
@@ -82,19 +83,32 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
               />
             ) : null}
           </div>
-          {rewards.suggestedRewards.length > 0 ? (
-            <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground">
-              {rewards.suggestedRewards.slice(0, 3).map((item) => (
-                <li key={item.id}>
-                  {item.label} · {item.pointsCost} pts
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-3 text-xs text-muted-foreground">
-              Keep paying on time to unlock data bundles and shopping tokens.
-            </p>
-          )}
+          <RentRewardsRedeem
+            tenantId={tenant.id}
+            rewards={rewards.suggestedRewards.slice(0, 5).map((item) => ({
+              id: item.id,
+              label: item.label,
+              pointsCost: item.pointsCost,
+              category: item.category,
+            }))}
+            pending={
+              (
+                tenant as {
+                  rewardRedemptions?: Array<{
+                    id: string;
+                    label: string;
+                    pointsCost: number;
+                    status: string;
+                  }>;
+                }
+              ).rewardRedemptions?.map((r) => ({
+                id: r.id,
+                label: r.label,
+                pointsCost: r.pointsCost,
+                status: r.status,
+              })) ?? []
+            }
+          />
         </section>
 
         <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">

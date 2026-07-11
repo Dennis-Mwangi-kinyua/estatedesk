@@ -8,6 +8,7 @@ import {
 import type { AccountingPageData } from "../_lib/types";
 import { AccountingAgingPanel } from "./accounting-aging-panel";
 import { AccountingBooksHealth } from "./accounting-books-health";
+import { AccountingComparative } from "./accounting-comparative";
 import { AccountingChartOfAccounts } from "./accounting-chart-of-accounts";
 import { AccountingExpenseForm } from "./accounting-expense-form";
 import { AccountingFinancialSnapshot } from "./accounting-financial-snapshot";
@@ -61,6 +62,7 @@ export function AccountingWorkspace({
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-5">
         <div className="min-w-0 space-y-4 sm:space-y-5">
           <AccountingBooksHealth data={data} />
+          <AccountingComparative data={data} />
           <AccountingFinancialSnapshot data={data} />
           <AccountingAgingPanel
             arAging={data.arAging}

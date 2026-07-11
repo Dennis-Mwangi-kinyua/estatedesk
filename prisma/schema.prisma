@@ -217,6 +217,7 @@ model Organization {
   issues                  IssueTicket[]
   issueResolutionReports  IssueResolutionReport[]
   kraIntegration          KraIntegration?
+  rentRewardRedemptions   RentRewardRedemption[]
   landlordAssignments     LandlordAssignment[]
   landlordProfiles        LandlordProfile[]
   marketer                PlatformMarketer?         @relation(fields: [marketerId], references: [id])
@@ -863,6 +864,7 @@ model Tenant {
   transferCopies   TenantTransferRequest[] @relation("TenantTransferCreatedTenant")
   transferRequests TenantTransferRequest[] @relation("TenantTransferSourceTenant")
   waterBills       WaterBill[]
+  rewardRedemptions RentRewardRedemption[]
 
   @@unique([orgId, phone])
   @@unique([orgId, email])
@@ -2460,12 +2462,38 @@ enum ChargeStatus {
   WAIVED
 }
 
+
+/// Tenant loyalty reward redemption (RentRewards program).
+model RentRewardRedemption {
+  id          String   @id @default(cuid())
+  orgId       String
+  tenantId    String
+  rewardId    String
+  label       String
+  category    String
+  pointsCost  Int
+  status      String   @default("PENDING")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  fulfilledAt DateTime?
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([orgId, status])
+  @@index([status, createdAt])
+}
+
 enum ChargeType {
   RENT
   DEPOSIT
   WATER
   PENALTY
   SERVICE_CHARGE
+  /// Monthly security / askari fee on units (allocated before water & rent).
+  SECURITY
   OTHER
 }
 

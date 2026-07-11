@@ -905,6 +905,129 @@ const coreGuideArticles = [
       },
     ],
   },
+
+  {
+    slug: "estate-desk-vs-excel-kenya",
+    category: "Comparisons",
+    title: "EstateDesk vs Excel: why Kenyan landlords outgrow spreadsheets",
+    summary:
+      "How EstateDesk replaces rent spreadsheets with M-Pesa allocation, water billing, KRA eTIMS-ready receipts, offline caretaker queues, and double-entry accounting for Kenya rental portfolios.",
+    readingMinutes: 8,
+    publishedAt: "2026-07-12",
+    keywords: [
+      "Excel alternative for landlords Kenya",
+      "best property management software Kenya",
+      "spreadsheet alternative property management",
+      "M-Pesa rent collection software",
+    ],
+    sections: [
+      {
+        heading: "What spreadsheets get wrong in Kenyan rentals",
+        paragraphs: [
+          "A rent workbook usually tracks names and amounts. It rarely handles partial M-Pesa payments that should clear garbage, water, and security before rent, offline caretaker meter readings from basements, or tax-shaped receipts for KRA review.",
+          "When staff change or a dispute reaches the Rent Restriction Tribunal, chat threads and multiple Excel tabs become evidence gaps. EstateDesk keeps charges, payments, communications, and documents in one auditable system.",
+        ],
+      },
+      {
+        heading: "Where EstateDesk is stronger than a workbook",
+        paragraphs: [
+          "Combined period bills allocate service, garbage, security, and water before residual funds hit rent. Verified payments post to a double-entry ledger with AR/AP aging. Public vacancy pages rank for tenant discovery without a separate website.",
+          "Caretakers work offline with IndexedDB queues and photo evidence. Managers review books health, period close, and eTIMS-ready receipt footers—none of which a static spreadsheet provides out of the box.",
+        ],
+      },
+      {
+        heading: "When to switch from Excel",
+        paragraphs: [
+          "Switch when you manage more than a handful of units, take partial mobile-money payments, need water readings, or answer to remote landlords and accountants who want consistent reports.",
+          "EstateDesk Free and Pro plans let small landlords start structured, then scale to Plus or Custom without re-entering the portfolio.",
+        ],
+      },
+    ],
+    takeaways: [
+      "Kenyan rent ops need M-Pesa allocation, not only a balance column.",
+      "Offline field work and tax-ready receipts are spreadsheet blind spots.",
+      "EstateDesk unifies vacancies, collections, accounting, and caretakers.",
+    ],
+    relatedGuideSlugs: ["rent-tracking-workflow", "kenya-rental-operations"],
+    relatedLinks: [
+      {
+        title: "Best property management software Kenya",
+        href: "/property-management-software-kenya",
+        description: "Kenya landing with M-Pesa, KRA eTIMS, and competitive positioning.",
+      },
+      {
+        title: "Pricing",
+        href: "/pricing",
+        description: "Free, Pro, Plus, and Custom plans.",
+      },
+    ],
+    faq: [
+      {
+        question: "Can I import my Excel tenants?",
+        answer:
+          "Yes. EstateDesk supports CSV import templates for tenants and related records so you can migrate without retyping every row.",
+      },
+    ],
+  },
+  {
+    slug: "kra-etims-rental-receipts",
+    category: "Tax & compliance",
+    title: "KRA eTIMS-ready rental receipts in EstateDesk",
+    summary:
+      "How EstateDesk builds eTIMS/eRITS-shaped receipts on verified payments, what credentials you need, and how live submission works for Kenyan property managers.",
+    readingMinutes: 7,
+    publishedAt: "2026-07-12",
+    keywords: [
+      "KRA eTIMS property management",
+      "eTIMS rental receipts Kenya",
+      "eRITS rental income tax software",
+      "property tax software Kenya",
+    ],
+    sections: [
+      {
+        heading: "What eTIMS-ready means in EstateDesk",
+        paragraphs: [
+          "When a payment is verified, EstateDesk snapshots seller KRA PIN, optional buyer PIN, control unit serial, itemised allocations, and a tax footer on the PDF receipt.",
+          "If KRA_ETIMS client credentials and CU serial are configured, the platform can submit an OSCU-style sales payload and store the response on the document metadata.",
+        ],
+      },
+      {
+        heading: "Setup checklist",
+        paragraphs: [
+          "Complete KRA taxpayer profiles for properties, set environment variables for client ID/secret, environment, base URL, and control unit serial, then verify a test payment in sandbox.",
+          "Register the webhook URL /api/webhooks/kra-etims when KRA provides callback status. Until credentials exist, receipts remain layout-ready without failing settlement.",
+        ],
+      },
+      {
+        heading: "Operations tips",
+        paragraphs: [
+          "Keep property taxpayer profiles accurate so seller PIN is never blank on receipts. Review the Taxes desk eTIMS readiness panel after deploy.",
+          "Residential rent is typically zero-rated in the payload; always confirm tax treatment with your tax advisor for commercial or service charges.",
+        ],
+      },
+    ],
+    takeaways: [
+      "Receipts are eTIMS-shaped even before live credentials.",
+      "Live submit needs KRA onboarding plus CU serial and API keys.",
+      "Settlement never fails solely because eTIMS is offline.",
+    ],
+    relatedGuideSlugs: ["rent-tracking-workflow", "estate-desk-vs-excel-kenya"],
+    relatedLinks: [
+      {
+        title: "Kenya property software",
+        href: "/property-management-software-kenya",
+        description: "Full Kenya product positioning including tax readiness.",
+      },
+    ],
+    faq: [
+      {
+        question: "Is EstateDesk a certified OSCU device?",
+        answer:
+          "EstateDesk provides integration and payload readiness. Device/OSCU certification is completed with KRA using your taxpayer registration and control unit.",
+      },
+    ],
+  },
+
 ] as const satisfies readonly GuideArticle[];
 
 /** Public SEO guides + platform-private + role workspace-private help. */

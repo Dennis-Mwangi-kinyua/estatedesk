@@ -148,7 +148,7 @@ export async function loadTenantDetailsData(orgId: string, tenantId: string, act
         orderBy: {
           createdAt: "desc",
         },
-        take: 8,
+        take: 40,
         select: {
           id: true,
           method: true,
@@ -158,6 +158,19 @@ export async function loadTenantDetailsData(orgId: string, tenantId: string, act
           gatewayStatus: true,
           verificationStatus: true,
           paidAt: true,
+          createdAt: true,
+        },
+      },
+      rewardRedemptions: {
+        orderBy: { createdAt: "desc" },
+        take: 12,
+        select: {
+          id: true,
+          label: true,
+          pointsCost: true,
+          status: true,
+          rewardId: true,
+          category: true,
           createdAt: true,
         },
       },

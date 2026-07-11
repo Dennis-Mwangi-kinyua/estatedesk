@@ -57,3 +57,26 @@ describe("RentRewards loyalty engine", () => {
     assert.equal(tierForPoints(500), "PLATINUM");
   });
 });
+
+describe("RentRewards redemption", () => {
+  it("allows redeem when points are sufficient", async () => {
+    const { canRedeemReward } = await import(
+      "../../apps/web/src/lib/rewards/redeem"
+    );
+    const early = {
+      paidAt: new Date(),
+      amount: 15000,
+      dueDate: new Date(Date.now() + 5 * 86400000),
+      verificationStatus: "VERIFIED",
+      gatewayStatus: "SUCCESS",
+    };
+    const many = Array.from({ length: 10 }, () => early);
+    const result = canRedeemReward({
+      payments: many,
+      redeemedPoints: 0,
+      rewardId: "data-1gb",
+    });
+    assert.equal(result.ok, true);
+  });
+});
+

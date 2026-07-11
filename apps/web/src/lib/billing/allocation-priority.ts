@@ -57,15 +57,16 @@ export function classifyChargeForAllocation(
   if (type === "WATER") return "WATER";
   if (type === "PENALTY") return "PENALTY";
   if (type === "DEPOSIT") return "DEPOSIT";
+  if (type === "SECURITY") return "SECURITY";
   if (type === "SERVICE_CHARGE") {
-    // Combined "service + security" descriptions still rank as service tier.
+    // Legacy combined "service + security" rows still rank as service tier.
     if (SECURITY_HINT.test(desc) && !SERVICE_HINT.test(desc)) return "SECURITY";
     return "SERVICE_CHARGE";
   }
 
-  if (type === "OTHER" || type === "GARBAGE" || type === "SECURITY") {
+  if (type === "OTHER" || type === "GARBAGE") {
     if (type === "GARBAGE" || GARBAGE_HINT.test(desc)) return "GARBAGE";
-    if (type === "SECURITY" || SECURITY_HINT.test(desc)) return "SECURITY";
+    if (SECURITY_HINT.test(desc)) return "SECURITY";
     if (SERVICE_HINT.test(desc)) return "SERVICE_CHARGE";
     // Default bare OTHER (legacy) treats as garbage utility fee.
     if (!desc.trim()) return "GARBAGE";
