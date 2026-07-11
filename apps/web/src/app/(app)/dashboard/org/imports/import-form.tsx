@@ -10,6 +10,10 @@ import {
   Upload,
   XCircle,
 } from "lucide-react";
+import {
+  DataCard,
+  ResponsiveDataList,
+} from "@/components/ui/responsive-data-list";
 import { IMPORT_TEMPLATES } from "@/lib/imports/templates";
 import type { ImportKind } from "@/lib/imports/types";
 import { runCsvImportAction } from "./actions";
@@ -390,42 +394,85 @@ export function CsvImportForm() {
               {state.rowResults.length} rows
             </span>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/15 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-                  <th className="px-5 py-3 font-semibold sm:px-6">Line</th>
-                  <th className="px-4 py-3 font-semibold">Record</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-5 py-3 font-semibold sm:px-6">Notes</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+          <ResponsiveDataList
+            mobile={
+              <ul className="divide-y divide-border">
                 {state.rowResults.map((row) => (
-                  <tr key={`${row.line}-${row.label}`} className="hover:bg-muted/10">
-                    <td className="px-5 py-3 font-semibold text-foreground sm:px-6">
-                      {row.line}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{row.label}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          row.status === "valid"
-                            ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                            : "bg-red-500/10 text-red-700 dark:text-red-300"
-                        }`}
-                      >
-                        {row.status === "valid" ? "Valid" : "Error"}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground sm:px-6">
-                      {row.errors.length ? row.errors.join(" ") : "Ready to import"}
-                    </td>
-                  </tr>
+                  <li key={`${row.line}-${row.label}`}>
+                    <DataCard>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-foreground">
+                            Line {row.line}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                            {row.label}
+                          </p>
+                        </div>
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                            row.status === "valid"
+                              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                              : "bg-red-500/10 text-red-700 dark:text-red-300"
+                          }`}
+                        >
+                          {row.status === "valid" ? "Valid" : "Error"}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                        {row.errors.length
+                          ? row.errors.join(" ")
+                          : "Ready to import"}
+                      </p>
+                    </DataCard>
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </ul>
+            }
+            desktop={
+              <table className="min-w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/15 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                    <th className="px-5 py-3 font-semibold sm:px-6">Line</th>
+                    <th className="px-4 py-3 font-semibold">Record</th>
+                    <th className="px-4 py-3 font-semibold">Status</th>
+                    <th className="px-5 py-3 font-semibold sm:px-6">Notes</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {state.rowResults.map((row) => (
+                    <tr
+                      key={`${row.line}-${row.label}`}
+                      className="hover:bg-muted/10"
+                    >
+                      <td className="px-5 py-3 font-semibold text-foreground sm:px-6">
+                        {row.line}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {row.label}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                            row.status === "valid"
+                              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                              : "bg-red-500/10 text-red-700 dark:text-red-300"
+                          }`}
+                        >
+                          {row.status === "valid" ? "Valid" : "Error"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground sm:px-6">
+                        {row.errors.length
+                          ? row.errors.join(" ")
+                          : "Ready to import"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            }
+          />
         </section>
       ) : null}
     </div>

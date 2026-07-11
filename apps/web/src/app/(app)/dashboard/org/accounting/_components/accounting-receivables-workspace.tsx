@@ -1,4 +1,9 @@
 import { HandCoins } from "lucide-react";
+import {
+  DataCard,
+  DataCardRow,
+  ResponsiveDataList,
+} from "@/components/ui/responsive-data-list";
 import type { getTenantReceivablesReport } from "@/lib/accounting/receivables";
 import { formatDate, formatMoney } from "../_lib/helpers";
 import type { AccountingPageData } from "../_lib/types";
@@ -73,56 +78,107 @@ export function AccountingReceivablesWorkspace({
 
       <section className={panelShellClassName}>
         <SectionHeader title="Outstanding balances" />
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-border bg-muted/20 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-              <tr>
-                <th className="px-5 py-3 font-semibold">Tenant</th>
-                <th className="px-5 py-3 font-semibold">Unit</th>
-                <th className="px-5 py-3 font-semibold">Reference</th>
-                <th className="px-5 py-3 font-semibold">Due</th>
-                <th className="px-5 py-3 font-semibold">Balance</th>
-                <th className="px-5 py-3 font-semibold">Aging</th>
-                <th className="px-5 py-3 font-semibold">GL</th>
-              </tr>
-            </thead>
-            <tbody>
-              {receivables.rows.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-5 py-8 text-muted-foreground">
-                    No outstanding tenant receivables.
-                  </td>
-                </tr>
-              ) : (
-                receivables.rows.map((row) => (
-                  <tr key={`${row.source}-${row.reference}-${row.tenantId}`} className="border-b border-border/70">
-                    <td className="px-5 py-3 font-medium text-foreground">{row.tenantName}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{row.unitLabel}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{row.reference}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{formatDate(row.dueDate)}</td>
-                    <td className="px-5 py-3 font-medium text-foreground">
-                      {formatMoney(row.balance, org.currencyCode)}
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {BUCKET_LABELS[row.bucket]}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span
-                        className={
-                          row.glPosted
-                            ? "rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200"
-                            : "rounded-full bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
-                        }
-                      >
-                        {row.glPosted ? "Posted" : "Pending"}
-                      </span>
-                    </td>
+        {receivables.rows.length === 0 ? (
+          <p className="px-5 py-8 text-sm text-muted-foreground sm:px-6">
+            No outstanding tenant receivables.
+          </p>
+        ) : (
+          <ResponsiveDataList
+            mobile={
+              <ul className="divide-y divide-border">
+                {receivables.rows.map((row) => (
+                  <li key={`${row.source}-${row.reference}-${row.tenantId}`}>
+                    <DataCard>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold">
+                            {row.tenantName}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                            {row.unitLabel} · {row.reference}
+                          </p>
+                        </div>
+                        <span
+                          className={
+                            row.glPosted
+                              ? "shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200"
+                              : "shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+                          }
+                        >
+                          {row.glPosted ? "Posted" : "Pending"}
+                        </span>
+                      </div>
+                      <dl className="mt-2.5 space-y-1.5 rounded-xl border border-border bg-muted/20 p-2.5">
+                        <DataCardRow
+                          label="Balance"
+                          value={formatMoney(row.balance, org.currencyCode)}
+                        />
+                        <DataCardRow label="Due" value={formatDate(row.dueDate)} />
+                        <DataCardRow
+                          label="Aging"
+                          value={BUCKET_LABELS[row.bucket]}
+                        />
+                      </dl>
+                    </DataCard>
+                  </li>
+                ))}
+              </ul>
+            }
+            desktop={
+              <table className="min-w-full text-left text-sm">
+                <thead className="border-b border-border bg-muted/20 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                  <tr>
+                    <th className="px-5 py-3 font-semibold">Tenant</th>
+                    <th className="px-5 py-3 font-semibold">Unit</th>
+                    <th className="px-5 py-3 font-semibold">Reference</th>
+                    <th className="px-5 py-3 font-semibold">Due</th>
+                    <th className="px-5 py-3 font-semibold">Balance</th>
+                    <th className="px-5 py-3 font-semibold">Aging</th>
+                    <th className="px-5 py-3 font-semibold">GL</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {receivables.rows.map((row) => (
+                    <tr
+                      key={`${row.source}-${row.reference}-${row.tenantId}`}
+                      className="border-b border-border/70"
+                    >
+                      <td className="px-5 py-3 font-medium text-foreground">
+                        {row.tenantName}
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {row.unitLabel}
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {row.reference}
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {formatDate(row.dueDate)}
+                      </td>
+                      <td className="px-5 py-3 font-medium text-foreground">
+                        {formatMoney(row.balance, org.currencyCode)}
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {BUCKET_LABELS[row.bucket]}
+                      </td>
+                      <td className="px-5 py-3">
+                        <span
+                          className={
+                            row.glPosted
+                              ? "rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200"
+                              : "rounded-full bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+                          }
+                        >
+                          {row.glPosted ? "Posted" : "Pending"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            }
+          />
+        )}
       </section>
     </div>
   );

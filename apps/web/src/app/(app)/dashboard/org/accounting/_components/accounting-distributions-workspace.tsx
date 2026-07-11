@@ -1,5 +1,10 @@
 import Link from "next/link";
 import { FileSpreadsheet, HandCoins } from "lucide-react";
+import {
+  DataCard,
+  DataCardRow,
+  ResponsiveDataList,
+} from "@/components/ui/responsive-data-list";
 import { emailOwnerStatementAction, postOwnerDistributionAction } from "../distribution-actions";
 import type { getDistributionsPageData } from "../_lib/distribution-queries";
 import type { getOwnerStatementPageData } from "../_lib/owner-statement-queries";
@@ -147,65 +152,128 @@ export function AccountingDistributionsWorkspace({
               ) : null}
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                    <th className="px-2 py-2">Property</th>
-                    <th className="px-2 py-2">Income</th>
-                    <th className="px-2 py-2">Expenses</th>
-                    <th className="px-2 py-2">Distributions</th>
-                    <th className="px-2 py-2">Net to owner</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {statement.properties.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="px-2 py-6 text-muted-foreground">
-                        No posted GL activity for this landlord in the selected period.
-                      </td>
-                    </tr>
-                  ) : (
-                    statement.properties.map((row) => (
-                      <tr key={row.propertyId ?? "unassigned"} className="border-b border-border/60">
-                        <td className="px-2 py-2">{row.propertyName}</td>
+            {statement.properties.length === 0 ? (
+              <p className="px-2 py-6 text-sm text-muted-foreground">
+                No posted GL activity for this landlord in the selected period.
+              </p>
+            ) : (
+              <ResponsiveDataList
+                mobile={
+                  <ul className="divide-y divide-border rounded-xl border border-border">
+                    {statement.properties.map((row) => (
+                      <li key={row.propertyId ?? "unassigned"}>
+                        <DataCard>
+                          <p className="text-sm font-semibold">{row.propertyName}</p>
+                          <dl className="mt-2 space-y-1.5 rounded-xl border border-border bg-muted/20 p-2.5">
+                            <DataCardRow
+                              label="Income"
+                              value={formatMoney(row.income, org.currencyCode)}
+                            />
+                            <DataCardRow
+                              label="Expenses"
+                              value={formatMoney(row.expenses, org.currencyCode)}
+                            />
+                            <DataCardRow
+                              label="Distributions"
+                              value={formatMoney(
+                                row.distributions,
+                                org.currencyCode,
+                              )}
+                            />
+                            <DataCardRow
+                              label="Net to owner"
+                              value={formatMoney(row.netToOwner, org.currencyCode)}
+                            />
+                          </dl>
+                        </DataCard>
+                      </li>
+                    ))}
+                    <li>
+                      <DataCard className="bg-muted/10">
+                        <p className="text-sm font-semibold">Total</p>
+                        <dl className="mt-2 space-y-1.5">
+                          <DataCardRow
+                            label="Income"
+                            value={formatMoney(
+                              statement.totals.income,
+                              org.currencyCode,
+                            )}
+                          />
+                          <DataCardRow
+                            label="Net to owner"
+                            value={formatMoney(
+                              statement.totals.netToOwner,
+                              org.currencyCode,
+                            )}
+                          />
+                        </dl>
+                      </DataCard>
+                    </li>
+                  </ul>
+                }
+                desktop={
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-left text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                        <th className="px-2 py-2">Property</th>
+                        <th className="px-2 py-2">Income</th>
+                        <th className="px-2 py-2">Expenses</th>
+                        <th className="px-2 py-2">Distributions</th>
+                        <th className="px-2 py-2">Net to owner</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statement.properties.map((row) => (
+                        <tr
+                          key={row.propertyId ?? "unassigned"}
+                          className="border-b border-border/60"
+                        >
+                          <td className="px-2 py-2">{row.propertyName}</td>
+                          <td className="px-2 py-2">
+                            {formatMoney(row.income, org.currencyCode)}
+                          </td>
+                          <td className="px-2 py-2">
+                            {formatMoney(row.expenses, org.currencyCode)}
+                          </td>
+                          <td className="px-2 py-2">
+                            {formatMoney(row.distributions, org.currencyCode)}
+                          </td>
+                          <td className="px-2 py-2 font-medium text-foreground">
+                            {formatMoney(row.netToOwner, org.currencyCode)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t border-border font-semibold text-foreground">
+                        <td className="px-2 py-2">Total</td>
                         <td className="px-2 py-2">
-                          {formatMoney(row.income, org.currencyCode)}
+                          {formatMoney(statement.totals.income, org.currencyCode)}
                         </td>
                         <td className="px-2 py-2">
-                          {formatMoney(row.expenses, org.currencyCode)}
+                          {formatMoney(
+                            statement.totals.expenses,
+                            org.currencyCode,
+                          )}
                         </td>
                         <td className="px-2 py-2">
-                          {formatMoney(row.distributions, org.currencyCode)}
+                          {formatMoney(
+                            statement.totals.distributions,
+                            org.currencyCode,
+                          )}
                         </td>
-                        <td className="px-2 py-2 font-medium text-foreground">
-                          {formatMoney(row.netToOwner, org.currencyCode)}
+                        <td className="px-2 py-2">
+                          {formatMoney(
+                            statement.totals.netToOwner,
+                            org.currencyCode,
+                          )}
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-                {statement.properties.length > 0 ? (
-                  <tfoot>
-                    <tr className="border-t border-border font-semibold text-foreground">
-                      <td className="px-2 py-2">Total</td>
-                      <td className="px-2 py-2">
-                        {formatMoney(statement.totals.income, org.currencyCode)}
-                      </td>
-                      <td className="px-2 py-2">
-                        {formatMoney(statement.totals.expenses, org.currencyCode)}
-                      </td>
-                      <td className="px-2 py-2">
-                        {formatMoney(statement.totals.distributions, org.currencyCode)}
-                      </td>
-                      <td className="px-2 py-2">
-                        {formatMoney(statement.totals.netToOwner, org.currencyCode)}
-                      </td>
-                    </tr>
-                  </tfoot>
-                ) : null}
-              </table>
-            </div>
+                    </tfoot>
+                  </table>
+                }
+              />
+            )}
           </div>
         ) : (
           <p className="px-5 py-8 text-sm text-muted-foreground sm:px-6">

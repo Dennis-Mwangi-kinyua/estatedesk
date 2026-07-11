@@ -1,5 +1,10 @@
 import Link from "next/link";
 import { ArrowLeft, Landmark } from "lucide-react";
+import {
+  DataCard,
+  DataCardRow,
+  ResponsiveDataList,
+} from "@/components/ui/responsive-data-list";
 import type { getAccountLedgerPage } from "@/lib/accounting/journal-queries";
 import {
   buttonSecondaryClassName,
@@ -66,57 +71,99 @@ export function AccountingAccountWorkspace({
 
       <section className={panelShellClassName}>
         <SectionHeader title="Account activity" description="Recent posted journal lines for this account." />
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-border bg-muted/20 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-              <tr>
-                <th className="px-5 py-3 font-semibold">Date</th>
-                <th className="px-5 py-3 font-semibold">Journal</th>
-                <th className="px-5 py-3 font-semibold">Description</th>
-                <th className="px-5 py-3 font-semibold">Debit</th>
-                <th className="px-5 py-3 font-semibold">Credit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lines.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-5 py-8 text-muted-foreground">
-                    No posted activity for this account yet.
-                  </td>
-                </tr>
-              ) : (
-                lines.map((line) => (
-                  <tr key={line.id} className="border-b border-border/70">
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {formatDate(line.journal.entryDate)}
-                    </td>
-                    <td className="px-5 py-3">
-                      <Link
-                        href="/dashboard/org/accounting/journals"
-                        className="font-medium text-foreground hover:text-primary"
-                      >
-                        {line.journal.entryNumber}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {line.description || line.journal.description}
-                    </td>
-                    <td className="px-5 py-3 font-medium text-foreground">
-                      {Number(line.debit) > 0
-                        ? formatMoney(Number(line.debit), currencyCode)
-                        : "—"}
-                    </td>
-                    <td className="px-5 py-3 font-medium text-foreground">
-                      {Number(line.credit) > 0
-                        ? formatMoney(Number(line.credit), currencyCode)
-                        : "—"}
-                    </td>
+        {lines.length === 0 ? (
+          <p className="px-5 py-8 text-sm text-muted-foreground sm:px-6">
+            No posted activity for this account yet.
+          </p>
+        ) : (
+          <ResponsiveDataList
+            mobile={
+              <ul className="divide-y divide-border">
+                {lines.map((line) => (
+                  <li key={line.id}>
+                    <DataCard>
+                      <div className="flex items-start justify-between gap-2">
+                        <Link
+                          href="/dashboard/org/accounting/journals"
+                          className="text-sm font-semibold text-foreground hover:text-primary"
+                        >
+                          {line.journal.entryNumber}
+                        </Link>
+                        <span className="shrink-0 text-[11px] text-muted-foreground">
+                          {formatDate(line.journal.entryDate)}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {line.description || line.journal.description}
+                      </p>
+                      <dl className="mt-2.5 space-y-1.5 rounded-xl border border-border bg-muted/20 p-2.5">
+                        <DataCardRow
+                          label="Debit"
+                          value={
+                            Number(line.debit) > 0
+                              ? formatMoney(Number(line.debit), currencyCode)
+                              : "—"
+                          }
+                        />
+                        <DataCardRow
+                          label="Credit"
+                          value={
+                            Number(line.credit) > 0
+                              ? formatMoney(Number(line.credit), currencyCode)
+                              : "—"
+                          }
+                        />
+                      </dl>
+                    </DataCard>
+                  </li>
+                ))}
+              </ul>
+            }
+            desktop={
+              <table className="min-w-full text-left text-sm">
+                <thead className="border-b border-border bg-muted/20 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                  <tr>
+                    <th className="px-5 py-3 font-semibold">Date</th>
+                    <th className="px-5 py-3 font-semibold">Journal</th>
+                    <th className="px-5 py-3 font-semibold">Description</th>
+                    <th className="px-5 py-3 font-semibold">Debit</th>
+                    <th className="px-5 py-3 font-semibold">Credit</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {lines.map((line) => (
+                    <tr key={line.id} className="border-b border-border/70">
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {formatDate(line.journal.entryDate)}
+                      </td>
+                      <td className="px-5 py-3">
+                        <Link
+                          href="/dashboard/org/accounting/journals"
+                          className="font-medium text-foreground hover:text-primary"
+                        >
+                          {line.journal.entryNumber}
+                        </Link>
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {line.description || line.journal.description}
+                      </td>
+                      <td className="px-5 py-3 font-medium text-foreground">
+                        {Number(line.debit) > 0
+                          ? formatMoney(Number(line.debit), currencyCode)
+                          : "—"}
+                      </td>
+                      <td className="px-5 py-3 font-medium text-foreground">
+                        {Number(line.credit) > 0
+                          ? formatMoney(Number(line.credit), currencyCode)
+                          : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            }
+          />
+        )}
       </section>
     </div>
   );

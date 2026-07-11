@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { PieChart } from "lucide-react";
 import {
+  DataCard,
+  DataCardRow,
+  ResponsiveDataList,
+} from "@/components/ui/responsive-data-list";
+import {
   approveBudgetAction,
   createBudgetAction,
   upsertBudgetLineAction,
@@ -127,50 +132,88 @@ export function AccountingBudgetsWorkspace({
               </form>
             ) : null}
 
-            <div className="mt-5 overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                    <th className="px-2 py-2">Account</th>
-                    <th className="px-2 py-2">Budgeted</th>
-                    <th className="px-2 py-2">Actual</th>
-                    <th className="px-2 py-2">Variance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {variance.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="px-2 py-6 text-muted-foreground">
-                        Add budget lines to see variance.
-                      </td>
-                    </tr>
-                  ) : (
-                    variance.map((row) => (
-                      <tr key={row.accountId} className="border-b border-border/60">
-                        <td className="px-2 py-2">
-                          {row.code} · {row.name}
-                        </td>
-                        <td className="px-2 py-2">
-                          {formatMoney(row.budgeted, org.currencyCode)}
-                        </td>
-                        <td className="px-2 py-2">
-                          {formatMoney(row.actual, org.currencyCode)}
-                        </td>
-                        <td
-                          className={`px-2 py-2 font-medium ${
-                            row.variance > 0 ? "text-amber-700" : "text-emerald-700"
-                          }`}
-                        >
-                          {formatMoney(row.variance, org.currencyCode)}
-                          {row.variancePct !== null
-                            ? ` (${row.variancePct.toFixed(1)}%)`
-                            : ""}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+            <div className="mt-5">
+              {variance.length === 0 ? (
+                <p className="px-2 py-6 text-sm text-muted-foreground">
+                  Add budget lines to see variance.
+                </p>
+              ) : (
+                <ResponsiveDataList
+                  mobile={
+                    <ul className="divide-y divide-border rounded-xl border border-border">
+                      {variance.map((row) => (
+                        <li key={row.accountId}>
+                          <DataCard>
+                            <p className="text-sm font-semibold">
+                              {row.code} · {row.name}
+                            </p>
+                            <dl className="mt-2 space-y-1.5 rounded-xl border border-border bg-muted/20 p-2.5">
+                              <DataCardRow
+                                label="Budgeted"
+                                value={formatMoney(row.budgeted, org.currencyCode)}
+                              />
+                              <DataCardRow
+                                label="Actual"
+                                value={formatMoney(row.actual, org.currencyCode)}
+                              />
+                              <DataCardRow
+                                label="Variance"
+                                value={`${formatMoney(row.variance, org.currencyCode)}${
+                                  row.variancePct !== null
+                                    ? ` (${row.variancePct.toFixed(1)}%)`
+                                    : ""
+                                }`}
+                              />
+                            </dl>
+                          </DataCard>
+                        </li>
+                      ))}
+                    </ul>
+                  }
+                  desktop={
+                    <table className="min-w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-left text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                          <th className="px-2 py-2">Account</th>
+                          <th className="px-2 py-2">Budgeted</th>
+                          <th className="px-2 py-2">Actual</th>
+                          <th className="px-2 py-2">Variance</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {variance.map((row) => (
+                          <tr
+                            key={row.accountId}
+                            className="border-b border-border/60"
+                          >
+                            <td className="px-2 py-2">
+                              {row.code} · {row.name}
+                            </td>
+                            <td className="px-2 py-2">
+                              {formatMoney(row.budgeted, org.currencyCode)}
+                            </td>
+                            <td className="px-2 py-2">
+                              {formatMoney(row.actual, org.currencyCode)}
+                            </td>
+                            <td
+                              className={`px-2 py-2 font-medium ${
+                                row.variance > 0
+                                  ? "text-amber-700"
+                                  : "text-emerald-700"
+                              }`}
+                            >
+                              {formatMoney(row.variance, org.currencyCode)}
+                              {row.variancePct !== null
+                                ? ` (${row.variancePct.toFixed(1)}%)`
+                                : ""}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  }
+                />
+              )}
             </div>
           </div>
         ) : (

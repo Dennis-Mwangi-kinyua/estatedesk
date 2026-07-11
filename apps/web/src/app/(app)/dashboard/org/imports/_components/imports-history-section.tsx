@@ -1,4 +1,9 @@
 import { Clock3, FileSpreadsheet } from "lucide-react";
+import {
+  DataCard,
+  DataCardRow,
+  ResponsiveDataList,
+} from "@/components/ui/responsive-data-list";
 import type { ImportHistoryItem } from "../_lib/types";
 
 const kindLabels: Record<string, string> = {
@@ -16,7 +21,7 @@ export function ImportsHistorySection({
 }) {
   return (
     <section className="overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
         <div>
           <p className="text-sm font-semibold text-foreground">Import history</p>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -29,77 +34,129 @@ export function ImportsHistorySection({
         </span>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/20 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-              <th className="px-5 py-3 font-semibold sm:px-6">When</th>
-              <th className="px-4 py-3 font-semibold">Dataset</th>
-              <th className="px-4 py-3 font-semibold">Mode</th>
-              <th className="px-4 py-3 font-semibold">Status</th>
-              <th className="px-4 py-3 text-right font-semibold">Rows</th>
-              <th className="px-5 py-3 text-right font-semibold sm:px-6">Created</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {history.map((run) => (
-              <tr key={run.id} className="transition hover:bg-muted/15">
-                <td className="px-5 py-4 text-muted-foreground sm:px-6">
-                  {run.createdAt.toLocaleString("en-KE", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </td>
-                <td className="px-4 py-4 font-medium text-foreground">
-                  {kindLabels[run.kind] ?? run.kind}
-                </td>
-                <td className="px-4 py-4 text-muted-foreground">
-                  {run.mode === "DRY_RUN" ? "Validation" : "Commit"}
-                </td>
-                <td className="px-4 py-4">
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      run.status === "COMPLETED"
-                        ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                        : "bg-red-500/10 text-red-700 dark:text-red-300"
-                    }`}
-                  >
-                    {run.status === "COMPLETED" ? "Completed" : "Failed"}
-                  </span>
-                  {run.errorCount > 0 ? (
-                    <p className="mt-1 text-xs text-red-600 dark:text-red-300">
-                      {run.errorCount} error{run.errorCount === 1 ? "" : "s"}
-                    </p>
-                  ) : null}
-                </td>
-                <td className="px-4 py-4 text-right text-muted-foreground">
-                  {run.totalRows}
-                </td>
-                <td className="px-5 py-4 text-right font-semibold text-foreground sm:px-6">
-                  {run.createdRows}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {historyUnavailable ? (
-          <div className="border-t border-amber-500/20 bg-amber-500/10 px-5 py-10 text-center text-sm text-amber-800 dark:text-amber-200 sm:px-6">
-            Import history is temporarily unavailable. You can still validate or upload a CSV.
+      {historyUnavailable ? (
+        <div className="border-t border-amber-500/20 bg-amber-500/10 px-5 py-10 text-center text-sm text-amber-800 dark:text-amber-200 sm:px-6">
+          Import history is temporarily unavailable. You can still validate or upload a
+          CSV.
+        </div>
+      ) : history.length === 0 ? (
+        <div className="flex flex-col items-center px-5 py-12 text-center sm:px-6">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-muted/30">
+            <FileSpreadsheet className="h-6 w-6 text-muted-foreground" />
           </div>
-        ) : history.length === 0 ? (
-          <div className="flex flex-col items-center border-t border-border px-5 py-12 text-center sm:px-6">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-muted/30">
-              <FileSpreadsheet className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <p className="mt-4 text-sm font-semibold text-foreground">No imports yet</p>
-            <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-              Run your first validation to preview row results. Successful commits will appear
-              here with timestamps, row counts, and error summaries.
-            </p>
-          </div>
-        ) : null}
-      </div>
+          <p className="mt-4 text-sm font-semibold text-foreground">No imports yet</p>
+          <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+            Run your first validation to preview row results. Successful commits will
+            appear here with timestamps, row counts, and error summaries.
+          </p>
+        </div>
+      ) : (
+        <ResponsiveDataList
+          mobile={
+            <ul className="divide-y divide-border">
+              {history.map((run) => (
+                <li key={run.id}>
+                  <DataCard>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">
+                          {kindLabels[run.kind] ?? run.kind}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {run.createdAt.toLocaleString("en-KE", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </p>
+                      </div>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          run.status === "COMPLETED"
+                            ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                            : "bg-red-500/10 text-red-700 dark:text-red-300"
+                        }`}
+                      >
+                        {run.status === "COMPLETED" ? "Completed" : "Failed"}
+                      </span>
+                    </div>
+                    <dl className="mt-2.5 space-y-1.5 rounded-xl border border-border bg-muted/20 p-2.5">
+                      <DataCardRow
+                        label="Mode"
+                        value={run.mode === "DRY_RUN" ? "Validation" : "Commit"}
+                      />
+                      <DataCardRow label="Rows" value={run.totalRows} />
+                      <DataCardRow label="Created" value={run.createdRows} />
+                      {run.errorCount > 0 ? (
+                        <DataCardRow
+                          label="Errors"
+                          value={`${run.errorCount} error${run.errorCount === 1 ? "" : "s"}`}
+                        />
+                      ) : null}
+                    </dl>
+                  </DataCard>
+                </li>
+              ))}
+            </ul>
+          }
+          desktop={
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/20 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                  <th className="px-5 py-3 font-semibold sm:px-6">When</th>
+                  <th className="px-4 py-3 font-semibold">Dataset</th>
+                  <th className="px-4 py-3 font-semibold">Mode</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 text-right font-semibold">Rows</th>
+                  <th className="px-5 py-3 text-right font-semibold sm:px-6">
+                    Created
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {history.map((run) => (
+                  <tr key={run.id} className="transition hover:bg-muted/15">
+                    <td className="px-5 py-4 text-muted-foreground sm:px-6">
+                      {run.createdAt.toLocaleString("en-KE", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </td>
+                    <td className="px-4 py-4 font-medium text-foreground">
+                      {kindLabels[run.kind] ?? run.kind}
+                    </td>
+                    <td className="px-4 py-4 text-muted-foreground">
+                      {run.mode === "DRY_RUN" ? "Validation" : "Commit"}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          run.status === "COMPLETED"
+                            ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                            : "bg-red-500/10 text-red-700 dark:text-red-300"
+                        }`}
+                      >
+                        {run.status === "COMPLETED" ? "Completed" : "Failed"}
+                      </span>
+                      {run.errorCount > 0 ? (
+                        <p className="mt-1 text-xs text-red-600 dark:text-red-300">
+                          {run.errorCount} error
+                          {run.errorCount === 1 ? "" : "s"}
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-4 text-right text-muted-foreground">
+                      {run.totalRows}
+                    </td>
+                    <td className="px-5 py-4 text-right font-semibold text-foreground sm:px-6">
+                      {run.createdRows}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          }
+        />
+      )}
     </section>
   );
 }

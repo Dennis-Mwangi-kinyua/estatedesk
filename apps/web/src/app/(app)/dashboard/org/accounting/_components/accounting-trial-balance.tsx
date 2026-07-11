@@ -1,3 +1,8 @@
+import {
+  DataCard,
+  DataCardRow,
+  ResponsiveDataList,
+} from "@/components/ui/responsive-data-list";
 import { formatMoney } from "../_lib/helpers";
 import type { AccountingPageData } from "../_lib/types";
 import { panelShellClassName } from "./accounting-ui";
@@ -11,7 +16,7 @@ export function AccountingTrialBalance({ data }: { data: AccountingPageData }) {
 
   return (
     <section className={panelShellClassName}>
-      <div className="border-b border-border px-5 py-4 sm:px-6">
+      <div className="border-b border-border px-4 py-4 sm:px-6">
         <h2 className="text-lg font-semibold tracking-tight text-foreground">
           Trial balance
         </h2>
@@ -26,47 +31,76 @@ export function AccountingTrialBalance({ data }: { data: AccountingPageData }) {
           trial balance.
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="border-b border-border bg-muted/20">
-              <tr className="text-left">
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Account
-                </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Debit
-                </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Credit
-                </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Balance
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+        <ResponsiveDataList
+          mobile={
+            <ul className="divide-y divide-border">
               {summary.rows.map((row) => (
-                <tr
-                  key={row.code}
-                  className="border-b border-border/70 transition hover:bg-muted/10"
-                >
-                  <td className="px-4 py-3 font-medium text-foreground">
-                    {row.code} · {row.name}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {formatMoney(row.debit, org.currencyCode)}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {formatMoney(row.credit, org.currencyCode)}
-                  </td>
-                  <td className="px-4 py-3 font-semibold text-foreground">
-                    {formatMoney(row.balance, org.currencyCode)}
-                  </td>
-                </tr>
+                <li key={row.code}>
+                  <DataCard>
+                    <p className="text-sm font-semibold text-foreground">
+                      {row.code} · {row.name}
+                    </p>
+                    <dl className="mt-2.5 space-y-1.5 rounded-xl border border-border bg-muted/20 p-2.5">
+                      <DataCardRow
+                        label="Debit"
+                        value={formatMoney(row.debit, org.currencyCode)}
+                      />
+                      <DataCardRow
+                        label="Credit"
+                        value={formatMoney(row.credit, org.currencyCode)}
+                      />
+                      <DataCardRow
+                        label="Balance"
+                        value={formatMoney(row.balance, org.currencyCode)}
+                      />
+                    </dl>
+                  </DataCard>
+                </li>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </ul>
+          }
+          desktop={
+            <table className="min-w-full text-sm">
+              <thead className="border-b border-border bg-muted/20">
+                <tr className="text-left">
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Account
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Debit
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Credit
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Balance
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.rows.map((row) => (
+                  <tr
+                    key={row.code}
+                    className="border-b border-border/70 transition hover:bg-muted/10"
+                  >
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      {row.code} · {row.name}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {formatMoney(row.debit, org.currencyCode)}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {formatMoney(row.credit, org.currencyCode)}
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-foreground">
+                      {formatMoney(row.balance, org.currencyCode)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          }
+        />
       )}
     </section>
   );

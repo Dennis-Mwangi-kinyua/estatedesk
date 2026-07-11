@@ -1,4 +1,9 @@
 import Link from "next/link";
+import {
+  DataCard,
+  DataCardRow,
+  ResponsiveDataList,
+} from "@/components/ui/responsive-data-list";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { getPagination } from "@/lib/db/pagination";
 import {
@@ -56,12 +61,12 @@ export default async function PlatformPaymentsPage({
   const ledger = await getPlatformPaymentLedger(undefined, { skip, take, q });
 
   return (
-    <div className="space-y-6">
+    <div className="ed-mobile-first space-y-4 sm:space-y-6">
       <div>
         <p className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">
           Platform ledger
         </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-neutral-950">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-950 sm:text-3xl">
           Organization payments
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">
@@ -70,7 +75,7 @@ export default async function PlatformPaymentsPage({
         </p>
       </div>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="ed-keep-cols grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
         <StatCard label="Organizations" value={ledger.totals.organizations} />
         <StatCard
           label="Listed paid"
@@ -106,57 +111,100 @@ export default async function PlatformPaymentsPage({
           </button>
         </form>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-neutral-50 text-left text-neutral-500">
-              <tr>
-                <th className="px-4 py-3 font-medium">Organization</th>
-                <th className="px-4 py-3 font-medium">Tenants</th>
-                <th className="px-4 py-3 font-medium">Expected</th>
-                <th className="px-4 py-3 font-medium">Paid</th>
-                <th className="px-4 py-3 font-medium">Deficit</th>
-                <th className="px-4 py-3 font-medium">Payments</th>
-                <th className="px-4 py-3 font-medium">Last payment</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ledger.rows.map((row) => (
-                <tr key={row.orgId} className="border-t border-neutral-100">
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/platform/organizations/${row.slug}`}
-                      className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
-                    >
-                      {row.name}
-                    </Link>
-                    <p className="mt-1 text-xs text-neutral-500">/{row.slug}</p>
-                  </td>
-                  <td className="px-4 py-3 text-neutral-600">{row.tenantCount}</td>
-                  <td className="px-4 py-3 font-medium">
-                    {formatLedgerCurrency(row.expected)}
-                  </td>
-                  <td className="px-4 py-3 font-medium text-emerald-700">
-                    {formatLedgerCurrency(row.paid)}
-                  </td>
-                  <td className="px-4 py-3 font-medium text-red-700">
-                    {formatLedgerCurrency(row.deficit)}
-                  </td>
-                  <td className="px-4 py-3 text-neutral-600">{row.paymentCount}</td>
-                  <td className="px-4 py-3 text-neutral-600">
-                    {formatLedgerDate(row.lastPaymentAt)}
-                  </td>
-                </tr>
-              ))}
-              {ledger.rows.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-neutral-500">
-                    No organizations found.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </div>
+        {ledger.rows.length === 0 ? (
+          <p className="px-4 py-10 text-center text-sm text-neutral-500">
+            No organizations found.
+          </p>
+        ) : (
+          <ResponsiveDataList
+            mobile={
+              <ul className="divide-y divide-neutral-100">
+                {ledger.rows.map((row) => (
+                  <li key={row.orgId}>
+                    <DataCard>
+                      <Link
+                        href={`/platform/organizations/${row.slug}`}
+                        className="text-sm font-semibold text-neutral-950 underline-offset-4 hover:underline"
+                      >
+                        {row.name}
+                      </Link>
+                      <p className="mt-0.5 text-xs text-neutral-500">/{row.slug}</p>
+                      <dl className="mt-2.5 space-y-1.5 rounded-xl border border-neutral-200 bg-neutral-50 p-2.5">
+                        <DataCardRow label="Tenants" value={row.tenantCount} />
+                        <DataCardRow
+                          label="Expected"
+                          value={formatLedgerCurrency(row.expected)}
+                        />
+                        <DataCardRow
+                          label="Paid"
+                          value={formatLedgerCurrency(row.paid)}
+                        />
+                        <DataCardRow
+                          label="Deficit"
+                          value={formatLedgerCurrency(row.deficit)}
+                        />
+                        <DataCardRow
+                          label="Last payment"
+                          value={formatLedgerDate(row.lastPaymentAt)}
+                        />
+                      </dl>
+                    </DataCard>
+                  </li>
+                ))}
+              </ul>
+            }
+            desktop={
+              <table className="min-w-full text-sm">
+                <thead className="bg-neutral-50 text-left text-neutral-500">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Organization</th>
+                    <th className="px-4 py-3 font-medium">Tenants</th>
+                    <th className="px-4 py-3 font-medium">Expected</th>
+                    <th className="px-4 py-3 font-medium">Paid</th>
+                    <th className="px-4 py-3 font-medium">Deficit</th>
+                    <th className="px-4 py-3 font-medium">Payments</th>
+                    <th className="px-4 py-3 font-medium">Last payment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ledger.rows.map((row) => (
+                    <tr key={row.orgId} className="border-t border-neutral-100">
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/platform/organizations/${row.slug}`}
+                          className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
+                        >
+                          {row.name}
+                        </Link>
+                        <p className="mt-1 text-xs text-neutral-500">
+                          /{row.slug}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600">
+                        {row.tenantCount}
+                      </td>
+                      <td className="px-4 py-3 font-medium">
+                        {formatLedgerCurrency(row.expected)}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-emerald-700">
+                        {formatLedgerCurrency(row.paid)}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-red-700">
+                        {formatLedgerCurrency(row.deficit)}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600">
+                        {row.paymentCount}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600">
+                        {formatLedgerDate(row.lastPaymentAt)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            }
+          />
+        )}
 
         <PaginationControls
           page={page}
