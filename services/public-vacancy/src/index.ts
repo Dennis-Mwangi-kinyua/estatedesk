@@ -14,6 +14,7 @@ export const PUBLIC_VACANCY_SERVICE = {
 } as const;
 
 export * from "./cache";
+export * from "./ensure-slug";
 export * from "./image";
 export * from "./list-sitemap";
 export * from "./listings";
@@ -21,6 +22,7 @@ export * from "./resolve";
 export * from "./sitemap";
 export * from "./slug";
 export * from "./slug-index";
+export * from "./where";
 
 export function getPublicVacancyHealth() {
   return {

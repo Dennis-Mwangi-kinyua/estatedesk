@@ -30,12 +30,12 @@ export function ApiKeyCreateForm({
     <div className="space-y-4">
       <form
         action={action}
-        className="grid gap-3 rounded-[24px] border border-neutral-200 bg-neutral-50 p-4 lg:grid-cols-[1fr_1fr_180px_auto]"
+        className="grid grid-cols-1 gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 p-3 sm:p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,180px)_auto]"
       >
         <select
           name="orgId"
           required
-          className="h-12 rounded-2xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 outline-none"
+          className="min-h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 outline-none"
         >
           <option value="">Select organization</option>
           {organizations.map((org) => (
@@ -49,19 +49,19 @@ export function ApiKeyCreateForm({
           name="name"
           required
           placeholder="Vacant homes website"
-          className="h-12 rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none placeholder:text-neutral-400"
+          className="min-h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none placeholder:text-neutral-400"
         />
 
         <input
           name="expiresAt"
           type="date"
-          className="h-12 rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none"
+          className="min-h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none"
         />
 
         <button
           type="submit"
           disabled={pending}
-          className="h-12 rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="min-h-12 w-full rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
         >
           {pending ? "Creating..." : "Create key"}
         </button>

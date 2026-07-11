@@ -15,6 +15,7 @@ export function PlatformModeToggle({
 }: PlatformModeToggleProps) {
   const { mode, switchMode } = usePlatformMode();
   const compact = variant === "compact";
+  const mobile = variant === "mobile";
 
   return (
     <div
@@ -24,6 +25,7 @@ export function PlatformModeToggle({
       className={[
         "grid grid-cols-2 gap-1 rounded-xl border border-border bg-muted/60 p-1",
         compact ? "min-w-[148px]" : "",
+        mobile ? "w-full" : "",
         className,
       ].join(" ")}
     >
@@ -39,8 +41,9 @@ export function PlatformModeToggle({
             onClick={() => switchMode(target)}
             aria-pressed={active}
             className={[
-              "inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition",
-              compact ? "px-2 py-1.5" : "",
+              "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition",
+              compact ? "min-h-9 px-2 py-1.5" : "",
+              mobile ? "min-h-11 text-[13px]" : "",
               active
                 ? target === "developer"
                   ? "bg-violet-600 text-white shadow-sm dark:bg-violet-500"
@@ -49,7 +52,7 @@ export function PlatformModeToggle({
             ].join(" ")}
           >
             <Icon className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">{meta.shortLabel}</span>
+            <span className="truncate">{mobile ? meta.label : meta.shortLabel}</span>
           </button>
         );
       })}

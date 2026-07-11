@@ -15,7 +15,7 @@ export function DeveloperSensitiveBanner({ isSuperAdmin }: { isSuperAdmin: boole
 
   if (!sensitive && !isSuperAdmin) {
     return (
-      <div className="mb-4 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100">
+      <div className="mb-3 rounded-xl border border-violet-200 bg-violet-50 px-3 py-3 text-sm leading-6 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100 sm:mb-4 sm:px-4">
         <div className="flex items-start gap-2">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
@@ -29,12 +29,15 @@ export function DeveloperSensitiveBanner({ isSuperAdmin }: { isSuperAdmin: boole
 
   if (!sensitive) {
     return (
-      <div className="mb-4 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100">
+      <div className="mb-3 rounded-xl border border-violet-200 bg-violet-50 px-3 py-3 text-sm leading-6 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100 sm:mb-4 sm:px-4">
         <div className="flex items-start gap-2">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
             <strong>Developer mode</strong> — engineering and ops tooling. Use the mode
-            toggle or <kbd className="rounded border border-violet-300 px-1 text-[11px]">Alt+Shift+A</kbd>{" "}
+            toggle or{" "}
+            <kbd className="rounded border border-violet-300 px-1 text-[11px]">
+              Alt+Shift+A
+            </kbd>{" "}
             to return to Administration.
           </p>
         </div>
@@ -43,10 +46,10 @@ export function DeveloperSensitiveBanner({ isSuperAdmin }: { isSuperAdmin: boole
   }
 
   return (
-    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50">
+    <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm leading-6 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50 sm:mb-4 sm:px-4">
       <div className="flex items-start gap-2">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
-        <div>
+        <div className="min-w-0">
           <p className="font-semibold">Sensitive super-admin tooling</p>
           <p className="mt-0.5 text-amber-900/90 dark:text-amber-50/90">
             Actions on this page can revoke keys, run jobs, export data, or affect backups.

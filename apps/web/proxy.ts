@@ -29,6 +29,8 @@ const PUBLIC_PREFIXES = [
   "/api/cron/retention",
   "/api/auth/accept-invite",
   "/api/public/vacant-houses",
+  // Soft-auth badge endpoint: returns count 0 without a session (no 401 noise).
+  "/api/pwa/badge-count",
   "/login",
   "/register",
   "/forgot-password",

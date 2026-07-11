@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
@@ -9,7 +8,9 @@ import {
   CheckCircle2,
   ChevronRight,
   Coins,
+  ExternalLink,
   MapPin,
+  MessageCircle,
   Phone,
   Send,
   ShieldCheck,
@@ -18,6 +19,7 @@ import {
   VacancyDetailRelatedGrid,
   type RelatedVacancyListingCard,
 } from "@/components/marketing/vacancy-detail-related-grid";
+import { VacancyGalleryLightbox } from "@/components/marketing/vacancy-gallery-lightbox";
 import type { VacancyPaginationState } from "@/lib/vacancy-pagination";
 import { VacancyShareActions } from "@/components/marketing/vacancy-share-actions";
 
@@ -62,6 +64,7 @@ type VacancyDetailDescriptionProps = {
 type VacancyInquiryFormProps = {
   action: (formData: FormData) => void | Promise<void>;
   defaultMessage: string;
+  defaultPreferredLocation?: string;
   sent?: string;
   error?: string;
 };
@@ -69,9 +72,12 @@ type VacancyInquiryFormProps = {
 type VacancyDetailSidebarProps = {
   rentLabel: string;
   serviceChargeLabel: string;
+  depositLabel?: string | null;
   viewingLabel: string;
   managerName: string;
   callHref: string;
+  whatsappHref?: string | null;
+  mapsHref?: string | null;
   shareUrl: string;
   shareTitle: string;
   shareText: string;
@@ -129,58 +135,23 @@ export function VacancyDetailGallery({
   imageUrl,
   hasPhotos,
 }: VacancyDetailGalleryProps) {
-  return (
-    <div className="space-y-3">
-      <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-[0_24px_60px_rgba(15,23,42,0.10)] dark:border-white/10 dark:bg-slate-800">
-        {hasPhotos && gallery[0]?.key && imageUrl(gallery[0].key) ? (
-          <Image
-            src={imageUrl(gallery[0].key)!}
-            alt={gallery[0]?.fileName ?? title}
-            fill
-            priority
-            sizes="(min-width: 1024px) 62vw, 100vw"
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-slate-100 dark:bg-slate-800">
-            <span className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
-              No images
-            </span>
-          </div>
-        )}
-        <div className="absolute left-4 top-4 z-10 flex flex-wrap gap-2">
-          <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-[0_4px_14px_rgba(5,150,105,0.45)]">
-            Vacant now
-          </span>
-          <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900 shadow-md">
-            {viewingLabel}
-          </span>
-        </div>
-        <div className="absolute bottom-4 right-4 z-10 rounded-2xl border border-slate-200/90 bg-white px-4 py-3 shadow-[0_14px_36px_rgba(15,23,42,0.28)]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Monthly rent</p>
-          <p className="mt-0.5 text-2xl font-semibold tracking-tight text-slate-950">{rentLabel}</p>
-        </div>
-      </div>
+  const images = hasPhotos
+    ? gallery
+        .map((asset) => {
+          const src = imageUrl(asset.key);
+          if (!src) return null;
+          return { key: asset.key, fileName: asset.fileName, src };
+        })
+        .filter((item): item is { key: string; fileName: string | null; src: string } => Boolean(item))
+    : [];
 
-      {gallery.length > 1 ? (
-        <div className="grid grid-cols-4 gap-2 sm:gap-3">
-          {gallery.slice(1, 5).map((asset) => (
-            <div
-              key={asset.key}
-              className="relative aspect-[4/3] overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-slate-800"
-            >
-              <Image
-                src={imageUrl(asset.key)!}
-                alt={asset.fileName ?? title}
-                fill
-                sizes="20vw"
-                className="object-cover"
-              />
-            </div>
-          ))}
-        </div>
-      ) : null}
-    </div>
+  return (
+    <VacancyGalleryLightbox
+      title={title}
+      rentLabel={rentLabel}
+      viewingLabel={viewingLabel}
+      images={images}
+    />
   );
 }
 
@@ -255,7 +226,16 @@ export function VacancyDetailDescription({
   );
 }
 
-function VacancyInquiryForm({ action, defaultMessage, sent, error }: VacancyInquiryFormProps) {
+function VacancyInquiryForm({
+  action,
+  defaultMessage,
+  defaultPreferredLocation,
+  sent,
+  error,
+}: VacancyInquiryFormProps) {
+  const fieldClassName =
+    "min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-500/20";
+
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-900">
       <h2 className="text-lg font-semibold text-slate-950 dark:text-white">Request a viewing</h2>
@@ -282,34 +262,49 @@ function VacancyInquiryForm({ action, defaultMessage, sent, error }: VacancyInqu
           <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
             Full name
           </span>
-          <input
-            name="fullName"
-            required
-            placeholder="Jane Kamau"
-            className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
-          />
+          <input name="fullName" required placeholder="Jane Kamau" className={fieldClassName} />
         </label>
         <label className="block space-y-1.5">
           <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
             Phone number
           </span>
-          <input
-            name="phone"
-            required
-            placeholder="07xx xxx xxx"
-            className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
-          />
+          <input name="phone" required placeholder="07xx xxx xxx" className={fieldClassName} />
         </label>
         <label className="block space-y-1.5">
           <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
             Email address
           </span>
+          <input name="email" type="email" placeholder="you@example.com" className={fieldClassName} />
+        </label>
+        <label className="block space-y-1.5">
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+            Preferred location
+          </span>
           <input
-            name="email"
-            type="email"
-            placeholder="you@example.com"
-            className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
+            name="preferredLocation"
+            defaultValue={defaultPreferredLocation}
+            placeholder="e.g. Ruaka, Kiambu"
+            className={fieldClassName}
           />
+        </label>
+        <label className="block space-y-1.5">
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+            Budget (KES / month)
+          </span>
+          <input name="budget" placeholder="e.g. 25000" className={fieldClassName} />
+        </label>
+        <label className="block space-y-1.5">
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+            How did you hear about us?
+          </span>
+          <select name="referralSource" defaultValue="" className={fieldClassName}>
+            <option value="">Select (optional)</option>
+            <option value="search">Search / Google</option>
+            <option value="social">Social media</option>
+            <option value="referral">Friend or family</option>
+            <option value="agent">Agent / caretaker</option>
+            <option value="other">Other</option>
+          </select>
         </label>
         <label className="block space-y-1.5">
           <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
@@ -338,9 +333,12 @@ function VacancyInquiryForm({ action, defaultMessage, sent, error }: VacancyInqu
 export function VacancyDetailSidebar({
   rentLabel,
   serviceChargeLabel,
+  depositLabel,
   viewingLabel,
   managerName,
   callHref,
+  whatsappHref,
+  mapsHref,
   shareUrl,
   shareTitle,
   shareText,
@@ -358,6 +356,12 @@ export function VacancyDetailSidebar({
             <span className="text-slate-600 dark:text-slate-300">Service charge</span>
             <span className="font-semibold text-slate-950 dark:text-white">{serviceChargeLabel}</span>
           </div>
+          {depositLabel ? (
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-slate-600 dark:text-slate-300">Deposit</span>
+              <span className="font-semibold text-slate-950 dark:text-white">{depositLabel}</span>
+            </div>
+          ) : null}
           <div className="flex items-center justify-between gap-3">
             <span className="text-slate-600 dark:text-slate-300">Viewing</span>
             <span className="font-semibold text-slate-950 dark:text-white">{viewingLabel}</span>
@@ -367,13 +371,37 @@ export function VacancyDetailSidebar({
             <span className="truncate font-semibold text-slate-950 dark:text-white">{managerName}</span>
           </div>
         </div>
-        <a
-          href={callHref}
-          className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
-        >
-          <Phone className="h-4 w-4" />
-          Call landlord or agent
-        </a>
+        <div className="mt-5 grid gap-2">
+          <a
+            href={callHref}
+            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
+          >
+            <Phone className="h-4 w-4" />
+            Call landlord or agent
+          </a>
+          {whatsappHref ? (
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-100 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-100 dark:hover:bg-emerald-500/20"
+            >
+              <MessageCircle className="h-4 w-4" />
+              WhatsApp manager
+            </a>
+          ) : null}
+          {mapsHref ? (
+            <a
+              href={mapsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 dark:border-white/15 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-white/10"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Open in Maps
+            </a>
+          ) : null}
+        </div>
       </section>
 
       <VacancyInquiryForm {...inquiry} />

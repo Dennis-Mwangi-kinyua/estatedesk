@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Prisma, PlatformRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -158,6 +158,14 @@ export function buildAuditLogWhere(params: {
   return where;
 }
 
+function auditLogsQuery<T>(label: string, operation: () => Promise<T>) {
+  return retryTransientDatabaseOperation(operation, {
+    attempts: 4,
+    delayMs: 650,
+    label,
+  });
+}
+
 export async function getAuditLogs(params: {
   page: number;
   pageSize: number;
@@ -172,27 +180,30 @@ export async function getAuditLogs(params: {
     action: action?.trim() || undefined,
   });
 
-  const [logs, totalCount, distinctActions] = await Promise.all([
-    prisma.auditLog.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: pageSize,
-      select: auditLogSelect,
-    }),
-    prisma.auditLog.count({ where }),
-    prisma.auditLog.findMany({
-      select: { action: true },
-      distinct: ["action"],
-      orderBy: { action: "asc" },
-    }),
-  ]);
+  // Neon cold starts + large audit tables often time out on first hit.
+  // Retry the whole batch; keep distinct-actions lighter via groupBy.
+  return auditLogsQuery("platform-audit-logs", async () => {
+    const [logs, totalCount, actionGroups] = await Promise.all([
+      prisma.auditLog.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+        select: auditLogSelect,
+      }),
+      prisma.auditLog.count({ where }),
+      prisma.auditLog.groupBy({
+        by: ["action"],
+        orderBy: { action: "asc" },
+      }),
+    ]);
 
-  return {
-    logs,
-    totalCount,
-    actions: distinctActions.map((item) => item.action).filter(Boolean),
-    totalPages: Math.max(1, Math.ceil(totalCount / pageSize)),
-  };
+    return {
+      logs,
+      totalCount,
+      actions: actionGroups.map((item) => item.action).filter(Boolean),
+      totalPages: Math.max(1, Math.ceil(totalCount / pageSize)),
+    };
+  });
 }
 

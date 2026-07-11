@@ -388,13 +388,116 @@ export default async function WebsiteControlCenterPage({
         </form>
       </Surface>
 
-      {/* Global feature overrides */}
+      {/* Global feature overrides — mobile-first cards, table from lg */}
       <Surface
         title="Global feature overrides"
         description="Force a feature on/off website-wide, or inherit per-org settings. Use FORCE-ALL-ORGS to rewrite every organization."
       >
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+        {/* Phone / tablet cards (default) */}
+        <ul className="ed-global-feature-list divide-y divide-border lg:hidden">
+          {PLATFORM_FEATURE_FLAG_KEYS.map((key) => {
+            const current =
+              key in control.globalFeatures
+                ? control.globalFeatures[key]
+                  ? "on"
+                  : "off"
+                : "inherit";
+
+            return (
+              <li key={key} className="space-y-3 px-3 py-4 sm:px-4">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <p className="min-w-0 break-all text-sm font-semibold leading-5 text-foreground">
+                    {key}
+                  </p>
+                  <Badge
+                    tone={
+                      current === "on"
+                        ? toneForStatus("ACTIVE")
+                        : current === "off"
+                          ? toneForStatus("DISABLED")
+                          : toneForStatus("PENDING")
+                    }
+                  >
+                    {current.toUpperCase()}
+                  </Badge>
+                </div>
+
+                <div className="space-y-1.5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Platform override
+                  </p>
+                  <form
+                    action={updateGlobalFeatureKillAction}
+                    className="grid grid-cols-3 gap-2"
+                  >
+                    <input type="hidden" name="featureKey" value={key} />
+                    <button
+                      name="mode"
+                      value="on"
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 px-2 text-xs font-semibold text-emerald-900 transition hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-100"
+                    >
+                      On
+                    </button>
+                    <button
+                      name="mode"
+                      value="off"
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-2 text-xs font-semibold text-red-800 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-100"
+                    >
+                      Off
+                    </button>
+                    <button
+                      name="mode"
+                      value="inherit"
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-2 text-xs font-semibold text-foreground transition hover:bg-muted/50"
+                    >
+                      Inherit
+                    </button>
+                  </form>
+                </div>
+
+                <div className="space-y-2 rounded-xl border border-amber-200/80 bg-amber-50/50 p-3 dark:border-amber-500/25 dark:bg-amber-500/5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-amber-900 dark:text-amber-100">
+                    Force all organizations
+                  </p>
+                  <p className="text-[11px] leading-4 text-amber-900/80 dark:text-amber-100/80">
+                    Type <span className="font-mono font-semibold">FORCE-ALL-ORGS</span> then
+                    confirm. Rewrites every org&apos;s stored flag.
+                  </p>
+                  <form action={forceAllOrgsFeatureAction} className="grid gap-2">
+                    <input type="hidden" name="featureKey" value={key} />
+                    <input type="hidden" name="enabled" value="true" />
+                    <input
+                      name="confirmation"
+                      placeholder="FORCE-ALL-ORGS"
+                      autoComplete="off"
+                      className="min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm dark:border-white/10 dark:bg-slate-950"
+                    />
+                    <button className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-950 px-3 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">
+                      Force ON all orgs
+                    </button>
+                  </form>
+                  <form action={forceAllOrgsFeatureAction} className="grid gap-2">
+                    <input type="hidden" name="featureKey" value={key} />
+                    <input type="hidden" name="enabled" value="false" />
+                    <input
+                      name="confirmation"
+                      placeholder="FORCE-ALL-ORGS"
+                      autoComplete="off"
+                      className="min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm dark:border-white/10 dark:bg-slate-950"
+                    />
+                    <button className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-red-200 bg-red-50 px-3 text-sm font-semibold text-red-800 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-100">
+                      Force OFF all orgs
+                    </button>
+                  </form>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* Desktop table */}
+        <div className="ed-global-feature-table hidden overflow-x-auto lg:block">
+          <table className="w-full min-w-[720px] text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
                 <th className="px-4 py-3 font-medium">Feature</th>
@@ -414,7 +517,7 @@ export default async function WebsiteControlCenterPage({
 
                 return (
                   <tr key={key} className="border-t border-slate-100 dark:border-white/10">
-                    <td className="px-4 py-3 font-medium text-slate-950 dark:text-white">
+                    <td className="whitespace-normal px-4 py-3 font-medium text-slate-950 dark:text-white">
                       {key}
                     </td>
                     <td className="px-4 py-3">
@@ -431,7 +534,10 @@ export default async function WebsiteControlCenterPage({
                       </Badge>
                     </td>
                     <td className="px-4 py-3">
-                      <form action={updateGlobalFeatureKillAction} className="flex flex-wrap gap-1">
+                      <form
+                        action={updateGlobalFeatureKillAction}
+                        className="flex flex-wrap gap-1"
+                      >
                         <input type="hidden" name="featureKey" value={key} />
                         <button
                           name="mode"
@@ -457,7 +563,10 @@ export default async function WebsiteControlCenterPage({
                       </form>
                     </td>
                     <td className="px-4 py-3">
-                      <form action={forceAllOrgsFeatureAction} className="flex flex-wrap items-center gap-2">
+                      <form
+                        action={forceAllOrgsFeatureAction}
+                        className="flex flex-wrap items-center gap-2"
+                      >
                         <input type="hidden" name="featureKey" value={key} />
                         <input type="hidden" name="enabled" value="true" />
                         <input
@@ -469,7 +578,10 @@ export default async function WebsiteControlCenterPage({
                           Force ON all
                         </button>
                       </form>
-                      <form action={forceAllOrgsFeatureAction} className="mt-1 flex flex-wrap items-center gap-2">
+                      <form
+                        action={forceAllOrgsFeatureAction}
+                        className="mt-1 flex flex-wrap items-center gap-2"
+                      >
                         <input type="hidden" name="featureKey" value={key} />
                         <input type="hidden" name="enabled" value="false" />
                         <input
@@ -639,82 +751,91 @@ export default async function WebsiteControlCenterPage({
         </div>
       </Surface>
 
-      {/* Org controls */}
+      {/* Org controls — mobile-first cards, wide table from lg */}
       <Surface
         title="Organization website control"
         description="Force org status, billing override, support entry into the live org workspace, soft-delete, and restore. Filter by name or slug."
       >
-        <form className="border-b border-border p-4">
+        <div className="border-b border-border p-3 sm:p-4">
+          <label htmlFor="control-org-filter" className="sr-only">
+            Filter organizations
+          </label>
           <input
             name="q"
             defaultValue=""
             form="unused"
             id="control-org-filter"
-            placeholder="Filter organizations…"
-            className="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm"
+            placeholder="Filter by name or slug…"
+            className="min-h-11 w-full rounded-xl border border-border bg-card px-3 text-sm"
           />
           <p className="mt-2 text-xs text-muted-foreground">
-            Type to filter the table client-side (name or slug).
+            Filters the list below as you type.
           </p>
-        </form>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm" id="control-org-table">
-            <thead className="bg-muted/40 text-left text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3 font-medium">Organization</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Plan</th>
-                <th className="px-4 py-3 font-medium">Force status</th>
-                <th className="px-4 py-3 font-medium">Billing override</th>
-                <th className="px-4 py-3 font-medium">Support / delete</th>
-              </tr>
-            </thead>
-            <tbody>
+        </div>
+
+        {organizations.length === 0 ? (
+          <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+            No organizations.
+          </p>
+        ) : (
+          <>
+            {/* Phone / tablet cards */}
+            <ul className="ed-org-control-list divide-y divide-border lg:hidden">
               {organizations.map((org) => (
-                <tr
+                <li
                   key={org.id}
                   data-org-filter={`${org.name} ${org.slug}`.toLowerCase()}
-                  className="control-org-row border-t border-border align-top"
+                  className="control-org-row space-y-3 px-3 py-4 sm:px-4"
                 >
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/platform/organizations/${org.slug}`}
-                      className="font-semibold text-foreground hover:underline"
-                    >
-                      {org.name}
-                    </Link>
-                    <p className="mt-1 text-xs text-muted-foreground">/{org.slug}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge tone={toneForStatus(org.status)}>{org.status}</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                    {org.subscription
-                      ? `${org.subscription.plan} · ${org.subscription.status}`
-                      : "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <form action={forceOrgStatusAction} className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <Link
+                        href={`/platform/organizations/${org.slug}`}
+                        className="text-sm font-semibold text-foreground hover:underline"
+                      >
+                        {org.name}
+                      </Link>
+                      <p className="mt-0.5 text-xs text-muted-foreground">/{org.slug}</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Badge tone={toneForStatus(org.status)}>{org.status}</Badge>
+                      <span className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                        {org.subscription
+                          ? `${org.subscription.plan} · ${org.subscription.status}`
+                          : "No plan"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                      Force status
+                    </p>
+                    <form action={forceOrgStatusAction} className="grid grid-cols-3 gap-2">
                       <input type="hidden" name="orgId" value={org.id} />
                       {(["ACTIVE", "SUSPENDED", "DISABLED"] as const).map((status) => (
                         <button
                           key={status}
                           name="status"
                           value={status}
-                          className="rounded-lg border border-slate-200 px-2 py-1 text-[11px] font-semibold hover:bg-slate-50 dark:border-white/10"
+                          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-1 text-[11px] font-semibold text-foreground transition hover:bg-muted/50"
                         >
                           {status}
                         </button>
                       ))}
                     </form>
-                  </td>
-                  <td className="px-4 py-3">
-                    <form action={overrideSubscriptionAction} className="space-y-1">
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                      Billing override
+                    </p>
+                    <form action={overrideSubscriptionAction} className="grid gap-2">
                       <input type="hidden" name="orgId" value={org.id} />
                       <select
                         name="plan"
                         defaultValue={org.subscription?.plan ?? "PRO"}
-                        className="h-8 w-full rounded-lg border border-slate-200 px-2 text-xs dark:border-white/10 dark:bg-slate-950"
+                        className="min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm dark:border-white/10 dark:bg-slate-950"
                       >
                         <option value="FREE">FREE</option>
                         <option value="PRO">PRO</option>
@@ -724,7 +845,7 @@ export default async function WebsiteControlCenterPage({
                       <select
                         name="status"
                         defaultValue={org.subscription?.status ?? "ACTIVE"}
-                        className="h-8 w-full rounded-lg border border-slate-200 px-2 text-xs dark:border-white/10 dark:bg-slate-950"
+                        className="min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm dark:border-white/10 dark:bg-slate-950"
                       >
                         <option value="ACTIVE">ACTIVE</option>
                         <option value="TRIALING">TRIALING</option>
@@ -732,64 +853,192 @@ export default async function WebsiteControlCenterPage({
                         <option value="CANCELLED">CANCELLED</option>
                         <option value="EXPIRED">EXPIRED</option>
                       </select>
-                      <button className="h-8 w-full rounded-lg bg-slate-950 text-[11px] font-semibold text-white dark:bg-white dark:text-slate-950">
-                        Override
+                      <button className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-950 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">
+                        Override billing
                       </button>
                     </form>
-                  </td>
-                  <td className="px-4 py-3">
-                    <form action={enterOrgAsSupportAction} className="space-y-1">
+                  </div>
+
+                  <div className="space-y-2 rounded-xl border border-violet-200/80 bg-violet-50/50 p-3 dark:border-violet-500/25 dark:bg-violet-500/5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-violet-900 dark:text-violet-100">
+                      Support entry
+                    </p>
+                    <form action={enterOrgAsSupportAction} className="grid gap-2">
                       <input type="hidden" name="orgId" value={org.id} />
                       <input
                         name="reason"
                         required
                         minLength={8}
-                        placeholder="Support reason"
-                        className="h-8 w-full rounded-lg border border-border bg-card px-2 text-xs"
+                        placeholder="Support reason (min 8 chars)"
+                        className="min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm dark:border-white/10 dark:bg-slate-950"
                       />
                       <select
                         name="hours"
                         defaultValue="2"
-                        className="h-8 w-full rounded-lg border border-border bg-card px-2 text-xs"
+                        className="min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm dark:border-white/10 dark:bg-slate-950"
                       >
-                        <option value="1">1h</option>
-                        <option value="2">2h</option>
-                        <option value="4">4h</option>
-                        <option value="8">8h</option>
+                        <option value="1">1 hour</option>
+                        <option value="2">2 hours</option>
+                        <option value="4">4 hours</option>
+                        <option value="8">8 hours</option>
                       </select>
-                      <button className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border border-violet-200 bg-violet-50 text-[11px] font-semibold text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100">
-                        <Building2 className="h-3 w-3" />
+                      <button className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 text-sm font-semibold text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100">
+                        <Building2 className="h-4 w-4" />
                         Enter as support
                       </button>
                     </form>
-                    <form action={softDeleteOrgAction} className="mt-2 space-y-1">
+                  </div>
+
+                  <div className="space-y-2 rounded-xl border border-red-200/80 bg-red-50/40 p-3 dark:border-red-500/25 dark:bg-red-500/5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-900 dark:text-red-100">
+                      Soft-delete
+                    </p>
+                    <form action={softDeleteOrgAction} className="grid gap-2">
                       <input type="hidden" name="orgId" value={org.id} />
                       <input type="hidden" name="slug" value={org.slug} />
                       <input
                         name="confirmation"
-                        placeholder={org.slug}
-                        className="h-8 w-full rounded-lg border border-red-200 px-2 text-xs dark:border-red-500/30 dark:bg-slate-950"
+                        placeholder={`Type slug: ${org.slug}`}
+                        className="min-h-11 w-full rounded-xl border border-red-200 bg-background px-3 text-sm dark:border-red-500/30 dark:bg-slate-950"
                       />
-                      <button className="h-8 w-full rounded-lg border border-red-200 text-[11px] font-semibold text-red-700 hover:bg-red-50">
-                        Soft-delete (type slug)
+                      <button className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-red-200 text-sm font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-500/30 dark:text-red-100">
+                        Soft-delete organization
                       </button>
                     </form>
-                  </td>
-                </tr>
+                  </div>
+                </li>
               ))}
-              {organizations.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                    No organizations.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </div>
+            </ul>
+
+            {/* Desktop table */}
+            <div className="ed-org-control-table hidden overflow-x-auto lg:block">
+              <table className="w-full min-w-[960px] text-sm" id="control-org-table">
+                <thead className="bg-muted/40 text-left text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Organization</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Plan</th>
+                    <th className="px-4 py-3 font-medium">Force status</th>
+                    <th className="px-4 py-3 font-medium">Billing override</th>
+                    <th className="px-4 py-3 font-medium">Support / delete</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {organizations.map((org) => (
+                    <tr
+                      key={org.id}
+                      data-org-filter={`${org.name} ${org.slug}`.toLowerCase()}
+                      className="control-org-row border-t border-border align-top"
+                    >
+                      <td className="whitespace-normal px-4 py-3">
+                        <Link
+                          href={`/platform/organizations/${org.slug}`}
+                          className="font-semibold text-foreground hover:underline"
+                        >
+                          {org.name}
+                        </Link>
+                        <p className="mt-1 text-xs text-muted-foreground">/{org.slug}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge tone={toneForStatus(org.status)}>{org.status}</Badge>
+                      </td>
+                      <td className="whitespace-normal px-4 py-3 text-slate-600 dark:text-slate-300">
+                        {org.subscription
+                          ? `${org.subscription.plan} · ${org.subscription.status}`
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <form action={forceOrgStatusAction} className="flex flex-wrap gap-1">
+                          <input type="hidden" name="orgId" value={org.id} />
+                          {(["ACTIVE", "SUSPENDED", "DISABLED"] as const).map((status) => (
+                            <button
+                              key={status}
+                              name="status"
+                              value={status}
+                              className="rounded-lg border border-slate-200 px-2 py-1 text-[11px] font-semibold hover:bg-slate-50 dark:border-white/10"
+                            >
+                              {status}
+                            </button>
+                          ))}
+                        </form>
+                      </td>
+                      <td className="px-4 py-3">
+                        <form action={overrideSubscriptionAction} className="space-y-1">
+                          <input type="hidden" name="orgId" value={org.id} />
+                          <select
+                            name="plan"
+                            defaultValue={org.subscription?.plan ?? "PRO"}
+                            className="h-8 w-full rounded-lg border border-slate-200 px-2 text-xs dark:border-white/10 dark:bg-slate-950"
+                          >
+                            <option value="FREE">FREE</option>
+                            <option value="PRO">PRO</option>
+                            <option value="PLUS">PLUS</option>
+                            <option value="ENTERPRISE">ENTERPRISE</option>
+                          </select>
+                          <select
+                            name="status"
+                            defaultValue={org.subscription?.status ?? "ACTIVE"}
+                            className="h-8 w-full rounded-lg border border-slate-200 px-2 text-xs dark:border-white/10 dark:bg-slate-950"
+                          >
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="TRIALING">TRIALING</option>
+                            <option value="PAST_DUE">PAST_DUE</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                            <option value="EXPIRED">EXPIRED</option>
+                          </select>
+                          <button className="h-8 w-full rounded-lg bg-slate-950 text-[11px] font-semibold text-white dark:bg-white dark:text-slate-950">
+                            Override
+                          </button>
+                        </form>
+                      </td>
+                      <td className="px-4 py-3">
+                        <form action={enterOrgAsSupportAction} className="space-y-1">
+                          <input type="hidden" name="orgId" value={org.id} />
+                          <input
+                            name="reason"
+                            required
+                            minLength={8}
+                            placeholder="Support reason"
+                            className="h-8 w-full rounded-lg border border-border bg-card px-2 text-xs"
+                          />
+                          <select
+                            name="hours"
+                            defaultValue="2"
+                            className="h-8 w-full rounded-lg border border-border bg-card px-2 text-xs"
+                          >
+                            <option value="1">1h</option>
+                            <option value="2">2h</option>
+                            <option value="4">4h</option>
+                            <option value="8">8h</option>
+                          </select>
+                          <button className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border border-violet-200 bg-violet-50 text-[11px] font-semibold text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100">
+                            <Building2 className="h-3 w-3" />
+                            Enter as support
+                          </button>
+                        </form>
+                        <form action={softDeleteOrgAction} className="mt-2 space-y-1">
+                          <input type="hidden" name="orgId" value={org.id} />
+                          <input type="hidden" name="slug" value={org.slug} />
+                          <input
+                            name="confirmation"
+                            placeholder={org.slug}
+                            className="h-8 w-full rounded-lg border border-red-200 px-2 text-xs dark:border-red-500/30 dark:bg-slate-950"
+                          />
+                          <button className="h-8 w-full rounded-lg border border-red-200 text-[11px] font-semibold text-red-700 hover:bg-red-50">
+                            Soft-delete (type slug)
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
 
         {deletedOrgs.length > 0 ? (
-          <div className="border-t border-slate-100 p-4 dark:border-white/10">
+          <div className="border-t border-slate-100 p-3 dark:border-white/10 sm:p-4">
             <p className="mb-3 text-sm font-semibold text-slate-950 dark:text-white">
               Soft-deleted organizations
             </p>
@@ -797,17 +1046,17 @@ export default async function WebsiteControlCenterPage({
               {deletedOrgs.map((org) => (
                 <div
                   key={org.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 px-3 py-2 dark:border-white/10"
+                  className="flex flex-col gap-3 rounded-xl border border-slate-200 px-3 py-3 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-medium">{org.name}</p>
                     <p className="text-xs text-slate-500">
                       /{org.slug} · deleted {formatDateTime(org.deletedAt)}
                     </p>
                   </div>
-                  <form action={restoreOrgAction}>
+                  <form action={restoreOrgAction} className="w-full sm:w-auto">
                     <input type="hidden" name="orgId" value={org.id} />
-                    <button className="rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600">
+                    <button className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-600 sm:min-h-9 sm:w-auto sm:rounded-lg sm:px-3 sm:py-1.5 sm:text-xs">
                       Restore
                     </button>
                   </form>

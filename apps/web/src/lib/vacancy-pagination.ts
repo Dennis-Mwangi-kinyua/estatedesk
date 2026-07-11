@@ -1,4 +1,4 @@
-export const PUBLIC_VACANCY_LIST_PAGE_SIZE = 8;
+export const PUBLIC_VACANCY_LIST_PAGE_SIZE = 12;
 export const PUBLIC_VACANCY_RELATED_PAGE_SIZE = 8;
 
 export type VacancyPaginationState = {
@@ -16,8 +16,26 @@ export function parsePositiveInt(value: string | undefined, fallback = 1) {
   return parsed;
 }
 
-export function buildVacancyPagination(total: number, page: number, pageSize: number): VacancyPaginationState {
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+export function parseOptionalPositiveInt(value: string | undefined) {
+  if (!value?.trim()) return undefined;
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return undefined;
+  return parsed;
+}
+
+export function parseOptionalNonNegativeNumber(value: string | undefined) {
+  if (!value?.trim()) return undefined;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) return undefined;
+  return parsed;
+}
+
+export function buildVacancyPagination(
+  total: number,
+  page: number,
+  pageSize: number,
+): VacancyPaginationState {
+  const pageCount = Math.max(1, Math.ceil(Math.max(total, 0) / pageSize));
   const currentPage = Math.min(Math.max(page, 1), pageCount);
   const start = (currentPage - 1) * pageSize;
 

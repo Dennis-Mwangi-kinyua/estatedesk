@@ -3,6 +3,10 @@ import { BillingPlan, Prisma, SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getPagination } from "@/lib/db/pagination";
 import {
+  isTransientDatabaseError,
+  retryTransientDatabaseOperation,
+} from "@/lib/db/retry";
+import {
   Badge,
   PageHeader,
   PaginationControls,
@@ -23,6 +27,14 @@ type SearchParams = Promise<{
 
 const STATUS_VALUES = Object.values(SubscriptionStatus);
 const PLAN_VALUES = Object.values(BillingPlan);
+
+function billingQuery<T>(label: string, operation: () => Promise<T>) {
+  return retryTransientDatabaseOperation(operation, {
+    attempts: 4,
+    delayMs: 650,
+    label,
+  });
+}
 
 function parseStatus(value?: string) {
   if (!value) return null;
@@ -61,6 +73,102 @@ function buildWhere({
   return where;
 }
 
+/** Stable distinct colors per organization for scannable billing rows. */
+const ORG_COLOR_PALETTE = [
+  {
+    row: "bg-sky-50/90 dark:bg-sky-500/10",
+    bar: "bg-sky-500",
+    chip: "border-sky-200 bg-sky-100 text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/15 dark:text-sky-100",
+  },
+  {
+    row: "bg-emerald-50/90 dark:bg-emerald-500/10",
+    bar: "bg-emerald-500",
+    chip: "border-emerald-200 bg-emerald-100 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-100",
+  },
+  {
+    row: "bg-violet-50/90 dark:bg-violet-500/10",
+    bar: "bg-violet-500",
+    chip: "border-violet-200 bg-violet-100 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/15 dark:text-violet-100",
+  },
+  {
+    row: "bg-amber-50/90 dark:bg-amber-500/10",
+    bar: "bg-amber-500",
+    chip: "border-amber-200 bg-amber-100 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-100",
+  },
+  {
+    row: "bg-rose-50/90 dark:bg-rose-500/10",
+    bar: "bg-rose-500",
+    chip: "border-rose-200 bg-rose-100 text-rose-900 dark:border-rose-500/30 dark:bg-rose-500/15 dark:text-rose-100",
+  },
+  {
+    row: "bg-cyan-50/90 dark:bg-cyan-500/10",
+    bar: "bg-cyan-500",
+    chip: "border-cyan-200 bg-cyan-100 text-cyan-900 dark:border-cyan-500/30 dark:bg-cyan-500/15 dark:text-cyan-100",
+  },
+  {
+    row: "bg-indigo-50/90 dark:bg-indigo-500/10",
+    bar: "bg-indigo-500",
+    chip: "border-indigo-200 bg-indigo-100 text-indigo-900 dark:border-indigo-500/30 dark:bg-indigo-500/15 dark:text-indigo-100",
+  },
+  {
+    row: "bg-fuchsia-50/90 dark:bg-fuchsia-500/10",
+    bar: "bg-fuchsia-500",
+    chip: "border-fuchsia-200 bg-fuchsia-100 text-fuchsia-900 dark:border-fuchsia-500/30 dark:bg-fuchsia-500/15 dark:text-fuchsia-100",
+  },
+  {
+    row: "bg-teal-50/90 dark:bg-teal-500/10",
+    bar: "bg-teal-500",
+    chip: "border-teal-200 bg-teal-100 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/15 dark:text-teal-100",
+  },
+  {
+    row: "bg-orange-50/90 dark:bg-orange-500/10",
+    bar: "bg-orange-500",
+    chip: "border-orange-200 bg-orange-100 text-orange-950 dark:border-orange-500/30 dark:bg-orange-500/15 dark:text-orange-100",
+  },
+  {
+    row: "bg-lime-50/90 dark:bg-lime-500/10",
+    bar: "bg-lime-500",
+    chip: "border-lime-200 bg-lime-100 text-lime-950 dark:border-lime-500/30 dark:bg-lime-500/15 dark:text-lime-100",
+  },
+  {
+    row: "bg-pink-50/90 dark:bg-pink-500/10",
+    bar: "bg-pink-500",
+    chip: "border-pink-200 bg-pink-100 text-pink-900 dark:border-pink-500/30 dark:bg-pink-500/15 dark:text-pink-100",
+  },
+] as const;
+
+function colorForOrg(orgId: string, index: number) {
+  if (index < ORG_COLOR_PALETTE.length) {
+    return ORG_COLOR_PALETTE[index];
+  }
+
+  let hash = 0;
+  for (let i = 0; i < orgId.length; i += 1) {
+    hash = (hash * 31 + orgId.charCodeAt(i)) >>> 0;
+  }
+  return ORG_COLOR_PALETTE[hash % ORG_COLOR_PALETTE.length];
+}
+
+function BillingLoadError({ transient }: { transient: boolean }) {
+  return (
+    <div className="ed-mobile-first space-y-4 sm:space-y-5">
+      <PageHeader
+        eyebrow="Billing"
+        title="Subscriptions"
+        description="Subscription plans, renewal windows, and recent plan changes with server-side filtering."
+      />
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50">
+        <p className="font-semibold">Could not load subscriptions right now</p>
+        <p className="mt-1">
+          {transient
+            ? "The database request timed out or failed temporarily (common on Neon cold starts). Refresh the page in a moment."
+            : "The database request failed. Refresh the page, and if it keeps happening check connectivity and the Prisma schema."}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default async function PlatformBillingPage({
   searchParams,
 }: {
@@ -76,137 +184,237 @@ export default async function PlatformBillingPage({
   });
   const where = buildWhere({ q, status, plan });
 
-  const [subscriptions, totalFiltered, total, active, trialing, pastDue] =
-    await Promise.all([
-      prisma.subscription.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take,
-        include: {
-          org: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              status: true,
+  let loadResult: {
+    subscriptions: Array<{
+      id: string;
+      plan: BillingPlan;
+      status: SubscriptionStatus;
+      billingEmail: string | null;
+      currentPeriodStart: Date;
+      currentPeriodEnd: Date;
+      trialStartsAt: Date | null;
+      trialEndsAt: Date | null;
+      cancelledAt: Date | null;
+      org: { id: string; name: string; slug: string; status: string };
+      planChanges: Array<{
+        id: string;
+        fromPlan: BillingPlan | null;
+        toPlan: BillingPlan;
+        effectiveFrom: Date;
+        reason: string | null;
+      }>;
+    }>;
+    totalFiltered: number;
+    total: number;
+    active: number;
+    trialing: number;
+    pastDue: number;
+  };
+
+  try {
+    loadResult = await billingQuery("platform-billing-subscriptions", async () => {
+      const [subscriptions, totalFiltered, total, active, trialing, pastDue] =
+        await Promise.all([
+          prisma.subscription.findMany({
+            where,
+            orderBy: { createdAt: "desc" },
+            skip,
+            take,
+            include: {
+              org: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                  status: true,
+                },
+              },
+              planChanges: {
+                orderBy: { effectiveFrom: "desc" },
+                take: 2,
+              },
             },
-          },
-          planChanges: {
-            orderBy: { effectiveFrom: "desc" },
-            take: 2,
-          },
-        },
-      }),
-      prisma.subscription.count({ where }),
-      prisma.subscription.count(),
-      prisma.subscription.count({ where: { status: "ACTIVE" } }),
-      prisma.subscription.count({ where: { status: "TRIALING" } }),
-      prisma.subscription.count({ where: { status: "PAST_DUE" } }),
-    ]);
+          }),
+          prisma.subscription.count({ where }),
+          prisma.subscription.count(),
+          prisma.subscription.count({ where: { status: "ACTIVE" } }),
+          prisma.subscription.count({ where: { status: "TRIALING" } }),
+          prisma.subscription.count({ where: { status: "PAST_DUE" } }),
+        ]);
+
+      return {
+        subscriptions,
+        totalFiltered,
+        total,
+        active,
+        trialing,
+        pastDue,
+      };
+    });
+  } catch (error) {
+    console.error("[PlatformBillingPage] subscription load failed", error);
+    return (
+      <BillingLoadError transient={isTransientDatabaseError(error)} />
+    );
+  }
+
+  const { subscriptions, totalFiltered, total, active, trialing, pastDue } =
+    loadResult;
+
+  const orderedOrgIds = Array.from(
+    new Set(subscriptions.map((sub) => sub.org.id)),
+  );
+  const orgColorById = new Map(
+    orderedOrgIds.map((orgId, index) => [
+      orgId,
+      colorForOrg(orgId, index),
+    ] as const),
+  );
 
   return (
-    <div className="space-y-5">
+    <div className="ed-mobile-first space-y-4 sm:space-y-5">
       <PageHeader
         eyebrow="Billing"
         title="Subscriptions"
         description="Subscription plans, renewal windows, and recent plan changes with server-side filtering."
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="ed-keep-cols grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
         <StatCard label="Subscriptions" value={total} />
         <StatCard label="Active" value={active} />
         <StatCard label="Trialing" value={trialing} />
         <StatCard label="Past due" value={pastDue} />
       </section>
 
-      <section className="overflow-hidden rounded-[26px] border border-neutral-200 bg-white shadow-sm">
-        <form className="grid gap-3 border-b border-neutral-200 p-4 lg:grid-cols-[1fr_160px_160px_auto]">
+      <section className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm sm:rounded-[26px]">
+        <form className="grid gap-2.5 border-b border-border p-3 sm:gap-3 sm:p-4 lg:grid-cols-[1fr_160px_160px_auto]">
           <input
             name="q"
             defaultValue={q}
             placeholder="Search organization or billing email"
-            className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none"
+            className="min-h-11 w-full rounded-xl border border-border bg-muted/40 px-3 text-sm outline-none focus:border-foreground sm:rounded-2xl sm:px-4 sm:py-3"
           />
           <select
             name="plan"
             defaultValue={plan ?? ""}
-            className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-medium outline-none"
+            className="min-h-11 w-full rounded-xl border border-border bg-muted/40 px-3 text-sm font-medium outline-none focus:border-foreground sm:rounded-2xl sm:px-4 sm:py-3"
           >
             <option value="">All plans</option>
             {PLAN_VALUES.map((value) => (
-              <option key={value} value={value}>{value}</option>
+              <option key={value} value={value}>
+                {value}
+              </option>
             ))}
           </select>
           <select
             name="status"
             defaultValue={status ?? ""}
-            className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-medium outline-none"
+            className="min-h-11 w-full rounded-xl border border-border bg-muted/40 px-3 text-sm font-medium outline-none focus:border-foreground sm:rounded-2xl sm:px-4 sm:py-3"
           >
             <option value="">All statuses</option>
             {STATUS_VALUES.map((value) => (
-              <option key={value} value={value}>{value}</option>
+              <option key={value} value={value}>
+                {value}
+              </option>
             ))}
           </select>
-          <button className="rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white">
+          <button
+            type="submit"
+            className="min-h-11 w-full rounded-xl bg-foreground px-5 text-sm font-semibold text-background sm:rounded-2xl lg:w-auto"
+          >
             Apply
           </button>
         </form>
 
         {subscriptions.length === 0 ? (
-          <div className="p-10 text-center text-sm text-neutral-500">
+          <div className="p-10 text-center text-sm text-muted-foreground">
             No subscriptions found.
           </div>
         ) : (
-          <div className="divide-y divide-neutral-100">
-            {subscriptions.map((subscription) => (
-              <div key={subscription.id} className="space-y-4 p-4 sm:p-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <Link
-                      href={`/platform/organizations/${subscription.org.slug}`}
-                      className="text-base font-semibold text-neutral-950 underline-offset-4 hover:underline"
-                    >
-                      {subscription.org.name}
-                    </Link>
-                    <p className="mt-1 text-sm text-neutral-500">/{subscription.org.slug}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge>{subscription.plan}</Badge>
-                    <Badge tone={toneForStatus(subscription.status)}>
-                      {subscription.status}
-                    </Badge>
-                  </div>
-                </div>
+          <div className="divide-y divide-border">
+            {subscriptions.map((subscription) => {
+              const color =
+                orgColorById.get(subscription.org.id) ??
+                colorForOrg(subscription.org.id, 0);
 
-                <div className="grid gap-2 text-sm text-neutral-600 md:grid-cols-3">
-                  <p>Billing email: {subscription.billingEmail ?? "-"}</p>
-                  <p>Period start: {formatDateTime(subscription.currentPeriodStart)}</p>
-                  <p>Period end: {formatDateTime(subscription.currentPeriodEnd)}</p>
-                  <p>Trial start: {formatDateTime(subscription.trialStartsAt)}</p>
-                  <p>Trial end: {formatDateTime(subscription.trialEndsAt)}</p>
-                  <p>Cancelled at: {formatDateTime(subscription.cancelledAt)}</p>
-                </div>
-
-                {subscription.planChanges.length > 0 ? (
-                  <div className="grid gap-2 md:grid-cols-2">
-                    {subscription.planChanges.map((change) => (
-                      <div key={change.id} className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3 text-sm">
-                        <span className="font-medium text-neutral-950">
-                          {change.fromPlan ?? "-"} to {change.toPlan}
-                        </span>
-                        <span className="ml-2 text-neutral-500">
-                          {formatDateTime(change.effectiveFrom)}
-                        </span>
-                        {change.reason ? (
-                          <p className="mt-1 text-neutral-500">{change.reason}</p>
-                        ) : null}
-                      </div>
-                    ))}
+              return (
+                <div
+                  key={subscription.id}
+                  className={`relative space-y-3 p-3 sm:space-y-4 sm:p-5 ${color.row}`}
+                >
+                  <span
+                    className={`absolute inset-y-0 left-0 w-1 ${color.bar}`}
+                    aria-hidden="true"
+                  />
+                  <div className="flex flex-col gap-3 pl-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <Link
+                        href={`/platform/organizations/${subscription.org.slug}`}
+                        className="text-base font-semibold text-foreground underline-offset-4 hover:underline"
+                      >
+                        {subscription.org.name}
+                      </Link>
+                      <p className="mt-1 truncate text-sm text-muted-foreground">
+                        /{subscription.org.slug}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span
+                        className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${color.chip}`}
+                      >
+                        {subscription.plan}
+                      </span>
+                      <Badge tone={toneForStatus(subscription.status)}>
+                        {subscription.status}
+                      </Badge>
+                    </div>
                   </div>
-                ) : null}
-              </div>
-            ))}
+
+                  <div className="grid gap-2 pl-2 text-sm text-muted-foreground md:grid-cols-3">
+                    <p className="min-w-0 break-words">
+                      Billing email: {subscription.billingEmail ?? "—"}
+                    </p>
+                    <p>
+                      Period start:{" "}
+                      {formatDateTime(subscription.currentPeriodStart)}
+                    </p>
+                    <p>
+                      Period end: {formatDateTime(subscription.currentPeriodEnd)}
+                    </p>
+                    <p>
+                      Trial start: {formatDateTime(subscription.trialStartsAt)}
+                    </p>
+                    <p>Trial end: {formatDateTime(subscription.trialEndsAt)}</p>
+                    <p>
+                      Cancelled at: {formatDateTime(subscription.cancelledAt)}
+                    </p>
+                  </div>
+
+                  {subscription.planChanges.length > 0 ? (
+                    <div className="grid gap-2 pl-2 md:grid-cols-2">
+                      {subscription.planChanges.map((change) => (
+                        <div
+                          key={change.id}
+                          className="rounded-xl border border-border bg-background/70 p-3 text-sm sm:rounded-2xl"
+                        >
+                          <span className="font-medium text-foreground">
+                            {change.fromPlan ?? "—"} to {change.toPlan}
+                          </span>
+                          <span className="ml-2 text-muted-foreground">
+                            {formatDateTime(change.effectiveFrom)}
+                          </span>
+                          {change.reason ? (
+                            <p className="mt-1 text-muted-foreground">
+                              {change.reason}
+                            </p>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         )}
 

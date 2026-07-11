@@ -7,8 +7,10 @@ import { AssetType, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
+import { ensureUnitPublicSlug } from "@/lib/public-vacancy-ensure-slug";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { storage } from "@/lib/storage";
 
 function optionalString(value: FormDataEntryValue | null) {
   if (typeof value !== "string") return null;
@@ -40,9 +42,80 @@ function uploadError(unitId: string, message: string): never {
   );
 }
 
-function publicAssetUrl(key: string) {
-  if (key.startsWith("/") || key.startsWith("http")) return key;
-  return `/${key.replace(/^public\//, "")}`;
+function successRedirect(unitId: string, message: string): never {
+  redirect(
+    `/dashboard/org/units/${unitId}?message=${encodeURIComponent(message)}&messageType=success`,
+  );
+}
+
+function isS3Configured() {
+  return Boolean(
+    process.env.S3_BUCKET &&
+      process.env.S3_REGION &&
+      ((process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY) ||
+        process.env.AWS_ACCESS_KEY_ID),
+  );
+}
+
+async function storeVacancyImage(input: {
+  orgId: string;
+  unitId: string;
+  file: File;
+  buffer: Buffer;
+}) {
+  const ext = path.extname(input.file.name).toLowerCase() || ".jpg";
+  const fileName = `${input.unitId}-${randomUUID()}${ext}`;
+
+  if (isS3Configured()) {
+    const key = `vacancies/${input.orgId}/${fileName}`;
+    const uploaded = await storage.uploadFile({
+      key,
+      body: input.buffer,
+      contentType: input.file.type || "image/jpeg",
+    });
+
+    return {
+      key: uploaded.key,
+      publicUrl: uploaded.url,
+      storage: "s3" as const,
+    };
+  }
+
+  const uploadDir = path.join(process.cwd(), "public", "uploads", "vacancies");
+  await mkdir(uploadDir, { recursive: true });
+  const publicKey = `/uploads/vacancies/${fileName}`;
+  await writeFile(path.join(uploadDir, fileName), input.buffer);
+
+  return {
+    key: publicKey,
+    publicUrl: publicKey,
+    storage: "local" as const,
+  };
+}
+
+async function loadManagedUnit(unitId: string, orgId: string) {
+  return prisma.unit.findFirst({
+    where: {
+      id: unitId,
+      deletedAt: null,
+      property: {
+        orgId,
+        deletedAt: null,
+      },
+    },
+    select: {
+      id: true,
+      houseNo: true,
+      publicSlug: true,
+      propertyId: true,
+      property: { select: { name: true } },
+      images: {
+        where: { deletedAt: null },
+        select: { id: true, key: true },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
 }
 
 export async function updateUnitVacancyMarketingAction(
@@ -51,27 +124,15 @@ export async function updateUnitVacancyMarketingAction(
 ) {
   const session = await requireManagementAccess();
 
-  const unit = await prisma.unit.findFirst({
-    where: {
-      id: unitId,
-      deletedAt: null,
-      property: {
-        orgId: session.activeOrgId!,
-        deletedAt: null,
-      },
-    },
-    select: {
-      id: true,
-      houseNo: true,
-      property: { select: { name: true } },
-    },
-  });
+  const unit = await loadManagedUnit(unitId, session.activeOrgId!);
 
   if (!unit) {
     uploadError(unitId, "Unit not found.");
   }
 
-  await prisma.unit.update({
+  const isPubliclyListed = formData.get("isPubliclyListed") === "on";
+
+  const updated = await prisma.unit.update({
     where: { id: unit.id },
     data: {
       roomCount: optionalInteger(formData.get("roomCount")),
@@ -85,14 +146,31 @@ export async function updateUnitVacancyMarketingAction(
       viewingFeeRequired: formData.get("viewingFeeRequired") === "on",
       viewingFeeAmount: optionalDecimal(formData.get("viewingFeeAmount")),
       notes: optionalString(formData.get("notes")),
+      isPubliclyListed,
+    },
+    select: {
+      id: true,
+      houseNo: true,
+      publicSlug: true,
+      property: { select: { name: true } },
     },
   });
 
+  const publicSlug = isPubliclyListed
+    ? await ensureUnitPublicSlug({
+        id: updated.id,
+        houseNo: updated.houseNo,
+        publicSlug: updated.publicSlug,
+        property: updated.property,
+      })
+    : updated.publicSlug;
+
   revalidatePath(`/dashboard/org/units/${unitId}`);
   revalidatePublicVacancies({
-    unitId: unit.id,
-    propertyName: unit.property.name,
-    houseNo: unit.houseNo,
+    unitId: updated.id,
+    propertyName: updated.property.name,
+    houseNo: updated.houseNo,
+    publicSlug,
   });
 }
 
@@ -102,26 +180,7 @@ export async function uploadUnitVacancyImagesAction(
 ) {
   const session = await requireManagementAccess();
 
-  const unit = await prisma.unit.findFirst({
-    where: {
-      id: unitId,
-      deletedAt: null,
-      property: {
-        orgId: session.activeOrgId!,
-        deletedAt: null,
-      },
-    },
-    select: {
-      id: true,
-      houseNo: true,
-      propertyId: true,
-      property: { select: { name: true } },
-      images: {
-        where: { deletedAt: null },
-        select: { id: true },
-      },
-    },
-  });
+  const unit = await loadManagedUnit(unitId, session.activeOrgId!);
 
   if (!unit) {
     uploadError(unitId, "Unit not found.");
@@ -140,9 +199,6 @@ export async function uploadUnitVacancyImagesAction(
     uploadError(unitId, "Each unit can have up to 12 vacancy images.");
   }
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "vacancies");
-  await mkdir(uploadDir, { recursive: true });
-
   for (const file of files) {
     if (!file.type.startsWith("image/")) {
       uploadError(unitId, "Only image files are allowed.");
@@ -152,12 +208,13 @@ export async function uploadUnitVacancyImagesAction(
       uploadError(unitId, "Each image must be 5MB or smaller.");
     }
 
-    const ext = path.extname(file.name).toLowerCase() || ".jpg";
-    const fileName = `${unit.id}-${randomUUID()}${ext}`;
-    const publicKey = `/uploads/vacancies/${fileName}`;
     const buffer = Buffer.from(await file.arrayBuffer());
-
-    await writeFile(path.join(uploadDir, fileName), buffer);
+    const stored = await storeVacancyImage({
+      orgId: session.activeOrgId!,
+      unitId: unit.id,
+      file,
+      buffer,
+    });
 
     await prisma.asset.create({
       data: {
@@ -166,22 +223,149 @@ export async function uploadUnitVacancyImagesAction(
         fileName: file.name,
         fileType: "image",
         mimeType: file.type,
-        key: publicKey,
+        key: stored.key,
         size: file.size,
         assetType: AssetType.PHOTO,
         uploadedByUserId: session.userId,
         metadata: {
-          publicUrl: publicAssetUrl(publicKey),
+          publicUrl: stored.publicUrl,
           purpose: "vacancy_gallery",
+          storage: stored.storage,
         },
       },
     });
   }
+
+  const publicSlug = await ensureUnitPublicSlug({
+    id: unit.id,
+    houseNo: unit.houseNo,
+    publicSlug: unit.publicSlug,
+    property: unit.property,
+  });
 
   revalidatePath(`/dashboard/org/units/${unitId}`);
   revalidatePublicVacancies({
     unitId: unit.id,
     propertyName: unit.property.name,
     houseNo: unit.houseNo,
+    publicSlug,
   });
+}
+
+export async function deleteUnitVacancyImageAction(
+  unitId: string,
+  formData: FormData,
+) {
+  const session = await requireManagementAccess();
+  const assetId = optionalString(formData.get("assetId"));
+
+  if (!assetId) {
+    uploadError(unitId, "Image not found.");
+  }
+
+  const unit = await loadManagedUnit(unitId, session.activeOrgId!);
+  if (!unit) {
+    uploadError(unitId, "Unit not found.");
+  }
+
+  const asset = await prisma.asset.findFirst({
+    where: {
+      id: assetId,
+      unitId: unit.id,
+      orgId: session.activeOrgId!,
+      deletedAt: null,
+    },
+    select: { id: true, key: true },
+  });
+
+  if (!asset) {
+    uploadError(unitId, "Image not found.");
+  }
+
+  await prisma.asset.update({
+    where: { id: asset.id },
+    data: { deletedAt: new Date() },
+  });
+
+  // Best-effort storage cleanup for S3 keys (skip local /public paths).
+  if (asset.key && !asset.key.startsWith("/") && isS3Configured()) {
+    try {
+      await storage.deleteFile(asset.key);
+    } catch (error) {
+      console.warn("[vacancy-image] S3 delete failed", error);
+    }
+  }
+
+  const publicSlug = await ensureUnitPublicSlug({
+    id: unit.id,
+    houseNo: unit.houseNo,
+    publicSlug: unit.publicSlug,
+    property: unit.property,
+  });
+
+  revalidatePath(`/dashboard/org/units/${unitId}`);
+  revalidatePublicVacancies({
+    unitId: unit.id,
+    propertyName: unit.property.name,
+    houseNo: unit.houseNo,
+    publicSlug,
+  });
+  successRedirect(unitId, "Image removed.");
+}
+
+export async function setPrimaryUnitVacancyImageAction(
+  unitId: string,
+  formData: FormData,
+) {
+  const session = await requireManagementAccess();
+  const assetId = optionalString(formData.get("assetId"));
+
+  if (!assetId) {
+    uploadError(unitId, "Image not found.");
+  }
+
+  const unit = await loadManagedUnit(unitId, session.activeOrgId!);
+  if (!unit) {
+    uploadError(unitId, "Unit not found.");
+  }
+
+  const asset = unit.images.find((image) => image.id === assetId);
+  if (!asset) {
+    uploadError(unitId, "Image not found.");
+  }
+
+  // Move selected image to front by bumping createdAt of others after it.
+  const now = Date.now();
+  await prisma.$transaction(async (tx) => {
+    await tx.asset.update({
+      where: { id: asset.id },
+      data: { createdAt: new Date(now - unit.images.length * 1000) },
+    });
+
+    let offset = 1;
+    for (const image of unit.images) {
+      if (image.id === asset.id) continue;
+      await tx.asset.update({
+        where: { id: image.id },
+        data: { createdAt: new Date(now - (unit.images.length - offset) * 1000) },
+      });
+      offset += 1;
+    }
+  });
+
+  const publicSlug = await ensureUnitPublicSlug({
+    id: unit.id,
+    houseNo: unit.houseNo,
+    publicSlug: unit.publicSlug,
+    property: unit.property,
+  });
+
+  revalidatePath(`/dashboard/org/units/${unitId}`);
+  revalidatePublicVacancies({
+    unitId: unit.id,
+    propertyName: unit.property.name,
+    houseNo: unit.houseNo,
+    publicSlug,
+  });
+  successRedirect(unitId, "Primary photo updated.");
 }

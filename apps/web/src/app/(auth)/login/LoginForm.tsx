@@ -69,24 +69,82 @@ export default function LoginForm({
           }
         }
 
-        @keyframes loadingDot {
-          0%, 80%, 100% {
-            transform: scale(0.72);
-            opacity: 0.35;
-          }
-
-          40% {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-
         .login-loading-ring {
           animation: loginSpin 0.85s linear infinite;
         }
 
         .login-loading-dot {
-          animation: loadingDot 1.1s ease-in-out infinite;
+          width: 0.7rem;
+          height: 0.7rem;
+          border-radius: 9999px;
+          animation-duration: 1.15s;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+
+        .login-loading-dot--teal {
+          background: #14b8a6;
+          animation-name: loadingDotGlowTeal;
+        }
+
+        .login-loading-dot--violet {
+          background: #8b5cf6;
+          animation-name: loadingDotGlowViolet;
+          animation-delay: 0.18s;
+        }
+
+        .login-loading-dot--amber {
+          background: #f59e0b;
+          animation-name: loadingDotGlowAmber;
+          animation-delay: 0.36s;
+        }
+
+        @keyframes loadingDotGlowTeal {
+          0%, 80%, 100% {
+            transform: scale(0.7);
+            opacity: 0.4;
+            box-shadow: 0 0 0.15rem rgba(20, 184, 166, 0.2);
+          }
+          40% {
+            transform: scale(1.15);
+            opacity: 1;
+            box-shadow:
+              0 0 0.45rem rgba(20, 184, 166, 0.95),
+              0 0 1rem rgba(45, 212, 191, 0.65),
+              0 0 1.6rem rgba(20, 184, 166, 0.35);
+          }
+        }
+
+        @keyframes loadingDotGlowViolet {
+          0%, 80%, 100% {
+            transform: scale(0.7);
+            opacity: 0.4;
+            box-shadow: 0 0 0.15rem rgba(139, 92, 246, 0.2);
+          }
+          40% {
+            transform: scale(1.15);
+            opacity: 1;
+            box-shadow:
+              0 0 0.45rem rgba(139, 92, 246, 0.95),
+              0 0 1rem rgba(167, 139, 250, 0.65),
+              0 0 1.6rem rgba(139, 92, 246, 0.35);
+          }
+        }
+
+        @keyframes loadingDotGlowAmber {
+          0%, 80%, 100% {
+            transform: scale(0.7);
+            opacity: 0.4;
+            box-shadow: 0 0 0.15rem rgba(245, 158, 11, 0.2);
+          }
+          40% {
+            transform: scale(1.15);
+            opacity: 1;
+            box-shadow:
+              0 0 0.45rem rgba(245, 158, 11, 0.95),
+              0 0 1rem rgba(251, 191, 36, 0.65),
+              0 0 1.6rem rgba(245, 158, 11, 0.35);
+          }
         }
 
         .login-auth-overlay {
@@ -170,10 +228,13 @@ export default function LoginForm({
               Please wait while we securely log you in.
             </p>
 
-            <div className="mt-5 flex items-center justify-center gap-2">
-              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-slate-950" />
-              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-slate-950 [animation-delay:0.16s]" />
-              <span className="login-loading-dot h-2.5 w-2.5 rounded-full bg-slate-950 [animation-delay:0.32s]" />
+            <div
+              className="mt-5 flex items-center justify-center gap-2.5"
+              aria-hidden="true"
+            >
+              <span className="login-loading-dot login-loading-dot--teal" />
+              <span className="login-loading-dot login-loading-dot--violet" />
+              <span className="login-loading-dot login-loading-dot--amber" />
             </div>
           </div>
         </div>,

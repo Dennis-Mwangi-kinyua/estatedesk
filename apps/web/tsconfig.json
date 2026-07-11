@@ -36,6 +36,8 @@
       "@estatedesk/events/*": ["../../packages/events/src/*"],
       "@estatedesk/public-vacancy": ["../../services/public-vacancy/src/index.ts"],
       "@estatedesk/public-vacancy/*": ["../../services/public-vacancy/src/*"],
+      "@estatedesk/public-vacancy/ensure-slug": ["../../services/public-vacancy/src/ensure-slug.ts"],
+      "@estatedesk/public-vacancy/where": ["../../services/public-vacancy/src/where.ts"],
       "@estatedesk/notifications": ["../../services/notifications/src/index.ts"],
       "@estatedesk/notifications/*": ["../../services/notifications/src/lib/*"]
     },

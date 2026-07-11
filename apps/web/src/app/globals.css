@@ -1962,6 +1962,42 @@ html.light,
     min-width: 36rem;
   }
 
+  /* Access matrix / global feature overrides: list cards on phones, not wide tables */
+  .ed-mobile-first .ed-access-matrix-list,
+  .ed-mobile-first .ed-global-feature-list,
+  .ed-mobile-first .ed-org-control-list,
+  .ed-mobile-first .ed-kra-alerts-list {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .ed-mobile-first .ed-access-matrix-table,
+  .ed-mobile-first .ed-global-feature-table,
+  .ed-mobile-first .ed-org-control-table,
+  .ed-mobile-first .ed-kra-alerts-table {
+    display: none !important;
+  }
+
+  .ed-mobile-first .ed-access-matrix-table table,
+  .ed-mobile-first .ed-access-matrix-table table.min-w-full,
+  .ed-mobile-first .ed-global-feature-table table,
+  .ed-mobile-first .ed-global-feature-table table.min-w-full,
+  .ed-mobile-first .ed-org-control-table table,
+  .ed-mobile-first .ed-org-control-table table.min-w-full,
+  .ed-mobile-first .ed-kra-alerts-table table,
+  .ed-mobile-first .ed-kra-alerts-table table.min-w-full {
+    min-width: 0;
+  }
+
+  .ed-mobile-first .ed-access-matrix-table :where(th, td),
+  .ed-mobile-first .ed-global-feature-table :where(th, td),
+  .ed-mobile-first .ed-org-control-table :where(th, td),
+  .ed-mobile-first .ed-kra-alerts-table :where(th, td) {
+    white-space: normal;
+  }
+
   .ed-mobile-first :where(th, td) {
     white-space: nowrap;
   }
@@ -1981,6 +2017,34 @@ html.light,
   .ed-mobile-first .org-theme-content {
     width: 100%;
     max-width: 100%;
+  }
+
+  /* Platform developer/admin content: phone-first overflow + dense grids */
+  .ed-mobile-first .platform-theme-content {
+    overflow-x: clip;
+  }
+
+  .ed-mobile-first .platform-theme-content :where(pre, code) {
+    max-width: 100%;
+  }
+
+  /* Tailwind lg:/xl: multi-col grids often render as multi-col even on narrow phones
+     if the cascade is broken; force single column under 768px. */
+  .ed-mobile-first .platform-theme-content
+    :where(
+      .grid.lg\:grid-cols-2,
+      .grid.lg\:grid-cols-3,
+      .grid.xl\:grid-cols-2,
+      .grid.xl\:grid-cols-3,
+      .grid.xl\:grid-cols-4
+    ):not(.ed-keep-cols) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Full-width primary CTAs under page headers on phones */
+  .ed-mobile-first .page-header a,
+  .ed-mobile-first .page-header button {
+    min-height: var(--ed-touch);
   }
 
   .ed-mobile-first .ed-mobile-content > .space-y-6,

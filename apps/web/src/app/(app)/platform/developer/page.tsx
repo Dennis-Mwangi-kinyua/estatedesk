@@ -102,10 +102,75 @@ export default async function DeveloperPortalPage({
     return true;
   });
 
+  const accessRows = [
+    {
+      tool: "Admin dashboard, orgs, users, billing, onboarding",
+      platformAdmin: true,
+      superAdmin: true,
+    },
+    {
+      tool: "Support Access (timed org entry)",
+      platformAdmin: true,
+      superAdmin: true,
+    },
+    {
+      tool: "Developer home, health, API explorer, flags, rate limits",
+      platformAdmin: true,
+      superAdmin: true,
+    },
+    {
+      tool: "System Docs (private deep documentation)",
+      platformAdmin: true,
+      superAdmin: true,
+    },
+    {
+      tool: "Website Control (kill switches, nuclear ops)",
+      platformAdmin: false,
+      superAdmin: true,
+    },
+    {
+      tool: "API keys vault",
+      platformAdmin: false,
+      superAdmin: true,
+    },
+    {
+      tool: "Jobs & queues",
+      platformAdmin: false,
+      superAdmin: true,
+    },
+    {
+      tool: "Data management / backups",
+      platformAdmin: false,
+      superAdmin: true,
+    },
+    {
+      tool: "Help · Website control / Admin ops guides",
+      platformAdmin: true,
+      superAdmin: true,
+    },
+  ] as const;
+
+  function AccessPill({ allowed, label }: { allowed: boolean; label: string }) {
+    return (
+      <span
+        className={[
+          "inline-flex min-h-8 items-center justify-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+          allowed
+            ? "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-100"
+            : "border-border bg-muted/50 text-muted-foreground",
+        ].join(" ")}
+      >
+        <span aria-hidden="true">{allowed ? "✓" : "–"}</span>
+        <span>{label}</span>
+        <span className="sr-only">{allowed ? "allowed" : "not allowed"}</span>
+      </span>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-7xl space-y-4 sm:space-y-6">
       {params.error === "super-admin-only" ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50 sm:px-4">
           That tool requires a <strong>super admin</strong>. Platform admins can use
           health, feature flags, API explorer, rate-limit inspection, help, security,
           and audit logs.
@@ -117,35 +182,35 @@ export default async function DeveloperPortalPage({
         title="Engineering control plane"
         description="Full engineering control of the EstateDesk website: kill switches, APIs, jobs, flags, data, and super-admin nuclear ops. Switch back to Administration with the mode toggle or Alt+Shift+A."
         action={
-          <div className="flex flex-wrap gap-2">
+          <>
             <Link
               href="/platform/developer/docs"
-              className="inline-flex items-center gap-2 rounded-xl border border-violet-300 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-900 transition hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-100 dark:hover:bg-violet-500/25"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-violet-300 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-900 transition hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-100 dark:hover:bg-violet-500/25"
             >
-              <BookOpen className="h-4 w-4" />
+              <BookOpen className="h-4 w-4 shrink-0" />
               System docs
             </Link>
             {isSuperAdmin ? (
               <Link
                 href="/platform/control"
-                className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
               >
                 Website control
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 shrink-0" />
               </Link>
             ) : null}
             <Link
               href="/platform"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
             >
               Switch to Admin
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 shrink-0" />
             </Link>
-          </div>
+          </>
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Active API keys" value={formatNumber(activeApiKeys)} />
         <StatCard
           label="Queued notifications"
@@ -177,7 +242,7 @@ export default async function DeveloperPortalPage({
         title="Developer tools"
         description="Jump into operational and integration tooling without leaving the platform super-admin shell."
       >
-        <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 p-3 min-[480px]:grid-cols-2 min-[480px]:gap-3 min-[480px]:p-4 xl:grid-cols-3">
           {tools.map((tool) => {
             const Icon = toolIcons[tool.href] ?? Code2;
 
@@ -185,17 +250,17 @@ export default async function DeveloperPortalPage({
               <Link
                 key={tool.href}
                 href={tool.href}
-                className="group flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-violet-500/40"
+                className="group flex min-h-[4.5rem] items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition active:scale-[0.99] hover:border-violet-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-violet-500/40 sm:p-4 sm:hover:-translate-y-0.5"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700 dark:bg-violet-500/15 dark:text-violet-200">
                   <Icon className="h-5 w-5" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-semibold leading-5 text-slate-950 dark:text-white">
                       {tool.label}
                     </p>
-                    <div className="flex shrink-0 items-center gap-1">
+                    <div className="flex shrink-0 items-center gap-1 pt-0.5">
                       {tool.superAdminOnly ? (
                         <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-800 dark:bg-amber-500/20 dark:text-amber-200">
                           SA
@@ -214,12 +279,12 @@ export default async function DeveloperPortalPage({
         </div>
       </Surface>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Surface
           title="Integration readiness"
           description="Snapshot of configured external integrations for this environment."
         >
-          <div className="border-b border-slate-100 px-4 py-3 dark:border-white/10">
+          <div className="border-b border-slate-100 px-3 py-3 dark:border-white/10 sm:px-4">
             <div className="flex flex-wrap gap-2 text-xs">
               <Badge tone={toneForStatus("READY")}>
                 Ready {integrationReadiness.totals.ready}
@@ -242,13 +307,13 @@ export default async function DeveloperPortalPage({
             {integrationReadiness.integrations.slice(0, 8).map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between gap-3 px-4 py-3"
+                className="flex items-start justify-between gap-3 px-3 py-3 sm:items-center sm:px-4"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
                     {item.name}
                   </p>
-                  <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                  <p className="mt-0.5 text-xs leading-5 text-slate-500 dark:text-slate-400">
                     {item.category} · {item.region}
                     {item.missingEnv.length > 0
                       ? ` · missing ${item.missingEnv.length} env`
@@ -265,10 +330,10 @@ export default async function DeveloperPortalPage({
           title="Mode switch & shortcuts"
           description="Administration and Developer share platform access. Last path per mode is remembered when you toggle."
         >
-          <div className="grid gap-3 p-4">
+          <div className="grid gap-3 p-3 sm:p-4">
             <Link
               href="/platform"
-              className="rounded-xl border border-border bg-muted/40 p-4 transition hover:bg-card"
+              className="rounded-xl border border-border bg-muted/40 p-4 transition hover:bg-card active:scale-[0.99]"
             >
               <p className="text-sm font-semibold text-foreground">
                 Administration mode
@@ -293,33 +358,61 @@ export default async function DeveloperPortalPage({
 
       <Surface
         title="Access matrix"
-        description="Who can open which tools. SA = SUPER_ADMIN only."
+        description="Who can open which tools. SA-only rows need SUPER_ADMIN."
       >
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+        {/* Mobile-first list (default). No table on small screens. */}
+        <ul className="ed-access-matrix-list divide-y divide-border lg:hidden">
+          {accessRows.map((row) => {
+            const saOnly = !row.platformAdmin && row.superAdmin;
+
+            return (
+              <li key={row.tool} className="px-3 py-3.5 sm:px-4">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <p className="min-w-0 flex-1 text-sm font-semibold leading-5 text-foreground">
+                    {row.tool}
+                  </p>
+                  {saOnly ? (
+                    <span className="shrink-0 rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-900 dark:bg-amber-500/20 dark:text-amber-100">
+                      SA only
+                    </span>
+                  ) : null}
+                </div>
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  <AccessPill allowed={row.platformAdmin} label="Platform admin" />
+                  <AccessPill allowed={row.superAdmin} label="Super admin" />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* Large screens only — wide comparison table */}
+        <div className="ed-access-matrix-table hidden lg:block">
+          <table className="w-full table-fixed text-sm">
             <thead className="bg-muted/40 text-left text-muted-foreground">
               <tr>
-                <th className="px-4 py-3 font-medium">Tool</th>
-                <th className="px-4 py-3 font-medium">PLATFORM_ADMIN</th>
-                <th className="px-4 py-3 font-medium">SUPER_ADMIN</th>
+                <th className="w-[48%] px-4 py-3 font-medium">Tool</th>
+                <th className="w-[26%] px-4 py-3 font-medium">Platform admin</th>
+                <th className="w-[26%] px-4 py-3 font-medium">Super admin</th>
               </tr>
             </thead>
             <tbody>
-              {[
-                ["Admin dashboard, orgs, users, billing, onboarding", "Yes", "Yes"],
-                ["Support Access (timed org entry)", "Yes", "Yes"],
-                ["Developer home, health, API explorer, flags, rate limits", "Yes", "Yes"],
-                ["System Docs (private deep documentation)", "Yes", "Yes"],
-                ["Website Control (kill switches, nuclear ops)", "No", "Yes"],
-                ["API keys vault", "No", "Yes"],
-                ["Jobs & queues", "No", "Yes"],
-                ["Data management / backups", "No", "Yes"],
-                ["Help · Website control / Admin ops guides", "Yes", "Yes"],
-              ].map(([tool, pa, sa]) => (
-                <tr key={tool} className="border-t border-border">
-                  <td className="px-4 py-3 text-foreground">{tool}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{pa}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{sa}</td>
+              {accessRows.map((row) => (
+                <tr key={row.tool} className="border-t border-border">
+                  <td className="whitespace-normal px-4 py-3 align-top font-medium text-foreground">
+                    {row.tool}
+                    {!row.platformAdmin && row.superAdmin ? (
+                      <span className="ml-2 inline-flex rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-900 dark:bg-amber-500/20 dark:text-amber-100">
+                        SA
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="whitespace-normal px-4 py-3 align-top">
+                    <AccessPill allowed={row.platformAdmin} label={row.platformAdmin ? "Yes" : "No"} />
+                  </td>
+                  <td className="whitespace-normal px-4 py-3 align-top">
+                    <AccessPill allowed={row.superAdmin} label={row.superAdmin ? "Yes" : "No"} />
+                  </td>
                 </tr>
               ))}
             </tbody>

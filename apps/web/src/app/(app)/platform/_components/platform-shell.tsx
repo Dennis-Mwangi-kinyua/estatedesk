@@ -171,9 +171,6 @@ function PlatformShellInner({
                 </div>
 
                 <div className="flex shrink-0 items-center gap-3">
-                  <div className="hidden xl:block">
-                    <PlatformModeToggle variant="header" />
-                  </div>
                   <HeaderThemeToggle />
                   <div className="ed-soft-button flex items-center gap-3 rounded-lg border px-4 py-2 shadow-sm">
                     <MessageSquareText className="h-4 w-4 text-muted-foreground" />
@@ -185,9 +182,9 @@ function PlatformShellInner({
               </div>
             </header>
 
-            <section className="min-h-0 flex-1 overflow-hidden p-2 sm:p-4 lg:p-6">
-              <div className="ios-panel h-full overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm dark:bg-card/80 sm:rounded-xl">
-                <div className="platform-theme-content ed-mobile-content h-full overflow-auto overscroll-y-contain p-3 text-foreground sm:p-5 lg:p-6">
+            <section className="min-h-0 min-w-0 flex-1 overflow-hidden p-0 sm:p-3 lg:p-6">
+              <div className="ios-panel h-full min-w-0 overflow-hidden rounded-none border-0 border-border bg-card/90 shadow-none backdrop-blur-sm dark:bg-card/80 sm:rounded-xl sm:border sm:shadow-sm">
+                <div className="platform-theme-content ed-mobile-content h-full min-w-0 overflow-x-hidden overflow-y-auto overscroll-y-contain p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-foreground sm:p-5 lg:p-6">
                   <DeveloperSensitiveBanner isSuperAdmin={isSuperAdmin} />
                   {children}
                 </div>

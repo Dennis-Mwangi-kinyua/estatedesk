@@ -5,10 +5,10 @@ import type { AdminRecord } from "../_lib/types";
 export function PageHeader() {
   return (
     <div className="space-y-2">
-      <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+      <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:text-3xl">
         Platform Admins
       </h1>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm leading-6 text-muted-foreground">
         Manage verified admin usernames, secure login credentials, roles, and
         platform permissions.
       </p>
@@ -16,25 +16,64 @@ export function PageHeader() {
   );
 }
 
-export function AdminsCard({ admins }: { admins: AdminRecord[] }) {
+function deleteGuard(admin: AdminRecord, activeAdminCount: number) {
+  if (admin.isRootSuperAdmin) {
+    return {
+      canDelete: false,
+      reason: "Root super admin cannot be deleted.",
+    };
+  }
+
+  // Deleting the last ACTIVE platform admin would lock out the control plane.
+  if (admin.status === "ACTIVE" && activeAdminCount <= 1) {
+    return {
+      canDelete: false,
+      reason: "Cannot delete the last active platform admin.",
+    };
+  }
+
+  return { canDelete: true, reason: null as string | null };
+}
+
+export function AdminsCard({
+  admins,
+  activeAdminCount,
+}: {
+  admins: AdminRecord[];
+  activeAdminCount: number;
+}) {
+  const lastActiveProtected = activeAdminCount <= 1;
+
   return (
     <section className="overflow-hidden rounded-2xl border bg-background shadow-sm">
-      <div className="flex items-center justify-between border-b px-4 py-4 sm:px-5">
-        <div>
-          <h2 className="text-base font-semibold text-foreground">Admins</h2>
-          <p className="text-sm text-muted-foreground">
-            {admins.length} {admins.length === 1 ? "admin" : "admins"} found
-          </p>
-        </div>
+      <div className="border-b px-3 py-3 sm:px-5 sm:py-4">
+        <h2 className="text-base font-semibold text-foreground">Admins</h2>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          {admins.length} {admins.length === 1 ? "admin" : "admins"} found
+          {lastActiveProtected ? (
+            <span className="mt-1 block text-amber-800 dark:text-amber-200">
+              At least one active platform admin must remain. Delete is faded for
+              the last active admin.
+            </span>
+          ) : null}
+        </p>
       </div>
 
       {admins.length === 0 ? (
         <EmptyState />
       ) : (
         <div className="divide-y">
-          {admins.map((admin) => (
-            <AdminRow key={admin.id} admin={admin} />
-          ))}
+          {admins.map((admin) => {
+            const guard = deleteGuard(admin, activeAdminCount);
+            return (
+              <AdminRow
+                key={admin.id}
+                admin={admin}
+                canDelete={guard.canDelete}
+                deleteBlockedReason={guard.reason}
+              />
+            );
+          })}
         </div>
       )}
     </section>
@@ -43,67 +82,81 @@ export function AdminsCard({ admins }: { admins: AdminRecord[] }) {
 
 export function EmptyState() {
   return (
-    <div className="flex min-h-[180px] items-center justify-center p-8 text-sm text-muted-foreground">
+    <div className="flex min-h-[160px] items-center justify-center p-6 text-center text-sm text-muted-foreground sm:p-8">
       No platform admins found.
     </div>
   );
 }
 
-export function AdminRow({ admin }: { admin: AdminRecord }) {
+export function AdminRow({
+  admin,
+  canDelete,
+  deleteBlockedReason,
+}: {
+  admin: AdminRecord;
+  canDelete: boolean;
+  deleteBlockedReason?: string | null;
+}) {
   const displayName = admin.fullName?.trim() || "Unnamed Admin";
 
   return (
-    <article className="space-y-4 p-4 sm:p-5">
+    <article className="space-y-4 p-3 sm:p-5">
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-lg font-semibold text-foreground">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <h3 className="text-base font-semibold leading-6 text-foreground sm:text-lg">
             {displayName}
           </h3>
 
-          {admin.platformRole && (
-            <Badge variant="default">{formatRole(admin.platformRole)}</Badge>
-          )}
+          <div className="flex flex-wrap gap-1.5">
+            {admin.platformRole ? (
+              <Badge variant="default">{formatRole(admin.platformRole)}</Badge>
+            ) : null}
 
-          {admin.isRootSuperAdmin && <Badge variant="danger">ROOT</Badge>}
+            {admin.isRootSuperAdmin ? <Badge variant="danger">ROOT</Badge> : null}
 
-          {admin.canCreatePlatformAdmins && (
-            <Badge variant="info">CAN CREATE ADMINS</Badge>
-          )}
+            {admin.canCreatePlatformAdmins ? (
+              <Badge variant="info">CAN CREATE ADMINS</Badge>
+            ) : null}
 
-          {admin.emailVerified && <Badge variant="success">EMAIL VERIFIED</Badge>}
+            {admin.emailVerified ? (
+              <Badge variant="success">EMAIL VERIFIED</Badge>
+            ) : null}
 
-          {admin.phoneVerified && <Badge variant="success">PHONE VERIFIED</Badge>}
+            {admin.phoneVerified ? (
+              <Badge variant="success">PHONE VERIFIED</Badge>
+            ) : null}
 
-          <StatusBadge status={admin.status} />
+            <StatusBadge status={admin.status} />
+          </div>
         </div>
 
-        <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2 lg:grid-cols-3">
-          <p>
+        <div className="grid grid-cols-1 gap-2 text-sm text-muted-foreground min-[480px]:grid-cols-2">
+          <p className="min-w-0 break-words">
             <span className="font-medium text-foreground">Username:</span>{" "}
             {admin.username ?? "—"}
           </p>
 
-          <p>
+          <p className="min-w-0 break-words">
             <span className="font-medium text-foreground">Email:</span>{" "}
             {admin.email ?? "—"}
           </p>
 
-          <p>
+          <p className="min-w-0 break-words">
             <span className="font-medium text-foreground">Phone:</span>{" "}
             {admin.phone ?? "—"}
           </p>
 
-          <p>
+          <p className="min-w-0">
             <span className="font-medium text-foreground">Role:</span>{" "}
             {admin.platformRole ? formatRole(admin.platformRole) : "—"}
           </p>
 
-          <p>
+          <p className="min-w-0">
             <span className="font-medium text-foreground">Created:</span>{" "}
             {formatDate(admin.createdAt)}
           </p>
 
-          <p>
+          <p className="min-w-0">
             <span className="font-medium text-foreground">Status:</span>{" "}
             {admin.status}
           </p>
@@ -112,16 +165,28 @@ export function AdminRow({ admin }: { admin: AdminRecord }) {
 
       <PermissionsSection permissions={admin.platformPermissions} />
 
-      <div className="flex justify-end">
-        <form action={deletePlatformAdmin} className="inline">
+      <div className="flex flex-col gap-2 border-t border-border pt-3">
+        <form action={deletePlatformAdmin} className="w-full">
           <input type="hidden" name="userId" value={admin.id} />
           <button
             type="submit"
-            className="inline-flex items-center rounded-xl border border-red-200 bg-red-50 px-3 py-1 text-sm font-medium text-red-700 hover:opacity-90"
+            disabled={!canDelete}
+            title={deleteBlockedReason ?? "Delete this platform admin"}
+            className={[
+              "inline-flex min-h-11 w-full items-center justify-center rounded-xl border px-4 text-sm font-semibold transition",
+              canDelete
+                ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-100"
+                : "cursor-not-allowed border-border bg-muted/40 text-muted-foreground opacity-50",
+            ].join(" ")}
           >
             Delete Admin
           </button>
         </form>
+        {!canDelete && deleteBlockedReason ? (
+          <p className="text-center text-xs leading-5 text-muted-foreground">
+            {deleteBlockedReason}
+          </p>
+        ) : null}
       </div>
     </article>
   );
@@ -146,7 +211,7 @@ export function PermissionsSection({
             <span
               key={permission.id}
               className={[
-                "inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium",
+                "inline-flex max-w-full items-center break-words rounded-full border px-3 py-1.5 text-xs font-medium",
                 permission.granted
                   ? "border-green-200 bg-green-50 text-green-700"
                   : "border-red-200 bg-red-50 text-red-700",

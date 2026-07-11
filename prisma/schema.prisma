@@ -759,6 +759,10 @@ model Unit {
   status               UnitStatus               @default(VACANT)
   vacantSince          DateTime?
   notes                String?
+  /// When true and status is VACANT, the unit appears on public /vacancies pages.
+  isPubliclyListed     Boolean                  @default(true)
+  /// Stable unique public path segment, e.g. sunrise-apartments-unit-a01 or …-a01-x7k2m9
+  publicSlug           String?                  @unique
   isActive             Boolean                  @default(true)
   deletedAt            DateTime?
   createdAt            DateTime                 @default(now())
@@ -785,6 +789,7 @@ model Unit {
   @@index([status])
   @@index([isActive])
   @@index([deletedAt])
+  @@index([isPubliclyListed, status, isActive, deletedAt])
   @@index([propertyId, isActive, deletedAt, status])
   @@index([propertyId, type, bedrooms, status])
   @@index([propertyId, houseNo])
@@ -794,18 +799,21 @@ model Unit {
 
 /// Public inquiry submitted from a vacant unit listing.
 model VacancyInquiry {
-  id        String       @id @default(cuid())
-  orgId     String
-  unitId    String
-  fullName  String
-  phone     String
-  email     String?
-  message   String
-  status    String       @default("NEW")
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  unit      Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  id                 String       @id @default(cuid())
+  orgId              String
+  unitId             String
+  fullName           String
+  phone              String
+  email              String?
+  message            String
+  preferredLocation  String?
+  budget             String?
+  referralSource     String?
+  status             String       @default("NEW")
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  org                Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  unit               Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   @@index([orgId, createdAt])
   @@index([unitId, createdAt])

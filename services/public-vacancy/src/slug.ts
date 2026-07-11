@@ -13,11 +13,41 @@ function slugify(value: string) {
     .slice(0, 80);
 }
 
+/** Human-readable base path segment (may collide across orgs/properties). */
 export function vacancyPublicSlug(input: {
   propertyName: string;
   houseNo: string;
 }) {
   return slugify(`${input.propertyName} unit ${input.houseNo}`) || "vacancy";
+}
+
+/** Stable unique slug: base + short unit-id disambiguator when needed. */
+export function vacancyPublicSlugForUnit(input: {
+  propertyName: string;
+  houseNo: string;
+  unitId: string;
+  forceUnique?: boolean;
+}) {
+  const base = vacancyPublicSlug(input);
+  if (!input.forceUnique) return base;
+
+  const suffix = input.unitId.replace(/[^a-z0-9]/gi, "").slice(-6).toLowerCase();
+  return suffix ? `${base}-${suffix}` : base;
+}
+
+export function resolvePublicListingHref(input: {
+  publicSlug?: string | null;
+  propertyName: string;
+  houseNo: string;
+}) {
+  const slug =
+    input.publicSlug?.trim() ||
+    vacancyPublicSlug({
+      propertyName: input.propertyName,
+      houseNo: input.houseNo,
+    });
+
+  return `/vacancies/${slug}`;
 }
 
 export function stripLegacyVacancySlug(slug: string) {

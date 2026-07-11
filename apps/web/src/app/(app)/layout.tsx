@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { privatePageMetadata } from "@/lib/seo";
 import { isDevDebugLoggingEnabled } from "@/lib/dev/background-refresh";
 
+import { PwaAppBadgeSync } from "@/components/pwa/pwa-app-badge-sync";
 import { SensitiveDataWatermark } from "@/components/security/sensitive-data-watermark";
 import { AppActionFeedback } from "@/components/shared/app-action-feedback";
 import { DestructiveActionGuard } from "@/components/shared/destructive-action-guard";
@@ -85,6 +86,7 @@ export default async function AppLayout({
     <div className="app-mobile-canvas app-sensitive-surface ed-mobile-surface relative min-h-dvh w-full min-w-0 overflow-x-hidden">
       <SensitiveDataWatermark orgLabel={orgLabel} />
       {children}
+      {isSecurityGateRoute ? null : <PwaAppBadgeSync />}
       {isSecurityGateRoute ? null : <AppActionFeedback />}
       {isSecurityGateRoute ? null : <DestructiveActionGuard />}
     </div>

@@ -146,7 +146,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
                   Last sync: {formatDateTime(org.kraIntegration.lastSyncAt)}
                 </p>
                 {org.kraIntegration.lastError ? (
-                  <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-100">
+                  <p className="break-words rounded-xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-700 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-100">
                     {org.kraIntegration.lastError}
                   </p>
                 ) : null}

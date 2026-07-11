@@ -4,7 +4,7 @@ import { NotificationChannel, NotificationType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { resolveVacancyUnitIdFromSlug } from "@/lib/public-vacancy-resolve";
-import { vacancyPublicSlug } from "@/lib/public-vacancy-slug";
+import { ensureUnitPublicSlug } from "@/lib/public-vacancy-ensure-slug";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -58,6 +58,9 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
   const phone = requiredText(formData.get("phone"), "Phone");
   const email = optionalText(formData.get("email"));
   const message = requiredText(formData.get("message"), "Message");
+  const preferredLocation = optionalText(formData.get("preferredLocation"));
+  const budget = optionalText(formData.get("budget"));
+  const referralSource = optionalText(formData.get("referralSource"));
   const unitId = await resolveVacancyUnitIdFromSlug(publicSlug);
 
   if (!unitId) {
@@ -72,6 +75,7 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
       isActive: true,
       deletedAt: null,
       status: "VACANT",
+      isPubliclyListed: true,
       property: {
         isActive: true,
         deletedAt: null,
@@ -80,6 +84,7 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
     select: {
       id: true,
       houseNo: true,
+      publicSlug: true,
       property: {
         select: {
           orgId: true,
@@ -107,10 +112,21 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
     );
   }
 
-  const canonicalSlug = vacancyPublicSlug({
-    propertyName: unit.property.name,
+  const canonicalSlug = await ensureUnitPublicSlug({
+    id: unit.id,
     houseNo: unit.houseNo,
+    publicSlug: unit.publicSlug,
+    property: { name: unit.property.name },
   });
+
+  const detailLines = [
+    message,
+    preferredLocation ? `Preferred location: ${preferredLocation}` : null,
+    budget ? `Budget: ${budget}` : null,
+    referralSource ? `Referral: ${referralSource}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   await prisma.$transaction(async (tx) => {
     await tx.vacancyInquiry.create({
@@ -120,18 +136,37 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
         fullName,
         phone,
         email,
-        message,
+        message: detailLines,
+        preferredLocation,
+        budget,
+        referralSource,
       },
     });
 
     await notifyRecipients({
       db: tx,
       orgId: unit.property.orgId,
-      recipients: unit.property.org.memberships.map((member) => ({ userId: member.userId })),
-      channels: [NotificationChannel.IN_APP],
+      recipients: unit.property.org.memberships.map((member) => ({
+        userId: member.userId,
+      })),
+      // Queue multi-channel delivery (cron/workers send EMAIL/SMS/WhatsApp/push).
+      channels: [
+        NotificationChannel.IN_APP,
+        NotificationChannel.WEB_PUSH,
+        NotificationChannel.EMAIL,
+        NotificationChannel.SMS,
+        NotificationChannel.WHATSAPP,
+      ],
       type: NotificationType.GENERAL,
       title: "New vacancy enquiry",
-      message: `${fullName} enquired about ${unit.property.name}, Unit ${unit.houseNo}. Phone: ${phone}.`,
+      message: `${fullName} enquired about ${unit.property.name}, Unit ${unit.houseNo}. Phone: ${phone}.${email ? ` Email: ${email}.` : ""}`,
+      actionUrl: "/dashboard/org/vacancy-inquiries",
+      providerResponse: {
+        source: "public_vacancy_enquiry",
+        unitId: unit.id,
+        enquirerEmail: email,
+        enquirerPhone: phone,
+      },
     });
   });
 
@@ -139,8 +174,10 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
     unitId: unit.id,
     propertyName: unit.property.name,
     houseNo: unit.houseNo,
+    publicSlug: canonicalSlug,
   });
   revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/notifications");
+  revalidatePath("/dashboard/org/vacancy-inquiries");
   redirect(`/vacancies/${canonicalSlug}?sent=1#enquire`);
 }

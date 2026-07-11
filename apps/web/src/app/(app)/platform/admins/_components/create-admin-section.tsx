@@ -3,28 +3,32 @@ import { createPlatformAdmin } from "../_lib/actions";
 import { ALL_PLATFORM_PERMISSIONS } from "../_lib/constants";
 import { Field, formatRole } from "./admins-ui";
 
+const fieldClassName =
+  "min-h-11 w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40";
+
 export function CreateAdminSection() {
   return (
     <section className="rounded-2xl border bg-background shadow-sm">
       <details className="group">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4 sm:px-5">
-          <div>
+        <summary className="flex cursor-pointer list-none flex-col gap-3 px-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="min-w-0">
             <h2 className="text-base font-semibold text-foreground">
               Add Platform Admin
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
               Create a verified admin account with username, password, role, and
               permissions.
             </p>
           </div>
 
-          <span className="inline-flex min-h-10 items-center justify-center rounded-xl bg-foreground px-4 text-sm font-medium text-background transition group-open:bg-muted group-open:text-foreground">
-            Add Admin
+          <span className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-foreground px-4 text-sm font-semibold text-background transition group-open:bg-muted group-open:text-foreground sm:w-auto">
+            <span className="group-open:hidden">Add Admin</span>
+            <span className="hidden group-open:inline">Close form</span>
           </span>
         </summary>
 
-        <div className="border-t px-4 py-4 sm:px-5">
-          <form action={createPlatformAdmin} className="space-y-6">
+        <div className="border-t px-3 py-4 sm:px-5">
+          <form action={createPlatformAdmin} className="space-y-5 sm:space-y-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Full name" htmlFor="fullName">
                 <input
@@ -32,7 +36,7 @@ export function CreateAdminSection() {
                   name="fullName"
                   required
                   placeholder="Enter full name"
-                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
+                  className={fieldClassName}
                 />
               </Field>
 
@@ -44,7 +48,7 @@ export function CreateAdminSection() {
                   minLength={3}
                   maxLength={30}
                   placeholder="e.g. admin.jane"
-                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
+                  className={fieldClassName}
                 />
               </Field>
 
@@ -55,7 +59,7 @@ export function CreateAdminSection() {
                   type="email"
                   required
                   placeholder="admin@estatedesk.com"
-                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
+                  className={fieldClassName}
                 />
               </Field>
 
@@ -64,7 +68,7 @@ export function CreateAdminSection() {
                   id="phone"
                   name="phone"
                   placeholder="Optional phone number"
-                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
+                  className={fieldClassName}
                 />
               </Field>
 
@@ -76,7 +80,7 @@ export function CreateAdminSection() {
                   required
                   minLength={8}
                   placeholder="At least 8 characters"
-                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
+                  className={fieldClassName}
                 />
               </Field>
 
@@ -88,7 +92,7 @@ export function CreateAdminSection() {
                   required
                   minLength={8}
                   placeholder="Repeat password"
-                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
+                  className={fieldClassName}
                 />
               </Field>
 
@@ -97,7 +101,7 @@ export function CreateAdminSection() {
                   id="platformRole"
                   name="platformRole"
                   defaultValue={PlatformRole.PLATFORM_ADMIN}
-                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
+                  className={fieldClassName}
                 >
                   <option value={PlatformRole.PLATFORM_ADMIN}>
                     PLATFORM ADMIN
@@ -111,7 +115,7 @@ export function CreateAdminSection() {
                   id="status"
                   name="status"
                   defaultValue={UserStatus.ACTIVE}
-                  className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground/40"
+                  className={fieldClassName}
                 >
                   <option value={UserStatus.ACTIVE}>ACTIVE</option>
                   <option value={UserStatus.SUSPENDED}>SUSPENDED</option>
@@ -120,34 +124,34 @@ export function CreateAdminSection() {
               </Field>
             </div>
 
-            <div className="grid gap-3 rounded-2xl border p-4">
-              <label className="flex items-start gap-3">
+            <div className="grid gap-3 rounded-2xl border p-3 sm:p-4">
+              <label className="flex min-h-11 items-start gap-3">
                 <input
                   type="checkbox"
                   name="canCreatePlatformAdmins"
-                  className="mt-1 h-4 w-4 rounded border"
+                  className="mt-1 h-4 w-4 shrink-0 rounded border"
                 />
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">
                     Can create platform admins
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs leading-5 text-muted-foreground">
                     Allows this admin to create other platform admins.
                   </p>
                 </div>
               </label>
 
-              <label className="flex items-start gap-3">
+              <label className="flex min-h-11 items-start gap-3">
                 <input
                   type="checkbox"
                   name="isRootSuperAdmin"
-                  className="mt-1 h-4 w-4 rounded border"
+                  className="mt-1 h-4 w-4 shrink-0 rounded border"
                 />
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">
                     Root super admin
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs leading-5 text-muted-foreground">
                     Highest-level admin. Must use the SUPER ADMIN role.
                   </p>
                 </div>
@@ -159,25 +163,25 @@ export function CreateAdminSection() {
                 <h3 className="text-sm font-semibold text-foreground">
                   Platform permissions
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs leading-5 text-muted-foreground">
                   Select the rights this admin should have.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 lg:grid-cols-3 lg:gap-3">
                 {ALL_PLATFORM_PERMISSIONS.map((permission) => (
                   <label
                     key={permission}
-                    className="flex items-start gap-3 rounded-2xl border p-3"
+                    className="flex min-h-11 items-start gap-3 rounded-2xl border p-3"
                   >
                     <input
                       type="checkbox"
                       name="permissions"
                       value={permission}
-                      className="mt-1 h-4 w-4 rounded border"
+                      className="mt-1 h-4 w-4 shrink-0 rounded border"
                     />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium leading-5 text-foreground">
                         {formatRole(permission)}
                       </p>
                     </div>
@@ -186,19 +190,17 @@ export function CreateAdminSection() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-3 text-sm leading-6 text-blue-800 sm:p-4">
               The admin username and email will be marked as verified
               immediately. The password will be securely hashed before saving.
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <button
-                type="submit"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-foreground px-4 text-sm font-medium text-background transition hover:opacity-90"
-              >
-                Create Verified Admin
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-foreground px-4 text-sm font-semibold text-background transition hover:opacity-90 sm:w-auto"
+            >
+              Create Verified Admin
+            </button>
           </form>
         </div>
       </details>

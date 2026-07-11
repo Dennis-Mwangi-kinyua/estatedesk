@@ -36,6 +36,7 @@ const publicVacantUnitWhere = {
   status: "VACANT" as const,
   isActive: true,
   deletedAt: null,
+  isPubliclyListed: true,
   property: {
     isActive: true,
     deletedAt: null,
@@ -53,6 +54,7 @@ export async function buildVacancyDetailSitemapXml() {
       id: true,
       updatedAt: true,
       houseNo: true,
+      publicSlug: true,
       property: { select: { name: true } },
     },
     orderBy: { updatedAt: "desc" },
@@ -60,14 +62,21 @@ export async function buildVacancyDetailSitemapXml() {
   });
 
   const urls = units
-    .map((unit) =>
-      buildUrlEntry({
-        loc: `${APP_URL}/vacancies/${vacancyPublicSlug({ propertyName: unit.property.name, houseNo: unit.houseNo })}`,
+    .map((unit) => {
+      const slug =
+        unit.publicSlug?.trim() ||
+        vacancyPublicSlug({
+          propertyName: unit.property.name,
+          houseNo: unit.houseNo,
+        });
+
+      return buildUrlEntry({
+        loc: `${APP_URL}/vacancies/${slug}`,
         lastmod: formatDate(unit.updatedAt),
         changefreq: "weekly",
         priority: "0.6",
-      }),
-    )
+      });
+    })
     .join("\n");
 
   return wrapUrlset(urls);

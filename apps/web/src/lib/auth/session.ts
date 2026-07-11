@@ -131,11 +131,12 @@ async function readSessionTokenFromCookies() {
   };
 }
 
-function canMutateSessionCookies(error: unknown) {
-  const message = error instanceof Error ? error.message : String(error);
-  return message.includes("Cookies can only be modified");
-}
-
+/**
+ * Session cookie writes are best-effort during Server Component renders.
+ * Next only allows cookie mutation in Server Actions / Route Handlers; any
+ * failure here must never take down the RSC tree (production digests hide the
+ * real "Cookies can only be modified..." message).
+ */
 function setSessionCookie(
   cookieStore: Awaited<ReturnType<typeof cookies>>,
   token: string,
@@ -147,10 +148,9 @@ function setSessionCookie(
       createSessionCookieValue(token),
       getSessionCookieOptions(maxAge),
     );
-  } catch (error) {
-    if (!canMutateSessionCookies(error)) {
-      throw error;
-    }
+  } catch {
+    // Intentionally ignored — renewal/upgrade can complete on the next
+    // mutable request (action/route) without breaking page render.
   }
 }
 
@@ -161,10 +161,8 @@ function clearSessionCookie(cookieStore: Awaited<ReturnType<typeof cookies>>) {
       expires: new Date(0),
       maxAge: 0,
     });
-  } catch (error) {
-    if (!canMutateSessionCookies(error)) {
-      throw error;
-    }
+  } catch {
+    // Intentionally ignored — same RSC cookie-mutation constraint as set.
   }
 }
 

@@ -61,4 +61,44 @@ describe("public vacancy resolve", () => {
 
     assert.equal(unitId, "unit-faraway");
   });
+
+  it("returns null for ambiguous base-slug collisions", () => {
+    const slug = vacancyPublicSlug({
+      propertyName: "Sunrise Apartments",
+      houseNo: "A1",
+    });
+    const unitId = resolveVacancyUnitIdFromSlugIndex(slug, [
+      {
+        id: "unit-a",
+        propertyName: "Sunrise Apartments",
+        houseNo: "A1",
+      },
+      {
+        id: "unit-b",
+        propertyName: "Sunrise Apartments",
+        houseNo: "A1",
+      },
+    ]);
+
+    assert.equal(unitId, null);
+  });
+
+  it("prefers exact stored publicSlug matches", () => {
+    const unitId = resolveVacancyUnitIdFromSlugIndex("sunrise-apartments-unit-a1-abc123", [
+      {
+        id: "unit-a",
+        propertyName: "Sunrise Apartments",
+        houseNo: "A1",
+        publicSlug: "sunrise-apartments-unit-a1-abc123",
+      },
+      {
+        id: "unit-b",
+        propertyName: "Sunrise Apartments",
+        houseNo: "A1",
+        publicSlug: "sunrise-apartments-unit-a1-def456",
+      },
+    ]);
+
+    assert.equal(unitId, "unit-a");
+  });
 });

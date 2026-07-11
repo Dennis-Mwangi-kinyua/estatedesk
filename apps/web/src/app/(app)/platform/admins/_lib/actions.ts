@@ -150,8 +150,59 @@ export async function deletePlatformAdmin(formData: FormData) {
     throw new Error("Missing user id.");
   }
 
-  // Soft-delete the user by setting `deletedAt` so the record is excluded
-  // from normal queries without permanently removing it.
+  const target = await prisma.user.findFirst({
+    where: {
+      id: userId,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      isRootSuperAdmin: true,
+      platformRole: true,
+      status: true,
+    },
+  });
+
+  if (!target) {
+    throw new Error("Platform admin not found.");
+  }
+
+  if (target.isRootSuperAdmin) {
+    throw new Error("Root super admin cannot be deleted.");
+  }
+
+  const isPlatformAdmin =
+    target.platformRole === PlatformRole.PLATFORM_ADMIN ||
+    target.platformRole === PlatformRole.SUPER_ADMIN ||
+    target.isRootSuperAdmin;
+
+  if (!isPlatformAdmin) {
+    throw new Error("User is not a platform admin.");
+  }
+
+  // Never remove the last remaining active platform admin.
+  if (target.status === UserStatus.ACTIVE) {
+    const activeAdminCount = await prisma.user.count({
+      where: {
+        deletedAt: null,
+        status: UserStatus.ACTIVE,
+        OR: [
+          {
+            platformRole: {
+              in: [PlatformRole.PLATFORM_ADMIN, PlatformRole.SUPER_ADMIN],
+            },
+          },
+          { isRootSuperAdmin: true },
+        ],
+      },
+    });
+
+    if (activeAdminCount <= 1) {
+      throw new Error("Cannot delete the last active platform admin.");
+    }
+  }
+
+  // Soft-delete so the record is excluded from normal queries.
   await prisma.user.update({
     where: { id: userId },
     data: { deletedAt: new Date() },

@@ -2,7 +2,10 @@
 
 import { useEffect } from "react";
 
-/** Client-side filter for the control center organization table. */
+/**
+ * Client-side filter for organization control cards (mobile) and table rows (desktop).
+ * Targets any element with `.control-org-row` and `data-org-filter`.
+ */
 export function ControlOrgTableFilter() {
   useEffect(() => {
     const input = document.getElementById(
@@ -14,7 +17,10 @@ export function ControlOrgTableFilter() {
       const q = input.value.trim().toLowerCase();
       document.querySelectorAll<HTMLElement>(".control-org-row").forEach((row) => {
         const hay = row.dataset.orgFilter ?? "";
-        row.style.display = !q || hay.includes(q) ? "" : "none";
+        const match = !q || hay.includes(q);
+        // Preserve default display for both <li> cards and <tr> rows.
+        row.hidden = !match;
+        row.style.display = match ? "" : "none";
       });
     };
 

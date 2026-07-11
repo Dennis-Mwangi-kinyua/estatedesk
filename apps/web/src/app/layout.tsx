@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
 import { WebVitalsReporter } from "@/components/monitoring/web-vitals-reporter";
 import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
-import { PwaAppBadgeSync } from "@/components/pwa/pwa-app-badge-sync";
 import { PwaInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { ServiceWorkerUpdatePrompt } from "@/components/pwa/service-worker-update-prompt";
@@ -245,7 +244,6 @@ export default async function RootLayout({
           <MobileSwipeBack />
           <ServiceWorkerRegistration />
           <ServiceWorkerUpdatePrompt />
-          <PwaAppBadgeSync />
           <PwaInstallPrompt />
           <div id="main-content" className="ed-mobile-first-root min-h-dvh w-full min-w-0">
             <IncidentBanner />

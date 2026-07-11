@@ -24,28 +24,34 @@ export async function UnreadNotificationAlertsPanel({
   userId,
   tenantId,
 }: UnreadNotificationAlertsPanelProps) {
-  const headerStore = await headers();
-  const pathname = (headerStore.get("x-estatedesk-pathname") ?? "").replace(
-    /\/+$/,
-    "",
-  );
+  try {
+    const headerStore = await headers();
+    const pathname = (headerStore.get("x-estatedesk-pathname") ?? "").replace(
+      /\/+$/,
+      "",
+    );
 
-  if (NOTIFICATIONS_PATHS.has(pathname)) {
+    if (NOTIFICATIONS_PATHS.has(pathname)) {
+      return null;
+    }
+
+    const alert = await getUnreadNotificationAlert({
+      audience,
+      orgId,
+      userId,
+      tenantId,
+    });
+
+    if (alert.count <= 0) {
+      return null;
+    }
+
+    const scope = [audience, orgId, userId ?? "", tenantId ?? ""].join(":");
+
+    return <UnreadNotificationAlerts scope={scope} alert={alert} />;
+  } catch (error) {
+    // Badge/alerts are non-critical — never fail the whole Server Component tree.
+    console.error("[UnreadNotificationAlertsPanel] failed", error);
     return null;
   }
-
-  const alert = await getUnreadNotificationAlert({
-    audience,
-    orgId,
-    userId,
-    tenantId,
-  });
-
-  if (alert.count <= 0) {
-    return null;
-  }
-
-  const scope = [audience, orgId, userId ?? "", tenantId ?? ""].join(":");
-
-  return <UnreadNotificationAlerts scope={scope} alert={alert} />;
 }

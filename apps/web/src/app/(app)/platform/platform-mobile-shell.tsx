@@ -67,49 +67,53 @@ export default function PlatformMobileShell({
   return (
     <>
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="ed-shell-panel flex h-14 shrink-0 items-center justify-between gap-2 border-b px-3 pt-safe sm:h-16 sm:px-4 lg:hidden">
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <span
-              className={[
-                "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-                isDeveloper
-                  ? "bg-violet-600 text-white"
-                  : "ed-brand-mark bg-primary text-primary-foreground",
-              ].join(" ")}
-            >
-              <BrandIcon className="h-4 w-4" />
-            </span>
+        <header className="ed-shell-panel flex shrink-0 flex-col border-b pt-safe lg:hidden">
+          <div className="flex h-14 items-center justify-between gap-2 px-3 sm:h-16 sm:px-4">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+              <span
+                className={[
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                  isDeveloper
+                    ? "bg-violet-600 text-white"
+                    : "ed-brand-mark bg-primary text-primary-foreground",
+                ].join(" ")}
+              >
+                <BrandIcon className="h-4 w-4" />
+              </span>
 
-            <div className="min-w-0">
-              <h1 className="truncate text-sm font-semibold tracking-tight text-foreground sm:text-base">
-                EstateDesk
-              </h1>
-              <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
-                {meta.brandSubtitle}
-              </p>
+              <div className="min-w-0">
+                <h1 className="truncate text-sm font-semibold tracking-tight text-foreground sm:text-base">
+                  EstateDesk
+                </h1>
+                <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
+                  {meta.brandSubtitle}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+              <HeaderThemeToggle />
+              <button
+                ref={menuButtonRef}
+                type="button"
+                onClick={() => setOpen(true)}
+                aria-label="Open menu"
+                aria-expanded={open}
+                aria-controls={panelId}
+                className="ios-button ed-soft-button inline-flex h-11 w-11 items-center justify-center border shadow-sm transition active:scale-[0.98]"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <div className="hidden min-[420px]:block">
-              <PlatformModeToggle variant="compact" />
-            </div>
-            <HeaderThemeToggle />
-            <button
-              ref={menuButtonRef}
-              type="button"
-              onClick={() => setOpen(true)}
-              aria-label="Open menu"
-              aria-expanded={open}
-              aria-controls={panelId}
-              className="ios-button ed-soft-button inline-flex h-10 w-10 items-center justify-center border shadow-sm transition active:scale-[0.98]"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
+          {/* Always-visible mode switch on phones — critical for Admin ↔ Developer */}
+          <div className="border-t border-border/70 px-3 py-2 sm:px-4">
+            <PlatformModeToggle variant="mobile" className="w-full" />
           </div>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+        <div className="min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
       </div>
 
       <button
@@ -146,13 +150,6 @@ export default function PlatformMobileShell({
             >
               <X className="h-4 w-4" />
             </button>
-          </div>
-
-          <div className="border-b border-border px-3 py-3">
-            <PlatformModeToggle variant="mobile" />
-            <p className="mt-2 text-[10px] text-muted-foreground">
-              Shortcut: Alt+Shift+A / Alt+Shift+D
-            </p>
           </div>
 
           <nav className="flex-1 space-y-1 overflow-auto p-3">

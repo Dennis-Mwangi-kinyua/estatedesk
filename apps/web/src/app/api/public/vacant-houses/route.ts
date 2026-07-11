@@ -106,6 +106,7 @@ export async function GET(request: Request) {
       isActive: true,
       deletedAt: null,
       status: "VACANT",
+      isPubliclyListed: true,
       property: {
         orgId: apiKey.orgId,
         deletedAt: null,
@@ -121,6 +122,7 @@ export async function GET(request: Request) {
       bathrooms: true,
       roomCount: true,
       rentAmount: true,
+      depositAmount: true,
       serviceCharge: true,
       garbageFee: true,
       securityFee: true,
@@ -129,6 +131,7 @@ export async function GET(request: Request) {
       viewingFeeRequired: true,
       viewingFeeAmount: true,
       type: true,
+      publicSlug: true,
       images: {
         where: { deletedAt: null },
         orderBy: { createdAt: "asc" },
@@ -162,11 +165,28 @@ export async function GET(request: Request) {
       console.error("Failed to update API key lastUsedAt", error);
     });
 
-  return NextResponse.json({
-    count: units.length,
-    houses: units.map((unit) => ({
+  const { publicVacancyImageUrl } = await import("@/lib/public-vacancy-image");
+  const { resolvePublicListingHref } = await import("@/lib/public-vacancy-slug");
+  const { APP_URL } = await import("@/lib/sitemap-utils");
+  const siteBase = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || APP_URL).replace(
+    /\/$/,
+    "",
+  );
+
+  const houses = units.map((unit) => {
+    const publicSlug =
+      unit.publicSlug?.trim() ||
+      undefined;
+    const listingPath = resolvePublicListingHref({
+      publicSlug,
+      propertyName: unit.property.name,
+      houseNo: unit.houseNo,
+    });
+
+    return {
       id: unit.id,
       houseNumber: unit.houseNo,
+      unitCode: unit.houseNo,
       bedrooms: unit.bedrooms,
       bathrooms: unit.bathrooms,
       roomCount: unit.roomCount,
@@ -174,10 +194,15 @@ export async function GET(request: Request) {
         unit.property.location ??
         unit.property.address ??
         unit.property.name,
+      city: unit.property.location ?? null,
       property: unit.property.name,
+      propertyName: unit.property.name,
       building: unit.building?.name ?? null,
       type: unit.type,
+      unitType: unit.type,
       price: Number(unit.rentAmount),
+      rentAmount: Number(unit.rentAmount),
+      depositAmount: unit.depositAmount ? Number(unit.depositAmount) : null,
       serviceCharge: unit.serviceCharge ? Number(unit.serviceCharge) : null,
       garbageFee: unit.garbageFee ? Number(unit.garbageFee) : null,
       securityFee: unit.securityFee ? Number(unit.securityFee) : null,
@@ -185,11 +210,25 @@ export async function GET(request: Request) {
       hasBalcony: unit.hasBalcony,
       viewingFeeRequired: unit.viewingFeeRequired,
       viewingFeeAmount: unit.viewingFeeAmount ? Number(unit.viewingFeeAmount) : null,
+      publicSlug: publicSlug ?? listingPath.replace("/vacancies/", ""),
+      listingUrl: `${siteBase}${listingPath}`,
       images: unit.images.map((image) => ({
-        url: image.key,
+        url: publicVacancyImageUrl(image.key) ?? image.key,
+        key: image.key,
         fileName: image.fileName,
       })),
       currency: "KES",
-    })),
+    };
+  });
+
+  return NextResponse.json({
+    count: houses.length,
+    houses,
+    // Contract-aligned envelope (integrations may use either shape).
+    data: houses,
+    meta: {
+      count: houses.length,
+      generatedAt: new Date().toISOString(),
+    },
   });
 }

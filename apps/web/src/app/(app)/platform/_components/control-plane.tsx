@@ -65,20 +65,24 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="ios-panel rounded-xl border border-border bg-card/90 p-3 shadow-sm backdrop-blur-sm sm:p-6">
+    <div className="page-header ios-panel rounded-xl border border-border bg-card/90 p-3 shadow-sm backdrop-blur-sm sm:p-5 lg:p-6">
       <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-end lg:justify-between">
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-xs">
-          {eyebrow}
-        </p>
-        <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-foreground sm:mt-2 sm:text-2xl lg:text-3xl">
-          {title}
-        </h1>
-        <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground sm:mt-2">
-          {description}
-        </p>
-      </div>
-      {action ? <div className="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto">{action}</div> : null}
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-xs">
+            {eyebrow}
+          </p>
+          <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-foreground sm:mt-2 sm:text-2xl lg:text-3xl">
+            {title}
+          </h1>
+          <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground sm:mt-2">
+            {description}
+          </p>
+        </div>
+        {action ? (
+          <div className="flex w-full min-w-0 shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap lg:justify-end [&>*]:w-full [&>*]:justify-center sm:[&>*]:w-auto">
+            {action}
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -116,8 +120,8 @@ export function Surface({
   children: ReactNode;
 }) {
   return (
-    <section className="ios-panel overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm">
-      <div className="border-b border-border px-4 py-4">
+    <section className="ios-panel min-w-0 overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm">
+      <div className="border-b border-border px-3 py-3 sm:px-4 sm:py-4">
         <h2 className="text-base font-semibold text-foreground">{title}</h2>
         {description ? (
           <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>

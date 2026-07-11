@@ -20,6 +20,7 @@ export type VacancyListingCard = {
   bathsLabel: string;
   rentLabel: string;
   serviceChargeLabel: string;
+  depositLabel?: string | null;
   viewingLabel: string;
   description: string;
   callHref: string;
@@ -110,6 +111,7 @@ export function VacancyListingGrid({
                 </p>
                 <p className="mt-0.5 truncate text-[11px] text-slate-600 dark:text-slate-300">
                   {listing.serviceChargeLabel}
+                  {listing.depositLabel ? ` · ${listing.depositLabel}` : ""}
                 </p>
 
                 <div className="mt-3 grid grid-cols-[2.5rem_1fr] gap-2">

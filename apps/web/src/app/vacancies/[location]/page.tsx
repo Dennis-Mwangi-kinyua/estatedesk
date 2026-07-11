@@ -41,15 +41,18 @@ import { resolveVacancyUnitIdFromSlug } from "@/lib/public-vacancy-resolve";
 import {
   isLegacyVacancySlug,
   isRawDatabaseId,
+  resolvePublicListingHref,
   stripLegacyVacancySlug,
   vacancyOgImagePath,
   vacancyPublicSlug,
 } from "@/lib/public-vacancy-slug";
+import { ensureUnitPublicSlug } from "@/lib/public-vacancy-ensure-slug";
 import {
   paginateItems,
   parsePositiveInt,
   PUBLIC_VACANCY_RELATED_PAGE_SIZE,
 } from "@/lib/vacancy-pagination";
+import { mapsSearchHref, telHref, whatsappHref } from "@/lib/vacancy-contact";
 
 type Props = {
   params: Promise<{ location: string }>;
@@ -71,7 +74,7 @@ async function getVacancyUnit(slug: string) {
   const unitId = await resolveVacancyUnitIdFromSlug(slug);
   if (!unitId) return null;
 
-  return retryTransientDatabaseOperation(
+  const unit = await retryTransientDatabaseOperation(
     () =>
       prisma.unit.findFirst({
         where: {
@@ -79,6 +82,7 @@ async function getVacancyUnit(slug: string) {
           isActive: true,
           deletedAt: null,
           status: "VACANT",
+          isPubliclyListed: true,
           property: {
             isActive: true,
             deletedAt: null,
@@ -112,6 +116,17 @@ async function getVacancyUnit(slug: string) {
       label: `public-vacancy-detail:${unitId}`,
     },
   );
+
+  if (!unit) return null;
+
+  const publicSlug = await ensureUnitPublicSlug({
+    id: unit.id,
+    houseNo: unit.houseNo,
+    publicSlug: unit.publicSlug,
+    property: { name: unit.property.name },
+  });
+
+  return { ...unit, publicSlug };
 }
 
 function VacancyTemporarilyUnavailable() {
@@ -179,15 +194,23 @@ type VacancyDetailItem = {
   icon: React.ReactNode;
 };
 
-async function getRelatedVacancyUnits(currentUnitId: string) {
+async function getRelatedVacancyUnits(input: {
+  currentUnitId: string;
+  location?: string | null;
+  unitType?: string | null;
+}) {
+  const location = input.location?.trim() || "";
+
   return retryTransientDatabaseOperation(
     () =>
       prisma.unit.findMany({
         where: {
-          id: { not: currentUnitId },
+          id: { not: input.currentUnitId },
           isActive: true,
           deletedAt: null,
           status: "VACANT",
+          isPubliclyListed: true,
+          ...(input.unitType ? { type: input.unitType as never } : {}),
           property: {
             isActive: true,
             deletedAt: null,
@@ -195,10 +218,19 @@ async function getRelatedVacancyUnits(currentUnitId: string) {
               status: "ACTIVE",
               deletedAt: null,
             },
+            ...(location
+              ? {
+                  OR: [
+                    { location: { contains: location, mode: "insensitive" } },
+                    { address: { contains: location, mode: "insensitive" } },
+                    { name: { contains: location, mode: "insensitive" } },
+                  ],
+                }
+              : {}),
           },
         },
         orderBy: [{ updatedAt: "desc" }, { houseNo: "asc" }],
-        take: 60,
+        take: 24,
         select: {
           id: true,
           houseNo: true,
@@ -206,6 +238,7 @@ async function getRelatedVacancyUnits(currentUnitId: string) {
           bedrooms: true,
           roomCount: true,
           rentAmount: true,
+          publicSlug: true,
           images: {
             where: { deletedAt: null },
             orderBy: { createdAt: "asc" },
@@ -224,7 +257,7 @@ async function getRelatedVacancyUnits(currentUnitId: string) {
     {
       attempts: PUBLIC_VACANCY_ATTEMPTS,
       delayMs: PUBLIC_VACANCY_DELAY_MS,
-      label: `related-vacancies:${currentUnitId}`,
+      label: `related-vacancies:${input.currentUnitId}`,
     },
   );
 }
@@ -237,6 +270,21 @@ function formatCurrency(value: unknown) {
     currency: DEFAULT_CURRENCY,
     maximumFractionDigits: 0,
   }).format(Number(value));
+}
+
+/**
+ * `unstable_cache` rehydrates Prisma Date fields as ISO strings. Accept both
+ * Date and string so JSON-LD never throws on cached vacancy detail reads.
+ */
+function toIsoDateTime(value: Date | string | null | undefined): string | undefined {
+  if (value == null) return undefined;
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? undefined : value.toISOString();
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
 }
 
 function publicVacancyImageAbsolute(key: string | null | undefined) {
@@ -278,10 +326,6 @@ function buildAddress(unit: VacancyUnit) {
   };
 }
 
-function shuffleVacancies<T>(items: T[]) {
-  return [...items].sort(() => Math.random() - 0.5);
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { location: id } = await params;
   const rentalLocation = getPublicRentalLocation(id);
@@ -319,11 +363,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = buildTitle(unit);
   const description = buildDescription(unit);
-  const publicSlug = vacancyPublicSlug({
+  const publicSlug =
+    unit.publicSlug?.trim() ||
+    vacancyPublicSlug({
+      propertyName: unit.property.name,
+      houseNo: unit.houseNo,
+    });
+  const url = `${APP_URL}${resolvePublicListingHref({
+    publicSlug,
     propertyName: unit.property.name,
     houseNo: unit.houseNo,
-  });
-  const url = `${APP_URL}/vacancies/${publicSlug}`;
+  })}`;
   const primaryImage = publicVacancyImageAbsolute(unit.images[0]?.key);
   const image = primaryImage ?? `${APP_URL}${vacancyOgImagePath(publicSlug)}`;
 
@@ -363,10 +413,12 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
   const { unit, databaseUnavailable } = await getVacancyUnitOrUnavailable(id);
   if (databaseUnavailable) return <VacancyTemporarilyUnavailable />;
   if (!unit) notFound();
-  const publicSlug = vacancyPublicSlug({
-    propertyName: unit.property.name,
-    houseNo: unit.houseNo,
-  });
+  const publicSlug =
+    unit.publicSlug?.trim() ||
+    vacancyPublicSlug({
+      propertyName: unit.property.name,
+      houseNo: unit.houseNo,
+    });
   const canonicalSlug = stripLegacyVacancySlug(id);
   if (
     id !== publicSlug ||
@@ -379,7 +431,25 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
   let relatedVacancies: RelatedVacancyUnit[] = [];
 
   try {
-    relatedVacancies = shuffleVacancies(await getRelatedVacancyUnits(unit.id));
+    relatedVacancies = await getRelatedVacancyUnits({
+      currentUnitId: unit.id,
+      location: unit.property?.location ?? unit.property?.address,
+      unitType: unit.type,
+    });
+
+    // Fall back to same-type nationwide if local pool is thin.
+    if (relatedVacancies.length < 4) {
+      const broader = await getRelatedVacancyUnits({
+        currentUnitId: unit.id,
+        unitType: unit.type,
+      });
+      const seen = new Set(relatedVacancies.map((item) => item.id));
+      for (const item of broader) {
+        if (seen.has(item.id)) continue;
+        relatedVacancies.push(item);
+        seen.add(item.id);
+      }
+    }
   } catch (error) {
     if (!isPublicVacancyDatabaseError(error)) {
       throw error;
@@ -390,7 +460,11 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
 
   const title = buildTitle(unit);
   const description = buildDescription(unit);
-  const url = `${APP_URL}/vacancies/${publicSlug}`;
+  const url = `${APP_URL}${resolvePublicListingHref({
+    publicSlug,
+    propertyName: unit.property.name,
+    houseNo: unit.houseNo,
+  })}`;
   const place = unit.property?.location ?? unit.property?.address ?? unit.property?.name ?? "Location not listed";
   const locationHref = resolvePublicRentalLocationHref(place);
   const detailBasePath = `/vacancies/${publicSlug}`;
@@ -399,6 +473,7 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
   const serviceChargeLabel = unit.serviceCharge
     ? formatCurrency(unit.serviceCharge)
     : "No service charge";
+  const depositLabel = unit.depositAmount ? formatCurrency(unit.depositAmount) : null;
   const viewingLabel = unit.viewingFeeRequired
     ? unit.viewingFeeAmount
       ? formatCurrency(unit.viewingFeeAmount)
@@ -426,6 +501,9 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
     },
     { label: "Location", value: place, icon: highlightIcons.location },
     { label: "Viewing", value: viewingLabel, icon: highlightIcons.viewing },
+    depositLabel
+      ? { label: "Deposit", value: depositLabel, icon: <Coins className="h-4 w-4" /> }
+      : null,
     unit.hasBalcony ? { label: "Balcony", value: "Available", icon: <Building2 className="h-4 w-4" /> } : null,
     unit.electricityBilling ? { label: "Electricity", value: unit.electricityBilling, icon: <Zap className="h-4 w-4" /> } : null,
     unit.serviceCharge
@@ -439,12 +517,23 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
   const addressSchema = buildAddress(unit);
   const hasPhotos = unit.images.length > 0;
   const gallery = unit.images;
-  const callHref = unit.property?.org.phone
-    ? `tel:${unit.property.org.phone}`
+  const orgPhone = unit.property?.org.phone ?? null;
+  const callHref = orgPhone
+    ? telHref(orgPhone, `mailto:${unit.property?.org.email ?? "info@estatedesk.com"}`)
     : `mailto:${unit.property?.org.email ?? "info@estatedesk.com"}`;
-  const boundInquiryAction = sendVacancyInquiryAction.bind(null, publicSlug);
   const shareText = `${title} is vacant in ${place}. Rent: ${rentLabel}. View details on EstateDesk.`;
-  const propertyNotes = [unit.property?.notes, unit.notes].filter(Boolean).join("\n\n") || null;
+  const managerWhatsapp = whatsappHref(
+    orgPhone,
+    `Hi, I'm interested in ${title} (${place}). ${url}`,
+  );
+  const mapsHref = mapsSearchHref(
+    [unit.property?.address, unit.property?.location, unit.property?.name]
+      .filter(Boolean)
+      .join(", "),
+  );
+  const boundInquiryAction = sendVacancyInquiryAction.bind(null, publicSlug);
+  const propertyNotes = unit.property?.notes?.trim() || null;
+  const unitNotes = unit.notes?.trim() || null;
   const relatedListingCards = relatedVacancies.map((listing) => {
     const relatedPlace =
       listing.property.location ?? listing.property.address ?? listing.property.name;
@@ -452,10 +541,11 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
 
     return {
       id: listing.id,
-      href: `/vacancies/${vacancyPublicSlug({
+      href: resolvePublicListingHref({
+        publicSlug: listing.publicSlug,
         propertyName: listing.property.name,
         houseNo: listing.houseNo,
-      })}`,
+      }),
       imageSrc: listing.images[0]?.key ? publicVacancyImageUrl(listing.images[0].key) : null,
       hasImage: Boolean(listing.images[0]?.key),
       imageAlt:
@@ -507,14 +597,14 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
           telephone: unit.property?.org.phone ?? undefined,
           email: unit.property?.org.email ?? undefined,
         },
-        dateModified: unit.updatedAt.toISOString(),
+        dateModified: toIsoDateTime(unit.updatedAt),
       },
       {
         "@type": "RealEstateListing",
         name: title,
         description,
         url,
-        datePosted: unit.updatedAt.toISOString(),
+        datePosted: toIsoDateTime(unit.updatedAt),
         image: hasPhotos
           ? gallery.map((asset) => publicVacancyImageAbsolute(asset.key)).filter(Boolean)
           : [`${APP_URL}${vacancyOgImagePath(publicSlug)}`],
@@ -577,10 +667,11 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
               description={description}
             />
             <VacancyDetailHighlights highlights={highlights} />
-            {isUsefulAddress(unit.property?.address) || propertyNotes ? (
+            {isUsefulAddress(unit.property?.address) || propertyNotes || unitNotes ? (
               <VacancyDetailDescription
                 address={isUsefulAddress(unit.property?.address) ? unit.property?.address : null}
                 propertyNotes={propertyNotes}
+                unitNotes={unitNotes}
               />
             ) : null}
           </section>
@@ -588,15 +679,19 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
           <VacancyDetailSidebar
             rentLabel={rentLabel}
             serviceChargeLabel={serviceChargeLabel}
+            depositLabel={depositLabel}
             viewingLabel={viewingLabel}
             managerName={unit.property?.org.name ?? "Property manager"}
             callHref={callHref}
+            whatsappHref={managerWhatsapp}
+            mapsHref={mapsHref}
             shareUrl={url}
             shareTitle={title}
             shareText={shareText}
             inquiry={{
               action: boundInquiryAction,
               defaultMessage: `I am interested in ${title} in ${place}. Please contact me about viewing.`,
+              defaultPreferredLocation: place !== "Location not listed" ? place : undefined,
               sent: statusParams?.sent,
               error: statusParams?.error,
             }}

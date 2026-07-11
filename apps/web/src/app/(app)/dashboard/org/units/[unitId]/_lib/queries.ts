@@ -115,6 +115,8 @@ export async function getUnitDetailsData(orgId: string, requestedUnitRef: string
       status: true,
       vacantSince: true,
       notes: true,
+      isPubliclyListed: true,
+      publicSlug: true,
       isActive: true,
       sequenceNo: true,
       createdAt: true,

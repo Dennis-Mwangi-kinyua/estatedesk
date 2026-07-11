@@ -1,10 +1,19 @@
 import { unstable_cache } from "next/cache";
-import { Prisma, UnitType } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { PUBLIC_VACANCIES_CACHE_TAG } from "./cache";
 import { prisma } from "@/lib/prisma";
+import {
+  buildVacancyListWhere,
+  unitTypesForSearch,
+  vacancyListOrderBy,
+  type VacancyListQuery,
+  type VacancyListSort,
+} from "./where";
 
 export const PUBLIC_VACANCY_REVALIDATE_SECONDS = 300;
+export const PUBLIC_VACANCY_LIST_PAGE_SIZE = 12;
+export const PUBLIC_VACANCY_MAX_PAGE_SIZE = 48;
 
 const PUBLIC_VACANCY_RETRY_OPTIONS = {
   attempts: 2,
@@ -12,22 +21,8 @@ const PUBLIC_VACANCY_RETRY_OPTIONS = {
   label: "public-vacancy-list",
 };
 
-export function unitTypesForSearch(query: string): UnitType[] {
-  const normalized = query.toLowerCase().replace(/[^a-z0-9]+/g, " ");
-  const types: UnitType[] = [];
-
-  if (/\bbedsitters?\b/.test(normalized)) types.push(UnitType.BEDSITTER);
-  if (/\bstudios?\b/.test(normalized)) types.push(UnitType.STUDIO);
-  if (/\bsingle\s*rooms?\b/.test(normalized)) types.push(UnitType.SINGLE_ROOM);
-  if (/\bshops?\b/.test(normalized)) types.push(UnitType.SHOP);
-  if (/\boffices?\b/.test(normalized)) types.push(UnitType.OFFICE);
-  if (/\bstalls?\b/.test(normalized)) types.push(UnitType.STALL);
-  if (/\bwarehouses?\b/.test(normalized)) types.push(UnitType.WAREHOUSE);
-  if (/\bgodowns?\b/.test(normalized)) types.push(UnitType.GODOWN);
-  if (/\bapartments?\b|\bflats?\b/.test(normalized)) types.push(UnitType.APARTMENT);
-
-  return Array.from(new Set(types));
-}
+export { unitTypesForSearch };
+export type { VacancyListQuery, VacancyListSort };
 
 export function isPublicVacancyDatabaseError(error: unknown) {
   if (isTransientDatabaseError(error)) return true;
@@ -39,147 +34,157 @@ export function isPublicVacancyDatabaseError(error: unknown) {
   return false;
 }
 
-async function queryVacancyListings({
-  query,
-  location,
-  sort,
-}: {
-  query: string;
-  location: string;
-  sort: "location" | "rent_asc" | "rent_desc";
-}) {
-  const queryUnitTypes = unitTypesForSearch(query);
-
-  return retryTransientDatabaseOperation(
-    () =>
-      prisma.unit.findMany({
-        where: {
-          isActive: true,
-          deletedAt: null,
-          status: "VACANT",
-          ...(query
-            ? {
-                OR: [
-                  { houseNo: { contains: query, mode: "insensitive" } },
-                  { property: { is: { name: { contains: query, mode: "insensitive" } } } },
-                  { property: { is: { location: { contains: query, mode: "insensitive" } } } },
-                  { property: { is: { address: { contains: query, mode: "insensitive" } } } },
-                  { property: { is: { org: { is: { name: { contains: query, mode: "insensitive" } } } } } },
-                  { building: { is: { name: { contains: query, mode: "insensitive" } } } },
-                  ...(queryUnitTypes.length ? [{ type: { in: queryUnitTypes } }] : []),
-                ],
-              }
-            : {}),
-          property: {
-            is: {
-              isActive: true,
-              deletedAt: null,
-              org: {
-                is: {
-                  status: "ACTIVE",
-                  deletedAt: null,
-                },
-              },
-              ...(location
-                ? {
-                    OR: [
-                      { location: { contains: location, mode: "insensitive" } },
-                      { address: { contains: location, mode: "insensitive" } },
-                      { name: { contains: location, mode: "insensitive" } },
-                    ],
-                  }
-                : {}),
-            },
-          },
-        },
-        orderBy:
-          sort === "rent_asc"
-            ? [{ rentAmount: "asc" }, { property: { name: "asc" } }]
-            : sort === "rent_desc"
-              ? [{ rentAmount: "desc" }, { property: { name: "asc" } }]
-              : [{ property: { location: "asc" } }, { property: { name: "asc" } }, { houseNo: "asc" }],
-        take: 240,
-        select: {
-          id: true,
-          houseNo: true,
-          type: true,
-          bedrooms: true,
-          bathrooms: true,
-          roomCount: true,
-          rentAmount: true,
-          serviceCharge: true,
-          viewingFeeRequired: true,
-          viewingFeeAmount: true,
-          notes: true,
-          images: {
-            where: { deletedAt: null },
-            orderBy: { createdAt: "asc" },
-            take: 1,
-            select: { key: true, fileName: true },
-          },
-          building: { select: { name: true } },
-          property: {
-            select: {
-              name: true,
-              location: true,
-              address: true,
-              notes: true,
-              org: { select: { name: true, phone: true } },
-            },
-          },
-        },
-      }),
-    PUBLIC_VACANCY_RETRY_OPTIONS,
-  );
-}
-
-const publicVacancyCountWhere = {
-  isActive: true,
-  deletedAt: null,
-  status: "VACANT" as const,
+const listingSelect = {
+  id: true,
+  houseNo: true,
+  type: true,
+  bedrooms: true,
+  bathrooms: true,
+  roomCount: true,
+  rentAmount: true,
+  depositAmount: true,
+  serviceCharge: true,
+  viewingFeeRequired: true,
+  viewingFeeAmount: true,
+  notes: true,
+  publicSlug: true,
+  isPubliclyListed: true,
+  updatedAt: true,
+  images: {
+    where: { deletedAt: null },
+    orderBy: { createdAt: "asc" as const },
+    take: 1,
+    select: { key: true, fileName: true },
+  },
+  building: { select: { name: true } },
   property: {
-    is: {
-      isActive: true,
-      deletedAt: null,
-      org: {
-        status: "ACTIVE" as const,
-        deletedAt: null,
-      },
+    select: {
+      name: true,
+      location: true,
+      address: true,
+      notes: true,
+      org: { select: { name: true, phone: true } },
     },
   },
+} satisfies Prisma.UnitSelect;
+
+export type VacancyListingRow = Prisma.UnitGetPayload<{ select: typeof listingSelect }>;
+
+export type VacancyListPageResult = {
+  items: VacancyListingRow[];
+  total: number;
+  page: number;
+  pageSize: number;
 };
 
-async function queryVacancyListingsCount() {
+function normalizePage(page: number | undefined) {
+  if (!page || !Number.isFinite(page) || page < 1) return 1;
+  return Math.floor(page);
+}
+
+function normalizePageSize(pageSize: number | undefined) {
+  if (!pageSize || !Number.isFinite(pageSize) || pageSize < 1) {
+    return PUBLIC_VACANCY_LIST_PAGE_SIZE;
+  }
+  return Math.min(Math.floor(pageSize), PUBLIC_VACANCY_MAX_PAGE_SIZE);
+}
+
+async function queryVacancyListingsPage(params: VacancyListQuery & {
+  page?: number;
+  pageSize?: number;
+}): Promise<VacancyListPageResult> {
+  const page = normalizePage(params.page);
+  const pageSize = normalizePageSize(params.pageSize);
+  const where = buildVacancyListWhere(params);
+  const orderBy = vacancyListOrderBy(params.sort ?? "location");
+
   return retryTransientDatabaseOperation(
-    () => prisma.unit.count({ where: publicVacancyCountWhere }),
+    async () => {
+      const [total, items] = await Promise.all([
+        prisma.unit.count({ where }),
+        prisma.unit.findMany({
+          where,
+          orderBy,
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          select: listingSelect,
+        }),
+      ]);
+
+      return { items, total, page, pageSize };
+    },
     PUBLIC_VACANCY_RETRY_OPTIONS,
   );
 }
 
-export function getVacancyListingsCountCached() {
-  return unstable_cache(
-    () => queryVacancyListingsCount(),
-    ["public-vacancy-listings-count"],
-    {
-      revalidate: PUBLIC_VACANCY_REVALIDATE_SECONDS,
-      tags: [PUBLIC_VACANCIES_CACHE_TAG],
-    },
-  )();
+async function queryVacancyListingsCount(params: VacancyListQuery = {}) {
+  const where = buildVacancyListWhere(params);
+  return retryTransientDatabaseOperation(
+    () => prisma.unit.count({ where }),
+    PUBLIC_VACANCY_RETRY_OPTIONS,
+  );
 }
 
-export function getVacancyListingsCached(params: {
-  query: string;
-  location: string;
-  sort: "location" | "rent_asc" | "rent_desc";
-}) {
-  const cacheKey = ["public-vacancy-listings", params.query, params.location, params.sort].join(":");
+export function getVacancyListingsCountCached(params: VacancyListQuery = {}) {
+  const cacheKey = [
+    "public-vacancy-listings-count",
+    params.query ?? "",
+    params.location ?? "",
+    params.type ?? "",
+    String(params.minRent ?? ""),
+    String(params.maxRent ?? ""),
+    String(params.bedrooms ?? ""),
+  ].join(":");
 
   return unstable_cache(
-    () => queryVacancyListings(params),
+    () => queryVacancyListingsCount(params),
     [cacheKey],
     {
       revalidate: PUBLIC_VACANCY_REVALIDATE_SECONDS,
       tags: [PUBLIC_VACANCIES_CACHE_TAG],
     },
   )();
+}
+
+/** DB-backed paginated listing (preferred). */
+export function getVacancyListingsPageCached(
+  params: VacancyListQuery & { page?: number; pageSize?: number },
+) {
+  const cacheKey = [
+    "public-vacancy-listings-page",
+    params.query ?? "",
+    params.location ?? "",
+    params.sort ?? "location",
+    params.type ?? "",
+    String(params.minRent ?? ""),
+    String(params.maxRent ?? ""),
+    String(params.bedrooms ?? ""),
+    String(params.page ?? 1),
+    String(params.pageSize ?? PUBLIC_VACANCY_LIST_PAGE_SIZE),
+  ].join(":");
+
+  return unstable_cache(
+    () => queryVacancyListingsPage(params),
+    [cacheKey],
+    {
+      revalidate: PUBLIC_VACANCY_REVALIDATE_SECONDS,
+      tags: [PUBLIC_VACANCIES_CACHE_TAG],
+    },
+  )();
+}
+
+/**
+ * @deprecated Prefer getVacancyListingsPageCached for true pagination.
+ * Kept for call sites that still expect a flat array (returns first page only, size 240 max for safety).
+ */
+export function getVacancyListingsCached(params: {
+  query: string;
+  location: string;
+  sort: "location" | "rent_asc" | "rent_desc";
+}) {
+  return getVacancyListingsPageCached({
+    ...params,
+    page: 1,
+    pageSize: 240,
+  }).then((result) => result.items);
 }

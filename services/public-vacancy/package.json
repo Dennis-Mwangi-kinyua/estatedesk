@@ -6,13 +6,15 @@
   "exports": {
     ".": "./src/index.ts",
     "./cache": "./src/cache.ts",
+    "./ensure-slug": "./src/ensure-slug.ts",
     "./image": "./src/image.ts",
     "./list-sitemap": "./src/list-sitemap.ts",
     "./listings": "./src/listings.ts",
     "./resolve": "./src/resolve.ts",
     "./sitemap": "./src/sitemap.ts",
     "./slug": "./src/slug.ts",
-    "./slug-index": "./src/slug-index.ts"
+    "./slug-index": "./src/slug-index.ts",
+    "./where": "./src/where.ts"
   },
   "dependencies": {
     "@estatedesk/contracts": "file:../../packages/contracts"
