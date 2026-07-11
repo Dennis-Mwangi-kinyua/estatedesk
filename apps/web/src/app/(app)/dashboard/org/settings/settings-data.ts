@@ -55,6 +55,8 @@ export type SettingsPageData = {
       notes: string | null;
       requestedAt: string | null;
       status: string;
+      amountDue: number | null;
+      paymentReference: string | null;
     } | null;
   };
   preferences: {
@@ -176,6 +178,12 @@ export async function getSettingsPageData(
           requestedAt:
             typeof req.requestedAt === "string" ? req.requestedAt : null,
           status: typeof req.status === "string" ? req.status : "PENDING",
+          amountDue:
+            typeof req.amountDue === "number" ? req.amountDue : null,
+          paymentReference:
+            typeof req.paymentReference === "string"
+              ? req.paymentReference
+              : null,
         };
       })(),
     },

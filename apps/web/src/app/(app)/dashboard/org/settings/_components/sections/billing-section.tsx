@@ -93,11 +93,19 @@ export function BillingSection({ data }: { data: SettingsPageData }) {
           <p className="font-semibold">Upgrade request pending</p>
           <p className="mt-1">
             You requested <strong>{formatLabel(pendingRequest.plan)}</strong>
+            {pendingRequest.amountDue
+              ? ` (KES ${pendingRequest.amountDue.toLocaleString("en-KE")}/mo)`
+              : ""}
             {pendingRequest.requestedAt
               ? ` on ${new Date(pendingRequest.requestedAt).toLocaleDateString("en-KE")}`
               : ""}
             . Platform admins will confirm payment and apply the plan.
           </p>
+          {pendingRequest.paymentReference ? (
+            <p className="mt-2 text-xs opacity-90">
+              Payment ref: {pendingRequest.paymentReference}
+            </p>
+          ) : null}
           {pendingRequest.notes ? (
             <p className="mt-2 text-xs opacity-90">Notes: {pendingRequest.notes}</p>
           ) : null}
@@ -139,6 +147,18 @@ export function BillingSection({ data }: { data: SettingsPageData }) {
             options={upgradeTargets}
           />
 
+          <div className="rounded-xl border border-border bg-muted/20 px-3 py-2.5 text-xs leading-5 text-muted-foreground">
+            SaaS fee is paid outside the app (M-Pesa paybill / bank). Enter your
+            payment reference below so platform can confirm and activate the plan.
+            Monthly list prices: Pro KES 3,000 · Plus KES 6,500 · Custom by quote.
+          </div>
+
+          <InputField
+            label="Payment reference (optional)"
+            name="paymentReference"
+            placeholder="M-Pesa code / bank ref"
+          />
+
           <div className="space-y-2">
             <label
               htmlFor="upgradeNotes"
@@ -150,7 +170,7 @@ export function BillingSection({ data }: { data: SettingsPageData }) {
               id="upgradeNotes"
               name="upgradeNotes"
               rows={3}
-              placeholder="Payment reference, preferred start date, portfolio size…"
+              placeholder="Preferred start date, portfolio size, contact phone…"
               className="min-h-20 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-foreground"
             />
           </div>

@@ -331,10 +331,14 @@ export async function requestPlanUpgradeAction(formData: FormData) {
     | "PLUS"
     | "ENTERPRISE";
   const notes = readOptionalString(formData, "upgradeNotes");
+  const paymentReference = readOptionalString(formData, "paymentReference");
 
   if (!["PRO", "PLUS", "ENTERPRISE"].includes(requestedPlan)) {
     throw new Error("Choose a valid plan to request (Pro, Plus, or Custom).");
   }
+
+  const { APP_PLANS } = await import("@/lib/billing/plans");
+  const amountDue = APP_PLANS[requestedPlan].monthlyAmount;
 
   const [org, subscription] = await Promise.all([
     prisma.organization.findUnique({
@@ -361,6 +365,8 @@ export async function requestPlanUpgradeAction(formData: FormData) {
   const upgradeRequest = {
     plan: requestedPlan,
     notes: notes ?? null,
+    paymentReference: paymentReference ?? null,
+    amountDue,
     requestedAt: new Date().toISOString(),
     requestedByUserId: session.userId,
     requestedByName: session.fullName,
@@ -374,6 +380,7 @@ export async function requestPlanUpgradeAction(formData: FormData) {
       metadata: {
         ...metadata,
         upgradeRequest,
+        amountDue,
       } as Prisma.InputJsonValue,
     },
     create: {
@@ -382,7 +389,7 @@ export async function requestPlanUpgradeAction(formData: FormData) {
       status: "ACTIVE",
       currentPeriodStart: now,
       currentPeriodEnd: addMonths(now, 1),
-      metadata: { upgradeRequest } as Prisma.InputJsonValue,
+      metadata: { upgradeRequest, amountDue } as Prisma.InputJsonValue,
     },
   });
 
@@ -397,6 +404,8 @@ export async function requestPlanUpgradeAction(formData: FormData) {
       orgSlug: org.slug,
       fromPlan: subscription?.plan ?? "FREE",
       requestedPlan,
+      amountDue,
+      paymentReference,
       notes,
     },
   });

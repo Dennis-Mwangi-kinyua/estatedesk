@@ -6,6 +6,8 @@ import {
   isTransientDatabaseError,
   retryTransientDatabaseOperation,
 } from "@/lib/db/retry";
+import { listPendingUpgradeRequests } from "@/lib/billing/upgrade-requests";
+import { APP_PLANS } from "@/lib/billing/plans";
 import {
   Badge,
   PageHeader,
@@ -14,6 +16,10 @@ import {
   formatDateTime,
   toneForStatus,
 } from "../_components/control-plane";
+import {
+  applyUpgradeRequestAction,
+  rejectUpgradeRequestAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +29,9 @@ type SearchParams = Promise<{
   q?: string;
   status?: string;
   plan?: string;
+  ok?: string;
+  error?: string;
+  message?: string;
 }>;
 
 const STATUS_VALUES = Object.values(SubscriptionStatus);
@@ -261,6 +270,16 @@ export default async function PlatformBillingPage({
   const { subscriptions, totalFiltered, total, active, trialing, pastDue } =
     loadResult;
 
+  let pendingUpgrades: Awaited<ReturnType<typeof listPendingUpgradeRequests>> =
+    [];
+  try {
+    pendingUpgrades = await billingQuery("platform-billing-upgrade-queue", () =>
+      listPendingUpgradeRequests(40),
+    );
+  } catch (error) {
+    console.error("[PlatformBillingPage] upgrade queue load failed", error);
+  }
+
   const orderedOrgIds = Array.from(
     new Set(subscriptions.map((sub) => sub.org.id)),
   );
@@ -276,14 +295,161 @@ export default async function PlatformBillingPage({
       <PageHeader
         eyebrow="Billing"
         title="Subscriptions"
-        description="Subscription plans, renewal windows, and recent plan changes with server-side filtering."
+        description="Confirm paid upgrade requests, review plan limits, and manage renewal windows. Orgs cannot self-assign paid plans."
       />
 
-      <section className="ed-keep-cols grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
+      {params.ok === "upgrade-applied" ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm text-emerald-950 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-50">
+          Upgrade applied. Plan is active and the pending request was cleared.
+        </div>
+      ) : null}
+      {params.ok === "upgrade-rejected" ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50">
+          Upgrade request rejected.
+        </div>
+      ) : null}
+      {params.error ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-900 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-50">
+          {params.message
+            ? decodeURIComponent(params.message)
+            : "Could not process that billing action."}
+        </div>
+      ) : null}
+
+      <section className="ed-keep-cols grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-5">
         <StatCard label="Subscriptions" value={total} />
         <StatCard label="Active" value={active} />
         <StatCard label="Trialing" value={trialing} />
         <StatCard label="Past due" value={pastDue} />
+        <StatCard label="Upgrade queue" value={pendingUpgrades.length} />
+      </section>
+
+      <section className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-3 py-3 sm:px-4 sm:py-4">
+          <h2 className="text-base font-semibold text-foreground">
+            Upgrade request queue
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Confirm SaaS payment (M-Pesa/bank ref), then apply the plan. This marks
+            the request paid and activates the subscription.
+          </p>
+        </div>
+
+        {pendingUpgrades.length === 0 ? (
+          <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+            No pending upgrade requests.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {pendingUpgrades.map(({ subscription, request }) => {
+              const listPrice =
+                request.amountDue ??
+                APP_PLANS[request.plan]?.monthlyAmount ??
+                0;
+
+              return (
+                <li
+                  key={subscription.id}
+                  className="space-y-3 px-3 py-3.5 sm:px-4 sm:py-4"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <Link
+                        href={`/platform/organizations/${subscription.org.slug}`}
+                        className="text-sm font-semibold text-foreground underline-offset-4 hover:underline"
+                      >
+                        {subscription.org.name}
+                      </Link>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        /{subscription.org.slug} · current{" "}
+                        <Badge>{subscription.plan}</Badge> → requested{" "}
+                        <Badge
+                          tone="border-violet-300 bg-violet-50 text-violet-900"
+                        >
+                          {request.plan}
+                        </Badge>
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {request.requestedByName
+                          ? `By ${request.requestedByName}`
+                          : "Requested"}
+                        {request.requestedAt
+                          ? ` · ${new Date(request.requestedAt).toLocaleString("en-KE")}`
+                          : ""}
+                        {listPrice > 0
+                          ? ` · KES ${listPrice.toLocaleString("en-KE")}/mo`
+                          : " · Custom pricing"}
+                      </p>
+                      {request.paymentReference ? (
+                        <p className="mt-1 text-xs font-medium text-foreground">
+                          Payment ref: {request.paymentReference}
+                        </p>
+                      ) : null}
+                      {request.notes ? (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Notes: {request.notes}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <form
+                      action={applyUpgradeRequestAction}
+                      className="space-y-2 rounded-xl border border-emerald-200 bg-emerald-50/50 p-2.5 dark:border-emerald-500/30 dark:bg-emerald-500/10"
+                    >
+                      <input type="hidden" name="orgId" value={subscription.orgId} />
+                      <label className="block text-[11px] font-medium text-emerald-900 dark:text-emerald-100">
+                        Confirm payment ref
+                        <input
+                          name="paymentReference"
+                          defaultValue={request.paymentReference ?? ""}
+                          placeholder="M-Pesa / bank reference"
+                          className="mt-1 min-h-9 w-full rounded-lg border border-emerald-200 bg-white px-2 text-sm text-foreground dark:border-emerald-500/30 dark:bg-background"
+                        />
+                      </label>
+                      <label className="block text-[11px] font-medium text-emerald-900 dark:text-emerald-100">
+                        Operator notes (optional)
+                        <input
+                          name="notes"
+                          placeholder="Paid, activate PRO"
+                          className="mt-1 min-h-9 w-full rounded-lg border border-emerald-200 bg-white px-2 text-sm text-foreground dark:border-emerald-500/30 dark:bg-background"
+                        />
+                      </label>
+                      <button
+                        type="submit"
+                        className="min-h-9 w-full rounded-lg bg-emerald-700 px-3 text-sm font-semibold text-white"
+                      >
+                        Apply plan (mark paid)
+                      </button>
+                    </form>
+
+                    <form
+                      action={rejectUpgradeRequestAction}
+                      className="space-y-2 rounded-xl border border-border bg-muted/20 p-2.5"
+                    >
+                      <input type="hidden" name="orgId" value={subscription.orgId} />
+                      <label className="block text-[11px] font-medium text-muted-foreground">
+                        Reject reason (optional)
+                        <input
+                          name="notes"
+                          placeholder="Incomplete payment"
+                          className="mt-1 min-h-9 w-full rounded-lg border border-border bg-background px-2 text-sm text-foreground"
+                        />
+                      </label>
+                      <button
+                        type="submit"
+                        className="min-h-9 w-full rounded-lg border border-border bg-background px-3 text-sm font-semibold text-foreground"
+                      >
+                        Reject request
+                      </button>
+                    </form>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       <section className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm sm:rounded-[26px]">

@@ -154,13 +154,35 @@ export async function importCsv({
     validation.errors.push("No CSV rows found.");
   }
 
+  // Plan limits: reject imports that would exceed property/unit caps.
+  if (validation.errors.length === 0 && (kind === "properties" || kind === "units")) {
+    const { getOrgPlanUsage, planLimitMessage } = await import("@/lib/billing/access");
+    const usage = await getOrgPlanUsage(orgId);
+
+    if (kind === "properties") {
+      if (usage.properties + rows.length > usage.propertiesLimit) {
+        validation.errors.push(
+          `${planLimitMessage("property", usage)} This import would add ${rows.length} properties.`,
+        );
+      }
+    }
+
+    if (kind === "units") {
+      if (usage.units + rows.length > usage.unitsLimit) {
+        validation.errors.push(
+          `${planLimitMessage("unit", usage)} This import would add ${rows.length} units.`,
+        );
+      }
+    }
+  }
+
   if (validation.errors.length > 0 || dryRun) {
     return {
       ok: validation.errors.length === 0,
       dryRun,
       kind,
       totalRows: rows.length,
-      validRows: rows.length - validation.errors.length,
+      validRows: Math.max(0, rows.length - validation.errors.length),
       created: 0,
       errors: validation.errors,
       preview: validation.preview.slice(0, 10),
@@ -175,6 +197,14 @@ export async function importCsv({
 
   await prisma.$transaction(async (tx) => {
     if (kind === "properties") {
+      const { getOrgPlanUsage } = await import("@/lib/billing/access");
+      const usage = await getOrgPlanUsage(orgId);
+      if (usage.properties + rows.length > usage.propertiesLimit) {
+        throw new Error(
+          `Plan limit: cannot import ${rows.length} properties on ${usage.plan} plan.`,
+        );
+      }
+
       for (const row of rows) {
         await tx.property.create({
           data: {
@@ -193,6 +223,14 @@ export async function importCsv({
     }
 
     if (kind === "units") {
+      const { getOrgPlanUsage } = await import("@/lib/billing/access");
+      const usage = await getOrgPlanUsage(orgId);
+      if (usage.units + rows.length > usage.unitsLimit) {
+        throw new Error(
+          `Plan limit: cannot import ${rows.length} units on ${usage.plan} plan.`,
+        );
+      }
+
       for (const row of rows) {
         const property = await tx.property.findFirst({
           where: { orgId, name: required(row, "propertyName"), deletedAt: null },

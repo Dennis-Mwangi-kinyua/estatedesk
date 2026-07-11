@@ -272,6 +272,31 @@ export async function overrideSubscriptionAction(formData: FormData) {
   const now = new Date();
   const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
+  const existingMeta =
+    org.subscription?.metadata &&
+    typeof org.subscription.metadata === "object" &&
+    !Array.isArray(org.subscription.metadata)
+      ? (org.subscription.metadata as Record<string, unknown>)
+      : {};
+
+  // Clear pending upgrade requests when platform forces a plan.
+  const nextMeta = {
+    ...existingMeta,
+    amountDue: 0,
+    upgradeRequest:
+      existingMeta.upgradeRequest &&
+      typeof existingMeta.upgradeRequest === "object" &&
+      !Array.isArray(existingMeta.upgradeRequest)
+        ? {
+            ...(existingMeta.upgradeRequest as Record<string, unknown>),
+            status: "APPLIED",
+            appliedAt: now.toISOString(),
+            appliedByUserId: session.userId,
+            resolutionNotes: "Applied via Website Control subscription override",
+          }
+        : existingMeta.upgradeRequest,
+  };
+
   const sub = await prisma.subscription.upsert({
     where: { orgId: org.id },
     create: {
@@ -280,6 +305,7 @@ export async function overrideSubscriptionAction(formData: FormData) {
       status,
       currentPeriodStart: now,
       currentPeriodEnd: periodEnd,
+      metadata: nextMeta as object,
     },
     update: {
       plan,
@@ -287,6 +313,7 @@ export async function overrideSubscriptionAction(formData: FormData) {
       currentPeriodStart: now,
       currentPeriodEnd: periodEnd,
       cancelledAt: status === "CANCELLED" ? now : null,
+      metadata: nextMeta as object,
     },
   });
 
@@ -300,6 +327,7 @@ export async function overrideSubscriptionAction(formData: FormData) {
 
   refreshControl();
   revalidatePath("/platform/subscriptions");
+  revalidatePath("/platform/billing");
   revalidatePath(`/platform/organizations/${org.slug}`);
   redirect(`${PAGE}?ok=subscription`);
 }
