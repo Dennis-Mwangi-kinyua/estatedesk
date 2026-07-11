@@ -24,7 +24,7 @@ export function AccountingControlAccounts({ data }: { data: AccountingPageData }
         </p>
       </div>
 
-      <div className="grid gap-3 px-5 py-5 sm:grid-cols-2 sm:px-6">
+      <div className="grid grid-cols-2 gap-2.5 px-4 py-4 sm:gap-3 sm:px-6">
         <StatCard
           label="Tenant receivables"
           value={formatMoney(controlBalances.receivables, org.currencyCode)}

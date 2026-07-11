@@ -21,7 +21,7 @@ export default async function AccountingSettingsPage({
   }
 
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content ed-mobile-first mx-auto w-full max-w-7xl space-y-4 px-3 pb-24 pt-3 sm:space-y-6 sm:px-6 sm:pt-4 lg:px-8">
       <AccountingSubNav />
       <AccountingSettingsWorkspace
         data={data}

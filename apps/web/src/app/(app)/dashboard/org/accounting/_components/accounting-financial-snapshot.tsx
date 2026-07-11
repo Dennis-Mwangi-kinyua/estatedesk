@@ -9,9 +9,9 @@ export function AccountingFinancialSnapshot({ data }: { data: AccountingPageData
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       <AccountingCashPosition data={data} />
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2 xl:gap-5">
         <AccountingIncomeBreakdown data={data} />
         <AccountingControlAccounts data={data} />
       </div>

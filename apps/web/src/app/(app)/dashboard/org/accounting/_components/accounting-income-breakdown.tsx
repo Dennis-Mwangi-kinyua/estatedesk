@@ -23,30 +23,49 @@ export function AccountingIncomeBreakdown({ data }: { data: AccountingPageData }
         </p>
       </div>
 
-      <div className="grid gap-3 px-5 py-5 sm:grid-cols-2 xl:grid-cols-5 sm:px-6">
-        <StatCard
-          label="Rent income"
-          value={formatMoney(controlBalances.rentIncome, org.currencyCode)}
-          Icon={Home}
-        />
-        <StatCard
-          label="Water income"
-          value={formatMoney(controlBalances.waterIncome, org.currencyCode)}
-          Icon={Droplets}
-        />
-        <StatCard
-          label="Total income"
-          value={formatMoney(income, org.currencyCode)}
-          Icon={TrendingUp}
-        />
-        <StatCard
-          label="Total expenses"
-          value={formatMoney(expenses, org.currencyCode)}
-        />
-        <StatCard
-          label="Net income"
-          value={formatMoney(netIncome, org.currencyCode)}
-        />
+      <div className="flex gap-2.5 overflow-x-auto px-4 py-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-6 xl:grid-cols-3">
+        {(
+          [
+            {
+              label: "Rent income",
+              value: formatMoney(controlBalances.rentIncome, org.currencyCode),
+              Icon: Home,
+            },
+            {
+              label: "Water income",
+              value: formatMoney(controlBalances.waterIncome, org.currencyCode),
+              Icon: Droplets,
+            },
+            {
+              label: "Total income",
+              value: formatMoney(income, org.currencyCode),
+              Icon: TrendingUp,
+              highlight: true,
+            },
+            {
+              label: "Total expenses",
+              value: formatMoney(expenses, org.currencyCode),
+            },
+            {
+              label: "Net income",
+              value: formatMoney(netIncome, org.currencyCode),
+              highlight: netIncome !== 0,
+            },
+          ] as const
+        ).map((card) => (
+          <div
+            key={card.label}
+            className="min-w-[9.5rem] shrink-0 snap-start sm:min-w-0"
+          >
+            <StatCard
+              label={card.label}
+              value={card.value}
+              Icon={"Icon" in card ? card.Icon : undefined}
+              compact
+              highlight={"highlight" in card ? Boolean(card.highlight) : false}
+            />
+          </div>
+        ))}
       </div>
     </section>
   );
