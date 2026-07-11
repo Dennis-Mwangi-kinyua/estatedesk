@@ -1,6 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/seo";
 
+/**
+ * Paths crawlers must not waste budget on.
+ * Public marketing, vacancies, guides, legal, login/register stay crawlable
+ * via Allow `/` + more-specific Disallow (Google longest-match rules).
+ */
 const PRIVATE_ROUTE_PREFIXES = [
   "/dashboard/",
   "/platform/",
@@ -22,6 +27,9 @@ const PRIVATE_ROUTE_PREFIXES = [
   "/access-denied",
   "/sign-lease/",
   "/accept-invite/",
+  "/verify-lease/",
+  "/share/",
+  "/maintenance",
   "/offline",
   "/account-suspended",
   "/service-terminated",
