@@ -27,14 +27,15 @@ const homepageAudiences = [
 ];
 
 const homepageFeatures = [
-  "Tenant profiles, lease records, occupancy tracking, and move-out history.",
-  "Rent tracking, tenant balances, paid and unpaid tenant visibility, and payment verification workflows.",
-  "Water billing workflows for readings, tenant charges, balances, and billing history.",
-  "Public vacancy pages for available homes, apartments, bedsitters, shops, offices, and mixed-use spaces.",
-  "Maintenance issue tracking, caretaker coordination, inspections, and printable records.",
+  "Tenant profiles, leases, occupancy, move-out history, and tribunal-ready communication packs.",
+  "M-Pesa and multi-bank rent collection with combined bills that clear utilities before rent.",
+  "Water billing, offline caretaker metering, IndexedDB queues, and background sync.",
+  "KRA eTIMS/eRITS-ready receipts with seller PIN, control unit, and live submit when configured.",
+  "Double-entry accounting: cash position, AR/AP aging, books health, budgets, owner distributions.",
+  "Public vacancy SEO pages for houses, apartments, bedsitters, shops, and offices.",
+  "WhatsApp Business intents for balance, bill, pay, and receipt links.",
   "Role-aware access for admins, managers, accountants, caretakers, staff, and tenants.",
-  "Reports for occupancy, payments, balances, issues, inspections, and operational activity.",
-  "Mobile-friendly access through modern browsers for office, field, and remote teams.",
+  "PWA install, free Web Push alerts, and mobile-first dashboards for field and office teams.",
 ];
 
 const homepageFaqItems = marketingFaqItems.slice(0, 8);
@@ -168,28 +169,29 @@ function HomepageSeoContent() {
                 Property management software
               </div>
               <h2 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl dark:text-slate-50">
-                What is EstateDesk?
+                What EstateDesk does — and why it wins
               </h2>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-600 sm:text-base dark:text-slate-300">
-                EstateDesk is a property management workspace for landlords, managers,
-                agencies, caretakers, and tenants. It keeps properties, units, tenants,
-                rent records, water bills, vacancies, maintenance, inspections, staff access,
-                and reports connected in one place.
+                EstateDesk is Kenya-built property management software: M-Pesa rent
+                collection, water billing, offline caretaker metering, double-entry
+                accounting, KRA eTIMS-ready receipts, WhatsApp ops, public vacancy SEO,
+                and role-based staff access. It replaces spreadsheets, notebooks, and
+                generic foreign PMS tools that ignore how Kenyan rentals actually run.
               </p>
 
               <div className="mt-5 grid gap-3 md:grid-cols-3">
                 {[
                   [
-                    "Organized records",
-                    "Every tenant, unit, payment, issue, and inspection is tied to the correct property workflow.",
+                    "Kenya-first payments & tax",
+                    "M-Pesa, multi-bank rails, service-before-rent allocation, and KRA eTIMS/eRITS-ready receipts on verified payments.",
                   ],
                   [
-                    "Built for rental teams",
-                    "Useful for Kenya, East Africa, Dubai, and remote landlords who need clear portfolio visibility.",
+                    "Field + office in one system",
+                    "Offline meter queues, SLAs, inspections, unit QR, accounting, and vacancies—not three disconnected apps.",
                   ],
                   [
-                    "Operational visibility",
-                    "Teams can see occupancy, balances, vacancies, maintenance activity, and staff responsibility faster.",
+                    "Ranks & operates",
+                    "Public vacancy pages that tenants find on Google, plus private dashboards for managers, accountants, and caretakers.",
                   ],
                 ].map(([title, body]) => (
                   <article

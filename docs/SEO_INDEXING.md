@@ -1,9 +1,13 @@
 # EstateDesk SEO & Indexing
 
-Last verified: **2026-07-10** (local Next.js `16.2.6` on `http://localhost:3000`)
+Last verified: **2026-07-12**
 
 This document is the operational source of truth for **public indexability**.  
 Google/Bing **cannot** be forced to index pages from the codebase alone — you must submit sitemaps in Search Console. The app is built so public pages are **ready to be indexed**.
+
+### Product positioning (use in GSC titles / content)
+
+EstateDesk is **Kenya-built property management software**: M-Pesa rent collection, water billing, offline caretaker metering, double-entry accounting, **KRA eTIMS/eRITS-ready receipts**, WhatsApp ops, public vacancy SEO, and role-based staff access. Primary commercial landing: `/property-management-software-kenya`.
 
 ---
 

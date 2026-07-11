@@ -15,8 +15,10 @@ export const integrationProviders = [
       { key: "KRA_ETIMS_CLIENT_SECRET", label: "Client secret", requiredForLive: true },
       { key: "KRA_ETIMS_WEBHOOK_SECRET", label: "Webhook secret", requiredForLive: false },
     ],
-    localFoundation: "Taxpayer profiles, rental returns, tax charges, KRA attempts.",
-    nextAction: "Complete KRA/eTIMS onboarding and map certified invoice payloads.",
+    localFoundation:
+      "Taxpayer profiles, rental returns, tax charges, eTIMS-ready receipts, sales payload builder, OAuth token client, webhook at /api/webhooks/kra-etims.",
+    nextAction:
+      "Set KRA_ETIMS_* env (CLIENT_ID, CLIENT_SECRET, ENVIRONMENT, CU_SERIAL, BASE_URL) and complete KRA device/OSCU onboarding for live CU signatures.",
   },
   {
     id: "ke-mpesa-daraja",

@@ -284,6 +284,40 @@ export async function settleGatewayPayment({
         payment.id,
         actorUserId ?? payment.payerUserId,
       );
+
+      let etimsSubmission: Prisma.InputJsonValue | undefined;
+      try {
+        const { submitEtimsSalesReceipt } = await import("@/lib/tax/etims-client");
+        const etimsResult = await submitEtimsSalesReceipt({
+          serialNumber:
+            receiptNumber ||
+            snapshot.paymentReference ||
+            payment.id,
+          organizationKraPin: snapshot.kraPin,
+          tenantKraPin: snapshot.tenantKraPin,
+          amount: snapshot.amount,
+          currencyCode: snapshot.currencyCode,
+          paymentFor: snapshot.paymentFor,
+          allocations: snapshot.allocations,
+          controlUnitSerial: snapshot.etimsControlUnitSerial,
+          issuedAt: new Date(snapshot.paidAt),
+        });
+        etimsSubmission = {
+          ok: etimsResult.ok,
+          mode: etimsResult.mode,
+          environment: etimsResult.environment,
+          message: etimsResult.message,
+          kraReceiptNo: etimsResult.kraReceiptNo ?? null,
+          submittedAt: new Date().toISOString(),
+        };
+      } catch {
+        etimsSubmission = {
+          ok: false,
+          mode: "skipped",
+          message: "eTIMS submit threw; receipt snapshot still saved",
+        };
+      }
+
       await db.documentRecord.update({
         where: payment.receipt?.documentId
           ? { id: payment.receipt.documentId }
@@ -292,7 +326,8 @@ export async function settleGatewayPayment({
           metadata: {
             paymentId: payment.id,
             targetType: payment.targetType,
-            receiptSnapshot: snapshot,
+            receiptSnapshot: snapshot as unknown as Prisma.InputJsonValue,
+            ...(etimsSubmission ? { etimsSubmission } : {}),
             settlement: "gateway",
           },
         },

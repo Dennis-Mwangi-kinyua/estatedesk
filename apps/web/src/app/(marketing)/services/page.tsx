@@ -7,20 +7,22 @@ import { PublicAccessFooter } from "@/components/marketing/public-access-footer"
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 
 export const metadata = publicPageMetadata({
-  title: "Property Management System for Kenya, East Africa and Dubai",
+  title: "Property Management System: M-Pesa, Accounting & KRA eTIMS",
   description:
-    "EstateDesk System helps property teams in Kenya, East Africa, Dubai, the UAE, and global rental markets manage tenants, rent, leases, caretakers, inspections, maintenance issues, payments, water bills, staff access, reports, and records online.",
+    "EstateDesk is the property management system for Kenya and beyond: tenants, M-Pesa rent, water billing, caretakers, double-entry accounting, KRA eTIMS-ready receipts, vacancies, WhatsApp ops, inspections, and staff access—built to outperform spreadsheets and generic PMS software.",
   path: "/services",
   keywords: [
     "property management system Kenya",
+    "best property management software Kenya",
+    "M-Pesa rent collection software",
+    "KRA eTIMS property management",
+    "property accounting software Kenya",
     "property management system East Africa",
     "property management system Dubai",
-    "property management system UAE",
     "tenant management system Kenya",
     "rent tracking software Kenya",
     "caretaker workflow software",
     "property inspection software Kenya",
-    "remote rental management system",
   ],
 });
 
@@ -66,37 +68,42 @@ const services = [
   {
     title: "Property Management Software",
     href: "/property-management-software-kenya",
-    body: "EstateDesk gives rental teams one workspace for properties, buildings, units, tenants, leases, rent records, water bills, vacancies, maintenance, inspections, staff access, reports, and daily operations. It is built for landlords, property managers, agencies, caretakers, and tenants who need a clearer alternative to scattered spreadsheets and manual files.",
+    body: "EstateDesk is the Kenya-first property management system for portfolios that outgrew spreadsheets: properties, units, tenants, leases, M-Pesa rent, water, accounting, KRA eTIMS-ready receipts, vacancies, caretakers, and staff roles in one product that foreign PMS tools rarely match for local ops.",
   },
   {
     title: "Tenant Management",
     href: "/landlord-software",
-    body: "Tenant management keeps profiles, contacts, leases, occupancy, balances, movement history, notices, and operational notes connected to the right property and unit. This helps managers search tenant records faster, support renewals or move-outs, and reduce confusion when staff members need to review a tenant history.",
+    body: "Tenant management keeps profiles, contacts, leases, occupancy, balances, movement history, notices, and operational notes connected to the right property and unit—searchable for renewals, move-outs, and tribunal pack exports.",
   },
   {
     title: "Rent Collection Tracking",
     href: "/rent-tracking-software",
-    body: "EstateDesk supports rent tracking, tenant balances, payment records, paid and unpaid tenant visibility, payment verification, reminders, and reporting workflows. Property managers can follow up rent more consistently because the rent record is connected to tenants, leases, units, water bills, and reports.",
+    body: "M-Pesa STK, paybill, multi-bank rails, combined period bills, service-before-rent allocation, payment verification, and unpaid tenant follow-up—so collections match how Kenyan tenants pay.",
   },
   {
-    title: "Water Billing",
+    title: "Water Billing & Offline Metering",
     href: "/water-billing-software",
-    body: "Water billing workflows help teams record readings, create tenant water charges, review billing history, and understand balances. This is useful for apartments, bedsitters, shops, offices, and mixed-use properties where water charges must be tracked alongside rent and tenant records.",
+    body: "Readings, tenant water charges, balances, and caretaker offline queues with photo evidence and background sync when basement connectivity returns.",
+  },
+  {
+    title: "KRA eTIMS & Tax Readiness",
+    href: "/property-management-software-kenya",
+    body: "Taxpayer profiles, rental returns, eTIMS-shaped receipts on verified payments, OAuth sales submission when credentials are set, and webhook status at /api/webhooks/kra-etims.",
   },
   {
     title: "Vacancy Listings",
     href: "/vacancies",
-    body: "EstateDesk supports public vacancy discovery so available units can be found by tenants online. Property teams can publish vacant houses, apartments, bedsitters, shops, offices, warehouses, and other spaces with clearer location and unit details instead of relying only on calls or social posts.",
+    body: "Public vacancy discovery ranked by location and category so tenants find houses, apartments, bedsitters, shops, and offices on Google—without a separate marketing website.",
   },
   {
-    title: "Maintenance Management",
+    title: "Accounting & Owner Reporting",
     href: "/services",
-    body: "Maintenance workflows help tenants, caretakers, and office teams track issues from report to follow-up. Managers can review issue status, assignments, history, inspections, and related property records so repairs and complaints do not disappear into message threads.",
+    body: "Double-entry GL, cash position, AR/AP aging, books health, budgets, and owner distributions for accountants and remote landlords who need real books—not a payment export only.",
   },
   {
-    title: "Reporting and Analytics",
+    title: "Maintenance & Inspections",
     href: "/services",
-    body: "Reports help teams understand occupancy, rent balances, paid and unpaid tenants, issues, inspections, staff activity, vacancies, and operational progress. EstateDesk makes reporting easier by keeping core property records in one structured system.",
+    body: "Issue SLAs, caretaker assignment, inspections, printable work orders, and evidence trails so repairs do not disappear into WhatsApp threads.",
   },
 ];
 

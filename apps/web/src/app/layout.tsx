@@ -12,7 +12,13 @@ import { IncidentBanner } from "@/components/marketing/incident-banner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { APP_PLANS } from "@/lib/billing/plans";
-import { SEO_KEYWORDS, SITE_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/seo";
+import {
+  SEO_KEYWORDS,
+  SITE_DESCRIPTION,
+  SITE_DIFFERENTIATORS,
+  SITE_NAME,
+  getSiteUrl,
+} from "@/lib/seo";
 import {
   THEME_COOKIE_NAME,
   THEME_INIT_SCRIPT,
@@ -32,7 +38,8 @@ export const metadata: Metadata = {
   publisher: SITE_NAME,
   category: "Property management software",
   title: {
-    default: "EstateDesk | Property Management Software in Kenya",
+    default:
+      "EstateDesk | Best Property Management Software in Kenya (M-Pesa, KRA eTIMS)",
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -41,7 +48,8 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "EstateDesk | Property Management Software in Kenya",
+    title:
+      "EstateDesk | Best Property Management Software in Kenya (M-Pesa, KRA eTIMS)",
     description: SITE_DESCRIPTION,
     url: "/",
     siteName: SITE_NAME,
@@ -58,7 +66,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "EstateDesk | Property Management Software in Kenya",
+    title:
+      "EstateDesk | Best Property Management Software in Kenya (M-Pesa, KRA eTIMS)",
     description: SITE_DESCRIPTION,
     images: ["/images/og-vacancy.svg"],
   },
@@ -166,16 +175,21 @@ const structuredData = [
       "@id": `${siteUrl}/#organization`,
     },
     featureList: [
-      "Tenant management",
-      "Lease management",
-      "Rent tracking",
-      "Water billing",
-      "Maintenance issue tracking",
-      "Property inspections",
-      "Vacancy publishing",
-      "Staff permissions",
-      "Operational reports",
+      "Tenant and lease management",
+      "M-Pesa and multi-bank rent collection",
+      "Combined period bills with service-before-rent allocation",
+      "Water billing and offline caretaker metering",
+      "KRA eTIMS and eRITS-ready tax receipts",
+      "Double-entry accounting and AR/AP aging",
+      "WhatsApp Business billing chatbot",
+      "Public vacancy SEO listings",
+      "Maintenance SLAs and inspections",
+      "Role-based staff and caretaker access",
+      "Owner distributions and tribunal pack export",
+      "PWA install and free Web Push alerts",
+      ...SITE_DIFFERENTIATORS,
     ],
+    keywords: SEO_KEYWORDS.join(", "),
     areaServed: [
       { "@type": "Country", name: "Kenya" },
       { "@type": "Country", name: "Uganda" },

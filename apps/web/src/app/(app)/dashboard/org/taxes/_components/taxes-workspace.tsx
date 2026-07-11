@@ -1,6 +1,8 @@
 import type { OrgRole } from "@prisma/client";
+import type { getEtimsReadinessSummary } from "@/lib/tax/etims-client";
 import type { TaxesPageData } from "../_lib/types";
 import { TaxesAlerts } from "./taxes-alerts";
+import { TaxesEtimsPanel } from "./taxes-etims-panel";
 import { TaxesGuidance } from "./taxes-guidance";
 import { TaxesHeader } from "./taxes-header";
 import { TaxesIntegrationsPanel } from "./taxes-integrations-panel";
@@ -11,12 +13,14 @@ import { TaxesStats } from "./taxes-stats";
 export function TaxesWorkspace({
   data,
   orgRole,
+  etimsReadiness,
 }: {
   data: TaxesPageData;
   orgRole?: OrgRole | null;
+  etimsReadiness: ReturnType<typeof getEtimsReadinessSummary>;
 }) {
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content ed-mobile-first mx-auto w-full max-w-7xl space-y-4 px-3 pb-24 pt-3 sm:space-y-6 sm:px-6 sm:pt-4 lg:px-8">
       <TaxesHeader orgRole={orgRole} />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -30,6 +34,7 @@ export function TaxesWorkspace({
           />
 
           <TaxesStats stats={data.stats} />
+          <TaxesEtimsPanel readiness={etimsReadiness} />
 
           <section className="grid gap-4 lg:grid-cols-2">
             <TaxesIntegrationsPanel

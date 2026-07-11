@@ -9,17 +9,27 @@ export const marketingFaqItems: readonly FaqItem[] = [
   {
     question: "What is EstateDesk?",
     answer:
-      "EstateDesk is property management software for Kenyan landlords, property managers, caretakers, and tenants. It helps teams manage properties, units, tenants, leases, rent, water bills, inspections, maintenance issues, staff access, and reports online.",
+      "EstateDesk is Kenya-built property management software for landlords, property managers, agencies, caretakers, accountants, and tenants. It unifies tenants, leases, M-Pesa rent collection, water billing, double-entry accounting, KRA eTIMS-ready receipts, offline caretaker metering, WhatsApp ops, public vacancies, inspections, and staff access in one secure workspace.",
+  },
+  {
+    question: "Why is EstateDesk better than other property management software?",
+    answer:
+      "Most global PMS tools ignore Kenyan realities. EstateDesk supports M-Pesa and multi-bank collections, service-before-rent allocation on partial payments, offline caretaker metering, vacancy SEO pages, double-entry accounting with AR/AP aging, WhatsApp billing intents, and KRA eTIMS/eRITS-ready receipts—features spreadsheets and foreign products rarely combine.",
   },
   {
     question: "Who should use EstateDesk?",
     answer:
-      "EstateDesk is built for landlords, real estate offices, property management companies, caretakers, accountants, and operations teams that need a searchable system for rental records, tenant history, payments, issues, and property workflows.",
+      "EstateDesk is built for landlords, real estate offices, property management companies, caretakers, accountants, and operations teams that need a searchable system for rental records, tenant history, payments, tax-ready receipts, issues, and property workflows.",
   },
   {
     question: "Is EstateDesk property management software for Kenya?",
     answer:
-      "Yes. EstateDesk is built around Kenyan rental operations, including property records, unit occupancy, rent tracking, water bills, caretaker workflows, tenant communication, public vacancy discovery, and organization-level staff access.",
+      "Yes. EstateDesk is built around Kenyan rental operations: M-Pesa and bank payments, water bills, caretaker field work, KRA taxpayer profiles, eTIMS-ready receipts, tenant communication, public vacancy discovery, and organization-level staff access.",
+  },
+  {
+    question: "Does EstateDesk integrate with KRA eTIMS?",
+    answer:
+      "Yes. Verified payments produce eTIMS-shaped receipt data (seller PIN, control unit, item lines). When KRA_ETIMS credentials and CU serial are configured, EstateDesk can submit sales payloads and accept KRA webhook status at /api/webhooks/kra-etims.",
   },
   {
     question: "Can EstateDesk help landlords manage multiple properties?",

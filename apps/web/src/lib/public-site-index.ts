@@ -15,7 +15,7 @@ export const publicSiteIndexItems: readonly PublicSiteIndexItem[] = [
     title: "Home",
     path: "/",
     description:
-      "EstateDesk overview for property management software across Kenya, East Africa, Dubai, UAE, and global rental markets.",
+      "EstateDesk — best property management software for Kenya: M-Pesa rent, water billing, KRA eTIMS-ready receipts, accounting, caretakers, vacancies, and staff access.",
     priority: "1.0",
     changefreq: "daily",
   },
@@ -23,16 +23,16 @@ export const publicSiteIndexItems: readonly PublicSiteIndexItem[] = [
     title: "FAQ",
     path: "/faq",
     description:
-      "Detailed FAQ for landlords, property managers, diaspora landlords, East Africa, Dubai, UAE, remote rental management, vacant units, rent tracking, water billing, and caretaker workflows.",
+      "FAQ: why EstateDesk beats spreadsheets and generic PMS tools, KRA eTIMS, M-Pesa rent, water billing, vacancies, caretakers, East Africa, Dubai, and pricing.",
     priority: "0.95",
     changefreq: "weekly",
   },
   {
-    title: "Property Management Software Kenya",
+    title: "Best Property Management Software Kenya",
     path: "/property-management-software-kenya",
     description:
-      "Search landing page for Kenyan landlords, property managers, agencies, caretakers, rent tracking, water billing, vacancies, maintenance, inspections, reports, and staff access.",
-    priority: "0.95",
+      "Kenya landing: M-Pesa collections, service-before-rent bills, offline caretaker metering, double-entry accounting, KRA eTIMS/eRITS-ready receipts, vacancy SEO, and role-based ops.",
+    priority: "0.98",
     changefreq: "weekly",
   },
   {

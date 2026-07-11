@@ -1,9 +1,25 @@
 import type { Metadata } from "next";
 
 export const SITE_NAME = "EstateDesk";
+export const SITE_TAGLINE =
+  "Kenya-built property management software for rent, water, M-Pesa, KRA eTIMS-ready receipts, caretakers, and vacant houses.";
 export const SITE_DESCRIPTION =
-  "EstateDesk is property management software for landlords and property managers in Kenya, East Africa, Dubai, and global rental markets. Manage tenants, leases, rent, water bills, caretaker field operations, offline meter readings, maintenance SLAs, inspections, vacant houses, WhatsApp tenant contact, and staff access in one secure workspace.";
+  "EstateDesk is the property management software built for Kenya and East Africa: tenants, leases, M-Pesa rent collection, water billing, double-entry accounting, KRA eTIMS/eRITS-ready tax receipts, offline caretaker metering, WhatsApp ops, public vacancy listings, and role-based staff access—in one secure workspace that replaces spreadsheets, notebooks, and chat-only property management.";
 export const DEFAULT_SITE_URL = "https://estatedesk.co.ke";
+
+/** Product differentiators for SEO landings and structured data. */
+export const SITE_DIFFERENTIATORS = [
+  "Built for Kenyan rental ops: M-Pesa, KCB, multi-bank paybills, and KES-first ledgers",
+  "KRA eTIMS/eRITS-ready receipts with seller PIN, control unit, and submission payloads",
+  "Combined period bills that clear service, garbage, security, and water before rent",
+  "Offline caretaker metering with IndexedDB multi-store and background sync",
+  "Public vacancy SEO pages that convert tenants without a separate marketing site",
+  "Double-entry accounting, AR/AP aging, books health, and owner distributions",
+  "WhatsApp Business chatbot intents for balance, bill, pay, and receipt links",
+  "Role-aware access for admins, managers, accountants, caretakers, and tenants",
+  "Tribunal pack legal export and RentRewards loyalty from payment history",
+  "PWA install, free Web Push alerts, and mobile-first property operations",
+] as const;
 
 export const PUBLIC_LOCALES = [
   "en",
@@ -22,17 +38,22 @@ export const PUBLIC_LOCALES = [
 
 export const SEO_KEYWORDS = [
   "EstateDesk",
+  "best property management software Kenya",
   "property management software Kenya",
   "landlord software Kenya",
   "rental property management system Kenya",
-  "rent management system",
+  "rent management system Kenya",
   "tenant management software Kenya",
+  "M-Pesa rent collection software",
+  "KRA eTIMS property management",
+  "eTIMS rental receipts Kenya",
+  "eRITS rental income tax software",
+  "property accounting software Kenya",
   "caretaker management software",
   "caretaker field operations software",
-  "property maintenance SLA software",
-  "offline meter reading app",
+  "offline meter reading app Kenya",
   "Swahili property management software",
-  "WhatsApp tenant communication property management",
+  "WhatsApp property management software Kenya",
   "water billing software Kenya",
   "lease management software Kenya",
   "vacant houses Kenya",
@@ -46,12 +67,14 @@ export const SEO_KEYWORDS = [
   "property management software Rwanda",
   "property management software Dubai",
   "property management software UAE",
-  "real estate management software Dubai",
+  "Excel alternative for landlords Kenya",
+  "spreadsheet alternative property management",
   "rental management software for landlords",
   "property management software for small landlords",
   "cloud property management software",
   "online property management system",
   "rental portfolio management software",
+  "double entry property accounting software",
 ] as const;
 
 export function getSiteUrl() {

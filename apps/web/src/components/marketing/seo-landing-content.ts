@@ -21,98 +21,98 @@ const commonAudiences = [
 
 export const kenyaLandingContent: SeoLandingPageContent = {
   path: "/property-management-software-kenya",
-  eyebrow: "Kenya property software",
-  title: "Property Management Software in Kenya for Landlords and Property Managers",
-  serviceType: "Property management software Kenya",
+  eyebrow: "Best property management software Kenya",
+  title: "Best Property Management Software in Kenya — M-Pesa, Water Billing & KRA eTIMS",
+  serviceType: "Best property management software Kenya",
   summary:
-    "EstateDesk helps Kenyan landlords, property managers, agencies, caretakers, and tenants manage rental properties online: tenants, leases, rent tracking, water billing, vacancies, maintenance, inspections, reports, and staff access.",
+    "EstateDesk is Kenya’s full-stack property management software: M-Pesa rent collection, water billing, offline caretaker metering, double-entry accounting, KRA eTIMS/eRITS-ready receipts, WhatsApp ops, public vacancies, and role-based staff access—built to beat spreadsheet and generic global PMS tools that ignore Kenyan operations.",
   intro: [
-    "EstateDesk is property management software built around the everyday rental workflows found in Kenya. A rental office may be handling apartments in Nairobi, bedsitters in Nakuru, shops in Thika, mixed-use units in Kiambu, student housing near a campus, or a growing portfolio spread across different towns. The common challenge is the same: records are often scattered across notebooks, spreadsheets, WhatsApp chats, receipts, staff memory, and old files. EstateDesk gives the team one organized place to manage those records and act on them.",
-    "For Kenyan property managers, the system focuses on practical work instead of complicated theory. You can organize properties, buildings, units, tenants, leases, rent records, water bills, vacant units, maintenance issues, inspections, caretakers, staff access, and reports. This makes it easier to answer important questions quickly: who has paid, who has not paid, which units are vacant, which tenant has an issue, which caretaker is responsible, and which records need follow-up.",
-    "EstateDesk is also useful for landlords who are not always near the property. A landlord in another town or abroad can review activity online, see tenant and rent records, follow maintenance progress, and reduce dependence on verbal updates alone. For real estate agencies and management firms, EstateDesk creates a more professional operating system that improves accountability and makes rental management easier to scale.",
+    "EstateDesk is property management software designed specifically for how Kenyan rental businesses actually run. A Nairobi agency, a Kiambu landlord, a Mombasa caretaker, or a diaspora owner managing units remotely all face the same problem: rent lives in M-Pesa, water readings live in notebooks, vacancies live on WhatsApp status, and tax-ready paperwork is assembled late. EstateDesk unifies tenants, leases, combined rent+utility bills, payments, accounting, tax-ready receipts, vacancies, maintenance, and staff roles in one secure system.",
+    "Unlike generic global property software that assumes foreign banking and no field caretakers, EstateDesk prioritises Kenya-first workflows: M-Pesa and multi-bank collection, period bills that clear service charges, garbage, security, and water before rent, offline meter readings that sync when connectivity returns, bilingual caretaker tools, and KRA eTIMS/eRITS-shaped receipts with seller PIN and control-unit fields ready for certified submission.",
+    "Property managers get day-to-day control; accountants get a double-entry ledger with AR/AP aging and books health; landlords get remote visibility; tenants get invoices, payments, and public vacancy discovery. That is why EstateDesk is the stronger alternative to Excel, notebooks, chat-only ops, and one-size-fits-all foreign PMS products for Kenyan portfolios.",
   ],
   audienceTitle: "Who uses EstateDesk in Kenya?",
   audiences: commonAudiences,
-  featureTitle: "Key features for Kenyan rental operations",
+  featureTitle: "Why EstateDesk outperforms other property management software",
   features: [
     {
-      title: "Tenant and lease management",
-      body: "Keep tenant profiles, lease dates, unit occupancy, contacts, move-in records, move-out information, and tenant history in one searchable place.",
+      title: "M-Pesa + multi-bank rent ops",
+      body: "STK, paybill, KCB IPN, and multi-bank virtual account helpers so collections match how Kenyan tenants and commercial clients actually pay—not foreign ACH assumptions.",
     },
     {
-      title: "Rent tracking and balances",
-      body: "Track rent charges, payments, balances, paid tenants, unpaid tenants, and payment follow-up so rent management is clearer than a spreadsheet.",
+      title: "KRA eTIMS / eRITS-ready receipts",
+      body: "Verified payments produce tax-shaped receipts with seller PIN, control unit serial, item lines, and live submission hooks when KRA credentials are configured.",
     },
     {
-      title: "Water billing workflows",
-      body: "Record water readings, calculate water bills, connect them to tenant records, and keep billing history visible to the office and property team.",
+      title: "Service-before-rent bill allocation",
+      body: "Combined period bills clear service, garbage, security, and water before residual funds apply to rent—critical for fair partial M-Pesa payments.",
     },
     {
-      title: "Vacancy listings",
-      body: "Publish vacant units through public pages so tenants can discover available houses, apartments, bedsitters, shops, offices, and other spaces online.",
+      title: "Offline caretaker metering",
+      body: "IndexedDB multi-store queue, basement readings, photo evidence, and background sync when bars return—field reality that cloud-only tools ignore.",
     },
     {
-      title: "Maintenance and inspections",
-      body: "Track repair requests, caretaker follow-up, issue status, inspections, move-out checks, and documented property condition records.",
+      title: "Double-entry accounting",
+      body: "General ledger, cash position, trial balance, AR/AP aging, books health, budgets, and owner distributions—not just a payment spreadsheet.",
     },
     {
-      title: "Reports and staff access",
-      body: "Give managers, accountants, caretakers, and admins the right access while keeping reports and activity easier to review.",
+      title: "Vacancy SEO that ranks & converts",
+      body: "Public location/category vacancy pages help tenants find units on Google while managers run operations in the same product—no separate marketing stack required.",
     },
   ],
   benefitsTitle: "Benefits for property teams in Kenya",
   benefits: [
-    "Reduce missing records by keeping tenant, lease, rent, water, issue, inspection, and vacancy information in one online system.",
-    "Improve rent follow-up because managers can see balances, unpaid tenants, and payment status without rebuilding reports manually.",
-    "Make caretaker work more accountable by connecting issues, inspections, and property follow-up to clear records.",
-    "Help tenants find vacant units online and contact the managing office directly from public vacancy pages.",
-    "Support small landlords and growing agencies with plans that start free and scale to Pro, Plus, or Custom needs.",
+    "Replace notebooks, Excel, and WhatsApp-only ops with one auditable system of record.",
+    "Collect rent and utilities the Kenyan way—M-Pesa, paybill, bank rails—with clear balances.",
+    "Stay tax-ready with eTIMS-shaped receipts and taxpayer profiles instead of last-minute PDF chaos.",
+    "Keep caretakers accountable offline and online with SLA issues, inspections, and unit QR access.",
+    "Grow from free small-landlord plans to Pro, Plus, or Custom agency scale without re-platforming.",
   ],
   howItWorksTitle: "How EstateDesk works",
   howItWorks: [
     {
-      title: "Create your property records",
-      body: "Add properties, buildings, units, rent details, occupancy information, and the basic structure of the portfolio.",
+      title: "Set up portfolio & tax profiles",
+      body: "Add properties, units, KRA taxpayer profiles, payment instructions, and staff roles.",
     },
     {
-      title: "Add tenants and workflows",
-      body: "Connect tenants to units, record leases, track rent, manage water bills, assign staff, and publish vacancies where needed.",
+      title: "Bill, collect, and allocate",
+      body: "Issue combined bills, collect via M-Pesa or bank, allocate utilities before rent, and post to the ledger.",
     },
     {
-      title: "Run daily operations",
-      body: "Use dashboards, reports, issue tracking, inspections, notifications, and staff roles to manage the property more consistently.",
+      title: "Operate, report, and file-ready close",
+      body: "Run caretaker field work, vacancies, accounting close, and eTIMS-ready receipt exports month after month.",
     },
   ],
   faq: [
     {
       question: "What is the best property management software in Kenya?",
       answer:
-        "The best property management software in Kenya should fit local rental workflows such as tenant records, rent tracking, water billing, vacant units, caretaker coordination, maintenance, inspections, and reporting. EstateDesk is built around these workflows.",
+        "The best property management software in Kenya must support M-Pesa collections, water billing, caretaker field work, vacancies, accounting, and KRA-ready tax receipts. EstateDesk is built for those local workflows—unlike generic foreign PMS tools or spreadsheets.",
+    },
+    {
+      question: "Does EstateDesk support KRA eTIMS?",
+      answer:
+        "Yes. EstateDesk generates eTIMS-ready receipt fields (seller PIN, CU serial, item lines) on verified payments and can submit sales payloads when KRA_ETIMS credentials and control unit serial are configured.",
+    },
+    {
+      question: "Why is EstateDesk better than Excel for landlords?",
+      answer:
+        "Excel cannot allocate partial M-Pesa payments across utilities and rent, run offline caretaker queues, publish SEO vacancy pages, post double-entry journals, or produce tax-ready receipt trails. EstateDesk does all of that in one workspace.",
     },
     {
       question: "Can EstateDesk manage multiple properties in Kenya?",
       answer:
-        "Yes. EstateDesk can organize multiple properties, buildings, units, tenants, leases, payments, balances, staff roles, inspections, maintenance issues, and vacancies in one workspace.",
+        "Yes. EstateDesk organizes multiple properties, buildings, units, tenants, leases, payments, balances, staff roles, inspections, maintenance, vacancies, and tax profiles in one system.",
     },
     {
       question: "Does EstateDesk support vacant house listings?",
       answer:
-        "Yes. EstateDesk supports public vacancy pages so tenants can find available homes, apartments, bedsitters, shops, offices, and other rental spaces online.",
-    },
-    {
-      question: "Can I track rent payments in EstateDesk?",
-      answer:
-        "Yes. EstateDesk supports rent tracking, balances, payment records, verification, reminders, and reports depending on the plan you choose.",
-    },
-    {
-      question: "Does EstateDesk support water billing in Kenya?",
-      answer:
-        "Yes. EstateDesk supports water billing workflows for readings, charges, tenant balances, and billing history.",
+        "Yes. Public vacancy pages help tenants find houses, apartments, bedsitters, shops, and offices online—with location SEO that drives discovery without a separate website.",
     },
   ],
-  ctaTitle: "Run your Kenyan rental portfolio with clearer records",
+  ctaTitle: "Run Kenya rentals with software built for Kenya",
   ctaBody:
-    "Start with EstateDesk if you want a more organized way to manage tenants, rent, water bills, vacancies, caretakers, inspections, maintenance, and reports without changing how your private platform data is structured.",
+    "Start EstateDesk to unify M-Pesa rent, water, caretakers, accounting, KRA eTIMS-ready receipts, and vacancies—so your portfolio is easier to operate, audit, and grow than with any spreadsheet or generic global PMS.",
 };
 
 export const dubaiLandingContent: SeoLandingPageContent = {
