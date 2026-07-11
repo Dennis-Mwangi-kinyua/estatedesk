@@ -8,7 +8,7 @@ import {
   getString,
   paymentsMessageUrl,
   readString,
-  requirePaymentReviewer,
+  requirePaymentManager,
   revalidatePaymentSurfaces,
 } from "./payment-action-shared";
 import { reversePaymentPosting } from "@/lib/accounting/payments";
@@ -17,7 +17,7 @@ import { notifyRecipients } from "@/lib/notifications/notify";
 import { chargeAfterPaymentReversal } from "@/lib/payments/lifecycle";
 
 export async function reverseVerifiedPaymentAction(formData: FormData) {
-  const session = await requirePaymentReviewer();
+  const session = await requirePaymentManager();
   const paymentId = readString(formData, "paymentId");
   const reason = readString(formData, "reason");
 

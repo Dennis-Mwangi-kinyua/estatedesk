@@ -19,6 +19,7 @@
     "backup:database": "bash scripts/backup-database.sh",
     "backup:validate": "bash scripts/validate-backup.sh",
     "restore:drill": "bash scripts/restore-drill.sh",
+    "production:check": "node scripts/production-readiness-check.mjs",
     "postinstall": "prisma generate",
     "seed": "tsx prisma/seed.ts",
     "qa:tenant-portal": "npm run qa:tenant-portal -w @estatedesk/web",

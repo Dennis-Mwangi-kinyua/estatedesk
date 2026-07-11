@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { requireOrgRole } from "@/lib/permissions/guards";
+import { requireOrgPermission } from "@/lib/permissions/guards";
 
 export const PAYMENTS_PATH = "/dashboard/org/payments";
 
@@ -35,8 +35,20 @@ export function getNumber(source: Record<string, Prisma.JsonValue>, key: string)
   return typeof source[key] === "number" ? source[key] : undefined;
 }
 
+/** Verify / reject — ADMIN + ACCOUNTANT (role-matrix payments.verify). */
 export async function requirePaymentReviewer() {
-  const session = await requireOrgRole(["ADMIN", "MANAGER", "ACCOUNTANT"]);
+  const session = await requireOrgPermission("payments.verify");
+
+  if (!session.activeOrgId) {
+    throw new Error("Missing active organization id in session");
+  }
+
+  return session;
+}
+
+/** Reverse / reconcile / bank import — payments.manage. */
+export async function requirePaymentManager() {
+  const session = await requireOrgPermission("payments.manage");
 
   if (!session.activeOrgId) {
     throw new Error("Missing active organization id in session");

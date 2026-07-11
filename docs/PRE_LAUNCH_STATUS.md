@@ -2,7 +2,7 @@
 
 This matrix tracks documentation and operational evidence that must be complete before commercial launch. It prevents polished templates from being mistaken for finished work.
 
-Last reviewed: 2026-07-10
+Last reviewed: 2026-07-11
 
 ## Summary
 
@@ -18,7 +18,10 @@ Last reviewed: 2026-07-10
 | Operations runbook | Complete | `docs/OPERATIONS.md`, `docs/production-deploy-checklist.md` |
 | Sitemap documentation | Complete | `SITEMAPS.md`, `docs/SEO_INDEXING.md` |
 | QA report (smoke + unit) | Complete | `docs/QA_REPORT.md` (2026-07-10) |
-| Payment product rules | Complete (manual E2E pending) | Combined bills + gateway/manual settlement |
+| Payment product rules | Complete (live prod E2E pending) | Combined bills + gateway/manual settlement; verify/manage permission split |
+| Plan integrity | Complete | Org cannot self-assign paid plans; upgrade queue on `/platform/billing`; import limits |
+| Production readiness UI | Complete | `/platform/system-health` readiness + `npm run production:check` |
+| Go-live runbook | Complete | `docs/PRODUCTION_GO_LIVE.md` |
 | DB migration health | Complete | `prisma migrate status` up to date (2026-07-10) |
 | In-app help links | Complete | Role-scoped protected routes at `/dashboard/{org,tenant,caretaker,landlord}/help` and `/platform/help` |
 | Theme coherence | Complete | Shared `ed-dashboard-shell` primitives and tenant/org surface migration |

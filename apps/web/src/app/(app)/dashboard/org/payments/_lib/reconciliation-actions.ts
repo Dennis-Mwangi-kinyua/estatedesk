@@ -8,7 +8,7 @@ import {
   getString,
   paymentsMessageUrl,
   readString,
-  requirePaymentReviewer,
+  requirePaymentManager,
   revalidatePaymentSurfaces,
 } from "./payment-action-shared";
 import { writeAuditLog } from "@/lib/audit/security";
@@ -16,7 +16,7 @@ import { prisma } from "@/lib/prisma";
 import { parseBankStatement } from "@/lib/payments/bank-statement";
 
 export async function importBankStatementAction(formData: FormData) {
-  const session = await requirePaymentReviewer();
+  const session = await requirePaymentManager();
   const file = formData.get("statement");
   if (!(file instanceof File) || file.size === 0) {
     throw new Error("Choose a bank statement CSV file.");
@@ -86,7 +86,7 @@ export async function importBankStatementAction(formData: FormData) {
 }
 
 export async function reconcilePaymentAction(formData: FormData) {
-  const session = await requirePaymentReviewer();
+  const session = await requirePaymentManager();
   const paymentId = readString(formData, "paymentId");
   const notes = readString(formData, "notes");
 
@@ -150,7 +150,7 @@ export async function reconcilePaymentAction(formData: FormData) {
 }
 
 export async function disputePaymentReconciliationAction(formData: FormData) {
-  const session = await requirePaymentReviewer();
+  const session = await requirePaymentManager();
   const paymentId = readString(formData, "paymentId");
   const notes = readString(formData, "notes");
 
