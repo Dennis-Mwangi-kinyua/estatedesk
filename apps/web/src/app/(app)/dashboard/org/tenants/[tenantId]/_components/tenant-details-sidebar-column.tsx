@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { encodePublicId } from "@/lib/public-id";
+import { computeRentRewards } from "@/lib/rewards/rent-rewards";
 import type { TenantDetailsData } from "../_lib/types";
 import {
   DetailItem,
@@ -21,6 +22,15 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
     currentDeposit,
     totalPayments,
   } = data;
+
+  const rewards = computeRentRewards(
+    (tenant.payments ?? []).map((payment) => ({
+      paidAt: payment.paidAt ?? payment.createdAt,
+      amount: Number(payment.amount),
+      verificationStatus: payment.verificationStatus,
+      gatewayStatus: payment.gatewayStatus,
+    })),
+  );
   return (
       <div className="space-y-5">
         <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
@@ -40,6 +50,51 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
             <DetailItem label="Deleted at" value={formatDate(tenant.deletedAt)} />
             <DetailItem label="Payments logged" value={formatCurrency(totalPayments)} />
           </div>
+
+          <div className="mt-4 flex flex-col gap-2">
+            <a
+              href={`/dashboard/org/tenants/${tenant.id}/tribunal-pack`}
+              className="inline-flex items-center justify-center rounded-full border border-teal-700/20 bg-teal-700 px-4 py-2.5 text-center text-xs font-semibold text-white shadow-sm hover:bg-teal-800"
+            >
+              Download tribunal pack (PDF)
+            </a>
+            <p className="text-[11px] text-muted-foreground">
+              One-click Rent Restriction Tribunal export: payments, charges, and communication logs.
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+          <SectionHeader
+            title="RentRewards"
+            description="Loyalty points for early and on-time rent payments."
+          />
+          <div className="mt-4 grid gap-3">
+            <DetailItem label="Points" value={String(rewards.points)} />
+            <DetailItem label="Tier" value={rewards.tier} />
+            <DetailItem label="Early payments" value={String(rewards.earlyPayments)} />
+            <DetailItem label="On-time payments" value={String(rewards.onTimePayments)} />
+            <DetailItem label="Streak (months)" value={String(rewards.streakMonths)} />
+            {rewards.nextTier ? (
+              <DetailItem
+                label="Next tier"
+                value={`${rewards.nextTier} · ${rewards.pointsToNextTier} pts to go`}
+              />
+            ) : null}
+          </div>
+          {rewards.suggestedRewards.length > 0 ? (
+            <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground">
+              {rewards.suggestedRewards.slice(0, 3).map((item) => (
+                <li key={item.id}>
+                  {item.label} · {item.pointsCost} pts
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Keep paying on time to unlock data bundles and shopping tokens.
+            </p>
+          )}
         </section>
 
         <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">

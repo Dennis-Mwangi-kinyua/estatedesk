@@ -7,6 +7,7 @@ import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { saveImagePayloadAsset } from "@/lib/uploads/image-payload";
 import type {
+  OfflineInspectionItem,
   OfflineIssueItem,
   OfflineMeterReadingItem,
   OfflineQueueItem,
@@ -40,6 +41,13 @@ export async function syncOfflineQueueAction(
           allowedUnitIds,
           orgId,
           submittedByUserId: session.userId,
+        });
+      } else if (item.kind === "inspection") {
+        await syncInspectionItem({
+          item,
+          orgId,
+          userId: session.userId,
+          allowedUnitIds,
         });
       } else {
         await syncIssueItem({
@@ -182,6 +190,66 @@ async function syncIssueItem({
       title: item.title,
       description: item.description,
       priority: item.priority,
+      propertyId,
+      unitId,
+      photoAssetId,
+      status: "OPEN",
+    },
+  });
+}
+
+/** Offline inspection logs sync as medium-priority issues until a dedicated store exists. */
+async function syncInspectionItem({
+  item,
+  orgId,
+  userId,
+  allowedUnitIds,
+}: {
+  item: OfflineInspectionItem;
+  orgId: string;
+  userId: string;
+  allowedUnitIds: string[];
+}) {
+  let propertyId = item.propertyId;
+  let unitId = item.unitId;
+
+  if (unitId && !allowedUnitIds.includes(unitId)) {
+    throw new Error("Unit is outside your assignment scope.");
+  }
+
+  if (unitId && !propertyId) {
+    const unit = await prisma.unit.findFirst({
+      where: { id: unitId, deletedAt: null },
+      select: { propertyId: true },
+    });
+    propertyId = unit?.propertyId;
+  }
+
+  const roomSummary =
+    item.roomStatuses && item.roomStatuses.length > 0
+      ? `\nRooms: ${item.roomStatuses.map((r) => `${r.room}=${r.status}`).join(", ")}`
+      : "";
+
+  let photoAssetId: string | undefined;
+  if (item.photoPayload) {
+    photoAssetId = await saveImagePayloadAsset({
+      payload: item.photoPayload,
+      uploadDir: "inspections",
+      filePrefix: unitId ?? "inspection",
+      orgId,
+      unitId,
+      submittedByUserId: userId,
+      purpose: "inspection_evidence",
+    });
+  }
+
+  await prisma.issueTicket.create({
+    data: {
+      orgId,
+      reportedByUserId: userId,
+      title: "Offline inspection log",
+      description: `${item.notes}${roomSummary}`.trim(),
+      priority: "MEDIUM",
       propertyId,
       unitId,
       photoAssetId,

@@ -31,14 +31,18 @@ describe("PWA manifest", () => {
     assert.deepEqual(config.display_override, ["standalone", "minimal-ui", "browser"]);
     assert.equal(config.prefer_related_applications, false);
     assert.equal(config.id, "/");
-    assert.equal(config.start_url, "/dashboard");
+    assert.equal(config.start_url, "/dashboard?source=pwa");
     assert.equal(config.orientation, "any");
+    assert.equal(config.background_color, "#0f766e");
+    assert.equal(config.theme_color, "#0f766e");
     assert.deepEqual(config.launch_handler, { client_mode: "navigate-existing" });
     assert.equal(config.share_target?.action, "/share");
     assert.equal(
       config.share_target?.enctype,
       "application/x-www-form-urlencoded",
     );
+    assert.ok(Array.isArray((config as { screenshots?: unknown[] }).screenshots));
+    assert.ok(((config as { screenshots?: unknown[] }).screenshots?.length ?? 0) >= 1);
 
     const iconSizes = (config.icons ?? []).map((icon) => icon.sizes);
     assert.ok(iconSizes.includes("144x144"));
@@ -58,9 +62,11 @@ describe("service worker", () => {
       "utf8",
     );
 
-    assert.match(serviceWorker, /estatedesk-pwa-v5/);
+    assert.match(serviceWorker, /estatedesk-pwa-v6/);
     assert.match(serviceWorker, /requestBadgeSync/);
     assert.match(serviceWorker, /SYNC_APP_BADGE/);
+    assert.match(serviceWorker, /SYNC_CARETAKER_OFFLINE_QUEUE/);
+    assert.match(serviceWorker, /caretaker-offline-queue-sync/);
     assert.match(serviceWorker, /\/offline-shell\.html/);
     assert.match(serviceWorker, /Promise\.allSettled/);
     assert.match(serviceWorker, /openOrFocusClient/);

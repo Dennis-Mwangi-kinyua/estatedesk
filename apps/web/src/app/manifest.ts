@@ -11,12 +11,13 @@ export default function manifest(): MetadataRoute.Manifest {
     description: SITE_DESCRIPTION,
     lang: "en-KE",
     dir: "ltr",
-    start_url: "/dashboard",
+    start_url: "/dashboard?source=pwa",
     scope: "/",
     display: "standalone",
     display_override: ["standalone", "minimal-ui", "browser"],
     prefer_related_applications: false,
-    background_color: "#f8fafc",
+    // Splash / install chrome: solid brand colors hide browser chrome fully.
+    background_color: "#0f766e",
     theme_color: "#0f766e",
     orientation: "any",
     categories: ["business", "productivity", "finance"],
@@ -52,9 +53,27 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
+    // Install-store screenshots improve “Add to Home Screen” conversion.
+    screenshots: [
+      {
+        src: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        form_factor: "narrow",
+        label: "EstateDesk dashboard",
+      },
+      {
+        src: "/icons/maskable-icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        form_factor: "wide",
+        label: "EstateDesk property operations",
+      },
+    ],
     launch_handler: {
       client_mode: "navigate-existing",
     },
+    handle_links: "preferred",
     share_target: {
       action: "/share",
       method: "GET",
@@ -70,7 +89,7 @@ export default function manifest(): MetadataRoute.Manifest {
         name: "Dashboard",
         short_name: "Dashboard",
         description: "Open your EstateDesk dashboard.",
-        url: "/dashboard",
+        url: "/dashboard?source=pwa",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
       },
       {
@@ -85,6 +104,13 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: "Vacancies",
         description: "Browse public vacancy listings.",
         url: "/vacancies",
+        icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
+      },
+      {
+        name: "Pay rent",
+        short_name: "Pay",
+        description: "Open tenant invoice and pay.",
+        url: "/dashboard/tenant/invoice",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
       },
     ],

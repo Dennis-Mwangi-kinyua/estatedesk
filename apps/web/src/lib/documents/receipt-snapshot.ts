@@ -1,4 +1,8 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
+import {
+  buildEtimsReadyReceiptFields,
+  formatEtimsFooterSummary,
+} from "@/lib/tax/etims-receipt";
 
 type DocumentDb = PrismaClient | Prisma.TransactionClient;
 
@@ -14,6 +18,10 @@ export type ReceiptSnapshot = {
   organizationPhone: string | null;
   organizationEmail: string | null;
   kraPin: string | null;
+  tenantKraPin: string | null;
+  etimsControlUnitSerial: string | null;
+  etimsFooter: string | null;
+  etimsReadyForSubmission: boolean;
   payerName: string;
   tenantIdentifier: string | null;
   amount: number;
@@ -41,7 +49,7 @@ export async function createReceiptSnapshot(
     where: { id: paymentId },
     include: {
       org: { select: { name: true, address: true, phone: true, email: true, currencyCode: true } },
-      payerTenant: { select: { id: true, fullName: true } },
+      payerTenant: { select: { id: true, fullName: true, kraPin: true } },
       payerUser: { select: { fullName: true } },
       allocations: {
         include: {
@@ -98,12 +106,37 @@ export async function createReceiptSnapshot(
       : null;
   const allocatedAmount = allocations.reduce((sum, allocation) => sum + allocation.amount, 0);
 
+  const kraPin = property?.taxpayerProfile?.kraPin ?? null;
+  const tenantKraPin = payment.payerTenant?.kraPin ?? null;
+  const etimsControlUnitSerial =
+    process.env.KRA_ETIMS_CU_SERIAL?.trim() || null;
+  const serialHint =
+    payment.externalReference ??
+    payment.reference ??
+    payment.checkoutRequestId ??
+    payment.id;
+  const etims = buildEtimsReadyReceiptFields({
+    serialNumber: String(serialHint),
+    organizationKraPin: kraPin,
+    tenantKraPin,
+    amount: Number(payment.amount),
+    currencyCode: payment.org.currencyCode,
+    paymentFor: payment.targetType,
+    allocations,
+    controlUnitSerial: etimsControlUnitSerial,
+    issuedAt: payment.paidAt ?? payment.createdAt,
+  });
+
   return {
     organizationName: payment.org.name,
     organizationAddress: payment.org.address,
     organizationPhone: payment.org.phone,
     organizationEmail: payment.org.email,
-    kraPin: property?.taxpayerProfile?.kraPin ?? null,
+    kraPin,
+    tenantKraPin,
+    etimsControlUnitSerial,
+    etimsFooter: formatEtimsFooterSummary(etims),
+    etimsReadyForSubmission: etims.readyForSubmission,
     payerName: payment.payerTenant?.fullName ?? payment.payerUser?.fullName ?? payment.payerName ?? "Payer",
     tenantIdentifier: payment.payerTenant?.id ?? null,
     amount: Number(payment.amount),

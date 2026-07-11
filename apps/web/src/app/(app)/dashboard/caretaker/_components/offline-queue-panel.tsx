@@ -39,6 +39,34 @@ export function OfflineQueuePanel({ compact = false }: { compact?: boolean }) {
     setItems(getOfflineQueueItems());
   }, []);
 
+  const runSync = useCallback(
+    (queueItems: OfflineQueueItem[]) => {
+      if (!navigator.onLine || queueItems.length === 0) return;
+
+      startTransition(async () => {
+        const preparedItems = await prepareItemsForSync(queueItems);
+        const result = await syncOfflineQueueAction(preparedItems);
+
+        for (const id of result.syncedIds) {
+          const item = queueItems.find((entry) => entry.id === id);
+          await clearOfflinePhotoForItem(item?.photoKey);
+          removeOfflineQueueItem(id);
+        }
+
+        refresh();
+
+        if (result.errors.length > 0) {
+          setMessage(
+            `Synced ${result.syncedIds.length}. ${result.errors.length} item(s) still need attention.`,
+          );
+        } else {
+          setMessage(`Synced ${result.syncedIds.length} queued item(s).`);
+        }
+      });
+    },
+    [refresh],
+  );
+
   useEffect(() => {
     refresh();
 
@@ -46,37 +74,43 @@ export function OfflineQueuePanel({ compact = false }: { compact?: boolean }) {
       refresh();
     }
 
+    function handleOnline() {
+      refresh();
+      const queued = getOfflineQueueItems();
+      if (queued.length > 0) {
+        runSync(queued);
+      }
+    }
+
+    function handleServiceWorkerMessage(event: MessageEvent) {
+      if (event.data?.type === "SYNC_CARETAKER_OFFLINE_QUEUE") {
+        const queued = getOfflineQueueItems();
+        runSync(queued);
+      }
+    }
+
     window.addEventListener("caretaker-offline-queue-change", handleChange);
-    window.addEventListener("online", handleChange);
+    window.addEventListener("online", handleOnline);
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener(
+        "message",
+        handleServiceWorkerMessage,
+      );
+    }
     return () => {
       window.removeEventListener("caretaker-offline-queue-change", handleChange);
-      window.removeEventListener("online", handleChange);
+      window.removeEventListener("online", handleOnline);
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.removeEventListener(
+          "message",
+          handleServiceWorkerMessage,
+        );
+      }
     };
-  }, [refresh]);
+  }, [refresh, runSync]);
 
   function handleSync() {
-    if (!navigator.onLine || items.length === 0) return;
-
-    startTransition(async () => {
-      const preparedItems = await prepareItemsForSync(items);
-      const result = await syncOfflineQueueAction(preparedItems);
-
-      for (const id of result.syncedIds) {
-        const item = items.find((entry) => entry.id === id);
-        await clearOfflinePhotoForItem(item?.photoKey);
-        removeOfflineQueueItem(id);
-      }
-
-      refresh();
-
-      if (result.errors.length > 0) {
-        setMessage(
-          `Synced ${result.syncedIds.length}. ${result.errors.length} item(s) still need attention.`,
-        );
-      } else {
-        setMessage(`Synced ${result.syncedIds.length} queued item(s).`);
-      }
-    });
+    runSync(items);
   }
 
   if (compact) {
@@ -145,7 +179,9 @@ export function OfflineQueuePanel({ compact = false }: { compact?: boolean }) {
           <li key={item.id} className="rounded-xl border border-border bg-background px-3 py-2">
             {item.kind === "meter_reading"
               ? `Meter reading · ${item.period}${item.photoKey ? " · photo" : ""}`
-              : `Issue · ${item.title}${item.photoKey ? " · photo" : ""}`}
+              : item.kind === "inspection"
+                ? `Inspection · ${(item.notes || "log").slice(0, 40)}${item.photoKey ? " · photo" : ""}`
+                : `Issue · ${item.title}${item.photoKey ? " · photo" : ""}`}
           </li>
         ))}
       </ul>

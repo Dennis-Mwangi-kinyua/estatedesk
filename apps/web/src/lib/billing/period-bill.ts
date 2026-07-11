@@ -6,6 +6,7 @@ import {
   tenantVisibleWaterBillWhere,
 } from "@/lib/water-bills/status";
 import { toLedgerNumber } from "@/lib/ledger-utils";
+import { sortPeriodBillLinesForDisplay } from "@/lib/billing/allocation-priority";
 
 type Db = PrismaClient | Prisma.TransactionClient;
 
@@ -108,6 +109,7 @@ export async function getPeriodBillForTenant({
           houseNo: true,
           serviceCharge: true,
           garbageFee: true,
+          securityFee: true,
           property: { select: { name: true } },
         },
       },
@@ -119,6 +121,7 @@ export async function getPeriodBillForTenant({
         select: {
           id: true,
           chargeType: true,
+          description: true,
           amountDue: true,
           amountPaid: true,
           balance: true,
@@ -161,24 +164,33 @@ export async function getPeriodBillForTenant({
     const amountDue = toLedgerNumber(charge.amountDue);
     const amountPaid = toLedgerNumber(charge.amountPaid);
     const balance = Math.max(toLedgerNumber(charge.balance), 0);
+    const description = charge.description ?? "";
+    let label: string;
+    if (charge.chargeType === "RENT") {
+      label = "Rent";
+    } else if (charge.chargeType === "SERVICE_CHARGE") {
+      label = /security/i.test(description)
+        ? description.includes("service")
+          ? "Service charge + security"
+          : "Security fee"
+        : "Service charge";
+    } else if (charge.chargeType === "OTHER") {
+      label = /security/i.test(description)
+        ? "Security fee"
+        : /garbage|refuse|waste/i.test(description) || !description.trim()
+          ? "Garbage fee"
+          : description;
+    } else {
+      label = charge.chargeType.replaceAll("_", " ").toLowerCase();
+    }
     lines.push({
       kind: charge.chargeType === "RENT" ? "RENT" : "OTHER",
       id: charge.id,
-      label:
-        charge.chargeType === "RENT"
-          ? "Rent"
-          : charge.chargeType === "SERVICE_CHARGE"
-            ? "Service charge"
-            : charge.chargeType === "OTHER"
-              ? "Garbage fee"
-              : charge.chargeType.replaceAll("_", " ").toLowerCase(),
+      label,
       amountDue,
       amountPaid,
       balance,
     });
-    if (charge.dueDate && charge.dueDate < dueDate) {
-      // keep earliest open or any
-    }
     dueDate = charge.dueDate;
   }
 
@@ -186,7 +198,7 @@ export async function getPeriodBillForTenant({
   // so tenants still see a combined bill once water exists (payment path will upsert).
   if (!lines.some((l) => l.kind === "RENT")) {
     const monthly = toLedgerNumber(lease.monthlyRent);
-    lines.unshift({
+    lines.push({
       kind: "RENT",
       id: `pending-rent-${period}`,
       label: "Rent",
@@ -196,8 +208,7 @@ export async function getPeriodBillForTenant({
     });
   }
 
-  // Unit-level service and garbage fees are recurring monthly charges. Surface
-  // them even before their RentCharge rows are materialized by the pay flow.
+  // Unit-level fees before RentCharge rows are materialized by the pay flow.
   if (!lease.rentCharges.some((charge) => charge.chargeType === "SERVICE_CHARGE")) {
     const serviceCharge = toLedgerNumber(lease.unit.serviceCharge ?? 0);
     if (serviceCharge > 0) {
@@ -214,6 +225,7 @@ export async function getPeriodBillForTenant({
 
   if (!lease.rentCharges.some((charge) => charge.chargeType === "OTHER")) {
     const garbageFee = toLedgerNumber(lease.unit.garbageFee ?? 0);
+    const securityFee = toLedgerNumber(lease.unit.securityFee ?? 0);
     if (garbageFee > 0) {
       lines.push({
         kind: "OTHER",
@@ -224,6 +236,44 @@ export async function getPeriodBillForTenant({
         balance: garbageFee,
       });
     }
+    if (securityFee > 0 && garbageFee <= 0) {
+      lines.push({
+        kind: "OTHER",
+        id: `pending-security-fee-${period}`,
+        label: "Security fee",
+        amountDue: securityFee,
+        amountPaid: 0,
+        balance: securityFee,
+      });
+    } else if (
+      securityFee > 0 &&
+      garbageFee > 0 &&
+      !lease.rentCharges.some((c) => /security/i.test(c.description ?? ""))
+    ) {
+      // BOTH fees: surface security as its own display line (allocation may
+      // fold it into SERVICE_CHARGE when charges are materialized).
+      lines.push({
+        kind: "OTHER",
+        id: `pending-security-fee-${period}`,
+        label: "Security fee",
+        amountDue: securityFee,
+        amountPaid: 0,
+        balance: securityFee,
+      });
+    }
+  } else if (
+    toLedgerNumber(lease.unit.securityFee ?? 0) > 0 &&
+    !lease.rentCharges.some((c) => /security/i.test(c.description ?? ""))
+  ) {
+    const securityFee = toLedgerNumber(lease.unit.securityFee ?? 0);
+    lines.push({
+      kind: "OTHER",
+      id: `pending-security-fee-${period}`,
+      label: "Security fee",
+      amountDue: securityFee,
+      amountPaid: 0,
+      balance: securityFee,
+    });
   }
 
   let rentChargeId: string | null =
@@ -249,9 +299,10 @@ export async function getPeriodBillForTenant({
     rentChargeId = null;
   }
 
-  const amountDue = lines.reduce((s, l) => s + l.amountDue, 0);
-  const amountPaid = lines.reduce((s, l) => s + l.amountPaid, 0);
-  const balance = lines.reduce((s, l) => s + l.balance, 0);
+  const orderedLines = sortPeriodBillLinesForDisplay(lines);
+  const amountDue = orderedLines.reduce((s, l) => s + l.amountDue, 0);
+  const amountPaid = orderedLines.reduce((s, l) => s + l.amountPaid, 0);
+  const balance = orderedLines.reduce((s, l) => s + l.balance, 0);
 
   return {
     period,
@@ -260,7 +311,7 @@ export async function getPeriodBillForTenant({
     propertyName: lease.unit.property.name,
     unitHouseNo: lease.unit.houseNo,
     dueDate,
-    lines,
+    lines: orderedLines,
     amountDue,
     amountPaid,
     balance,

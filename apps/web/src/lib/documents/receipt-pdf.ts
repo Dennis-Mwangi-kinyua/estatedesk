@@ -18,6 +18,12 @@ export type ReceiptPdfData = {
   organizationPhone?: string | null;
   organizationEmail?: string | null;
   kraPin?: string | null;
+  /** Tenant / buyer KRA PIN for eTIMS-shaped receipts */
+  tenantKraPin?: string | null;
+  /** Control unit serial when org has eTIMS device registered */
+  etimsControlUnitSerial?: string | null;
+  /** Footer line from buildEtimsReadyReceiptFields */
+  etimsFooter?: string | null;
   tenantIdentifier?: string | null;
   propertyName?: string | null;
   unitName?: string | null;
@@ -274,7 +280,28 @@ async function generateEnhancedReceiptPdf(data: ReceiptPdfData) {
   page.drawText(`Issued: ${formatDate(data.issuedAt)}`, { x: 180, y: 117, size: 8, font: regular, color: ink });
   page.drawText(`Processed by: ${data.verifiedBy || "EstateDesk authorized staff"}`, { x: 180, y: 99, size: 8, font: regular, color: ink });
   page.drawText("Digitally issued; no handwritten signature is required.", { x: 180, y: 80, size: 7.5, font: regular, color: muted });
-  page.drawText("EstateDesk document trust • Confirm material payments against the source provider statement.", { x, y: 31, size: 7, font: regular, color: muted });
+  const etimsLine =
+    data.etimsFooter ||
+    [
+      data.kraPin ? `Seller PIN: ${data.kraPin}` : null,
+      data.etimsControlUnitSerial
+        ? `CU: ${data.etimsControlUnitSerial}`
+        : "CU: pending",
+      "eTIMS layout-ready",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  page.drawText(etimsLine.slice(0, 110), {
+    x,
+    y: 42,
+    size: 7,
+    font: regular,
+    color: muted,
+  });
+  page.drawText(
+    "EstateDesk document trust • Confirm material payments against the source provider statement.",
+    { x, y: 28, size: 7, font: regular, color: muted },
+  );
   return pdf.save({ useObjectStreams: false, addDefaultPage: false });
 }
 

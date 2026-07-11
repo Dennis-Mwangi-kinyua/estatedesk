@@ -1,6 +1,8 @@
 export const CARETAKER_OFFLINE_QUEUE_KEY = "estatedesk-caretaker-offline-queue";
+/** Background Sync tag registered with the service worker */
+export const CARETAKER_OFFLINE_SYNC_TAG = "caretaker-offline-queue-sync";
 
-export type OfflineQueueItemKind = "meter_reading" | "issue";
+export type OfflineQueueItemKind = "meter_reading" | "issue" | "inspection";
 
 export type OfflinePhotoPayload = {
   base64: string;
@@ -35,7 +37,22 @@ export type OfflineIssueItem = {
   photoPayload?: OfflinePhotoPayload;
 };
 
-export type OfflineQueueItem = OfflineMeterReadingItem | OfflineIssueItem;
+export type OfflineInspectionItem = {
+  id: string;
+  kind: "inspection";
+  createdAt: string;
+  unitId?: string;
+  propertyId?: string;
+  notes: string;
+  roomStatuses?: Array<{ room: string; status: string }>;
+  photoKey?: string;
+  photoPayload?: OfflinePhotoPayload;
+};
+
+export type OfflineQueueItem =
+  | OfflineMeterReadingItem
+  | OfflineIssueItem
+  | OfflineInspectionItem;
 
 function readQueue(): OfflineQueueItem[] {
   if (typeof window === "undefined") return [];
@@ -56,6 +73,28 @@ function writeQueue(items: OfflineQueueItem[]) {
     JSON.stringify(items),
   );
   window.dispatchEvent(new CustomEvent("caretaker-offline-queue-change"));
+  requestBackgroundSync();
+}
+
+/** Ask the service worker to flush the queue when connectivity returns. */
+export function requestBackgroundSync() {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+
+  void navigator.serviceWorker.ready
+    .then((reg) => {
+      const syncManager = (
+        reg as ServiceWorkerRegistration & {
+          sync?: { register: (tag: string) => Promise<void> };
+        }
+      ).sync;
+      if (syncManager?.register) {
+        return syncManager.register(CARETAKER_OFFLINE_SYNC_TAG);
+      }
+      return undefined;
+    })
+    .catch(() => {
+      // Background Sync unsupported or denied — online panel still works.
+    });
 }
 
 export function getOfflineQueueItems() {

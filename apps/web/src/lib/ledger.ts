@@ -24,6 +24,7 @@ import {
   getCurrentPeriod,
   toLedgerNumber,
 } from "@/lib/ledger-utils";
+import { partitionChargesAroundWater } from "@/lib/billing/allocation-priority";
 
 type LedgerDb = PrismaClient | Prisma.TransactionClient;
 type OrgLedgerOptions = {
@@ -183,11 +184,11 @@ export async function allocateRentPayment({
 }
 
 /**
- * Apply a verified payment to a period's rent (+ other lease charges) then water.
- * Used for combined period bills and partial payments that reduce the combined balance.
+ * Apply a verified payment across a period bill with strict hierarchy:
+ * service charge → garbage → security → (other fees/penalties) → water → rent last.
  *
- * Allocation order: RENT charges for the period (open balance first), then other
- * non-waived lease charges for that period, then water bill for the unit/period.
+ * Used for combined period bills and partial payments so utilities stay current
+ * before residual funds reduce rent.
  */
 export async function allocateCombinedPeriodPayment({
   db,
@@ -227,6 +228,7 @@ export async function allocateCombinedPeriodPayment({
         select: {
           serviceCharge: true,
           garbageFee: true,
+          securityFee: true,
         },
       },
     },
@@ -240,6 +242,7 @@ export async function allocateCombinedPeriodPayment({
   const coveredPeriods = new Set<string>();
   let primaryRentChargeId: string | null = null;
   let appliedWaterBillId: string | null = null;
+  let appliedAnyLeaseCharge = false;
 
   // Ensure a rent charge exists for the period so rent+water can form one bill.
   const rentCharge = await db.rentCharge.upsert({
@@ -277,23 +280,60 @@ export async function allocateCombinedPeriodPayment({
     // Accrual posting is best-effort until accounting is initialized.
   }
 
-  const recurringCharges = [
-    {
-      chargeType: "SERVICE_CHARGE" as const,
-      amount: lease.unit.serviceCharge,
-      description: "Monthly service charge",
-    },
-    {
-      chargeType: "OTHER" as const,
-      amount: lease.unit.garbageFee,
+  // Unique (leaseId, period, chargeType) limits one row per type.
+  // SECURITY has no enum yet — map via description on OTHER/SERVICE_CHARGE.
+  const garbageAmount = new Prisma.Decimal(lease.unit.garbageFee ?? 0);
+  const securityAmount = new Prisma.Decimal(lease.unit.securityFee ?? 0);
+  const serviceAmount = new Prisma.Decimal(lease.unit.serviceCharge ?? 0);
+
+  const recurringCharges: Array<{
+    chargeType: "SERVICE_CHARGE" | "OTHER";
+    amount: Prisma.Decimal;
+    description: string;
+  }> = [];
+
+  if (serviceAmount.gt(0) && securityAmount.gt(0) && garbageAmount.gt(0)) {
+    recurringCharges.push({
+      chargeType: "SERVICE_CHARGE",
+      amount: serviceAmount.add(securityAmount),
+      description: "Monthly service charge + security fee",
+    });
+    recurringCharges.push({
+      chargeType: "OTHER",
+      amount: garbageAmount,
       description: "Monthly garbage fee",
-    },
-  ];
+    });
+  } else {
+    if (serviceAmount.gt(0)) {
+      recurringCharges.push({
+        chargeType: "SERVICE_CHARGE",
+        amount: serviceAmount,
+        description: "Monthly service charge",
+      });
+    } else if (securityAmount.gt(0) && garbageAmount.gt(0)) {
+      recurringCharges.push({
+        chargeType: "SERVICE_CHARGE",
+        amount: securityAmount,
+        description: "Monthly security fee",
+      });
+    }
+
+    if (garbageAmount.gt(0)) {
+      recurringCharges.push({
+        chargeType: "OTHER",
+        amount: garbageAmount,
+        description: "Monthly garbage fee",
+      });
+    } else if (securityAmount.gt(0)) {
+      recurringCharges.push({
+        chargeType: "OTHER",
+        amount: securityAmount,
+        description: "Monthly security fee",
+      });
+    }
+  }
 
   for (const recurring of recurringCharges) {
-    const amount = new Prisma.Decimal(recurring.amount ?? 0);
-    if (amount.lte(0)) continue;
-
     await db.rentCharge.upsert({
       where: {
         leaseId_period_chargeType: {
@@ -307,9 +347,9 @@ export async function allocateCombinedPeriodPayment({
         orgId,
         leaseId: lease.id,
         period,
-        amountDue: amount,
+        amountDue: recurring.amount,
         amountPaid: 0,
-        balance: amount,
+        balance: recurring.amount,
         dueDate: dueDateForPeriod(period, lease.dueDay),
         chargeType: recurring.chargeType,
         description: recurring.description,
@@ -326,28 +366,25 @@ export async function allocateCombinedPeriodPayment({
       status: { in: ["UNPAID", "PARTIAL", "OVERDUE"] },
       balance: { gt: 0 },
     },
-    orderBy: [{ chargeType: "asc" }, { dueDate: "asc" }],
+    orderBy: [{ dueDate: "asc" }],
     select: {
       id: true,
       period: true,
       chargeType: true,
+      description: true,
       amountPaid: true,
       balance: true,
     },
   });
 
-  // Prefer RENT first, then other charge types for the same period.
-  openCharges.sort((a, b) => {
-    if (a.chargeType === "RENT" && b.chargeType !== "RENT") return -1;
-    if (b.chargeType === "RENT" && a.chargeType !== "RENT") return 1;
-    return 0;
-  });
+  // Hierarchy: utilities/fees first → water (below) → rent last.
+  const { beforeWater, rentLast } = partitionChargesAroundWater(openCharges);
 
-  for (const charge of openCharges) {
-    if (remaining.lte(0)) break;
+  async function applyToCharge(charge: (typeof openCharges)[number]) {
+    if (remaining.lte(0)) return;
 
     const balance = new Prisma.Decimal(charge.balance);
-    if (balance.lte(0)) continue;
+    if (balance.lte(0)) return;
 
     const allocationAmount = remaining.lt(balance) ? remaining : balance;
     const nextPaid = new Prisma.Decimal(charge.amountPaid).add(allocationAmount);
@@ -381,14 +418,21 @@ export async function allocateCombinedPeriodPayment({
       },
     });
 
-    if (charge.chargeType === "RENT" || !primaryRentChargeId) {
+    appliedAnyLeaseCharge = true;
+    if (charge.chargeType === "RENT") {
+      primaryRentChargeId = charge.id;
+    } else if (!primaryRentChargeId) {
       primaryRentChargeId = charge.id;
     }
     coveredPeriods.add(charge.period);
     remaining = remaining.sub(allocationAmount);
   }
 
-  // Apply remainder to water bill for the period (explicit id or unit+period).
+  for (const charge of beforeWater) {
+    await applyToCharge(charge);
+  }
+
+  // Apply remainder to water bill before rent.
   if (remaining.gt(0)) {
     const waterBill = waterBillId
       ? await db.waterBill.findFirst({
@@ -466,6 +510,17 @@ export async function allocateCombinedPeriodPayment({
     }
   }
 
+  // Rent (and deposits) receive residual funds last.
+  for (const charge of rentLast) {
+    await applyToCharge(charge);
+  }
+
+  // Prefer linking payment.rentChargeId to the RENT row when any rent was open.
+  const rentRow = openCharges.find((c) => c.chargeType === "RENT");
+  if (rentRow) {
+    primaryRentChargeId = rentRow.id;
+  }
+
   await db.payment.update({
     where: { id: paymentId },
     data: {
@@ -474,9 +529,9 @@ export async function allocateCombinedPeriodPayment({
       ...(primaryRentChargeId ? { rentChargeId: primaryRentChargeId } : {}),
       ...(appliedWaterBillId ? { waterBillId: appliedWaterBillId } : {}),
       targetType:
-        primaryRentChargeId && appliedWaterBillId
+        appliedAnyLeaseCharge && appliedWaterBillId
           ? "COMBINED"
-          : appliedWaterBillId && !primaryRentChargeId
+          : appliedWaterBillId && !appliedAnyLeaseCharge
             ? "WATER"
             : "RENT",
     },

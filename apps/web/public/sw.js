@@ -1,6 +1,7 @@
-const CACHE_VERSION = "estatedesk-pwa-v5";
+const CACHE_VERSION = "estatedesk-pwa-v6";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const OFFLINE_FALLBACKS = ["/offline", "/offline-shell.html"];
+const CARETAKER_OFFLINE_SYNC_TAG = "caretaker-offline-queue-sync";
 
 const PRECACHE_URLS = [
   ...OFFLINE_FALLBACKS,
@@ -75,6 +76,31 @@ self.addEventListener("fetch", (event) => {
   ) {
     event.respondWith(networkFirst(request));
   }
+});
+
+/**
+ * Background Sync: flush caretaker meter/issue queue when connectivity returns
+ * (basement readings, offline inspections). Clients handle the actual POST.
+ */
+self.addEventListener("sync", (event) => {
+  if (event.tag !== CARETAKER_OFFLINE_SYNC_TAG) {
+    return;
+  }
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) =>
+        Promise.allSettled(
+          clientList.map((client) =>
+            client.postMessage({
+              type: "SYNC_CARETAKER_OFFLINE_QUEUE",
+              tag: CARETAKER_OFFLINE_SYNC_TAG,
+            }),
+          ),
+        ),
+      ),
+  );
 });
 
 self.addEventListener("push", (event) => {
