@@ -12,6 +12,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import {
   getPlatformControl,
+  defaultIncidentMessage,
   defaultMaintenanceMessage,
 } from "@/lib/platform/control";
 import {
@@ -89,7 +90,10 @@ function flashMessage(params: { ok?: string; error?: string; count?: string }) {
     return { tone: "error" as const, text: `Action failed (${params.error}).` };
   }
   if (params.ok === "kill-switches") {
-    return { tone: "ok" as const, text: "Website kill switches saved." };
+    return {
+      tone: "ok" as const,
+      text: "Website controls saved (incident banner + kill switches).",
+    };
   }
   if (params.ok === "global-feature") {
     return { tone: "ok" as const, text: "Global feature override updated." };
@@ -132,26 +136,35 @@ function SwitchRow({
   label,
   description,
   defaultChecked,
+  tone = "default",
 }: {
   name: string;
   label: string;
   description: string;
   defaultChecked: boolean;
+  tone?: "default" | "danger" | "warning";
 }) {
+  const border =
+    tone === "danger"
+      ? "border-red-200 bg-red-50/40 dark:border-red-500/30 dark:bg-red-500/10"
+      : tone === "warning"
+        ? "border-amber-200 bg-amber-50/50 dark:border-amber-500/30 dark:bg-amber-500/10"
+        : "border-border bg-card";
+
   return (
-    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-950">
+    <label
+      className={`flex min-h-[4.5rem] cursor-pointer items-start gap-3 rounded-xl border p-3.5 sm:p-4 ${border}`}
+    >
       <input
         type="checkbox"
         name={name}
         value="true"
         defaultChecked={defaultChecked}
-        className="mt-1 h-4 w-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+        className="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
       />
       <span className="min-w-0">
-        <span className="block text-sm font-semibold text-slate-950 dark:text-white">
-          {label}
-        </span>
-        <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">
+        <span className="block text-sm font-semibold text-foreground">{label}</span>
+        <span className="mt-1 block text-xs leading-5 text-muted-foreground">
           {description}
         </span>
       </span>
@@ -211,6 +224,7 @@ export default async function WebsiteControlCenterPage({
 
   const activeKills = [
     control.maintenanceMode,
+    control.incidentMode,
     control.publicSignupDisabled,
     control.publicApiDisabled,
     control.webhooksDisabled,
@@ -219,24 +233,27 @@ export default async function WebsiteControlCenterPage({
     control.orgDashboardsDisabled,
   ].filter(Boolean).length;
 
+  const incidentPreview = defaultIncidentMessage(control);
+  const maintenancePreview = defaultMaintenanceMessage(control);
+
   return (
-    <div className="space-y-6">
+    <div className="ed-mobile-first space-y-4 sm:space-y-6">
       <ControlOrgTableFilter />
       <PageHeader
         eyebrow="Developer portal · Super admin"
         title="Website control center"
-        description="Full power over the EstateDesk website: maintenance mode, public surfaces, queues, sessions, API keys, organizations, and emergency ops. Every action is audit-logged."
+        description="Full power over the EstateDesk website: incident banners, maintenance, public surfaces, queues, sessions, API keys, organizations, and emergency ops. Every action is audit-logged."
         action={
-          <div className="flex flex-wrap gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
             <Link
               href="/platform/developer"
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground"
             >
               Developer home
             </Link>
             <Link
               href="/platform/system-health"
-              className="rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white"
             >
               System health
             </Link>
@@ -267,43 +284,154 @@ export default async function WebsiteControlCenterPage({
         </div>
       </div>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="ed-keep-cols grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
         <StatCard label="Active kill switches" value={formatNumber(activeKills)} />
+        <StatCard
+          label="Incident banner"
+          value={control.incidentMode ? "ON" : "OFF"}
+          note={control.incidentMode ? "Visible on public pages" : "Hidden"}
+        />
+        <StatCard
+          label="Maintenance"
+          value={control.maintenanceMode ? "ON" : "OFF"}
+          note={control.maintenanceMode ? "Portals blocked" : "Site open"}
+        />
         <StatCard label="Organizations" value={formatNumber(orgCount)} />
         <StatCard label="Users" value={formatNumber(userCount)} />
         <StatCard label="Live sessions" value={formatNumber(activeSessions)} />
         <StatCard label="Active API keys" value={formatNumber(activeApiKeys)} />
         <StatCard label="Failed notifications" value={formatNumber(failedNotifications)} />
-        <StatCard label="Rate-limit buckets" value={formatNumber(rateBuckets)} />
-        <StatCard
-          label="Maintenance"
-          value={control.maintenanceMode ? "ON" : "OFF"}
-          note={control.maintenanceMode ? defaultMaintenanceMessage(control) : "Site open"}
-        />
       </section>
+
+      {/* Incident controls — dedicated, mobile-first */}
+      <Surface
+        title="Incident controls"
+        description="Communicate degraded service without fully locking dashboards. Platform operators still pass maintenance locks."
+      >
+        <form action={updateKillSwitchesAction} className="space-y-4 p-3 sm:p-4">
+          {/* Preserve other kill-switch values when saving from this form */}
+          {control.maintenanceMode ? (
+            <input type="hidden" name="maintenanceMode" value="true" />
+          ) : null}
+          {control.publicSignupDisabled ? (
+            <input type="hidden" name="publicSignupDisabled" value="true" />
+          ) : null}
+          {control.publicApiDisabled ? (
+            <input type="hidden" name="publicApiDisabled" value="true" />
+          ) : null}
+          {control.webhooksDisabled ? (
+            <input type="hidden" name="webhooksDisabled" value="true" />
+          ) : null}
+          {control.cronDisabled ? (
+            <input type="hidden" name="cronDisabled" value="true" />
+          ) : null}
+          {control.orgDashboardsDisabled ? (
+            <input type="hidden" name="orgDashboardsDisabled" value="true" />
+          ) : null}
+          {control.tenantPortalsDisabled ? (
+            <input type="hidden" name="tenantPortalsDisabled" value="true" />
+          ) : null}
+          <input
+            type="hidden"
+            name="maintenanceMessage"
+            value={control.maintenanceMessage ?? ""}
+          />
+          <input type="hidden" name="notes" value={control.notes ?? ""} />
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge
+              tone={
+                control.incidentMode
+                  ? "border-amber-300 bg-amber-50 text-amber-950"
+                  : "border-border bg-muted/50 text-muted-foreground"
+              }
+            >
+              Incident {control.incidentMode ? "ACTIVE" : "idle"}
+            </Badge>
+            <Badge
+              tone={
+                control.maintenanceMode
+                  ? "border-red-300 bg-red-50 text-red-900"
+                  : "border-border bg-muted/50 text-muted-foreground"
+              }
+            >
+              Maintenance {control.maintenanceMode ? "ON" : "off"}
+            </Badge>
+          </div>
+
+          <SwitchRow
+            name="incidentMode"
+            label="Show incident banner"
+            description="Displays a site-wide banner on every page (marketing, auth, and app). Does not block logins or dashboards by itself."
+            defaultChecked={control.incidentMode}
+            tone="warning"
+          />
+
+          <label className="block space-y-1.5">
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Incident message
+            </span>
+            <textarea
+              name="incidentMessage"
+              defaultValue={control.incidentMessage ?? ""}
+              rows={3}
+              placeholder="We are investigating elevated payment webhook latency…"
+              className="min-h-[5.5rem] w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-violet-400"
+            />
+          </label>
+
+          <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 p-3 dark:border-amber-500/30 dark:bg-amber-500/10">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-800 dark:text-amber-100">
+              Live banner preview
+            </p>
+            <div className="mt-2 flex items-start gap-2 text-sm text-amber-950 dark:text-amber-50">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              <p className="min-w-0 leading-5">{incidentPreview}</p>
+            </div>
+            {!control.incidentMode ? (
+              <p className="mt-2 text-[11px] text-amber-800/80 dark:text-amber-100/80">
+                Preview only — enable “Show incident banner” and save to publish.
+              </p>
+            ) : null}
+          </div>
+
+          <button
+            type="submit"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-amber-600 px-5 text-sm font-semibold text-white transition hover:bg-amber-500 sm:w-auto"
+          >
+            <ShieldAlert className="h-4 w-4" />
+            Save incident controls
+          </button>
+        </form>
+      </Surface>
 
       {/* Kill switches */}
       <Surface
         title="Website kill switches"
-        description="Instantly enable or disable major surfaces of the live product."
+        description="Instantly enable or disable major surfaces of the live product. Includes maintenance, APIs, webhooks, and portals."
       >
-        <form action={updateKillSwitchesAction} className="space-y-4 p-4">
-          <div className="grid gap-3 lg:grid-cols-2">
+        <form action={updateKillSwitchesAction} className="space-y-4 p-3 sm:p-4">
+          {/* Preserve incident fields when saving kill switches */}
+          {control.incidentMode ? (
+            <input type="hidden" name="incidentMode" value="true" />
+          ) : null}
+          <input
+            type="hidden"
+            name="incidentMessage"
+            value={control.incidentMessage ?? ""}
+          />
+
+          <div className="grid gap-3 sm:grid-cols-2">
             <SwitchRow
               name="maintenanceMode"
               label="Maintenance mode"
               description="Blocks org, tenant, caretaker, and landlord dashboards (platform admins still pass)."
               defaultChecked={control.maintenanceMode}
-            />
-            <SwitchRow
-              name="incidentMode"
-              label="Incident mode banner"
-              description="Shows a public incident banner on marketing/auth pages without fully blocking dashboards."
-              defaultChecked={control.incidentMode}
+              tone="danger"
             />
             <SwitchRow
               name="publicSignupDisabled"
-              label="Disable public signup / onboarding requests"
+              label="Disable public signup / onboarding"
               description="Stops new company access requests on /register."
               defaultChecked={control.publicSignupDisabled}
             />
@@ -318,6 +446,7 @@ export default async function WebsiteControlCenterPage({
               label="Disable webhooks"
               description="Rejects inbound provider webhooks (e.g. M-Pesa)."
               defaultChecked={control.webhooksDisabled}
+              tone="danger"
             />
             <SwitchRow
               name="cronDisabled"
@@ -333,13 +462,22 @@ export default async function WebsiteControlCenterPage({
             />
             <SwitchRow
               name="tenantPortalsDisabled"
-              label="Disable tenant / caretaker / landlord portals"
-              description="Blocks field and tenant-facing dashboards."
+              label="Disable tenant / field portals"
+              description="Blocks tenant, caretaker, and landlord dashboards."
               defaultChecked={control.tenantPortalsDisabled}
             />
           </div>
 
-          <div className="grid gap-3 lg:grid-cols-3">
+          {control.maintenanceMode ? (
+            <div className="rounded-xl border border-red-200 bg-red-50/80 p-3 text-sm text-red-950 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-50">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em]">
+                Maintenance page copy
+              </p>
+              <p className="mt-1 leading-5">{maintenancePreview}</p>
+            </div>
+          ) : null}
+
+          <div className="grid gap-3 sm:grid-cols-2">
             <label className="block space-y-1.5">
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Maintenance message
@@ -349,19 +487,7 @@ export default async function WebsiteControlCenterPage({
                 defaultValue={control.maintenanceMessage ?? ""}
                 rows={3}
                 placeholder={defaultMaintenanceMessage(control)}
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-violet-400"
-              />
-            </label>
-            <label className="block space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Incident message
-              </span>
-              <textarea
-                name="incidentMessage"
-                defaultValue={control.incidentMessage ?? ""}
-                rows={3}
-                placeholder="We are investigating elevated payment webhook latency…"
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-violet-400"
+                className="min-h-[5.5rem] w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-violet-400"
               />
             </label>
             <label className="block space-y-1.5">
@@ -373,14 +499,14 @@ export default async function WebsiteControlCenterPage({
                 defaultValue={control.notes ?? ""}
                 rows={3}
                 placeholder="Why these switches are set…"
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-violet-400"
+                className="min-h-[5.5rem] w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-violet-400"
               />
             </label>
           </div>
 
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 text-sm font-semibold text-white transition hover:bg-violet-500 sm:w-auto"
           >
             <Power className="h-4 w-4" />
             Save kill switches

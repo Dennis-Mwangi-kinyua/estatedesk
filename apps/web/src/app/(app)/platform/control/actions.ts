@@ -77,6 +77,7 @@ export async function updateKillSwitchesAction(formData: FormData) {
     entityId: "global",
     beforeState: {
       maintenanceMode: before.maintenanceMode,
+      incidentMode: before.incidentMode,
       publicSignupDisabled: before.publicSignupDisabled,
       publicApiDisabled: before.publicApiDisabled,
       webhooksDisabled: before.webhooksDisabled,
@@ -86,6 +87,7 @@ export async function updateKillSwitchesAction(formData: FormData) {
     },
     afterState: {
       maintenanceMode: after.maintenanceMode,
+      incidentMode: after.incidentMode,
       publicSignupDisabled: after.publicSignupDisabled,
       publicApiDisabled: after.publicApiDisabled,
       webhooksDisabled: after.webhooksDisabled,
@@ -97,9 +99,13 @@ export async function updateKillSwitchesAction(formData: FormData) {
 
   await sendSecurityAlert({
     event: "PLATFORM_KILL_SWITCHES_UPDATED",
-    severity: after.maintenanceMode ? "critical" : "warning",
+    severity: after.maintenanceMode
+      ? "critical"
+      : after.incidentMode
+        ? "warning"
+        : "info",
     actorUserId: session.userId,
-    summary: `${session.fullName} updated platform kill switches (maintenance=${after.maintenanceMode}).`,
+    summary: `${session.fullName} updated platform controls (maintenance=${after.maintenanceMode}, incident=${after.incidentMode}).`,
   });
 
   refreshControl();
