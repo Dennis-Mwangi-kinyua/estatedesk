@@ -642,6 +642,8 @@ model KraIntegration {
   apiBaseUrl              String?
   eritsBaseUrl            String?
   webhookSecretCiphertext String?
+  controlUnitSerial       String?
+  branchOfficeId          String?
   status                  IntegrationStatus @default(ACTIVE)
   lastSyncAt              DateTime?
   lastError               String?

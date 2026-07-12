@@ -1,7 +1,13 @@
 import { CheckCircle2, AlertTriangle, Shield } from "lucide-react";
-import type { getEtimsReadinessSummary } from "@/lib/tax/etims-client";
 
-type Readiness = ReturnType<typeof getEtimsReadinessSummary>;
+type Readiness = {
+  configured: boolean;
+  environment: string;
+  baseUrl: string | null;
+  controlUnitSerial: string | null;
+  notes: string[];
+  statusLabel: string;
+};
 
 export function TaxesEtimsPanel({ readiness }: { readiness: Readiness }) {
   return (

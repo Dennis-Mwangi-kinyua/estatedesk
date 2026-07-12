@@ -1,4 +1,5 @@
 import type { OrgRole } from "@prisma/client";
+import { QuotePriceCheckPanel } from "@/app/(app)/dashboard/caretaker/vendors/_components/quote-price-check";
 import type { OrgExpendituresPageData } from "../_lib/types";
 import { ExpendituresDirectorySection } from "./expenditures-directory-section";
 import { ExpendituresForm } from "./expenditures-form";
@@ -16,14 +17,18 @@ export function ExpendituresWorkspace({
   defaultDate: string;
 }) {
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content ed-mobile-first mx-auto w-full max-w-7xl space-y-4 px-3 pb-24 pt-3 sm:space-y-6 sm:px-6 sm:pt-4 lg:px-8">
       <ExpendituresHeader data={data} orgRole={orgRole} />
       <ExpendituresStats data={data} />
-      <ExpendituresForm
-        data={data}
-        defaultDate={defaultDate}
-        orgRole={orgRole}
-      />
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
+        <ExpendituresForm
+          data={data}
+          defaultDate={defaultDate}
+          orgRole={orgRole}
+        />
+        <QuotePriceCheckPanel />
+      </div>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
         <ExpendituresDirectorySection data={data} orgRole={orgRole} />

@@ -50,7 +50,16 @@ Generate: `node scripts/generate-web-push-keys.mjs`
 npx prisma migrate deploy
 ```
 
-Includes `SECURITY` charge type and `RentRewardRedemption`.
+Includes:
+- `SECURITY` charge type
+- `RentRewardRedemption`
+- `KraIntegration.controlUnitSerial` + `branchOfficeId`
+
+## New product surfaces (after deploy)
+
+- Tenant: `/dashboard/tenant/rewards` (self-serve redeem)
+- Org expenditures: quote price index beside spend form
+- Org taxes: per-org eTIMS settings (encrypted secrets)
 
 ## Smoke after deploy
 
