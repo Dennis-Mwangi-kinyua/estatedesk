@@ -62,28 +62,35 @@ describe("platform nav mode", () => {
     assert.ok(developer.some((item) => item.href === "/platform/developer"));
     assert.ok(developer.some((item) => item.href === "/platform/api-keys"));
     assert.ok(developer.some((item) => item.href === "/platform/api-explorer"));
-    assert.ok(!developer.some((item) => item.href === "/platform/organizations"));
+    // Site ops (organizations, users, …) are dual-mode so developers can run the business plane.
+    assert.ok(developer.some((item) => item.href === "/platform/organizations"));
 
+    // PLATFORM_ADMIN still sees dual-mode site ops + non-super-admin developer tools.
     assert.ok(
-      !developerPlatformAdmin.some((item) => item.href === "/platform/api-keys"),
-    );
-    assert.ok(!developerPlatformAdmin.some((item) => item.href === "/platform/jobs"));
-    assert.ok(
-      !developerPlatformAdmin.some((item) => item.href === "/platform/data-management"),
+      developerPlatformAdmin.some((item) => item.href === "/platform/organizations"),
     );
     assert.ok(
-      !developerPlatformAdmin.some((item) => item.href === "/platform/backups"),
+      developerPlatformAdmin.some((item) => item.href === "/platform/api-keys"),
     );
     assert.ok(
       developerPlatformAdmin.some((item) => item.href === "/platform/feature-flags"),
+    );
+    // Website Control remains super-admin only.
+    assert.ok(
+      !developerPlatformAdmin.some((item) => item.href === "/platform/control"),
+    );
+    assert.ok(
+      developer.some((item) => item.href === "/platform/control"),
     );
   });
 
   it("maps mode homes and super-admin paths correctly", () => {
     assert.equal(getModeHome("admin"), "/platform");
     assert.equal(getModeHome("developer"), "/platform/developer");
-    assert.equal(isSuperAdminOnlyPath("/platform/api-keys"), true);
-    assert.equal(isSuperAdminOnlyPath("/platform/jobs/retry"), true);
+    // Only Website Control is super-admin exclusive in current product.
+    assert.equal(isSuperAdminOnlyPath("/platform/control"), true);
+    assert.equal(isSuperAdminOnlyPath("/platform/api-keys"), false);
+    assert.equal(isSuperAdminOnlyPath("/platform/jobs/retry"), false);
     assert.equal(isSuperAdminOnlyPath("/platform/feature-flags"), false);
   });
 

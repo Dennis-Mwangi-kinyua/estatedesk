@@ -80,10 +80,22 @@ test("orgs only expose the payment methods they enable", () => {
   const xIds = listAvailablePaymentMethods(orgX).map((m) => m.id);
   const yIds = listAvailablePaymentMethods(orgY).map((m) => m.id);
 
-  assert.deepEqual(xIds, ["mpesa", "kcb", "family"]);
-  assert.deepEqual(yIds, ["equity", "coop"]);
+  // Catalog surfaces eCitizen-style rails (STK + manual paste) plus enabled bank ids.
+  assert.ok(xIds.includes("mpesa-stk"));
+  assert.ok(xIds.includes("manual-mpesa"));
+  assert.ok(xIds.includes("kcb"));
+  assert.ok(xIds.includes("family"));
+  assert.ok(!xIds.includes("equity"));
+
+  // Bank-only orgs still get the generic manual-bank rail alongside named banks.
+  assert.ok(yIds.includes("manual-bank"));
+  assert.ok(yIds.includes("equity"));
+  assert.ok(yIds.includes("coop"));
+  assert.ok(!yIds.includes("mpesa-stk"));
+  assert.ok(!yIds.includes("manual-mpesa"));
   assert.equal(isPaymentMethodAvailable(orgX, "equity"), false);
   assert.equal(isPaymentMethodAvailable(orgY, "mpesa"), false);
+  assert.equal(isPaymentMethodAvailable(orgY, "mpesa-stk"), false);
 });
 
 test("legacy flags still resolve enabled methods", () => {
