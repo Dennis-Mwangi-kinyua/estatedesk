@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { getBuildingsPageData } from "./_lib/queries";

@@ -11,10 +11,7 @@ import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
 import { encodePublicId } from "@/lib/public-id";
 import { buildCaretakerAllocationFilters } from "@/app/(app)/dashboard/caretaker/inspections/[inspectionId]/_lib/helpers";
-import {
-  getCaretakerMeterEntryHref,
-  getCaretakerUnitHref,
-} from "@/app/(app)/dashboard/caretaker/_lib/paths";
+import { getCaretakerMeterEntryHref } from "@/app/(app)/dashboard/caretaker/_lib/paths";
 import { CURRENT_PERIOD } from "@/app/(app)/dashboard/caretaker/water-bills/_lib/types";
 import {
   CALENDAR_LOAD_ERROR_MESSAGE,

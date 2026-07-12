@@ -31,7 +31,9 @@ async function prepareItemsForSync(items: OfflineQueueItem[]) {
 }
 
 export function OfflineQueuePanel({ compact = false }: { compact?: boolean }) {
-  const [items, setItems] = useState<OfflineQueueItem[]>([]);
+  const [items, setItems] = useState<OfflineQueueItem[]>(() =>
+    typeof window === "undefined" ? [] : getOfflineQueueItems(),
+  );
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -68,15 +70,13 @@ export function OfflineQueuePanel({ compact = false }: { compact?: boolean }) {
   );
 
   useEffect(() => {
-    refresh();
-
     function handleChange() {
-      refresh();
+      setItems(getOfflineQueueItems());
     }
 
     function handleOnline() {
-      refresh();
       const queued = getOfflineQueueItems();
+      setItems(queued);
       if (queued.length > 0) {
         runSync(queued);
       }
@@ -107,7 +107,7 @@ export function OfflineQueuePanel({ compact = false }: { compact?: boolean }) {
         );
       }
     };
-  }, [refresh, runSync]);
+  }, [runSync]);
 
   function handleSync() {
     runSync(items);

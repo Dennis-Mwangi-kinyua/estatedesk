@@ -155,7 +155,7 @@ async function syncIssueItem({
   allowedUnitIds: string[];
 }) {
   let propertyId = item.propertyId;
-  let unitId = item.unitId;
+  const unitId = item.unitId;
 
   if (unitId && !allowedUnitIds.includes(unitId)) {
     throw new Error("Unit is outside your assignment scope.");
@@ -211,7 +211,7 @@ async function syncInspectionItem({
   allowedUnitIds: string[];
 }) {
   let propertyId = item.propertyId;
-  let unitId = item.unitId;
+  const unitId = item.unitId;
 
   if (unitId && !allowedUnitIds.includes(unitId)) {
     throw new Error("Unit is outside your assignment scope.");

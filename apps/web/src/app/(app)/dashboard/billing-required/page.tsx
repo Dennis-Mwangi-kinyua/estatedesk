@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireOrgMembership } from "@/lib/permissions/guards";
 import {
@@ -45,12 +46,12 @@ export default async function BillingRequiredPage() {
           </p>
           <p className="mt-2">
             Admins can open{" "}
-            <a
+            <Link
               href="/dashboard/org/settings#billing"
               className="font-semibold text-neutral-950 underline underline-offset-2"
             >
               Settings → Billing
-            </a>{" "}
+            </Link>{" "}
             to submit an upgrade request after payment.
           </p>
         </div>

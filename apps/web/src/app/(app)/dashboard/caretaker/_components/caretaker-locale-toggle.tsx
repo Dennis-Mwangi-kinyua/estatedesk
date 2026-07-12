@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   CARETAKER_LOCALE_STORAGE_KEY,
   type CaretakerLocale,
@@ -10,16 +10,14 @@ type Props = {
   className?: string;
 };
 
-export function CaretakerLocaleToggle({ className = "" }: Props) {
-  const [locale, setLocale] = useState<CaretakerLocale>("en");
+function readStoredLocale(): CaretakerLocale {
+  if (typeof window === "undefined") return "en";
+  const stored = window.localStorage.getItem(CARETAKER_LOCALE_STORAGE_KEY);
+  return stored === "en" || stored === "sw" ? stored : "en";
+}
 
-  useEffect(() => {
-    const stored = window.localStorage.getItem(CARETAKER_LOCALE_STORAGE_KEY);
-    if (stored === "en" || stored === "sw") {
-      setLocale(stored);
-      document.documentElement.lang = stored;
-    }
-  }, []);
+export function CaretakerLocaleToggle({ className = "" }: Props) {
+  const [locale, setLocale] = useState<CaretakerLocale>(readStoredLocale);
 
   function updateLocale(next: CaretakerLocale) {
     setLocale(next);

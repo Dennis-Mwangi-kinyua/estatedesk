@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MapPin } from "lucide-react";
 
 type CheckInState = {
@@ -11,27 +11,40 @@ type CheckInState = {
   message: string;
 };
 
-export function InspectionCheckIn() {
-  const [state, setState] = useState<CheckInState>({
+function initialCheckInState(): CheckInState {
+  if (typeof window !== "undefined" && !navigator.geolocation) {
+    return {
+      latitude: "",
+      longitude: "",
+      capturedAt: "",
+      status: "error",
+      message:
+        "GPS is unavailable on this device. You can still submit the report.",
+    };
+  }
+
+  return {
     latitude: "",
     longitude: "",
     capturedAt: "",
     status: "idle",
     message: "Capture on-site check-in before submitting the report.",
-  });
+  };
+}
 
-  useEffect(() => {
+export function InspectionCheckIn() {
+  const [state, setState] = useState<CheckInState>(initialCheckInState);
+
+  function captureLocation() {
     if (!navigator.geolocation) {
       setState((current) => ({
         ...current,
         status: "error",
-        message: "GPS is unavailable on this device. You can still submit the report.",
+        message:
+          "GPS is unavailable on this device. You can still submit the report.",
       }));
+      return;
     }
-  }, []);
-
-  function captureLocation() {
-    if (!navigator.geolocation) return;
 
     setState((current) => ({
       ...current,
@@ -74,15 +87,18 @@ export function InspectionCheckIn() {
           >
             On-site check-in
           </h3>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">{state.message}</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            {state.message}
+          </p>
         </div>
         <button
           type="button"
           onClick={captureLocation}
-          className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-muted/30"
+          disabled={state.status === "capturing"}
+          className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-muted/30 disabled:opacity-60"
         >
           <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-          Capture location
+          {state.status === "capturing" ? "Capturing…" : "Capture location"}
         </button>
       </div>
 
@@ -92,7 +108,10 @@ export function InspectionCheckIn() {
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div>
-          <label htmlFor="check-in-photo" className="mb-2 block text-sm font-medium text-foreground">
+          <label
+            htmlFor="check-in-photo"
+            className="mb-2 block text-sm font-medium text-foreground"
+          >
             Arrival photo (optional)
           </label>
           <input
