@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import {
   getUnreadNotificationAlert,
   type NotificationAlertAudience,
+  type UnreadNotificationAlert,
 } from "@/lib/notifications/unread-alert";
 import { UnreadNotificationAlerts } from "@/components/notifications/unread-notification-alerts";
 
@@ -24,6 +25,9 @@ export async function UnreadNotificationAlertsPanel({
   userId,
   tenantId,
 }: UnreadNotificationAlertsPanelProps) {
+  let alert: UnreadNotificationAlert | null = null;
+  let skip = false;
+
   try {
     const headerStore = await headers();
     const pathname = (headerStore.get("x-estatedesk-pathname") ?? "").replace(
@@ -32,26 +36,26 @@ export async function UnreadNotificationAlertsPanel({
     );
 
     if (NOTIFICATIONS_PATHS.has(pathname)) {
-      return null;
+      skip = true;
+    } else {
+      alert = await getUnreadNotificationAlert({
+        audience,
+        orgId,
+        userId,
+        tenantId,
+      });
     }
-
-    const alert = await getUnreadNotificationAlert({
-      audience,
-      orgId,
-      userId,
-      tenantId,
-    });
-
-    if (alert.count <= 0) {
-      return null;
-    }
-
-    const scope = [audience, orgId, userId ?? "", tenantId ?? ""].join(":");
-
-    return <UnreadNotificationAlerts scope={scope} alert={alert} />;
   } catch (error) {
     // Badge/alerts are non-critical — never fail the whole Server Component tree.
     console.error("[UnreadNotificationAlertsPanel] failed", error);
     return null;
   }
+
+  if (skip || !alert || alert.count <= 0) {
+    return null;
+  }
+
+  const scope = [audience, orgId, userId ?? "", tenantId ?? ""].join(":");
+
+  return <UnreadNotificationAlerts scope={scope} alert={alert} />;
 }
