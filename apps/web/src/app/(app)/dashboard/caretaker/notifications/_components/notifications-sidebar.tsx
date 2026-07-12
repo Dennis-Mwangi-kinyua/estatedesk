@@ -55,7 +55,7 @@ export function NotificationsSidebar() {
       </section>
 
       <section className={`${panelShellClassName} p-4`}>
-        <h2 className="text-sm font-semibold text-foreground">What you'll see here</h2>
+        <h2 className="text-sm font-semibold text-foreground">What you&apos;ll see here</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           Common notification types for caretakers in the field.
         </p>

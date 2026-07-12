@@ -54,7 +54,7 @@ export async function createCaretakerIssueAction(formData: FormData) {
   });
 
   let propertyId = parsed.propertyId;
-  let unitId = parsed.unitId;
+  const unitId = parsed.unitId;
 
   if (unitId) {
     const allowedUnitIds = await getCaretakerAllowedUnitIds({

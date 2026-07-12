@@ -1,22 +1,12 @@
-import { headers } from "next/headers";
-import {
-  getUnreadNotificationAlert,
-  type NotificationAlertAudience,
-} from "@/lib/notifications/unread-alert";
-import { UnreadNotificationAlerts } from "@/components/notifications/unread-notification-alerts";
+import { getUnreadAlertPayload } from "@/lib/notifications/unread-alert";
+import { UnreadNotificationAlerts } from "./unread-notification-alerts";
 
 type UnreadNotificationAlertsPanelProps = {
-  audience: NotificationAlertAudience;
+  audience: "org" | "tenant" | "caretaker" | "landlord" | "platform";
   orgId: string;
-  userId?: string;
-  tenantId?: string;
+  userId?: string | null;
+  tenantId?: string | null;
 };
-
-const NOTIFICATIONS_PATHS = new Set([
-  "/dashboard/org/notifications",
-  "/dashboard/caretaker/notifications",
-  "/dashboard/tenant/notifications",
-]);
 
 export async function UnreadNotificationAlertsPanel({
   audience,
@@ -24,34 +14,26 @@ export async function UnreadNotificationAlertsPanel({
   userId,
   tenantId,
 }: UnreadNotificationAlertsPanelProps) {
+  let alert: Awaited<ReturnType<typeof getUnreadAlertPayload>> | null = null;
+
   try {
-    const headerStore = await headers();
-    const pathname = (headerStore.get("x-estatedesk-pathname") ?? "").replace(
-      /\/+$/,
-      "",
-    );
-
-    if (NOTIFICATIONS_PATHS.has(pathname)) {
-      return null;
-    }
-
-    const alert = await getUnreadNotificationAlert({
+    alert = await getUnreadAlertPayload({
       audience,
       orgId,
       userId,
       tenantId,
     });
-
-    if (alert.count <= 0) {
-      return null;
-    }
-
-    const scope = [audience, orgId, userId ?? "", tenantId ?? ""].join(":");
-
-    return <UnreadNotificationAlerts scope={scope} alert={alert} />;
   } catch (error) {
     // Badge/alerts are non-critical — never fail the whole Server Component tree.
     console.error("[UnreadNotificationAlertsPanel] failed", error);
     return null;
   }
+
+  if (!alert || alert.count <= 0) {
+    return null;
+  }
+
+  const scope = [audience, orgId, userId ?? "", tenantId ?? ""].join(":");
+
+  return <UnreadNotificationAlerts scope={scope} alert={alert} />;
 }

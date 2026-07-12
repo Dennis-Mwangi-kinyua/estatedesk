@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { createElement, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
@@ -216,8 +216,6 @@ function MethodCard({
   badgeClass: string;
   onSelect: (option: PaymentMethodDefinition) => void;
 }) {
-  const Icon = getOptionIcon(option);
-
   return (
     <button
       type="button"
@@ -231,7 +229,7 @@ function MethodCard({
           {option.logoText}
         </div>
         <div className="rounded-full bg-muted p-2 text-foreground/70 transition group-hover:bg-primary/10 group-hover:text-primary">
-          <Icon className="h-5 w-5" />
+          {createElement(getOptionIcon(option), { className: "h-5 w-5" })}
         </div>
       </div>
       <h3 className="text-lg font-semibold text-foreground">{option.name}</h3>

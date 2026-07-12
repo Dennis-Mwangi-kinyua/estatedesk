@@ -51,6 +51,8 @@ export function InspectionsWorkspace({
   data: InspectionsPageData;
   orgRole?: OrgRole | null;
 }) {
+  // Request-time comparison for overdue flags (server component).
+  // eslint-disable-next-line react-hooks/purity -- intentional request clock
   const now = Date.now();
 
   return (

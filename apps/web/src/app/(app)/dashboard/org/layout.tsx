@@ -58,10 +58,9 @@ export default async function OrgLayout({
   if (supportSession && supportSession.orgId !== session.activeOrgId) {
     supportSession = null;
   }
-  if (
-    supportSession &&
-    supportSession.expiresAtUnix <= Math.floor(Date.now() / 1000)
-  ) {
+  // eslint-disable-next-line react-hooks/purity -- request-time session expiry check
+  const requestUnix = Math.floor(Date.now() / 1000);
+  if (supportSession && supportSession.expiresAtUnix <= requestUnix) {
     await clearSupportSessionCookie();
     await setUserSession({
       userId: session.userId,

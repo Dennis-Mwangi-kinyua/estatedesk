@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { LifeBuoy, Timer } from "lucide-react";
 import {
   leaveOrgSupportAccessAction,
@@ -15,11 +16,29 @@ export type SupportSessionBannerData = {
   expiresAtUnix: number;
 };
 
-export function SupportSessionBanner({ session }: { session: SupportSessionBannerData }) {
-  const remaining = Math.max(
-    0,
-    Math.ceil((session.expiresAtUnix - Math.floor(Date.now() / 1000)) / 60),
+function minutesRemaining(expiresAtUnix: number, nowUnix: number) {
+  return Math.max(0, Math.ceil((expiresAtUnix - nowUnix) / 60));
+}
+
+export function SupportSessionBanner({
+  session,
+}: {
+  session: SupportSessionBannerData;
+}) {
+  const [remaining, setRemaining] = useState(() =>
+    minutesRemaining(session.expiresAtUnix, session.expiresAtUnix),
   );
+
+  useEffect(() => {
+    function tick() {
+      setRemaining(
+        minutesRemaining(session.expiresAtUnix, Math.floor(Date.now() / 1000)),
+      );
+    }
+    tick();
+    const id = window.setInterval(tick, 30_000);
+    return () => window.clearInterval(id);
+  }, [session.expiresAtUnix]);
 
   return (
     <div className="border-b border-amber-300/60 bg-amber-50 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-50">
@@ -27,9 +46,7 @@ export function SupportSessionBanner({ session }: { session: SupportSessionBanne
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <LifeBuoy className="h-4 w-4 shrink-0" />
-            <span className="truncate">
-              Support session · {session.orgName}
-            </span>
+            <span className="truncate">Support session · {session.orgName}</span>
           </div>
           <p className="mt-1 text-xs leading-5 text-amber-900/90 dark:text-amber-50/90">
             Reason: {session.reason}. You are acting as org ADMIN for this workspace.

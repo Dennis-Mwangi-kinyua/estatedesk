@@ -5,6 +5,7 @@ import {
   useEffect,
   useId,
   useState,
+  useSyncExternalStore,
   type ComponentType,
   type ReactNode,
 } from "react";
@@ -34,15 +35,16 @@ export function WorkspaceDetailPanel({
   children,
 }: WorkspaceDetailPanelProps) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const titleId = useId();
   const descriptionId = useId();
+  // Client-only portal host (SSR false, client true) without setState-in-effect.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const close = useCallback(() => setOpen(false), []);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!open) {

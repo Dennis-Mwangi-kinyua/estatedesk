@@ -59,8 +59,11 @@ export function NewOrganizationWorkspace({
     stepReady && (footerReached || (form.step === 3 && reviewConfirmed));
 
   useEffect(() => {
-    setFooterReached(false);
-    setReviewConfirmed(false);
+    const id = window.setTimeout(() => {
+      setFooterReached(false);
+      setReviewConfirmed(false);
+    }, 0);
+    return () => window.clearTimeout(id);
   }, [form.step]);
 
   useEffect(() => {

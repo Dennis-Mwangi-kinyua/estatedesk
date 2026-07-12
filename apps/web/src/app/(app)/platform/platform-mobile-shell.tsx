@@ -61,7 +61,9 @@ export default function PlatformMobileShell({
   }, [closeMenu, open]);
 
   useEffect(() => {
-    setOpen(false);
+    // Close drawer after navigation without sync setState in effect body.
+    const id = window.setTimeout(() => setOpen(false), 0);
+    return () => window.clearTimeout(id);
   }, [pathname]);
 
   return (

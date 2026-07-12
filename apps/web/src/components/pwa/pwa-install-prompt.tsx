@@ -49,13 +49,17 @@ export function PwaInstallPrompt() {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
+    let iosTimer: number | undefined;
     if (isIosDevice()) {
-      setShowIosHelp(true);
-      setVisible(true);
+      iosTimer = window.setTimeout(() => {
+        setShowIosHelp(true);
+        setVisible(true);
+      }, 0);
     }
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      if (iosTimer !== undefined) window.clearTimeout(iosTimer);
     };
   }, []);
 

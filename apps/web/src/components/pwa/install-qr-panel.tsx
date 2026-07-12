@@ -13,6 +13,16 @@ type InstallQrPanelProps = {
   className?: string;
 };
 
+function resolveAbsoluteUrl(targetUrl: string) {
+  if (targetUrl.startsWith("http://") || targetUrl.startsWith("https://")) {
+    return targetUrl;
+  }
+  if (typeof window === "undefined") {
+    return targetUrl.startsWith("/") ? targetUrl : `/${targetUrl}`;
+  }
+  return `${window.location.origin}${targetUrl.startsWith("/") ? "" : "/"}${targetUrl}`;
+}
+
 /**
  * Frictionless QR onboarding: scan opens PWA/web without an app store.
  * Use at vacant building entrances or on unit doors.
@@ -24,17 +34,12 @@ export function InstallQrPanel({
   size = 200,
   className = "",
 }: InstallQrPanelProps) {
+  const absoluteUrl = useMemo(() => resolveAbsoluteUrl(targetUrl), [targetUrl]);
   const [dataUrl, setDataUrl] = useState<string | null>(null);
-  const [absoluteUrl, setAbsoluteUrl] = useState(targetUrl);
 
   useEffect(() => {
     let active = true;
-    const resolved =
-      targetUrl.startsWith("http://") || targetUrl.startsWith("https://")
-        ? targetUrl
-        : `${window.location.origin}${targetUrl.startsWith("/") ? "" : "/"}${targetUrl}`;
-
-    setAbsoluteUrl(resolved);
+    const resolved = resolveAbsoluteUrl(targetUrl);
 
     QRCode.toDataURL(resolved, {
       margin: 1,

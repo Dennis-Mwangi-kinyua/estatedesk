@@ -11,12 +11,17 @@ export default async function PlatformAdminsPage() {
     redirectTo: "/dashboard",
   });
 
+  let admins: Awaited<ReturnType<typeof getPlatformAdmins>> | null = null;
+  let loadFailed = false;
+
   try {
-    const admins = await getPlatformAdmins();
-    return <AdminsWorkspace admins={admins} />;
+    admins = await getPlatformAdmins();
   } catch (error) {
     console.error("[PlatformAdminsPage] failed to load admins", error);
+    loadFailed = true;
+  }
 
+  if (loadFailed || !admins) {
     return (
       <div className="mx-auto w-full max-w-5xl space-y-4">
         <div>
@@ -38,4 +43,6 @@ export default async function PlatformAdminsPage() {
       </div>
     );
   }
+
+  return <AdminsWorkspace admins={admins} />;
 }

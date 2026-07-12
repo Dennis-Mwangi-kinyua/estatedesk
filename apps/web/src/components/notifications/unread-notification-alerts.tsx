@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Bell, ExternalLink, X } from "lucide-react";
 import type { UnreadNotificationAlert } from "@/lib/notifications/unread-alert";
@@ -63,19 +63,22 @@ export function UnreadNotificationAlerts({
   alert,
 }: UnreadNotificationAlertsProps) {
   const [popupOpen, setPopupOpen] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   useEffect(() => {
-    setHydrated(true);
     if (alert.count <= 0 || !alert.latest?.id) {
-      setPopupOpen(false);
-      return;
+      const clearId = window.setTimeout(() => setPopupOpen(false), 0);
+      return () => window.clearTimeout(clearId);
     }
 
     const storageKey = popupStorageKey(scope, alert.latest.id);
     if (window.localStorage.getItem(storageKey) === "dismissed") {
-      setPopupOpen(false);
-      return;
+      const clearId = window.setTimeout(() => setPopupOpen(false), 0);
+      return () => window.clearTimeout(clearId);
     }
 
     const timer = window.setTimeout(() => setPopupOpen(true), 300);

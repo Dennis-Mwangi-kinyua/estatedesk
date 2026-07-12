@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Search, Users } from "lucide-react";
 import { ListPagination } from "@/app/(app)/dashboard/caretaker/_components/list-pagination";
 import {
@@ -54,12 +55,12 @@ export function TenantsList({ data }: { data: CaretakerTenantsPageData }) {
                 : "When leases are linked to apartments you cover, tenants will appear here for quick contact and follow-up."}
             </p>
             {query ? (
-              <a
+              <Link
                 href="/dashboard/caretaker/tenants"
                 className="mt-5 inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
               >
                 Clear search
-              </a>
+              </Link>
             ) : null}
           </div>
         ) : (

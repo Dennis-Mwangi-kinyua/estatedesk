@@ -33,17 +33,12 @@ export function QuickMeterReadingPopup({
       ),
     [pendingUnits, state.submittedUnitIds],
   );
+  const effectiveUnitId = remainingUnits.some((unit) => unit.id === selectedUnitId)
+    ? selectedUnitId
+    : (remainingUnits[0]?.id ?? "");
   const activeUnit =
-    remainingUnits.find((unit) => unit.id === selectedUnitId) ??
+    remainingUnits.find((unit) => unit.id === effectiveUnitId) ??
     remainingUnits[0];
-
-  useEffect(() => {
-    if (!remainingUnits.length) return;
-
-    if (!remainingUnits.some((unit) => unit.id === selectedUnitId)) {
-      setSelectedUnitId(remainingUnits[0].id);
-    }
-  }, [remainingUnits, selectedUnitId]);
 
   useEffect(() => {
     if (!open) return;
@@ -133,7 +128,7 @@ export function QuickMeterReadingPopup({
                   </label>
                   <select
                     name="unitId"
-                    value={selectedUnitId}
+                    value={effectiveUnitId}
                     onChange={(event) => setSelectedUnitId(event.target.value)}
                     required
                     className={fieldClassName}

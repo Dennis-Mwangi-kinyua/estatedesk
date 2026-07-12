@@ -77,13 +77,18 @@ export function PropertyCreateWizard({
   }
 
   useEffect(() => {
-    if (currentStep !== STEPS.length) {
-      setReviewConfirmed(false);
-      return;
-    }
+    const id = window.setTimeout(() => {
+      if (currentStep !== STEPS.length) {
+        setReviewConfirmed(false);
+        return;
+      }
 
-    setReviewSummary(refreshReviewSummary());
-    setReviewConfirmed(false);
+      setReviewSummary(refreshReviewSummary());
+      setReviewConfirmed(false);
+    }, 0);
+    return () => window.clearTimeout(id);
+    // refreshReviewSummary is recreated each render; step + maps are the real deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, currencyCode, landlordProfileMap, taxpayerProfileMap]);
 
   function handleNext() {
