@@ -18,7 +18,7 @@ export type MarketingWorkspaceProps = {
 
 export function MarketingWorkspace(props: MarketingWorkspaceProps) {
   return (
-    <div className="space-y-6">
+    <div className="ed-mobile-first flex min-w-0 max-w-full flex-col gap-4 overflow-x-clip sm:gap-6">
       <MarketingMarketersSection {...props} />
       <MarketingLeadsOrgsSection {...props} />
     </div>

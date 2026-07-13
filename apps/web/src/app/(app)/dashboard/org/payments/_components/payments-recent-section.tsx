@@ -24,7 +24,7 @@ export function PaymentsRecentSection({
         </p>
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
+        <table className="payments-responsive-table min-w-full text-sm">
           <thead className="border-b border-border bg-muted/20 text-left">
             <tr>
               <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -62,25 +62,25 @@ export function PaymentsRecentSection({
                 key={payment.id}
                 className="border-b border-border/70 transition hover:bg-muted/10"
               >
-                <td className="px-4 py-3 font-medium text-foreground">
+                <td data-label="Payer" className="px-4 py-3 font-medium text-foreground">
                   {payment.payerTenant?.fullName ??
                     payment.payerUser?.fullName ??
                     payment.payerName ??
                     payment.payerType}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
+                <td data-label="Target" className="px-4 py-3 text-muted-foreground">
                   {formatStatus(payment.targetType)}
                 </td>
-                <td className="px-4 py-3 font-semibold text-foreground">
+                <td data-label="Amount" className="px-4 py-3 font-semibold text-foreground">
                   {formatLedgerCurrency(payment.amount)}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
+                <td data-label="Gateway" className="px-4 py-3 text-muted-foreground">
                   {formatStatus(payment.gatewayStatus)}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
+                <td data-label="Verification" className="px-4 py-3 text-muted-foreground">
                   {formatStatus(payment.verificationStatus)}
                 </td>
-                <td className="px-4 py-3">
+                <td data-label="Reconciliation" className="px-4 py-3">
                   <span
                     className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${reconciliationClasses(
                       payment.reconciliationStatus,
@@ -89,16 +89,16 @@ export function PaymentsRecentSection({
                     {formatStatus(payment.reconciliationStatus)}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
+                <td data-label="Reference" className="px-4 py-3 text-muted-foreground">
                   {payment.reference ??
                     payment.externalReference ??
                     payment.checkoutRequestId ??
                     "-"}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
+                <td data-label="Date" className="px-4 py-3 text-muted-foreground">
                   {formatLedgerDate(payment.paidAt ?? payment.createdAt)}
                 </td>
-                <td className="min-w-72 px-4 py-3">
+                <td data-label="Correction" data-mobile-block="true" className="min-w-72 px-4 py-3">
                   {payment.verificationStatus === "VERIFIED" ? (
                     <form action={reverseVerifiedPaymentAction} className="grid gap-2">
                       <input type="hidden" name="paymentId" value={payment.id} />
@@ -124,7 +124,7 @@ export function PaymentsRecentSection({
             ))}
             {ledger.recentPayments.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={9} className="payments-empty-cell px-4 py-8 text-center text-muted-foreground">
                   No payments recorded this month.
                 </td>
               </tr>

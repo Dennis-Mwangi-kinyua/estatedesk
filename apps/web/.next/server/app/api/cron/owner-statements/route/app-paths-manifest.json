@@ -1,0 +1,3 @@
+{
+  "/api/cron/owner-statements/route": "app/api/cron/owner-statements/route.js"
+}

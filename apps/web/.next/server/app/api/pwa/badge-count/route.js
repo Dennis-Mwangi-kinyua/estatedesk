@@ -1,0 +1,12 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/pwa/badge-count/route.js")
+R.c("server/chunks/[root-of-the-server]__0.fs~f-._.js")
+R.c("server/chunks/node_modules_next_0x_x~l6._.js")
+R.c("server/chunks/node_modules_next_dist_064w.za._.js")
+R.c("server/chunks/node_modules_next_0p7zs5o._.js")
+R.c("server/chunks/[root-of-the-server]__11j~5mn._.js")
+R.c("server/chunks/_0w1~_2g._.js")
+R.c("server/chunks/_09dwdz-._.js")
+R.c("server/chunks/node_modules_next_dist_0gzrts9._.js")
+R.c("server/chunks/apps_web__next-internal_server_app_api_pwa_badge-count_route_actions_0slrt6j.js")
+R.m(964380)
+module.exports=R.m(964380).exports

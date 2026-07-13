@@ -1,0 +1,3 @@
+module.exports=[642937,a=>{"use strict";async function b(a,b,c,d){let e=c.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").replace(/-{2,}/g,"-").slice(0,48)||"tenant";for(let c=0;c<50;c+=1){let f=0===c?e:`${e.slice(0,40)}-${c+1}`;if(!await a.tenant.findFirst({where:{orgId:b,slug:f,...d?{id:{not:d}}:{}},select:{id:!0}}))return f}return`${e.slice(0,32)}-${Date.now().toString(36)}`}async function c(a,c){if(c.slug?.trim())return c.slug.trim();let d=await b(a,c.orgId,c.fullName,c.id);return await a.tenant.update({where:{id:c.id},data:{slug:d},select:{id:!0}}),d}a.s(["allocateTenantSlug",0,b,"ensureTenantSlug",0,c])}];
+
+//# sourceMappingURL=apps_web_src_lib_tenants_slug_ts_0251na_._.js.map

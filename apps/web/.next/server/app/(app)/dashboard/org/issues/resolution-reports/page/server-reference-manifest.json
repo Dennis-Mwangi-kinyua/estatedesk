@@ -1,0 +1,89 @@
+{
+  "node": {
+    "00dd0d37b0cd186fd20a0541908951af609054d5a9": {
+      "workers": {
+        "app/(app)/dashboard/org/issues/resolution-reports/page": {
+          "moduleId": 370158,
+          "async": true,
+          "exportedName": "logoutAction",
+          "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+        }
+      },
+      "exportedName": "logoutAction",
+      "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+    },
+    "405912e174edb09f1fae01d34a108407f7ece3430d": {
+      "workers": {
+        "app/(app)/dashboard/org/issues/resolution-reports/page": {
+          "moduleId": 370158,
+          "async": true,
+          "exportedName": "leaveOrgSupportAccessAction",
+          "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+        }
+      },
+      "exportedName": "leaveOrgSupportAccessAction",
+      "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+    },
+    "007dc04b1ba63eb25dc749e4c590558abb7854ee14": {
+      "workers": {
+        "app/(app)/dashboard/org/issues/resolution-reports/page": {
+          "moduleId": 370158,
+          "async": true,
+          "exportedName": "extendOrgSupportAccessAction",
+          "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+        }
+      },
+      "exportedName": "extendOrgSupportAccessAction",
+      "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+    },
+    "401618de7a5d7abd2b93cf246ed1cfbb718893cd4d": {
+      "workers": {
+        "app/(app)/dashboard/org/issues/resolution-reports/page": {
+          "moduleId": 370158,
+          "async": true,
+          "exportedName": "approveIssueResolutionReportAction",
+          "filename": "apps/web/src/app/(app)/dashboard/org/issues/actions.ts"
+        }
+      },
+      "exportedName": "approveIssueResolutionReportAction",
+      "filename": "apps/web/src/app/(app)/dashboard/org/issues/actions.ts"
+    },
+    "404194eef598d5180e712524dfe85fbe1077bd8d50": {
+      "workers": {
+        "app/(app)/dashboard/org/issues/resolution-reports/page": {
+          "moduleId": 370158,
+          "async": true,
+          "exportedName": "rejectIssueResolutionReportAction",
+          "filename": "apps/web/src/app/(app)/dashboard/org/issues/actions.ts"
+        }
+      },
+      "exportedName": "rejectIssueResolutionReportAction",
+      "filename": "apps/web/src/app/(app)/dashboard/org/issues/actions.ts"
+    },
+    "4082d4944f2e3e08364f3a2b519f2097f484cdbc5d": {
+      "workers": {
+        "app/(app)/dashboard/org/issues/resolution-reports/page": {
+          "moduleId": 370158,
+          "async": true,
+          "exportedName": "updateIssueStatusAction",
+          "filename": "apps/web/src/app/(app)/dashboard/org/issues/actions.ts"
+        }
+      },
+      "exportedName": "updateIssueStatusAction",
+      "filename": "apps/web/src/app/(app)/dashboard/org/issues/actions.ts"
+    },
+    "40c2234e4fa4c928e4662b53b757cadb5d9933c1bc": {
+      "workers": {
+        "app/(app)/dashboard/org/issues/resolution-reports/page": {
+          "moduleId": 370158,
+          "async": true,
+          "exportedName": "assignCaretakerAction",
+          "filename": "apps/web/src/app/(app)/dashboard/org/issues/actions.ts"
+        }
+      },
+      "exportedName": "assignCaretakerAction",
+      "filename": "apps/web/src/app/(app)/dashboard/org/issues/actions.ts"
+    }
+  },
+  "edge": {}
+}

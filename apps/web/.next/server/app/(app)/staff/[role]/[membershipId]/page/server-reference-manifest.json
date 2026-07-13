@@ -1,0 +1,89 @@
+{
+  "node": {
+    "00dd0d37b0cd186fd20a0541908951af609054d5a9": {
+      "workers": {
+        "app/(app)/staff/[role]/[membershipId]/page": {
+          "moduleId": 648127,
+          "async": true,
+          "exportedName": "logoutAction",
+          "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+        }
+      },
+      "exportedName": "logoutAction",
+      "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+    },
+    "405912e174edb09f1fae01d34a108407f7ece3430d": {
+      "workers": {
+        "app/(app)/staff/[role]/[membershipId]/page": {
+          "moduleId": 648127,
+          "async": true,
+          "exportedName": "leaveOrgSupportAccessAction",
+          "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+        }
+      },
+      "exportedName": "leaveOrgSupportAccessAction",
+      "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+    },
+    "007dc04b1ba63eb25dc749e4c590558abb7854ee14": {
+      "workers": {
+        "app/(app)/staff/[role]/[membershipId]/page": {
+          "moduleId": 648127,
+          "async": true,
+          "exportedName": "extendOrgSupportAccessAction",
+          "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+        }
+      },
+      "exportedName": "extendOrgSupportAccessAction",
+      "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+    },
+    "40199498524680f8f2071b9e52e483e2528a2f6179": {
+      "workers": {
+        "app/(app)/staff/[role]/[membershipId]/page": {
+          "moduleId": 648127,
+          "async": true,
+          "exportedName": "createCaretakerAssignment",
+          "filename": "apps/web/src/features/staff/actions/create-caretaker-assignment.ts"
+        }
+      },
+      "exportedName": "createCaretakerAssignment",
+      "filename": "apps/web/src/features/staff/actions/create-caretaker-assignment.ts"
+    },
+    "40b9e5b0a2c9f9df3f7dbf49dac4e908a6defc3be6": {
+      "workers": {
+        "app/(app)/staff/[role]/[membershipId]/page": {
+          "moduleId": 648127,
+          "async": true,
+          "exportedName": "endCaretakerAssignment",
+          "filename": "apps/web/src/features/staff/actions/create-caretaker-assignment.ts"
+        }
+      },
+      "exportedName": "endCaretakerAssignment",
+      "filename": "apps/web/src/features/staff/actions/create-caretaker-assignment.ts"
+    },
+    "404454e229fd7bc3039efbddce45a933eab987b953": {
+      "workers": {
+        "app/(app)/staff/[role]/[membershipId]/page": {
+          "moduleId": 648127,
+          "async": true,
+          "exportedName": "deactivateMembershipAction",
+          "filename": "apps/web/src/features/staff/actions/deactivate-membership.ts"
+        }
+      },
+      "exportedName": "deactivateMembershipAction",
+      "filename": "apps/web/src/features/staff/actions/deactivate-membership.ts"
+    },
+    "40a57ef0208d870b5145b5fe36f05988468c70fc16": {
+      "workers": {
+        "app/(app)/staff/[role]/[membershipId]/page": {
+          "moduleId": 648127,
+          "async": true,
+          "exportedName": "reactivateMembershipAction",
+          "filename": "apps/web/src/features/staff/actions/deactivate-membership.ts"
+        }
+      },
+      "exportedName": "reactivateMembershipAction",
+      "filename": "apps/web/src/features/staff/actions/deactivate-membership.ts"
+    }
+  },
+  "edge": {}
+}

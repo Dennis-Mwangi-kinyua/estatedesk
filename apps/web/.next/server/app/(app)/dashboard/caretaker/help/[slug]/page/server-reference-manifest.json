@@ -1,0 +1,29 @@
+{
+  "node": {
+    "00dd0d37b0cd186fd20a0541908951af609054d5a9": {
+      "workers": {
+        "app/(app)/dashboard/caretaker/help/[slug]/page": {
+          "moduleId": 355241,
+          "async": true,
+          "exportedName": "logoutAction",
+          "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+        }
+      },
+      "exportedName": "logoutAction",
+      "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+    },
+    "40a83a98045309920e12606dbfca561aedd7823c2d": {
+      "workers": {
+        "app/(app)/dashboard/caretaker/help/[slug]/page": {
+          "moduleId": 355241,
+          "async": true,
+          "exportedName": "syncOfflineQueueAction",
+          "filename": "apps/web/src/app/(app)/dashboard/caretaker/_lib/sync-offline-queue-action.ts"
+        }
+      },
+      "exportedName": "syncOfflineQueueAction",
+      "filename": "apps/web/src/app/(app)/dashboard/caretaker/_lib/sync-offline-queue-action.ts"
+    }
+  },
+  "edge": {}
+}

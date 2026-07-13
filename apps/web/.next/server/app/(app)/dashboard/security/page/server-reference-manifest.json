@@ -1,0 +1,41 @@
+{
+  "node": {
+    "009c198f57292723d349de5b84bd7096cefae685fe": {
+      "workers": {
+        "app/(app)/dashboard/security/page": {
+          "moduleId": 515969,
+          "async": true,
+          "exportedName": "revokeOtherSessionsAction",
+          "filename": "apps/web/src/app/(app)/dashboard/security/actions.ts"
+        }
+      },
+      "exportedName": "revokeOtherSessionsAction",
+      "filename": "apps/web/src/app/(app)/dashboard/security/actions.ts"
+    },
+    "4019945b4c3768e2d9f84b1cfc2ea341e9519cdf6a": {
+      "workers": {
+        "app/(app)/dashboard/security/page": {
+          "moduleId": 515969,
+          "async": true,
+          "exportedName": "revokeSessionAction",
+          "filename": "apps/web/src/app/(app)/dashboard/security/actions.ts"
+        }
+      },
+      "exportedName": "revokeSessionAction",
+      "filename": "apps/web/src/app/(app)/dashboard/security/actions.ts"
+    },
+    "00dd0d37b0cd186fd20a0541908951af609054d5a9": {
+      "workers": {
+        "app/(app)/dashboard/security/page": {
+          "moduleId": 515969,
+          "async": true,
+          "exportedName": "logoutAction",
+          "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+        }
+      },
+      "exportedName": "logoutAction",
+      "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+    }
+  },
+  "edge": {}
+}

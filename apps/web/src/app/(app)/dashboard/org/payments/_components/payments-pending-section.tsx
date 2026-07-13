@@ -36,7 +36,7 @@ export function PaymentsPendingSection({
               </p>
             </div>
 
-            <form action="/dashboard/org/payments" className="flex w-full max-w-md gap-2">
+            <form action="/dashboard/org/payments" className="flex w-full max-w-md flex-col gap-2 min-[400px]:flex-row">
               <input
                 type="search"
                 name="q"
@@ -52,7 +52,7 @@ export function PaymentsPendingSection({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+          <table className="payments-responsive-table min-w-full text-sm">
             <thead className="border-b border-border bg-muted/20 text-left">
               <tr>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -90,22 +90,22 @@ export function PaymentsPendingSection({
                     key={payment.id}
                     className="border-b border-border/70 transition hover:bg-muted/10"
                   >
-                    <td className="px-4 py-3 font-medium text-foreground">
+                    <td data-label="Payer" className="px-4 py-3 font-medium text-foreground">
                       {payment.payerTenant?.fullName ??
                         payment.payerUser?.fullName ??
                         payment.payerName ??
                         payment.payerType}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td data-label="Method" className="px-4 py-3 text-muted-foreground">
                       {getCheckoutMethodLabel(payment.method, payment.callbackRaw)}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td data-label="Target" className="px-4 py-3 text-muted-foreground">
                       {formatStatus(payment.targetType)}
                     </td>
-                    <td className="px-4 py-3 font-semibold text-foreground">
+                    <td data-label="Amount" className="px-4 py-3 font-semibold text-foreground">
                       {formatLedgerCurrency(payment.amount)}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td data-label="Reference" className="px-4 py-3 text-muted-foreground">
                       <span className="font-semibold text-foreground">
                         {payment.externalReference ??
                           payment.reference ??
@@ -113,13 +113,13 @@ export function PaymentsPendingSection({
                           "-"}
                       </span>
                     </td>
-                    <td className="max-w-sm px-4 py-3 text-xs leading-5 text-muted-foreground">
+                    <td data-label="Message" className="max-w-sm px-4 py-3 text-xs leading-5 text-muted-foreground">
                       {transactionMessage ? transactionMessage : "-"}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td data-label="Submitted" className="px-4 py-3 text-muted-foreground">
                       {formatLedgerDate(payment.createdAt)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td data-label="Actions" data-mobile-block="true" className="px-4 py-3">
                       <div className="flex min-w-64 flex-col gap-2">
                         <form action={verifyTenantPaymentAction}>
                           <input type="hidden" name="paymentId" value={payment.id} />
@@ -171,7 +171,7 @@ export function PaymentsPendingSection({
 
   return (
     <section className={`${panelShellClassName} p-5 sm:p-6`}>
-      <form action="/dashboard/org/payments" className="flex max-w-md gap-2">
+      <form action="/dashboard/org/payments" className="flex max-w-md flex-col gap-2 min-[400px]:flex-row">
         <input
           type="search"
           name="q"

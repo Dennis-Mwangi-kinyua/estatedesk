@@ -1,0 +1,1 @@
+globalThis.__RSC_MANIFEST=(globalThis.__RSC_MANIFEST||{});globalThis.__RSC_MANIFEST["/manifest.webmanifest/route"]={"moduleLoading":{"prefix":"/_next/"},"ssrModuleMapping":{},"edgeSSRModuleMapping":{},"clientModules":{},"entryCSSFiles":{"/home/baba-nyakio/Desktop/estatedesk-main/apps/web/src/app/manifest.webmanifest/route":[]},"rscModuleMapping":{},"edgeRscModuleMapping":{}};

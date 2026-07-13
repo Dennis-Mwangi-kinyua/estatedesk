@@ -1,0 +1,41 @@
+{
+  "node": {
+    "00dd0d37b0cd186fd20a0541908951af609054d5a9": {
+      "workers": {
+        "app/(app)/dashboard/caretaker/water-bills/read/[unitId]/page": {
+          "moduleId": 893369,
+          "async": true,
+          "exportedName": "logoutAction",
+          "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+        }
+      },
+      "exportedName": "logoutAction",
+      "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+    },
+    "40a83a98045309920e12606dbfca561aedd7823c2d": {
+      "workers": {
+        "app/(app)/dashboard/caretaker/water-bills/read/[unitId]/page": {
+          "moduleId": 893369,
+          "async": true,
+          "exportedName": "syncOfflineQueueAction",
+          "filename": "apps/web/src/app/(app)/dashboard/caretaker/_lib/sync-offline-queue-action.ts"
+        }
+      },
+      "exportedName": "syncOfflineQueueAction",
+      "filename": "apps/web/src/app/(app)/dashboard/caretaker/_lib/sync-offline-queue-action.ts"
+    },
+    "60357f6c12e7efc1f709c96a1f8510fe6b67850048": {
+      "workers": {
+        "app/(app)/dashboard/caretaker/water-bills/read/[unitId]/page": {
+          "moduleId": 893369,
+          "async": true,
+          "exportedName": "submitMeterReading",
+          "filename": "apps/web/src/app/(app)/dashboard/caretaker/water-bills/read/[unitId]/_lib/submit-meter-reading.ts"
+        }
+      },
+      "exportedName": "submitMeterReading",
+      "filename": "apps/web/src/app/(app)/dashboard/caretaker/water-bills/read/[unitId]/_lib/submit-meter-reading.ts"
+    }
+  },
+  "edge": {}
+}

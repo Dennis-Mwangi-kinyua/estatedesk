@@ -61,7 +61,7 @@ export default async function PlatformPaymentsPage({
   const ledger = await getPlatformPaymentLedger(undefined, { skip, take, q });
 
   return (
-    <div className="ed-mobile-first space-y-4 sm:space-y-6">
+    <div className="ed-mobile-first min-w-0 max-w-full space-y-4 overflow-x-clip sm:space-y-6">
       <div>
         <p className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">
           Platform ledger
@@ -75,7 +75,7 @@ export default async function PlatformPaymentsPage({
         </p>
       </div>
 
-      <section className="ed-keep-cols grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
+      <section className="ed-keep-cols grid grid-cols-1 gap-2.5 min-[360px]:grid-cols-2 sm:gap-3 xl:grid-cols-4">
         <StatCard label="Organizations" value={ledger.totals.organizations} />
         <StatCard
           label="Listed paid"
@@ -104,7 +104,7 @@ export default async function PlatformPaymentsPage({
             name="q"
             defaultValue={q}
             placeholder="Search organization or slug"
-            className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none"
+            className="min-w-0 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-base outline-none sm:text-sm"
           />
           <button className="rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white">
             Apply
@@ -118,17 +118,17 @@ export default async function PlatformPaymentsPage({
         ) : (
           <ResponsiveDataList
             mobile={
-              <ul className="divide-y divide-neutral-100">
+              <ul className="min-w-0 divide-y divide-neutral-100 overflow-hidden">
                 {ledger.rows.map((row) => (
                   <li key={row.orgId}>
                     <DataCard>
                       <Link
                         href={`/platform/organizations/${row.slug}`}
-                        className="text-sm font-semibold text-neutral-950 underline-offset-4 hover:underline"
+                        className="block max-w-full break-words text-sm font-semibold text-neutral-950 underline-offset-4 hover:underline"
                       >
                         {row.name}
                       </Link>
-                      <p className="mt-0.5 text-xs text-neutral-500">/{row.slug}</p>
+                      <p className="mt-0.5 break-all text-xs text-neutral-500">/{row.slug}</p>
                       <dl className="mt-2.5 space-y-1.5 rounded-xl border border-neutral-200 bg-neutral-50 p-2.5">
                         <DataCardRow label="Tenants" value={row.tenantCount} />
                         <DataCardRow
@@ -143,6 +143,7 @@ export default async function PlatformPaymentsPage({
                           label="Deficit"
                           value={formatLedgerCurrency(row.deficit)}
                         />
+                        <DataCardRow label="Payments" value={row.paymentCount} />
                         <DataCardRow
                           label="Last payment"
                           value={formatLedgerDate(row.lastPaymentAt)}

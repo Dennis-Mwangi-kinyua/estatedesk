@@ -1,0 +1,3 @@
+module.exports=[606371,a=>{"use strict";var b=a.i(572131);a.s(["ControlOrgTableFilter",0,function(){return(0,b.useEffect)(()=>{let a=document.getElementById("control-org-filter");if(!a)return;let b=()=>{let b=a.value.trim().toLowerCase();document.querySelectorAll(".control-org-row").forEach(a=>{let c=a.dataset.orgFilter??"",d=!b||c.includes(b);a.hidden=!d,a.style.display=d?"":"none"})};return a.addEventListener("input",b),()=>a.removeEventListener("input",b)},[]),null}])}];
+
+//# sourceMappingURL=apps_web_src_app_%28app%29_platform_control_org-table-filter_tsx_068~my0._.js.map

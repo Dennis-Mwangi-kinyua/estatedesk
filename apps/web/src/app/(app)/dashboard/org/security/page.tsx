@@ -129,7 +129,7 @@ export default async function OrgSecurityPage() {
               Active sessions
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              EstateDesk sessions expire after 30 minutes. Review signed-in devices
+              EstateDesk sessions expire after 30 days of inactivity. Review signed-in devices
               and revoke any session you do not recognize.
             </p>
           </div>
@@ -168,7 +168,7 @@ export default async function OrgSecurityPage() {
               <Clock3 className="h-4 w-4" />
               Timeout
             </p>
-            <p className="mt-2 text-sm font-semibold text-foreground">30 minutes</p>
+            <p className="mt-2 text-sm font-semibold text-foreground">30 days of inactivity</p>
           </div>
         </div>
       </section>

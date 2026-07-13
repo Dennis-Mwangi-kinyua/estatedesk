@@ -29,7 +29,7 @@ export function SecuritySessionsContent({
               Active sessions
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              EstateDesk sessions now expire after 30 minutes. Review signed-in
+              EstateDesk sessions expire after 30 days of inactivity. Review signed-in
               devices and revoke any session you do not recognize.
             </p>
           </div>

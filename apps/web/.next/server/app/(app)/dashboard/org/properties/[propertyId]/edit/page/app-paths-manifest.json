@@ -1,0 +1,3 @@
+{
+  "/(app)/dashboard/org/properties/[propertyId]/edit/page": "app/(app)/dashboard/org/properties/[propertyId]/edit/page.js"
+}

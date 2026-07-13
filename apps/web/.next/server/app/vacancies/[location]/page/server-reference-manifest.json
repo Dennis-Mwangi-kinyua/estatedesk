@@ -1,0 +1,17 @@
+{
+  "node": {
+    "600746ad4aa727cf96a754a2e0f73ba3b09b44558a": {
+      "workers": {
+        "app/vacancies/[location]/page": {
+          "moduleId": 211691,
+          "async": true,
+          "exportedName": "sendVacancyInquiryAction",
+          "filename": "apps/web/src/app/vacancies/[location]/actions.ts"
+        }
+      },
+      "exportedName": "sendVacancyInquiryAction",
+      "filename": "apps/web/src/app/vacancies/[location]/actions.ts"
+    }
+  },
+  "edge": {}
+}

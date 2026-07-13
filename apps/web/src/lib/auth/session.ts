@@ -67,7 +67,10 @@ export class ActiveSessionLimitError extends Error {
 }
 
 const MAX_ACTIVE_SESSIONS_PER_USER = 2;
-const SESSION_MAX_AGE_SECONDS = 60 * 30;
+// Keep normal web and installed-PWA sessions across browser/app restarts. This
+// remains a sliding expiry: active sessions are renewed below, while sessions
+// that are not used for 30 days expire in both the database and the browser.
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 const SESSION_RENEWAL_THRESHOLD = 0.5;
 
 function isProduction() {
@@ -84,7 +87,11 @@ function envFlagEnabled(name: string, defaultInProduction: boolean) {
 }
 
 const ENFORCE_USER_AGENT_MATCH = envFlagEnabled("SESSION_BIND_USER_AGENT", true);
-const ENFORCE_IP_MATCH = envFlagEnabled("SESSION_BIND_IP", true);
+// Mobile clients routinely change public IPs as they move between Wi-Fi and
+// cellular networks. Binding a session to that address turns those legitimate
+// network changes into logouts. Deployments that have a stable trusted proxy
+// can still explicitly opt in with SESSION_BIND_IP=true.
+const ENFORCE_IP_MATCH = envFlagEnabled("SESSION_BIND_IP", false);
 
 function generateSessionToken(): string {
   return crypto.randomBytes(32).toString("hex");

@@ -5,7 +5,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("en-KE", {
   timeStyle: "short",
 });
 
-export const SESSION_TIMEOUT_LABEL = "30 minutes";
+export const SESSION_TIMEOUT_LABEL = "30 days of inactivity";
 
 export function formatSessionDateTime(value: Date) {
   return dateTimeFormatter.format(value);

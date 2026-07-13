@@ -55,7 +55,7 @@ function SubmitButton({
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-3 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-400 sm:w-auto"
+      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
     >
       <Icon className="h-4 w-4" />
       {pending ? "Saving..." : label}
@@ -92,19 +92,19 @@ export function CreateMarketerForm() {
         name="fullName"
         required
         placeholder="Marketer name"
-        className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none"
+        className="rounded-2xl border border-border bg-background px-4 py-3 text-base text-foreground outline-none focus:border-ring focus:ring-4 focus:ring-ring/20 sm:text-sm"
       />
       <input
         name="email"
         type="email"
         placeholder="Email"
-        className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none"
+        className="rounded-2xl border border-border bg-background px-4 py-3 text-base text-foreground outline-none focus:border-ring focus:ring-4 focus:ring-ring/20 sm:text-sm"
       />
       <input
         name="referralCode"
         required
         placeholder="REFCODE"
-        className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-semibold uppercase outline-none"
+        className="rounded-2xl border border-border bg-background px-4 py-3 text-base font-semibold uppercase text-foreground outline-none focus:border-ring focus:ring-4 focus:ring-ring/20 sm:text-sm"
       />
       <input
         name="defaultCommissionRate"
@@ -114,12 +114,12 @@ export function CreateMarketerForm() {
         step="0.01"
         defaultValue="10"
         aria-label="Default commission rate percentage"
-        className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none"
+        className="rounded-2xl border border-border bg-background px-4 py-3 text-base text-foreground outline-none focus:border-ring focus:ring-4 focus:ring-ring/20 sm:text-sm"
       />
       <input
         name="notes"
         placeholder="Notes"
-        className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none"
+        className="rounded-2xl border border-border bg-background px-4 py-3 text-base text-foreground outline-none focus:border-ring focus:ring-4 focus:ring-ring/20 sm:text-sm"
       />
       <SubmitButton label="Add" icon="plus" />
       <div className="md:col-span-2 lg:col-span-4 xl:col-span-6">
@@ -142,7 +142,7 @@ export function MarketerUpdateForm({
 
   return (
     <form action={action} className="flex w-full flex-col gap-2 lg:min-w-[360px]">
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-[96px_130px_1fr_auto]">
+      <div className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-2 sm:grid-cols-[96px_130px_1fr_auto]">
         <input type="hidden" name="marketerId" value={marketerId} />
         <input
           name="defaultCommissionRate"
@@ -152,12 +152,12 @@ export function MarketerUpdateForm({
           step="0.01"
           defaultValue={defaultCommissionRate}
           aria-label="Default commission rate percentage"
-          className="h-11 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none"
+          className="h-11 w-full rounded-xl border border-border bg-background px-3 py-2 text-base text-foreground outline-none sm:text-sm"
         />
         <select
           name="status"
           defaultValue={status}
-          className="h-11 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none"
+          className="h-11 rounded-xl border border-border bg-background px-3 py-2 text-base text-foreground outline-none sm:text-sm"
         >
           <option value="ACTIVE">ACTIVE</option>
           <option value="INACTIVE">INACTIVE</option>
@@ -166,7 +166,7 @@ export function MarketerUpdateForm({
           name="notes"
           defaultValue={notes}
           placeholder="Notes"
-          className="col-span-2 h-11 min-w-0 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none sm:col-span-1"
+          className="h-11 min-w-0 rounded-xl border border-border bg-background px-3 py-2 text-base text-foreground outline-none min-[400px]:col-span-2 sm:col-span-1 sm:text-sm"
         />
         <SubmitButton />
       </div>
@@ -196,12 +196,12 @@ export function AttributionForm({
 
   return (
     <form action={action} className="flex w-full flex-col gap-2 lg:min-w-[520px]">
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-[minmax(150px,1fr)_96px_145px_minmax(150px,1fr)_auto]">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(150px,1fr)_96px_145px_minmax(150px,1fr)_auto]">
         <input type="hidden" name={hiddenName} value={hiddenValue} />
         <select
           name="marketerId"
           defaultValue={selectedMarketerId ?? "none"}
-          className="col-span-2 h-11 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none sm:col-span-1"
+          className="h-11 rounded-xl border border-border bg-background px-3 py-2 text-base text-foreground outline-none sm:text-sm"
         >
           <option value="none">Unassigned</option>
           {marketers.map((marketer) => (
@@ -219,12 +219,12 @@ export function AttributionForm({
           defaultValue={commissionRate ?? ""}
           placeholder="Rate %"
           aria-label="Commission rate percentage"
-          className="h-11 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none"
+          className="h-11 w-full rounded-xl border border-border bg-background px-3 py-2 text-base text-foreground outline-none sm:text-sm"
         />
         <select
           name="commissionStatus"
           defaultValue={commissionStatus}
-          className="h-11 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none"
+          className="h-11 rounded-xl border border-border bg-background px-3 py-2 text-base text-foreground outline-none sm:text-sm"
         >
           {commissionStatuses.map((status) => (
             <option key={status} value={status}>
@@ -236,7 +236,7 @@ export function AttributionForm({
           name="commissionNotes"
           defaultValue={commissionNotes ?? ""}
           placeholder="Commission notes"
-          className="col-span-2 h-11 min-w-0 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none sm:col-span-1"
+          className="h-11 min-w-0 rounded-xl border border-border bg-background px-3 py-2 text-base text-foreground outline-none sm:text-sm"
         />
         <SubmitButton />
       </div>

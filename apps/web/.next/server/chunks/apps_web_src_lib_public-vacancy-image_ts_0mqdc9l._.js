@@ -1,0 +1,3 @@
+module.exports=[930707,t=>{"use strict";function s(t){if(!t)return null;if(t.startsWith("/")||t.startsWith("http://")||t.startsWith("https://"))return t.startsWith("/"),t;let s=function(t){if(t.startsWith("http://")||t.startsWith("https://"))return t;let s=process.env.S3_PUBLIC_BASE_URL,e=process.env.S3_BUCKET??process.env.S3_BUCKET_NAME,r=process.env.S3_REGION;return s?`${s.replace(/\/$/,"")}/${t.replace(/^\/+/,"")}`:e&&r?`https://${e}.s3.${r}.amazonaws.com/${t.replace(/^\/+/,"")}`:null}(t);return s||`/${t.replace(/^public\//,"")}`}t.s([],797645),t.i(797645),t.s(["publicVacancyImageUrl",0,s],757431),t.i(757431),t.s(["publicVacancyImageUrl",0,s],930707)}];
+
+//# sourceMappingURL=apps_web_src_lib_public-vacancy-image_ts_0mqdc9l._.js.map

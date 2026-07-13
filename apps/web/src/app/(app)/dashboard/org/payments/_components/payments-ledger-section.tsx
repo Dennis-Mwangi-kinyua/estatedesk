@@ -1,7 +1,7 @@
 import { DeferredLink } from "@/components/navigation/app-links";
 import { formatLedgerCurrency, formatLedgerDate } from "@/lib/ledger";
 import type { PaymentsPageData } from "../_lib/types";
-import { formatStatus, panelShellClassName, statusClasses } from "./payments-ui";
+import { panelShellClassName, statusClasses } from "./payments-ui";
 
 export function PaymentsLedgerSection({
   ledger,
@@ -26,7 +26,7 @@ export function PaymentsLedgerSection({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+          <table className="payments-responsive-table min-w-full text-sm">
             <thead className="border-b border-border bg-muted/20 text-left">
               <tr>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -61,7 +61,7 @@ export function PaymentsLedgerSection({
                   key={row.tenantId}
                   className="border-b border-border/70 transition hover:bg-muted/10"
                 >
-                  <td className="px-4 py-3">
+                  <td data-label="Tenant" className="px-4 py-3">
                     <DeferredLink
                       href={`/dashboard/org/tenants/${row.tenantId}`}
                       className="font-semibold text-foreground transition hover:text-primary"
@@ -72,17 +72,17 @@ export function PaymentsLedgerSection({
                       {row.phone || row.email || "-"}
                     </p>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{row.unitLabel}</td>
-                  <td className="px-4 py-3 font-medium text-foreground">
+                  <td data-label="Unit" className="px-4 py-3 text-muted-foreground">{row.unitLabel}</td>
+                  <td data-label="Due" className="px-4 py-3 font-medium text-foreground">
                     {formatLedgerCurrency(row.amountDue)}
                   </td>
-                  <td className="px-4 py-3 font-medium text-emerald-700 dark:text-emerald-300">
+                  <td data-label="Paid" className="px-4 py-3 font-medium text-emerald-700 dark:text-emerald-300">
                     {formatLedgerCurrency(row.amountPaid)}
                   </td>
-                  <td className="px-4 py-3 font-medium text-red-700 dark:text-red-300">
+                  <td data-label="Deficit" className="px-4 py-3 font-medium text-red-700 dark:text-red-300">
                     {formatLedgerCurrency(row.deficit)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td data-label="Status" className="px-4 py-3">
                     <span
                       className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClasses(
                         row.tone,
@@ -96,10 +96,10 @@ export function PaymentsLedgerSection({
                       </p>
                     ) : null}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">
+                  <td data-label="Oldest due" className="px-4 py-3 text-muted-foreground">
                     {formatLedgerDate(row.oldestDueDate)}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">
+                  <td data-label="Last payment" className="px-4 py-3 text-muted-foreground">
                     {formatLedgerDate(row.lastPaymentAt)}
                   </td>
                 </tr>

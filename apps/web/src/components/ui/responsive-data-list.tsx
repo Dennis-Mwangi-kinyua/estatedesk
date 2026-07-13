@@ -53,7 +53,7 @@ export function DataCardRow({
   return (
     <div className="flex min-w-0 items-start justify-between gap-3 text-xs sm:text-sm">
       <dt className="shrink-0 font-medium text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 text-right font-semibold text-foreground">{value}</dd>
+      <dd className="min-w-0 break-words text-right font-semibold tabular-nums text-foreground">{value}</dd>
     </div>
   );
 }

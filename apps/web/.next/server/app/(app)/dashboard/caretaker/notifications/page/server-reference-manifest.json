@@ -1,0 +1,53 @@
+{
+  "node": {
+    "00dd0d37b0cd186fd20a0541908951af609054d5a9": {
+      "workers": {
+        "app/(app)/dashboard/caretaker/notifications/page": {
+          "moduleId": 404709,
+          "async": true,
+          "exportedName": "logoutAction",
+          "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+        }
+      },
+      "exportedName": "logoutAction",
+      "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+    },
+    "40a83a98045309920e12606dbfca561aedd7823c2d": {
+      "workers": {
+        "app/(app)/dashboard/caretaker/notifications/page": {
+          "moduleId": 404709,
+          "async": true,
+          "exportedName": "syncOfflineQueueAction",
+          "filename": "apps/web/src/app/(app)/dashboard/caretaker/_lib/sync-offline-queue-action.ts"
+        }
+      },
+      "exportedName": "syncOfflineQueueAction",
+      "filename": "apps/web/src/app/(app)/dashboard/caretaker/_lib/sync-offline-queue-action.ts"
+    },
+    "004bd8e590cddc1b4a80d5e226a48997f6d826a228": {
+      "workers": {
+        "app/(app)/dashboard/caretaker/notifications/page": {
+          "moduleId": 404709,
+          "async": true,
+          "exportedName": "markAllCaretakerNotificationsReadAction",
+          "filename": "apps/web/src/app/(app)/dashboard/caretaker/notifications/actions.ts"
+        }
+      },
+      "exportedName": "markAllCaretakerNotificationsReadAction",
+      "filename": "apps/web/src/app/(app)/dashboard/caretaker/notifications/actions.ts"
+    },
+    "40a093c88e4538b5e85b416b54410c7bdf61e9bf93": {
+      "workers": {
+        "app/(app)/dashboard/caretaker/notifications/page": {
+          "moduleId": 404709,
+          "async": true,
+          "exportedName": "markCaretakerNotificationReadAction",
+          "filename": "apps/web/src/app/(app)/dashboard/caretaker/notifications/actions.ts"
+        }
+      },
+      "exportedName": "markCaretakerNotificationReadAction",
+      "filename": "apps/web/src/app/(app)/dashboard/caretaker/notifications/actions.ts"
+    }
+  },
+  "edge": {}
+}

@@ -162,54 +162,6 @@ export default function LoginForm({
           backdrop-filter: blur(14px) saturate(1.08);
         }
 
-        @media (max-height: 740px) {
-          .login-form-compact {
-            padding-top: 12px;
-            padding-bottom: 12px;
-          }
-
-          .login-form-stack {
-            gap: 12px;
-          }
-
-          .login-field-stack {
-            gap: 6px;
-          }
-
-          .login-form-label {
-            font-size: 13px;
-          }
-
-          .login-form-meta {
-            margin-top: 12px;
-            padding-top: 12px;
-          }
-        }
-
-        @media (max-height: 660px) {
-          .login-form-compact {
-            padding-top: 10px;
-            padding-bottom: 10px;
-          }
-
-          .login-form-stack {
-            gap: 10px;
-          }
-
-          .login-form-meta {
-            display: none;
-          }
-        }
-
-        @media (max-height: 590px) {
-          .login-form-label {
-            display: none;
-          }
-
-          .login-form-stack {
-            gap: 8px;
-          }
-        }
       `}</style>
 
       {isPending && typeof document !== "undefined"
@@ -345,7 +297,7 @@ export default function LoginForm({
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.18)] transition duration-150 active:scale-[0.99] hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70 sm:min-h-12"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_26px_rgba(13,148,136,0.28)] transition duration-150 active:scale-[0.99] hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-200 disabled:cursor-not-allowed disabled:bg-teal-400 disabled:shadow-none sm:min-h-12"
           >
             <span>{isPending ? "Verifying..." : "Log in"}</span>
             {!isPending ? <ArrowRight className="h-4 w-4" /> : null}

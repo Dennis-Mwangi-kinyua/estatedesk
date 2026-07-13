@@ -1,0 +1,3 @@
+module.exports=[189292,a=>{"use strict";var b=a.i(187924);a.s(["default",0,function({label:a="Print / Save PDF"}){return(0,b.jsx)("button",{type:"button",onClick:()=>window.print(),className:"inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 print:hidden",children:a})}])}];
+
+//# sourceMappingURL=099-_%28app%29_dashboard_org_inspections_%5BinspectionId%5D_PrintReportButton_tsx_12xg48a._.js.map

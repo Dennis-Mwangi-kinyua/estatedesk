@@ -1,20 +1,17 @@
 import {
-  AdminLink,
   Badge,
   EmptyRow,
   PageHeader,
   StatCard,
   Surface,
   formatCurrency,
-  formatDateTime,
   toneForStatus,
 } from "../../_components/control-plane";
 import {
-  AttributionForm,
   CreateMarketerForm,
   MarketerUpdateForm,
 } from "../marketing-forms";
-import { estimateMonthlyCommission, formatPercent, toNumber } from "../_lib/helpers";
+import { formatPercent, toNumber } from "../_lib/helpers";
 import type { MarketingWorkspaceProps } from "./marketing-workspace";
 import { EmptyState, InfoTile } from "./marketing-ui";
 
@@ -32,21 +29,23 @@ export function MarketingMarketersSection(props: MarketingWorkspaceProps) {
 
   return (
     <>
-      <PageHeader
-        eyebrow="Growth"
-        title="Marketing attribution"
-        description="Track which marketer brought each lead or customer, manage referral codes, and follow commission readiness from the platform side."
-      />
+      <div className="order-1">
+        <PageHeader
+          eyebrow="Growth"
+          title="Marketing attribution"
+          description="Track which marketer brought each lead or customer, manage referral codes, and follow commission readiness from the platform side."
+        />
+      </div>
 
       {degraded ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+        <div className="order-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50">
           Marketing attribution data could not be loaded because the database
           timed out. The page is still available; refresh once the database
           connection recovers.
         </div>
       ) : null}
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="ed-keep-cols order-3 grid grid-cols-1 gap-2.5 min-[360px]:grid-cols-2 sm:gap-3 xl:grid-cols-5">
         <StatCard label="Active marketers" value={activeMarketers.length} />
         <StatCard label="Attributed leads" value={attributedLeads} />
         <StatCard label="Attributed orgs" value={attributedOrgs} note={`${unassignedOrgs} unassigned`} />
@@ -60,23 +59,24 @@ export function MarketingMarketersSection(props: MarketingWorkspaceProps) {
       <Surface
         title="Add marketer"
         description="Create a marketer and give them a referral code. Public onboarding and sales forms accept ?ref=CODE, ?referral=CODE, and now let clients type the code manually before submitting."
+        className="order-6 lg:order-4"
       >
         <CreateMarketerForm />
       </Surface>
 
-      <Surface title="Marketers">
-        <div className="grid gap-3 p-3 lg:hidden">
+      <Surface title="Marketers" className="order-7 lg:order-5">
+        <div className="grid min-w-0 gap-3 p-3 lg:hidden">
           {marketers.map((marketer) => (
             <article
               key={marketer.id}
-              className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3"
+              className="min-w-0 rounded-2xl border border-border bg-muted/20 p-3"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h3 className="truncate text-sm font-semibold text-neutral-950">
+                  <h3 className="break-words text-sm font-semibold text-foreground">
                     {marketer.fullName}
                   </h3>
-                  <p className="mt-1 truncate text-xs text-neutral-500">
+                  <p className="mt-1 break-all text-xs text-muted-foreground">
                     {marketer.email ?? marketer.phone ?? "No contact"}
                   </p>
                 </div>
@@ -85,7 +85,7 @@ export function MarketingMarketersSection(props: MarketingWorkspaceProps) {
                 </Badge>
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+              <div className="mt-3 grid grid-cols-1 gap-2 text-xs min-[360px]:grid-cols-2 sm:grid-cols-4">
                 <InfoTile label="Code" value={marketer.referralCode} />
                 <InfoTile
                   label="Onboarding"
@@ -116,9 +116,9 @@ export function MarketingMarketersSection(props: MarketingWorkspaceProps) {
           ) : null}
         </div>
 
-        <div className="hidden overflow-x-auto lg:block">
+        <div className="hidden max-w-full overflow-x-auto lg:block">
           <table className="min-w-full text-sm">
-            <thead className="bg-neutral-50 text-left text-neutral-500">
+            <thead className="bg-muted/40 text-left text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-medium">Marketer</th>
                 <th className="px-4 py-3 font-medium">Referral code</th>
@@ -132,26 +132,26 @@ export function MarketingMarketersSection(props: MarketingWorkspaceProps) {
             </thead>
             <tbody>
               {marketers.map((marketer) => (
-                <tr key={marketer.id} className="border-t border-neutral-100">
+                <tr key={marketer.id} className="border-t border-border">
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-neutral-950">{marketer.fullName}</p>
-                    <p className="mt-1 text-xs text-neutral-500">
+                    <p className="font-semibold text-foreground">{marketer.fullName}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {marketer.email ?? marketer.phone ?? "No contact"}
                     </p>
                   </td>
-                  <td className="px-4 py-3 font-semibold text-neutral-700">
+                  <td className="px-4 py-3 font-semibold text-foreground">
                     {marketer.referralCode}
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs text-neutral-600">
+                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                     /register?ref={marketer.referralCode}
                   </td>
-                  <td className="px-4 py-3 text-neutral-600">
+                  <td className="px-4 py-3 text-muted-foreground">
                     {formatPercent(marketer.defaultCommissionRate)}
                   </td>
-                  <td className="px-4 py-3 text-neutral-600">
+                  <td className="px-4 py-3 text-muted-foreground">
                     {marketer._count.onboardingRequests}
                   </td>
-                  <td className="px-4 py-3 text-neutral-600">
+                  <td className="px-4 py-3 text-muted-foreground">
                     {marketer._count.organizations}
                   </td>
                   <td className="px-4 py-3">

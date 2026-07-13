@@ -1,0 +1,3 @@
+{
+  "/(app)/access-denied/page": "app/(app)/access-denied/page.js"
+}

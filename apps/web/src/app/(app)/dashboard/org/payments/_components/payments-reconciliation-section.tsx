@@ -47,7 +47,7 @@ export function PaymentsReconciliationSection({
             relying on finance reports.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid w-full gap-2 min-[420px]:grid-cols-2 lg:w-auto">
           <Link
             href={`/api/org/reports/reconciliation?${periodParams.toString()}&status=UNRECONCILED`}
             className="inline-flex items-center justify-center rounded-2xl border border-amber-200 bg-background px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50 dark:border-amber-800 dark:text-amber-200 dark:hover:bg-amber-950/30"
@@ -106,13 +106,13 @@ export function PaymentsReconciliationSection({
             className="mt-2 min-h-11 w-full rounded-2xl border border-border bg-background p-2 text-sm text-foreground"
           />
         </label>
-        <button className={`${buttonPrimaryClassName} min-h-11`}>
+        <button className={`${buttonPrimaryClassName} min-h-11 w-full sm:w-auto`}>
           Import and match
         </button>
       </form>
 
       <div className="overflow-x-auto rounded-2xl border border-border">
-        <table className="min-w-full text-sm">
+        <table className="payments-responsive-table min-w-full text-sm">
           <thead className="border-b border-border bg-muted/20 text-left">
             <tr>
               <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -141,7 +141,7 @@ export function PaymentsReconciliationSection({
                 key={payment.id}
                 className="border-b border-border/70 transition hover:bg-muted/10"
               >
-                <td className="px-4 py-3 font-medium text-foreground">
+                <td data-label="Payer" className="px-4 py-3 font-medium text-foreground">
                   {payment.payerTenant?.fullName ??
                     payment.payerUser?.fullName ??
                     payment.payerName ??
@@ -150,16 +150,16 @@ export function PaymentsReconciliationSection({
                     {formatStatus(payment.method)} · {formatStatus(payment.targetType)}
                   </p>
                 </td>
-                <td className="px-4 py-3 font-semibold text-foreground">
+                <td data-label="Amount" className="px-4 py-3 font-semibold text-foreground">
                   {formatLedgerCurrency(payment.amount)}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
+                <td data-label="Reference" className="px-4 py-3 text-muted-foreground">
                   {payment.externalReference ??
                     payment.reference ??
                     payment.checkoutRequestId ??
                     "-"}
                 </td>
-                <td className="px-4 py-3">
+                <td data-label="Status" className="px-4 py-3">
                   <span
                     className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${reconciliationClasses(
                       payment.reconciliationStatus,
@@ -173,10 +173,10 @@ export function PaymentsReconciliationSection({
                     </p>
                   ) : null}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
+                <td data-label="Recorded" className="px-4 py-3 text-muted-foreground">
                   {formatLedgerDate(payment.paidAt ?? payment.createdAt)}
                 </td>
-                <td className="px-4 py-3">
+                <td data-label="Actions" data-mobile-block="true" className="px-4 py-3">
                   <div className="grid min-w-72 gap-2">
                     <form
                       action={reconcilePaymentAction}
@@ -218,7 +218,7 @@ export function PaymentsReconciliationSection({
             ))}
             {reconciliationQueue.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={6} className="payments-empty-cell px-4 py-8 text-center text-muted-foreground">
                   No verified payments need reconciliation right now.
                 </td>
               </tr>

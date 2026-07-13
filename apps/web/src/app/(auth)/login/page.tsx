@@ -25,18 +25,26 @@ const serviceItems = [
   {
     label: "Rent",
     icon: CreditCard,
+    tileClass: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    iconClass: "bg-emerald-100 text-emerald-700",
   },
   {
     label: "Water",
     icon: Droplets,
+    tileClass: "border-sky-200 bg-sky-50 text-sky-800",
+    iconClass: "bg-sky-100 text-sky-700",
   },
   {
     label: "Inspect",
     icon: ClipboardList,
+    tileClass: "border-amber-200 bg-amber-50 text-amber-800",
+    iconClass: "bg-amber-100 text-amber-700",
   },
   {
     label: "Staff",
     icon: Users2,
+    tileClass: "border-violet-200 bg-violet-50 text-violet-800",
+    iconClass: "bg-violet-100 text-violet-700",
   },
 ];
 
@@ -97,8 +105,33 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         }
 
         @media (max-width: 1023px) {
+          .login-screen {
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior-y: contain;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          .login-shell {
+            height: auto;
+            min-height: 100%;
+            overflow: visible;
+          }
+
+          .login-content {
+            height: auto;
+            min-height: 100%;
+          }
+
+          .mobile-card {
+            flex: none;
+            overflow: visible;
+          }
+
           .login-form-shell {
             min-height: 0;
+            flex: none;
+            overflow: visible;
           }
 
           .login-form-shell form {
@@ -131,69 +164,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           }
         }
 
-        @media (max-height: 740px) {
-          .mobile-copy {
-            display: none;
-          }
-
-          .mobile-service-tags {
-            display: none;
-          }
-
-          .mobile-header {
-            padding-top: 14px;
-            padding-bottom: 14px;
-          }
-
-          .mobile-title {
-            margin-top: 10px;
-            font-size: 26px;
-            line-height: 1;
-          }
-        }
-
-        @media (max-height: 670px) {
-          .ios-status-bar,
-          .mobile-footer,
-          .secure-pill {
-            display: none;
-          }
-
-          .mobile-service-card {
-            margin-bottom: 10px;
-          }
-
-          .mobile-home-pill {
-            padding-top: 9px;
-            padding-bottom: 9px;
-          }
-
-          .login-form-shell input,
-          .login-form-shell select,
-          .login-form-shell textarea {
-            min-height: 38px;
-            height: 38px;
-          }
-
-          .login-form-shell button {
-            min-height: 40px;
-          }
-        }
-
-        @media (max-height: 590px) {
-          .mobile-service-card {
-            display: none;
-          }
-
-          .mobile-header {
-            padding-top: 12px;
-            padding-bottom: 12px;
-          }
-
-          .mobile-title {
-            font-size: 24px;
-          }
-        }
       `}</style>
 
       <div className="h-full min-h-0 lg:grid lg:grid-cols-[1.08fr_0.92fr]">
@@ -204,7 +174,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <main className="login-shell mobile-page relative flex h-full min-h-0 items-stretch justify-center overflow-hidden px-3 lg:items-center lg:px-8 xl:px-10">
           <div className="absolute inset-0 bg-white" />
 
-          <div className="relative z-10 flex h-full min-h-0 w-full max-w-[430px] flex-col gap-2 lg:h-auto lg:max-w-md">
+          <div className="login-content relative z-10 flex h-full min-h-0 w-full max-w-[430px] flex-col gap-2 lg:h-auto lg:max-w-md">
             <div className="ios-status-bar flex h-6 shrink-0 items-center justify-between px-5 text-[12px] font-semibold tracking-[-0.02em] text-slate-800 lg:hidden">
               <span>9:41</span>
 
@@ -276,16 +246,20 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                     </div>
                   </div>
 
-                  <div className="mobile-service-tags mt-3 grid grid-cols-4 gap-1.5">
+                  <div className="mobile-service-tags mt-3 grid grid-cols-2 gap-2">
                     {serviceItems.map((item) => {
                       const Icon = item.icon;
 
                       return (
                         <div
                           key={item.label}
-                          className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl border border-slate-200 bg-white/85 px-1.5 py-2 text-[10px] font-medium text-slate-700"
+                          className={`flex min-w-0 items-center gap-2 rounded-2xl border px-2.5 py-2 text-xs font-semibold ${item.tileClass}`}
                         >
-                          <Icon className="h-3.5 w-3.5 text-slate-500" />
+                          <span
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-xl ${item.iconClass}`}
+                          >
+                            <Icon className="h-3.5 w-3.5" />
+                          </span>
                           <span className="truncate">{item.label}</span>
                         </div>
                       );

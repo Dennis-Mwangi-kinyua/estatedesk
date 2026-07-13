@@ -1,0 +1,77 @@
+{
+  "node": {
+    "00dd0d37b0cd186fd20a0541908951af609054d5a9": {
+      "workers": {
+        "app/(app)/platform/users/[id]/page": {
+          "moduleId": 83788,
+          "async": true,
+          "exportedName": "logoutAction",
+          "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+        }
+      },
+      "exportedName": "logoutAction",
+      "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+    },
+    "403af86b4aedc483799c49248f5dfc76fec23aa232": {
+      "workers": {
+        "app/(app)/platform/users/[id]/page": {
+          "moduleId": 83788,
+          "async": true,
+          "exportedName": "updatePlatformUserProfile",
+          "filename": "apps/web/src/app/(app)/platform/users/[id]/actions.ts"
+        }
+      },
+      "exportedName": "updatePlatformUserProfile",
+      "filename": "apps/web/src/app/(app)/platform/users/[id]/actions.ts"
+    },
+    "406f9d4d58e4032c53923ce8b15f1ea3c235cf42b8": {
+      "workers": {
+        "app/(app)/platform/users/[id]/page": {
+          "moduleId": 83788,
+          "async": true,
+          "exportedName": "updatePlatformUserPermissions",
+          "filename": "apps/web/src/app/(app)/platform/users/[id]/actions.ts"
+        }
+      },
+      "exportedName": "updatePlatformUserPermissions",
+      "filename": "apps/web/src/app/(app)/platform/users/[id]/actions.ts"
+    },
+    "4076c16dc9cfc0923528841a24847fe3f292a5dcda": {
+      "workers": {
+        "app/(app)/platform/users/[id]/page": {
+          "moduleId": 83788,
+          "async": true,
+          "exportedName": "updatePlatformUserStatus",
+          "filename": "apps/web/src/app/(app)/platform/users/[id]/actions.ts"
+        }
+      },
+      "exportedName": "updatePlatformUserStatus",
+      "filename": "apps/web/src/app/(app)/platform/users/[id]/actions.ts"
+    },
+    "40caa3e21349fb2ddddb9cce3bbc62b3917dffe00b": {
+      "workers": {
+        "app/(app)/platform/users/[id]/page": {
+          "moduleId": 83788,
+          "async": true,
+          "exportedName": "resetPlatformUserPassword",
+          "filename": "apps/web/src/app/(app)/platform/users/[id]/actions.ts"
+        }
+      },
+      "exportedName": "resetPlatformUserPassword",
+      "filename": "apps/web/src/app/(app)/platform/users/[id]/actions.ts"
+    },
+    "40e91c78ba3cada2460ff12ae813ef53a5bf3eaa71": {
+      "workers": {
+        "app/(app)/platform/users/[id]/page": {
+          "moduleId": 83788,
+          "async": true,
+          "exportedName": "archiveOrphanPlatformUser",
+          "filename": "apps/web/src/app/(app)/platform/users/[id]/actions.ts"
+        }
+      },
+      "exportedName": "archiveOrphanPlatformUser",
+      "filename": "apps/web/src/app/(app)/platform/users/[id]/actions.ts"
+    }
+  },
+  "edge": {}
+}

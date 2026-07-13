@@ -1,0 +1,41 @@
+{
+  "node": {
+    "00dd0d37b0cd186fd20a0541908951af609054d5a9": {
+      "workers": {
+        "app/(app)/platform/backups/page": {
+          "moduleId": 718210,
+          "async": true,
+          "exportedName": "logoutAction",
+          "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+        }
+      },
+      "exportedName": "logoutAction",
+      "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+    },
+    "4050dc0ec244272c9fd2555a2f349946937994e4ac": {
+      "workers": {
+        "app/(app)/platform/backups/page": {
+          "moduleId": 718210,
+          "async": true,
+          "exportedName": "markRestoreDrillAction",
+          "filename": "apps/web/src/app/(app)/platform/backups/actions.ts"
+        }
+      },
+      "exportedName": "markRestoreDrillAction",
+      "filename": "apps/web/src/app/(app)/platform/backups/actions.ts"
+    },
+    "4055533df81b56aaa868b8e58b59dee8ccea463e85": {
+      "workers": {
+        "app/(app)/platform/backups/page": {
+          "moduleId": 718210,
+          "async": true,
+          "exportedName": "recordBackupCheckpointAction",
+          "filename": "apps/web/src/app/(app)/platform/backups/actions.ts"
+        }
+      },
+      "exportedName": "recordBackupCheckpointAction",
+      "filename": "apps/web/src/app/(app)/platform/backups/actions.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,17 @@
+{
+  "node": {
+    "40fd3f2dbdc2bd7b6651642e7fd801340ca46d25c5": {
+      "workers": {
+        "app/(marketing)/contact/page": {
+          "moduleId": 249386,
+          "async": true,
+          "exportedName": "contactSalesAction",
+          "filename": "apps/web/src/app/(marketing)/contact/actions.ts"
+        }
+      },
+      "exportedName": "contactSalesAction",
+      "filename": "apps/web/src/app/(marketing)/contact/actions.ts"
+    }
+  },
+  "edge": {}
+}

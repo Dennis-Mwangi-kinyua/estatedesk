@@ -1,0 +1,3 @@
+{
+  "/(app)/dashboard/caretaker/units/[unitId]/page": "app/(app)/dashboard/caretaker/units/[unitId]/page.js"
+}

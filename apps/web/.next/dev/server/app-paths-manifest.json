@@ -1,0 +1,8 @@
+{
+  "/(app)/platform/payments/page": "app/(app)/platform/payments/page.js",
+  "/(app)/platform/expenditures/page": "app/(app)/platform/expenditures/page.js",
+  "/(app)/platform/payment-ops/page": "app/(app)/platform/payment-ops/page.js",
+  "/(app)/platform/onboarding/page": "app/(app)/platform/onboarding/page.js",
+  "/(app)/platform/marketing/page": "app/(app)/platform/marketing/page.js",
+  "/(app)/platform/system-health/page": "app/(app)/platform/system-health/page.js"
+}

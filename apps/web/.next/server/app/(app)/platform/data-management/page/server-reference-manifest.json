@@ -1,0 +1,41 @@
+{
+  "node": {
+    "00dd0d37b0cd186fd20a0541908951af609054d5a9": {
+      "workers": {
+        "app/(app)/platform/data-management/page": {
+          "moduleId": 825835,
+          "async": true,
+          "exportedName": "logoutAction",
+          "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+        }
+      },
+      "exportedName": "logoutAction",
+      "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+    },
+    "4057af1c87248ca130ba998f3b449941d80baa34ce": {
+      "workers": {
+        "app/(app)/platform/data-management/page": {
+          "moduleId": 825835,
+          "async": true,
+          "exportedName": "approveDataExportRequestAction",
+          "filename": "apps/web/src/app/(app)/platform/data-management/actions.ts"
+        }
+      },
+      "exportedName": "approveDataExportRequestAction",
+      "filename": "apps/web/src/app/(app)/platform/data-management/actions.ts"
+    },
+    "40d5a8fe4fff3fa68f8457ad43d63d9db7263372e0": {
+      "workers": {
+        "app/(app)/platform/data-management/page": {
+          "moduleId": 825835,
+          "async": true,
+          "exportedName": "rejectDataExportRequestAction",
+          "filename": "apps/web/src/app/(app)/platform/data-management/actions.ts"
+        }
+      },
+      "exportedName": "rejectDataExportRequestAction",
+      "filename": "apps/web/src/app/(app)/platform/data-management/actions.ts"
+    }
+  },
+  "edge": {}
+}

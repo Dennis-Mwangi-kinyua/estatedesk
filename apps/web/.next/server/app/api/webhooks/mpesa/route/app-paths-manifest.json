@@ -1,0 +1,3 @@
+{
+  "/api/webhooks/mpesa/route": "app/api/webhooks/mpesa/route.js"
+}

@@ -1,0 +1,3 @@
+{
+  "/(app)/dashboard/tenant/lease/[leaseId]/download/route": "app/(app)/dashboard/tenant/lease/[leaseId]/download/route.js"
+}

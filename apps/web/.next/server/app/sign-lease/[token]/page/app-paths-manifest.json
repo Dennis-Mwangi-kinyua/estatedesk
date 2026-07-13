@@ -1,0 +1,3 @@
+{
+  "/sign-lease/[token]/page": "app/sign-lease/[token]/page.js"
+}

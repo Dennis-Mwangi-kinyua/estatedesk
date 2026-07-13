@@ -1,0 +1,41 @@
+{
+  "node": {
+    "00dd0d37b0cd186fd20a0541908951af609054d5a9": {
+      "workers": {
+        "app/(app)/dashboard/tenant/notifications/page": {
+          "moduleId": 819419,
+          "async": true,
+          "exportedName": "logoutAction",
+          "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+        }
+      },
+      "exportedName": "logoutAction",
+      "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+    },
+    "0071364c42f543cea823c571cc4d094a085d570e24": {
+      "workers": {
+        "app/(app)/dashboard/tenant/notifications/page": {
+          "moduleId": 819419,
+          "async": true,
+          "exportedName": "markAllTenantNotificationsReadAction",
+          "filename": "apps/web/src/app/(app)/dashboard/tenant/notifications/actions.ts"
+        }
+      },
+      "exportedName": "markAllTenantNotificationsReadAction",
+      "filename": "apps/web/src/app/(app)/dashboard/tenant/notifications/actions.ts"
+    },
+    "4048c520c5aba5f8034fb9c8500ae14dd580f60978": {
+      "workers": {
+        "app/(app)/dashboard/tenant/notifications/page": {
+          "moduleId": 819419,
+          "async": true,
+          "exportedName": "markTenantNotificationReadAction",
+          "filename": "apps/web/src/app/(app)/dashboard/tenant/notifications/actions.ts"
+        }
+      },
+      "exportedName": "markTenantNotificationReadAction",
+      "filename": "apps/web/src/app/(app)/dashboard/tenant/notifications/actions.ts"
+    }
+  },
+  "edge": {}
+}

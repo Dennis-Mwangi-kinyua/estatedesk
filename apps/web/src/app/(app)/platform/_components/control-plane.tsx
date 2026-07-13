@@ -114,13 +114,15 @@ export function Surface({
   title,
   children,
   description,
+  className,
 }: {
   title: string;
   description?: string;
   children: ReactNode;
+  className?: string;
 }) {
   return (
-    <section className="ios-panel min-w-0 overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm">
+    <section className={`ios-panel min-w-0 overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm ${className ?? ""}`}>
       <div className="border-b border-border px-3 py-3 sm:px-4 sm:py-4">
         <h2 className="text-base font-semibold text-foreground">{title}</h2>
         {description ? (
@@ -201,11 +203,11 @@ export function PaginationControls({
       <p>
         Showing {from}-{to} of {formatNumber(total)}
       </p>
-      <div className="flex items-center gap-2">
+      <div className="grid min-w-0 grid-cols-3 gap-2 sm:flex sm:items-center">
         <Link
           href={href(Math.max(1, page - 1))}
           aria-disabled={page <= 1}
-          className={`rounded-xl border border-slate-200 px-3 py-2 font-medium dark:border-white/10 ${
+          className={`min-w-0 text-center rounded-xl border border-slate-200 px-2 py-2 font-medium sm:px-3 dark:border-white/10 ${
             page <= 1
               ? "pointer-events-none bg-slate-50 text-slate-300 dark:bg-slate-900 dark:text-slate-600"
               : "bg-white text-slate-800 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
@@ -213,13 +215,13 @@ export function PaginationControls({
         >
           Previous
         </Link>
-        <span className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-slate-900">
+        <span className="min-w-0 whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-2 py-2 text-center sm:px-3 dark:border-white/10 dark:bg-slate-900">
           {page} / {totalPages}
         </span>
         <Link
           href={href(Math.min(totalPages, page + 1))}
           aria-disabled={page >= totalPages}
-          className={`rounded-xl border border-slate-200 px-3 py-2 font-medium dark:border-white/10 ${
+          className={`min-w-0 text-center rounded-xl border border-slate-200 px-2 py-2 font-medium sm:px-3 dark:border-white/10 ${
             page >= totalPages
               ? "pointer-events-none bg-slate-50 text-slate-300 dark:bg-slate-900 dark:text-slate-600"
               : "bg-white text-slate-800 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"

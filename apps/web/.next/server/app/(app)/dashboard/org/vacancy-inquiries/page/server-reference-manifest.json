@@ -1,0 +1,53 @@
+{
+  "node": {
+    "00dd0d37b0cd186fd20a0541908951af609054d5a9": {
+      "workers": {
+        "app/(app)/dashboard/org/vacancy-inquiries/page": {
+          "moduleId": 522686,
+          "async": true,
+          "exportedName": "logoutAction",
+          "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+        }
+      },
+      "exportedName": "logoutAction",
+      "filename": "apps/web/src/features/auth/actions/logout-action.ts"
+    },
+    "405912e174edb09f1fae01d34a108407f7ece3430d": {
+      "workers": {
+        "app/(app)/dashboard/org/vacancy-inquiries/page": {
+          "moduleId": 522686,
+          "async": true,
+          "exportedName": "leaveOrgSupportAccessAction",
+          "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+        }
+      },
+      "exportedName": "leaveOrgSupportAccessAction",
+      "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+    },
+    "007dc04b1ba63eb25dc749e4c590558abb7854ee14": {
+      "workers": {
+        "app/(app)/dashboard/org/vacancy-inquiries/page": {
+          "moduleId": 522686,
+          "async": true,
+          "exportedName": "extendOrgSupportAccessAction",
+          "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+        }
+      },
+      "exportedName": "extendOrgSupportAccessAction",
+      "filename": "apps/web/src/app/(app)/platform/support-access/actions.ts"
+    },
+    "40c6e486e5590d5ed7c0d9a479a39597aa807311bc": {
+      "workers": {
+        "app/(app)/dashboard/org/vacancy-inquiries/page": {
+          "moduleId": 522686,
+          "async": true,
+          "exportedName": "updateVacancyInquiryStatusAction",
+          "filename": "apps/web/src/app/(app)/dashboard/org/vacancy-inquiries/actions.ts"
+        }
+      },
+      "exportedName": "updateVacancyInquiryStatusAction",
+      "filename": "apps/web/src/app/(app)/dashboard/org/vacancy-inquiries/actions.ts"
+    }
+  },
+  "edge": {}
+}

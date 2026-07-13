@@ -1,0 +1,3 @@
+{
+  "/api/monitoring/client-errors/route": "app/api/monitoring/client-errors/route.js"
+}
