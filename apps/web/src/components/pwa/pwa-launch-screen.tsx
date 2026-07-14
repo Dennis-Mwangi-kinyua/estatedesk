@@ -35,18 +35,27 @@ export function PwaLaunchScreen() {
 
   return (
     <div className="pwa-launch-screen" role="status" aria-label="EstateDesk is loading">
-      {/* Keep the cached PWA icon independent of the image optimizer at startup. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        className="pwa-launch-screen__icon"
-        src="/icons/icon-192.png"
-        alt=""
-        width="88"
-        height="88"
-      />
-      <p className="pwa-launch-screen__name">EstateDesk</p>
-      <span className="pwa-launch-screen__spinner" aria-hidden="true" />
+      <PwaLoadingCard />
       <span className="sr-only">Loading EstateDesk</span>
+    </div>
+  );
+}
+
+export function PwaLoadingCard() {
+  return (
+    <div className="pwa-loading-card">
+      <div className="pwa-loading-card__icon" aria-hidden="true">
+        <span className="pwa-launch-screen__spinner" />
+      </div>
+      <p className="pwa-loading-card__title">Loading your workspace</p>
+      <p className="pwa-loading-card__message">
+        Please wait while EstateDesk gets everything ready.
+      </p>
+      <div className="pwa-loading-dots" aria-hidden="true">
+        <span className="pwa-loading-dot pwa-loading-dot--teal" />
+        <span className="pwa-loading-dot pwa-loading-dot--violet" />
+        <span className="pwa-loading-dot pwa-loading-dot--amber" />
+      </div>
     </div>
   );
 }

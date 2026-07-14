@@ -31,11 +31,11 @@ function StatCard({
   note?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+    <div className="min-w-0 rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm sm:p-4">
       <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-neutral-950">
+      <p className="mt-2 min-w-0 break-words text-xl font-semibold tracking-tight text-neutral-950 sm:text-2xl">
         {value}
       </p>
       {note ? <p className="mt-1 text-xs text-neutral-500">{note}</p> : null}
@@ -75,7 +75,7 @@ export default async function PlatformPaymentsPage({
         </p>
       </div>
 
-      <section className="ed-keep-cols grid grid-cols-1 gap-2.5 min-[360px]:grid-cols-2 sm:gap-3 xl:grid-cols-4">
+      <section className="grid min-w-0 grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
         <StatCard label="Organizations" value={ledger.totals.organizations} />
         <StatCard
           label="Listed paid"
@@ -92,7 +92,7 @@ export default async function PlatformPaymentsPage({
         />
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+      <section className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
         <div className="border-b border-neutral-200 px-4 py-3">
           <h2 className="text-base font-semibold text-neutral-950">
             Organizations
@@ -117,6 +117,7 @@ export default async function PlatformPaymentsPage({
           </p>
         ) : (
           <ResponsiveDataList
+            className="min-w-0 max-w-full"
             mobile={
               <ul className="min-w-0 divide-y divide-neutral-100 overflow-hidden">
                 {ledger.rows.map((row) => (

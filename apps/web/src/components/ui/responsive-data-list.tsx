@@ -15,7 +15,7 @@ export function ResponsiveDataList({
   className?: string;
 }) {
   return (
-    <div className={className}>
+    <div className={["min-w-0 max-w-full", className].filter(Boolean).join(" ")}>
       <div className="min-w-0 lg:hidden">{mobile}</div>
       <div className="hidden min-w-0 overflow-x-auto lg:block">{desktop}</div>
     </div>

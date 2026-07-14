@@ -259,21 +259,16 @@ export default function LoginForm({
                 type="button"
                 onClick={togglePassword}
                 disabled={isPending}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold text-slate-500 transition active:scale-95 hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label={showPassword ? "Hide password" : "View password"}
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-500 transition active:scale-95 hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                title={showPassword ? "Hide password" : "Show password"}
                 aria-pressed={showPassword}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <EyeOff className="h-5 w-5" aria-hidden="true" />
                 ) : (
-                  <Eye className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <Eye className="h-5 w-5" aria-hidden="true" />
                 )}
-                <span className="hidden min-[380px]:inline">
-                  {showPassword ? "Hide password" : "View password"}
-                </span>
-                <span className="min-[380px]:hidden">
-                  {showPassword ? "Hide" : "View"}
-                </span>
               </button>
             </InputShell>
 

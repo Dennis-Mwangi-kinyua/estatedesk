@@ -12,10 +12,10 @@
   min-height: 100dvh;
   place-items: center;
   align-content: center;
-  gap: 1rem;
   padding: env(safe-area-inset-top) 1.5rem env(safe-area-inset-bottom);
-  background: #0f766e;
-  color: #ffffff;
+  background:
+    radial-gradient(circle at center, rgb(255 255 255 / 18%), transparent 34%),
+    #0f766e;
   font-family: "Geist", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
@@ -23,27 +23,89 @@ html[data-pwa-launch="visible"] .pwa-launch-screen {
   display: grid;
 }
 
-.pwa-launch-screen__icon {
-  width: 5.5rem;
-  height: 5.5rem;
-  border-radius: 1rem;
+.app-route-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem max(1.25rem, env(safe-area-inset-bottom));
+  background: rgb(15 23 42 / 38%);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  backdrop-filter: blur(14px) saturate(1.08);
 }
 
-.pwa-launch-screen__name {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: 0;
+.pwa-loading-card {
+  width: min(100%, 18.75rem);
+  border: 1px solid rgb(255 255 255 / 80%);
+  border-radius: 1rem;
+  padding: 1.75rem 1.5rem;
+  background: rgb(255 255 255 / 94%);
+  color: #0f172a;
+  text-align: center;
+  box-shadow: 0 28px 90px rgb(15 23 42 / 28%);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.pwa-loading-card__icon {
+  display: flex;
+  width: 4rem;
+  height: 4rem;
+  margin-inline: auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: #0f172a;
+  box-shadow: 0 16px 36px rgb(15 23 42 / 22%);
 }
 
 .pwa-launch-screen__spinner {
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-top: 0.5rem;
-  border: 2px solid rgb(255 255 255 / 35%);
+  display: block;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 3px solid rgb(255 255 255 / 30%);
   border-top-color: #ffffff;
   border-radius: 50%;
-  animation: pwa-launch-spin 700ms linear infinite;
+  animation: pwa-launch-spin 850ms linear infinite;
+}
+
+.pwa-loading-card__title {
+  margin: 1.25rem 0 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.pwa-loading-card__message {
+  margin: 0.375rem 0 0;
+  color: #475569;
+  font-size: 0.875rem;
+  line-height: 1.35rem;
+}
+
+.pwa-loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-top: 1.25rem;
+}
+
+.pwa-loading-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 9999px;
+  animation: pwa-loading-dot-glow 1.15s ease-in-out infinite;
+}
+
+.pwa-loading-dot--teal { color: #14b8a6; background: currentColor; }
+.pwa-loading-dot--violet { color: #8b5cf6; background: currentColor; animation-delay: 180ms; }
+.pwa-loading-dot--amber { color: #f59e0b; background: currentColor; animation-delay: 360ms; }
+
+@keyframes pwa-loading-dot-glow {
+  0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+  40% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 1rem currentColor; }
 }
 
 @keyframes pwa-launch-spin {
@@ -53,7 +115,8 @@ html[data-pwa-launch="visible"] .pwa-launch-screen {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pwa-launch-screen__spinner {
+  .pwa-launch-screen__spinner,
+  .pwa-loading-dot {
     animation-duration: 1.4s;
   }
 }
