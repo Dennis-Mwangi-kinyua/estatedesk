@@ -52,11 +52,11 @@ export function SectionPager({
       <p>
         Showing {formatNumber(from)}-{formatNumber(to)} of {formatNumber(total)}
       </p>
-      <div className="flex items-center gap-2">
+      <div className="grid min-w-0 grid-cols-3 gap-2 sm:flex sm:items-center">
         <a
           href={pagerHref(params, pageKey, page - 1)}
           aria-disabled={page <= 1}
-          className={`rounded-lg border border-slate-200 px-3 py-2 font-medium dark:border-white/10 ${
+          className={`min-w-0 whitespace-nowrap rounded-lg border border-slate-200 px-2 py-2 text-center font-medium sm:px-3 dark:border-white/10 ${
             page <= 1
               ? "pointer-events-none bg-slate-50 text-slate-300 dark:bg-slate-900 dark:text-slate-600"
               : "bg-white text-slate-800 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-100"
@@ -64,13 +64,13 @@ export function SectionPager({
         >
           Previous
         </a>
-        <span className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-slate-900">
+        <span className="min-w-0 whitespace-nowrap rounded-lg border border-slate-200 bg-slate-50 px-2 py-2 text-center sm:px-3 dark:border-white/10 dark:bg-slate-900">
           {page} / {totalPages}
         </span>
         <a
           href={pagerHref(params, pageKey, page + 1)}
           aria-disabled={page >= totalPages}
-          className={`rounded-lg border border-slate-200 px-3 py-2 font-medium dark:border-white/10 ${
+          className={`min-w-0 whitespace-nowrap rounded-lg border border-slate-200 px-2 py-2 text-center font-medium sm:px-3 dark:border-white/10 ${
             page >= totalPages
               ? "pointer-events-none bg-slate-50 text-slate-300 dark:bg-slate-900 dark:text-slate-600"
               : "bg-white text-slate-800 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-100"

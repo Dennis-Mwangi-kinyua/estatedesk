@@ -85,7 +85,121 @@ export default async function DataManagementPage() {
         title="Data export requests"
         description="Organizations request a CSV archive here; platform admins approve or reject before download."
       >
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-border lg:hidden">
+          {exportRequests.map((request) => (
+            <article key={request.id} className="space-y-3 px-3 py-4 sm:px-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <AdminLink href={`/platform/organizations/${request.org.slug}`}>
+                    <span className="break-words text-sm font-semibold leading-5">
+                      {request.org.name}
+                    </span>
+                  </AdminLink>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    /{request.org.slug}
+                  </p>
+                </div>
+                <Badge tone={toneForStatus(request.status)}>{request.status}</Badge>
+              </div>
+
+              <dl className="grid gap-2 rounded-xl border border-border bg-muted/30 p-3 text-xs">
+                <div className="min-w-0">
+                  <dt className="font-medium text-muted-foreground">Requested by</dt>
+                  <dd className="mt-0.5 break-words font-semibold text-foreground">
+                    {request.requestedBy.fullName}
+                  </dd>
+                  <dd className="break-all text-muted-foreground">
+                    {request.requestedBy.email ?? "No email"}
+                  </dd>
+                </div>
+                <div className="flex items-start justify-between gap-3">
+                  <dt className="shrink-0 font-medium text-muted-foreground">Requested</dt>
+                  <dd className="text-right font-semibold text-foreground">
+                    {formatDateTime(request.requestedAt)}
+                  </dd>
+                </div>
+                <div className="min-w-0">
+                  <dt className="font-medium text-muted-foreground">Reason</dt>
+                  <dd className="mt-0.5 break-words text-foreground">
+                    {request.reason || "No reason provided"}
+                  </dd>
+                </div>
+                {request.reviewedAt || request.reviewedBy ? (
+                  <div className="min-w-0">
+                    <dt className="font-medium text-muted-foreground">Reviewed</dt>
+                    <dd className="mt-0.5 break-words text-foreground">
+                      {request.reviewedBy?.fullName ?? "Platform team"}
+                      {request.reviewedAt
+                        ? ` · ${formatDateTime(request.reviewedAt)}`
+                        : ""}
+                    </dd>
+                  </div>
+                ) : null}
+                {request.reviewerNotes ? (
+                  <div className="min-w-0">
+                    <dt className="font-medium text-muted-foreground">Reviewer note</dt>
+                    <dd className="mt-0.5 break-words text-foreground">
+                      {request.reviewerNotes}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+
+              {request.status === "PENDING" ? (
+                <div className="grid gap-2 rounded-xl border border-border bg-card p-3">
+                  <form action={approveDataExportRequestAction} className="grid gap-2">
+                    <input type="hidden" name="requestId" value={request.id} />
+                    <label className="grid gap-1.5 text-xs font-medium text-muted-foreground">
+                      Approval note
+                      <input
+                        name="reviewerNotes"
+                        placeholder="Optional approval note"
+                        className="min-h-11 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring/30"
+                      />
+                    </label>
+                    <button
+                      className="min-h-11 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
+                      type="submit"
+                    >
+                      Approve export
+                    </button>
+                  </form>
+                  <form action={rejectDataExportRequestAction} className="grid gap-2 border-t border-border pt-2">
+                    <input type="hidden" name="requestId" value={request.id} />
+                    <label className="grid gap-1.5 text-xs font-medium text-muted-foreground">
+                      Rejection note
+                      <input
+                        name="reviewerNotes"
+                        placeholder="Why is this being rejected?"
+                        className="min-h-11 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring/30"
+                      />
+                    </label>
+                    <button
+                      className="min-h-11 w-full rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-100"
+                      type="submit"
+                    >
+                      Reject export
+                    </button>
+                  </form>
+                </div>
+              ) : request.status === "APPROVED" ? (
+                <a
+                  href={`/api/data-exports/${request.id}/download`}
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted/50"
+                >
+                  Download ZIP
+                </a>
+              ) : null}
+            </article>
+          ))}
+          {exportRequests.length === 0 ? (
+            <p className="px-4 py-10 text-center text-sm text-muted-foreground">
+              No export requests found.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="hidden overflow-x-auto lg:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500">
               <tr>
@@ -173,7 +287,65 @@ export default async function DataManagementPage() {
       </Surface>
 
       <Surface title="Retention overview">
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-border lg:hidden">
+          {orgs.map((org) => (
+            <article key={org.id} className="space-y-3 px-3 py-4 sm:px-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <AdminLink href={`/platform/organizations/${org.slug}`}>
+                    <span className="break-words text-sm font-semibold leading-5">
+                      {org.name}
+                    </span>
+                  </AdminLink>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    /{org.slug}
+                  </p>
+                </div>
+                <Badge tone={toneForStatus(org.status)}>{org.status}</Badge>
+              </div>
+
+              <dl className="grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                  <dt className="text-muted-foreground">Retention</dt>
+                  <dd className="mt-0.5 font-semibold text-foreground">
+                    {org.dataRetentionDays} days
+                  </dd>
+                </div>
+                <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                  <dt className="text-muted-foreground">Tenants</dt>
+                  <dd className="mt-0.5 font-semibold text-foreground">{org._count.tenants}</dd>
+                </div>
+                <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                  <dt className="text-muted-foreground">Payments</dt>
+                  <dd className="mt-0.5 font-semibold text-foreground">{org._count.payments}</dd>
+                </div>
+                <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                  <dt className="text-muted-foreground">Files / audit logs</dt>
+                  <dd className="mt-0.5 font-semibold text-foreground">
+                    {org._count.assets} / {org._count.auditLogs}
+                  </dd>
+                </div>
+              </dl>
+
+              <p className="text-xs text-muted-foreground">
+                Updated <span className="font-medium text-foreground">{formatDateTime(org.updatedAt)}</span>
+              </p>
+              <a
+                href={`/api/platform/data-exports/${org.slug}/download`}
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted/50"
+              >
+                Download CSV ZIP
+              </a>
+            </article>
+          ))}
+          {orgs.length === 0 ? (
+            <p className="px-4 py-10 text-center text-sm text-muted-foreground">
+              No organizations found.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="hidden overflow-x-auto lg:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500">
               <tr>

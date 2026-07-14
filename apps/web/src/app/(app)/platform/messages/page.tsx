@@ -226,7 +226,7 @@ export default async function PlatformMessagesPage({
                     </h3>
                     <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-300">
                       <UserRound className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{request.fullName}</span>
+                      <span className="break-words">{request.fullName}</span>
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">
@@ -350,7 +350,7 @@ export default async function PlatformMessagesPage({
                   <ContactLine email={message.sender.email} phone={message.sender.phone} />
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-200 pt-4 dark:border-white/10">
+                <div className="platform-action-group mt-4 border-t border-slate-200 pt-4 dark:border-white/10">
                   {message.status === "OPEN" ? (
                     <form action={markPlatformMessageReadAction}>
                       <input type="hidden" name="messageId" value={message.id} />
@@ -369,7 +369,10 @@ export default async function PlatformMessagesPage({
                       </button>
                     </form>
                   ) : null}
-                  <form action={deletePlatformMessageAction}>
+                  <form
+                    action={deletePlatformMessageAction}
+                    className="platform-action-danger"
+                  >
                     <input type="hidden" name="messageId" value={message.id} />
                     <button className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 shadow-sm transition hover:bg-red-100 dark:border-red-300/30 dark:bg-red-300/10 dark:text-red-100 dark:hover:bg-red-300/20">
                       <Trash2 className="h-3.5 w-3.5" />

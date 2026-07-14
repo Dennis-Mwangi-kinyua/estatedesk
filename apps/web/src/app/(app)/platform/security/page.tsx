@@ -60,7 +60,7 @@ function SecurityLogCard({ log }: { log: SecurityLog }) {
       <div className="space-y-2.5 px-3 py-3.5 sm:px-4 sm:py-4">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-foreground">
+            <p className="break-words text-sm font-semibold leading-5 text-foreground">
               {log.actor.fullName}
             </p>
             <p className="mt-0.5 truncate text-xs text-muted-foreground">

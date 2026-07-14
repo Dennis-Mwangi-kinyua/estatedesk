@@ -194,8 +194,8 @@ export default async function PlatformApiKeysPage({
                   </div>
                 </div>
 
-                <div className="flex items-start justify-end gap-2">
-                  <form action={togglePlatformApiKeyStatusAction} className="">
+                <div className="platform-action-group items-start lg:justify-end">
+                  <form action={togglePlatformApiKeyStatusAction}>
                     <input type="hidden" name="apiKeyId" value={key.id} />
                     <input type="hidden" name="nextActive" value={isActive ? "false" : "true"} />
                     <button className="rounded-2xl border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
@@ -204,7 +204,10 @@ export default async function PlatformApiKeysPage({
                   </form>
 
                   {(!isActive || expired) ? (
-                    <form action={deletePlatformApiKeyAction} className="">
+                    <form
+                      action={deletePlatformApiKeyAction}
+                      className="platform-action-danger"
+                    >
                       <input type="hidden" name="apiKeyId" value={key.id} />
                       <button className="rounded-2xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50">
                         Delete

@@ -55,6 +55,28 @@ describe("PWA manifest", () => {
   });
 });
 
+describe("PWA launch screen", () => {
+  it("detects standalone mode before paint and renders a loading overlay", () => {
+    const layout = readFileSync(
+      resolve(process.cwd(), "apps/web/src/app/layout.tsx"),
+      "utf8",
+    );
+    const launchScreen = readFileSync(
+      resolve(
+        process.cwd(),
+        "apps/web/src/components/pwa/pwa-launch-screen.tsx",
+      ),
+      "utf8",
+    );
+
+    assert.match(layout, /display-mode: standalone/);
+    assert.match(layout, /dataset\.pwaLaunch="visible"/);
+    assert.match(layout, /<PwaLaunchScreen \/>/);
+    assert.match(launchScreen, /MINIMUM_VISIBLE_TIME_MS/);
+    assert.match(launchScreen, /dataset\.pwaLaunch = "ready"/);
+  });
+});
+
 describe("service worker", () => {
   it("precaches offline fallbacks and uses resilient install logic", () => {
     const serviceWorker = readFileSync(

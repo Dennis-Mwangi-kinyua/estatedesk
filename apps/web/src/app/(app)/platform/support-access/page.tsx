@@ -100,7 +100,7 @@ function OrgSupportCard({ org }: { org: OrgTarget }) {
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <AdminLink href={`/platform/organizations/${org.slug}`}>
-              <span className="block truncate text-sm font-semibold">
+              <span className="block break-words text-sm font-semibold leading-5">
                 {org.name}
               </span>
             </AdminLink>

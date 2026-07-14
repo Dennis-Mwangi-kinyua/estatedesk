@@ -1,7 +1,4 @@
-{"timestamp":"00:00:03.050","source":"Server","level":"LOG","message":"- Experiments (use with caution):"}
-{"timestamp":"00:00:03.050","source":"Server","level":"LOG","message":"  · cpus: 1"}
-{"timestamp":"00:00:03.050","source":"Server","level":"LOG","message":"  · optimizePackageImports"}
-{"timestamp":"00:00:03.051","source":"Server","level":"LOG","message":""}
-{"timestamp":"00:00:07.214","source":"Server","level":"LOG","message":"○ Compiling / ..."}
-{"timestamp":"00:00:11.506","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
-{"timestamp":"00:48:11.362","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:00:02.542","source":"Server","level":"LOG","message":"- Experiments (use with caution):"}
+{"timestamp":"00:00:02.542","source":"Server","level":"LOG","message":"  · cpus: 1"}
+{"timestamp":"00:00:02.542","source":"Server","level":"LOG","message":"  · optimizePackageImports"}
+{"timestamp":"00:00:02.542","source":"Server","level":"LOG","message":""}

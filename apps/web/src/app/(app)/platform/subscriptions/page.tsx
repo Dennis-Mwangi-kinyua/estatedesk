@@ -213,7 +213,7 @@ export default async function SubscriptionToolsPage() {
                           <AdminLink
                             href={`/platform/organizations/${sub.org.slug}`}
                           >
-                            <span className="block truncate text-sm font-semibold">
+                            <span className="block break-words text-sm font-semibold leading-5">
                               {sub.org.name}
                             </span>
                           </AdminLink>

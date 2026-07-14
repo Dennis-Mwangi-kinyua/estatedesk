@@ -213,7 +213,36 @@ export default async function PlatformRateLimitsPage() {
         title="Configured policies"
         description="Current application-level throttles. Database-backed buckets persist across requests; proxy buckets are process-local."
       >
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-border lg:hidden">
+          {policies.map((policy) => (
+            <article key={policy.name} className="space-y-2.5 px-3 py-3.5 sm:px-4">
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="break-words text-sm font-semibold leading-5 text-foreground">
+                  {policy.name}
+                </h3>
+                <Badge>{policy.backing}</Badge>
+              </div>
+              <dl className="grid grid-cols-3 gap-2 text-xs">
+                <div className="min-w-0">
+                  <dt className="text-muted-foreground">Scope</dt>
+                  <dd className="mt-0.5 break-words font-semibold text-foreground">
+                    {policy.scope}
+                  </dd>
+                </div>
+                <div className="min-w-0">
+                  <dt className="text-muted-foreground">Limit</dt>
+                  <dd className="mt-0.5 font-semibold text-foreground">{policy.limit}</dd>
+                </div>
+                <div className="min-w-0">
+                  <dt className="text-muted-foreground">Window</dt>
+                  <dd className="mt-0.5 font-semibold text-foreground">{policy.window}</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+
+        <div className="hidden overflow-x-auto lg:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -250,7 +279,50 @@ export default async function PlatformRateLimitsPage() {
       </Surface>
 
       <Surface title="Bucket scopes">
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-border lg:hidden">
+          {groupedScopes.map((scope) => (
+            <article key={scope.scope} className="space-y-3 px-3 py-3.5 sm:px-4">
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="break-words text-sm font-semibold leading-5 text-foreground">
+                  {scope.scope}
+                </h3>
+                <Badge>{formatNumber(scope.totalHits)} hits</Badge>
+              </div>
+              <dl className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-muted/30 p-2.5 text-xs">
+                <div>
+                  <dt className="text-muted-foreground">Buckets</dt>
+                  <dd className="font-semibold text-foreground">{formatNumber(scope.buckets)}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Active</dt>
+                  <dd className="font-semibold text-foreground">{formatNumber(scope.active)}</dd>
+                </div>
+                <div className="col-span-2">
+                  <dt className="text-muted-foreground">Latest activity</dt>
+                  <dd className="font-semibold text-foreground">{formatDateTime(scope.latest)}</dd>
+                </div>
+              </dl>
+              {canMutate ? (
+                <form action={clearRateLimitScopeAction}>
+                  <input type="hidden" name="scope" value={scope.scope} />
+                  <button
+                    type="submit"
+                    className="min-h-11 w-full rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200"
+                  >
+                    Clear scope
+                  </button>
+                </form>
+              ) : null}
+            </article>
+          ))}
+          {groupedScopes.length === 0 ? (
+            <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+              No persistent rate-limit buckets found.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="hidden overflow-x-auto lg:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -312,7 +384,56 @@ export default async function PlatformRateLimitsPage() {
         title="Hottest buckets"
         description="Highest-count persistent buckets. Super admins can reset a bucket to immediately unthrottle a client."
       >
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-border lg:hidden">
+          {topBuckets.map((bucket) => (
+            <article key={bucket.key} className="space-y-3 px-3 py-3.5 sm:px-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {bucketScope(bucket.key)}
+                  </p>
+                  <p className="mt-1 break-all font-mono text-xs text-foreground">
+                    {bucket.key}
+                  </p>
+                </div>
+                <Badge tone={bucketTone(bucket.resetAt)}>
+                  {bucketStatus(bucket.resetAt)}
+                </Badge>
+              </div>
+              <dl className="grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                  <dt className="text-muted-foreground">Count</dt>
+                  <dd className="font-semibold text-foreground">{formatNumber(bucket.count)}</dd>
+                </div>
+                <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                  <dt className="text-muted-foreground">Resets</dt>
+                  <dd className="font-semibold text-foreground">{formatDateTime(bucket.resetAt)}</dd>
+                </div>
+              </dl>
+              <p className="text-xs text-muted-foreground">
+                Updated {formatDateTime(bucket.updatedAt)}
+              </p>
+              {canMutate ? (
+                <form action={resetRateLimitBucketAction}>
+                  <input type="hidden" name="key" value={bucket.key} />
+                  <button
+                    type="submit"
+                    className="min-h-11 w-full rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted/50"
+                  >
+                    Reset bucket
+                  </button>
+                </form>
+              ) : null}
+            </article>
+          ))}
+          {topBuckets.length === 0 ? (
+            <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+              No rate-limit activity found.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="hidden overflow-x-auto lg:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>

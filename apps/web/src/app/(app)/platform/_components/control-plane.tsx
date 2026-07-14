@@ -137,7 +137,7 @@ export function Surface({
 export function Badge({ children, tone }: { children: ReactNode; tone?: string }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
+      className={`platform-badge inline-flex w-fit shrink-0 items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${
         tone ?? "border-border bg-muted/60 text-muted-foreground"
       }`}
     >
@@ -207,7 +207,7 @@ export function PaginationControls({
         <Link
           href={href(Math.max(1, page - 1))}
           aria-disabled={page <= 1}
-          className={`min-w-0 text-center rounded-xl border border-slate-200 px-2 py-2 font-medium sm:px-3 dark:border-white/10 ${
+          className={`min-w-0 whitespace-nowrap rounded-xl border border-slate-200 px-2 py-2 text-center font-medium sm:px-3 dark:border-white/10 ${
             page <= 1
               ? "pointer-events-none bg-slate-50 text-slate-300 dark:bg-slate-900 dark:text-slate-600"
               : "bg-white text-slate-800 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
@@ -221,7 +221,7 @@ export function PaginationControls({
         <Link
           href={href(Math.min(totalPages, page + 1))}
           aria-disabled={page >= totalPages}
-          className={`min-w-0 text-center rounded-xl border border-slate-200 px-2 py-2 font-medium sm:px-3 dark:border-white/10 ${
+          className={`min-w-0 whitespace-nowrap rounded-xl border border-slate-200 px-2 py-2 text-center font-medium sm:px-3 dark:border-white/10 ${
             page >= totalPages
               ? "pointer-events-none bg-slate-50 text-slate-300 dark:bg-slate-900 dark:text-slate-600"
               : "bg-white text-slate-800 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"

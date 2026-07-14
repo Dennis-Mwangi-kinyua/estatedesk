@@ -244,7 +244,7 @@ export default async function WebsiteControlCenterPage({
         title="Website control center"
         description="Full power over the EstateDesk website: incident banners, maintenance, public surfaces, queues, sessions, API keys, organizations, and emergency ops. Every action is audit-logged."
         action={
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
+          <div className="platform-action-group">
             <Link
               href="/platform/developer"
               className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground"

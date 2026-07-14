@@ -63,7 +63,39 @@ export default async function BroadcastsPage() {
       </section>
 
       <Surface title="Recent general notifications">
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-border lg:hidden">
+          {notifications.map((item) => (
+            <article key={item.id} className="space-y-2.5 px-3 py-3.5 sm:px-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <AdminLink href={`/platform/organizations/${item.org.slug}`}>
+                    <span className="break-words text-sm font-semibold leading-5">
+                      {item.org.name}
+                    </span>
+                  </AdminLink>
+                  <p className="mt-0.5 break-words text-xs text-muted-foreground">
+                    {item.user?.fullName ?? item.tenant?.fullName ?? "Organization"}
+                  </p>
+                </div>
+                <Badge tone={toneForStatus(item.status)}>{item.status}</Badge>
+              </div>
+              <p className="break-words text-sm font-medium text-foreground">
+                {item.title}
+              </p>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span>{item.channel}</span>
+                <span>{formatDateTime(item.createdAt)}</span>
+              </div>
+            </article>
+          ))}
+          {notifications.length === 0 ? (
+            <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+              No general notifications found.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="hidden overflow-x-auto lg:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500">
               <tr>

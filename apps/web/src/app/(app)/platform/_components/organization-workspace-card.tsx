@@ -126,8 +126,8 @@ function IdentityHeader({
         </div>
 
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+          <div className="flex flex-wrap items-start gap-2">
+            <h3 className="min-w-0 break-words text-sm font-semibold leading-5 text-slate-950 dark:text-white">
               {name}
             </h3>
             <StatusBadge tone={statusTone(status)}>{status}</StatusBadge>
@@ -175,7 +175,7 @@ function BillingBlock({
       </p>
       <div className="mt-2">
         <span
-          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${billing.tone}`}
+          className={`platform-badge inline-flex w-fit shrink-0 items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold ${billing.tone}`}
         >
           {billing.label}
         </span>

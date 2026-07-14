@@ -8,15 +8,15 @@ export function MetricCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700">
+    <div className="flex min-w-0 flex-col items-center gap-1.5 rounded-xl border border-neutral-200 bg-neutral-50 px-2 py-2.5 text-center sm:flex-row sm:gap-3 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-left">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-700 sm:h-9 sm:w-9 sm:rounded-xl">
         {icon}
       </div>
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-neutral-500">
+      <div className="min-w-0">
+        <p className="text-[9px] font-medium uppercase tracking-[0.08em] text-neutral-500 sm:text-[11px] sm:tracking-[0.12em]">
           {label}
         </p>
-        <p className="text-base font-semibold text-neutral-950">{value}</p>
+        <p className="text-sm font-semibold text-neutral-950 sm:text-base">{value}</p>
       </div>
     </div>
   );
@@ -60,7 +60,7 @@ export function Tag({
   icon: React.ReactNode;
 }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-700">
+    <span className="platform-badge inline-flex w-fit shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-700">
       {icon}
       {children}
     </span>
@@ -69,7 +69,7 @@ export function Tag({
 
 export function MiniTag({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-700">
+    <span className="platform-badge inline-flex w-fit shrink-0 items-center whitespace-nowrap rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-700">
       {children}
     </span>
   );

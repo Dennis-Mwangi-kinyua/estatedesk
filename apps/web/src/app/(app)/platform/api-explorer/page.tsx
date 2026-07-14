@@ -167,7 +167,30 @@ export default async function ApiExplorerPage() {
         title="Endpoint catalog"
         description="High-value surface area for external and operational integrations."
       >
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-border lg:hidden">
+          {endpoints.map((endpoint) => (
+            <article
+              key={`${endpoint.method}:${endpoint.path}`}
+              className="space-y-2.5 px-3 py-3.5 sm:px-4"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge>{endpoint.method}</Badge>
+                <Badge tone={toneForStatus(endpoint.group.toUpperCase())}>
+                  {endpoint.group}
+                </Badge>
+                <span className="text-xs text-muted-foreground">{endpoint.auth}</span>
+              </div>
+              <code className="block max-w-full overflow-x-auto rounded-lg bg-muted/50 px-3 py-2 text-xs text-foreground">
+                {endpoint.path}
+              </code>
+              <p className="break-words text-sm leading-6 text-muted-foreground">
+                {endpoint.purpose}
+              </p>
+            </article>
+          ))}
+        </div>
+
+        <div className="hidden overflow-x-auto lg:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>

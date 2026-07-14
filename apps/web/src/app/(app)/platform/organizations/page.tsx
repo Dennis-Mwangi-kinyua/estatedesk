@@ -89,17 +89,17 @@ export default async function PlatformOrganizationsPage({
         title="Organizations"
         description="Search, review, and open organization workspaces without loading the whole platform into one request."
         action={
-          <div className="flex flex-wrap gap-2">
+          <div className="platform-action-group">
             <Link
               href="/platform/organizations/new"
-              className="inline-flex items-center gap-2 rounded-xl bg-neutral-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-neutral-800"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-neutral-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-neutral-800"
             >
               <Plus className="h-4 w-4" />
               Add organization
             </Link>
             <Link
               href="/platform/reports"
-              className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-800 shadow-sm transition hover:bg-neutral-50"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-800 shadow-sm transition hover:bg-neutral-50"
             >
               <FileText className="h-4 w-4" />
               Reports

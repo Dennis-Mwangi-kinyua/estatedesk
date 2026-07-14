@@ -67,7 +67,7 @@ function AttentionPaymentCard({ payment }: { payment: AttentionPayment }) {
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <AdminLink href={`/platform/organizations/${payment.org.slug}`}>
-              <span className="block truncate text-sm font-semibold">
+              <span className="block break-words text-sm font-semibold leading-5">
                 {payment.org.name}
               </span>
             </AdminLink>
@@ -92,7 +92,7 @@ function AttentionPaymentCard({ payment }: { payment: AttentionPayment }) {
         <dl className="grid grid-cols-1 gap-1.5 rounded-xl border border-border bg-muted/30 p-2.5 text-[11px] sm:grid-cols-2 sm:text-xs">
           <div className="min-w-0">
             <dt className="font-medium text-muted-foreground">Payer</dt>
-            <dd className="mt-0.5 truncate font-semibold text-foreground">
+            <dd className="mt-0.5 break-words font-semibold text-foreground">
               {paymentPayer(payment)}
             </dd>
           </div>

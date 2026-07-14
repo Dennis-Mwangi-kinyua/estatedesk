@@ -68,7 +68,7 @@ export function ActionBadge({ action }: { action: string }) {
 
   return (
     <span
-      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${styles}`}
+      className={`platform-badge inline-flex w-fit shrink-0 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium ${styles}`}
     >
       {formatLabel(action)}
     </span>
@@ -77,7 +77,7 @@ export function ActionBadge({ action }: { action: string }) {
 
 export function MiniBadge({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex w-fit rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
+    <span className="platform-badge inline-flex w-fit shrink-0 whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
       {children}
     </span>
   );

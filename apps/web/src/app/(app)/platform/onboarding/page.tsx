@@ -270,7 +270,7 @@ export default async function PlatformOnboardingPage({
                       placeholder="Internal follow-up notes"
                       className="min-h-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
                     />
-                    <div className="flex flex-wrap gap-2">
+                    <div className="platform-action-group">
                       <button className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
                         <CheckCircle2 className="h-4 w-4" />
                         Save
@@ -279,7 +279,7 @@ export default async function PlatformOnboardingPage({
                   </form>
                 </div>
 
-                <div className="flex flex-wrap gap-2 border-t border-slate-100 p-4 dark:border-white/10 sm:px-5">
+                <div className="platform-action-group border-t border-slate-100 p-4 dark:border-white/10 sm:px-5">
                   {request.status === "NEW" ? (
                     <form action={quickUpdateOnboardingStatusAction}>
                       <input type="hidden" name="requestId" value={request.id} />
@@ -300,9 +300,12 @@ export default async function PlatformOnboardingPage({
                       </button>
                     </form>
                   ) : null}
-                  <form action={deleteOnboardingRequestAction}>
+                  <form
+                    action={deleteOnboardingRequestAction}
+                    className="platform-action-danger"
+                  >
                     <input type="hidden" name="requestId" value={request.id} />
-                    <button className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 shadow-sm transition hover:bg-red-100 dark:border-red-300/30 dark:bg-red-300/10 dark:text-red-100 dark:hover:bg-red-300/20">
+                    <button className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 shadow-sm transition hover:bg-red-100 dark:border-red-300/30 dark:bg-red-300/10 dark:text-red-100 dark:hover:bg-red-300/20">
                       <Trash2 className="h-3.5 w-3.5" />
                       Delete
                     </button>

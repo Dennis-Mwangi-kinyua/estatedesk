@@ -62,7 +62,7 @@ export function JobsOverviewSection({
         title="Cron and queue monitor"
         description="Operational view of cron runs, notification dispatch, retry queues, KRA attempts, and delivery provider readiness."
         action={
-          <div className="flex flex-wrap gap-2">
+          <div className="platform-action-group">
             <form action={runNotificationsJobAction}>
               <HiddenReturnTo value={returnTo} />
               <JobActionButton pendingLabel="Running...">Run notifications</JobActionButton>

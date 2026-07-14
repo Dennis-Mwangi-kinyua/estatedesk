@@ -4,6 +4,7 @@ import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
 import { WebVitalsReporter } from "@/components/monitoring/web-vitals-reporter";
 import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
 import { PwaInstallPrompt } from "@/components/pwa/pwa-install-prompt";
+import { PwaLaunchScreen } from "@/components/pwa/pwa-launch-screen";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { ServiceWorkerUpdatePrompt } from "@/components/pwa/service-worker-update-prompt";
 import { InlineScript } from "@/components/layout/inline-script";
@@ -245,12 +246,17 @@ export default async function RootLayout({
       <head>
         <InlineScript id="estatedesk-theme-init" html={THEME_INIT_SCRIPT} />
         <InlineScript
+          id="estatedesk-pwa-launch-init"
+          html={`(function(){try{var standalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;if(standalone){document.documentElement.dataset.pwaLaunch="visible";document.documentElement.dataset.pwaLaunchStartedAt=String(performance.now())}}catch(e){}})();`}
+        />
+        <InlineScript
           id="estatedesk-structured-data"
           scriptType="application/ld+json"
           html={JSON.stringify(structuredData)}
         />
       </head>
       <body className="ed-mobile-first min-h-dvh bg-background antialiased">
+        <PwaLaunchScreen />
         <SkipToMain />
         <ThemeProvider>
           <MarketingAnalytics />

@@ -39,7 +39,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
             {recentPayments.map((payment) => (
               <div key={payment.id} className="flex items-start justify-between gap-3 p-4">
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-slate-950 dark:text-white">
+                  <p className="break-words font-medium leading-5 text-slate-950 dark:text-white">
                     {payment.payerTenant?.fullName ??
                       payment.payerUser?.fullName ??
                       payment.payerName ??
@@ -70,7 +70,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
             {recentMembers.map((member) => (
               <div key={member.id} className="flex items-start justify-between gap-3 p-4">
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-slate-950 dark:text-white">
+                  <p className="break-words font-medium leading-5 text-slate-950 dark:text-white">
                     {member.user.fullName}
                   </p>
                   <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
@@ -93,7 +93,36 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
       </section>
 
       <Surface title="Recent audit activity">
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-border md:hidden">
+          {recentAuditLogs.map((log) => (
+            <article key={log.id} className="space-y-2.5 px-3 py-3.5 sm:px-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="break-words text-sm font-semibold leading-5 text-foreground">
+                    {log.actor.fullName}
+                  </p>
+                  <p className="mt-0.5 break-all text-xs text-muted-foreground">
+                    {log.actor.email ?? "No email"}
+                  </p>
+                </div>
+                <p className="shrink-0 text-right text-xs text-muted-foreground">
+                  {formatDateTime(log.createdAt)}
+                </p>
+              </div>
+              <Badge tone={toneForStatus(log.action)}>{labelize(log.action)}</Badge>
+              <p className="break-all text-xs text-muted-foreground">
+                {log.entityType} / {log.entityId}
+              </p>
+            </article>
+          ))}
+          {recentAuditLogs.length === 0 ? (
+            <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+              No audit activity found.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-950 dark:text-slate-400">
               <tr>
@@ -159,7 +188,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
           </label>
           <button
             type="submit"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/20 dark:focus-visible:ring-offset-slate-900"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/20 dark:focus-visible:ring-offset-slate-900 sm:w-auto"
           >
             Archive and terminate access
           </button>
@@ -190,7 +219,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
           </label>
           <button
             type="submit"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-red-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:bg-red-500 dark:text-white dark:hover:bg-red-400 dark:focus-visible:ring-offset-slate-900"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-red-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:bg-red-500 dark:text-white dark:hover:bg-red-400 dark:focus-visible:ring-offset-slate-900 sm:w-auto"
           >
             Permanently delete organization
           </button>

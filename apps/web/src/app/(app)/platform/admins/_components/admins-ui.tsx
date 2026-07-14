@@ -211,7 +211,7 @@ export function PermissionsSection({
             <span
               key={permission.id}
               className={[
-                "inline-flex max-w-full items-center break-words rounded-full border px-3 py-1.5 text-xs font-medium",
+                "inline-flex max-w-full items-center rounded-lg border px-3 py-1.5 text-xs font-medium",
                 permission.granted
                   ? "border-green-200 bg-green-50 text-green-700"
                   : "border-red-200 bg-red-50 text-red-700",
@@ -283,7 +283,7 @@ export function Badge({
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${variants[variant]}`}
+      className={`platform-badge inline-flex w-fit shrink-0 items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium ${variants[variant]}`}
     >
       {children}
     </span>

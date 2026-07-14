@@ -4,6 +4,60 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.pwa-launch-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: none;
+  min-height: 100dvh;
+  place-items: center;
+  align-content: center;
+  gap: 1rem;
+  padding: env(safe-area-inset-top) 1.5rem env(safe-area-inset-bottom);
+  background: #0f766e;
+  color: #ffffff;
+  font-family: "Geist", "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+html[data-pwa-launch="visible"] .pwa-launch-screen {
+  display: grid;
+}
+
+.pwa-launch-screen__icon {
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 1rem;
+}
+
+.pwa-launch-screen__name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pwa-launch-screen__spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.5rem;
+  border: 2px solid rgb(255 255 255 / 35%);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: pwa-launch-spin 700ms linear infinite;
+}
+
+@keyframes pwa-launch-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pwa-launch-screen__spinner {
+    animation-duration: 1.4s;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -1379,11 +1433,21 @@ html.light,
     -webkit-backdrop-filter: blur(28px) saturate(1.35);
   }
 
-  .app-mobile-canvas :where(button, [role="button"], a.ios-button, input, select) {
+  .app-mobile-canvas :where(
+    button:not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]):not([class*="w-8"]):not([class*="w-9"]):not([class*="w-10"]),
+    [role="button"]:not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]):not([class*="w-8"]):not([class*="w-9"]):not([class*="w-10"]),
+    a.ios-button:not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]),
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+    select
+  ) {
     min-height: 2.75rem;
   }
 
-  .app-mobile-canvas :where(input, select, textarea) {
+  .app-mobile-canvas :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+    select,
+    textarea
+  ) {
     width: 100%;
     max-width: 100%;
     border-radius: 0.875rem;
@@ -1887,12 +1951,80 @@ html.light,
 
 .ed-mobile-first :where(h1, h2, h3, h4) {
   text-wrap: balance;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .ed-mobile-first :where(p, li, dd, label, td, th, span) {
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+/* Compact controls must stay readable; long identifiers opt into break-all locally. */
+.ed-mobile-first .platform-theme-content :where(button, [role="button"]) {
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: nowrap;
+}
+
+.ed-mobile-first .platform-theme-content .platform-badge {
+  max-width: 100%;
+  flex-shrink: 0;
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: nowrap;
+}
+
+.platform-action-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.platform-action-group > :where(form, a, button) {
+  width: 100%;
+  min-width: 0;
+}
+
+.platform-action-group > form > button,
+.platform-action-group > a,
+.platform-action-group > button {
+  width: 100%;
+  justify-content: center;
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: nowrap;
+}
+
+@media (min-width: 420px) and (max-width: 639px) {
+  .platform-action-group {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .platform-action-group > .platform-action-danger:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 640px) {
+  .platform-action-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .platform-action-group > :where(form, a, button) {
+    width: auto;
+  }
+
+  .platform-action-group > form > button,
+  .platform-action-group > a,
+  .platform-action-group > button {
+    width: auto;
+  }
+
+  .platform-action-group > .platform-action-danger {
+    margin-left: auto;
+  }
 }
 
 /* Touch-friendly interactive controls (except icon-only square buttons) */
@@ -1917,18 +2049,6 @@ html.light,
 
   .ed-mobile-first textarea {
     min-height: 6.5rem;
-  }
-
-  /* Dense multi-column grids collapse to a single column on phones */
-  .ed-mobile-first :where(
-    .grid.grid-cols-3,
-    .grid.grid-cols-4,
-    .grid.grid-cols-5,
-    .grid.grid-cols-6,
-    .grid.grid-cols-7,
-    .grid.grid-cols-8
-  ):not(.ed-keep-cols) {
-    grid-template-columns: minmax(0, 1fr);
   }
 
   /* Tables: force horizontal scroll instead of page blowout */
@@ -2120,10 +2240,6 @@ html.light,
 
 /* Very small phones */
 @media (max-width: 389px) {
-  .ed-mobile-first :where(.grid.sm\:grid-cols-2, .grid.grid-cols-2):not(.ed-keep-cols) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .ed-mobile-first {
     --ed-gutter: max(0.625rem, env(safe-area-inset-left, 0px));
   }

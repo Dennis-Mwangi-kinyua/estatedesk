@@ -47,22 +47,22 @@ export function UserDetailProfile({ details, notice }: UserDetailWorkspaceProps)
   const { user, grantedPermissions, revokedPermissions, isOrphanUser, archiveConfirmation, grantedPermissionSet } = details;
 
   return (
-          <section className="space-y-6">
-            <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+          <section className="space-y-4 sm:space-y-6">
+            <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-5">
-                <div className="flex min-w-0 items-center gap-4">
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl border border-neutral-200 bg-neutral-100 text-xl font-semibold text-neutral-900">
+                <div className="flex min-w-0 flex-col items-start gap-3 min-[420px]:flex-row min-[420px]:items-center sm:gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 text-lg font-semibold text-neutral-900 sm:h-20 sm:w-20 sm:rounded-3xl sm:text-xl">
                     {getInitials(user.fullName)}
                   </div>
 
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="break-words text-2xl font-semibold text-neutral-950">
+                      <h2 className="break-words text-xl font-semibold leading-7 text-neutral-950 sm:text-2xl">
                         {user.fullName}
                       </h2>
 
                       {user.isRootSuperAdmin && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-700">
+                        <span className="platform-badge inline-flex w-fit shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-700">
                           <Crown className="h-3.5 w-3.5" />
                           ROOT
                         </span>

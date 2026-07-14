@@ -252,7 +252,39 @@ export default async function PlatformBackupsPage({
         title="Recovery checkpoints"
         description="Operational checkpoints used to confirm the platform can be restored, exported, and audited."
       >
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-border lg:hidden">
+          {checkpoints.map((checkpoint) => (
+            <article key={checkpoint.name} className="space-y-2.5 px-3 py-3.5 sm:px-4">
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="break-words text-sm font-semibold leading-5 text-foreground">
+                  {checkpoint.name}
+                </h3>
+                <Badge tone={checkpointTone(checkpoint.status)}>
+                  {checkpoint.status}
+                </Badge>
+              </div>
+              <dl className="grid gap-1.5 text-xs">
+                <div className="flex items-start justify-between gap-3">
+                  <dt className="text-muted-foreground">Cadence</dt>
+                  <dd className="text-right font-medium text-foreground">
+                    {checkpoint.cadence}
+                  </dd>
+                </div>
+                <div className="flex items-start justify-between gap-3">
+                  <dt className="text-muted-foreground">Latest signal</dt>
+                  <dd className="text-right font-medium text-foreground">
+                    {formatDateTime(checkpoint.latest)}
+                  </dd>
+                </div>
+              </dl>
+              <p className="break-words text-sm leading-6 text-muted-foreground">
+                {checkpoint.detail}
+              </p>
+            </article>
+          ))}
+        </div>
+
+        <div className="hidden overflow-x-auto lg:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -294,7 +326,47 @@ export default async function PlatformBackupsPage({
         title="Recent export recovery requests"
         description="Approved exports are recovery artifacts for individual organizations and can be downloaded from Data Management."
       >
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-border lg:hidden">
+          {exportRequests.map((request) => (
+            <article key={request.id} className="space-y-2.5 px-3 py-3.5 sm:px-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="break-words text-sm font-semibold leading-5 text-foreground">
+                    {request.org.name}
+                  </h3>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    /{request.org.slug}
+                  </p>
+                </div>
+                <Badge>{request.status}</Badge>
+              </div>
+              <p className="break-words text-xs text-muted-foreground">
+                Requested by {request.requestedBy.fullName}
+              </p>
+              <dl className="grid gap-1.5 text-xs">
+                <div className="flex items-start justify-between gap-3">
+                  <dt className="text-muted-foreground">Requested</dt>
+                  <dd className="text-right font-medium text-foreground">
+                    {formatDateTime(request.requestedAt)}
+                  </dd>
+                </div>
+                <div className="flex items-start justify-between gap-3">
+                  <dt className="text-muted-foreground">Expires</dt>
+                  <dd className="text-right font-medium text-foreground">
+                    {formatDateTime(request.expiresAt)}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+          {exportRequests.length === 0 ? (
+            <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+              No export recovery requests found.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="hidden overflow-x-auto lg:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
