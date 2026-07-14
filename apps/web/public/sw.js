@@ -1,4 +1,4 @@
-const CACHE_VERSION = "estatedesk-pwa-v6";
+const CACHE_VERSION = "estatedesk-pwa-v7";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const OFFLINE_FALLBACKS = ["/offline", "/offline-shell.html"];
 const CARETAKER_OFFLINE_SYNC_TAG = "caretaker-offline-queue-sync";

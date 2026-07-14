@@ -16,9 +16,9 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     display_override: ["standalone", "minimal-ui", "browser"],
     prefer_related_applications: false,
-    // Splash / install chrome: solid brand colors hide browser chrome fully.
-    background_color: "#0f766e",
-    theme_color: "#0f766e",
+    // Neutral launch chrome hands off cleanly to the in-app loading screen.
+    background_color: "#f8fafc",
+    theme_color: "#f8fafc",
     orientation: "any",
     categories: ["business", "productivity", "finance"],
     icons: [

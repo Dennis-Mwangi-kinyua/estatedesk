@@ -14,8 +14,10 @@
   align-content: center;
   padding: env(safe-area-inset-top) 1.5rem env(safe-area-inset-bottom);
   background:
-    radial-gradient(circle at center, rgb(255 255 255 / 18%), transparent 34%),
-    #0f766e;
+    radial-gradient(circle at center, rgb(255 255 255 / 95%), transparent 42%),
+    rgb(248 250 252 / 98%);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   font-family: "Geist", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
@@ -23,17 +25,29 @@ html[data-pwa-launch="visible"] .pwa-launch-screen {
   display: grid;
 }
 
+@media (prefers-color-scheme: dark) {
+  .pwa-launch-screen {
+    background:
+      radial-gradient(circle at center, rgb(30 41 59 / 92%), transparent 42%),
+      rgb(2 6 23 / 98%);
+  }
+}
+
 .app-route-loading {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  display: grid;
+  display: none;
   min-height: 100dvh;
   place-items: center;
   padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem max(1.25rem, env(safe-area-inset-bottom));
   background: rgb(15 23 42 / 38%);
   -webkit-backdrop-filter: blur(14px) saturate(1.08);
   backdrop-filter: blur(14px) saturate(1.08);
+}
+
+html[data-pwa-launch] .app-route-loading {
+  display: grid;
 }
 
 .pwa-loading-card {
@@ -90,6 +104,24 @@ html[data-pwa-launch="visible"] .pwa-launch-screen {
   justify-content: center;
   gap: 0.625rem;
   margin-top: 1.25rem;
+}
+
+.pwa-launch-recovery {
+  display: flex;
+  width: min(100%, 18.75rem);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.pwa-launch-recovery button {
+  flex: 1;
+  border: 1px solid rgb(148 163 184 / 65%);
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  background: rgb(255 255 255 / 92%);
+  color: #0f172a;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .pwa-loading-dot {

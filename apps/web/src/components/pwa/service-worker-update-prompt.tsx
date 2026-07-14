@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { RefreshCw, X } from "lucide-react";
 import { activateWaitingServiceWorker } from "@/lib/pwa/client";
+import { isStandaloneDisplayMode } from "@/lib/pwa/client";
 
 export function ServiceWorkerUpdatePrompt() {
   const [visible, setVisible] = useState(false);
@@ -10,6 +11,10 @@ export function ServiceWorkerUpdatePrompt() {
 
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+      return;
+    }
+
+    if (!isStandaloneDisplayMode()) {
       return;
     }
 
