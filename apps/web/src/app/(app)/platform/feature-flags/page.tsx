@@ -20,6 +20,21 @@ import { toggleOrganizationFeatureFlagAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
+const ORG_COLOR_PALETTE = [
+  { surface: "bg-sky-50/80 dark:bg-sky-500/10", bar: "bg-sky-500" },
+  { surface: "bg-emerald-50/80 dark:bg-emerald-500/10", bar: "bg-emerald-500" },
+  { surface: "bg-violet-50/80 dark:bg-violet-500/10", bar: "bg-violet-500" },
+  { surface: "bg-amber-50/80 dark:bg-amber-500/10", bar: "bg-amber-500" },
+  { surface: "bg-rose-50/80 dark:bg-rose-500/10", bar: "bg-rose-500" },
+  { surface: "bg-cyan-50/80 dark:bg-cyan-500/10", bar: "bg-cyan-500" },
+  { surface: "bg-indigo-50/80 dark:bg-indigo-500/10", bar: "bg-indigo-500" },
+  { surface: "bg-orange-50/80 dark:bg-orange-500/10", bar: "bg-orange-500" },
+] as const;
+
+function colorForOrganization(index: number) {
+  return ORG_COLOR_PALETTE[index % ORG_COLOR_PALETTE.length];
+}
+
 function readFeature(features: Record<string, boolean>, key: string) {
   return Boolean(features[key]);
 }
@@ -88,14 +103,14 @@ export default async function FeatureFlagsPage() {
   const globalOverrideCount = Object.keys(control.globalFeatures).length;
 
   return (
-    <div className="ed-mobile-first space-y-4 sm:space-y-6">
+    <div className="ed-mobile-first min-w-0 max-w-full space-y-4 overflow-x-clip sm:space-y-6">
       <PageHeader
         eyebrow="Developer portal"
         title="Feature flags"
         description="Toggle per-organization capabilities. Global overrides from Website Control win at read time and are highlighted below."
       />
 
-      <section className="ed-keep-cols grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
+      <section className="grid min-w-0 grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
         <StatCard label="Organizations" value={organizations.length} />
         <StatCard label="Configured feature sets" value={configured} />
         <StatCard label="Global overrides" value={globalOverrideCount} />
@@ -137,22 +152,28 @@ export default async function FeatureFlagsPage() {
           </p>
         ) : (
           <ResponsiveDataList
+            desktopBreakpoint="2xl"
             mobile={
-              <ul className="divide-y divide-border">
-                {organizations.map((org) => {
+              <ul className="min-w-0 divide-y divide-border">
+                {organizations.map((org, index) => {
                   const effective = applyGlobalFeatureOverrides(
                     org.settings?.features,
                     control.globalFeatures,
                   );
+                  const color = colorForOrganization(index);
 
                   return (
-                    <li key={org.id}>
-                      <DataCard>
+                    <li key={org.id} className={`relative ${color.surface}`}>
+                      <span
+                        className={`absolute inset-y-0 left-0 w-1 ${color.bar}`}
+                        aria-hidden="true"
+                      />
+                      <DataCard className="pl-5">
                         <div className="min-w-0">
                           <AdminLink href={`/platform/organizations/${org.slug}`}>
                             {org.name}
                           </AdminLink>
-                          <p className="mt-0.5 text-xs text-muted-foreground">
+                          <p className="mt-0.5 break-all text-xs text-muted-foreground">
                             /{org.slug}
                             {org.settings?.updatedAt
                               ? ` · updated ${formatDateTime(org.settings.updatedAt)}`
@@ -194,15 +215,23 @@ export default async function FeatureFlagsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {organizations.map((org) => {
+                  {organizations.map((org, index) => {
                     const effective = applyGlobalFeatureOverrides(
                       org.settings?.features,
                       control.globalFeatures,
                     );
+                    const color = colorForOrganization(index);
 
                     return (
-                      <tr key={org.id} className="border-t border-border">
-                        <td className="px-4 py-3">
+                      <tr
+                        key={org.id}
+                        className={`border-t border-border ${color.surface}`}
+                      >
+                        <td className="relative px-5 py-3">
+                          <span
+                            className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`}
+                            aria-hidden="true"
+                          />
                           <AdminLink href={`/platform/organizations/${org.slug}`}>
                             {org.name}
                           </AdminLink>

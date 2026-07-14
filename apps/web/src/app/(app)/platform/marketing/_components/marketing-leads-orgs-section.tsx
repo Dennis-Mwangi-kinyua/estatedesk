@@ -18,7 +18,7 @@ export function MarketingLeadsOrgsSection(props: MarketingWorkspaceProps) {
   return (
     <>
       <Surface title="Recent leads" className="order-4 lg:order-6">
-        <div className="grid min-w-0 gap-3 p-3 lg:hidden">
+        <div className="grid min-w-0 gap-3 p-3 2xl:hidden">
           {leads.map((lead) => (
             <article
               key={lead.id}
@@ -83,7 +83,7 @@ export function MarketingLeadsOrgsSection(props: MarketingWorkspaceProps) {
           ) : null}
         </div>
 
-        <div className="hidden max-w-full overflow-x-auto lg:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-muted/40 text-left text-muted-foreground">
               <tr>
@@ -150,7 +150,7 @@ export function MarketingLeadsOrgsSection(props: MarketingWorkspaceProps) {
       </Surface>
 
       <Surface title="Recent organizations" className="order-5 lg:order-7">
-        <div className="grid min-w-0 gap-3 p-3 lg:hidden">
+        <div className="grid min-w-0 gap-3 p-3 2xl:hidden">
           {organizations.map((org) => {
             const estimated = estimateMonthlyCommission({
               plan: org.subscription?.plan ?? null,
@@ -222,7 +222,7 @@ export function MarketingLeadsOrgsSection(props: MarketingWorkspaceProps) {
           ) : null}
         </div>
 
-        <div className="hidden max-w-full overflow-x-auto lg:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-muted/40 text-left text-muted-foreground">
               <tr>

@@ -10,6 +10,7 @@ import {
 } from "@/lib/guides";
 import type { GuideArticle } from "@/lib/guides/types";
 import { absoluteUrl } from "@/lib/seo";
+import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
 function formatPublishedDate(value: string) {
   return new Intl.DateTimeFormat("en-KE", {
@@ -79,7 +80,7 @@ export function GuideArticlePage({ guide }: { guide: GuideArticle }) {
     <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
       />
       <PublicAccessHeader active="guides" />
 

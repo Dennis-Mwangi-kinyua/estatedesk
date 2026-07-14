@@ -6,6 +6,7 @@ import { PublicAccessHeader } from "@/components/marketing/public-access-header"
 import { type FaqItem, faqJsonLd } from "@/components/marketing/seo-faq";
 import { getLandingContentDepth } from "@/lib/content-depth/landing-depth";
 import { absoluteUrl } from "@/lib/seo";
+import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
 export type SeoLandingPageContent = {
   path: string;
@@ -90,7 +91,7 @@ export function SeoLandingPage({ content }: { content: SeoLandingPageContent }) 
     <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
       />
       <PublicAccessHeader active="services" />
 

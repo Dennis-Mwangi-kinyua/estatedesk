@@ -9,15 +9,20 @@ export function ResponsiveDataList({
   mobile,
   desktop,
   className,
+  desktopBreakpoint = "lg",
 }: {
   mobile: ReactNode;
   desktop: ReactNode;
   className?: string;
+  desktopBreakpoint?: "lg" | "2xl";
 }) {
+  const mobileVisibility = desktopBreakpoint === "2xl" ? "2xl:hidden" : "lg:hidden";
+  const desktopVisibility = desktopBreakpoint === "2xl" ? "2xl:block" : "lg:block";
+
   return (
     <div className={["min-w-0 max-w-full", className].filter(Boolean).join(" ")}>
-      <div className="min-w-0 lg:hidden">{mobile}</div>
-      <div className="hidden min-w-0 overflow-x-auto lg:block">{desktop}</div>
+      <div className={`min-w-0 ${mobileVisibility}`}>{mobile}</div>
+      <div className={`hidden min-w-0 overflow-x-auto ${desktopVisibility}`}>{desktop}</div>
     </div>
   );
 }

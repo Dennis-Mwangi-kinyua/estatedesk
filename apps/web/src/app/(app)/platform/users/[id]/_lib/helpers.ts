@@ -17,6 +17,13 @@ export function getInitials(name: string | null | undefined) {
 }
 
 export function getNotice(params?: { error?: string; updated?: string }) {
+  if (params?.error === "read-only") {
+    return {
+      tone: "error" as const,
+      message: "Platform user records are read-only and cannot be edited here.",
+    };
+  }
+
   if (params?.updated === "status") {
     return {
       tone: "success" as const,

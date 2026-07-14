@@ -8,6 +8,7 @@ import { ArrowLeft, Building2, Coins, ShieldCheck, Zap } from "lucide-react";
 import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { PUBLIC_VACANCIES_CACHE_TAG } from "@/lib/public-vacancy-cache";
 import { publicVacancyImageUrl } from "@/lib/public-vacancy-image";
+import { serializeJsonForHtml } from "@/lib/security/safe-json";
 import {
   isPublicVacancyDatabaseError,
   PUBLIC_VACANCY_REVALIDATE_SECONDS,
@@ -181,7 +182,7 @@ function JsonLdScript({ value }: { value: Record<string, unknown> }) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(value) }}
+      dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(value) }}
     />
   );
 }

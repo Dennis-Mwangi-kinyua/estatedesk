@@ -63,11 +63,6 @@ export async function getEtimsClientConfigForOrg(
     clientId && secret && environment !== "unconfigured",
   );
 
-  // Expose branch via env for payload builder when org-set
-  if (row.branchOfficeId?.trim()) {
-    process.env.KRA_ETIMS_BHF_ID = row.branchOfficeId.trim();
-  }
-
   return {
     environment: configured ? environment : "unconfigured",
     baseUrl: configured ? baseUrl : null,
@@ -75,6 +70,7 @@ export async function getEtimsClientConfigForOrg(
     clientSecret: secret ?? null,
     webhookSecret: webhookSecret || platform.webhookSecret,
     controlUnitSerial: controlUnitSerial ?? null,
+    branchOfficeId: row.branchOfficeId?.trim() || platform.branchOfficeId,
     configured,
     source: configured
       ? clientSecret || row.clientId

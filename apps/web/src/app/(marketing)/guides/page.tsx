@@ -9,6 +9,7 @@ import {
   guideCategories,
 } from "@/lib/guides";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
+import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
 export const metadata = publicPageMetadata({
   title: "Property Management Guides",
@@ -87,7 +88,7 @@ export default function GuidesHubPage() {
     <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
       />
       <PublicAccessHeader active="guides" />
 

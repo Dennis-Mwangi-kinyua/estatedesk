@@ -165,14 +165,14 @@ export default async function SubscriptionToolsPage() {
   );
 
   return (
-    <div className="ed-mobile-first space-y-4 sm:space-y-5 lg:space-y-6">
+    <div className="ed-mobile-first min-w-0 max-w-full space-y-4 overflow-x-clip sm:space-y-5 lg:space-y-6">
       <PageHeader
         eyebrow="Subscription controls"
         title="Plan enforcement"
         description="Subscription operations view for renewals, trials, past-due plans, and plan-change history."
       />
 
-      <section className="ed-keep-cols grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
+      <section className="grid min-w-0 grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
         <StatCard label="Subscriptions" value={subscriptions.length} />
         <StatCard
           label="Active"
@@ -196,7 +196,7 @@ export default async function SubscriptionToolsPage() {
         ) : (
           <>
             {/* Mobile cards with org color accent */}
-            <ul className="divide-y divide-border lg:hidden">
+            <ul className="min-w-0 divide-y divide-border 2xl:hidden">
               {subscriptions.map((sub) => {
                 const color =
                   orgColorById.get(sub.org.id) ?? colorForOrg(sub.org.id);
@@ -240,7 +240,7 @@ export default async function SubscriptionToolsPage() {
                       <dl className="grid grid-cols-1 gap-1.5 text-[11px] text-muted-foreground sm:text-xs">
                         <div className="flex justify-between gap-2">
                           <dt>Trial end</dt>
-                          <dd className="font-medium text-foreground">
+                          <dd className="min-w-0 break-words text-right font-medium text-foreground">
                             {formatDateTime(sub.trialEndsAt)}
                           </dd>
                         </div>
@@ -266,7 +266,7 @@ export default async function SubscriptionToolsPage() {
             </ul>
 
             {/* Desktop table with per-org row colors */}
-            <div className="hidden overflow-x-auto lg:block">
+            <div className="hidden max-w-full overflow-x-auto 2xl:block">
               <table className="min-w-full text-sm">
                 <thead className="bg-muted/40 text-left text-muted-foreground">
                   <tr>

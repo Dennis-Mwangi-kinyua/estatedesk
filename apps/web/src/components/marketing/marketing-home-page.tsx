@@ -6,6 +6,7 @@ import { siteContentDepth } from "@/lib/content-depth/site-topics";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { faqJsonLd, marketingFaqItems } from "@/components/marketing/seo-faq";
 import { absoluteUrl } from "@/lib/seo";
+import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
 const homepageAudiences = [
   {
@@ -125,7 +126,7 @@ export default function MarketingHomePage() {
     <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
       />
       <OperationsShowcase
         standalone

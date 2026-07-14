@@ -5,6 +5,7 @@ import OperationsShowcase from "@/components/marketing/operations-showcase";
 import { siteContentDepth } from "@/lib/content-depth/site-topics";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
+import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
 export const metadata = publicPageMetadata({
   title: "Property Management System: M-Pesa, Accounting & KRA eTIMS",
@@ -54,7 +55,7 @@ export default function ServicesPage() {
     <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
       />
       <OperationsShowcase standalone showFooter={false} />
       <ServicesSeoContent />

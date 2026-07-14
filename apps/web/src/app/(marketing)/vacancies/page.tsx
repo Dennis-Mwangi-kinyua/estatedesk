@@ -9,6 +9,7 @@ import {
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
+import { serializeJsonForHtml } from "@/lib/security/safe-json";
 import {
   VacancyListingGrid,
   type VacancyListingCard,
@@ -359,7 +360,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
     <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(collectionJsonLd) }}
       />
       <PublicAccessHeader active="vacancies" loginHref={loginHref} />
 

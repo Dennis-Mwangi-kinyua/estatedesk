@@ -18,6 +18,25 @@ import {
 
 export const dynamic = "force-dynamic";
 
+const RATE_COLOR_PALETTE = [
+  { card: "bg-sky-50/80 dark:bg-sky-500/10", row: "bg-sky-50/80 dark:bg-sky-500/10", bar: "bg-sky-500" },
+  { card: "bg-emerald-50/80 dark:bg-emerald-500/10", row: "bg-emerald-50/80 dark:bg-emerald-500/10", bar: "bg-emerald-500" },
+  { card: "bg-violet-50/80 dark:bg-violet-500/10", row: "bg-violet-50/80 dark:bg-violet-500/10", bar: "bg-violet-500" },
+  { card: "bg-amber-50/80 dark:bg-amber-500/10", row: "bg-amber-50/80 dark:bg-amber-500/10", bar: "bg-amber-500" },
+  { card: "bg-rose-50/80 dark:bg-rose-500/10", row: "bg-rose-50/80 dark:bg-rose-500/10", bar: "bg-rose-500" },
+  { card: "bg-cyan-50/80 dark:bg-cyan-500/10", row: "bg-cyan-50/80 dark:bg-cyan-500/10", bar: "bg-cyan-500" },
+  { card: "bg-indigo-50/80 dark:bg-indigo-500/10", row: "bg-indigo-50/80 dark:bg-indigo-500/10", bar: "bg-indigo-500" },
+  { card: "bg-orange-50/80 dark:bg-orange-500/10", row: "bg-orange-50/80 dark:bg-orange-500/10", bar: "bg-orange-500" },
+] as const;
+
+function colorForRate(key: string) {
+  let hash = 0;
+  for (let index = 0; index < key.length; index += 1) {
+    hash = (hash * 31 + key.charCodeAt(index)) >>> 0;
+  }
+  return RATE_COLOR_PALETTE[hash % RATE_COLOR_PALETTE.length];
+}
+
 type RateLimitPolicy = {
   name: string;
   scope: string;
@@ -176,7 +195,7 @@ export default async function PlatformRateLimitsPage() {
   ).sort((a, b) => b.totalHits - a.totalHits);
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 max-w-full space-y-6 overflow-x-clip">
       <PageHeader
         eyebrow="Developer portal"
         title="Rate limits"
@@ -213,16 +232,19 @@ export default async function PlatformRateLimitsPage() {
         title="Configured policies"
         description="Current application-level throttles. Database-backed buckets persist across requests; proxy buckets are process-local."
       >
-        <div className="divide-y divide-border lg:hidden">
-          {policies.map((policy) => (
-            <article key={policy.name} className="space-y-2.5 px-3 py-3.5 sm:px-4">
+        <div className="min-w-0 divide-y divide-border 2xl:hidden">
+          {policies.map((policy) => {
+            const color = colorForRate(policy.name);
+            return (
+            <article key={policy.name} className={`relative space-y-2.5 overflow-hidden py-3.5 pl-5 pr-3 sm:pr-4 ${color.card}`}>
+              <span className={`absolute inset-y-0 left-0 w-1 ${color.bar}`} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
                 <h3 className="break-words text-sm font-semibold leading-5 text-foreground">
                   {policy.name}
                 </h3>
                 <Badge>{policy.backing}</Badge>
               </div>
-              <dl className="grid grid-cols-3 gap-2 text-xs">
+              <dl className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
                 <div className="min-w-0">
                   <dt className="text-muted-foreground">Scope</dt>
                   <dd className="mt-0.5 break-words font-semibold text-foreground">
@@ -239,10 +261,11 @@ export default async function PlatformRateLimitsPage() {
                 </div>
               </dl>
             </article>
-          ))}
+            );
+          })}
         </div>
 
-        <div className="hidden overflow-x-auto lg:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -254,9 +277,12 @@ export default async function PlatformRateLimitsPage() {
               </tr>
             </thead>
             <tbody>
-              {policies.map((policy) => (
-                <tr key={policy.name} className="border-t border-neutral-100 dark:border-white/10">
-                  <td className="px-4 py-3 font-medium text-slate-950 dark:text-white">
+              {policies.map((policy) => {
+                const color = colorForRate(policy.name);
+                return (
+                <tr key={policy.name} className={`border-t border-neutral-100 dark:border-white/10 ${color.row}`}>
+                  <td className="relative px-5 py-3 font-medium text-slate-950 dark:text-white">
+                    <span className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`} aria-hidden="true" />
                     {policy.name}
                   </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
@@ -272,16 +298,20 @@ export default async function PlatformRateLimitsPage() {
                     <Badge>{policy.backing}</Badge>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
       </Surface>
 
       <Surface title="Bucket scopes">
-        <div className="divide-y divide-border lg:hidden">
-          {groupedScopes.map((scope) => (
-            <article key={scope.scope} className="space-y-3 px-3 py-3.5 sm:px-4">
+        <div className="min-w-0 divide-y divide-border 2xl:hidden">
+          {groupedScopes.map((scope) => {
+            const color = colorForRate(scope.scope);
+            return (
+            <article key={scope.scope} className={`relative space-y-3 overflow-hidden py-3.5 pl-5 pr-3 sm:pr-4 ${color.card}`}>
+              <span className={`absolute inset-y-0 left-0 w-1 ${color.bar}`} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
                 <h3 className="break-words text-sm font-semibold leading-5 text-foreground">
                   {scope.scope}
@@ -314,7 +344,8 @@ export default async function PlatformRateLimitsPage() {
                 </form>
               ) : null}
             </article>
-          ))}
+            );
+          })}
           {groupedScopes.length === 0 ? (
             <p className="px-4 py-8 text-center text-sm text-muted-foreground">
               No persistent rate-limit buckets found.
@@ -322,7 +353,7 @@ export default async function PlatformRateLimitsPage() {
           ) : null}
         </div>
 
-        <div className="hidden overflow-x-auto lg:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -337,9 +368,12 @@ export default async function PlatformRateLimitsPage() {
               </tr>
             </thead>
             <tbody>
-              {groupedScopes.map((scope) => (
-                <tr key={scope.scope} className="border-t border-neutral-100 dark:border-white/10">
-                  <td className="px-4 py-3 font-medium text-slate-950 dark:text-white">
+              {groupedScopes.map((scope) => {
+                const color = colorForRate(scope.scope);
+                return (
+                <tr key={scope.scope} className={`border-t border-neutral-100 dark:border-white/10 ${color.row}`}>
+                  <td className="relative px-5 py-3 font-medium text-slate-950 dark:text-white">
+                    <span className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`} aria-hidden="true" />
                     {scope.scope}
                   </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
@@ -368,7 +402,8 @@ export default async function PlatformRateLimitsPage() {
                     </td>
                   ) : null}
                 </tr>
-              ))}
+                );
+              })}
               {groupedScopes.length === 0 ? (
                 <EmptyRow
                   colSpan={canMutate ? 6 : 5}
@@ -384,9 +419,12 @@ export default async function PlatformRateLimitsPage() {
         title="Hottest buckets"
         description="Highest-count persistent buckets. Super admins can reset a bucket to immediately unthrottle a client."
       >
-        <div className="divide-y divide-border lg:hidden">
-          {topBuckets.map((bucket) => (
-            <article key={bucket.key} className="space-y-3 px-3 py-3.5 sm:px-4">
+        <div className="min-w-0 divide-y divide-border 2xl:hidden">
+          {topBuckets.map((bucket) => {
+            const color = colorForRate(bucket.key);
+            return (
+            <article key={bucket.key} className={`relative space-y-3 overflow-hidden py-3.5 pl-5 pr-3 sm:pr-4 ${color.card}`}>
+              <span className={`absolute inset-y-0 left-0 w-1 ${color.bar}`} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-muted-foreground">
@@ -425,7 +463,8 @@ export default async function PlatformRateLimitsPage() {
                 </form>
               ) : null}
             </article>
-          ))}
+            );
+          })}
           {topBuckets.length === 0 ? (
             <p className="px-4 py-8 text-center text-sm text-muted-foreground">
               No rate-limit activity found.
@@ -433,7 +472,7 @@ export default async function PlatformRateLimitsPage() {
           ) : null}
         </div>
 
-        <div className="hidden overflow-x-auto lg:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -449,12 +488,15 @@ export default async function PlatformRateLimitsPage() {
               </tr>
             </thead>
             <tbody>
-              {topBuckets.map((bucket) => (
+              {topBuckets.map((bucket) => {
+                const color = colorForRate(bucket.key);
+                return (
                 <tr
                   key={bucket.key}
-                  className="border-t border-neutral-100 align-top dark:border-white/10"
+                  className={`border-t border-neutral-100 align-top dark:border-white/10 ${color.row}`}
                 >
-                  <td className="max-w-md px-4 py-3">
+                  <td className="relative max-w-md px-5 py-3">
+                    <span className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`} aria-hidden="true" />
                     <p className="break-all font-mono text-xs text-slate-700 dark:text-slate-200">
                       {bucket.key}
                     </p>
@@ -490,7 +532,8 @@ export default async function PlatformRateLimitsPage() {
                     </td>
                   ) : null}
                 </tr>
-              ))}
+                );
+              })}
               {topBuckets.length === 0 ? (
                 <EmptyRow
                   colSpan={canMutate ? 7 : 6}

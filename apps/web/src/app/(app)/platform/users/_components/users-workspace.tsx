@@ -27,6 +27,25 @@ import { getInitials } from "../_lib/helpers";
 import { CreatePlatformUserPanel, RoleGuidePanel } from "./users-ui";
 import type { getPlatformUsersPageData } from "../_lib/queries";
 
+const USER_COLOR_PALETTE = [
+  { surface: "bg-sky-50/80 dark:bg-sky-500/10", bar: "bg-sky-500" },
+  { surface: "bg-emerald-50/80 dark:bg-emerald-500/10", bar: "bg-emerald-500" },
+  { surface: "bg-violet-50/80 dark:bg-violet-500/10", bar: "bg-violet-500" },
+  { surface: "bg-amber-50/80 dark:bg-amber-500/10", bar: "bg-amber-500" },
+  { surface: "bg-rose-50/80 dark:bg-rose-500/10", bar: "bg-rose-500" },
+  { surface: "bg-cyan-50/80 dark:bg-cyan-500/10", bar: "bg-cyan-500" },
+  { surface: "bg-indigo-50/80 dark:bg-indigo-500/10", bar: "bg-indigo-500" },
+  { surface: "bg-orange-50/80 dark:bg-orange-500/10", bar: "bg-orange-500" },
+] as const;
+
+function colorForUser(userId: string) {
+  let hash = 0;
+  for (let index = 0; index < userId.length; index += 1) {
+    hash = (hash * 31 + userId.charCodeAt(index)) >>> 0;
+  }
+  return USER_COLOR_PALETTE[hash % USER_COLOR_PALETTE.length];
+}
+
 export type UsersWorkspaceProps = {
   data: Awaited<ReturnType<typeof getPlatformUsersPageData>>;
   flash: { created?: string; createError?: string; archived?: string };
@@ -48,11 +67,11 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
   const params = props.flash;
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 max-w-full space-y-5 overflow-x-clip">
       <PageHeader
         eyebrow="Identity directory"
         title="Platform users"
-        description="Create platform users, assign system roles, review memberships, and clean up orphan accounts from one control surface."
+        description="Review platform identities, account status, organization memberships, and access information from a read-only directory."
       />
 
       {params.created ? (
@@ -140,7 +159,7 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
             </div>
           ) : (
             <>
-              <div className="hidden overflow-x-auto md:block">
+              <div className="hidden overflow-x-auto 2xl:block">
                 <table className="min-w-full text-sm">
                   <thead className="bg-neutral-50 text-left text-neutral-500">
                     <tr>
@@ -160,13 +179,18 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
                       const isOrphan =
                         user._count.memberships === 0 &&
                         user._count.platformPermissions === 0;
+                      const color = colorForUser(user.id);
 
                       return (
                         <tr
                           key={user.id}
-                          className="border-t border-neutral-100 align-top"
+                          className={`border-t border-neutral-100 align-top ${color.surface}`}
                         >
-                          <td className="px-4 py-3">
+                          <td className="relative px-5 py-3">
+                            <span
+                              className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`}
+                              aria-hidden="true"
+                            />
                             <div className="flex items-start gap-3">
                               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-semibold text-neutral-950">
                                 {getInitials(user.fullName)}
@@ -255,18 +279,23 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
                 </table>
               </div>
 
-              <div className="divide-y divide-neutral-200 md:hidden">
+              <div className="divide-y divide-neutral-200 2xl:hidden">
                 {users.map((user) => {
                   const isOrphan =
                     user._count.memberships === 0 &&
                     user._count.platformPermissions === 0;
+                  const color = colorForUser(user.id);
 
                   return (
                     <Link
                       key={user.id}
                       href={`/platform/users/${user.username ?? user.id}`}
-                      className="flex items-start justify-between gap-3 px-4 py-4 transition hover:bg-neutral-50"
+                      className={`relative flex min-w-0 items-start justify-between gap-3 overflow-hidden py-4 pl-5 pr-4 transition hover:brightness-[0.98] ${color.surface}`}
                     >
+                      <span
+                        className={`absolute inset-y-0 left-0 w-1 ${color.bar}`}
+                        aria-hidden="true"
+                      />
                       <div className="flex min-w-0 items-start gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-semibold text-neutral-950">
                           {getInitials(user.fullName)}

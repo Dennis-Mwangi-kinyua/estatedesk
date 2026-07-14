@@ -23,7 +23,7 @@ import type { JobsPageData } from "../_lib/queries";
 import type { JobsPageInput } from "../_lib/types";
 import { DEFAULT_PAGE_SIZE } from "../_lib/types";
 import { formatAge, formatJson, readProviderError } from "../_lib/helpers";
-import { HiddenReturnTo, MobileEmpty, MobileField, SectionPager } from "./jobs-ui";
+import { HiddenReturnTo, MobileEmpty, MobileField, SectionPager, colorForJobEntry } from "./jobs-ui";
 
 export type JobsWorkspaceProps = {
   data: JobsPageData;
@@ -55,9 +55,12 @@ export function JobsQueuesSection({
   return (
     <>
       <Surface title="Queued notification backlog">
-        <div className="grid gap-3 p-4 md:hidden">
-          {queuedNotifications.map((item) => (
-            <article key={item.id} className="rounded-lg border border-slate-200 p-4 dark:border-white/10">
+        <div className="grid min-w-0 gap-3 p-3 sm:p-4 2xl:hidden">
+          {queuedNotifications.map((item) => {
+            const color = colorForJobEntry(item.org.name);
+            return (
+            <article key={item.id} className={`relative min-w-0 overflow-hidden rounded-lg border p-4 pl-5 ${color.card}`}>
+              <span className={`absolute inset-y-0 left-0 w-1 ${color.bar}`} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold text-slate-950 dark:text-white">{item.org.name}</p>
@@ -74,10 +77,11 @@ export function JobsQueuesSection({
                 </div>
               </div>
             </article>
-          ))}
+            );
+          })}
           {queuedNotifications.length === 0 ? <MobileEmpty label="No queued notifications found." /> : null}
         </div>
-        <div className="hidden overflow-x-auto md:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -91,9 +95,11 @@ export function JobsQueuesSection({
               </tr>
             </thead>
             <tbody>
-              {queuedNotifications.map((item) => (
-                <tr key={item.id} className="border-t border-slate-100 dark:border-white/10">
-                  <td className="px-4 py-3 font-medium">{item.org.name}</td>
+              {queuedNotifications.map((item) => {
+                const color = colorForJobEntry(item.org.name);
+                return (
+                <tr key={item.id} className={`border-t border-slate-100 dark:border-white/10 ${color.row}`}>
+                  <td className="relative px-5 py-3 font-medium"><span className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`} aria-hidden="true" />{item.org.name}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{item.tenant?.fullName ?? item.user?.fullName ?? "-"}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{labelize(item.type)}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{item.channel}</td>
@@ -101,7 +107,8 @@ export function JobsQueuesSection({
                   <td className="px-4 py-3 font-medium">{formatAge(item.createdAt)}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{formatDateTime(item.createdAt)}</td>
                 </tr>
-              ))}
+                );
+              })}
               {queuedNotifications.length === 0 ? <EmptyRow colSpan={7} label="No queued notifications found." /> : null}
             </tbody>
           </table>
@@ -125,9 +132,12 @@ export function JobsQueuesSection({
             </JobActionButton>
           </form>
         </div>
-        <div className="grid gap-3 p-4 md:hidden">
-          {failedNotifications.map((item) => (
-            <article key={item.id} className="rounded-lg border border-slate-200 p-4 dark:border-white/10">
+        <div className="grid min-w-0 gap-3 p-3 sm:p-4 2xl:hidden">
+          {failedNotifications.map((item) => {
+            const color = colorForJobEntry(item.org.name);
+            return (
+            <article key={item.id} className={`relative min-w-0 overflow-hidden rounded-lg border p-4 pl-5 ${color.card}`}>
+              <span className={`absolute inset-y-0 left-0 w-1 ${color.bar}`} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold text-slate-950 dark:text-white">{item.org.name}</p>
@@ -151,10 +161,11 @@ export function JobsQueuesSection({
                 </div>
               </div>
             </article>
-          ))}
+            );
+          })}
           {failedNotifications.length === 0 ? <MobileEmpty label="No failed notifications found." /> : null}
         </div>
-        <div className="hidden overflow-x-auto md:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -169,9 +180,11 @@ export function JobsQueuesSection({
               </tr>
             </thead>
             <tbody>
-              {failedNotifications.map((item) => (
-                <tr key={item.id} className="border-t border-slate-100 dark:border-white/10">
-                  <td className="px-4 py-3 font-medium">{item.org.name}</td>
+              {failedNotifications.map((item) => {
+                const color = colorForJobEntry(item.org.name);
+                return (
+                <tr key={item.id} className={`border-t border-slate-100 dark:border-white/10 ${color.row}`}>
+                  <td className="relative px-5 py-3 font-medium"><span className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`} aria-hidden="true" />{item.org.name}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{item.tenant?.fullName ?? item.user?.fullName ?? "-"}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{labelize(item.type)}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{item.channel}</td>
@@ -188,7 +201,8 @@ export function JobsQueuesSection({
                     </form>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {failedNotifications.length === 0 ? <EmptyRow colSpan={8} label="No failed notifications found." /> : null}
             </tbody>
           </table>
@@ -197,9 +211,12 @@ export function JobsQueuesSection({
       </Surface>
 
       <Surface title="KRA retryable attempts">
-        <div className="grid gap-3 p-4 md:hidden">
-          {retryableKraAttempts.map((attempt) => (
-            <article key={attempt.id} className="rounded-lg border border-slate-200 p-4 dark:border-white/10">
+        <div className="grid min-w-0 gap-3 p-3 sm:p-4 2xl:hidden">
+          {retryableKraAttempts.map((attempt) => {
+            const color = colorForJobEntry(attempt.rentalReturn.org.name);
+            return (
+            <article key={attempt.id} className={`relative min-w-0 overflow-hidden rounded-lg border p-4 pl-5 ${color.card}`}>
+              <span className={`absolute inset-y-0 left-0 w-1 ${color.bar}`} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold text-slate-950 dark:text-white">{attempt.rentalReturn.org.name}</p>
@@ -225,10 +242,11 @@ export function JobsQueuesSection({
                 </form>
               </div>
             </article>
-          ))}
+            );
+          })}
           {retryableKraAttempts.length === 0 ? <MobileEmpty label="No retryable KRA attempts found." /> : null}
         </div>
-        <div className="hidden overflow-x-auto md:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -243,9 +261,11 @@ export function JobsQueuesSection({
               </tr>
             </thead>
             <tbody>
-              {retryableKraAttempts.map((attempt) => (
-                <tr key={attempt.id} className="border-t border-slate-100 dark:border-white/10">
-                  <td className="px-4 py-3 font-medium">{attempt.rentalReturn.org.name}</td>
+              {retryableKraAttempts.map((attempt) => {
+                const color = colorForJobEntry(attempt.rentalReturn.org.name);
+                return (
+                <tr key={attempt.id} className={`border-t border-slate-100 dark:border-white/10 ${color.row}`}>
+                  <td className="relative px-5 py-3 font-medium"><span className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`} aria-hidden="true" />{attempt.rentalReturn.org.name}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                     <p>{attempt.rentalReturn.period}</p>
                     <p className="mt-1 text-xs text-slate-500">{attempt.rentalReturn.filingKey}</p>
@@ -265,7 +285,8 @@ export function JobsQueuesSection({
                     </form>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {retryableKraAttempts.length === 0 ? <EmptyRow colSpan={8} label="No retryable KRA attempts found." /> : null}
             </tbody>
           </table>

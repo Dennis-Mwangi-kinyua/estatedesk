@@ -292,26 +292,6 @@ export async function settleGatewayPayment({
           "@/lib/tax/org-etims-config"
         );
         const orgConfig = await getEtimsClientConfigForOrg(payment.orgId);
-        // Temporarily apply org secrets for this submit (process-local).
-        const prev = {
-          id: process.env.KRA_ETIMS_CLIENT_ID,
-          secret: process.env.KRA_ETIMS_CLIENT_SECRET,
-          base: process.env.KRA_ETIMS_BASE_URL,
-          env: process.env.KRA_ETIMS_ENVIRONMENT,
-          cu: process.env.KRA_ETIMS_CU_SERIAL,
-        };
-        if (orgConfig.clientId) process.env.KRA_ETIMS_CLIENT_ID = orgConfig.clientId;
-        if (orgConfig.clientSecret) {
-          process.env.KRA_ETIMS_CLIENT_SECRET = orgConfig.clientSecret;
-        }
-        if (orgConfig.baseUrl) process.env.KRA_ETIMS_BASE_URL = orgConfig.baseUrl;
-        if (orgConfig.environment !== "unconfigured") {
-          process.env.KRA_ETIMS_ENVIRONMENT = orgConfig.environment;
-        }
-        if (orgConfig.controlUnitSerial) {
-          process.env.KRA_ETIMS_CU_SERIAL = orgConfig.controlUnitSerial;
-        }
-
         const etimsResult = await submitEtimsSalesReceipt({
           serialNumber:
             receiptNumber ||
@@ -326,18 +306,7 @@ export async function settleGatewayPayment({
           controlUnitSerial:
             orgConfig.controlUnitSerial || snapshot.etimsControlUnitSerial,
           issuedAt: new Date(snapshot.paidAt),
-        });
-
-        if (prev.id === undefined) delete process.env.KRA_ETIMS_CLIENT_ID;
-        else process.env.KRA_ETIMS_CLIENT_ID = prev.id;
-        if (prev.secret === undefined) delete process.env.KRA_ETIMS_CLIENT_SECRET;
-        else process.env.KRA_ETIMS_CLIENT_SECRET = prev.secret;
-        if (prev.base === undefined) delete process.env.KRA_ETIMS_BASE_URL;
-        else process.env.KRA_ETIMS_BASE_URL = prev.base;
-        if (prev.env === undefined) delete process.env.KRA_ETIMS_ENVIRONMENT;
-        else process.env.KRA_ETIMS_ENVIRONMENT = prev.env;
-        if (prev.cu === undefined) delete process.env.KRA_ETIMS_CU_SERIAL;
-        else process.env.KRA_ETIMS_CU_SERIAL = prev.cu;
+        }, orgConfig);
 
         etimsSubmission = {
           ok: etimsResult.ok,

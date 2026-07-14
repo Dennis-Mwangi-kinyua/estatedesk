@@ -160,7 +160,7 @@ export default async function PlatformBackupsPage({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 max-w-full space-y-6 overflow-x-clip">
       <PageHeader
         eyebrow="Developer portal"
         title="Backup and recovery"
@@ -252,7 +252,7 @@ export default async function PlatformBackupsPage({
         title="Recovery checkpoints"
         description="Operational checkpoints used to confirm the platform can be restored, exported, and audited."
       >
-        <div className="divide-y divide-border lg:hidden">
+        <div className="min-w-0 divide-y divide-border 2xl:hidden">
           {checkpoints.map((checkpoint) => (
             <article key={checkpoint.name} className="space-y-2.5 px-3 py-3.5 sm:px-4">
               <div className="flex items-start justify-between gap-3">
@@ -266,13 +266,13 @@ export default async function PlatformBackupsPage({
               <dl className="grid gap-1.5 text-xs">
                 <div className="flex items-start justify-between gap-3">
                   <dt className="text-muted-foreground">Cadence</dt>
-                  <dd className="text-right font-medium text-foreground">
+                  <dd className="min-w-0 break-words text-right font-medium text-foreground">
                     {checkpoint.cadence}
                   </dd>
                 </div>
                 <div className="flex items-start justify-between gap-3">
                   <dt className="text-muted-foreground">Latest signal</dt>
-                  <dd className="text-right font-medium text-foreground">
+                  <dd className="min-w-0 break-words text-right font-medium text-foreground">
                     {formatDateTime(checkpoint.latest)}
                   </dd>
                 </div>
@@ -284,7 +284,7 @@ export default async function PlatformBackupsPage({
           ))}
         </div>
 
-        <div className="hidden overflow-x-auto lg:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -326,7 +326,7 @@ export default async function PlatformBackupsPage({
         title="Recent export recovery requests"
         description="Approved exports are recovery artifacts for individual organizations and can be downloaded from Data Management."
       >
-        <div className="divide-y divide-border lg:hidden">
+        <div className="min-w-0 divide-y divide-border 2xl:hidden">
           {exportRequests.map((request) => (
             <article key={request.id} className="space-y-2.5 px-3 py-3.5 sm:px-4">
               <div className="flex items-start justify-between gap-3">
@@ -334,7 +334,7 @@ export default async function PlatformBackupsPage({
                   <h3 className="break-words text-sm font-semibold leading-5 text-foreground">
                     {request.org.name}
                   </h3>
-                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                  <p className="mt-0.5 break-all text-xs text-muted-foreground">
                     /{request.org.slug}
                   </p>
                 </div>
@@ -346,13 +346,13 @@ export default async function PlatformBackupsPage({
               <dl className="grid gap-1.5 text-xs">
                 <div className="flex items-start justify-between gap-3">
                   <dt className="text-muted-foreground">Requested</dt>
-                  <dd className="text-right font-medium text-foreground">
+                  <dd className="min-w-0 break-words text-right font-medium text-foreground">
                     {formatDateTime(request.requestedAt)}
                   </dd>
                 </div>
                 <div className="flex items-start justify-between gap-3">
                   <dt className="text-muted-foreground">Expires</dt>
-                  <dd className="text-right font-medium text-foreground">
+                  <dd className="min-w-0 break-words text-right font-medium text-foreground">
                     {formatDateTime(request.expiresAt)}
                   </dd>
                 </div>
@@ -366,7 +366,7 @@ export default async function PlatformBackupsPage({
           ) : null}
         </div>
 
-        <div className="hidden overflow-x-auto lg:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>

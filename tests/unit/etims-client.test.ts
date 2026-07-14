@@ -27,6 +27,22 @@ describe("KRA eTIMS client", () => {
     assert.equal(payload.cuSerial, "KRACUTEST01");
   });
 
+  it("uses the request-local branch office configuration", () => {
+    const fields = buildEtimsReadyReceiptFields({
+      serialNumber: "RCP-LOCAL-CONFIG",
+      organizationKraPin: "P051234567X",
+      amount: 1000,
+      controlUnitSerial: "KRACUTEST02",
+    });
+    const config = {
+      ...getEtimsClientConfig(),
+      branchOfficeId: "17",
+    };
+
+    const payload = buildEtimsSalesPayload(fields, config);
+    assert.equal(payload.bhfId, "17");
+  });
+
   it("reports unconfigured readiness without credentials", () => {
     const previous = {
       env: process.env.KRA_ETIMS_ENVIRONMENT,

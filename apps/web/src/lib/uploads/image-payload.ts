@@ -3,6 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { AssetType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { validateImageBytes } from "@/lib/uploads/secure-image";
 
 export type ImageUploadPayload = {
   base64: string;
@@ -35,15 +36,17 @@ export async function saveImagePayloadAsset({
   purpose: string;
   metadata?: Record<string, string | undefined>;
 }) {
-  const ext = path.extname(payload.fileName).toLowerCase() || ".jpg";
-  const fileName = `${filePrefix}-${randomUUID()}${ext}`;
+  const image = validateImageBytes(Buffer.from(payload.base64, "base64"), {
+    maxBytes: 5 * 1024 * 1024,
+  });
+  const fileName = `${filePrefix}-${randomUUID()}${image.extension}`;
   const publicKey = `/uploads/${uploadDir}/${fileName}`;
   const absoluteDir = path.join(process.cwd(), "public", "uploads", uploadDir);
 
   await mkdir(absoluteDir, { recursive: true });
   await writeFile(
     path.join(absoluteDir, fileName),
-    Buffer.from(payload.base64, "base64"),
+    image.buffer,
   );
 
   const asset = await prisma.asset.create({
@@ -52,9 +55,9 @@ export async function saveImagePayloadAsset({
       unitId,
       fileName: payload.fileName,
       fileType: "image",
-      mimeType: payload.mimeType,
+      mimeType: image.mimeType,
       key: publicKey,
-      size: payload.size,
+      size: image.size,
       assetType: AssetType.PHOTO,
       uploadedByUserId: submittedByUserId,
       metadata: {

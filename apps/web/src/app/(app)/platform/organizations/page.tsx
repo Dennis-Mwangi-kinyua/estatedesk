@@ -83,7 +83,7 @@ export default async function PlatformOrganizationsPage({
   );
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 max-w-full space-y-5 overflow-x-clip">
       <PageHeader
         eyebrow="Platform directory"
         title="Organizations"
@@ -128,7 +128,7 @@ export default async function PlatformOrganizationsPage({
         <StatCard label="Subscribed" value={formatNumber(subscribedOrganizations)} />
       </section>
 
-      <section className="overflow-hidden rounded-[26px] border border-neutral-200 bg-white/95 shadow-sm backdrop-blur">
+      <section className="min-w-0 max-w-full overflow-hidden rounded-[26px] border border-neutral-200 bg-white/95 shadow-sm backdrop-blur">
         <form className="grid gap-3 border-b border-neutral-200 p-4 md:grid-cols-[1fr_180px_auto]">
           <div className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
             <Search className="h-4 w-4 text-neutral-400" />
@@ -163,11 +163,12 @@ export default async function PlatformOrganizationsPage({
             No organizations match the current filters.
           </div>
         ) : (
-          <div className="space-y-3 p-3 sm:p-4">
-            {organizations.map((org) => (
+          <div className="min-w-0 space-y-3 p-3 sm:p-4">
+            {organizations.map((org, index) => (
               <OrganizationWorkspaceCard
                 key={org.id}
                 layout="wide"
+                colorVariant={(page - 1) * pageSize + index}
                 href={`/platform/organizations/${org.slug}`}
                 name={org.name}
                 slug={org.slug}

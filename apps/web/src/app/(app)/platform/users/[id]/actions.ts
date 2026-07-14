@@ -23,7 +23,16 @@ function getUserPath(user: { id: string; username: string | null }) {
   return `/platform/users/${user.username ?? user.id}`;
 }
 
+async function blockReadOnlyUserMutation(formData: FormData): Promise<never> {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+    redirectTo: "/login",
+  });
+  const userId = getRequiredString(formData, "userId");
+  redirect(`/platform/users/${userId || "unknown"}?error=read-only`);
+}
+
 export async function updatePlatformUserStatus(formData: FormData) {
+  await blockReadOnlyUserMutation(formData);
   const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/login",
   });
@@ -99,6 +108,7 @@ export async function updatePlatformUserStatus(formData: FormData) {
 }
 
 export async function updatePlatformUserProfile(formData: FormData) {
+  await blockReadOnlyUserMutation(formData);
   const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/login",
   });
@@ -219,6 +229,7 @@ export async function updatePlatformUserProfile(formData: FormData) {
 }
 
 export async function updatePlatformUserPermissions(formData: FormData) {
+  await blockReadOnlyUserMutation(formData);
   const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/login",
   });
@@ -287,6 +298,7 @@ export async function updatePlatformUserPermissions(formData: FormData) {
 }
 
 export async function resetPlatformUserPassword(formData: FormData) {
+  await blockReadOnlyUserMutation(formData);
   const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/login",
   });
@@ -349,6 +361,7 @@ export async function resetPlatformUserPassword(formData: FormData) {
 }
 
 export async function archiveOrphanPlatformUser(formData: FormData) {
+  await blockReadOnlyUserMutation(formData);
   const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/login",
   });

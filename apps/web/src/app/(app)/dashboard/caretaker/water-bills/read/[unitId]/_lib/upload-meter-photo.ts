@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { AssetType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { publicAssetUrl } from "./helpers";
+import { validateImageFile } from "@/lib/uploads/secure-image";
 
 export async function uploadMeterPhoto({
   photo,
@@ -21,12 +22,10 @@ export async function uploadMeterPhoto({
   const uploadDir = path.join(process.cwd(), "public", "uploads", "meters");
   await mkdir(uploadDir, { recursive: true });
 
-  const ext = path.extname(photo.name).toLowerCase() || ".jpg";
-  const fileName = `${unitId}-${period}-${randomUUID()}${ext}`;
+  const image = await validateImageFile(photo, { maxBytes: 5 * 1024 * 1024 });
+  const fileName = `${unitId}-${period}-${randomUUID()}${image.extension}`;
   const publicKey = `/uploads/meters/${fileName}`;
-  const buffer = Buffer.from(await photo.arrayBuffer());
-
-  await writeFile(path.join(uploadDir, fileName), buffer);
+  await writeFile(path.join(uploadDir, fileName), image.buffer);
 
   const asset = await prisma.asset.create({
     data: {
@@ -34,9 +33,9 @@ export async function uploadMeterPhoto({
       unitId,
       fileName: photo.name,
       fileType: "image",
-      mimeType: photo.type,
+      mimeType: image.mimeType,
       key: publicKey,
-      size: photo.size,
+      size: image.size,
       assetType: AssetType.PHOTO,
       uploadedByUserId: submittedByUserId,
       metadata: {

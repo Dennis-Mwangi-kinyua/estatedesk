@@ -23,6 +23,7 @@ export type EtimsClientConfig = {
   clientSecret: string | null;
   webhookSecret: string | null;
   controlUnitSerial: string | null;
+  branchOfficeId: string | null;
   configured: boolean;
 };
 
@@ -75,6 +76,7 @@ export function getEtimsClientConfig(): EtimsClientConfig {
     clientSecret,
     webhookSecret,
     controlUnitSerial,
+    branchOfficeId: trimEnv("KRA_ETIMS_BHF_ID"),
     configured,
   };
 }
@@ -87,10 +89,13 @@ export function isEtimsLiveConfigured() {
  * Build the OSCU/VSCU-style sales receipt body KRA expects from our fields.
  * Field names follow common eTIMS JSON conventions used by integrators.
  */
-export function buildEtimsSalesPayload(fields: EtimsReceiptFields) {
+export function buildEtimsSalesPayload(
+  fields: EtimsReceiptFields,
+  config: EtimsClientConfig = getEtimsClientConfig(),
+) {
   return {
     tin: fields.sellerPin,
-    bhfId: process.env.KRA_ETIMS_BHF_ID?.trim() || "00",
+    bhfId: config.branchOfficeId || "00",
     invcNo: fields.invoiceNumber,
     orgInvcNo: fields.invoiceNumber,
     custTin: fields.buyerPin,
@@ -151,7 +156,11 @@ export function buildEtimsSalesPayload(fields: EtimsReceiptFields) {
 }
 
 type TokenCache = { token: string; expiresAt: number };
-let tokenCache: TokenCache | null = null;
+const tokenCache = new Map<string, TokenCache>();
+
+function tokenCacheKey(config: EtimsClientConfig) {
+  return `${config.environment}:${config.baseUrl ?? ""}:${config.clientId ?? ""}`;
+}
 
 /**
  * Fetch OAuth client-credentials token from KRA eTIMS gateway.
@@ -164,8 +173,10 @@ export async function getEtimsAccessToken(
     return { ok: false, message: "eTIMS credentials are not configured." };
   }
 
-  if (tokenCache && tokenCache.expiresAt > Date.now() + 30_000) {
-    return { ok: true, token: tokenCache.token };
+  const cacheKey = tokenCacheKey(config);
+  const cachedToken = tokenCache.get(cacheKey);
+  if (cachedToken && cachedToken.expiresAt > Date.now() + 30_000) {
+    return { ok: true, token: cachedToken.token };
   }
 
   const tokenUrl =
@@ -204,10 +215,10 @@ export async function getEtimsAccessToken(
     }
 
     const expiresIn = Number(body.expires_in || 3500);
-    tokenCache = {
+    tokenCache.set(cacheKey, {
       token: body.access_token,
       expiresAt: Date.now() + Math.max(60, expiresIn) * 1000,
-    };
+    });
     return { ok: true, token: body.access_token };
   } catch (error) {
     return {
@@ -224,13 +235,13 @@ export async function getEtimsAccessToken(
  */
 export async function submitEtimsSalesReceipt(
   input: BuildEtimsReceiptInput,
+  config: EtimsClientConfig = getEtimsClientConfig(),
 ): Promise<EtimsSubmitResult> {
-  const config = getEtimsClientConfig();
   const fields = buildEtimsReadyReceiptFields({
     ...input,
     controlUnitSerial: input.controlUnitSerial ?? config.controlUnitSerial,
   });
-  const payload = buildEtimsSalesPayload(fields);
+  const payload = buildEtimsSalesPayload(fields, config);
 
   if (!config.configured || !config.baseUrl) {
     return {

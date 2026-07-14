@@ -11,6 +11,7 @@ import { ensureUnitPublicSlug } from "@/lib/public-vacancy-ensure-slug";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { storage } from "@/lib/storage";
+import { validateImageFile, type ValidatedImage } from "@/lib/uploads/secure-image";
 
 function optionalString(value: FormDataEntryValue | null) {
   if (typeof value !== "string") return null;
@@ -60,18 +61,16 @@ function isS3Configured() {
 async function storeVacancyImage(input: {
   orgId: string;
   unitId: string;
-  file: File;
-  buffer: Buffer;
+  image: ValidatedImage;
 }) {
-  const ext = path.extname(input.file.name).toLowerCase() || ".jpg";
-  const fileName = `${input.unitId}-${randomUUID()}${ext}`;
+  const fileName = `${input.unitId}-${randomUUID()}${input.image.extension}`;
 
   if (isS3Configured()) {
     const key = `vacancies/${input.orgId}/${fileName}`;
     const uploaded = await storage.uploadFile({
       key,
-      body: input.buffer,
-      contentType: input.file.type || "image/jpeg",
+      body: input.image.buffer,
+      contentType: input.image.mimeType,
     });
 
     return {
@@ -84,7 +83,7 @@ async function storeVacancyImage(input: {
   const uploadDir = path.join(process.cwd(), "public", "uploads", "vacancies");
   await mkdir(uploadDir, { recursive: true });
   const publicKey = `/uploads/vacancies/${fileName}`;
-  await writeFile(path.join(uploadDir, fileName), input.buffer);
+  await writeFile(path.join(uploadDir, fileName), input.image.buffer);
 
   return {
     key: publicKey,
@@ -200,20 +199,16 @@ export async function uploadUnitVacancyImagesAction(
   }
 
   for (const file of files) {
-    if (!file.type.startsWith("image/")) {
-      uploadError(unitId, "Only image files are allowed.");
+    let image: ValidatedImage;
+    try {
+      image = await validateImageFile(file, { maxBytes: 5 * 1024 * 1024 });
+    } catch (error) {
+      uploadError(unitId, error instanceof Error ? error.message : "Invalid image file.");
     }
-
-    if (file.size > 5 * 1024 * 1024) {
-      uploadError(unitId, "Each image must be 5MB or smaller.");
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
     const stored = await storeVacancyImage({
       orgId: session.activeOrgId!,
       unitId: unit.id,
-      file,
-      buffer,
+      image,
     });
 
     await prisma.asset.create({
@@ -222,9 +217,9 @@ export async function uploadUnitVacancyImagesAction(
         unitId: unit.id,
         fileName: file.name,
         fileType: "image",
-        mimeType: file.type,
+        mimeType: image.mimeType,
         key: stored.key,
-        size: file.size,
+        size: image.size,
         assetType: AssetType.PHOTO,
         uploadedByUserId: session.userId,
         metadata: {

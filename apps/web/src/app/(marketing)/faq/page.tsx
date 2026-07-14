@@ -3,6 +3,7 @@ import { ArrowRight, HelpCircle, Search } from "lucide-react";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
+import { serializeJsonForHtml } from "@/lib/security/safe-json";
 import {
   faqJsonLd,
   marketingFaqItems,
@@ -136,7 +137,7 @@ export default function FaqPage() {
     <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
       />
       <PublicAccessHeader active="faq" />
 

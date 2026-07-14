@@ -20,6 +20,7 @@ type OrganizationWorkspaceCardProps = {
   timezone?: string | null;
   createdAt: Date;
   layout?: "stacked" | "wide";
+  colorVariant?: number;
   metrics: {
     properties: number;
     tenants: number;
@@ -36,7 +37,44 @@ type OrganizationWorkspaceCardProps = {
 };
 
 const cardShellClass =
-  "group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20";
+  "group rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md";
+
+const organizationColorVariants = [
+  {
+    shell: "border-teal-200 bg-teal-50/70 hover:border-teal-300 dark:border-teal-400/20 dark:bg-teal-950/20 dark:hover:border-teal-400/35",
+    avatar: "border-teal-200 bg-teal-700 text-white dark:border-teal-400/30 dark:bg-teal-400 dark:text-teal-950",
+  },
+  {
+    shell: "border-violet-200 bg-violet-50/70 hover:border-violet-300 dark:border-violet-400/20 dark:bg-violet-950/20 dark:hover:border-violet-400/35",
+    avatar: "border-violet-200 bg-violet-700 text-white dark:border-violet-400/30 dark:bg-violet-400 dark:text-violet-950",
+  },
+  {
+    shell: "border-amber-200 bg-amber-50/70 hover:border-amber-300 dark:border-amber-400/20 dark:bg-amber-950/20 dark:hover:border-amber-400/35",
+    avatar: "border-amber-200 bg-amber-600 text-white dark:border-amber-400/30 dark:bg-amber-400 dark:text-amber-950",
+  },
+  {
+    shell: "border-sky-200 bg-sky-50/70 hover:border-sky-300 dark:border-sky-400/20 dark:bg-sky-950/20 dark:hover:border-sky-400/35",
+    avatar: "border-sky-200 bg-sky-700 text-white dark:border-sky-400/30 dark:bg-sky-400 dark:text-sky-950",
+  },
+  {
+    shell: "border-rose-200 bg-rose-50/70 hover:border-rose-300 dark:border-rose-400/20 dark:bg-rose-950/20 dark:hover:border-rose-400/35",
+    avatar: "border-rose-200 bg-rose-700 text-white dark:border-rose-400/30 dark:bg-rose-400 dark:text-rose-950",
+  },
+  {
+    shell: "border-indigo-200 bg-indigo-50/70 hover:border-indigo-300 dark:border-indigo-400/20 dark:bg-indigo-950/20 dark:hover:border-indigo-400/35",
+    avatar: "border-indigo-200 bg-indigo-700 text-white dark:border-indigo-400/30 dark:bg-indigo-400 dark:text-indigo-950",
+  },
+] as const;
+
+const neutralColorVariant = {
+  shell: "border-slate-200 bg-white hover:border-slate-300 dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20",
+  avatar: "border-slate-200 bg-slate-950 text-white dark:border-white/10 dark:bg-white dark:text-slate-950",
+};
+
+function getOrganizationColorVariant(colorVariant?: number) {
+  if (colorVariant === undefined) return neutralColorVariant;
+  return organizationColorVariants[Math.abs(colorVariant) % organizationColorVariants.length];
+}
 
 export function OrganizationWorkspaceCard(props: OrganizationWorkspaceCardProps) {
   if (props.layout === "wide") {
@@ -49,14 +87,16 @@ export function OrganizationWorkspaceCard(props: OrganizationWorkspaceCardProps)
 function StackedOrganizationWorkspaceCard(props: OrganizationWorkspaceCardProps) {
   const billing = formatSubscriptionSummary(props.subscription);
   const contact = props.email ?? props.phone ?? "No contact set";
+  const colors = getOrganizationColorVariant(props.colorVariant);
 
   return (
-    <Link href={props.href} className={`${cardShellClass} flex flex-col gap-3`}>
+    <Link href={props.href} className={`${cardShellClass} ${colors.shell} flex flex-col gap-3`}>
       <IdentityHeader
         name={props.name}
         slug={props.slug}
         contact={contact}
         status={props.status}
+        avatarClassName={colors.avatar}
         trailing={
           <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-slate-700 dark:group-hover:text-slate-200" />
         }
@@ -79,17 +119,19 @@ function StackedOrganizationWorkspaceCard(props: OrganizationWorkspaceCardProps)
 function WideOrganizationWorkspaceCard(props: OrganizationWorkspaceCardProps) {
   const billing = formatSubscriptionSummary(props.subscription);
   const contact = props.email ?? props.phone ?? "No contact set";
+  const colors = getOrganizationColorVariant(props.colorVariant);
 
   return (
     <Link
       href={props.href}
-      className={`${cardShellClass} xl:grid xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,1fr)_minmax(220px,0.85fr)_auto] xl:items-center xl:gap-6`}
+      className={`${cardShellClass} ${colors.shell} flex min-w-0 flex-col gap-3 2xl:grid 2xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,1fr)_minmax(220px,0.85fr)_auto] 2xl:items-center 2xl:gap-6`}
     >
       <IdentityHeader
         name={props.name}
         slug={props.slug}
         contact={contact}
         status={props.status}
+        avatarClassName={colors.avatar}
       />
 
       <MetricsStrip metrics={props.metrics} />
@@ -110,18 +152,20 @@ function IdentityHeader({
   slug,
   contact,
   status,
+  avatarClassName,
   trailing,
 }: {
   name: string;
   slug: string;
   contact: string;
   status: string;
+  avatarClassName: string;
   trailing?: ReactNode;
 }) {
   return (
     <div className="flex min-w-0 items-start justify-between gap-3">
       <div className="flex min-w-0 items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-950 text-sm font-semibold text-white dark:border-white/10 dark:bg-white dark:text-slate-950">
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border text-sm font-semibold ${avatarClassName}`}>
           {getInitials(name)}
         </div>
 

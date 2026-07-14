@@ -3,6 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { AssetType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { validateImageFile } from "@/lib/uploads/secure-image";
 
 function publicAssetUrl(key: string) {
   if (key.startsWith("/") || key.startsWith("http")) return key;
@@ -23,12 +24,10 @@ export async function uploadIssuePhoto({
   const uploadDir = path.join(process.cwd(), "public", "uploads", "issues");
   await mkdir(uploadDir, { recursive: true });
 
-  const ext = path.extname(photo.name).toLowerCase() || ".jpg";
-  const fileName = `${unitId ?? "general"}-${randomUUID()}${ext}`;
+  const image = await validateImageFile(photo, { maxBytes: 5 * 1024 * 1024 });
+  const fileName = `${unitId ?? "general"}-${randomUUID()}${image.extension}`;
   const publicKey = `/uploads/issues/${fileName}`;
-  const buffer = Buffer.from(await photo.arrayBuffer());
-
-  await writeFile(path.join(uploadDir, fileName), buffer);
+  await writeFile(path.join(uploadDir, fileName), image.buffer);
 
   const asset = await prisma.asset.create({
     data: {
@@ -36,9 +35,9 @@ export async function uploadIssuePhoto({
       unitId,
       fileName: photo.name,
       fileType: "image",
-      mimeType: photo.type,
+      mimeType: image.mimeType,
       key: publicKey,
-      size: photo.size,
+      size: image.size,
       assetType: AssetType.PHOTO,
       uploadedByUserId: submittedByUserId,
       metadata: {

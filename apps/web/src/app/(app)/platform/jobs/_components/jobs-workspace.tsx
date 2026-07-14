@@ -38,7 +38,7 @@ import { JobsQueuesSection } from "./jobs-queues-section";
 
 export function JobsWorkspace(props: JobsWorkspaceProps) {
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 max-w-full space-y-6 overflow-x-clip">
       <JobsOverviewSection {...props} />
       <JobsQueuesSection {...props} />
     </div>

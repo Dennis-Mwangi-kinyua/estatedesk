@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { serializeJsonForHtml } from "@/lib/security/safe-json";
 import {
   Building2,
   Check,
@@ -127,7 +128,7 @@ export default function PricingPage() {
     <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(pricingJsonLd) }}
       />
       <PublicAccessHeader active="pricing" />
 

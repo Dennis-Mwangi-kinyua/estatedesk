@@ -1,6 +1,25 @@
 import { formatNumber } from "../../_components/control-plane";
 import { pagerHref } from "../_lib/helpers";
 
+const JOB_ENTRY_COLORS = [
+  { card: "border-sky-200 bg-sky-50/80 dark:border-sky-400/20 dark:bg-sky-500/10", row: "bg-sky-50/80 dark:bg-sky-500/10", bar: "bg-sky-500" },
+  { card: "border-emerald-200 bg-emerald-50/80 dark:border-emerald-400/20 dark:bg-emerald-500/10", row: "bg-emerald-50/80 dark:bg-emerald-500/10", bar: "bg-emerald-500" },
+  { card: "border-violet-200 bg-violet-50/80 dark:border-violet-400/20 dark:bg-violet-500/10", row: "bg-violet-50/80 dark:bg-violet-500/10", bar: "bg-violet-500" },
+  { card: "border-amber-200 bg-amber-50/80 dark:border-amber-400/20 dark:bg-amber-500/10", row: "bg-amber-50/80 dark:bg-amber-500/10", bar: "bg-amber-500" },
+  { card: "border-rose-200 bg-rose-50/80 dark:border-rose-400/20 dark:bg-rose-500/10", row: "bg-rose-50/80 dark:bg-rose-500/10", bar: "bg-rose-500" },
+  { card: "border-cyan-200 bg-cyan-50/80 dark:border-cyan-400/20 dark:bg-cyan-500/10", row: "bg-cyan-50/80 dark:bg-cyan-500/10", bar: "bg-cyan-500" },
+  { card: "border-indigo-200 bg-indigo-50/80 dark:border-indigo-400/20 dark:bg-indigo-500/10", row: "bg-indigo-50/80 dark:bg-indigo-500/10", bar: "bg-indigo-500" },
+  { card: "border-orange-200 bg-orange-50/80 dark:border-orange-400/20 dark:bg-orange-500/10", row: "bg-orange-50/80 dark:bg-orange-500/10", bar: "bg-orange-500" },
+] as const;
+
+export function colorForJobEntry(key: string) {
+  let hash = 0;
+  for (let index = 0; index < key.length; index += 1) {
+    hash = (hash * 31 + key.charCodeAt(index)) >>> 0;
+  }
+  return JOB_ENTRY_COLORS[hash % JOB_ENTRY_COLORS.length];
+}
+
 export function MobileField({
   label,
   children,
@@ -13,7 +32,9 @@ export function MobileField({
       <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
         {label}
       </p>
-      <div className="mt-1 text-sm text-slate-700 dark:text-slate-200">{children}</div>
+      <div className="mt-1 min-w-0 [overflow-wrap:anywhere] text-sm text-slate-700 dark:text-slate-200">
+        {children}
+      </div>
     </div>
   );
 }

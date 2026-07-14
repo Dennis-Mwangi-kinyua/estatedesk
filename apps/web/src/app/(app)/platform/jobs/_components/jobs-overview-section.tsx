@@ -23,7 +23,7 @@ import type { JobsPageData } from "../_lib/queries";
 import type { JobsPageInput } from "../_lib/types";
 import { DEFAULT_PAGE_SIZE } from "../_lib/types";
 import { formatAge, formatJson, readProviderError } from "../_lib/helpers";
-import { HiddenReturnTo, MobileEmpty, MobileField, SectionPager } from "./jobs-ui";
+import { HiddenReturnTo, MobileEmpty, MobileField, SectionPager, colorForJobEntry } from "./jobs-ui";
 
 export type JobsWorkspaceProps = {
   data: JobsPageData;
@@ -83,7 +83,7 @@ export function JobsOverviewSection({
             name="q"
             defaultValue={q}
             placeholder="Search jobs, organizations, recipients, KRA filing keys"
-            className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-slate-400 dark:border-white/10 dark:bg-slate-900"
+            className="min-h-11 min-w-0 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-slate-400 dark:border-white/10 dark:bg-slate-900"
           />
           <select
             name="jobStatus"
@@ -136,9 +136,12 @@ export function JobsOverviewSection({
       </Surface>
 
       <Surface title="Recent job runs">
-        <div className="grid gap-3 p-4 md:hidden">
-          {jobRuns.map((run) => (
-            <article key={run.id} className="rounded-lg border border-slate-200 p-4 dark:border-white/10">
+        <div className="grid min-w-0 gap-3 p-3 sm:p-4 2xl:hidden">
+          {jobRuns.map((run) => {
+            const color = colorForJobEntry(run.jobName);
+            return (
+            <article key={run.id} className={`relative min-w-0 overflow-hidden rounded-lg border p-4 pl-5 ${color.card}`}>
+              <span className={`absolute inset-y-0 left-0 w-1 ${color.bar}`} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold text-slate-950 dark:text-white">{labelize(run.jobName)}</p>
@@ -170,10 +173,11 @@ export function JobsOverviewSection({
                 ) : null}
               </div>
             </article>
-          ))}
+            );
+          })}
           {jobRuns.length === 0 ? <MobileEmpty label="No job runs recorded yet." /> : null}
         </div>
-        <div className="hidden overflow-x-auto md:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -189,10 +193,13 @@ export function JobsOverviewSection({
               </tr>
             </thead>
             <tbody>
-              {jobRuns.map((run) => (
+              {jobRuns.map((run) => {
+                const color = colorForJobEntry(run.jobName);
+                return (
                 <Fragment key={run.id}>
-                  <tr className="border-t border-slate-100 dark:border-white/10">
-                    <td className="px-4 py-3">
+                  <tr className={`border-t border-slate-100 dark:border-white/10 ${color.row}`}>
+                    <td className="relative px-5 py-3">
+                      <span className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`} aria-hidden="true" />
                       <p className="font-medium text-slate-950 dark:text-white">{labelize(run.jobName)}</p>
                     </td>
                     <td className="px-4 py-3"><Badge tone={toneForStatus(run.status)}>{run.status}</Badge></td>
@@ -222,7 +229,8 @@ export function JobsOverviewSection({
                     </tr>
                   ) : null}
                 </Fragment>
-              ))}
+                );
+              })}
               {jobRuns.length === 0 ? <EmptyRow colSpan={9} label="No job runs recorded yet." /> : null}
             </tbody>
           </table>
@@ -235,8 +243,11 @@ export function JobsOverviewSection({
         description="Structural map for approved and pending external providers. Missing keys mean the adapter is not ready for live traffic; pending approval means credentials can be wired once the provider relationship is cleared."
       >
         <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-3">
-          {integrationReadiness.integrations.map((provider) => (
-            <div key={provider.id} className="rounded-lg border border-slate-200 p-4 dark:border-white/10">
+          {integrationReadiness.integrations.map((provider) => {
+            const color = colorForJobEntry(provider.id);
+            return (
+            <div key={provider.id} className={`relative overflow-hidden rounded-lg border p-4 pl-5 ${color.card}`}>
+              <span className={`absolute inset-y-0 left-0 w-1 ${color.bar}`} aria-hidden="true" />
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold text-slate-950 dark:text-white">{provider.name}</p>
@@ -258,7 +269,8 @@ export function JobsOverviewSection({
                 </p>
               ) : null}
             </div>
-          ))}
+            );
+          })}
         </div>
       </Surface>
 

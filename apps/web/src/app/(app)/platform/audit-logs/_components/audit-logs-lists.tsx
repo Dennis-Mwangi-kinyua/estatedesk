@@ -8,16 +8,39 @@ import {
   TableHead,
 } from "./audit-logs-shared";
 
+const LOG_COLOR_PALETTE = [
+  { surface: "bg-sky-50/80 dark:bg-sky-500/10", bar: "bg-sky-500" },
+  { surface: "bg-emerald-50/80 dark:bg-emerald-500/10", bar: "bg-emerald-500" },
+  { surface: "bg-violet-50/80 dark:bg-violet-500/10", bar: "bg-violet-500" },
+  { surface: "bg-amber-50/80 dark:bg-amber-500/10", bar: "bg-amber-500" },
+  { surface: "bg-rose-50/80 dark:bg-rose-500/10", bar: "bg-rose-500" },
+  { surface: "bg-cyan-50/80 dark:bg-cyan-500/10", bar: "bg-cyan-500" },
+  { surface: "bg-indigo-50/80 dark:bg-indigo-500/10", bar: "bg-indigo-500" },
+  { surface: "bg-orange-50/80 dark:bg-orange-500/10", bar: "bg-orange-500" },
+] as const;
+
+function colorForLog(index: number) {
+  return LOG_COLOR_PALETTE[index % LOG_COLOR_PALETTE.length];
+}
+
 export function MobileLogList({ logs }: { logs: AuditLogItem[] }) {
   return (
     <div className="divide-y divide-slate-200 dark:divide-white/10 md:hidden">
-      {logs.map((log) => {
+      {logs.map((log, index) => {
         const actorName = log.actor?.fullName?.trim() || "System";
         const actorEmail = log.actor?.email || "—";
         const orgName = log.org?.name || "—";
+        const color = colorForLog(index);
 
         return (
-          <article key={log.id} className="space-y-4 p-4">
+          <article
+            key={log.id}
+            className={`relative space-y-4 overflow-hidden py-4 pl-5 pr-4 ${color.surface}`}
+          >
+            <span
+              className={`absolute inset-y-0 left-0 w-1 ${color.bar}`}
+              aria-hidden="true"
+            />
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-slate-950 dark:text-white">
@@ -123,17 +146,22 @@ export function DesktopTable({ logs }: { logs: AuditLogItem[] }) {
           </tr>
         </thead>
         <tbody>
-          {logs.map((log) => {
+          {logs.map((log, index) => {
             const actorName = log.actor?.fullName?.trim() || "System";
             const actorEmail = log.actor?.email || "—";
             const orgName = log.org?.name || "—";
+            const color = colorForLog(index);
 
             return (
               <tr
                 key={log.id}
-                className="border-t border-slate-200 align-top dark:border-white/10"
+                className={`border-t border-slate-200 align-top dark:border-white/10 ${color.surface}`}
               >
-                <TableCell className="whitespace-nowrap text-slate-500 dark:text-slate-400">
+                <TableCell className="relative whitespace-nowrap pl-5 text-slate-500 dark:text-slate-400">
+                  <span
+                    className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`}
+                    aria-hidden="true"
+                  />
                   {formatDateTime(log.createdAt)}
                 </TableCell>
 

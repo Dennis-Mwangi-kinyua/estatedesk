@@ -18,6 +18,25 @@ import {
 
 export const dynamic = "force-dynamic";
 
+const ORG_COLOR_PALETTE = [
+  { surface: "bg-sky-50/80 dark:bg-sky-500/10", bar: "bg-sky-500" },
+  { surface: "bg-emerald-50/80 dark:bg-emerald-500/10", bar: "bg-emerald-500" },
+  { surface: "bg-violet-50/80 dark:bg-violet-500/10", bar: "bg-violet-500" },
+  { surface: "bg-amber-50/80 dark:bg-amber-500/10", bar: "bg-amber-500" },
+  { surface: "bg-rose-50/80 dark:bg-rose-500/10", bar: "bg-rose-500" },
+  { surface: "bg-cyan-50/80 dark:bg-cyan-500/10", bar: "bg-cyan-500" },
+  { surface: "bg-indigo-50/80 dark:bg-indigo-500/10", bar: "bg-indigo-500" },
+  { surface: "bg-orange-50/80 dark:bg-orange-500/10", bar: "bg-orange-500" },
+] as const;
+
+function colorForOrganization(orgId: string) {
+  let hash = 0;
+  for (let index = 0; index < orgId.length; index += 1) {
+    hash = (hash * 31 + orgId.charCodeAt(index)) >>> 0;
+  }
+  return ORG_COLOR_PALETTE[hash % ORG_COLOR_PALETTE.length];
+}
+
 export default async function DataManagementPage() {
   await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/dashboard",
@@ -86,8 +105,11 @@ export default async function DataManagementPage() {
         description="Organizations request a CSV archive here; platform admins approve or reject before download."
       >
         <div className="divide-y divide-border lg:hidden">
-          {exportRequests.map((request) => (
-            <article key={request.id} className="space-y-3 px-3 py-4 sm:px-4">
+          {exportRequests.map((request) => {
+            const color = colorForOrganization(request.org.id);
+            return (
+            <article key={request.id} className={`relative space-y-3 overflow-hidden py-4 pl-5 pr-3 sm:pr-4 ${color.surface}`}>
+              <span className={`absolute inset-y-0 left-0 w-1 ${color.bar}`} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <AdminLink href={`/platform/organizations/${request.org.slug}`}>
@@ -191,7 +213,8 @@ export default async function DataManagementPage() {
                 </a>
               ) : null}
             </article>
-          ))}
+            );
+          })}
           {exportRequests.length === 0 ? (
             <p className="px-4 py-10 text-center text-sm text-muted-foreground">
               No export requests found.
@@ -212,9 +235,12 @@ export default async function DataManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {exportRequests.map((request) => (
-                <tr key={request.id} className="border-t border-neutral-100 align-top">
-                  <td className="px-4 py-3">
+              {exportRequests.map((request) => {
+                const color = colorForOrganization(request.org.id);
+                return (
+                <tr key={request.id} className={`border-t border-neutral-100 align-top ${color.surface}`}>
+                  <td className="relative px-5 py-3">
+                    <span className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`} aria-hidden="true" />
                     <AdminLink href={`/platform/organizations/${request.org.slug}`}>{request.org.name}</AdminLink>
                     <p className="mt-1 text-xs text-neutral-500">/{request.org.slug}</p>
                   </td>
@@ -279,7 +305,8 @@ export default async function DataManagementPage() {
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {exportRequests.length === 0 ? <EmptyRow colSpan={6} label="No export requests found." /> : null}
             </tbody>
           </table>
@@ -288,8 +315,11 @@ export default async function DataManagementPage() {
 
       <Surface title="Retention overview">
         <div className="divide-y divide-border lg:hidden">
-          {orgs.map((org) => (
-            <article key={org.id} className="space-y-3 px-3 py-4 sm:px-4">
+          {orgs.map((org) => {
+            const color = colorForOrganization(org.id);
+            return (
+            <article key={org.id} className={`relative space-y-3 overflow-hidden py-4 pl-5 pr-3 sm:pr-4 ${color.surface}`}>
+              <span className={`absolute inset-y-0 left-0 w-1 ${color.bar}`} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <AdminLink href={`/platform/organizations/${org.slug}`}>
@@ -337,7 +367,8 @@ export default async function DataManagementPage() {
                 Download CSV ZIP
               </a>
             </article>
-          ))}
+            );
+          })}
           {orgs.length === 0 ? (
             <p className="px-4 py-10 text-center text-sm text-muted-foreground">
               No organizations found.
@@ -361,9 +392,12 @@ export default async function DataManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {orgs.map((org) => (
-                <tr key={org.id} className="border-t border-neutral-100">
-                  <td className="px-4 py-3">
+              {orgs.map((org) => {
+                const color = colorForOrganization(org.id);
+                return (
+                <tr key={org.id} className={`border-t border-neutral-100 ${color.surface}`}>
+                  <td className="relative px-5 py-3">
+                    <span className={`absolute inset-y-2 left-1.5 w-1 rounded-full ${color.bar}`} aria-hidden="true" />
                     <AdminLink href={`/platform/organizations/${org.slug}`}>{org.name}</AdminLink>
                     <p className="mt-1 text-xs text-neutral-500">/{org.slug}</p>
                   </td>
@@ -385,7 +419,8 @@ export default async function DataManagementPage() {
                     </a>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {orgs.length === 0 ? <EmptyRow colSpan={9} label="No organizations found." /> : null}
             </tbody>
           </table>

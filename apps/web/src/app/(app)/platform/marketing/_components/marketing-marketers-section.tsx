@@ -65,7 +65,7 @@ export function MarketingMarketersSection(props: MarketingWorkspaceProps) {
       </Surface>
 
       <Surface title="Marketers" className="order-7 lg:order-5">
-        <div className="grid min-w-0 gap-3 p-3 lg:hidden">
+        <div className="grid min-w-0 gap-3 p-3 2xl:hidden">
           {marketers.map((marketer) => (
             <article
               key={marketer.id}
@@ -116,7 +116,7 @@ export function MarketingMarketersSection(props: MarketingWorkspaceProps) {
           ) : null}
         </div>
 
-        <div className="hidden max-w-full overflow-x-auto lg:block">
+        <div className="hidden max-w-full overflow-x-auto 2xl:block">
           <table className="min-w-full text-sm">
             <thead className="bg-muted/40 text-left text-muted-foreground">
               <tr>

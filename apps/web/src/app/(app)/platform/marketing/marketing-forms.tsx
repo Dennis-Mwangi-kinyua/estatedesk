@@ -141,7 +141,7 @@ export function MarketerUpdateForm({
   );
 
   return (
-    <form action={action} className="flex w-full flex-col gap-2 lg:min-w-[360px]">
+    <form action={action} className="flex min-w-0 w-full flex-col gap-2 2xl:min-w-[360px]">
       <div className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-2 sm:grid-cols-[96px_130px_1fr_auto]">
         <input type="hidden" name="marketerId" value={marketerId} />
         <input
@@ -195,7 +195,7 @@ export function AttributionForm({
   );
 
   return (
-    <form action={action} className="flex w-full flex-col gap-2 lg:min-w-[520px]">
+    <form action={action} className="flex min-w-0 w-full flex-col gap-2 2xl:min-w-[520px]">
       <div className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(150px,1fr)_96px_145px_minmax(150px,1fr)_auto]">
         <input type="hidden" name={hiddenName} value={hiddenValue} />
         <select
