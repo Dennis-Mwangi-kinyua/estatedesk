@@ -248,7 +248,7 @@ export default async function RootLayout({
         <InlineScript id="estatedesk-theme-init" html={THEME_INIT_SCRIPT} />
         <InlineScript
           id="estatedesk-pwa-launch-init"
-          html={`(function(){try{var standalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;if(standalone){document.documentElement.dataset.pwaLaunch="visible";document.documentElement.dataset.pwaLaunchStartedAt=String(performance.now())}}catch(e){}})();`}
+          html={`(function(){try{var standalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;if(standalone){document.documentElement.dataset.pwaLaunch="visible";document.documentElement.dataset.pwaLaunchStartedAt=String(performance.now());var dark=window.matchMedia("(prefers-color-scheme: dark)").matches;var color=dark?"#020617":"#f8fafc";document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta){meta.setAttribute("content",color)})}}catch(e){}})();`}
         />
         <InlineScript
           id="estatedesk-structured-data"

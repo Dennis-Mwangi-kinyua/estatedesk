@@ -1,3 +1,0 @@
-module.exports=[904736,a=>{"use strict";async function b(b){let{getPlatformControl:d}=await a.A(248179);return c(b,(await d()).globalFeatures)}function c(a,b){let c=function(a){if(!a||"object"!=typeof a||Array.isArray(a))return{};let b={};for(let[c,d]of Object.entries(a))b[c]=!!d;return b}(a);for(let[a,d]of Object.entries(b))c[a]=!!d;return c}a.s(["applyGlobalFeatureOverrides",0,c,"getFeatureFlag",0,function(a,b,c=!1){return b in a?!!a[b]:c},"resolveOrgFeatures",0,b])}];
-
-//# sourceMappingURL=apps_web_src_lib_org_features_ts_0.8wvyc._.js.map

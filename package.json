@@ -1,6 +1,6 @@
 {
   "name": "estatedesk",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -15,11 +15,13 @@
     "typecheck": "npm run typecheck -w @estatedesk/web",
     "test": "node --import tsx --test tests/**/*.test.ts",
     "test:integration": "node --import tsx --test tests/integration/**/*.integration.ts",
+    "test:e2e": "playwright test",
     "load:test": "node scripts/load-test.mjs",
     "backup:database": "bash scripts/backup-database.sh",
     "backup:validate": "bash scripts/validate-backup.sh",
     "restore:drill": "bash scripts/restore-drill.sh",
     "production:check": "node scripts/production-readiness-check.mjs",
+    "version:set": "node scripts/set-release-version.mjs",
     "postinstall": "prisma generate",
     "seed": "tsx prisma/seed.ts",
     "qa:tenant-portal": "npm run qa:tenant-portal -w @estatedesk/web",

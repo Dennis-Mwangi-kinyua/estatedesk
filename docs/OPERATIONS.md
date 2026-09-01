@@ -92,6 +92,7 @@ Expected responses:
 - `npm test` runs the TypeScript unit tests through Node's built-in test runner and `tsx`.
 - Add tests beside the domain risk: ledger, payment allocation, permissions, public SEO helpers, and M-Pesa callbacks should receive coverage before large changes.
 - Every pull request should pass lint, typecheck, and tests through `.github/workflows/quality.yml`.
+- CI sets `ESTATEDESK_BUILD_WITHOUT_DATABASE=true` only for the `npm run build` lifecycle. This keeps vacancy prerendering deterministic by using an empty listing dataset without contacting PostgreSQL. The bypass also checks that npm is currently running the `build` lifecycle, so the flag cannot suppress listings on a running server; production builds omit it and continue prerendering live public listings.
 
 ## Next Maturity Steps
 

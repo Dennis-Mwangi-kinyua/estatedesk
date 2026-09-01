@@ -8,6 +8,7 @@ import { isStandaloneDisplayMode } from "@/lib/pwa/client";
 export function ServiceWorkerUpdatePrompt() {
   const [visible, setVisible] = useState(false);
   const [pending, setPending] = useState(false);
+  const [availableVersion, setAvailableVersion] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
@@ -22,8 +23,17 @@ export function ServiceWorkerUpdatePrompt() {
       window.location.reload();
     }
 
-    function markUpdateAvailable() {
+    function markUpdateAvailable(worker?: ServiceWorker | null) {
       setVisible(true);
+      if (!worker) return;
+
+      const channel = new MessageChannel();
+      channel.port1.onmessage = (event: MessageEvent<{ version?: unknown }>) => {
+        if (typeof event.data?.version === "string") {
+          setAvailableVersion(event.data.version);
+        }
+      };
+      worker.postMessage({ type: "GET_VERSION" }, [channel.port2]);
     }
 
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
@@ -31,7 +41,7 @@ export function ServiceWorkerUpdatePrompt() {
     navigator.serviceWorker.ready
       .then((registration) => {
         if (registration.waiting) {
-          markUpdateAvailable();
+          markUpdateAvailable(registration.waiting);
         }
 
         registration.addEventListener("updatefound", () => {
@@ -46,7 +56,7 @@ export function ServiceWorkerUpdatePrompt() {
               installingWorker.state === "installed" &&
               navigator.serviceWorker.controller
             ) {
-              markUpdateAvailable();
+              markUpdateAvailable(registration.waiting ?? installingWorker);
             }
           });
         });
@@ -87,7 +97,7 @@ export function ServiceWorkerUpdatePrompt() {
             Update available
           </p>
           <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-            A newer version of EstateDesk is ready. Refresh to load the latest fixes.
+            EstateDesk {availableVersion ? `version ${availableVersion}` : "has a newer version"} is ready. Refresh to load the latest fixes.
           </p>
         </div>
         <button

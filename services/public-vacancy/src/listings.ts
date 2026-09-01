@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { PUBLIC_VACANCIES_CACHE_TAG } from "./cache";
+import { isDatabaseIndependentBuild } from "./build-mode";
 import { prisma } from "@/lib/prisma";
 import {
   buildVacancyListWhere,
@@ -126,6 +127,10 @@ async function queryVacancyListingsCount(params: VacancyListQuery = {}) {
 }
 
 export function getVacancyListingsCountCached(params: VacancyListQuery = {}) {
+  if (isDatabaseIndependentBuild()) {
+    return Promise.resolve(0);
+  }
+
   const cacheKey = [
     "public-vacancy-listings-count",
     params.query ?? "",
@@ -150,6 +155,15 @@ export function getVacancyListingsCountCached(params: VacancyListQuery = {}) {
 export function getVacancyListingsPageCached(
   params: VacancyListQuery & { page?: number; pageSize?: number },
 ) {
+  if (isDatabaseIndependentBuild()) {
+    return Promise.resolve({
+      items: [],
+      total: 0,
+      page: normalizePage(params.page),
+      pageSize: normalizePageSize(params.pageSize),
+    });
+  }
+
   const cacheKey = [
     "public-vacancy-listings-page",
     params.query ?? "",

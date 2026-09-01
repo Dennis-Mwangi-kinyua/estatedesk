@@ -1,4 +1,4 @@
-const CACHE_VERSION = "estatedesk-pwa-v7";
+const CACHE_VERSION = "estatedesk-pwa-v0.2.1";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const OFFLINE_FALLBACKS = ["/offline", "/offline-shell.html"];
 const CARETAKER_OFFLINE_SYNC_TAG = "caretaker-offline-queue-sync";
@@ -25,6 +25,13 @@ self.addEventListener("install", (event) => {
 self.addEventListener("message", (event) => {
   if (event.data?.type === "SKIP_WAITING") {
     self.skipWaiting();
+  }
+
+  if (event.data?.type === "GET_VERSION") {
+    event.ports?.[0]?.postMessage({
+      type: "VERSION",
+      version: CACHE_VERSION.replace("estatedesk-pwa-v", ""),
+    });
   }
 });
 

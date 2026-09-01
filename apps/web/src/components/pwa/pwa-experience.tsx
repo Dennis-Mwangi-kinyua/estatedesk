@@ -215,7 +215,7 @@ export function PwaExperience() {
       {showInfo ? (
         <div className="fixed inset-0 z-[10002] grid place-items-end bg-slate-950/45 p-3 sm:place-items-center" role="dialog" aria-modal="true" aria-label="EstateDesk app information">
           <section className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl dark:bg-slate-900">
-            <div className="flex items-start justify-between"><div><p className="font-semibold text-slate-950 dark:text-white">EstateDesk installed app</p><p className="mt-1 text-sm text-slate-500">Version 0.1.0 · {online ? "Online" : "Offline"}</p></div><button type="button" onClick={() => setShowInfo(false)} aria-label="Close"><X className="h-5 w-5" /></button></div>
+            <div className="flex items-start justify-between"><div><p className="font-semibold text-slate-950 dark:text-white">EstateDesk installed app</p><p className="mt-1 text-sm text-slate-500">Version {process.env.NEXT_PUBLIC_APP_VERSION ?? "0.2.0"} · {online ? "Online" : "Offline"}</p></div><button type="button" onClick={() => setShowInfo(false)} aria-label="Close"><X className="h-5 w-5" /></button></div>
             <div className="mt-5 grid gap-3">
               <button type="button" onClick={updateReady ? applyUpdate : checkForUpdates} disabled={checking} className="flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60 dark:bg-white dark:text-slate-950">
                 {updateReady ? <Download className="h-4 w-4" /> : <RefreshCw className={`h-4 w-4 ${checking ? "animate-spin" : ""}`} />}{updateReady ? "Install available update" : checking ? "Checking…" : "Check for updates"}

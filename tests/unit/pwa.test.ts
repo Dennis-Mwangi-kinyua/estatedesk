@@ -31,10 +31,10 @@ describe("PWA manifest", () => {
     assert.deepEqual(config.display_override, ["standalone", "minimal-ui", "browser"]);
     assert.equal(config.prefer_related_applications, false);
     assert.equal(config.id, "/");
-    assert.equal(config.start_url, "/dashboard?source=pwa");
+    assert.equal(config.start_url, "/login?source=pwa");
     assert.equal(config.orientation, "any");
-    assert.equal(config.background_color, "#0f766e");
-    assert.equal(config.theme_color, "#0f766e");
+    assert.equal(config.background_color, "#f8fafc");
+    assert.equal(config.theme_color, "#f8fafc");
     assert.deepEqual(config.launch_handler, { client_mode: "navigate-existing" });
     assert.equal(config.share_target?.action, "/share");
     assert.equal(
@@ -84,7 +84,10 @@ describe("service worker", () => {
       "utf8",
     );
 
-    assert.match(serviceWorker, /estatedesk-pwa-v6/);
+    assert.match(
+      serviceWorker,
+      /const CACHE_VERSION = "estatedesk-pwa-v\d+\.\d+\.\d+"/,
+    );
     assert.match(serviceWorker, /requestBadgeSync/);
     assert.match(serviceWorker, /SYNC_APP_BADGE/);
     assert.match(serviceWorker, /SYNC_CARETAKER_OFFLINE_QUEUE/);

@@ -88,7 +88,7 @@ export function useCheckoutForm(searchParams: {
     return () => {
       active = false;
     };
-  }, [source, id]);
+  }, [source, id, amountParam]);
 
   const handleSubmit = () => {
     setError("");

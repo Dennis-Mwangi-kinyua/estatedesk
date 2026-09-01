@@ -1,3 +1,0 @@
-module.exports=[34508,a=>{"use strict";var b=a.i(187924);a.s(["OwnerStatementPrintControls",0,function(){return(0,b.jsxs)("div",{className:"mx-auto flex max-w-4xl items-center justify-between gap-3",children:[(0,b.jsx)("p",{className:"text-sm text-neutral-600",children:"Print-friendly owner statement"}),(0,b.jsx)("button",{type:"button",onClick:()=>window.print(),className:"rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white",children:"Print / Save as PDF"})]})}])}];
-
-//# sourceMappingURL=02dz_web_src_app_print_owner-statements_owner-statement-print-controls_tsx_0-rhtzx._.js.map

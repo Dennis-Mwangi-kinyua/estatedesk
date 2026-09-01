@@ -11,7 +11,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: SITE_DESCRIPTION,
     lang: "en-KE",
     dir: "ltr",
-    start_url: "/dashboard?source=pwa",
+    start_url: "/login?source=pwa",
     scope: "/",
     display: "standalone",
     display_override: ["standalone", "minimal-ui", "browser"],

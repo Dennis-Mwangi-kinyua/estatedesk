@@ -83,7 +83,8 @@ describe("platform mobile layout", () => {
       const hasMobileView =
         source.includes("ResponsiveDataList") ||
         source.includes("lg:hidden") ||
-        source.includes("md:hidden");
+        source.includes("md:hidden") ||
+        source.includes("2xl:hidden");
 
       assert.equal(
         hasMobileView,
