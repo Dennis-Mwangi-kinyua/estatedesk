@@ -6,10 +6,8 @@ const enabled =
   process.env.NEXT_PUBLIC_ENABLE_WEB_VITALS === "true" ||
   process.env.NEXT_PUBLIC_ANALYTICS_DEBUG === "true";
 
-export function WebVitalsReporter() {
+function EnabledWebVitalsReporter() {
   useReportWebVitals((metric) => {
-    if (!enabled || typeof window === "undefined") return;
-
     const body = JSON.stringify({
       id: metric.id,
       name: metric.name,
@@ -34,4 +32,10 @@ export function WebVitalsReporter() {
   });
 
   return null;
+}
+
+export function WebVitalsReporter() {
+  if (!enabled) return null;
+
+  return <EnabledWebVitalsReporter />;
 }

@@ -160,16 +160,27 @@ function shouldNoIndex(pathname: string) {
 }
 
 function applySecurityHeaders(response: NextResponse, pathname: string) {
+  const isPrivate = shouldNoIndex(pathname);
+
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Referrer-Policy",
+    isPrivate ? "no-referrer" : "strict-origin-when-cross-origin",
+  );
   response.headers.set(
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=(), display-capture=()",
   );
 
-  if (shouldNoIndex(pathname)) {
+  if (isPrivate) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    response.headers.set(
+      "Cache-Control",
+      "private, no-store, no-cache, max-age=0, must-revalidate",
+    );
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
   }
 
   return response;
