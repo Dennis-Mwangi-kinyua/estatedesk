@@ -53,20 +53,20 @@ export function VerifyTenantIdentityHistorySection({
 
             <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
               <div>
-                <p className="text-neutral-400">Lease</p>
+                <p className="text-muted-foreground">Lease</p>
                 <p className="mt-0.5 font-medium text-neutral-800">
                   {formatDate(record.leaseStartDate)} to{" "}
                   {formatDate(record.leaseEndDate)}
                 </p>
               </div>
               <div>
-                <p className="text-neutral-400">Move-out</p>
+                <p className="text-muted-foreground">Move-out</p>
                 <p className="mt-0.5 font-medium text-neutral-800">
                   {formatDate(record.moveOutDate)}
                 </p>
               </div>
               <div>
-                <p className="text-neutral-400">Rent</p>
+                <p className="text-muted-foreground">Rent</p>
                 <p className="mt-0.5 font-medium text-neutral-800">
                   {record.monthlyRent
                     ? formatCurrency(record.monthlyRent)
@@ -74,7 +74,7 @@ export function VerifyTenantIdentityHistorySection({
                 </p>
               </div>
               <div>
-                <p className="text-neutral-400">Paid</p>
+                <p className="text-muted-foreground">Paid</p>
                 <p className="mt-0.5 font-medium text-neutral-800">
                   {formatCurrency(record.totalPaid)} ·{" "}
                   {record.paymentCount} records
@@ -83,7 +83,7 @@ export function VerifyTenantIdentityHistorySection({
             </div>
 
             {record.notes ? (
-              <p className="mt-3 line-clamp-2 text-xs leading-5 text-neutral-600">
+              <p className="mt-3 line-clamp-2 text-xs leading-5 text-muted-foreground">
                 {record.notes}
               </p>
             ) : null}

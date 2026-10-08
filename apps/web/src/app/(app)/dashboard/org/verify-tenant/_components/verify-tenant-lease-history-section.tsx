@@ -20,7 +20,7 @@ export function VerifyTenantLeaseHistorySection({
       </div>
 
       {tenant.leases.length === 0 ? (
-        <div className="ed-theme-muted-panel rounded-2xl p-4 text-sm text-neutral-600">
+        <div className="ed-theme-muted-panel rounded-2xl p-4 text-sm text-muted-foreground">
           No lease history recorded.
         </div>
       ) : (

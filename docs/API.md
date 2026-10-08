@@ -56,13 +56,13 @@ In non-production environments, cron routes are allowed when `CRON_SECRET` is un
 
 Runs the notification delivery cron.
 
-**Schedule in repo:** every 10 minutes via `.github/workflows/cron.yml` when `PRODUCTION_CRON_ENABLED=true`.
+**Schedule in repo:** none. GitHub scheduled cron jobs are removed; an external scheduler can call this endpoint.
 
 ### `GET|POST /api/cron/retention`
 
 Runs retention review for soft-deleted records.
 
-**Schedule in repo:** daily at 02:20 UTC via `.github/workflows/cron.yml`.
+**Schedule in repo:** none. GitHub scheduled cron jobs are removed; an external scheduler can call this endpoint.
 
 ## Public vacancy listings
 

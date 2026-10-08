@@ -62,7 +62,7 @@ Last reviewed: 2026-07-11
 | Item | Document / location | Status |
 | --- | --- | --- |
 | External uptime monitoring | `docs/LAUNCH_READINESS.md` | Configure provider + `HEALTHCHECK_ENABLED` |
-| Production cron jobs | `.github/workflows/cron.yml` | Enable `PRODUCTION_CRON_ENABLED` |
+| Production cron jobs | Authenticated cron API endpoints | GitHub schedules removed; external scheduling optional |
 | Analytics and ads tags | `docs/ENVIRONMENT.md` | Enable only after legal/consent review |
 | Integration providers | `docs/INTEGRATION_READINESS.md` | Enable per provider as approved |
 

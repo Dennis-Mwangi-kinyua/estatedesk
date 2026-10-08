@@ -10,7 +10,7 @@ export function VerifyTenantTransferRequestsPanel({
   if (incomingTransferRequests.length === 0) return null;
 
   return (
-    <section className="rounded-[28px] border border-amber-200 bg-amber-50 p-4 shadow-sm">
+    <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
           <div className="flex flex-col gap-1">
             <h3 className="text-base font-semibold text-amber-950">
               Pending transfer requests
@@ -25,14 +25,14 @@ export function VerifyTenantTransferRequestsPanel({
             {incomingTransferRequests.map((request) => (
               <div
                 key={request.id}
-                className="rounded-2xl border border-amber-200 bg-white p-4"
+                className="rounded-2xl border border-amber-200 bg-card p-4"
               >
                 <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-start">
                   <div>
                     <p className="font-semibold text-foreground">
                       {request.sourceTenant.fullName}
                     </p>
-                    <p className="mt-1 text-sm text-neutral-600">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Requested by {request.targetOrg.name} on{" "}
                       {formatDate(request.requestedAt)}
                     </p>
@@ -46,7 +46,7 @@ export function VerifyTenantTransferRequestsPanel({
                         : ""}
                     </p>
                     {request.sourceTenant.moveOutNotices[0] ? (
-                      <p className="mt-2 text-sm text-neutral-600">
+                      <p className="mt-2 text-sm text-muted-foreground">
                         Move-out:{" "}
                         {formatDate(
                           request.sourceTenant.moveOutNotices[0].moveOutDate,
@@ -73,7 +73,7 @@ export function VerifyTenantTransferRequestsPanel({
                       />
                       <button
                         type="submit"
-                        className="inline-flex h-10 w-full items-center justify-center rounded-2xl bg-neutral-950 px-4 text-sm font-medium text-white transition hover:bg-neutral-800"
+                        className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
                       >
                         Approve transfer
                       </button>
@@ -92,7 +92,7 @@ export function VerifyTenantTransferRequestsPanel({
                       />
                       <button
                         type="submit"
-                        className="inline-flex h-10 w-full items-center justify-center rounded-2xl border border-red-200 bg-card px-4 text-sm font-medium text-red-700 transition hover:bg-red-50"
+                        className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-red-200 bg-card px-4 text-sm font-medium text-red-700 transition hover:bg-red-50"
                       >
                         Reject
                       </button>

@@ -120,7 +120,7 @@ See `docs/INTEGRATION_READINESS.md` for provider readiness expectations.
 
 1. Store secrets in your deployment platform, not in git
 2. Set `NEXT_PUBLIC_APP_URL` and `APP_URL` to the live domain
-3. Configure `CRON_SECRET` and enable `.github/workflows/cron.yml` via `PRODUCTION_CRON_ENABLED=true`
+3. Configure `CRON_SECRET` for authenticated cron API calls. GitHub scheduled cron jobs are removed; configure an external scheduler separately if needed.
 4. Configure `HEALTHCHECK_ENABLED=true` and `HEALTHCHECK_URL` for `.github/workflows/uptime.yml`
 5. Configure S3 before enabling uploads, receipts, or vacancy images
 6. Review `docs/PRE_LAUNCH_STATUS.md` before commercial launch

@@ -15,7 +15,7 @@ export function VerifyTenantResultSidebar({
   return (
     <div className="space-y-3">
       <div className="ed-theme-muted-panel rounded-2xl p-4">
-        <p className="text-xs font-medium uppercase text-neutral-400">
+        <p className="text-xs font-medium uppercase text-muted-foreground">
           Payment signals
         </p>
         <p className="mt-2 text-sm text-foreground/80">
@@ -25,11 +25,11 @@ export function VerifyTenantResultSidebar({
       </div>
 
       <div className="ed-theme-muted-panel rounded-2xl p-4">
-        <p className="text-xs font-medium uppercase text-neutral-400">
+        <p className="text-xs font-medium uppercase text-muted-foreground">
           Move-out history
         </p>
         {tenant.moveOutNotices.length === 0 ? (
-          <p className="mt-2 text-sm text-neutral-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             No move-out notices recorded.
           </p>
         ) : (
@@ -52,11 +52,11 @@ export function VerifyTenantResultSidebar({
       </div>
 
       <div className="ed-theme-muted-panel rounded-2xl p-4">
-        <p className="text-xs font-medium uppercase text-neutral-400">
+        <p className="text-xs font-medium uppercase text-muted-foreground">
           Previous organisations
         </p>
         {linkedOrgRecords.length === 0 ? (
-          <p className="mt-2 text-sm text-neutral-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             No linked organisation records yet.
           </p>
         ) : (

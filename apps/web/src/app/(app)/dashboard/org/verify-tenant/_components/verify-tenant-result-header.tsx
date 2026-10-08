@@ -6,7 +6,6 @@ type TenantResult = VerifyTenantPageData["results"][number];
 
 export function VerifyTenantResultHeader({
   tenant,
-  activeOrgId,
   search,
   isCurrentOrg,
   movedOut,
@@ -14,7 +13,6 @@ export function VerifyTenantResultHeader({
   totalPaid,
 }: {
   tenant: TenantResult;
-  activeOrgId: string;
   search: string;
   isCurrentOrg: boolean;
   movedOut: boolean;
@@ -26,7 +24,7 @@ export function VerifyTenantResultHeader({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-semibold text-foreground">
+            <h3 className="break-words text-lg font-semibold text-foreground">
               {tenant.fullName}
             </h3>
             <span
@@ -36,23 +34,23 @@ export function VerifyTenantResultHeader({
             >
               {formatStatus(tenant.status)}
             </span>
-            <span className="inline-flex rounded-full border border-black/10 bg-neutral-50 px-2.5 py-1 text-xs font-medium text-neutral-600">
+            <span className="inline-flex rounded-full border border-border bg-muted/30 px-2.5 py-1 text-xs font-medium text-muted-foreground">
               {isCurrentOrg ? "Your org" : "Other org"}
             </span>
           </div>
 
-          <p className="mt-1 text-sm text-neutral-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             {tenant.org.name}
           </p>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">
           {transferRequest?.status === "APPROVED" ? (
-            <span className="inline-flex h-10 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-medium text-emerald-700">
+            <span className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-medium text-emerald-700">
               Transfer approved
             </span>
           ) : transferRequest?.status === "PENDING" ? (
-            <span className="inline-flex h-10 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 px-4 text-sm font-medium text-amber-800">
+            <span className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 px-4 text-sm font-medium text-amber-800">
               Transfer requested
             </span>
           ) : !isCurrentOrg && movedOut ? (
@@ -70,22 +68,22 @@ export function VerifyTenantResultHeader({
               />
               <button
                 type="submit"
-                className="inline-flex h-10 items-center justify-center rounded-2xl bg-neutral-950 px-4 text-sm font-medium text-white transition hover:bg-neutral-800"
+                className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
               >
                 Request transfer
               </button>
             </form>
           ) : null}
 
-          <span className="inline-flex h-10 items-center justify-center rounded-2xl border border-black/10 bg-neutral-50 px-4 text-sm font-medium text-foreground/80">
+          <span className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-border bg-muted/30 px-4 text-sm font-medium text-foreground/80">
             Verification view only
           </span>
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-4">
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div className="ed-theme-muted-panel rounded-2xl p-3">
-          <p className="text-xs font-medium uppercase text-neutral-400">
+          <p className="text-xs font-medium uppercase text-muted-foreground">
             Phone
           </p>
           <p className="mt-1 break-all text-sm font-medium text-foreground">
@@ -93,7 +91,7 @@ export function VerifyTenantResultHeader({
           </p>
         </div>
         <div className="ed-theme-muted-panel rounded-2xl p-3">
-          <p className="text-xs font-medium uppercase text-neutral-400">
+          <p className="text-xs font-medium uppercase text-muted-foreground">
             Email
           </p>
           <p className="mt-1 break-all text-sm font-medium text-foreground">
@@ -101,7 +99,7 @@ export function VerifyTenantResultHeader({
           </p>
         </div>
         <div className="ed-theme-muted-panel rounded-2xl p-3">
-          <p className="text-xs font-medium uppercase text-neutral-400">
+          <p className="text-xs font-medium uppercase text-muted-foreground">
             National ID
           </p>
           <p className="mt-1 text-sm font-medium text-foreground">
@@ -109,7 +107,7 @@ export function VerifyTenantResultHeader({
           </p>
         </div>
         <div className="ed-theme-muted-panel rounded-2xl p-3">
-          <p className="text-xs font-medium uppercase text-neutral-400">
+          <p className="text-xs font-medium uppercase text-muted-foreground">
             Total paid
           </p>
           <p className="mt-1 text-sm font-medium text-foreground">

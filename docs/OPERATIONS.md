@@ -69,15 +69,15 @@ Expected responses:
 
 ## GitHub Uptime Workflow
 
-- `.github/workflows/uptime.yml` can run health checks every 15 minutes.
+- `.github/workflows/uptime.yml` provides manually triggered health checks. Its scheduled trigger is removed.
 - Set repository variable `HEALTHCHECK_ENABLED=true` to enable the workflow.
 - Set repository secret `HEALTHCHECK_URL` to the deployed origin, for example `https://estatedesk.co.ke`.
 - Keep external uptime monitoring as the primary alerting path if the GitHub Actions quota or outage behavior is not acceptable for production.
 
 ## Scheduled Production Jobs
 
-- `.github/workflows/cron.yml` schedules notification processing every ten minutes and retention review daily.
-- Set `PRODUCTION_CRON_ENABLED=true`, `PRODUCTION_APP_URL`, and `PRODUCTION_CRON_SECRET` in repository settings.
+- GitHub scheduled notification processing and retention jobs are removed. The authenticated cron API endpoints remain available for an external scheduler.
+- Configure an external scheduler with the deployed app URL and a bearer token matching the application’s `CRON_SECRET`, if automated processing is needed.
 - Hosting-provider cron is preferred when it offers stronger delivery guarantees; do not enable two schedulers without accepting duplicate idempotent calls.
 - Cron failures are recorded in the jobs table and should alert through `SECURITY_ALERT_WEBHOOK_URL`.
 

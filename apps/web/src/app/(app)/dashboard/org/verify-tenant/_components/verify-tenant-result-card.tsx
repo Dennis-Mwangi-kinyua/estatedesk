@@ -29,11 +29,10 @@ export function VerifyTenantResultCard({
 
   return (
     <section
-      className="overflow-hidden rounded-[32px] ed-theme-card border border-border bg-card shadow-[0_10px_30px_rgba(0,0,0,0.05)]"
+      className="overflow-hidden rounded-2xl ed-theme-card border border-border bg-card shadow-[0_10px_30px_rgba(0,0,0,0.05)]"
     >
       <VerifyTenantResultHeader
         tenant={tenant}
-        activeOrgId={activeOrgId}
         search={search}
         isCurrentOrg={isCurrentOrg}
         movedOut={movedOut}
