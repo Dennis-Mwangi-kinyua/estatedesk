@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "playwright/test";
 import { build } from "esbuild";
 import path from "node:path";
-async function mount(page: Page, tenant: boolean | "unit" | "verify" | "verify-empty"=false) {
+async function mount(page: Page, tenant: boolean | "unit" | "verify" | "verify-empty" | "leases" | "leases-empty"=false) {
  const bundle = await build({entryPoints:[path.resolve("tests/e2e/fixtures/portfolio.tsx")],bundle:true,write:false,platform:"browser",format:"iife",jsx:"automatic",tsconfig:"apps/web/tsconfig.json",define:{"process.env.NODE_ENV":'"production"',"process.env":"{}"},plugins:[{name:"portfolio-mocks",setup(builder){
  builder.onResolve({filter:/^next\/link$/},()=>({path:"link",namespace:"fixture"}));
  builder.onResolve({filter:/^next\/navigation$/},()=>({path:"navigation",namespace:"fixture"}));
@@ -69,4 +69,21 @@ test("tenant verification has accessible mobile search and a helpful no-match st
  await expect(page.getByRole("link", {name:"Add a new tenant"})).toHaveAttribute("href","/dashboard/org/tenants/new");
  await page.locator("html").evaluate(el=>el.classList.add("dark"));
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test("leases show responsive cards, agreement navigation, details and pagination", async ({page}) => {
+ await mount(page,"leases");
+ await expect(page.getByRole("heading",{level:1})).toContainText("Your leases");
+ await expect(page.getByRole("article")).toHaveCount(3);
+ const card=page.getByRole("article").first();
+ await expect(card.getByRole("link",{name:"View lease for Jane Example"})).toHaveAttribute("href","/dashboard/org/leases/lease-0");
+ await card.locator("summary").click();
+ await expect(card.getByText("Day 5 each month")).toBeVisible();
+ await expect(card.getByRole("link",{name:"Pat Example"})).toHaveAttribute("href","/staff/staff-0");
+ await expect(page.getByRole("link",{name:"Next",exact:true})).toHaveAttribute("href","/dashboard/org/leases?page=2");
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.locator("html").evaluate(el=>el.classList.add("dark"));
+ await expect(card).toBeVisible();
+ await mount(page,"leases-empty");
+ await expect(page.getByRole("heading",{name:"No leases found"})).toBeVisible();
 });

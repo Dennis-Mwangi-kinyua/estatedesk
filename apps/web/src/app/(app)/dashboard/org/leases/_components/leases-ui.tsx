@@ -26,7 +26,7 @@ export function StatCard({
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </p>
-      <p className={`mt-2 text-2xl font-semibold ${valueClassName}`}>{value}</p>
+      <p className={`mt-2 break-words text-xl font-semibold sm:text-2xl ${valueClassName}`}>{value}</p>
       {note ? (
         <p className="mt-1 text-sm leading-6 text-muted-foreground">{note}</p>
       ) : null}

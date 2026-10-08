@@ -17,7 +17,7 @@ export function LeasesWorkspace({
       <LeasesHeader data={data} orgRole={orgRole} />
       <LeasesStats data={data} />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="space-y-5">
         <LeasesDirectorySection data={data} />
         <LeasesGuidance orgRole={orgRole} />
       </div>

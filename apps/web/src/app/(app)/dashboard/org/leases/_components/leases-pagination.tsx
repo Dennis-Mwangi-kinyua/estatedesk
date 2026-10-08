@@ -30,12 +30,12 @@ export function LeasesPagination({
         {currentPage > 1 ? (
           <DeferredLink
             href={buildLeasesPageHref(currentPage - 1)}
-            className="inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
+            className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
           >
             Previous
           </DeferredLink>
         ) : (
-          <span className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-2xl border border-border bg-muted/30 px-4 text-sm font-medium text-muted-foreground">
+          <span className="inline-flex min-h-12 cursor-not-allowed items-center justify-center rounded-2xl border border-border bg-muted/30 px-4 text-sm font-medium text-muted-foreground">
             Previous
           </span>
         )}
@@ -47,12 +47,12 @@ export function LeasesPagination({
         {currentPage < totalPages ? (
           <DeferredLink
             href={buildLeasesPageHref(currentPage + 1)}
-            className="inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
+            className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
           >
             Next
           </DeferredLink>
         ) : (
-          <span className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-2xl border border-border bg-muted/30 px-4 text-sm font-medium text-muted-foreground">
+          <span className="inline-flex min-h-12 cursor-not-allowed items-center justify-center rounded-2xl border border-border bg-muted/30 px-4 text-sm font-medium text-muted-foreground">
             Next
           </span>
         )}

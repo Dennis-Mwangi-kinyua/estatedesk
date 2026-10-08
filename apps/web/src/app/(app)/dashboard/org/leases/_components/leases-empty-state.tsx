@@ -20,13 +20,13 @@ export function LeasesEmptyState() {
       <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
         <Link
           href="/dashboard/org/tenants/new"
-          className="inline-flex h-11 items-center justify-center rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+          className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
         >
           Add tenant with lease
         </Link>
         <Link
           href="/dashboard/org/tenants"
-          className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-5 text-sm font-medium text-foreground transition hover:bg-muted/30"
+          className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-border bg-background px-5 text-sm font-medium text-foreground transition hover:bg-muted/30"
         >
           View tenants
         </Link>
