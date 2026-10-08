@@ -35,7 +35,7 @@ export function InfoCard({ title, children }: InfoCardProps) {
 
 export function ErrorNotice({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-200">
+    <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-200">
       {children}
     </div>
   );
@@ -43,7 +43,7 @@ export function ErrorNotice({ children }: { children: React.ReactNode }) {
 
 export function WarningNotice({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+    <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
       {children}
     </div>
   );

@@ -17,13 +17,13 @@ export function PropertiesWorkspace({
   const { created } = data;
 
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-5 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
       <PropertiesHeaderSection data={data} orgRole={orgRole} />
-      <PropertiesStatsSection data={data} />
       {created ? <PropertiesCreatedBanner /> : null}
+      <PropertiesStatsSection data={data} />
       <PropertiesFiltersSection data={data} />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="space-y-5">
         <PropertiesDirectorySection data={data} />
         <PropertiesGuidance orgRole={orgRole} />
       </div>

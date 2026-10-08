@@ -2,6 +2,7 @@
 
 import {
   useActionState,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -41,6 +42,8 @@ export function NewTenantForm({
   availableUnits,
 }: NewTenantFormProps) {
   const formRef = useRef<HTMLFormElement | null>(null);
+  const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const initialStep = useRef(true);
 
   const [state, formAction, isPending] = useActionState(
     createTenantAction,
@@ -59,6 +62,12 @@ export function NewTenantForm({
     () => availableUnits.find((unit) => unit.id === selectedUnitId) ?? null,
     [availableUnits, selectedUnitId],
   );
+
+  useEffect(() => {
+    if (initialStep.current) { initialStep.current = false; return; }
+    stepHeadingRef.current?.focus({ preventScroll: true });
+    stepHeadingRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+  }, [step]);
 
   function suggestUsername(form: HTMLFormElement) {
     const fullName = String(new FormData(form).get("fullName") ?? "").trim();
@@ -112,18 +121,12 @@ export function NewTenantForm({
 
     setStepError(null);
     setStep((current) => getNextStep(current));
-    setTimeout(() => {
-      form.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 0);
   }
 
   function handleBack() {
     if (isPending) return;
     setStep((current) => getPreviousStep(current));
     setStepError(null);
-    setTimeout(() => {
-      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 0);
   }
 
   if (state.status === "success" && state.credentials) {
@@ -131,17 +134,17 @@ export function NewTenantForm({
   }
 
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content mx-auto w-full max-w-6xl space-y-5 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
       <NewTenantHeader
         orgName={orgName}
         availableUnitsCount={availableUnits.length}
       />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
         <section className={panelShellClassName}>
           <div className="border-b border-border bg-muted/10 px-4 py-4 sm:px-6">
-            <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-              <div className="flex min-w-max gap-3 sm:grid sm:min-w-0 sm:grid-cols-2 lg:grid-cols-5">
+            <div>
+              <ol aria-label="Tenant setup steps" className="grid grid-cols-5 gap-1 sm:gap-2">
                 {stepItems.map((item) => (
                   <StepChip
                     key={item.id}
@@ -150,11 +153,13 @@ export function NewTenantForm({
                     complete={step > item.id}
                   />
                 ))}
-              </div>
+              </ol>
             </div>
+            <div className="mt-3 h-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Tenant setup progress" aria-valuemin={1} aria-valuemax={5} aria-valuenow={step}><div className="h-full rounded-full bg-primary transition-all duration-300 motion-reduce:transition-none" style={{ width: `${step * 20}%` }} /></div>
           </div>
 
           <div className="px-4 py-5 sm:px-6 sm:py-6">
+            <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-wider text-primary">Step {step} of 5</p><h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 scroll-mt-28 text-xl font-semibold tracking-tight outline-none">{stepItems[step - 1].title}</h2><p className="mt-1 text-sm text-muted-foreground">{stepItems[step - 1].description}</p></div>
             <div aria-live="polite" aria-atomic="true" className="mb-5 space-y-3">
               {state.status === "error" && state.message ? (
                 <ErrorNotice>{state.message}</ErrorNotice>
@@ -167,7 +172,7 @@ export function NewTenantForm({
               id="new-tenant-form"
               ref={formRef}
               action={formAction}
-              className="space-y-6"
+              className="space-y-6 min-w-0"
             >
               <input type="hidden" name="unitId" value={selectedUnitId} />
 

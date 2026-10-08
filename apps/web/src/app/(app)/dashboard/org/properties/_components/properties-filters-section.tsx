@@ -22,11 +22,11 @@ export function PropertiesFiltersSection({ data }: { data: PropertiesPageData })
     <section className={`${panelShellClassName} p-5 sm:p-6`}>
       <form
         method="get"
-        className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_180px_180px_auto]"
+        className="grid grid-cols-2 gap-3 lg:grid-cols-[minmax(0,1fr)_180px_180px_auto]"
       >
         {created ? <input type="hidden" name="created" value="1" /> : null}
 
-        <label className="block">
+        <label className="col-span-2 block lg:col-span-1">
           <span className="mb-2 block text-sm font-medium text-foreground">Search</span>
           <div className="relative">
             <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-muted-foreground">
@@ -36,7 +36,7 @@ export function PropertiesFiltersSection({ data }: { data: PropertiesPageData })
               name="q"
               defaultValue={query}
               type="search"
-              placeholder="Search by name, location, address, notes, PIN..."
+              placeholder="Name, location, or address…"
               className={`${fieldClassName} pl-11`}
             />
           </div>
@@ -65,9 +65,9 @@ export function PropertiesFiltersSection({ data }: { data: PropertiesPageData })
           </select>
         </label>
 
-        <div className="flex items-end gap-3">
+        <div className="col-span-2 flex items-end gap-3 lg:col-span-1">
           <button type="submit" className={`${buttonPrimaryClassName} w-full lg:w-auto`}>
-            Apply
+            Search properties
           </button>
           {hasFilters ? (
             <DeferredLink href={clearFiltersHref} className={buttonSecondaryClassName}>

@@ -1,44 +1,11 @@
 "use client";
-
+import { Check } from "lucide-react";
 import type { StepItem } from "../_lib/types";
-
-export function StepChip({
-  item,
-  active,
-  complete,
-}: {
-  item: StepItem;
-  active: boolean;
-  complete: boolean;
-}) {
-  return (
-    <div
-      className={`w-[220px] shrink-0 rounded-2xl border px-4 py-4 sm:w-auto ${
-        active
-          ? "border-primary bg-card shadow-sm"
-          : complete
-            ? "border-emerald-200 bg-emerald-50/70 dark:border-emerald-800 dark:bg-emerald-950/30"
-            : "border-border bg-muted/10"
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
-            active
-              ? "bg-primary text-primary-foreground"
-              : complete
-                ? "bg-emerald-600 text-white dark:bg-emerald-500"
-                : "bg-muted text-muted-foreground"
-          }`}
-        >
-          {complete ? "✓" : item.id}
-        </div>
-
-        <div>
-          <p className="text-sm font-semibold text-foreground">{item.title}</p>
-          <p className="text-xs text-muted-foreground">{item.description}</p>
-        </div>
-      </div>
-    </div>
-  );
+const stickers = ["👤", "🤝", "🏡", "🔐", "✨"];
+export function StepChip({ item, active, complete }: { item: StepItem; active: boolean; complete: boolean }) {
+  return <li aria-current={active ? "step" : undefined} aria-label={`Step ${item.id}: ${item.title}${complete ? ", completed" : ""}`} className={`flex min-w-0 flex-col items-center gap-2 rounded-xl px-1 py-3 text-center ${active ? "bg-primary/5" : ""}`}>
+    <span aria-hidden="true" className={`flex h-10 w-10 items-center justify-center rounded-xl border text-lg sm:h-11 sm:w-11 ${active ? "border-primary/30 bg-background shadow-sm ring-2 ring-primary/10" : complete ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-border bg-background"}`}>{complete ? <Check className="h-5 w-5" /> : stickers[item.id-1]}</span>
+    <span className={`hidden text-xs font-medium sm:block ${active ? "text-primary" : "text-muted-foreground"}`}>{item.title}</span>
+    <span aria-hidden="true" className={`text-[10px] font-semibold sm:hidden ${active ? "text-primary" : "text-muted-foreground"}`}>{item.id}</span>
+  </li>;
 }

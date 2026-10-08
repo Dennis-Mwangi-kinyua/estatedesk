@@ -2,27 +2,15 @@ import type { PropertiesPageData } from "../_lib/types";
 import { PropertiesEmptyState } from "./properties-empty-state";
 import { PropertiesItemsSection } from "./properties-items-section";
 import { PropertiesPaginationSection } from "./properties-pagination-section";
-import { panelShellClassName } from "./properties-ui";
 
 export function PropertiesDirectorySection({ data }: { data: PropertiesPageData }) {
-  const { properties, overallProperties, inactiveProperties } = data;
+  const { properties } = data;
 
   return (
-    <section className={panelShellClassName}>
-      <div className="border-b border-border px-5 py-4 sm:px-6">
-        <h2 className="text-lg font-semibold tracking-tight text-foreground">
-          All properties
-        </h2>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          {overallProperties} {overallProperties === 1 ? "property" : "properties"} in
-          this organization
-          {inactiveProperties > 0 ? `, including ${inactiveProperties} inactive` : ""}.
-        </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Showing {data.showingFrom}–{data.showingTo} of {data.filteredTotal} matching{" "}
-          {data.filteredTotal === 1 ? "property" : "properties"}. Page {data.safeCurrentPage}{" "}
-          of {data.totalPages}.
-        </p>
+    <section aria-labelledby="properties-directory-title" className="min-w-0 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+        <div><h2 id="properties-directory-title" className="text-lg font-semibold text-foreground">{data.hasFilters ? "Matching properties" : "Property directory"}</h2><p className="mt-1 text-xs text-muted-foreground">Showing {data.showingFrom}–{data.showingTo} of {data.filteredTotal} properties</p></div>
+        <span className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground">Newest first</span>
       </div>
 
       {properties.length === 0 ? (

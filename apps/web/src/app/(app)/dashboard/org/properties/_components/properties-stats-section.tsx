@@ -10,7 +10,7 @@ export function PropertiesStatsSection({ data }: { data: PropertiesPageData }) {
   } = data;
 
   return (
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <StatCard label="Total properties" value={overallProperties} />
       <StatCard
         label="Active"
