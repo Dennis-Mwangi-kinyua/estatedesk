@@ -106,7 +106,7 @@ export function StepReview({
             </p>
 
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-              <Stat label="Unit mix rows" value={reviewSummary.unitMixCount} />
+              <Stat label="Unit category rows" value={reviewSummary.unitMixCount} />
               <Stat
                 label="Generated units"
                 value={reviewSummary.totalGeneratedUnits}
@@ -123,7 +123,7 @@ export function StepReview({
 
             <div className="mt-4 rounded-2xl border border-border bg-background p-4">
               <p className="text-sm font-semibold text-foreground">
-                Unit mix preview
+                Unit category preview
               </p>
 
               {reviewSummary.unitMixLabels.length ? (
@@ -134,7 +134,7 @@ export function StepReview({
                 </ul>
               ) : (
                 <p className="mt-3 text-sm text-muted-foreground">
-                  No unit mix rows added. The property will be created without
+                  No unit category rows added. The property will be created without
                   initial units.
                 </p>
               )}

@@ -1,3 +1,4 @@
+import { PortfolioHierarchy } from "@/components/portfolio/portfolio-hierarchy";
 import type { OrgRole } from "@prisma/client";
 import type { UnitsPageData } from "../_lib/types";
 import { UnitsBreadcrumb } from "./units-breadcrumb";
@@ -33,11 +34,12 @@ export function UnitsWorkspace({
   return (
     <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
       <UnitsHeaderSection data={data} orgRole={orgRole} />
+      <PortfolioHierarchy />
       <UnitsStatsSection data={data} />
       <UnitsFiltersSection data={data} />
       <UnitsBreadcrumb data={data} />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-5">
           {!hasPageContent(data) ? (
             <UnitsEmptyState data={data} orgRole={orgRole} />

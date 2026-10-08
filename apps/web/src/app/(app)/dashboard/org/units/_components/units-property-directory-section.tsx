@@ -18,7 +18,7 @@ export function UnitsPropertyDirectorySection({
           Properties
         </h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Open a property to review unit mixes such as apartments, bedsitters, and
+          Open a property to review unit categories such as apartments, bedsitters, and
           shops before drilling into individual units.
         </p>
       </div>
@@ -53,7 +53,7 @@ export function UnitsPropertyDirectorySection({
 
             <div className="mt-4 space-y-2 border-t border-border/70 pt-4">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                {item.mixCount} unit mix{item.mixCount === 1 ? "" : "es"}
+                {item.mixCount} unit categor{item.mixCount === 1 ? "y" : "ies"}
               </p>
               <InlineMixStats
                 totalUnits={item.totalUnits}

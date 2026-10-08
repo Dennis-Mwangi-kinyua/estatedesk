@@ -23,7 +23,7 @@ export const STEPS = [
   },
   {
     id: 4,
-    title: "Unit mix",
+    title: "Units",
     description: "Define the units that should be created automatically.",
   },
   {

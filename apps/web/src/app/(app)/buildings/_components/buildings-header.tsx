@@ -28,12 +28,11 @@ export function BuildingsHeader({
             </div>
 
             <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Buildings
+              Buildings & blocks 🏢
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-              Search buildings, review occupancy, and manage caretaker coverage for{" "}
-              {organizationName} from one polished dashboard.
+              Manage the buildings and blocks within {organizationName} properties. Each building can contain multiple rentable units, including apartments and shops.
             </p>
 
             <InAppGuideHint topic="portfolio" workspace="org" orgRole={orgRole} />

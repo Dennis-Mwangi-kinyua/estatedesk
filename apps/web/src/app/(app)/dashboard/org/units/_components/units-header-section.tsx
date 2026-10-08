@@ -29,15 +29,15 @@ export function UnitsHeaderSection({
             </div>
 
             <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Units
+              Units & apartments 🚪
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
               {view === "units" && selectedProperty && selectedMix
                 ? `Reviewing ${selectedMix.label} units at ${selectedProperty.name} for ${organizationName}.`
                 : view === "mixes" && selectedProperty
-                  ? `Browse unit mixes at ${selectedProperty.name} before opening occupied or vacant inventory.`
-                  : `Browse properties, apartment mixes, and unit inventory for ${organizationName}.`}
+                  ? `Browse unit categories at ${selectedProperty.name} before opening occupied or vacant inventory.`
+                  : `Browse properties, unit categories, and unit inventory for ${organizationName}.`}
             </p>
 
             {vacantUnits > 0 ? (

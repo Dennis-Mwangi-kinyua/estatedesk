@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { PortfolioHierarchy } from "@/components/portfolio/portfolio-hierarchy";
 import { createPropertyAction } from "@/features/properties/actions/create-property-action";
 import { StepBilling } from "./_components/step-billing";
 import { StepLandlord } from "./_components/step-landlord";
@@ -91,6 +92,13 @@ export function PropertyCreateWizard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, currencyCode, landlordProfileMap, taxpayerProfileMap]);
 
+  useEffect(() => {
+    if (currentStep === 1) return;
+    const heading = formRef.current?.querySelector<HTMLElement>('div.block h2');
+    if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
+    formRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+  }, [currentStep]);
+
   function handleNext() {
     const form = formRef.current;
     if (!form) return;
@@ -125,13 +133,14 @@ export function PropertyCreateWizard({
   }
 
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content mx-auto w-full max-w-6xl space-y-5 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+      <PortfolioHierarchy />
       <section className={panelShellClassName}>
         <WizardHeader orgName={orgName} helpOrgRole={helpOrgRole} />
 
         <WizardStepNav currentStep={currentStep} />
 
-        <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid gap-0 xl:grid-cols-[minmax(0,1fr)_280px]">
           <div className="px-5 py-6 sm:px-6">
             {errorMessage ? (
               <div className={`mb-6 ${alertErrorClassName}`}>{errorMessage}</div>

@@ -127,9 +127,9 @@ export function UnitsFiltersSection({ data }: { data: UnitsPageData }) {
 
         <p className="text-sm text-muted-foreground">
           {view === "properties"
-            ? "Open a property card to browse apartment mixes and unit inventory."
+            ? "Open a property card to browse unit categories and unit inventory."
             : view === "mixes"
-              ? "Open a unit mix to see occupied and vacant units with pagination."
+              ? "Open a unit category to see occupied and vacant units with pagination."
               : hasFilters
                 ? "Filtered unit list for the selected mix."
                 : "Use status tabs below to focus on occupied or vacant units."}

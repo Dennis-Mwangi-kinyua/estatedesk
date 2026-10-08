@@ -8,10 +8,10 @@ export function StepUnitMix({ currencyCode }: { currencyCode: string }) {
     <section className="block">
       <div className="space-y-5">
         <div>
-          <h2 className={stepTitleClassName}>Initial unit mix</h2>
+          <h2 className={stepTitleClassName}>Initial units</h2>
           <p className={stepDescriptionClassName}>
-            Add the unit mix for this property. On submit, the system will save
-            the plan and generate the actual units automatically.
+            Choose the types and quantities of individually rented spaces. For example,
+            10 apartments creates 10 separate units. Apartments are not buildings.
           </p>
         </div>
 

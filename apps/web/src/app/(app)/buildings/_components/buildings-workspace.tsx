@@ -1,3 +1,4 @@
+import { PortfolioHierarchy } from "@/components/portfolio/portfolio-hierarchy";
 import type { OrgRole } from "@prisma/client";
 import type { getBuildingsPageData } from "../_lib/queries";
 import { BuildingsDirectorySection } from "./buildings-directory-section";
@@ -15,10 +16,11 @@ export function BuildingsWorkspace({ data, orgRole }: BuildingsWorkspaceProps) {
   return (
     <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
       <BuildingsHeader data={data} orgRole={orgRole} />
+      <PortfolioHierarchy />
       <BuildingsStatsSection data={data} />
       <BuildingsFiltersSection data={data} />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
         <BuildingsDirectorySection data={data} />
         <BuildingsGuidance orgRole={orgRole} />
       </div>

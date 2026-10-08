@@ -24,10 +24,10 @@ export function UnitsMixGroupsSection({
           {selectedProperty.name}
         </p>
         <h2 className="mt-2 text-lg font-semibold tracking-tight text-foreground">
-          Unit mixes
+          Unit categories
         </h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Choose an apartment type or unit category to review occupied and vacant
+          Choose a unit type, such as an apartment or shop, to review occupied and vacant
           inventory.
         </p>
       </div>
@@ -69,7 +69,7 @@ export function UnitsMixGroupsSection({
                   <div className="min-w-0 flex-1">
                     <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/20 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                       <Layers3 className="h-3.5 w-3.5 shrink-0" />
-                      Unit mix
+                      Unit category
                     </div>
                     <h3 className="mt-3 text-base font-semibold leading-snug text-foreground group-hover:text-primary sm:text-lg">
                       {group.label}

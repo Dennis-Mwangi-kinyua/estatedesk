@@ -148,7 +148,7 @@ export function PropertyUnitPlanBuilder({
       {rows.length === 0 ? (
         <div className={emptyStateClassName}>
           <h3 className="text-sm font-semibold text-foreground">
-            No unit mix added yet
+            No unit category added yet
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
             Add unit types and quantities now so the property automatically creates
@@ -160,7 +160,7 @@ export function PropertyUnitPlanBuilder({
             onClick={() => addRow("APARTMENT")}
             className={`mt-4 ${buttonPrimaryClassName}`}
           >
-            Add first unit mix
+            Add first unit category
           </button>
         </div>
       ) : (
@@ -179,7 +179,7 @@ export function PropertyUnitPlanBuilder({
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                      Unit mix {index + 1}
+                      Unit category {index + 1}
                     </p>
                     <h3 className="mt-1 text-base font-semibold text-foreground">
                       {unitTypeLabel(row.unitType, row.bedrooms)}
@@ -386,7 +386,7 @@ export function PropertyUnitPlanBuilder({
                       onChange={(event) =>
                         updateRow(row.id, "notes", event.target.value)
                       }
-                      placeholder="Optional internal note for this unit mix"
+                      placeholder="Optional internal note for this unit category"
                       className={textareaClassName}
                     />
                   </label>

@@ -7,14 +7,13 @@ import {
 } from "@prisma/client";
 import { PropertiesGuidance } from "../../../../_components/properties-guidance";
 import {
-  buttonPrimaryClassName,
-  buttonSecondaryClassName,
   fieldClassName,
   InfoPanel,
   panelShellClassName,
   StatCard,
 } from "../../../../_components/properties-ui";
-import { createUnitAction } from "../actions";
+import { UnitSetupForm } from "./unit-setup-form";
+import { PortfolioHierarchy } from "@/components/portfolio/portfolio-hierarchy";
 
 export type UnitCreatePropertyData = {
   id: string;
@@ -57,7 +56,7 @@ export function UnitCreateWorkspace({
               Unit Management
             </p>
             <h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground">
-              Add New Unit
+              Add a unit 🏡
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
               Create a new rentable unit under{" "}
@@ -72,7 +71,9 @@ export function UnitCreateWorkspace({
         </div>
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <PortfolioHierarchy />
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-6">
           <section className={`${panelShellClassName} p-6`}>
             <div className="mb-6">
@@ -82,9 +83,9 @@ export function UnitCreateWorkspace({
               </p>
             </div>
 
-            <form action={createUnitAction} className="space-y-6">
+            <UnitSetupForm propertyName={property.name} cancelHref={propertyBasePath}>
               <input type="hidden" name="propertyId" value={property.id} />
-              <div className="grid gap-5 md:grid-cols-2">
+              <fieldset data-unit-step="1" className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label
                     htmlFor="houseNo"
@@ -106,7 +107,7 @@ export function UnitCreateWorkspace({
                     htmlFor="buildingId"
                     className="text-sm font-medium text-foreground"
                   >
-                    Building
+                    Building / block (optional)
                   </label>
                   <select
                     id="buildingId"
@@ -165,6 +166,8 @@ export function UnitCreateWorkspace({
                   </select>
                 </div>
 
+              </fieldset>
+              <fieldset data-unit-step="2" className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label
                     htmlFor="bedrooms"
@@ -210,6 +213,7 @@ export function UnitCreateWorkspace({
                     id="floorArea"
                     name="floorArea"
                     type="number"
+                    min="0"
                     step="0.01"
                     className={fieldClassName}
                     placeholder="0.00"
@@ -231,6 +235,8 @@ export function UnitCreateWorkspace({
                   />
                 </div>
 
+              </fieldset>
+              <fieldset data-unit-step="3" className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label
                     htmlFor="rentAmount"
@@ -242,6 +248,7 @@ export function UnitCreateWorkspace({
                     id="rentAmount"
                     name="rentAmount"
                     type="number"
+                    min="0"
                     step="0.01"
                     className={fieldClassName}
                     placeholder="0.00"
@@ -259,14 +266,14 @@ export function UnitCreateWorkspace({
                     id="depositAmount"
                     name="depositAmount"
                     type="number"
+                    min="0"
                     step="0.01"
                     className={fieldClassName}
                     placeholder="0.00"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 sm:col-span-2">
                 <label
                   htmlFor="notes"
                   className="text-sm font-medium text-foreground"
@@ -302,16 +309,8 @@ export function UnitCreateWorkspace({
                 </label>
               </div>
 
-              <div className="flex flex-wrap gap-3 pt-2">
-                <button type="submit" className={buttonPrimaryClassName}>
-                  Create Unit
-                </button>
-
-                <Link href={propertyBasePath} className={buttonSecondaryClassName}>
-                  Cancel
-                </Link>
-              </div>
-            </form>
+              </fieldset>
+            </UnitSetupForm>
           </section>
 
           <section className={`${panelShellClassName} p-6`}>

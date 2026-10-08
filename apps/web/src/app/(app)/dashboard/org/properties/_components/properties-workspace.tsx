@@ -1,3 +1,4 @@
+import { PortfolioHierarchy } from "@/components/portfolio/portfolio-hierarchy";
 import type { OrgRole } from "@prisma/client";
 import type { PropertiesPageData } from "../_lib/types";
 import { PropertiesCreatedBanner } from "./properties-created-banner";
@@ -19,6 +20,7 @@ export function PropertiesWorkspace({
   return (
     <div className="org-theme-content mx-auto w-full max-w-7xl space-y-5 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
       <PropertiesHeaderSection data={data} orgRole={orgRole} />
+      <PortfolioHierarchy />
       {created ? <PropertiesCreatedBanner /> : null}
       <PropertiesStatsSection data={data} />
       <PropertiesFiltersSection data={data} />

@@ -13,7 +13,7 @@ export function WizardSidebar() {
           <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
             <li>• Keeps long forms focused and easy to complete</li>
             <li>• Reduces input fatigue on mobile</li>
-            <li>• Captures unit mix before final creation</li>
+            <li>• Captures unit category before final creation</li>
             <li>• Gives a final review before submission</li>
           </ul>
         </div>
@@ -25,7 +25,7 @@ export function WizardSidebar() {
           <div className="mt-3 space-y-2 text-sm text-muted-foreground">
             <p>1. Add the property profile</p>
             <p>2. Configure water defaults</p>
-            <p>3. Add residential or commercial unit mix</p>
+            <p>3. Add residential or commercial unit category</p>
             <p>4. Review, confirm, then create</p>
           </div>
         </div>
