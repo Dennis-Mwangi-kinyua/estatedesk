@@ -30,12 +30,12 @@ export async function updateProfilePicture(_state: { message: string }, form: Fo
       try { await deleteCloudflareImage(oldUrl); } catch { console.warn("Old profile picture cleanup failed."); }
     }
     revalidatePath("/", "layout");
-    return { message: remove ? "Profile picture deleted." : "Profile picture updated." };
+    return { success: true, message: remove ? "Profile picture deleted." : "Profile picture updated." };
   } catch (error) {
     if (newUrl && !committed) {
       try { await deleteCloudflareImage(newUrl); } catch { console.warn("Profile picture cleanup failed."); }
     }
     console.error("Profile picture update failed", error);
-    return { message: error instanceof Error && /Choose|image|Cloudflare/.test(error.message) ? error.message : "Could not update your profile picture. Please try again." };
+    return { success: false, message: error instanceof Error && /Choose|image|Cloudflare/.test(error.message) ? error.message : "Could not update your profile picture. Please try again." };
   }
 }

@@ -1,3 +1,4 @@
+import { ProfileAvatar } from "@/components/uploads/profile-avatar";
 import Link from "next/link";
 import { ShieldCheck, UserRound } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
@@ -17,6 +18,7 @@ export function ProfileHeader({
       <div className={panelBodyClassName}>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 text-xl font-semibold text-primary"><ProfileAvatar name={member.user.fullName} /></div>
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               <UserRound className="h-3.5 w-3.5" />
               {member.org.name}

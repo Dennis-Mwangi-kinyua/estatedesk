@@ -27,12 +27,7 @@ export function JobActionButton({
     <button
       type="submit"
       disabled={pending}
-      onClick={(event) => {
-        if (!confirmMessage || pending) return;
-        if (!window.confirm(confirmMessage)) {
-          event.preventDefault();
-        }
-      }}
+      data-confirm={confirmMessage}
       className={`inline-flex min-h-11 items-center justify-center rounded-lg border px-3 text-xs font-semibold transition disabled:cursor-not-allowed sm:min-h-9 ${classes}`}
     >
       {pending ? pendingLabel : children}

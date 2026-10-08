@@ -41,9 +41,16 @@ test("onboarding cards expose contact and setup actions, save errors, and confir
   await card.getByRole("button", { name: "Save changes" }).click();
   await expect(card.getByRole("alert")).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => (window as unknown as { lastOnboardingAction?: { status?: string } }).lastOnboardingAction?.status)).toBe("QUALIFIED");
-  page.once("dialog", dialog => dialog.dismiss());
+  page.on("dialog", () => { throw new Error("Browser confirmation must not be shown"); });
   await card.getByRole("button", { name: "Delete request", exact: true }).click();
-  await expect.poll(() => page.evaluate(() => (window as unknown as { lastOnboardingAction?: { status?: string } }).lastOnboardingAction?.status)).toBe("QUALIFIED");
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("dialog").getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(card.getByRole("button", { name: "Delete request", exact: true })).toBeFocused();
+  await card.getByRole("button", { name: "Delete request", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("Greenview Properties");
+  await page.getByRole("dialog").getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(card.getByRole("status").filter({ hasText: "Request deleted." })).toBeVisible();
   const dimensions = await page.evaluate(() => ({ content: document.documentElement.scrollWidth, viewport: window.innerWidth }));
   expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport);
 });

@@ -7,7 +7,7 @@ test("modern messages inbox supports reading, replies, status actions, and mobil
   const bundle = await build({
     entryPoints: [path.resolve("tests/e2e/fixtures/messages.tsx")], bundle: true, write: false,
     platform: "browser", format: "iife", jsx: "automatic", tsconfig: "apps/web/tsconfig.json",
-    define: { "process.env.NODE_ENV": '"production"' },
+    define: { "process.env": "{}", "process.env.NODE_ENV": '"production"' },
     plugins: [{ name: "messages-fixture", setup(builder) {
       builder.onResolve({ filter: /^next\/link$/ }, () => ({ path: "link", namespace: "fixture" }));
       builder.onResolve({ filter: /^@\/lib\/(prisma|permissions\/guards|db\/retry)$/ }, args => ({ path: args.path, namespace: "fixture" }));
@@ -38,9 +38,12 @@ test("modern messages inbox supports reading, replies, status actions, and mobil
   await page.getByRole("button", { name: "Mark read", exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { lastMessageAction?: { name: string } }).lastMessageAction?.name)).toBe("read");
   await page.getByRole("button", { name: "Mark spam", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("Could not update");
-  page.once("dialog", dialog => dialog.dismiss());
+  await expect(page.getByRole("alert").filter({ hasText: "Could not update" }).first()).toBeVisible();
+  page.on("dialog", () => { throw new Error("Browser confirmation must not be shown"); });
   await page.getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("dialog").getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { lastMessageAction?: { name: string } }).lastMessageAction?.name)).toBe("read");
   if (testInfo.project.name === "mobile-chromium") await page.getByRole("button", { name: "Back to messages" }).click();
   await page.getByRole("button", { name: /Riverside Estates.*Subscription question/ }).click();

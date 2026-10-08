@@ -23,7 +23,7 @@ function ActionForm({ action, requestId, status, confirm, children, className = 
     try { await action(data); return { success }; }
     catch { return { error: "The request could not be updated. Please try again." }; }
   }, {});
-  return <form action={formAction} className={className} onSubmit={event => { if (pending || (confirm && !window.confirm(confirm))) event.preventDefault(); }}>
+  return <form action={formAction} className={className} data-confirm={confirm} onSubmit={event => { if (pending) event.preventDefault(); }}>
     <input type="hidden" name="requestId" value={requestId} />
     {status && <input type="hidden" name="status" value={status} />}
     <fieldset disabled={pending} className="min-w-0 space-y-3">{children}</fieldset>

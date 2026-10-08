@@ -1,3 +1,4 @@
+import { ProfileAvatar } from "@/components/uploads/profile-avatar";
 import Link from "next/link";
 import { KeyRound, LogOut, PencilLine, UserRound } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
@@ -20,12 +21,7 @@ export function ProfileHeader({
   paymentHealth,
 }: Pick<TenantProfilePageData, "tenant" | "paymentHealth">) {
   const user = tenant.user;
-  const initials = tenant.fullName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
+
 
   return (
     <section className={panelShellClassName}>
@@ -33,7 +29,7 @@ export function ProfileHeader({
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="flex min-w-0 items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-base font-semibold text-primary-foreground shadow-sm sm:h-16 sm:w-16">
-              {initials || "TP"}
+              <ProfileAvatar name={tenant.fullName} />
             </div>
 
             <div className="min-w-0">

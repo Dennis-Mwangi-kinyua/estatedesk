@@ -1,3 +1,4 @@
+import { ProfileAvatar } from "@/components/uploads/profile-avatar";
 import type { Prisma } from "@prisma/client";
 import { PushNotificationSettingsPanel } from "@/components/pwa/push-notification-settings-panel";
 
@@ -81,6 +82,7 @@ export function StaffSelfProfileView({
   return (
     <div className={`space-y-5 ${isOrg ? "text-card-foreground" : "text-slate-950 dark:text-slate-100"}`}>
       <section className={`${shellClassName} p-5 sm:p-6`}>
+        <div className="mb-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 text-xl font-semibold text-primary"><ProfileAvatar name={member.user.fullName} /></div>
         <p className={`text-sm font-medium ${textMutedClassName}`}>
           {member.org.name}
         </p>
