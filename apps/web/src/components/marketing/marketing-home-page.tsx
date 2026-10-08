@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { VisualSticker } from "@/components/shared/visual-sticker";
 import { ArrowRight, CheckCircle2, HelpCircle, Layers3, Users } from "lucide-react";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import OperationsShowcase from "@/components/marketing/operations-showcase";
@@ -246,7 +247,7 @@ function HomepageSeoContent() {
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {homepageAudiences.map((audience) => (
               <article key={audience.title} className="rounded-2xl border border-neutral-200 bg-[#fbfcfe] p-5">
-                <h3 className="text-base font-semibold text-neutral-950">{audience.title}</h3>
+                <h3 className="flex items-center gap-3 text-base font-semibold text-neutral-950"><VisualSticker label={audience.title} />{audience.title}</h3>
                 <p className="mt-2 text-sm leading-7 text-neutral-600">{audience.body}</p>
               </article>
             ))}

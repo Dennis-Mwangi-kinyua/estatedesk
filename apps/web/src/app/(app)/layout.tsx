@@ -96,7 +96,7 @@ export default async function AppLayout({
     <ProfilePictureProvider url={user?.profileImageUrl ?? null}>
     <div className="estate-workspace app-mobile-canvas app-sensitive-surface ed-mobile-surface relative min-h-dvh w-full min-w-0 overflow-x-hidden">
       <WorkspaceThemeScope />
-      <SensitiveDataWatermark orgLabel={orgLabel} />
+      <SensitiveDataWatermark orgLabel={orgLabel} timestamp={new Date().toISOString()} />
       {children}
       {isSecurityGateRoute ? null : <PwaAppBadgeSync />}
       {isSecurityGateRoute ? null : <AppActionFeedback />}

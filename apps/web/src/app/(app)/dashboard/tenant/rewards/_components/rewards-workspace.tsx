@@ -163,7 +163,7 @@ export function TenantRewardsWorkspace({
                   <p className="font-semibold text-foreground">{row.label}</p>
                   <p className="text-xs text-muted-foreground">
                     {row.pointsCost} pts · {row.category} ·{" "}
-                    {new Date(row.createdAt).toLocaleDateString("en-KE")}
+                    {new Date(row.createdAt).toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi" })}
                   </p>
                 </div>
                 <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">

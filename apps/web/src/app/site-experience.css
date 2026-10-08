@@ -143,3 +143,59 @@ body.estate-glass-system .organisation-detail-page :is(.workspace-panel, .org-su
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Shared emoji accents: restrained size, semantic meaning, decorative only. */
+.visual-sticker {
+  --sticker-wash: #eaf2ff;
+  --sticker-edge: #cadcf5;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--sticker-edge);
+  border-radius: .875rem;
+  background: var(--sticker-wash);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 65%), 0 3px 8px rgb(25 45 75 / 5%);
+  vertical-align: middle;
+}
+.visual-sticker__emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 1.3rem; line-height: 1; }
+.visual-sticker--xs { width: 1.875rem; height: 1.875rem; border-radius: .625rem; }
+.visual-sticker--xs .visual-sticker__emoji { font-size: 1rem; }
+.visual-sticker--lg { width: 4rem; height: 4rem; border-radius: 1.25rem; }
+.visual-sticker--lg .visual-sticker__emoji { font-size: 2.1rem; }
+:is(.estate-workspace, .estate-glass-system) .visual-sticker[data-sticker-tone] { background: var(--sticker-wash); border-color: var(--sticker-edge); color: inherit; }
+.visual-sticker[data-sticker-tone="mint"] { --sticker-wash: #e8f6ef; --sticker-edge: #c5e6d6; }
+.visual-sticker[data-sticker-tone="peach"] { --sticker-wash: #fff2e8; --sticker-edge: #f0d8c6; }
+.visual-sticker[data-sticker-tone="violet"] { --sticker-wash: #f0edfb; --sticker-edge: #ddd5f3; }
+.dark .visual-sticker { --sticker-wash: #22354c; --sticker-edge: #3b516e; box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%); }
+.dark .visual-sticker[data-sticker-tone="mint"] { --sticker-wash: #203e34; --sticker-edge: #355b4c; }
+.dark .visual-sticker[data-sticker-tone="peach"] { --sticker-wash: #433326; --sticker-edge: #68503b; }
+.dark .visual-sticker[data-sticker-tone="violet"] { --sticker-wash: #332d4e; --sticker-edge: #51456e; }
+.estate-workspace h1[data-workspace-heading-icon][data-sticker-emoji]::before {
+  content: attr(data-sticker-emoji) / "";
+  display: inline-grid;
+  place-items: center;
+  width: 1.6em;
+  height: 1.6em;
+  margin-inline-end: .45em;
+  border: 1px solid var(--border);
+  border-radius: .5em;
+  mask-image: none;
+  background: var(--workspace-sky);
+  font-size: .7em;
+  vertical-align: middle;
+}
+.estate-glass-system h1[data-page-icon]::before { content: attr(data-page-icon) / ""; }
+.workspace-metric[data-metric-emoji] { position: relative; padding-inline-end: 3.5rem; }
+.workspace-metric[data-metric-emoji]::after { content: attr(data-metric-emoji) / ""; position: absolute; inset-block-start: 1rem; inset-inline-end: 1rem; display: grid; place-items: center; width: 2rem; height: 2rem; border: 1px solid var(--border); border-radius: .7rem; background: var(--card); font-size: 1.1rem; pointer-events: none; }
+@media (min-width: 1024px) {
+  .estate-workspace .workspace-hero__art { display: block; width: 7rem; height: 4.75rem; }
+  .workspace-hero__art > .visual-sticker { width: 3.5rem; height: 3.5rem; border-width: 2px; border-radius: 1rem; transform: rotate(-6deg); }
+  .workspace-hero__art > .visual-sticker:nth-child(2) { width: 3rem; height: 3rem; transform: rotate(6deg); }
+  .workspace-hero__art > .visual-sticker .visual-sticker__emoji { font-size: 1.8rem; }
+}
+@media (prefers-reduced-motion: reduce) { .workspace-hero__art > .visual-sticker { transform: none; } }
+@media print { .visual-sticker, .workspace-metric[data-metric-emoji]::after, h1[data-sticker-emoji]::before { display: none !important; } }
+.public-access-nav-link .visual-sticker { width: 1.5rem; height: 1.5rem; border-radius: .5rem; }
+.public-access-nav-link .visual-sticker__emoji { font-size: .95rem; }

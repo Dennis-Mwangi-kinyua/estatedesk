@@ -1,11 +1,10 @@
-"use client";
-
 type SensitiveDataWatermarkProps = {
   orgLabel?: string | null;
+  timestamp: string;
 };
 
-function buildWatermarkLabel(orgLabel?: string | null) {
-  const timestamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+function buildWatermarkLabel(timestampValue: string, orgLabel?: string | null) {
+  const timestamp = timestampValue.slice(0, 16).replace("T", " ");
   const org = orgLabel?.trim();
 
   return org
@@ -19,8 +18,9 @@ function buildWatermarkLabel(orgLabel?: string | null) {
  */
 export function SensitiveDataWatermark({
   orgLabel,
+  timestamp,
 }: SensitiveDataWatermarkProps) {
-  const label = buildWatermarkLabel(orgLabel);
+  const label = buildWatermarkLabel(timestamp, orgLabel);
 
   return (
     <div

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { VisualSticker } from "@/components/shared/visual-sticker";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
@@ -137,7 +138,6 @@ export function PublicAccessHeader({
                     Explore
                   </p>
                   {visibleLinks.map((item) => {
-                    const Icon = item.icon;
                     const isActive = active === item.key;
 
                     return (
@@ -152,7 +152,7 @@ export function PublicAccessHeader({
                         }`}
                       >
                         <span className="inline-flex min-w-0 items-center gap-3">
-                          <Icon className="h-4 w-4 shrink-0 text-current" />
+                          <VisualSticker label={item.key} size="xs" />
                           <span className="truncate text-current">{item.label}</span>
                         </span>
                         <ArrowRight className="h-3.5 w-3.5 shrink-0 text-current opacity-60" />
@@ -189,7 +189,6 @@ export function PublicAccessHeader({
           <nav className="hidden lg:flex lg:w-auto lg:flex-1 lg:items-center lg:justify-end lg:gap-2">
             <div className="flex items-center gap-2">
               {visibleLinks.map((item) => {
-                const Icon = item.icon;
                 const isActive = active === item.key;
 
                 return (
@@ -202,7 +201,7 @@ export function PublicAccessHeader({
                         : "border-transparent bg-transparent text-slate-950 hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:border-white/25 dark:hover:bg-white/[0.14] dark:hover:text-white"
                     }`}
                   >
-                    <Icon className="h-4 w-4 shrink-0 text-current" />
+                    <VisualSticker label={item.key} size="xs" />
                     <span className="max-w-full truncate text-current">{item.label}</span>
                   </Link>
                 );

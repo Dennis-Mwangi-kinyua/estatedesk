@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { BellRing, ExternalLink, Phone, X } from "lucide-react";
 import { DeferredLink } from "@/components/navigation/app-links";
 import type { VacancyInquiryAlert } from "@/features/dashboard/server/get-vacancy-inquiry-alerts";
@@ -9,7 +9,28 @@ import type { VacancyInquiryAlert } from "@/features/dashboard/server/get-vacanc
 const dateFormatter = new Intl.DateTimeFormat("en-KE", {
   dateStyle: "medium",
   timeStyle: "short",
+  timeZone: "Africa/Nairobi",
 });
+
+function subscribeDismissals(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener("estatedesk:inquiry-dismissed", callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener("estatedesk:inquiry-dismissed", callback);
+  };
+}
+
+function dismissedSnapshot(key: string) {
+  try { return window.sessionStorage.getItem(key) ?? "[]"; } catch { return "[]"; }
+}
+
+function storeDismissed(key: string, ids: Set<string>) {
+  try {
+    window.sessionStorage.setItem(key, JSON.stringify(Array.from(ids)));
+    window.dispatchEvent(new Event("estatedesk:inquiry-dismissed"));
+  } catch { /* Dismissals still work in memory when storage is unavailable. */ }
+}
 
 function formatDate(value: string) {
   return dateFormatter.format(new Date(value));
@@ -23,15 +44,16 @@ export function VacancyInquiryAlert({
   orgId: string;
 }) {
   const storageKey = `estatedesk:v1:vacancy-inquiries-dismissed:${orgId}`;
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => {
-    if (typeof window === "undefined") return new Set();
-
+  const storedIds = useSyncExternalStore(subscribeDismissals, () => dismissedSnapshot(storageKey), () => "[]");
+  const [localDismissals, setLocalDismissals] = useState<Set<string>>(() => new Set());
+  const dismissedIds = useMemo(() => {
     try {
-      return new Set(JSON.parse(window.sessionStorage.getItem(storageKey) ?? "[]"));
+      const values: unknown = JSON.parse(storedIds);
+      return new Set([...localDismissals, ...(Array.isArray(values) ? values.filter((id): id is string => typeof id === "string") : [])]);
     } catch {
-      return new Set();
+      return localDismissals;
     }
-  });
+  }, [localDismissals, storedIds]);
 
   const visibleInquiries = useMemo(
     () => inquiries.filter((inquiry) => !dismissedIds.has(inquiry.id)),
@@ -43,18 +65,16 @@ export function VacancyInquiryAlert({
   const latest = visibleInquiries[0];
 
   const dismiss = (id: string) => {
-    setDismissedIds((current) => {
-      const next = new Set(current);
-      next.add(id);
-      window.sessionStorage.setItem(storageKey, JSON.stringify(Array.from(next)));
-      return next;
-    });
+    const next = new Set(dismissedIds);
+    next.add(id);
+    setLocalDismissals(next);
+    storeDismissed(storageKey, next);
   };
 
   const dismissAll = () => {
     const next = new Set(inquiries.map((inquiry) => inquiry.id));
-    window.sessionStorage.setItem(storageKey, JSON.stringify(Array.from(next)));
-    setDismissedIds(next);
+    storeDismissed(storageKey, next);
+    setLocalDismissals(next);
   };
 
   return (

@@ -26,7 +26,7 @@ export default async function SignLeaseLayout({
 
   return (
     <div className="app-sensitive-surface relative min-h-screen">
-      <SensitiveDataWatermark orgLabel={orgLabel} />
+      <SensitiveDataWatermark orgLabel={orgLabel} timestamp={new Date().toISOString()} />
       {children}
     </div>
   );

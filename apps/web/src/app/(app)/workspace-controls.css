@@ -86,7 +86,9 @@
   mask-repeat: no-repeat;
 }
 .estate-workspace .workspace-hero__eyebrow svg { width: 1rem; height: 1rem; }
-.estate-workspace .workspace-hero__art { display: none; }
+@media (max-width: 1023px) {
+  .estate-workspace .workspace-hero__art { display: none; }
+}
 .estate-workspace .workspace-hero__side { justify-content: center; }
 @media (max-width: 419px) {
   .estate-workspace :is(main, .platform-theme-content, .org-theme-content)

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { VisualSticker } from "@/components/shared/visual-sticker";
 import {
   ArrowLeft,
   ChevronRight,
@@ -237,7 +238,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
                   <div className="mobile-service-tags mt-3 grid grid-cols-2 gap-2">
                     {serviceItems.map((item) => {
-                      const Icon = item.icon;
 
                       return (
                         <div
@@ -247,7 +247,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                           <span
                             className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-xl ${item.iconClass}`}
                           >
-                            <Icon className="h-3.5 w-3.5" />
+                            <VisualSticker label={item.label} size="xs" />
                           </span>
                           <span className="truncate">{item.label}</span>
                         </div>
