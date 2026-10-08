@@ -1,3 +1,4 @@
+import "./workspace.css";
 import { ReactNode } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -83,7 +84,7 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="app-mobile-canvas app-sensitive-surface ed-mobile-surface relative min-h-dvh w-full min-w-0 overflow-x-hidden">
+    <div className="estate-workspace app-mobile-canvas app-sensitive-surface ed-mobile-surface relative min-h-dvh w-full min-w-0 overflow-x-hidden">
       <SensitiveDataWatermark orgLabel={orgLabel} />
       {children}
       {isSecurityGateRoute ? null : <PwaAppBadgeSync />}

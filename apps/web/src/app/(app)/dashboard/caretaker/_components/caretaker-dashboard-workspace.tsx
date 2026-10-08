@@ -1,3 +1,4 @@
+import { WorkspaceActions } from "@/components/shared/workspace-actions";
 import type { CaretakerDashboardResult } from "@/app/(app)/dashboard/caretaker/_lib/types";
 import {
   CaretakerWorkspaceFooter,
@@ -33,6 +34,7 @@ export function CaretakerDashboardWorkspace({
       ) : (
         <>
           <CaretakerDashboardHeader data={result.data} fullName={fullName} />
+          <WorkspaceActions />
 
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-5">

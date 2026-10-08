@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 import type { CaretakerDashboardStats } from "@/app/(app)/dashboard/caretaker/_lib/types";
 import {
   FocusTaskCard,
@@ -24,9 +23,7 @@ export function CaretakerDashboardFocusSection({
           </h2>
         </div>
 
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-muted/20 text-muted-foreground">
-          <Sparkles className="h-5 w-5" />
-        </div>
+
       </div>
 
       <div className={`space-y-3 ${panelBodyClassName}`}>

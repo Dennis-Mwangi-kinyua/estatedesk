@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
+import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import {
-  SIDEBAR_LINKS,
+  SIDEBAR_LINKS, SIDEBAR_GROUPS, sidebarGroup,
   type OrgRole,
 } from "./org-sidebar-links";
 import {
@@ -30,6 +31,7 @@ export function OrgDashboardSidebar({
   role = "ADMIN",
 }: OrgDashboardSidebarProps) {
   const pathname = usePathname();
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   const visibleLinks = useMemo(() => {
     return SIDEBAR_LINKS.filter((item) => item.roles.includes(role));
@@ -39,6 +41,8 @@ export function OrgDashboardSidebar({
     setMobileOpen(false);
   }, [setMobileOpen]);
 
+  useNavigationDialog(mobileOpen, drawerRef, closeMobile);
+
   return (
     <>
       <aside className="ed-shell-panel fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r lg:flex">
@@ -47,13 +51,13 @@ export function OrgDashboardSidebar({
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {visibleLinks.map((item) => (
+          {SIDEBAR_GROUPS.map((group) => <div key={group}>{visibleLinks.some(item => sidebarGroup(item.href) === group) && <p className="px-3 pb-2 pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group}</p>}{visibleLinks.filter(item => sidebarGroup(item.href) === group).map((item) => (
             <SidebarNavItem
               key={item.href}
               item={item}
               pathname={pathname}
             />
-          ))}
+          ))}</div>)}
         </nav>
 
         <div className="space-y-2 p-4">
@@ -63,6 +67,8 @@ export function OrgDashboardSidebar({
       </aside>
 
       <div
+        inert={!mobileOpen}
+        aria-hidden={!mobileOpen}
         className={[
           "fixed inset-0 z-[120] lg:hidden transition-all duration-300 ease-out",
           mobileOpen ? "pointer-events-auto" : "pointer-events-none",
@@ -79,8 +85,13 @@ export function OrgDashboardSidebar({
         />
 
         <div
+          ref={drawerRef}
+          role="dialog"
+          aria-modal={mobileOpen ? true : undefined}
+          aria-label="Workspace navigation"
+          tabIndex={-1}
           className={[
-            "absolute inset-y-0 left-0 flex w-[90%] max-w-[390px] flex-col border-r border-slate-200 bg-white/86 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out dark:border-white/10 dark:bg-slate-950/86",
+            "system-glass-sidebar absolute inset-y-0 left-0 flex w-[90%] max-w-[390px] flex-col border-r border-slate-200 bg-white/86 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out dark:border-white/10 dark:bg-slate-950/86",
             mobileOpen ? "translate-x-0" : "-translate-x-full",
           ].join(" ")}
         >
@@ -104,7 +115,7 @@ export function OrgDashboardSidebar({
 
             <nav className="ios-scroll min-h-0 flex-1 overflow-y-auto px-3 py-4 overscroll-contain">
               <div className="space-y-2 pb-2">
-                {visibleLinks.map((item) => (
+                {SIDEBAR_GROUPS.map((group) => <div key={group}>{visibleLinks.some(item => sidebarGroup(item.href) === group) && <p className="px-3 pb-2 pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group}</p>}{visibleLinks.filter(item => sidebarGroup(item.href) === group).map((item) => (
                   <SidebarNavItem
                     key={item.href}
                     item={item}
@@ -112,7 +123,7 @@ export function OrgDashboardSidebar({
                     mobile
                     onNavigate={closeMobile}
                   />
-                ))}
+                ))}</div>)}
               </div>
             </nav>
 

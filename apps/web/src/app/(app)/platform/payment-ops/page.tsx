@@ -120,10 +120,13 @@ function AttentionPaymentCard({ payment }: { payment: AttentionPayment }) {
   );
 }
 
-export default async function PaymentOpsPage() {
+export default async function PaymentOpsPage({ searchParams }: { searchParams?: Promise<{ orgId?: string }> }) {
   await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/dashboard",
   });
+
+  const params = searchParams ? await searchParams : {};
+  const scope = params.orgId ? { orgId: params.orgId.slice(0, 100) } : {};
 
   let pending: number;
   let failed: number;
@@ -135,14 +138,15 @@ export default async function PaymentOpsPage() {
     const loaded = await paymentOpsQuery("platform-payment-ops", async () => {
       const [pendingCount, failedCount, rejectedCount, missingCount, rows] =
         await Promise.all([
-          prisma.payment.count({ where: { verificationStatus: "PENDING" } }),
-          prisma.payment.count({ where: { gatewayStatus: "FAILED" } }),
-          prisma.payment.count({ where: { verificationStatus: "REJECTED" } }),
+          prisma.payment.count({ where: { ...scope, verificationStatus: "PENDING" } }),
+          prisma.payment.count({ where: { ...scope, gatewayStatus: "FAILED" } }),
+          prisma.payment.count({ where: { ...scope, verificationStatus: "REJECTED" } }),
           prisma.payment.count({
-            where: { verificationStatus: "VERIFIED", receipt: null },
+            where: { ...scope, verificationStatus: "VERIFIED", receipt: null },
           }),
           prisma.payment.findMany({
             where: {
+              ...scope,
               OR: [
                 { verificationStatus: "PENDING" },
                 { verificationStatus: "REJECTED" },
@@ -179,7 +183,7 @@ export default async function PaymentOpsPage() {
     return (
       <div className="ed-mobile-first space-y-4 sm:space-y-5">
         <PageHeader
-          eyebrow="Payment operations"
+          eyebrow={params.orgId ? "Organisation payment operations" : "Payment operations"}
           title="Callbacks and reconciliation"
           description="Payments requiring platform attention: pending verification, rejected records, failed gateways, and verified payments missing receipts."
         />
@@ -203,7 +207,7 @@ export default async function PaymentOpsPage() {
   return (
     <div className="ed-mobile-first space-y-4 sm:space-y-5 lg:space-y-6">
       <PageHeader
-        eyebrow="Payment operations"
+        eyebrow={params.orgId ? "Organisation payment operations" : "Payment operations"}
         title="Callbacks and reconciliation"
         description="Payments requiring platform attention: pending verification, rejected records, failed gateways, and verified payments missing receipts."
       />

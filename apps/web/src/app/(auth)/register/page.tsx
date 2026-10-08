@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 import {
   ArrowRight,
   Bell,
@@ -16,8 +15,7 @@ import {
   ShieldCheck,
   Wrench,
 } from "lucide-react";
-import { createOnboardingRequestAction } from "./actions";
-import { ReferralCodeField } from "@/components/marketing/referral-code-field";
+import { RegisterRequestForm } from "./register-request-form";
 import { RegisterStatusToast } from "./register-status-toast";
 import { publicPageMetadata } from "@/lib/seo";
 
@@ -284,104 +282,7 @@ export default async function RegisterPage({
               </div>
             </div>
 
-            <form action={createOnboardingRequestAction} className="space-y-3">
-              <div className="hidden" aria-hidden="true">
-                <label>
-                  Website
-                  <input
-                    name="website"
-                    type="text"
-                    tabIndex={-1}
-                    autoComplete="off"
-                  />
-                </label>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Field label="Full name">
-                  <input
-                    name="fullName"
-                    type="text"
-                    required
-                    minLength={2}
-                    maxLength={120}
-                    autoComplete="name"
-                    className="h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
-                    placeholder="Jane Wanjiku"
-                  />
-                </Field>
-
-                <Field label="Company">
-                  <input
-                    name="companyName"
-                    type="text"
-                    required
-                    minLength={2}
-                    maxLength={160}
-                    autoComplete="organization"
-                    className="h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
-                    placeholder="Acme Properties"
-                  />
-                </Field>
-              </div>
-
-              <Field label="Work email">
-                <input
-                  name="workEmail"
-                  type="email"
-                  required
-                  maxLength={160}
-                  autoComplete="email"
-                  className="h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
-                  placeholder="name@company.com"
-                />
-              </Field>
-
-              <Field label="Phone number">
-                <input
-                  name="phone"
-                  type="tel"
-                  maxLength={40}
-                  autoComplete="tel"
-                  className="h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
-                  placeholder="+254 700 000 000"
-                />
-              </Field>
-
-              <ReferralCodeField defaultCode={referralCode} />
-
-              <Field label="What do you manage?">
-                <select
-                  name="managedPropertyType"
-                  required
-                  className="h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
-                >
-                  <option value="Residential properties">Residential properties</option>
-                  <option value="Commercial properties">Commercial properties</option>
-                  <option value="Mixed-use properties">Mixed-use properties</option>
-                  <option value="Warehouses / godowns">Warehouses / godowns</option>
-                  <option value="Multiple property types">Multiple property types</option>
-                </select>
-              </Field>
-
-              <Field label="Message">
-                <textarea
-                  name="message"
-                  rows={4}
-                  maxLength={1200}
-                  className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-3 py-3 text-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
-                  placeholder="Number of units, team size, billing pain points, or rollout timeline"
-                />
-              </Field>
-
-              <button
-                type="submit"
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-neutral-950 px-4 text-sm font-semibold text-white transition hover:bg-neutral-800"
-              >
-                Contact marketing team
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </form>
+            <RegisterRequestForm referralCode={referralCode} />
 
             <p className="mt-4 text-center text-sm text-neutral-500">
               Already have an account?{" "}
@@ -448,7 +349,7 @@ export default async function RegisterPage({
                 From request to rollout
               </p>
               <h2 className="mt-2 text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl">
-                A professional onboarding path, not a self-serve guess.
+                A clear path from request to workspace.
               </h2>
               <p className="mt-4 text-base leading-7 text-neutral-600">
                 The request process helps us understand your portfolio,
@@ -510,22 +411,5 @@ export default async function RegisterPage({
         </div>
       </section>
     </main>
-  );
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-neutral-700">
-        {label}
-      </span>
-      {children}
-    </label>
   );
 }

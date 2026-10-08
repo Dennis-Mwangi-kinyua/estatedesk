@@ -1,8 +1,15 @@
 "use client";
 
+import { SidebarSticker } from "@/components/shared/sidebar-sticker";
+
+import "../platform-glass.css";
+
+import { WorkspaceActions } from "@/components/shared/workspace-actions";
+
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import {
   Building2,
   Code2,
@@ -10,7 +17,7 @@ import {
   MessageSquareText,
 } from "lucide-react";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
-import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
+import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import {
   getNavItemsForMode,
@@ -18,7 +25,6 @@ import {
   modeMeta,
   type PlatformMode,
 } from "../_lib/nav";
-import { platformNavIconMap } from "../_lib/icons";
 import { DeveloperSensitiveBanner } from "./developer-sensitive-banner";
 import { PlatformModeProvider, usePlatformMode } from "./platform-mode-context";
 import { PlatformModeToggle } from "./platform-mode-toggle";
@@ -34,6 +40,7 @@ function PlatformShellInner({
   isSuperAdmin: boolean;
 }) {
   const pathname = usePathname();
+  const [navQuery, setNavQuery] = useState("");
   const { mode } = usePlatformMode();
   const navItems = useMemo(
     () => getNavItemsForMode(mode, { isSuperAdmin }),
@@ -77,9 +84,9 @@ function PlatformShellInner({
             </div>
           </div>
 
+          <label className="mx-3 mt-3"><span className="sr-only">Find an admin tool</span><input type="search" placeholder="Find a tool…" value={navQuery} onChange={(event) => setNavQuery(event.target.value)} className="w-full rounded-xl border border-border bg-muted/40 px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-primary" /></label>
           <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-4">
-            {navItems.map((item) => {
-              const Icon = platformNavIconMap[item.icon];
+            {navItems.filter((item) => `${item.label} ${item.description ?? ""}`.toLowerCase().includes(navQuery.toLowerCase().trim())).map((item) => {
               const active = isNavItemActive(pathname, item.href);
 
               return (
@@ -104,7 +111,7 @@ function PlatformShellInner({
                         : "ed-nav-icon bg-muted text-muted-foreground group-hover:bg-card group-hover:text-primary",
                     ].join(" ")}
                   >
-                    <Icon className="h-4 w-4" />
+                    <SidebarSticker href={item.href} />
                   </span>
                   <span className="min-w-0 flex-1 truncate">{item.label}</span>
                   {item.superAdminOnly ? (
@@ -183,9 +190,10 @@ function PlatformShellInner({
             </header>
 
             <section className="min-h-0 min-w-0 flex-1 overflow-hidden p-0 sm:p-3 lg:p-6">
-              <div className="ios-panel h-full min-w-0 overflow-hidden rounded-none border-0 border-border bg-card/90 shadow-none backdrop-blur-sm dark:bg-card/80 sm:rounded-xl sm:border sm:shadow-sm">
+              <div className="platform-content-frame ios-panel h-full min-w-0 overflow-hidden rounded-none border-0 border-border bg-card/90 shadow-none backdrop-blur-sm dark:bg-card/80 sm:rounded-xl sm:border sm:shadow-sm">
                 <div className="platform-theme-content ed-mobile-content h-full min-w-0 overflow-x-hidden overflow-y-auto overscroll-y-contain p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-foreground sm:p-5 lg:p-6">
                   <DeveloperSensitiveBanner isSuperAdmin={isSuperAdmin} />
+                  {pathname !== "/platform" && pathname !== "/platform/developer" && <WorkspaceActions />}
                   {children}
                 </div>
               </div>

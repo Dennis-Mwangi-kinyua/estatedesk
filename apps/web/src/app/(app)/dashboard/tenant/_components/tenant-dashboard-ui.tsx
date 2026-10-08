@@ -25,7 +25,7 @@ export function SummaryMetric({
   note?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
+    <div className="workspace-metric rounded-2xl border border-border bg-muted/10 px-4 py-4">
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </p>

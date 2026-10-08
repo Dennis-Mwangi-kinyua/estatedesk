@@ -1,5 +1,6 @@
 "use client";
 
+
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { OrgDashboardHeader } from "@/components/layout/org-dashboard-header";
@@ -13,6 +14,7 @@ import {
 
 type OrgDashboardShellProps = {
   children: ReactNode;
+  unreadCount?: number;
   organizationName: string;
   userName?: string;
   userRole?: string;
@@ -22,6 +24,7 @@ type OrgDashboardShellProps = {
 
 export function OrgDashboardShell({
   children,
+  unreadCount = 0,
   organizationName,
   userName = "Admin User",
   userRole = "Organization Admin",
@@ -31,7 +34,7 @@ export function OrgDashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden">
+    <div data-workspace="org" className="ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden">
       <OrgDashboardSidebar
         organizationName={organizationName}
         mobileOpen={mobileOpen}
@@ -40,6 +43,7 @@ export function OrgDashboardShell({
       />
 
       <OrgDashboardHeader
+        unreadCount={unreadCount}
         title={organizationName}
         subtitle={`${userRole} workspace`}
         onMenuClick={() => setMobileOpen(true)}
@@ -52,6 +56,7 @@ export function OrgDashboardShell({
           {supportSession ? <SupportSessionBanner session={supportSession} /> : null}
           <main className="org-mobile-main-offset flex-1 px-3 py-3 sm:px-5 sm:py-4 lg:px-8 lg:pb-16">
             <div className="app-content-shell org-theme-content relative z-0 w-full min-w-0 space-y-4 text-slate-950 sm:space-y-6 dark:text-slate-100">
+
               {children}
             </div>
           </main>

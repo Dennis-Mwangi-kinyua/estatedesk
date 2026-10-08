@@ -52,3 +52,19 @@ export async function deletePlatformMessageAction(formData: FormData) {
 
   revalidatePath("/platform/messages");
 }
+
+export async function closePlatformMessageAction(formData: FormData) {
+  await requireMessageAccess();
+  const messageId = formText(formData, "messageId");
+  if (!messageId) throw new Error("Missing message id.");
+  await prisma.platformMessage.updateMany({ where: { id: messageId, status: { in: ["OPEN", "READ"] } }, data: { status: "CLOSED" } });
+  revalidatePath("/platform/messages");
+}
+
+export async function reopenPlatformMessageAction(formData: FormData) {
+  await requireMessageAccess();
+  const messageId = formText(formData, "messageId");
+  if (!messageId) throw new Error("Missing message id.");
+  await prisma.platformMessage.updateMany({ where: { id: messageId, status: { in: ["CLOSED", "SPAM"] } }, data: { status: "OPEN" } });
+  revalidatePath("/platform/messages");
+}

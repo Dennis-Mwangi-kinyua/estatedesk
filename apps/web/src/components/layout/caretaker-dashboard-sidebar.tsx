@@ -1,56 +1,15 @@
 "use client";
 
+import { SidebarSticker } from "@/components/shared/sidebar-sticker";
+
 import { usePathname } from "next/navigation";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import clsx from "clsx";
-import {
-  Home,
-  Wrench,
-  ClipboardList,
-  FileText,
-  Users,
-  Droplets,
-  Inbox,
-  Bell,
-  LogOut,
-  ShieldCheck,
-  UserRound,
-  ListTodo,
-  Building2,
-  Search,
-  Calendar,
-  DoorOpen,
-  FolderOpen,
-  Megaphone,
-  NotebookPen,
-  Truck,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { CARETAKER_NAV_ITEMS } from "@/app/(app)/dashboard/caretaker/_lib/i18n";
 import { CaretakerNavLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-nav-label";
-
-const navIcons = {
-  "/dashboard/caretaker/today": ListTodo,
-  "/dashboard/caretaker/search": Search,
-  "/dashboard/caretaker/calendar": Calendar,
-  "/dashboard/caretaker": Home,
-  "/dashboard/caretaker/units": Building2,
-  "/dashboard/caretaker/issues": Wrench,
-  "/dashboard/caretaker/inspections": ClipboardList,
-  "/dashboard/caretaker/move-outs": DoorOpen,
-  "/dashboard/caretaker/leases": FileText,
-  "/dashboard/caretaker/tenants": Users,
-  "/dashboard/caretaker/water-bills": Droplets,
-  "/dashboard/caretaker/documents": FolderOpen,
-  "/dashboard/caretaker/broadcasts": Megaphone,
-  "/dashboard/caretaker/handover": NotebookPen,
-  "/dashboard/caretaker/vendors": Truck,
-  "/dashboard/caretaker/finance-requests": Inbox,
-  "/dashboard/caretaker/notifications": Bell,
-  "/dashboard/caretaker/profile": UserRound,
-  "/dashboard/caretaker/security": ShieldCheck,
-} as const;
 
 type Props = {
   fullName: string;
@@ -81,14 +40,14 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
             <nav className="space-y-1">
               {CARETAKER_NAV_ITEMS.map((item) => {
                 const active =
-                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  pathname === item.href || (item.href !== "/dashboard/caretaker" && pathname.startsWith(`${item.href}/`));
 
-                const Icon = navIcons[item.href as keyof typeof navIcons] ?? Home;
 
                 return (
                   <HoverPrefetchLink
                     key={item.href}
                     href={item.href}
+                    aria-current={active ? "page" : undefined}
                     className={clsx(
                       "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150 active:scale-[0.99]",
                       active ? "ed-nav-item-active" : "ed-nav-item",
@@ -100,7 +59,7 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
                         active ? "ed-nav-icon-active" : "ed-nav-icon",
                       )}
                     >
-                      <Icon className="h-[18px] w-[18px]" />
+                      <SidebarSticker href={item.href} />
                     </span>
 
                     <span className="truncate">

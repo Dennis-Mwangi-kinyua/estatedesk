@@ -1,9 +1,13 @@
 "use client";
 
+import { SidebarSticker } from "@/components/shared/sidebar-sticker";
+
+
+import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 import { usePathname } from "next/navigation";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
   Building2,
@@ -17,7 +21,8 @@ import {
 } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
-import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
+import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
+import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 
 type LandlordDashboardShellProps = {
   children: ReactNode;
@@ -77,7 +82,6 @@ function LandlordNav({
   return (
     <nav className="space-y-2" aria-label="Landlord navigation">
       {navItems.map((item) => {
-        const Icon = item.icon;
         const hashIndex = item.href.indexOf("#");
         const hasHash = hashIndex >= 0;
         const itemHash = hasHash ? item.href.slice(hashIndex) : "";
@@ -90,6 +94,7 @@ function LandlordNav({
           <HoverPrefetchLink
             key={item.href}
             href={item.href}
+            aria-current={active ? "page" : undefined}
             onClick={onNavigate}
             className={[
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
@@ -106,7 +111,7 @@ function LandlordNav({
                   : "ed-nav-icon",
               ].join(" ")}
             >
-              <Icon className="h-4 w-4" />
+              <SidebarSticker href={item.href} />
             </span>
             <span className="truncate">{item.label}</span>
           </HoverPrefetchLink>
@@ -122,10 +127,13 @@ export function LandlordDashboardShell({
   organizationName,
 }: LandlordDashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const closeMenu = useCallback(() => setMobileOpen(false), []);
+  useNavigationDialog(mobileOpen, drawerRef, closeMenu);
   const currentYear = useMemo(() => new Date().getFullYear(), []);
 
   return (
-    <div className="app-mobile-canvas ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden">
+    <div data-workspace="landlord" className="app-mobile-canvas ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden">
       <aside className="ed-shell-panel fixed inset-y-0 left-0 z-[100] hidden w-72 border-r p-4 lg:block">
         <HoverPrefetchLink href="/dashboard/landlord" className="flex items-center gap-3">
           <div className="ed-brand-mark flex h-10 w-10 items-center justify-center rounded-lg shadow-sm">
@@ -192,12 +200,7 @@ export function LandlordDashboardShell({
 
           <div className="flex shrink-0 items-center gap-2">
             <HeaderThemeToggle />
-            <div className="ed-soft-button hidden rounded-lg border px-3 py-2 text-right shadow-sm sm:block">
-              <p className="max-w-[200px] truncate text-sm font-medium leading-none text-slate-950">
-                {displayName}
-              </p>
-              <p className="mt-1 text-[11px] text-slate-500">Landlord</p>
-            </div>
+            <WorkspaceIdentity name={displayName} role="Landlord" />
           </div>
         </div>
       </header>
@@ -210,7 +213,7 @@ export function LandlordDashboardShell({
             className="absolute inset-0 bg-slate-950/35 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="ed-shell-panel absolute inset-x-3 top-4 mx-auto max-h-[calc(100vh-2rem)] max-w-[430px] overflow-y-auto rounded-[28px] border p-4 shadow-[0_24px_80px_rgba(15,23,42,0.28)]">
+          <div ref={drawerRef} role="dialog" aria-modal="true" aria-label="Landlord navigation" tabIndex={-1} className="ed-shell-panel absolute inset-x-3 top-4 mx-auto max-h-[calc(100vh-2rem)] max-w-[430px] overflow-y-auto rounded-[28px] border p-4 shadow-[0_24px_80px_rgba(15,23,42,0.28)]">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
@@ -263,7 +266,8 @@ export function LandlordDashboardShell({
       <div className="lg:pl-72">
         <div className="flex min-h-screen flex-col pt-[72px] lg:pt-16">
           <main className="flex-1 px-3 py-3 pb-20 sm:px-5 sm:py-4 lg:px-8">
-            <div className="app-content-shell">{children}</div>
+            <div className="app-content-shell">
+              {children}</div>
           </main>
 
           <footer className="fixed bottom-0 left-0 right-0 z-[85] border-t border-white/60 bg-white/78 backdrop-blur-2xl lg:left-72">

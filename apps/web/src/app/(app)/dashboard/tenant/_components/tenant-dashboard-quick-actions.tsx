@@ -1,46 +1,36 @@
 import Link from "next/link";
-import {
-  Bell,
-  CreditCard,
-  Droplets,
-  FileText,
-  FolderOpen,
-  Receipt,
-  UserRound,
-  Wrench,
-} from "lucide-react";
+import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 import { panelShellClassName } from "./tenant-dashboard-ui";
 
 const ACTIONS = [
-  { href: "/dashboard/tenant/payments", label: "Payments", icon: CreditCard },
-  { href: "/dashboard/tenant/water-bills", label: "Water bills", icon: Droplets },
-  { href: "/dashboard/tenant/lease", label: "Lease", icon: FileText },
-  { href: "/dashboard/tenant/issues", label: "Maintenance", icon: Wrench },
-  { href: "/dashboard/tenant/invoice", label: "Invoices", icon: Receipt },
-  { href: "/dashboard/tenant/notifications", label: "Notifications", icon: Bell },
-  { href: "/dashboard/tenant/documents", label: "Documents", icon: FolderOpen },
-  { href: "/dashboard/tenant/profile", label: "Profile", icon: UserRound },
+  { href: "/dashboard/tenant/payments", label: "Payments" },
+  { href: "/dashboard/tenant/water-bills", label: "Water bills" },
+  { href: "/dashboard/tenant/lease", label: "Lease" },
+  { href: "/dashboard/tenant/issues", label: "Maintenance" },
+  { href: "/dashboard/tenant/invoice", label: "Invoices" },
+  { href: "/dashboard/tenant/notifications", label: "Notifications" },
+  { href: "/dashboard/tenant/documents", label: "Documents" },
+  { href: "/dashboard/tenant/profile", label: "Profile" },
 ] as const;
 
 export function TenantDashboardQuickActions() {
   return (
     <section className={`${panelShellClassName} p-4 sm:p-5`}>
-      <h2 className="text-sm font-semibold text-foreground">Quick navigation</h2>
+      <h2 className="text-sm font-semibold text-foreground">Your shortcuts</h2>
       <p className="mt-1 text-sm leading-6 text-muted-foreground">
-        Jump directly to a workspace section.
+        Bills, documents, and updates in one place.
       </p>
 
       <div className="mt-4 grid grid-cols-1 gap-2">
         {ACTIONS.map((action) => {
-          const Icon = action.icon;
 
           return (
             <Link
               key={action.href}
               href={action.href}
-              className="inline-flex h-11 items-center gap-3 rounded-2xl border border-border bg-muted/10 px-4 text-sm font-medium text-foreground transition hover:bg-muted/25"
+              className="workspace-action inline-flex min-h-14 items-center gap-3 rounded-2xl border border-border bg-muted/10 px-4 text-sm font-medium text-foreground transition hover:bg-muted/25"
             >
-              <Icon className="h-4 w-4 text-muted-foreground" />
+              <SidebarSticker href={action.href} />
               {action.label}
             </Link>
           );

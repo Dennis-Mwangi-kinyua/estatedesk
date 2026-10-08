@@ -1,0 +1,5 @@
+export const fixtureMessages = [
+  { id: "unread-message", subject: "Help with water billing", message: "Hello EstateDesk team,\n\nCould you help us confirm how to record the new water meter readings? We have added our units and would like to get the first billing cycle right.\n\nThank you,\nJane", status: "OPEN", createdAt: "2026-10-08T07:00:00.000Z", org: { name: "Greenview Properties", slug: "greenview" }, sender: { fullName: "Jane Mwangi", email: "jane@example.test", phone: "+254700000000" } },
+  { id: "read-message", subject: "Portfolio import follow-up", message: "Our tenant import is complete. Please confirm the next setup steps.", status: "READ", createdAt: "2026-10-07T09:00:00.000Z", org: { name: "Acacia Homes", slug: "acacia" }, sender: { fullName: "Daniel Otieno", email: "daniel@example.test", phone: null } },
+  { id: "closed-message", subject: "Subscription question", message: "Thanks for helping us resolve the billing question.", status: "CLOSED", createdAt: "2026-10-06T08:00:00.000Z", org: { name: "Riverside Estates", slug: "riverside" }, sender: { fullName: "Amina Ali", email: "amina@example.test", phone: null } },
+];

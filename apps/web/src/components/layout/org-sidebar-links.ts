@@ -225,3 +225,12 @@ export function isActivePath(pathname: string, href: string) {
 
   return pathname === href || pathname.startsWith(`${href}/`);
 }
+export function sidebarGroup(href: string) {
+  const path = href.split("/")[3] ?? "";
+  if (["properties", "buildings", "units", "tenants", "verify-tenant", "leases", "vacancy-inquiries", "imports"].includes(path)) return "Portfolio";
+  if (["payments", "accounting", "finance-requests", "water-bills", "expenditures", "charges", "taxes", "reports"].includes(path)) return "Finance";
+  if (["move-outs", "inspections", "issues"].includes(path)) return "Operations";
+  if (["staff", "notifications", "settings", "security", "support", "profile"].includes(path)) return "Administration";
+  return "Overview";
+}
+export const SIDEBAR_GROUPS = ["Overview", "Portfolio", "Finance", "Operations", "Administration"];

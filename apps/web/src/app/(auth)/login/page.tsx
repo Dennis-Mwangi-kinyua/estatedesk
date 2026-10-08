@@ -175,17 +175,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <div className="absolute inset-0 bg-white" />
 
           <div className="login-content relative z-10 flex h-full min-h-0 w-full max-w-[430px] flex-col gap-2 lg:h-auto lg:max-w-md">
-            <div className="ios-status-bar flex h-6 shrink-0 items-center justify-between px-5 text-[12px] font-semibold tracking-[-0.02em] text-slate-800 lg:hidden">
-              <span>9:41</span>
-
-              <div className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-slate-800" />
-                <span className="h-1.5 w-1.5 rounded-full bg-slate-800" />
-                <span className="flex h-3 w-5 items-center rounded-[5px] border border-slate-800 p-[1px]">
-                  <span className="h-full w-[70%] rounded-[4px] bg-slate-800" />
-                </span>
-              </div>
-            </div>
 
             <div className="shrink-0 lg:hidden">
               <div className="mobile-home-pill flex w-full items-center rounded-[24px] border border-slate-200 bg-white px-4 py-3 shadow-sm">
@@ -281,9 +270,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   </div>
                 </div>
 
-                <h2 className="mobile-title mt-4 text-center text-[clamp(1.75rem,7vw,2rem)] font-semibold leading-none tracking-[-0.045em] text-slate-950">
+                <h1 className="mobile-title mt-4 text-center text-[clamp(1.75rem,7vw,2rem)] font-semibold leading-none tracking-[-0.045em] text-slate-950">
                   Welcome back
-                </h2>
+                </h1>
 
                 <p className="mobile-copy mx-auto mt-2 max-w-[320px] text-center text-sm leading-5 text-slate-600">
                   Log in to manage your workspace, property operations, billing

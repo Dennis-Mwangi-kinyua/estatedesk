@@ -1,4 +1,7 @@
-import { Lock, Mail, Phone, ShieldCheck, User2 } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Lock, Mail, Phone, User2 } from "lucide-react";
 import {
   iconBubbleClass,
   iconClass,
@@ -44,23 +47,31 @@ export function NewOrgStepAdmin(props: Props) {
     setAdminPasswordConfirm,
   } = props;
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  function generatePassword() {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    const bytes = crypto.getRandomValues(new Uint8Array(24));
+    const password = Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join("");
+    setAdminPassword(password);
+    setAdminPasswordConfirm(password);
+  }
+
   return (
     <section className={panelClass}>
       <div className="mb-6">
         <div className={iconBubbleClass}>
-          <ShieldCheck className="h-5 w-5" />
+          <span aria-hidden="true" className="text-2xl">🔑</span>
         </div>
-        <h2 className={stepTitleClass}>Organization master login</h2>
+        <h2 className={stepTitleClass}>Account owner login</h2>
         <p className={stepDescriptionClass}>
-          Create the organization-level admin account. This login can
-          create admins, managers, accountants, caretakers, tenants, and
-          landlord mappings inside the workspace.
+          Set up the owner’s administrator login. They will change their temporary
+          password on first sign-in. Download their credentials PDF after creation.
         </p>
       </div>
 
       <div className="grid gap-4">
-        <Field
-          label="Master full name"
+        <Field name="adminFullName" label="Full name"
           required
           error={state.fieldErrors?.adminFullName?.[0]}
         >
@@ -75,8 +86,7 @@ export function NewOrgStepAdmin(props: Props) {
           </div>
         </Field>
 
-        <Field
-          label="Master username"
+        <Field name="adminUsername" label="Username"
           required
           error={state.fieldErrors?.adminUsername?.[0]}
         >
@@ -96,8 +106,7 @@ export function NewOrgStepAdmin(props: Props) {
         </Field>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            label="Master email"
+          <Field name="adminEmail" label="Login email"
             required
             error={state.fieldErrors?.adminEmail?.[0]}
           >
@@ -113,8 +122,7 @@ export function NewOrgStepAdmin(props: Props) {
             </div>
           </Field>
 
-          <Field
-            label="Master phone"
+          <Field name="adminPhone" label="Phone (optional)"
             error={state.fieldErrors?.adminPhone?.[0]}
           >
             <div className="relative">
@@ -129,16 +137,20 @@ export function NewOrgStepAdmin(props: Props) {
           </Field>
         </div>
 
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/30 p-3">
+          <button type="button" onClick={generatePassword} className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm font-semibold">Generate secure password</button>
+          <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={showPassword} onChange={(event) => setShowPassword(event.target.checked)} />Show passwords</label>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            label="Password"
+          <Field name="adminPassword" label="Temporary password"
             required
             error={state.fieldErrors?.adminPassword?.[0]}
           >
             <div className="relative">
               <Lock className={iconClass} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 placeholder="At least 8 characters"
@@ -147,15 +159,15 @@ export function NewOrgStepAdmin(props: Props) {
             </div>
           </Field>
 
-          <Field
-            label="Confirm password"
+          <Field name="adminPasswordConfirm" label="Confirm password"
             required
             error={state.fieldErrors?.adminPasswordConfirm?.[0]}
           >
             <div className="relative">
               <Lock className={iconClass} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
                 value={adminPasswordConfirm}
                 onChange={(e) => setAdminPasswordConfirm(e.target.value)}
                 placeholder="Repeat password"

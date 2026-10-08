@@ -13,7 +13,7 @@ export function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
+    <section className="platform-glass-panel rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
       <div className="mb-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
           {title}
@@ -28,22 +28,26 @@ export function Panel({
 }
 
 export function MetricCard({
+  href,
+  emoji,
   label,
   value,
   meta,
   metaTone,
 }: {
+  href?: string;
+  emoji?: string;
   label: string;
   value: string;
   meta: string;
   metaTone: string;
 }) {
-  return (
-    <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
+  const content = (
+    <div className="platform-glass-metric group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        {label}
+        {emoji && <span aria-hidden="true" className="mr-2 text-lg">{emoji}</span>}{label}
       </p>
-      <div className="mt-2 flex items-end justify-between gap-3">
+      <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-3">
         <p className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white lg:text-[22px]">
           {value}
         </p>
@@ -51,23 +55,28 @@ export function MetricCard({
       </div>
     </div>
   );
+  return href ? <Link href={href} className="block min-w-0 rounded-xl focus-visible:outline-2 focus-visible:outline-primary">{content}</Link> : content;
 }
 
 export function CompactInfoCard({
+  href,
+  emoji,
   label,
   value,
   helper,
 }: {
+  href?: string;
+  emoji?: string;
   label: string;
   value: string;
   helper: string;
 }) {
-  return (
-    <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
+  const content = (
+    <div className="platform-glass-metric group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        {label}
+        {emoji && <span aria-hidden="true" className="mr-2 text-lg">{emoji}</span>}{label}
       </p>
-      <div className="mt-2 flex items-end justify-between gap-3">
+      <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-3">
         <p className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white lg:text-[22px]">
           {value}
         </p>
@@ -75,6 +84,7 @@ export function CompactInfoCard({
       </div>
     </div>
   );
+  return href ? <Link href={href} className="block min-w-0 rounded-xl focus-visible:outline-2 focus-visible:outline-primary">{content}</Link> : content;
 }
 
 export function ActionLink({
@@ -89,12 +99,12 @@ export function ActionLink({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3.5 py-3.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 dark:border-white/25 dark:bg-slate-700 dark:shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] dark:hover:border-white/40 dark:hover:bg-slate-600"
+      className="platform-glass-action group flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3.5 py-3.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 dark:border-white/25 dark:bg-slate-700 dark:shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] dark:hover:border-white/40 dark:hover:bg-slate-600"
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-700 ring-1 ring-slate-200/80 transition-colors group-hover:bg-white group-hover:text-slate-950 dark:bg-white/15 dark:text-white dark:ring-white/20 dark:group-hover:bg-white/25 dark:group-hover:text-white">
         <Icon className="h-4 w-4 stroke-[2.25]" />
       </div>
-      <p className="truncate text-sm font-semibold text-slate-900 transition-colors group-hover:text-slate-950 dark:text-slate-50 dark:group-hover:text-white">
+      <p className="min-w-0 text-sm font-semibold text-slate-900 transition-colors group-hover:text-slate-950 dark:text-slate-50 dark:group-hover:text-white">
         {label}
       </p>
     </Link>
@@ -103,7 +113,7 @@ export function ActionLink({
 
 export function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 dark:border-white/10 dark:bg-slate-900">
+    <div className="platform-glass-inset rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 dark:border-white/10 dark:bg-slate-900">
       <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
         {label}
       </p>
@@ -124,7 +134,7 @@ export function ChartPanel({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
+    <section className="platform-glass-panel rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
       <div>
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
           {eyebrow}
@@ -161,12 +171,12 @@ export function PremiumBarChart({
   }
 
   return (
-    <div className="flex h-full items-end gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900">
+    <div className="platform-glass-chart flex h-full items-end gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900">
       {bars.map((bar, index) => (
-        <div key={bar.id} className="group flex min-w-0 flex-1 flex-col items-center gap-2">
+        <div key={bar.id} className="group flex h-full min-w-0 flex-1 flex-col items-center gap-2">
           <div className="flex w-full flex-1 items-end justify-center">
             <div
-              className={`w-full max-w-[48px] rounded-t-lg ${tone} shadow-sm transition-all duration-200 group-hover:-translate-y-1 dark:bg-white`}
+              className={`platform-glass-bar w-full max-w-[48px] rounded-t-lg ${tone} shadow-sm transition-all duration-200 group-hover:-translate-y-1 dark:bg-white`}
               style={{ height: `${bar.height}%` }}
               title={`${labels[index]}: ${valueFormatter(values[index])}`}
             />

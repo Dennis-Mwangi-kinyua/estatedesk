@@ -1,3 +1,4 @@
+import { getUnreadNotificationAlert } from "@/lib/notifications/unread-alert";
 import type { ReactNode } from "react";
 import { OrgDashboardShell } from "@/components/layout/org-dashboard-shell";
 import { requireManagementAccess } from "@/lib/permissions/guards";
@@ -70,8 +71,10 @@ export default async function OrgLayout({
     supportSession = null;
   }
 
+  const unread = await getUnreadNotificationAlert({ audience: "org_staff", orgId: session.activeOrgId!, userId: session.userId }).catch(() => null);
   return (
     <OrgDashboardShell
+      unreadCount={unread?.count ?? 0}
       organizationName={organizationName}
       userName={session.fullName}
       userRole={userRole}

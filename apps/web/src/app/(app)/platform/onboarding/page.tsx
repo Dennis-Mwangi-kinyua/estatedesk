@@ -1,21 +1,12 @@
 import { Prisma } from "@prisma/client";
-import { CheckCircle2, Clock3, Mail, Phone, Search, Trash2, UserRound } from "lucide-react";
+import Link from "next/link";
+import { requirePlatformRole } from "@/lib/permissions/guards";
+import { OnboardingRequestCard } from "./_components/onboarding-request-card";
+import { ArrowRight, Plus, Search } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getPagination } from "@/lib/db/pagination";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
-import {
-  Badge,
-  PageHeader,
-  PaginationControls,
-  StatCard,
-  formatDateTime,
-  toneForStatus,
-} from "../_components/control-plane";
-import {
-  deleteOnboardingRequestAction,
-  quickUpdateOnboardingStatusAction,
-  updateOnboardingRequestAction,
-} from "./actions";
+import { PageHeader, PaginationControls } from "../_components/control-plane";
 
 export const dynamic = "force-dynamic";
 
@@ -34,14 +25,6 @@ function onboardingQuery<T>(label: string, operation: () => Promise<T>) {
     delayMs: 650,
     label,
   });
-}
-
-function getPriorityLabel(status: string) {
-  if (status === "NEW") return "Needs first response";
-  if (status === "CONTACTED") return "Awaiting qualification";
-  if (status === "QUALIFIED") return "Ready for setup";
-  if (status === "CLOSED") return "Completed";
-  return "No further action";
 }
 
 function buildWhere({
@@ -77,12 +60,14 @@ export default async function PlatformOnboardingPage({
 }: {
   searchParams: SearchParams;
 }) {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], { redirectTo: "/dashboard" });
   const params = await searchParams;
-  const q = (params.q ?? "").trim();
-  const status = (params.status ?? "").trim().toUpperCase();
+  const q = (params.q ?? "").trim().slice(0, 200);
+  const rawStatus = (params.status ?? "").trim().toUpperCase();
+  const status = STATUSES.find(item => item === rawStatus) ?? "";
   const { page, pageSize, skip, take } = getPagination({
-    page: Number(params.page ?? 1),
-    pageSize: Number(params.pageSize ?? 20),
+    page: /^\d{1,6}$/.test(params.page ?? "") ? Number(params.page) : 1,
+    pageSize: /^\d{1,3}$/.test(params.pageSize ?? "") ? Number(params.pageSize) : 20,
   });
   const where = buildWhere({ q, status });
 
@@ -91,7 +76,7 @@ export default async function PlatformOnboardingPage({
       onboardingQuery("platform-onboarding-requests", () =>
         prisma.onboardingRequest.findMany({
           where,
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: status === "NEW" ? "asc" : "desc" },
           skip,
           take,
           include: {
@@ -113,217 +98,28 @@ export default async function PlatformOnboardingPage({
         prisma.onboardingRequest.count({ where: { status: "QUALIFIED" } }),
       ),
       onboardingQuery("platform-onboarding-closed-count", () =>
-        prisma.onboardingRequest.count({ where: { status: { in: ["CLOSED", "REJECTED"] } } }),
+        prisma.onboardingRequest.count({ where: { status: "CLOSED" } }),
       ),
     ]);
 
-  return (
-    <div className="space-y-5">
-      <PageHeader
-        eyebrow="Growth"
-        title="Onboarding requests"
-        description="Public access requests from registration, with lead status, contact details, and platform team notes."
-      />
-
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard label="Matching" value={totalFiltered} />
-        <StatCard label="New" value={newCount} />
-        <StatCard label="Contacted" value={contactedCount} />
-        <StatCard label="Qualified" value={qualifiedCount} />
-        <StatCard label="Closed / rejected" value={closedCount} />
-      </section>
-
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900/90">
-        <form className="grid gap-3 border-b border-slate-100 p-4 dark:border-white/10 md:grid-cols-[1fr_180px_auto]">
-          <label className="relative block">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              name="q"
-              defaultValue={q}
-              placeholder="Search company, contact, email, phone, or notes"
-              className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-11 py-3 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
-            />
-          </label>
-          <select
-            name="status"
-            defaultValue={status}
-            className="min-h-11 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-950 outline-none focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
-          >
-            <option value="">All statuses</option>
-            {STATUSES.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-          <button className="min-h-11 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
-            Apply
-          </button>
-        </form>
-
-        {requests.length === 0 ? (
-          <div className="p-10 text-center text-sm text-slate-500 dark:text-slate-300">
-            No onboarding requests found.
-          </div>
-        ) : (
-          <div className="grid gap-4 p-4">
-            {requests.map((request) => (
-              <article
-                key={request.id}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950"
-              >
-                <div className="border-b border-slate-100 p-4 dark:border-white/10 sm:p-5">
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="break-words text-base font-semibold text-slate-950 dark:text-white">
-                          {request.companyName}
-                        </h2>
-                        <Badge tone={toneForStatus(request.status === "NEW" ? "pending" : request.status)}>
-                          {request.status}
-                        </Badge>
-                      </div>
-                      <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-300">
-                        <UserRound className="h-4 w-4 shrink-0" />
-                        <span className="break-words">{request.fullName}</span>
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 flex-wrap gap-2">
-                      <Badge>{getPriorityLabel(request.status)}</Badge>
-                      <Badge>
-                        <Clock3 className="mr-1 h-3.5 w-3.5" />
-                        {formatDateTime(request.createdAt)}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid gap-2 text-xs text-slate-600 dark:text-slate-300 sm:grid-cols-2 xl:grid-cols-4">
-                    <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 dark:border-white/10 dark:bg-slate-900">
-                      <Mail className="h-3.5 w-3.5 shrink-0" />
-                      <span className="break-all">{request.workEmail}</span>
-                    </span>
-                    {request.phone ? (
-                      <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 dark:border-white/10 dark:bg-slate-900">
-                        <Phone className="h-3.5 w-3.5 shrink-0" />
-                        <span>{request.phone}</span>
-                      </span>
-                    ) : null}
-                    <span className="inline-flex min-h-9 items-center rounded-full border border-slate-200 bg-slate-50 px-3 font-medium dark:border-white/10 dark:bg-slate-900">
-                      {request.managedPropertyType}
-                    </span>
-                    <span className="inline-flex min-h-9 items-center rounded-full border border-slate-200 bg-slate-50 px-3 dark:border-white/10 dark:bg-slate-900">
-                      {request.marketer
-                        ? `${request.marketer.fullName} (${request.marketer.referralCode})`
-                        : request.referralCode
-                          ? `Unmatched ${request.referralCode}`
-                          : "No referral"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 p-4 sm:p-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
-                  <div className="space-y-3">
-                    {request.message ? (
-                      <p className="whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
-                        {request.message}
-                      </p>
-                    ) : (
-                      <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3 text-sm text-slate-500 dark:border-white/10 dark:bg-slate-900 dark:text-slate-400">
-                        No customer message was included.
-                      </p>
-                    )}
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                      {request.handledBy ? (
-                        <span>
-                          Last handled by {request.handledBy.fullName ?? request.handledBy.email}{" "}
-                          {request.handledAt ? `on ${formatDateTime(request.handledAt)}` : ""}
-                        </span>
-                      ) : (
-                        <span>Not handled yet</span>
-                      )}
-                      {request.commissionRate ? (
-                        <span>Commission {request.commissionRate.toString()}%</span>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <form
-                    action={updateOnboardingRequestAction}
-                    className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-900"
-                  >
-                    <input type="hidden" name="requestId" value={request.id} />
-                    <select
-                      name="status"
-                      defaultValue={request.status}
-                      className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-950 outline-none focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
-                    >
-                      {STATUSES.map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                    <textarea
-                      name="internalNotes"
-                      defaultValue={request.internalNotes ?? ""}
-                      rows={3}
-                      placeholder="Internal follow-up notes"
-                      className="min-h-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
-                    />
-                    <div className="platform-action-group">
-                      <button className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
-                        <CheckCircle2 className="h-4 w-4" />
-                        Save
-                      </button>
-                    </div>
-                  </form>
-                </div>
-
-                <div className="platform-action-group border-t border-slate-100 p-4 dark:border-white/10 sm:px-5">
-                  {request.status === "NEW" ? (
-                    <form action={quickUpdateOnboardingStatusAction}>
-                      <input type="hidden" name="requestId" value={request.id} />
-                      <input type="hidden" name="status" value="CONTACTED" />
-                      <button className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
-                        <Phone className="h-3.5 w-3.5" />
-                        Mark contacted
-                      </button>
-                    </form>
-                  ) : null}
-                  {request.status !== "CLOSED" ? (
-                    <form action={quickUpdateOnboardingStatusAction}>
-                      <input type="hidden" name="requestId" value={request.id} />
-                      <input type="hidden" name="status" value="CLOSED" />
-                      <button className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        Close
-                      </button>
-                    </form>
-                  ) : null}
-                  <form
-                    action={deleteOnboardingRequestAction}
-                    className="platform-action-danger"
-                  >
-                    <input type="hidden" name="requestId" value={request.id} />
-                    <button className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 shadow-sm transition hover:bg-red-100 dark:border-red-300/30 dark:bg-red-300/10 dark:text-red-100 dark:hover:bg-red-300/20">
-                      <Trash2 className="h-3.5 w-3.5" />
-                      Delete
-                    </button>
-                  </form>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-
-        <PaginationControls
-          page={page}
-          pageSize={pageSize}
-          total={totalFiltered}
-          basePath="/platform/onboarding"
-          query={{ q, status }}
-        />
-      </section>
-    </div>
-  );
+  const queues = [
+    { status: "NEW", label: "Needs contact", count: newCount },
+    { status: "CONTACTED", label: "Needs qualification", count: contactedCount },
+    { status: "QUALIFIED", label: "Ready for setup", count: qualifiedCount },
+  ];
+  return <div className="space-y-5">
+    <PageHeader eyebrow="Organisation setup" title="Onboarding requests" description="Contact applicants, qualify their requirements, and create their organisations." action={<Link href="/platform/organizations/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"><Plus className="h-4 w-4" />Create organisation</Link>} />
+    <nav aria-label="Onboarding work queues" className="grid gap-3 sm:grid-cols-3">{queues.map(queue => <Link key={queue.status} href={`/platform/onboarding?status=${queue.status}`} aria-current={status === queue.status ? "page" : undefined} className={`flex min-h-24 items-center justify-between gap-3 rounded-xl border p-4 transition hover:border-primary/40 ${status === queue.status ? "border-primary/40 bg-primary/5" : "border-border bg-card"}`}><div><span className="block text-sm font-semibold">{queue.label}</span><span className="mt-1 block text-2xl font-semibold">{queue.count}</span></div><ArrowRight className="h-4 w-4 text-muted-foreground" /></Link>)}</nav>
+    <section className="space-y-4 rounded-2xl border border-border bg-card p-4 sm:p-5" aria-label="Filter requests">
+      <form className="grid items-end gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]">
+        <label className="min-w-0 text-sm font-medium">Search requests<div className="relative mt-2"><Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" /><input name="q" defaultValue={q} maxLength={200} placeholder="Company, contact, email, phone, or notes" className="min-h-11 w-full rounded-xl border border-border bg-card py-2 pl-10 pr-3 font-normal" /></div></label>
+        <label className="text-sm font-medium">Status<select name="status" defaultValue={status} className="mt-2 min-h-11 w-full rounded-xl border border-border bg-card px-3 font-normal"><option value="">All statuses</option>{STATUSES.map(item => <option key={item} value={item}>{item[0] + item.slice(1).toLowerCase()}</option>)}</select></label>
+        <div className="flex items-center gap-3"><button className="min-h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">Apply filters</button>{(q || status) && <Link className="inline-flex min-h-11 items-center text-sm text-muted-foreground underline" href="/platform/onboarding">Clear filters</Link>}</div>
+        <input type="hidden" name="pageSize" value={pageSize} />
+      </form>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3 text-sm text-muted-foreground"><p>{totalFiltered} {totalFiltered === 1 ? "request" : "requests"}{status ? ` · ${status[0] + status.slice(1).toLowerCase()}` : " · All statuses"}{q ? ` matching “${q}”` : ""}</p><Link className="underline" href="/platform/onboarding?status=CLOSED">View closed requests ({closedCount})</Link></div>
+    </section>
+    {requests.length === 0 ? <section className="rounded-2xl border border-dashed border-border bg-card p-8 text-center"><h2 className="font-semibold">{q ? "No matching requests" : status === "NEW" ? "No new requests waiting" : "No requests in this view"}</h2><p className="mt-2 text-sm text-muted-foreground">{q ? "Try a different search or clear the filters." : "Switch queues to follow up on existing applicants."}</p><Link className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-border px-4 text-sm font-medium" href="/platform/onboarding">View all requests</Link></section> : <section className="space-y-4" aria-label="Onboarding requests">{requests.map(request => <OnboardingRequestCard key={request.id} request={{ id: request.id, companyName: request.companyName, fullName: request.fullName, workEmail: request.workEmail, phone: request.phone, managedPropertyType: request.managedPropertyType, status: request.status, message: request.message, internalNotes: request.internalNotes, createdAt: request.createdAt.toISOString(), handledAt: request.handledAt?.toISOString() ?? null, handledBy: request.handledBy?.fullName ?? request.handledBy?.email ?? null, commissionRate: request.commissionRate?.toString() ?? null, referral: request.marketer ? `${request.marketer.fullName} (${request.marketer.referralCode})` : request.referralCode }} />)}</section>}
+    <PaginationControls page={page} pageSize={pageSize} total={totalFiltered} basePath="/platform/onboarding" query={{ q, status }} />
+  </div>;
 }

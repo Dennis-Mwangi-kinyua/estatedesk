@@ -27,6 +27,8 @@ import {
   getServerResolvedTheme,
 } from "@/lib/theme/preference";
 import "./globals.css";
+import "./system-glass.css";
+import "./modern-ui.css";
 
 const siteUrl = getSiteUrl();
 const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
@@ -256,7 +258,7 @@ export default async function RootLayout({
           html={JSON.stringify(structuredData)}
         />
       </head>
-      <body className="ed-mobile-first min-h-dvh bg-background antialiased">
+      <body className="estate-glass-system ed-mobile-first min-h-dvh bg-background antialiased">
         <PwaLaunchScreen />
         <SkipToMain />
         <ThemeProvider>

@@ -1,3 +1,4 @@
+import { MetricSticker } from "@/components/shared/metric-sticker";
 import type { ComponentType, ReactNode } from "react";
 import { DeferredLink } from "@/components/navigation/app-links";
 
@@ -34,11 +35,7 @@ export function StatCard({
         <p className="text-[11px] font-semibold uppercase leading-snug tracking-[0.08em] text-muted-foreground sm:text-xs">
           {label}
         </p>
-        {Icon ? (
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground sm:h-10 sm:w-10 sm:rounded-2xl">
-            <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-          </div>
-        ) : null}
+        <MetricSticker label={typeof label === "string" ? label : undefined} icon={Icon} />
       </div>
       <div className="min-w-0">
         <p className={`text-2xl font-semibold tracking-tight sm:text-3xl ${valueClassName}`}>
@@ -54,7 +51,7 @@ export function StatCard({
   );
 
   const className =
-    "rounded-2xl border border-border bg-muted/10 px-3.5 py-3.5 transition hover:border-border/80 hover:bg-muted/15 sm:px-4 sm:py-4";
+    "workspace-metric rounded-2xl border border-border bg-muted/10 px-3.5 py-3.5 transition hover:border-border/80 hover:bg-muted/15 sm:px-4 sm:py-4";
 
   if (href) {
     return (
@@ -81,7 +78,7 @@ export function QuickLinkCard({
   return (
     <DeferredLink
       href={href}
-      className="group rounded-2xl border border-border bg-muted/10 px-4 py-4 transition hover:-translate-y-0.5 hover:border-border/80 hover:bg-muted/20 hover:shadow-sm"
+      className="workspace-action group rounded-2xl border border-border bg-muted/10 px-4 py-4 transition hover:-translate-y-0.5 hover:border-border/80 hover:bg-muted/20 hover:shadow-sm"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">

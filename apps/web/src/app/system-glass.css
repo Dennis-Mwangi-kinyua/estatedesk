@@ -1,0 +1,201 @@
+/* Shared visual language for public pages, portals, and portaled UI. */
+body.estate-glass-system {
+  --system-glass-fill: linear-gradient(145deg, rgb(255 255 255 / 88%), rgb(255 255 255 / 62%));
+  --system-glass-border: rgb(148 163 184 / 36%);
+  --system-glass-shadow: 0 12px 36px rgb(54 78 130 / 8%), inset 0 1px 0 rgb(255 255 255 / 92%);
+  --system-glass-control: rgb(255 255 255 / 72%);
+  --system-glass-canvas: #f3f4f6;
+  --system-glass-ink: #17253d;
+  --system-glass-muted: #50617a;
+  background: var(--system-glass-canvas);
+  color: var(--system-glass-ink);
+}
+.dark body.estate-glass-system {
+  --system-glass-fill: linear-gradient(145deg, rgb(32 46 70 / 92%), rgb(21 33 54 / 82%));
+  --system-glass-border: rgb(187 209 255 / 20%);
+  --system-glass-shadow: 0 16px 40px rgb(0 0 0 / 18%), inset 0 1px 0 rgb(214 230 255 / 12%);
+  --system-glass-control: rgb(30 44 67 / 90%);
+  --system-glass-canvas: #111827;
+  --system-glass-ink: #edf3fc;
+  --system-glass-muted: #afbed2;
+}
+@layer utilities {
+  body.estate-glass-system :is(.estate-workspace, .app-mobile-canvas, .ed-mobile-surface, .platform-shell-admin, .platform-shell-developer) {
+    background: var(--system-glass-canvas) !important;
+  }
+  /* Large page canvases reveal the shared background; no blur on scrolling roots. */
+  body.estate-glass-system :is(main, section, div)[class*="min-h-"]:is(.bg-white, .bg-background, .bg-slate-50, .bg-slate-950, .bg-neutral-50) {
+    background: transparent !important;
+  }
+  body.estate-glass-system :is(.ed-shell-panel, .system-glass-sidebar, header[class*="border-b"], footer[class*="border-t"], [data-slot="sheet-content"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"]) {
+    background: var(--system-glass-fill) !important;
+    border-color: var(--system-glass-border) !important;
+    box-shadow: var(--system-glass-shadow);
+    -webkit-backdrop-filter: blur(22px) saturate(145%);
+    backdrop-filter: blur(22px) saturate(145%);
+    color: var(--system-glass-ink);
+  }
+  /* Existing authored card boundaries, rather than every nested container. */
+  body.estate-glass-system :is(.ed-theme-card, .ed-theme-muted-panel, .seo-steps-panel, .seo-step-card, .ios-card, .workspace-panel, .workspace-metric, .workspace-action, .estate-stickers, [data-slot="card"], .system-glass-card),
+  body.estate-glass-system :is(div, section, article, aside, a, form)[class*="rounded"][class~="border"]:is(.bg-white, .bg-card, .bg-slate-50, .bg-neutral-50, .bg-background) {
+    background: var(--system-glass-fill) !important;
+    border-color: var(--system-glass-border) !important;
+    border-radius: 1.5rem;
+    box-shadow: var(--system-glass-shadow);
+  }
+  body.estate-glass-system :is(.ios-card, [data-slot="card"], .system-glass-card, .estate-stickers) {
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+    backdrop-filter: blur(12px) saturate(130%);
+  }
+  body.estate-glass-system :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]):not([type="color"]), textarea, select, [data-slot="select-trigger"]) {
+    background: var(--system-glass-control) !important;
+    color: var(--system-glass-ink) !important;
+    border-color: color-mix(in srgb, var(--system-glass-muted) 30%, transparent) !important;
+    border-radius: .875rem;
+    box-shadow: inset 0 1px 2px rgb(24 51 94 / 4%);
+  }
+  body.estate-glass-system :is(input, textarea)::placeholder { color: var(--system-glass-muted); }
+  body.estate-glass-system select option { background: var(--background); color: var(--foreground); }
+  body.estate-glass-system :is(.ed-soft-button, .workspace-theme-toggle) {
+    background: var(--system-glass-control) !important;
+    border-color: var(--system-glass-border) !important;
+    border-radius: 1rem;
+    box-shadow: inset 0 1px 0 var(--system-glass-border), 0 4px 12px rgb(44 71 121 / 5%);
+  }
+  body.estate-glass-system :is(aside, .system-glass-sidebar) { border-color: var(--system-glass-border); }
+  body.estate-glass-system aside.ed-shell-panel { border-radius: 0 1.75rem 1.75rem 0; }
+  body.estate-glass-system nav a[aria-current="page"] {
+    border-radius: 1rem;
+    box-shadow: inset 0 1px 0 var(--system-glass-border), 0 4px 14px rgb(44 71 121 / 6%);
+  }
+  body.estate-glass-system :is(.ed-nav-icon, .ed-brand-mark) { border-radius: .875rem; }
+  body.estate-glass-system table { border-collapse: separate; border-spacing: 0; }
+  body.estate-glass-system thead { background: var(--system-glass-control); }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  body.estate-glass-system { --system-glass-fill: #f7f9fd; --system-glass-control: #fff; }
+  .dark body.estate-glass-system { --system-glass-fill: #19263b; --system-glass-control: #1e2c43; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  body.estate-glass-system { --system-glass-fill: #f7f9fd; --system-glass-control: #fff; }
+  .dark body.estate-glass-system { --system-glass-fill: #19263b; --system-glass-control: #1e2c43; }
+  body.estate-glass-system :is(.ed-shell-panel, .system-glass-sidebar, header, footer, .ios-card, [data-slot="card"], [data-slot$="content"], .system-glass-card, .estate-stickers) { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+}
+@media print {
+  body.estate-glass-system { background: white !important; }
+  body.estate-glass-system :is(.ed-shell-panel, .ios-card, [data-slot="card"], .system-glass-card, .estate-stickers) { background: white !important; box-shadow: none !important; backdrop-filter: none !important; }
+}
+
+@layer utilities {
+  body.estate-glass-system .ed-theme-page { background: transparent !important; }
+  body.estate-glass-system .ed-theme-page > section[class*="border-y"] {
+    background: var(--system-glass-fill) !important;
+    border-color: var(--system-glass-border) !important;
+  }
+  body.estate-glass-system :is(.platform-content-frame, .app-content-shell) { background: transparent !important; }
+  body.estate-glass-system .platform-shell-admin .ed-shell-panel > .bg-card\/95 { background: transparent !important; }
+}
+
+.estate-glass-system .sidebar-sticker {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--system-glass-border);
+  border-radius: .8rem;
+  background: linear-gradient(145deg, rgb(183 212 255 / 48%), var(--system-glass-control));
+  font-size: 1.3rem;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 var(--system-glass-border), 0 3px 7px rgb(44 71 121 / 10%);
+  transform: rotate(-5deg);
+  transition: transform 180ms ease;
+}
+.estate-glass-system .sidebar-sticker[data-tone="1"] { background: linear-gradient(145deg, rgb(154 227 201 / 35%), var(--system-glass-control)); transform: rotate(4deg); }
+.estate-glass-system .sidebar-sticker[data-tone="2"] { background: linear-gradient(145deg, rgb(244 204 171 / 40%), var(--system-glass-control)); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .estate-glass-system a:hover .sidebar-sticker { transform: rotate(0) translateY(-2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .estate-glass-system .sidebar-sticker { transition: none; transform: none; }
+}
+
+@layer utilities {
+  body.estate-glass-system .developer-glass-page > .ios-panel {
+    background: var(--system-glass-fill) !important;
+    border-color: var(--system-glass-border) !important;
+    border-radius: 1.75rem;
+    box-shadow: var(--system-glass-shadow);
+  }
+  body.estate-glass-system .developer-glass-page > div > .ios-panel {
+    background: var(--system-glass-fill) !important;
+    border-color: var(--system-glass-border) !important;
+    border-radius: 1.75rem;
+    box-shadow: var(--system-glass-shadow);
+  }
+  body.estate-glass-system .developer-glass-hero .page-header {
+    background: transparent !important;
+    border: 0;
+    padding: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  body.estate-glass-system .developer-glass-hero h1 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -.05em;
+    text-wrap: balance;
+  }
+  body.estate-glass-system .developer-glass-tool {
+    background: var(--system-glass-fill) !important;
+    border-color: var(--system-glass-border) !important;
+    border-radius: 1.25rem;
+    box-shadow: var(--system-glass-shadow);
+  }
+  body.estate-glass-system .developer-glass-tool > span { background: transparent !important; }
+  body.estate-glass-system .developer-glass-tool .sidebar-sticker { width: 2.75rem; height: 2.75rem; font-size: 1.6rem; }
+}
+
+.estate-glass-system label[data-invalid="true"] :is(input, select, textarea) {
+  border-color: #dc2626 !important;
+  outline: 1px solid #dc2626;
+}
+
+/* Consistent interaction states across authored pages and shared controls. */
+@layer utilities {
+  body.estate-glass-system { background: var(--system-glass-canvas) !important; }
+  .dark body.estate-glass-system { --system-glass-border: rgb(187 209 255 / 22%); }
+  body.estate-glass-system :is(button, a, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid var(--ring, #315d99);
+    outline-offset: 3px;
+  }
+  body.estate-glass-system :is(input, textarea, select)[aria-invalid="true"],
+  body.estate-glass-system label[data-invalid="true"] :is(input, textarea, select) {
+    border-color: #dc2626 !important;
+    outline: 1px solid #dc2626;
+  }
+  .dark body.estate-glass-system :is(input, textarea, select)[aria-invalid="true"],
+  .dark body.estate-glass-system label[data-invalid="true"] :is(input, textarea, select) { border-color: #f87171 !important; }
+  body.estate-glass-system :is(input, textarea, select):disabled { opacity: .65; cursor: not-allowed; }
+  body.estate-glass-system :is(.page-header, [data-slot="card-header"]) :is(h1, h2, p) { overflow-wrap: anywhere; }
+  body.estate-glass-system :is([data-slot="button"], .ios-button, .ed-soft-button) { -webkit-tap-highlight-color: transparent; }
+}
+@media (max-width: 767px) {
+  body.estate-glass-system :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), textarea, select) { font-size: 16px; }
+  body.estate-glass-system [data-slot="button"]:not([data-variant="link"]) { min-height: 44px; }
+  body.estate-glass-system [data-slot="button"][data-size^="icon"] { min-width: 44px; }
+  body.estate-glass-system :is(.ed-shell-panel, .system-glass-sidebar) nav a { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.estate-glass-system *, body.estate-glass-system *::before, body.estate-glass-system *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+@layer utilities {
+  body.estate-glass-system .login-screen { background: var(--system-glass-canvas) !important; }
+  body.estate-glass-system .login-shell > .absolute.inset-0 { background: transparent !important; }
+}

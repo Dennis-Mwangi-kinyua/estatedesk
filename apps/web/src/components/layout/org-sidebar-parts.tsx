@@ -1,7 +1,9 @@
 "use client";
 
+import { SidebarSticker } from "@/components/shared/sidebar-sticker";
+
 import { memo } from "react";
-import { Building2, LogOut } from "lucide-react";
+import { Building2, LogOut, ChevronRight } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import { isActivePath, type SidebarLink } from "./org-sidebar-links";
@@ -19,13 +21,13 @@ export const SidebarNavItem = memo(function SidebarNavItem({
   mobile = false,
   onNavigate,
 }: SidebarNavItemProps) {
-  const Icon = item.icon;
   const active = isActivePath(pathname, item.href);
 
   if (mobile) {
     return (
       <HoverPrefetchLink
         href={item.href}
+        aria-current={active ? "page" : undefined}
         onClick={onNavigate}
         className={[
           "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors duration-150",
@@ -40,14 +42,14 @@ export const SidebarNavItem = memo(function SidebarNavItem({
               : "ed-nav-icon",
           ].join(" ")}
         >
-          <Icon className="h-4 w-4" />
+          <SidebarSticker href={item.href} />
         </span>
 
         <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
           <span className="truncate">{item.label}</span>
-          <Icon
+          <ChevronRight
             className={
-            active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-current opacity-45"
+            "h-4 w-4 shrink-0 text-current opacity-50"
             }
           />
         </div>
@@ -58,6 +60,7 @@ export const SidebarNavItem = memo(function SidebarNavItem({
   return (
     <HoverPrefetchLink
       href={item.href}
+      aria-current={active ? "page" : undefined}
       className={[
         "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors",
         active ? "ed-nav-item-active" : "ed-nav-item",
@@ -71,12 +74,12 @@ export const SidebarNavItem = memo(function SidebarNavItem({
           : "ed-nav-icon",
         ].join(" ")}
       >
-        <Icon className="h-4 w-4" />
+        <SidebarSticker href={item.href} />
       </span>
 
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
         <span className="truncate">{item.label}</span>
-        <Icon className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-current opacity-45"} />
+        <ChevronRight className={"h-4 w-4 shrink-0 text-current opacity-50"} />
       </div>
     </HoverPrefetchLink>
   );

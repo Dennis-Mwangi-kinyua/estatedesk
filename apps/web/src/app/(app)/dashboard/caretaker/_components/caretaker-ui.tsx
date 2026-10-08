@@ -1,3 +1,4 @@
+import { MetricSticker } from "@/components/shared/metric-sticker";
 import type { ComponentType, ReactNode } from "react";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import { DeferredLink } from "@/components/navigation/app-links";
@@ -42,16 +43,12 @@ export function StatCard({
           <p className="mt-1 text-sm leading-6 text-muted-foreground">{note}</p>
         ) : null}
       </div>
-      {Icon ? (
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-muted/20 text-muted-foreground">
-          <Icon className="h-5 w-5" />
-        </div>
-      ) : null}
+      <MetricSticker label={typeof label === "string" ? label : undefined} icon={Icon} />
     </div>
   );
 
   const className =
-    "rounded-2xl border border-border bg-muted/10 px-4 py-4 transition hover:border-border/80 hover:bg-muted/15";
+    "workspace-metric rounded-2xl border border-border bg-muted/10 px-4 py-4 transition hover:border-border/80 hover:bg-muted/15";
 
   if (href) {
     return (
@@ -78,7 +75,7 @@ export function QuickLinkCard({
   return (
     <DeferredLink
       href={href}
-      className="group rounded-2xl border border-border bg-muted/10 px-4 py-4 transition hover:-translate-y-0.5 hover:border-primary/25 hover:bg-muted/20 hover:shadow-sm"
+      className="workspace-action group rounded-2xl border border-border bg-muted/10 px-4 py-4 transition hover:-translate-y-0.5 hover:border-primary/25 hover:bg-muted/20 hover:shadow-sm"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">

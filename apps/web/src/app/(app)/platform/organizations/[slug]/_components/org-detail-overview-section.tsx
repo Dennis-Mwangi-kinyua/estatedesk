@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import {
   ArrowLeft,
   Building2,
@@ -10,18 +11,12 @@ import {
   Users,
 } from "lucide-react";
 import {
-  archiveOrganizationAction,
-  permanentlyDeleteOrganizationAction,
-} from "../actions";
-import {
   Badge,
-  PageHeader,
   StatCard,
   Surface,
   formatCurrency,
   formatDateTime,
   formatNumber,
-  labelize,
   toneForStatus,
 } from "../../../_components/control-plane";
 import { formatSubscriptionSummary } from "../../../_lib/helpers";
@@ -44,31 +39,15 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
           Organizations
         </Link>
 
-        <PageHeader
-          eyebrow="Organization control"
-          title={org.name}
-          description="Workspace health, billing, membership, payments, feature configuration, integrations, and recent activity in one platform administration view."
-          action={
-            <div className="platform-action-group">
-              <Link
-                href="/platform/payment-ops"
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-              >
-                <Receipt className="h-4 w-4" />
-                Payment ops
-              </Link>
-              <Link
-                href="/platform/audit-logs"
-                className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
-              >
-                <ShieldCheck className="h-4 w-4" />
-                Audit logs
-              </Link>
-            </div>
-          }
-        />
+        <div className="workspace-panel overflow-hidden rounded-3xl border border-border bg-card">
+          <WorkspaceHero kind="org" eyebrow="Organisation control centre" title={org.name} description="Your organisation’s profile, billing, people, and operational activity in one clear view." actions={<>
+            <Link href={`/platform/payment-ops?orgId=${encodeURIComponent(org.id)}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><Receipt className="h-4 w-4" />Payment operations</Link>
+            <Link href="#organisation-audit" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><ShieldCheck className="h-4 w-4" />Audit activity</Link>
+          </>}><div className="flex flex-wrap items-center gap-2 text-xs"><Badge tone={toneForStatus(org.status)}>{org.status}</Badge><span className="rounded-full border border-border bg-card/60 px-3 py-1.5 text-muted-foreground">/{org.slug}</span><span className="rounded-full border border-border bg-card/60 px-3 py-1.5 text-muted-foreground">{org.currencyCode} · {org.timezone}</span></div></WorkspaceHero>
+        </div>
       </div>
 
+      <nav aria-label="Organisation sections" className="flex flex-wrap gap-2 rounded-2xl border border-border bg-card p-3">{[["organisation-profile", "🏢", "Profile"], ["organisation-billing", "💳", "Billing"], ["organisation-operations", "⚙️", "Operations"], ["organisation-payments", "🧾", "Payments"], ["organisation-members", "👥", "Members"], ["organisation-audit", "📋", "Audit activity"]].map(([id, emoji, label]) => <Link key={id} href={`#${id}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-muted/20 px-3 text-sm font-medium hover:bg-muted"><span aria-hidden="true">{emoji}</span>{label}</Link>)}</nav>
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Status" value={org.status} note={`Created ${formatDate(org.createdAt)}`} />
         <StatCard label="Tenants" value={formatNumber(org._count.tenants)} note={`${formatNumber(org._count.leases)} leases`} />
@@ -77,8 +56,8 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
-        <Surface title="Workspace profile">
-          <div className="grid gap-3 p-4 sm:grid-cols-2">
+        <Surface id="organisation-profile" title="Workspace profile">
+          <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
             <InfoTile icon={<Building2 className="h-4 w-4" />} label="Slug" value={`/${org.slug}`} />
             <InfoTile icon={<Settings className="h-4 w-4" />} label="Timezone" value={org.timezone} />
             <InfoTile icon={<CreditCard className="h-4 w-4" />} label="Currency" value={org.currencyCode} />
@@ -88,7 +67,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
           </div>
         </Surface>
 
-        <Surface title="Billing and subscription">
+        <Surface id="organisation-billing" title="Billing and subscription">
           <div className="p-4">
             {org.subscription ? (
               <div className="space-y-4">
@@ -116,7 +95,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
         </Surface>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-3">
+      <section className="grid items-start gap-4 xl:grid-cols-3">
         <Surface title="Feature flags">
           <div className="p-4">
             {featureKeys.length ? (
@@ -157,7 +136,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
           </div>
         </Surface>
 
-        <Surface title="Operational counts">
+        <Surface id="organisation-operations" title="Operational counts">
           <div className="grid grid-cols-2 gap-3 p-4">
             <SmallCount label="Members" value={org._count.memberships} />
             <SmallCount label="API keys" value={org._count.apiKeys} />
@@ -165,6 +144,10 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
             <SmallCount label="Messages" value={recentMessages.length} />
             <SmallCount label="Notifications" value={org._count.notifications} />
             <SmallCount label="Assets" value={org._count.assets} />
+            <SmallCount label="Water bills" value={org._count.waterBills} />
+            <SmallCount label="Leases" value={org._count.leases} />
+            <SmallCount label="Invitations" value={org._count.invitations} />
+            <SmallCount label="Audit records" value={org._count.auditLogs} />
           </div>
         </Surface>
       </section>

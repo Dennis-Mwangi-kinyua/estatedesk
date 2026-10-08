@@ -1,5 +1,7 @@
 "use server";
 
+import { headers } from "next/headers";
+import { checkRateLimit } from "@/lib/rate-limit";
 import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -98,6 +100,11 @@ export async function resendVerificationEmailAction(formData: FormData) {
     );
   }
 
+  const headerStore = await headers();
+  const ip = headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const limit = await checkRateLimit({ key: `verification-email:${ip}:${email}`, limit: 3, windowMs: 3600000 });
+  if (!limit.allowed) redirect(`/verify-email?status=limited&email=${encodeURIComponent(email)}`);
+
   const user = await prisma.user.findFirst({
     where: {
       email,
@@ -141,10 +148,7 @@ export async function resendVerificationEmailAction(formData: FormData) {
     process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? "";
   const verifyUrl = `${appUrl}/verify-email?token=${token}`;
 
-  await sendVerificationEmail({
-    to: email,
-    verifyUrl,
-  });
+  try { await sendVerificationEmail({ to: email, verifyUrl }); } catch { redirect(`/verify-email?status=delivery_failed&email=${encodeURIComponent(email)}`); }
 
   redirect(`/verify-email?status=sent&email=${encodeURIComponent(email)}`);
 }

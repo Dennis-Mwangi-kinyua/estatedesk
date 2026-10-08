@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import { BarChart3 } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
@@ -12,24 +14,11 @@ export function OverviewSection({
   data: LandlordDashboardData;
 }) {
   return (
-    <section id="overview" className="ios-panel rounded-[28px] p-4 sm:p-5">
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
-            Landlord workspace
-          </p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-neutral-950 sm:text-3xl">
-            {data.displayName}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
-            Monitor only the properties and units mapped to your landlord
-            account, including occupancy, tenants, expected rent, received rent,
-            and open balances for the current period.
-          </p>
-          <InAppGuideHint topic="rent" workspace="landlord" orgRole="LANDLORD" />
-        </div>
+    <section id="overview" className="workspace-panel overflow-hidden rounded-3xl border border-border bg-card">
+      <div className="space-y-0">
+        <WorkspaceHero kind="landlord" eyebrow="Your landlord workspace" title={`Welcome back, ${data.displayName}`} description="A clear view of your mapped properties, occupancy, rent collections, and open balances." actions={<><Link href="/dashboard/landlord/statements" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">View statements</Link><Link href="/dashboard/landlord/payouts" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-4 text-sm font-medium">Review payouts</Link></>}><InAppGuideHint topic="rent" workspace="landlord" orgRole="LANDLORD" /></WorkspaceHero>
 
-        <div className="rounded-[24px] border border-neutral-200 bg-neutral-50 p-4">
+        <div className="m-5 rounded-2xl border border-border bg-muted/20 p-4 sm:m-6">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-medium text-neutral-500">

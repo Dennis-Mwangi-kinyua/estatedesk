@@ -84,10 +84,7 @@ export async function forgotPasswordAction(formData: FormData) {
       process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? "";
     const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
-    await sendPasswordResetEmail({
-      to: email,
-      resetUrl,
-    });
+    try { await sendPasswordResetEmail({ to: email, resetUrl }); } catch { redirect("/forgot-password?status=delivery_failed"); }
   }
 
   redirect("/forgot-password?status=sent");

@@ -1,4 +1,3 @@
-import { CheckCircle2 } from "lucide-react";
 import { panelClass, stepDescriptionClass, stepTitleClass } from "../_lib/constants";
 import { ReviewCard } from "./new-org-ui";
 import type { NewOrgFormState } from "./use-new-org-form";
@@ -48,18 +47,18 @@ export function NewOrgStepReview(
     <section className={panelClass}>
       <div className="mb-6">
         <div className="inline-flex rounded-full bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-300">
-          <CheckCircle2 className="h-5 w-5" />
+          <span aria-hidden="true" className="text-2xl">📋</span>
         </div>
         <h2 className={stepTitleClass}>Review details</h2>
         <p className={stepDescriptionClass}>
-          Check the organization and master login details below. Nothing is
-          saved until you confirm and choose Create organization.
+          Check the organization and owner login details below. Nothing is
+          saved until you confirm and choose Create organisation.
         </p>
       </div>
 
       {reviewConfirmed ? (
         <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300">
-          Details reviewed. Use Create organization below when you are ready to
+          Details reviewed. Use Create organisation below when you are ready to
           save this workspace.
         </div>
       ) : null}
@@ -87,7 +86,7 @@ export function NewOrgStepReview(
         />
 
         <ReviewCard
-          title="Master login"
+          title="Owner login"
           items={[
             ["Full name", adminFullName || "—"],
             ["Username", adminUsername || "—"],

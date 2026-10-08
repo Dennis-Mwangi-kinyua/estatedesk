@@ -1,8 +1,16 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { jsonKeys } from "./helpers";
 
 export async function getOrganizationDetailData(
+  slugParam: { slug: string },
+  searchParamsValue: { deleteError?: string; archiveError?: string } | undefined,
+) {
+  return retryTransientDatabaseOperation(() => loadOrganizationDetailData(slugParam, searchParamsValue), { label: "platform-organisation-detail", attempts: 2 });
+}
+
+async function loadOrganizationDetailData(
   slugParam: { slug: string },
   searchParamsValue: { deleteError?: string; archiveError?: string } | undefined,
 ) {

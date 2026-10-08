@@ -5,17 +5,17 @@ export const initialState: CreateOrganizationState = {
 };
 
 export const steps = [
-  { id: 1, title: "Organization" },
-  { id: 2, title: "Master login" },
+  { id: 1, title: "Workspace" },
+  { id: 2, title: "Owner login" },
   { id: 3, title: "Review" },
 ];
 
 export const panelClass =
-  "rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 sm:p-6";
+  "rounded-xl border border-slate-200 bg-white dark:bg-slate-900 p-4 shadow-sm dark:border-white/10 sm:p-6";
 export const fieldClass =
-  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-white/30";
+  "w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-white/30";
 export const iconFieldClass =
-  "w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-white/30";
+  "w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-900 py-3 pl-11 pr-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 dark:border-white/10 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-white/30";
 export const iconClass =
   "pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500";
 export const iconBubbleClass =

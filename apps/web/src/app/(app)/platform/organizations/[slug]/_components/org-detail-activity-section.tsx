@@ -1,32 +1,16 @@
-import Link from "next/link";
-import {
-  ArrowLeft,
-  Building2,
-  CreditCard,
-  FileText,
-  Receipt,
-  Settings,
-  ShieldCheck,
-  Users,
-} from "lucide-react";
 import {
   archiveOrganizationAction,
   permanentlyDeleteOrganizationAction,
 } from "../actions";
 import {
   Badge,
-  PageHeader,
-  StatCard,
   Surface,
   formatCurrency,
   formatDateTime,
-  formatNumber,
   labelize,
   toneForStatus,
 } from "../../../_components/control-plane";
-import { formatDate } from "../_lib/helpers";
 import type { OrgDetailWorkspaceProps } from "./org-detail-workspace";
-import { InfoTile, SmallCount } from "./org-detail-ui";
 
 export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
   const { org, statusParams, recentPayments, recentMembers, recentAuditLogs } = props;
@@ -34,7 +18,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
   return (
     <>
       <section className="grid gap-4 xl:grid-cols-2">
-        <Surface title="Recent payments">
+        <Surface id="organisation-payments" title="Recent payments">
           <div className="divide-y divide-slate-100 dark:divide-white/10">
             {recentPayments.map((payment) => (
               <div key={payment.id} className="flex items-start justify-between gap-3 p-4">
@@ -65,7 +49,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
           </div>
         </Surface>
 
-        <Surface title="Recent members">
+        <Surface id="organisation-members" title="Recent members">
           <div className="divide-y divide-slate-100 dark:divide-white/10">
             {recentMembers.map((member) => (
               <div key={member.id} className="flex items-start justify-between gap-3 p-4">
@@ -92,7 +76,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
         </Surface>
       </section>
 
-      <Surface title="Recent audit activity">
+      <Surface id="organisation-audit" title="Recent audit activity">
         <div className="divide-y divide-border md:hidden">
           {recentAuditLogs.map((log) => (
             <article key={log.id} className="space-y-2.5 px-3 py-3.5 sm:px-4">

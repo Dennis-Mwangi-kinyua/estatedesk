@@ -1,5 +1,8 @@
 "use client";
 
+import { WorkspaceActions } from "@/components/shared/workspace-actions";
+
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { reportClientError } from "@/lib/errors/report-client-error";
 import type { OrgRole } from "@prisma/client";
@@ -114,13 +117,26 @@ export function OrgDashboardWorkspace({
   }, [interval]);
 
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-5 px-4 pb-28 pt-4 sm:space-y-6 sm:px-6 lg:px-8">
+    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-5 pb-12 sm:space-y-6">
       <VacancyInquiryAlert inquiries={vacancyInquiries} orgId={orgId} />
       <OrgDashboardHeader
         data={data}
         organizationName={organizationName}
         orgRole={orgRole}
       />
+      {(orgRole === "ADMIN" || orgRole === "MANAGER") && (data.totalProperties === 0 || data.totalUnits === 0 || data.totalTenants === 0 || data.activeLeases === 0 || data.totalPayments === 0) && <section className="rounded-2xl border border-border bg-card p-4" aria-labelledby="setup-progress-title">
+        <h2 id="setup-progress-title" className="font-semibold">Finish setting up your organisation</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Complete these steps to start managing your portfolio.</p>
+        <ol className="mt-3 flex flex-wrap gap-3">{[
+          { label: "Properties", done: data.totalProperties > 0, href: "/dashboard/org/properties" },
+          { label: "Units", done: data.totalUnits > 0, href: "/dashboard/org/units" },
+          { label: "Tenants", done: data.totalTenants > 0, href: "/dashboard/org/tenants" },
+          { label: "Leases", done: data.activeLeases > 0, href: "/dashboard/org/leases" },
+          { label: "Payments", done: data.totalPayments > 0, href: "/dashboard/org/payments" },
+        ].map(item => <li key={item.href}><Link className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border px-3 text-sm" href={item.href}><span aria-hidden="true">{item.done ? "✓" : "○"}</span>{item.label}<span className="sr-only">{item.done ? ": completed" : ": needs setup"}</span></Link></li>)}</ol>
+        {orgRole === "ADMIN" && <Link className="mt-3 inline-block text-sm text-primary underline" href="/dashboard/org/settings">Configure billing and payment collection</Link>}
+      </section>}
+      <WorkspaceActions role={orgRole ?? undefined} />
       <OrgDashboardStats data={data} />
       <OrgDashboardRolePanel data={data} orgRole={orgRole} />
 

@@ -40,6 +40,10 @@ function getFeedback(status?: string) {
         title: "Verification email sent",
         message: "We sent a new verification link to your email address.",
       };
+    case "limited":
+      return { tone: "error" as const, title: "Please wait", message: "Too many verification email requests. Try again later." };
+    case "delivery_failed":
+      return { tone: "error" as const, title: "Email could not be sent", message: "Email delivery is unavailable. Contact your administrator or try again later." };
     case "expired":
       return {
         tone: "error" as const,

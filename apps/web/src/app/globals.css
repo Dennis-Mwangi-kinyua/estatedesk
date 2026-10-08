@@ -2157,7 +2157,7 @@ html.light,
     section,
     article
   )
-    :has(> table) {
+    :has(> table):not(.hidden) {
     display: block;
     width: 100%;
     max-width: 100%;

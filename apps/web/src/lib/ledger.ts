@@ -7,6 +7,7 @@ import {
   type PrismaClient,
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { notifyRecipients } from "@/lib/notifications/notify";
 import { postRentChargeAccrual } from "@/lib/accounting/billing";
 export {
@@ -825,6 +826,17 @@ function groupRowsByOrgId<T extends { orgId: string }>(rows: T[]) {
 }
 
 export async function getPlatformPaymentLedger(
+  period = getCurrentPeriod(),
+  options?: { skip?: number; take?: number; q?: string },
+) {
+  // Retry the complete read so failed requests never produce partial financial totals.
+  return retryTransientDatabaseOperation(
+    () => loadPlatformPaymentLedger(period, options),
+    { label: "platform-payment-ledger", attempts: 2 },
+  );
+}
+
+async function loadPlatformPaymentLedger(
   period = getCurrentPeriod(),
   options?: {
     skip?: number;

@@ -1,57 +1,15 @@
 "use client";
 
+import { SidebarSticker } from "@/components/shared/sidebar-sticker";
+
 import { DeferredLink } from "@/components/navigation/app-links";
-import {
-  X,
-  Home,
-  Wrench,
-  ClipboardList,
-  FileText,
-  Users,
-  Droplets,
-  Inbox,
-  Bell,
-  LogOut,
-  ShieldCheck,
-  UserRound,
-  ListTodo,
-  Building2,
-  Search,
-  Calendar,
-  DoorOpen,
-  FolderOpen,
-  Megaphone,
-  NotebookPen,
-  Truck,
-} from "lucide-react";
+import { X, LogOut } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import { CARETAKER_NAV_ITEMS } from "@/app/(app)/dashboard/caretaker/_lib/i18n";
 import { CaretakerNavLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-nav-label";
-
-const navIcons = {
-  "/dashboard/caretaker/today": ListTodo,
-  "/dashboard/caretaker/search": Search,
-  "/dashboard/caretaker/calendar": Calendar,
-  "/dashboard/caretaker": Home,
-  "/dashboard/caretaker/units": Building2,
-  "/dashboard/caretaker/issues": Wrench,
-  "/dashboard/caretaker/inspections": ClipboardList,
-  "/dashboard/caretaker/move-outs": DoorOpen,
-  "/dashboard/caretaker/leases": FileText,
-  "/dashboard/caretaker/tenants": Users,
-  "/dashboard/caretaker/water-bills": Droplets,
-  "/dashboard/caretaker/documents": FolderOpen,
-  "/dashboard/caretaker/broadcasts": Megaphone,
-  "/dashboard/caretaker/handover": NotebookPen,
-  "/dashboard/caretaker/vendors": Truck,
-  "/dashboard/caretaker/finance-requests": Inbox,
-  "/dashboard/caretaker/notifications": Bell,
-  "/dashboard/caretaker/profile": UserRound,
-  "/dashboard/caretaker/security": ShieldCheck,
-} as const;
 
 type Props = {
   fullName: string;
@@ -184,9 +142,8 @@ export function CaretakerMobileSidebar({
           <nav className="space-y-1.5">
             {CARETAKER_NAV_ITEMS.map((item) => {
               const active =
-                pathname === item.href || pathname.startsWith(`${item.href}/`);
+                pathname === item.href || (item.href !== "/dashboard/caretaker" && pathname.startsWith(`${item.href}/`));
 
-              const Icon = navIcons[item.href as keyof typeof navIcons] ?? Home;
 
               return (
                 <DeferredLink
@@ -203,7 +160,7 @@ export function CaretakerMobileSidebar({
                       active ? "ed-nav-icon-active" : "ed-nav-icon",
                     )}
                   >
-                    <Icon className="h-4 w-4" />
+                    <SidebarSticker href={item.href} />
                   </span>
 
                   <span className="truncate">

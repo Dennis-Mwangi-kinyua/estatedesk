@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Menu } from "lucide-react";
-import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
+import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
+import { Bell, Menu, Search } from "lucide-react";
+import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 
 type OrgDashboardHeaderProps = {
   title?: string;
   subtitle?: string;
   userName?: string;
   userRole?: string;
+  unreadCount?: number;
   onMenuClick?: () => void;
 };
 
@@ -18,6 +20,7 @@ export function OrgDashboardHeader({
   userName = "Admin User",
   userRole = "Organization Admin",
   onMenuClick,
+  unreadCount = 0,
 }: OrgDashboardHeaderProps) {
   return (
     <header className="ed-shell-panel fixed left-0 right-0 top-0 z-[110] border-b bg-card/95 shadow-sm backdrop-blur-xl lg:left-72">
@@ -43,24 +46,18 @@ export function OrgDashboardHeader({
         </div>
 
         <div className="ml-2 flex shrink-0 items-center gap-2">
+          <Link href="/dashboard/org/search" aria-label="Search organisation" className="ios-button ed-soft-button touch-target flex items-center justify-center border"><Search className="h-4 w-4" /></Link>
           <HeaderThemeToggle />
 
           <Link
             href="/dashboard/org/notifications"
-            aria-label="Notifications"
-            className="ios-button ed-soft-button touch-target flex items-center justify-center border shadow-sm lg:h-10 lg:w-10"
+            aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`}
+            className="relative ios-button ed-soft-button touch-target flex items-center justify-center border shadow-sm lg:h-10 lg:w-10"
           >
-            <Bell className="h-4 w-4" />
+            <Bell className="h-4 w-4" />{unreadCount > 0 && <span className="absolute -right-1 -top-1 rounded-full bg-red-600 px-1.5 text-[10px] font-bold text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}
           </Link>
 
-          <div className="ed-soft-button hidden max-w-[16rem] rounded-2xl border px-3 py-2 text-right shadow-sm backdrop-blur-xl sm:block">
-            <p className="text-sm font-medium leading-none text-slate-950 dark:text-white">
-              {userName}
-            </p>
-            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-              {userRole}
-            </p>
-          </div>
+          <WorkspaceIdentity name={userName} role={userRole} />
         </div>
       </div>
     </header>

@@ -4,7 +4,7 @@ import { Bell, Menu } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { CaretakerMobileSidebar } from "@/components/layout/caretaker-mobile-nav";
-import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
+import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 import { CaretakerLocaleToggle } from "@/app/(app)/dashboard/caretaker/_components/caretaker-locale-toggle";
 import { CaretakerSearchBar } from "@/app/(app)/dashboard/caretaker/_components/caretaker-search-bar";
 import { OfflineQueuePanel } from "@/app/(app)/dashboard/caretaker/_components/offline-queue-panel";
@@ -66,7 +66,6 @@ export function CaretakerDashboardHeader({
               className="ios-button ed-soft-button relative inline-flex h-11 w-11 shrink-0 items-center justify-center border shadow-sm"
             >
               <Bell className="h-5 w-5" />
-              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-accent" />
             </DeferredLink>
           </div>
 

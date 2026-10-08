@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
 import { Bell, Menu } from "lucide-react";
-import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
+import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 
 type TenantDashboardHeaderProps = {
   organizationName: string;
@@ -60,14 +61,7 @@ export function TenantDashboardHeader({
             ) : null}
           </Link>
 
-          <div className="ed-soft-button hidden max-w-[16rem] rounded-2xl border px-3 py-2 text-right shadow-sm backdrop-blur-xl sm:block">
-            <p className="text-sm font-medium leading-none text-slate-950 dark:text-white">
-              {userName}
-            </p>
-            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-              Tenant account
-            </p>
-          </div>
+          <WorkspaceIdentity name={userName} role="Tenant account" />
         </div>
       </div>
     </header>

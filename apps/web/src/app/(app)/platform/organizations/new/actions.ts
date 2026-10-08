@@ -1,7 +1,11 @@
 "use server";
 
+import crypto from "node:crypto";
+import { sendVerificationEmail } from "@/lib/notifications/email";
+import { hashOpaqueToken } from "@/lib/crypto/tokens";
+import { isValidTimezone, isValidPhone, normalizePhone } from "./_lib/form-validation";
 import bcrypt from "bcryptjs";
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -19,6 +23,7 @@ import {
 
 const createOrganizationSchema = z
   .object({
+    onboardingRequestId: z.string().trim().max(100).optional(),
     organizationName: z.string().trim().min(2, "Organization name is required"),
     organizationSlug: z.string().trim().optional(),
     organizationEmail: z
@@ -27,14 +32,14 @@ const createOrganizationSchema = z
       .email("Enter a valid organization email")
       .optional()
       .or(z.literal("")),
-    organizationPhone: z.string().trim().optional(),
+    organizationPhone: z.string().trim().refine(isValidPhone, "Use international phone format").optional(),
     organizationAddress: z.string().trim().optional(),
     currencyCode: z
       .string()
       .trim()
       .transform((value) => value.toUpperCase())
       .refine(isSupportedCurrency, "Select a supported East African or UAE currency"),
-    timezone: z.string().trim().min(1, "Timezone is required"),
+    timezone: z.string().trim().refine(isValidTimezone, "Choose a valid timezone"),
     dataRetentionDays: z.coerce
       .number()
       .int("Must be a whole number")
@@ -58,7 +63,7 @@ const createOrganizationSchema = z
         "Use only letters, numbers, dots, underscores, and hyphens",
       ),
     adminEmail: z.string().trim().email("Enter a valid admin email"),
-    adminPhone: z.string().trim().optional(),
+    adminPhone: z.string().trim().refine(isValidPhone, "Use international phone format").optional(),
     adminPassword: z
       .string()
       .min(8, "Password must be at least 8 characters"),
@@ -76,6 +81,7 @@ const createOrganizationSchema = z
 
 export type CreateOrganizationState = {
   success: boolean;
+  createdAccount?: { organizationName: string; slug: string; accountType: string; fullName: string; username: string; email: string; phone: string | null; plan: string; verificationSent?: boolean };
   error?: string;
   fieldErrors?: Record<string, string[] | undefined>;
 };
@@ -112,6 +118,7 @@ export async function createOrganizationAction(
     );
 
     const parsed = createOrganizationSchema.safeParse({
+      onboardingRequestId: formData.get("onboardingRequestId") ?? "",
       organizationName: formData.get("organizationName"),
       organizationSlug: formData.get("organizationSlug"),
       organizationEmail: formData.get("organizationEmail"),
@@ -141,13 +148,13 @@ export async function createOrganizationAction(
 
     const data = parsed.data;
     const slug = slugify(data.organizationSlug || data.organizationName);
-    const adminPhone = (data.adminPhone ?? "").replace(/\s+/g, "") || null;
+    const adminPhone = normalizePhone(data.adminPhone ?? "") || null;
     const adminEmail = data.adminEmail.toLowerCase();
 
     if (!slug) {
       return {
         success: false,
-        error: "A valid organization slug could not be generated.",
+        error: "A valid organization address could not be generated.", fieldErrors: { organizationSlug: ["Use letters or numbers in the workspace address."] },
       };
     }
 
@@ -156,14 +163,12 @@ export async function createOrganizationAction(
         Promise.all([
           prisma.organization.findFirst({
             where: {
-              deletedAt: null,
-              OR: [{ slug }, { name: data.organizationName }],
+              OR: [{ slug }, { name: data.organizationName, deletedAt: null }],
             },
             select: { id: true, slug: true, name: true },
           }),
           prisma.user.findFirst({
             where: {
-              deletedAt: null,
               OR: [
                 { username: data.adminUsername },
                 { email: adminEmail },
@@ -178,6 +183,7 @@ export async function createOrganizationAction(
 
     if (existingOrg) {
       return {
+        fieldErrors: { [existingOrg.slug === slug ? "organizationSlug" : "organizationName"]: ["Already in use. Choose a different value."] },
         success: false,
         error:
           existingOrg.slug === slug
@@ -218,15 +224,20 @@ export async function createOrganizationAction(
 
     const passwordHash = await bcrypt.hash(data.adminPassword, 12);
 
+    const token = crypto.randomBytes(32).toString("hex");
     await retryTransientDatabaseOperation(
       () =>
         prisma.$transaction(async (tx) => {
+          if (data.onboardingRequestId) {
+            const claimed = await tx.onboardingRequest.updateMany({ where: { id: data.onboardingRequestId, status: "QUALIFIED" }, data: { status: "CLOSED", handledAt: new Date(), handledByUserId: session.userId } });
+            if (claimed.count !== 1) throw new Error("ONBOARDING_REQUEST_UNAVAILABLE");
+          }
           const org = await tx.organization.create({
             data: {
               name: data.organizationName,
               slug,
               email: data.organizationEmail || null,
-              phone: data.organizationPhone || null,
+              phone: normalizePhone(data.organizationPhone ?? "") || null,
               address: data.organizationAddress || null,
               status: "ACTIVE",
               currencyCode: data.currencyCode.toUpperCase(),
@@ -245,8 +256,8 @@ export async function createOrganizationAction(
               status: "ACTIVE",
               platformRole: "USER",
               mustChangePassword: true,
-              emailVerified: new Date(),
-              phoneVerified: adminPhone ? new Date() : null,
+              emailVerified: null,
+              phoneVerified: null,
               createdByUserId: session.userId,
             },
           });
@@ -284,6 +295,8 @@ export async function createOrganizationAction(
             },
           });
 
+          await tx.emailVerificationToken.create({ data: { email: adminEmail, token: hashOpaqueToken(token, "email-verification"), expiresAt: new Date(Date.now() + 86400000) } });
+          await tx.auditLog.create({ data: { orgId: org.id, actorUserId: session.userId, action: "ORGANIZATION_CREATED", entityType: "Organization", entityId: org.id, metadata: { plan: data.plan, accountType: data.accountType, ownerUserId: adminUser.id, onboardingRequestId: data.onboardingRequestId || null } } });
           const now = new Date();
           const trialEnd = new Date(now);
           trialEnd.setDate(trialEnd.getDate() + 14);
@@ -311,7 +324,18 @@ export async function createOrganizationAction(
       { label: "create-organization-transaction" },
     );
 
-    redirect("/platform/organizations");
+    let verificationSent = false;
+    try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? "";
+      if (appUrl) { await sendVerificationEmail({ to: adminEmail, verifyUrl: `${appUrl}/verify-email?token=${token}` }); verificationSent = true; }
+    } catch (error) { logServerError("createOrganizationAction.verification", error); }
+    revalidatePath("/platform/organizations");
+    revalidatePath("/platform");
+    revalidatePath("/platform/onboarding");
+    return {
+      success: true,
+      createdAccount: { organizationName: data.organizationName, slug, accountType: data.accountType, fullName: data.adminFullName, username: data.adminUsername, email: adminEmail, phone: adminPhone, plan: data.plan, verificationSent },
+    };
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
@@ -326,6 +350,8 @@ export async function createOrganizationAction(
       };
     }
 
+    if (error instanceof Error && error.message === "ONBOARDING_REQUEST_UNAVAILABLE") return { success: false, error: "This onboarding request was already processed or is no longer qualified. Return to onboarding and review its status." };
+    if (typeof error === "object" && error && "code" in error && error.code === "P2002") return { success: false, error: "An account detail was just registered by another request. Check availability and try again." };
     logServerError("createOrganizationAction", error);
 
     return {
@@ -333,4 +359,20 @@ export async function createOrganizationAction(
       error: GENERIC_CREATE_ERROR_MESSAGE,
     };
   }
+}
+
+export async function checkOrganizationAvailability(values: Record<string, string>): Promise<Record<string, string[]>> {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], { redirectTo: "/login" });
+  const parsed = z.object({ organizationName: z.string().trim().max(200), organizationSlug: z.string().trim().max(200), adminUsername: z.string().trim().toLowerCase().max(30), adminEmail: z.string().trim().toLowerCase().max(254), adminPhone: z.string().trim().max(40) }).safeParse(values);
+  if (!parsed.success) return { organizationName: ["Check the length and format of the account details."] };
+  values = parsed.data;
+  const slug = slugify(values.organizationSlug || values.organizationName || "");
+  const [orgs, users] = await Promise.all([
+    prisma.organization.findMany({ where: { OR: [{ slug }, { name: values.organizationName || "", deletedAt: null }] }, select: { slug: true, name: true }, take: 2 }),
+    prisma.user.findMany({ where: { OR: [{ username: values.adminUsername || "" }, { email: (values.adminEmail || "").toLowerCase() }, ...(values.adminPhone ? [{ phone: normalizePhone(values.adminPhone) }] : [])] }, select: { username: true, email: true, phone: true }, take: 3 }),
+  ]);
+  const errors: Record<string, string[]> = {};
+  for (const org of orgs) { if (org.slug === slug) errors.organizationSlug = ["This workspace address is already in use."]; if (org.name === values.organizationName) errors.organizationName = ["This workspace name is already in use."]; }
+  for (const user of users) { if (user.username === values.adminUsername) errors.adminUsername = ["Username already in use."]; if (user.email === values.adminEmail?.toLowerCase()) errors.adminEmail = ["Email already in use."]; if (values.adminPhone && user.phone === normalizePhone(values.adminPhone)) errors.adminPhone = ["Phone already in use."]; }
+  return errors;
 }

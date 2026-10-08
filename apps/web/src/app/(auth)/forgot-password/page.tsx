@@ -27,6 +27,8 @@ function getStatusMessage(status?: string) {
         type: "error" as const,
         text: "Please enter a valid email address.",
       };
+    case "delivery_failed":
+      return { type: "error" as const, text: "Email delivery is unavailable. Contact your administrator or try again later." };
     case "limited":
       return {
         type: "error" as const,

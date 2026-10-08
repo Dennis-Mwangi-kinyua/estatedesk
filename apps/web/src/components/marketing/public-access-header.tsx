@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -17,6 +18,10 @@ import {
   X,
 } from "lucide-react";
 import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
+
+const subscribeHydration = () => () => {};
+const clientHydration = () => true;
+const serverHydration = () => false;
 
 type PublicAccessHeaderProps = {
   active?: "home" | "vacancies" | "services" | "pricing" | "contact" | "faq" | "guides";
@@ -38,7 +43,11 @@ export function PublicAccessHeader({
   loginHref = "/login",
   showPricing = true,
 }: PublicAccessHeaderProps) {
+  const hydrated = useSyncExternalStore(subscribeHydration, clientHydration, serverHydration);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+  useNavigationDialog(isMenuOpen, panelRef, closeMenu);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const visibleLinks = showPricing
     ? publicLinks
@@ -68,7 +77,7 @@ export function PublicAccessHeader({
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-[100] shrink-0 border-b border-slate-200/80 bg-white/95 shadow-[0_14px_34px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#0d1117]/95 dark:shadow-[0_14px_34px_rgba(0,0,0,0.22)]">
+      <header className="modern-public-header fixed inset-x-0 top-0 z-[100] shrink-0 border-b border-slate-200/80 bg-white/95 shadow-[0_14px_34px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#0d1117]/95 dark:shadow-[0_14px_34px_rgba(0,0,0,0.22)]">
         {/* Incident banner is rendered via IncidentBannerSlot from server parents when needed. */}
         <div className="mx-auto flex h-16 max-w-[1536px] items-center justify-between gap-3 px-3 sm:px-6 lg:px-8">
           <div className="flex w-full items-center justify-between gap-2 lg:contents">
@@ -86,6 +95,7 @@ export function PublicAccessHeader({
             <div ref={mobileMenuRef} className="relative lg:hidden">
               <button
                 type="button"
+                disabled={!hydrated}
                 aria-expanded={isMenuOpen}
                 aria-controls="public-access-mobile-menu"
                 aria-label={isMenuOpen ? "Close menu" : "Open menu"}
@@ -96,12 +106,17 @@ export function PublicAccessHeader({
                 <X className={`h-5 w-5 ${isMenuOpen ? "block" : "hidden"}`} />
               </button>
               {isMenuOpen ? (
-                <div className="fixed inset-x-0 bottom-0 top-16 z-[105] bg-white/68 backdrop-blur-2xl dark:bg-[#05080d]/82" />
+                <button type="button" aria-label="Close menu overlay" onClick={closeMenu} className="fixed inset-x-0 bottom-0 top-16 z-[105] bg-white/68 backdrop-blur-2xl dark:bg-[#05080d]/82" />
               ) : null}
               <div
+                ref={panelRef}
+                role="dialog"
+                aria-modal={isMenuOpen ? true : undefined}
+                aria-label="Site navigation"
+                tabIndex={-1}
                 id="public-access-mobile-menu"
                 hidden={!isMenuOpen}
-                className="fixed right-3 top-20 z-[110] w-[min(21rem,calc(100vw-1.5rem))] rounded-xl border border-slate-200 bg-white p-3 shadow-[0_24px_70px_rgba(15,23,42,0.22)] dark:border-white/20 dark:bg-[#111821] dark:shadow-[0_24px_70px_rgba(0,0,0,0.52)]"
+                className="fixed right-3 top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto z-[110] w-[min(21rem,calc(100vw-1.5rem))] rounded-xl border border-slate-200 bg-white p-3 shadow-[0_24px_70px_rgba(15,23,42,0.22)] dark:border-white/20 dark:bg-[#111821] dark:shadow-[0_24px_70px_rgba(0,0,0,0.52)]"
               >
                 <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/16 dark:bg-[#18202a]">
                   <div className="min-w-0">

@@ -70,7 +70,7 @@ export function PlatformDashboardRecent({
                 <Link
                   key={request.id}
                   href="/platform/onboarding?status=NEW"
-                  className="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20"
+                  className="platform-glass-inset group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -146,7 +146,7 @@ export function PlatformDashboardRecent({
             {recentPayments.map((payment) => (
               <div
                 key={payment.id}
-                className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20"
+                className="platform-glass-inset group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">

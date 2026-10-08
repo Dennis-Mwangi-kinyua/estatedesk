@@ -1,8 +1,8 @@
+import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import Link from "next/link";
 import {
   CreditCard,
   FileText,
-  Home,
   MapPin,
   Wrench,
 } from "lucide-react";
@@ -97,74 +97,17 @@ export function TenantDashboardHeader({
 
   return (
     <section className={panelShellClassName}>
-      <div className="border-b border-border px-5 py-5 sm:px-6 sm:py-6">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              <Home className="h-3.5 w-3.5" />
-              Overview
-            </div>
-
-            <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Welcome back, {fullName}
-            </h1>
-
-            <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-              {summary}
-            </p>
-
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/20 px-3 py-1 text-xs font-medium text-foreground">
-                <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                {location || "No unit assigned"}
-              </span>
-              <StatusPill status={leaseStatus} />
-              <span className="rounded-full border border-border bg-muted/20 px-3 py-1 text-xs font-medium text-muted-foreground">
-                {organizationName}
-              </span>
-            </div>
-
-            <InAppGuideHint topic="rent" workspace="tenant" />
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row xl:min-w-[240px] xl:flex-col">
-            {showPayNow ? (
-              <Link
-                href="/dashboard/tenant/payments"
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
-              >
-                <CreditCard className="h-4 w-4" />
-                Pay outstanding balance
-              </Link>
-            ) : (
-              <Link
-                href="/dashboard/tenant/payments"
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
-              >
-                <CreditCard className="h-4 w-4" />
-                View payments
-              </Link>
-            )}
-            <Link
-              href="/dashboard/tenant/lease"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
-            >
-              <FileText className="h-4 w-4" />
-              My lease
-            </Link>
-            <Link
-              href="/dashboard/tenant/issues/report"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
-            >
-              <Wrench className="h-4 w-4" />
-              Report issue
-            </Link>
-          </div>
-        </div>
-      </div>
+      <WorkspaceHero kind="tenant" eyebrow="Your tenant workspace" title={`Welcome back, ${fullName}`} description={summary} actions={<>
+          <Link href="/dashboard/tenant/payments" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><CreditCard className="h-4 w-4" />{showPayNow ? "Pay outstanding balance" : "View payments"}</Link>
+          <Link href="/dashboard/tenant/lease" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><FileText className="h-4 w-4" />My lease</Link>
+          <Link href="/dashboard/tenant/issues/report" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><Wrench className="h-4 w-4" />Report issue</Link>
+        </>}>
+          <div className="flex flex-wrap items-center gap-2 text-xs"><span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1.5"><MapPin className="h-3.5 w-3.5 text-muted-foreground" />{location || "No unit assigned"}</span><StatusPill status={leaseStatus} /><span className="rounded-full border border-border bg-card/60 px-3 py-1.5 text-muted-foreground">{organizationName}</span></div>
+          <InAppGuideHint topic="rent" workspace="tenant" />
+        </WorkspaceHero>
 
       <div className="grid gap-3 px-5 py-5 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
+        <div className="workspace-metric rounded-2xl border border-border bg-muted/10 px-4 py-4">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Monthly rent
           </p>
@@ -175,7 +118,7 @@ export function TenantDashboardHeader({
             Due day {dueDay ?? "—"}
           </p>
         </div>
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
+        <div className="workspace-metric rounded-2xl border border-border bg-muted/10 px-4 py-4">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Balance
           </p>
@@ -194,7 +137,7 @@ export function TenantDashboardHeader({
             {portalContext.paymentHealth?.paymentStatus ?? "No ledger data"}
           </p>
         </div>
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
+        <div className="workspace-metric rounded-2xl border border-border bg-muted/10 px-4 py-4">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Open requests
           </p>
@@ -211,7 +154,7 @@ export function TenantDashboardHeader({
             Maintenance in progress
           </p>
         </div>
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
+        <div className="workspace-metric rounded-2xl border border-border bg-muted/10 px-4 py-4">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Notifications
           </p>

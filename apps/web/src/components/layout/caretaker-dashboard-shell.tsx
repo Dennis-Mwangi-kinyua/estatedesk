@@ -13,7 +13,7 @@ export function CaretakerDashboardShell({
   children,
 }: CaretakerDashboardShellProps) {
   return (
-    <div className="app-mobile-canvas ed-mobile-surface h-dvh w-full min-w-0 overflow-hidden">
+    <div data-workspace="caretaker" className="app-mobile-canvas ed-mobile-surface h-dvh w-full min-w-0 overflow-hidden">
       <div className="flex h-full min-h-0 w-full">
         <CaretakerDashboardSidebar fullName={fullName} />
 
@@ -22,6 +22,7 @@ export function CaretakerDashboardShell({
 
           <main className="mobile-bottom-safe min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-3 py-3 sm:px-5 sm:py-5 md:px-6 lg:px-8">
             <div className="app-content-shell w-full min-w-0 space-y-4 sm:space-y-6">
+
               {children}
             </div>
           </main>

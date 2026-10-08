@@ -1,0 +1,171 @@
+/* Authenticated workspace only. Public pages retain their original theme. */
+.estate-workspace {
+  --background: #f3f4f6;
+  --foreground: #17253d;
+  --card: #ffffff;
+  --card-foreground: #17253d;
+  --primary: #315d99;
+  --primary-foreground: #ffffff;
+  --secondary: #edf3fb;
+  --secondary-foreground: #294e7c;
+  --muted: #edf2f8;
+  --muted-foreground: #58677c;
+  --accent: #e2f5ec;
+  --accent-foreground: #21654b;
+  --border: #dce5ef;
+  --input: #ccd8e6;
+  --ring: #4c7dbf;
+  --radius: 1rem;
+  --chart-1: #4b83cf;
+  --chart-2: #2ea887;
+  --chart-3: #e9a044;
+  --chart-4: #9670d2;
+  --chart-5: #e77d91;
+  --workspace-sky: #eaf3ff;
+  --workspace-mint: #e6f7ee;
+  --workspace-peach: #fff1df;
+  --workspace-sky-ink: #315d99;
+  --workspace-mint-ink: #21654b;
+  --workspace-peach-ink: #8b571b;
+  --workspace-shadow: 0 8px 28px rgb(34 63 102 / 5%);
+  background: var(--background);
+  color: var(--foreground);
+}
+.dark .estate-workspace {
+  --background: #111827;
+  --foreground: #edf3fc;
+  --card: #192332;
+  --card-foreground: #edf3fc;
+  --primary: #9cc5ff;
+  --primary-foreground: #132640;
+  --secondary: #243248;
+  --secondary-foreground: #d0e1fa;
+  --muted: #243044;
+  --muted-foreground: #afbed2;
+  --accent: #203e36;
+  --accent-foreground: #a4e3c7;
+  --border: #334257;
+  --input: #40516b;
+  --ring: #9cc5ff;
+  --workspace-sky: #203654;
+  --workspace-mint: #1e3b34;
+  --workspace-peach: #413326;
+  --workspace-sky-ink: #b6d6ff;
+  --workspace-mint-ink: #a4e3c7;
+  --workspace-peach-ink: #f4cf99;
+  --workspace-shadow: 0 8px 28px rgb(0 0 0 / 14%);
+  background: var(--background);
+}
+.estate-workspace :where(.org-theme-content, .platform-theme-content) {
+  --card: inherit;
+  --foreground: inherit;
+  --muted-foreground: inherit;
+  --border: inherit;
+  --input: inherit;
+}
+.estate-workspace :where(.ios-card, [data-slot="card"], .workspace-panel) {
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: var(--workspace-shadow);
+}
+.estate-workspace .ed-shell-panel {
+  border-color: var(--border);
+  background: color-mix(in srgb, var(--card) 95%, transparent);
+  color: var(--foreground);
+}
+.estate-workspace :where(nav a[aria-current="page"], .workspace-active-link) {
+  border-color: color-mix(in srgb, var(--primary) 28%, var(--border));
+  background: var(--workspace-sky);
+  color: var(--workspace-sky-ink);
+}
+.estate-workspace .workspace-metric {
+  --metric-surface: var(--workspace-sky);
+  --metric-ink: var(--workspace-sky-ink);
+  position: relative;
+  border-radius: 1.125rem;
+  border-color: color-mix(in srgb, var(--metric-ink) 20%, var(--border));
+  background: linear-gradient(135deg, var(--metric-surface), var(--card));
+  box-shadow: var(--workspace-shadow);
+}
+.estate-workspace .workspace-metric:nth-child(3n + 2) { --metric-surface: var(--workspace-mint); --metric-ink: var(--workspace-mint-ink); }
+.estate-workspace .workspace-metric:nth-child(3n) { --metric-surface: var(--workspace-peach); --metric-ink: var(--workspace-peach-ink); }
+.estate-workspace .workspace-metric__icon { background: var(--metric-surface); color: var(--metric-ink); border-radius: .875rem; }
+.estate-workspace .workspace-action { border-radius: 1rem; border-color: var(--border); background: var(--card); box-shadow: var(--workspace-shadow); }
+.estate-workspace .workspace-action > div:first-child { background: var(--workspace-mint); color: var(--workspace-mint-ink); border-radius: .875rem; }
+.estate-workspace .estate-stickers {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+  position: relative;
+  isolation: isolate;
+  margin-bottom: 1.25rem;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--border));
+  border-radius: 1.5rem;
+  background: radial-gradient(ellipse at top right, var(--workspace-mint), transparent 65%), linear-gradient(120deg, var(--workspace-sky), var(--card) 75%);
+  color: var(--foreground);
+  box-shadow: var(--workspace-shadow);
+}
+.estate-workspace .estate-stickers__eyebrow { display: flex; align-items: center; gap: .5rem; color: var(--workspace-sky-ink); font-size: .625rem; font-weight: 700; letter-spacing: .1em; }
+.estate-workspace .estate-stickers__eyebrow > span { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; background: var(--card); border-radius: .625rem; font-size: 1rem; box-shadow: 0 2px 6px rgb(30 65 105 / 7%); }
+.estate-workspace .estate-stickers__title { margin-top: .65rem; font-size: clamp(1.2rem, 2.6vw, 1.7rem); font-weight: 750; letter-spacing: -.035em; line-height: 1.2; text-wrap: balance; }
+.estate-workspace .estate-stickers__detail { margin-top: .5rem; max-width: 40rem; font-size: .8125rem; line-height: 1.6; color: var(--muted-foreground); min-height: 2.6em; }
+.estate-workspace .estate-stickers__collection { display: flex; gap: .75rem; flex-shrink: 0; padding: .25rem; }
+.estate-workspace .estate-sticker {
+  --sticker-surface: var(--workspace-sky);
+  --sticker-ink: var(--workspace-sky-ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  width: clamp(4rem, 15vw, 5.25rem);
+  min-height: 5rem;
+  padding: .5rem;
+  border: 2px solid var(--card);
+  border-radius: 1.25rem;
+  background: var(--sticker-surface);
+  color: var(--sticker-ink);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--sticker-ink) 18%, transparent), 0 8px 18px rgb(25 60 100 / 7%);
+  cursor: pointer;
+  transform: rotate(-6deg);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.estate-workspace .estate-sticker--mint { --sticker-surface: var(--workspace-mint); --sticker-ink: var(--workspace-mint-ink); transform: rotate(5deg); }
+.estate-workspace .estate-sticker--peach { --sticker-surface: var(--workspace-peach); --sticker-ink: var(--workspace-peach-ink); transform: rotate(-4deg); }
+.estate-workspace .estate-sticker__emoji { font-size: 2.25rem; line-height: 1.25; filter: drop-shadow(0 3px 2px rgb(0 0 0 / 8%)); }
+.estate-workspace .estate-sticker__label { font-size: .625rem; font-weight: 700; }
+.estate-workspace .estate-sticker[aria-pressed="true"] { transform: translateY(-5px) rotate(0); outline: 2px solid var(--sticker-ink); outline-offset: 3px; }
+.estate-workspace .workspace-theme-toggle { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border: 1px solid var(--border); border-radius: .875rem; color: var(--workspace-sky-ink); background: var(--workspace-sky); cursor: pointer; }
+.estate-workspace :is(.estate-sticker, .workspace-theme-toggle):focus-visible { outline: 3px solid var(--ring); outline-offset: 4px; }
+@media (hover: hover) {
+  .estate-workspace .estate-sticker:hover { transform: translateY(-5px) rotate(0) scale(1.04); }
+  .estate-workspace .workspace-action:hover { border-color: var(--primary); background: var(--workspace-sky); }
+}
+@media (min-width: 640px) {
+  .estate-workspace .estate-stickers { flex-direction: row; align-items: center; justify-content: space-between; gap: 1.5rem; }
+  .estate-workspace .estate-stickers__copy { flex: 1; }
+  .estate-workspace .estate-stickers--compact { padding: 1.25rem 1.5rem; }
+}
+@media (max-width: 359px) {
+  .estate-workspace .estate-stickers__eyebrow { font-size: .5625rem; letter-spacing: .04em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .estate-workspace .estate-sticker { transition: none; }
+}
+@media print {
+  .estate-workspace { background: white !important; color: black !important; }
+  .estate-workspace .estate-stickers, .estate-workspace .workspace-theme-toggle { display: none !important; }
+}
+
+/* Keep secondary-page sticker accents compact so the task remains prominent. */
+.estate-workspace .estate-stickers--compact { padding: 1rem; gap: .75rem; }
+.estate-workspace .estate-stickers--compact .estate-stickers__title { font-size: 1.125rem; }
+.estate-workspace .estate-stickers--compact .estate-sticker { width: 3.75rem; min-height: 3.75rem; border-radius: 1rem; }
+.estate-workspace .estate-stickers--compact .estate-sticker__emoji { font-size: 1.5rem; }
+.estate-workspace .estate-stickers--compact .estate-stickers__collection { gap: .5rem; }
+.estate-workspace .estate-stickers--compact:not([data-expanded="true"]) .estate-stickers__detail { display: none; }

@@ -128,6 +128,7 @@ export default function MarketingHomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
       />
+      <h1 className="sr-only">EstateDesk property management and rental listings</h1>
       <OperationsShowcase
         standalone
         publicHeaderActive="home"

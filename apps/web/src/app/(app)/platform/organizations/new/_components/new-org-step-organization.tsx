@@ -1,4 +1,5 @@
-import { Building2, Mail, MapPin, Phone } from "lucide-react";
+import { APP_PLANS, type AppPlan, planSupportsTrial } from "@/lib/billing/plans";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { CurrencySelect } from "@/components/forms/currency-select";
 import {
   fieldClass,
@@ -65,33 +66,50 @@ export function NewOrgStepOrganization(props: Props) {
     generatedSlug,
   } = props;
 
+  const selectedPlan = APP_PLANS[plan as AppPlan] ?? APP_PLANS.FREE;
   return (
     <section className={panelClass}>
       <div className="mb-6">
         <div className={iconBubbleClass}>
-          <Building2 className="h-5 w-5" />
+          <span aria-hidden="true" className="text-2xl">🏢</span>
         </div>
-        <h2 className={stepTitleClass}>Organization details</h2>
+        <h2 className={stepTitleClass}>Organisation details</h2>
         <p className={stepDescriptionClass}>
           Add the main workspace details and default organization settings.
         </p>
       </div>
 
       <div className="grid gap-4">
-        <Field
-          label="Organization name"
+        <Field label="Account type" required>
+          <select
+            value={accountType}
+            onChange={(e) => setAccountType(e.target.value)}
+            className={fieldClass}
+          >
+            <option value="PROPERTY_MANAGER">
+              Property management agency
+            </option>
+            <option value="LANDLORD">Landlord / own portfolio</option>
+          </select>
+          <p className={helperTextClass}>
+            Both account types receive an administrator login. Landlord accounts
+            also receive a linked landlord profile.
+          </p>
+        </Field>
+
+        <Field name="organizationName" label={accountType === "LANDLORD" ? "Portfolio name" : "Agency name"}
           required
           error={state.fieldErrors?.organizationName?.[0]}
         >
           <input
             value={organizationName}
             onChange={(e) => setOrganizationName(e.target.value)}
-            placeholder="Greenview Properties Ltd"
+            placeholder={accountType === "LANDLORD" ? "Jane’s property portfolio" : "Greenview Properties Ltd"}
             className={fieldClass}
           />
         </Field>
 
-        <Field label="Slug">
+        <Field name="organizationSlug" label="Workspace address" error={state.fieldErrors?.organizationSlug?.[0]}>
           <input
             value={organizationSlug}
             onChange={(e) => setOrganizationSlug(e.target.value)}
@@ -99,14 +117,13 @@ export function NewOrgStepOrganization(props: Props) {
             className={fieldClass}
           />
           <p className={helperTextClass}>
-            Generated slug:{" "}
+            Workspace address:{" "}
             <span className="font-medium">{generatedSlug || "—"}</span>
           </p>
         </Field>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            label="Organization email"
+          <Field name="organizationEmail" label="Organisation email"
             error={state.fieldErrors?.organizationEmail?.[0]}
           >
             <div className="relative">
@@ -121,7 +138,7 @@ export function NewOrgStepOrganization(props: Props) {
             </div>
           </Field>
 
-          <Field label="Organization phone">
+          <Field name="organizationPhone" label="Organisation phone" error={state.fieldErrors?.organizationPhone?.[0]}>
             <div className="relative">
               <Phone className={iconClass} />
               <input
@@ -159,12 +176,12 @@ export function NewOrgStepOrganization(props: Props) {
             />
           </Field>
 
-          <Field
-            label="Timezone"
+          <Field name="timezone" label="Timezone"
             required
             error={state.fieldErrors?.timezone?.[0]}
           >
             <input
+              list="organisation-timezones"
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
               placeholder="Africa/Nairobi"
@@ -172,8 +189,7 @@ export function NewOrgStepOrganization(props: Props) {
             />
           </Field>
 
-          <Field
-            label="Data retention days"
+          <Field name="dataRetentionDays" label="Data retention days"
             error={state.fieldErrors?.dataRetentionDays?.[0]}
           >
             <input
@@ -186,7 +202,8 @@ export function NewOrgStepOrganization(props: Props) {
           </Field>
         </div>
 
-        <Field label="Plan" required error={state.fieldErrors?.plan?.[0]}>
+        <datalist id="organisation-timezones">{Intl.supportedValuesOf("timeZone").map(zone => <option key={zone} value={zone} />)}</datalist>
+        <Field name="plan" label="Plan" required error={state.fieldErrors?.plan?.[0]}>
           <select
             value={plan}
             onChange={(e) => setPlan(e.target.value)}
@@ -198,23 +215,11 @@ export function NewOrgStepOrganization(props: Props) {
             <option value="ENTERPRISE">Enterprise</option>
           </select>
         </Field>
-
-        <Field label="Account type" required>
-          <select
-            value={accountType}
-            onChange={(e) => setAccountType(e.target.value)}
-            className={fieldClass}
-          >
-            <option value="PROPERTY_MANAGER">
-              Property management organization
-            </option>
-            <option value="LANDLORD">Landlord organization</option>
-          </select>
-          <p className={helperTextClass}>
-            The master login is always an organization admin. Landlord
-            access can be mapped separately after setup.
-          </p>
-        </Field>
+        <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm" aria-live="polite">
+          <p className="font-semibold">{selectedPlan.name}: {plan === "ENTERPRISE" ? "Custom pricing and limits" : `KES ${selectedPlan.monthlyAmount.toLocaleString()} / month`}</p>
+          <p>{plan === "ENTERPRISE" ? "Limits agreed with sales." : `${selectedPlan.propertiesLimit} properties · ${selectedPlan.unitsLimit} units · ${selectedPlan.usersLimit} internal users`}</p>
+          <p className="mt-2">{planSupportsTrial(plan) ? "14-day trial. Paid access requires billing setup after the trial." : plan === "FREE" ? "No subscription charge." : "Confirm billing terms with sales before activation."} Subscription pricing is in KES; workspace currency applies to portfolio records.</p>
+        </div>
       </div>
     </section>
   );

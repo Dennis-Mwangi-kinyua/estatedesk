@@ -1,3 +1,4 @@
+import { MetricSticker, labelSticker } from "@/components/shared/metric-sticker";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -69,7 +70,7 @@ export function PageHeader({
       <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-xs">
-            {eyebrow}
+            <span aria-hidden="true" className="workspace-page-marker">{labelSticker(title)}</span>{eyebrow}
           </p>
           <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-foreground sm:mt-2 sm:text-2xl lg:text-3xl">
             {title}
@@ -98,10 +99,8 @@ export function StatCard({
   note?: string;
 }) {
   return (
-    <div className="ios-card rounded-xl border border-border bg-card/90 p-3 shadow-sm sm:p-4">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:text-xs">
-        {label}
-      </p>
+    <div className="workspace-metric ios-card rounded-xl border border-border bg-card/90 p-3 shadow-sm sm:p-4">
+      <div className="flex items-center justify-between gap-2"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:text-xs">{label}</p><MetricSticker label={label} /></div>
       <p className="mt-1.5 text-xl font-semibold tracking-tight text-foreground sm:mt-2 sm:text-2xl">
         {value}
       </p>
@@ -111,18 +110,20 @@ export function StatCard({
 }
 
 export function Surface({
+  id,
   title,
   children,
   description,
   className,
 }: {
+  id?: string;
   title: string;
   description?: string;
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <section className={`ios-panel min-w-0 overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm ${className ?? ""}`}>
+    <section id={id} className={`workspace-panel ios-panel scroll-mt-24 min-w-0 overflow-hidden rounded-xl border border-border bg-card/90 shadow-sm backdrop-blur-sm ${className ?? ""}`}>
       <div className="border-b border-border px-3 py-3 sm:px-4 sm:py-4">
         <h2 className="text-base font-semibold text-foreground">{title}</h2>
         {description ? (

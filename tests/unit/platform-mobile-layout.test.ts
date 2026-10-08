@@ -54,20 +54,21 @@ describe("platform mobile layout", () => {
   it("standardizes phone action groups", () => {
     const css = read("apps/web/src/app/globals.css");
     const onboarding = read(
-      "apps/web/src/app/(app)/platform/onboarding/page.tsx",
+      "apps/web/src/app/(app)/platform/onboarding/_components/onboarding-request-card.tsx",
     );
     const messages = read(
-      "apps/web/src/app/(app)/platform/messages/page.tsx",
+      "apps/web/src/app/(app)/platform/messages/_components/messages-inbox.tsx",
     );
 
     assert.match(css, /\.platform-action-group \{/);
     assert.match(css, /grid-template-columns: minmax\(0, 1fr\)/);
     assert.match(css, /\.platform-action-group > form > button/);
     assert.match(css, /\.platform-action-danger/);
-    assert.match(onboarding, /platform-action-group/);
-    assert.match(onboarding, /platform-action-danger/);
-    assert.match(messages, /platform-action-group/);
-    assert.match(messages, /platform-action-danger/);
+    assert.match(onboarding, /min-h-11/);
+    assert.match(onboarding, /grid gap-2 sm:grid-cols-2/);
+    assert.match(onboarding, /Permanently delete.*cannot be undone/);
+    assert.match(messages, /flex flex-wrap/);
+    assert.match(messages, /Permanently delete.*cannot be undone/);
   });
 
   it("pairs every platform table file with a mobile presentation", () => {

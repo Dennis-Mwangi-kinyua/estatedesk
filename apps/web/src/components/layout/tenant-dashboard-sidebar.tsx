@@ -1,8 +1,11 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { SidebarSticker } from "@/components/shared/sidebar-sticker";
+
+import { useCallback, useMemo, useRef } from "react";
+import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 import { usePathname } from "next/navigation";
-import { Home, X } from "lucide-react";
+import { Home, X, ChevronRight } from "lucide-react";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { LogoutButton } from "./org-sidebar-parts";
@@ -51,13 +54,13 @@ function TenantSidebarNavItem({
   mobile?: boolean;
   onNavigate?: () => void;
 }) {
-  const Icon = item.icon;
   const active = isTenantActivePath(pathname, item.href);
 
   if (mobile) {
     return (
       <HoverPrefetchLink
         href={item.href}
+        aria-current={active ? "page" : undefined}
         onClick={onNavigate}
         className={[
           "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors duration-150",
@@ -70,14 +73,14 @@ function TenantSidebarNavItem({
             active ? "ed-nav-icon-active" : "ed-nav-icon",
           ].join(" ")}
         >
-          <Icon className="h-4 w-4" />
+          <SidebarSticker href={item.href} />
         </span>
 
         <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
           <span className="truncate">{item.label}</span>
-          <Icon
+          <ChevronRight
             className={
-              active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-current opacity-45"
+              "h-4 w-4 shrink-0 text-current opacity-50"
             }
           />
         </div>
@@ -88,6 +91,7 @@ function TenantSidebarNavItem({
   return (
     <HoverPrefetchLink
       href={item.href}
+      aria-current={active ? "page" : undefined}
       className={[
         "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors",
         active ? "ed-nav-item-active" : "ed-nav-item",
@@ -99,12 +103,12 @@ function TenantSidebarNavItem({
           active ? "ed-nav-icon-active" : "ed-nav-icon",
         ].join(" ")}
       >
-        <Icon className="h-4 w-4" />
+        <SidebarSticker href={item.href} />
       </span>
 
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
         <span className="truncate">{item.label}</span>
-        <Icon className={active ? "h-4 w-4 text-white/80" : "h-4 w-4 text-current opacity-45"} />
+        <ChevronRight className={"h-4 w-4 shrink-0 text-current opacity-50"} />
       </div>
     </HoverPrefetchLink>
   );
@@ -117,6 +121,7 @@ export function TenantDashboardSidebar({
   setMobileOpen,
 }: TenantDashboardSidebarProps) {
   const pathname = usePathname();
+  const drawerRef = useRef<HTMLDivElement>(null);
   const visibleLinks = useMemo(
     () => getTenantSidebarLinks(hasActiveLease),
     [hasActiveLease],
@@ -125,6 +130,8 @@ export function TenantDashboardSidebar({
   const closeMobile = useCallback(() => {
     setMobileOpen(false);
   }, [setMobileOpen]);
+
+  useNavigationDialog(mobileOpen, drawerRef, closeMobile);
 
   return (
     <>
@@ -150,6 +157,8 @@ export function TenantDashboardSidebar({
       </aside>
 
       <div
+        inert={!mobileOpen}
+        aria-hidden={!mobileOpen}
         className={[
           "fixed inset-0 z-[120] lg:hidden transition-all duration-300 ease-out",
           mobileOpen ? "pointer-events-auto" : "pointer-events-none",
@@ -166,8 +175,13 @@ export function TenantDashboardSidebar({
         />
 
         <div
+          ref={drawerRef}
+          role="dialog"
+          aria-modal={mobileOpen ? true : undefined}
+          aria-label="Workspace navigation"
+          tabIndex={-1}
           className={[
-            "absolute inset-y-0 left-0 flex w-[90%] max-w-[390px] flex-col border-r border-slate-200 bg-white/86 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out dark:border-white/10 dark:bg-slate-950/86",
+            "system-glass-sidebar absolute inset-y-0 left-0 flex w-[90%] max-w-[390px] flex-col border-r border-slate-200 bg-white/86 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out dark:border-white/10 dark:bg-slate-950/86",
             mobileOpen ? "translate-x-0" : "-translate-x-full",
           ].join(" ")}
         >

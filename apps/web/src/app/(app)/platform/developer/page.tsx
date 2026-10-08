@@ -1,20 +1,7 @@
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import Link from "next/link";
-import {
-  Activity,
-  ArrowRight,
-  BookOpen,
-  Code2,
-  Database,
-  FileChartColumn,
-  Flag,
-  HardDrive,
-  KeyRound,
-  Settings,
-  ShieldAlert,
-  Timer,
-  Webhook,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
+import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 import { prisma } from "@/lib/prisma";
 import { getIntegrationReadinessReport } from "@/lib/integrations";
 import { requirePlatformRole } from "@/lib/permissions/guards";
@@ -30,23 +17,6 @@ import {
 import { developerNavItems } from "../_lib/nav";
 
 export const dynamic = "force-dynamic";
-
-const toolIcons: Record<string, LucideIcon> = {
-  "/platform/developer": Code2,
-  "/platform/developer/docs": BookOpen,
-  "/platform/control": Settings,
-  "/platform/system-health": Activity,
-  "/platform/api-explorer": Webhook,
-  "/platform/api-keys": KeyRound,
-  "/platform/feature-flags": Flag,
-  "/platform/jobs": Settings,
-  "/platform/rate-limits": Timer,
-  "/platform/data-management": Database,
-  "/platform/backups": HardDrive,
-  "/platform/audit-logs": FileChartColumn,
-  "/platform/security": ShieldAlert,
-  "/platform/help": BookOpen,
-};
 
 type SearchParams = Promise<{ error?: string }>;
 
@@ -64,36 +34,29 @@ export default async function DeveloperPortalPage({
   const now = new Date();
   const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-  const [
-    activeApiKeys,
-    queuedNotifications,
-    failedNotifications,
-    sentNotifications,
-    failedPayments,
-    latestAudit,
-    exportPending,
-    recentJobFailures,
-  ] = await Promise.all([
-    prisma.apiKey.count({ where: { isActive: true } }),
-    prisma.notification.count({ where: { status: "QUEUED" } }),
-    prisma.notification.count({ where: { status: "FAILED" } }),
-    prisma.notification.count({
-      where: { status: "SENT", sentAt: { gte: dayAgo } },
-    }),
-    prisma.payment.count({ where: { gatewayStatus: "FAILED" } }),
-    prisma.auditLog.findFirst({
-      orderBy: { createdAt: "desc" },
-      select: {
-        action: true,
-        createdAt: true,
-        org: { select: { name: true } },
-      },
-    }),
-    prisma.dataExportRequest.count({ where: { status: "PENDING" } }),
-    prisma.cronJobRun.count({
-      where: { status: "FAILED", startedAt: { gte: dayAgo } },
-    }),
+  const metricResults = await Promise.allSettled([
+    retryTransientDatabaseOperation(() => prisma.apiKey.count({ where: { isActive: true } }), { label: "developer-api-keys", attempts: 2 }),
+    retryTransientDatabaseOperation(() => prisma.notification.groupBy({ where: { status: { in: ["QUEUED", "FAILED"] } }, by: ["status"], _count: { _all: true } }), { label: "developer-notification-queue", attempts: 2 }),
+    retryTransientDatabaseOperation(() => prisma.notification.count({ where: { status: "SENT", sentAt: { gte: dayAgo } } }), { label: "developer-sent-notifications", attempts: 2 }),
+    retryTransientDatabaseOperation(() => prisma.payment.count({ where: { gatewayStatus: "FAILED" } }), { label: "developer-failed-payments", attempts: 2 }),
+    retryTransientDatabaseOperation(() => prisma.auditLog.findFirst({ orderBy: { createdAt: "desc" }, select: { action: true, createdAt: true, org: { select: { name: true } } } }), { label: "developer-latest-audit", attempts: 2 }),
+    retryTransientDatabaseOperation(() => prisma.dataExportRequest.count({ where: { status: "PENDING" } }), { label: "developer-exports", attempts: 2 }),
+    retryTransientDatabaseOperation(() => prisma.cronJobRun.count({ where: { status: "FAILED", startedAt: { gte: dayAgo } } }), { label: "developer-cron-failures", attempts: 2 }),
   ]);
+  const [keysResult, notificationsResult, sentResult, paymentsResult, auditResult, exportsResult, jobsResult] = metricResults;
+  const activeApiKeys = keysResult.status === "fulfilled" ? keysResult.value : null;
+  const queuedNotifications = notificationsResult.status === "fulfilled" ? notificationsResult.value.find(group => group.status === "QUEUED")?._count._all ?? 0 : null;
+  const failedNotifications = notificationsResult.status === "fulfilled" ? notificationsResult.value.find(group => group.status === "FAILED")?._count._all ?? 0 : null;
+  const sentNotifications = sentResult.status === "fulfilled" ? sentResult.value : null;
+  const failedPayments = paymentsResult.status === "fulfilled" ? paymentsResult.value : null;
+  const latestAudit = auditResult.status === "fulfilled" ? auditResult.value : null;
+  const exportPending = exportsResult.status === "fulfilled" ? exportsResult.value : null;
+  const recentJobFailures = jobsResult.status === "fulfilled" ? jobsResult.value : null;
+  const unavailableMetrics = metricResults.filter(result => result.status === "rejected").length;
+  metricResults.forEach((result, index) => {
+    if (result.status === "rejected") console.error("[developer.metrics]", { metric: ["apiKeys", "notificationQueue", "sentNotifications", "failedPayments", "audit", "exports", "jobs"][index], code: result.reason?.code ?? "unknown", name: result.reason?.name ?? "unknown" });
+  });
+  const metricNumber = (value: number | null) => value === null ? "Unavailable" : formatNumber(value);
 
   const integrationReadiness = getIntegrationReadinessReport();
   const tools = developerNavItems.filter((item) => {
@@ -163,7 +126,7 @@ export default async function DeveloperPortalPage({
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-4 sm:space-y-6">
+    <div className="developer-glass-page mx-auto w-full max-w-7xl space-y-4 sm:space-y-6">
       {params.error === "super-admin-only" ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50 sm:px-4">
           That tool requires a <strong>super admin</strong>. Platform admins can run
@@ -173,10 +136,12 @@ export default async function DeveloperPortalPage({
         </div>
       ) : null}
 
+      <section className="developer-glass-hero system-glass-card rounded-3xl border p-5 sm:p-8">
+      <p className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-violet-800 dark:text-violet-200"><SidebarSticker href="/platform/developer" /> Your engineering workspace</p>
       <PageHeader
         eyebrow="Developer portal"
-        title="Engineering control plane"
-        description="Full engineering control of the EstateDesk website: kill switches, APIs, jobs, flags, data, and super-admin nuclear ops. Switch back to Administration with the mode toggle or Alt+Shift+A."
+        title="Build. Connect. Keep things moving."
+        description="Your integrations, background jobs, and platform tools in one clear workspace. Explore a tool below or check what needs attention."
         action={
           <>
             <Link
@@ -205,27 +170,29 @@ export default async function DeveloperPortalPage({
           </>
         }
       />
+      </section>
 
-      <section className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Active API keys" value={formatNumber(activeApiKeys)} />
+      {unavailableMetrics > 0 && <div role="status" className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm"><p>Some operational metrics could not be loaded. Available data and developer tools are shown below.</p><div className="mt-2 flex flex-wrap gap-4"><Link href="/platform/developer" className="font-semibold underline">Retry metrics</Link><Link href="/platform/system-health" className="font-semibold underline">Check system health</Link></div></div>}
+      <section className="developer-glass-stats grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Active API keys" value={metricNumber(activeApiKeys)} />
         <StatCard
           label="Queued notifications"
-          value={formatNumber(queuedNotifications)}
+          value={metricNumber(queuedNotifications)}
         />
         <StatCard
           label="Failed notifications"
-          value={formatNumber(failedNotifications)}
+          value={metricNumber(failedNotifications)}
         />
-        <StatCard label="Failed payments" value={formatNumber(failedPayments)} />
-        <StatCard label="Sent in 24h" value={formatNumber(sentNotifications)} />
+        <StatCard label="Failed payments" value={metricNumber(failedPayments)} />
+        <StatCard label="Sent in 24h" value={metricNumber(sentNotifications)} />
         <StatCard
           label="Failed cron runs (24h)"
-          value={formatNumber(recentJobFailures)}
+          value={metricNumber(recentJobFailures)}
         />
-        <StatCard label="Pending data exports" value={formatNumber(exportPending)} />
+        <StatCard label="Pending data exports" value={metricNumber(exportPending)} />
         <StatCard
           label="Latest audit"
-          value={latestAudit?.action?.replaceAll("_", " ") ?? "-"}
+          value={latestAudit?.action?.replaceAll("_", " ") ?? (auditResult.status === "rejected" ? "Unavailable" : "No activity")}
           note={
             latestAudit
               ? `${latestAudit.org?.name ?? "Platform"} • ${formatDateTime(latestAudit.createdAt)}`
@@ -236,20 +203,19 @@ export default async function DeveloperPortalPage({
 
       <Surface
         title="Developer tools"
-        description="Jump into operational and integration tooling without leaving the platform super-admin shell."
+        description="Choose a tool to manage integrations, monitor operations, or support your workspaces."
       >
         <div className="grid grid-cols-1 gap-2 p-3 min-[480px]:grid-cols-2 min-[480px]:gap-3 min-[480px]:p-4 xl:grid-cols-3">
           {tools.map((tool) => {
-            const Icon = toolIcons[tool.href] ?? Code2;
 
             return (
               <Link
                 key={tool.href}
                 href={tool.href}
-                className="group flex min-h-[4.5rem] items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition active:scale-[0.99] hover:border-violet-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-violet-500/40 sm:p-4 sm:hover:-translate-y-0.5"
+                className="developer-glass-tool group flex min-h-[4.5rem] items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition active:scale-[0.99] hover:border-violet-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-violet-500/40 sm:p-4 sm:hover:-translate-y-0.5"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700 dark:bg-violet-500/15 dark:text-violet-200">
-                  <Icon className="h-5 w-5" />
+                  <SidebarSticker href={tool.href} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">

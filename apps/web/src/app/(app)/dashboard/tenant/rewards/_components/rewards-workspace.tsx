@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Gift, Sparkles } from "lucide-react";
+import { Gift } from "lucide-react";
 import type { RentRewardsSnapshot } from "@/lib/rewards/rent-rewards";
 import type { RedeemableReward } from "@/lib/rewards/redeem";
 import { requestTenantRewardAction } from "../actions";
@@ -88,7 +88,6 @@ export function TenantRewardsWorkspace({
 
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1">
-            <Sparkles className="h-3 w-3 text-primary" />
             Streak {snapshot.streakMonths} mo
           </span>
           <span className="rounded-full border border-border bg-background px-2.5 py-1">

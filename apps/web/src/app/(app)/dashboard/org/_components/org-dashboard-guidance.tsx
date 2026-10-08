@@ -6,7 +6,6 @@ import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-da
 import {
   DASHBOARD_GUIDANCE,
   DASHBOARD_QUICK_LINKS,
-  DASHBOARD_WORKFLOW_STEPS,
 } from "../_lib/constants";
 import { panelShellClassName, QuickLinkCard } from "./org-dashboard-ui";
 
@@ -17,6 +16,15 @@ export function OrgDashboardGuidance({
   data: OrgDashboardSummary;
   orgRole?: OrgRole | null;
 }) {
+const setup = [
+    { title: "Add your first property", done: data.totalProperties > 0, href: "/dashboard/org/properties" },
+    { title: "Add units", done: data.totalUnits > 0, href: "/dashboard/org/units" },
+    { title: "Add staff", done: data.totalEmployees > 1, href: "/dashboard/org/staff" },
+    { title: "Add tenants", done: data.totalTenants > 0, href: "/dashboard/org/tenants" },
+    { title: "Create a lease", done: data.activeLeases > 0, href: "/dashboard/org/leases" },
+    { title: "Record your first payment", done: data.totalPayments > 0, href: "/dashboard/org/payments" },
+  ].filter(item => orgRole === "ADMIN" || item.href !== "/dashboard/org/staff");
+  const complete = setup.filter(item => item.done).length;
   return (
     <WorkspaceGuidePanel
       title="Portfolio signals"
@@ -72,24 +80,25 @@ export function OrgDashboardGuidance({
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">Getting started</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Core setup workflow for new portfolio managers.
+          {complete} of {setup.length} setup steps completed.
         </p>
 
         <div className="mt-4 space-y-3">
-          {DASHBOARD_WORKFLOW_STEPS.map((item) => (
+          {setup.map((item, index) => (
             <div
-              key={item.step}
+              key={item.href}
               className="rounded-2xl border border-border bg-muted/10 p-3"
             >
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                  {item.step}
+                  {item.done ? "✓" : index + 1}
                 </span>
                 <p className="text-sm font-semibold text-foreground">{item.title}</p>
               </div>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {item.description}
+                {item.done ? "Completed" : "Next setup step"}
               </p>
+              <Link className="mt-2 inline-block text-sm font-medium text-primary underline" href={item.href}>{item.done ? "View" : "Start"}</Link>
             </div>
           ))}
         </div>

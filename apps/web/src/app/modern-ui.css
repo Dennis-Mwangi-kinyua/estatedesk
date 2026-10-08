@@ -1,0 +1,137 @@
+/* Shared presentation for marketing, account access, and every role workspace. */
+body.estate-glass-system {
+  --system-glass-canvas: #f5f7fb;
+  --system-glass-fill: linear-gradient(145deg, rgb(255 255 255 / 96%), rgb(255 255 255 / 86%));
+  --system-glass-border: rgb(148 163 184 / 24%);
+  --system-glass-shadow: 0 6px 24px rgb(30 50 90 / 4%), 0 1px 3px rgb(30 50 90 / 3%);
+  --system-glass-control: #fff;
+  --system-glass-ink: #19263e;
+  --system-glass-muted: #56657b;
+  font-feature-settings: "cv11", "ss01";
+}
+.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surface) {
+  --background: #f5f7fb;
+  --foreground: #19263e;
+  --card: #fff;
+  --card-foreground: #19263e;
+  --primary: #285ed4;
+  --primary-foreground: #fff;
+  --secondary: #edf2fc;
+  --secondary-foreground: #36558b;
+  --muted: #f1f4f9;
+  --muted-foreground: #56657b;
+  --border: #e1e7f0;
+  --input: #d5deeb;
+  --ring: #3474e8;
+  --workspace-sky: #edf4ff;
+  --workspace-mint: #edf8f2;
+  --workspace-peach: #fff5e9;
+  --workspace-shadow: var(--system-glass-shadow);
+}
+.dark body.estate-glass-system {
+  --system-glass-canvas: #101827;
+  --system-glass-fill: linear-gradient(145deg, rgb(26 38 58 / 98%), rgb(23 34 52 / 94%));
+  --system-glass-control: #1a283e;
+  --system-glass-border: rgb(163 185 219 / 16%);
+  --system-glass-shadow: 0 8px 26px rgb(0 0 0 / 12%), inset 0 1px 0 rgb(255 255 255 / 3%);
+  --system-glass-ink: #eaf1fc;
+  --system-glass-muted: #b1bfd4;
+}
+.dark .estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surface) {
+  --background: #101827;
+  --foreground: #eaf1fc;
+  --card: #19263b;
+  --card-foreground: #eaf1fc;
+  --primary: #a1c6ff;
+  --primary-foreground: #122440;
+  --secondary: #26364f;
+  --secondary-foreground: #d3e2fa;
+  --muted: #223149;
+  --muted-foreground: #b1bfd4;
+  --border: #32415a;
+  --input: #40516b;
+  --ring: #9cc5ff;
+  --workspace-sky: #203655;
+  --workspace-mint: #203c36;
+  --workspace-peach: #403427;
+}
+.estate-glass-system :where(h1, h2, h3) { text-wrap: balance; }
+.estate-glass-system :where(h1, h2) { letter-spacing: -.025em; }
+.estate-glass-system :where(button, a, input, select, textarea):focus-visible { outline: 2px solid var(--ring, #3474e8); outline-offset: 3px; }
+.estate-glass-system :where(button, input, textarea, select) { transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
+.estate-glass-system input[aria-invalid="true"], .estate-glass-system textarea[aria-invalid="true"] { border-color: #dc2626 !important; }
+.estate-glass-system :is([data-slot="card"], .workspace-panel, .ios-panel, .ios-card) { min-width: 0; box-shadow: var(--system-glass-shadow); }
+.estate-glass-system :is([data-slot="card-title"], .workspace-panel h2) { font-weight: 600; }
+.estate-glass-system [data-slot="button"] { border-radius: .85rem; }
+.estate-glass-system [data-slot="card"] { border-radius: 1.4rem; }
+.estate-glass-system :where(th) { font-size: .72rem; font-weight: 600; color: var(--muted-foreground); }
+.estate-glass-system :where(tbody tr) { transition: background-color 140ms ease; }
+.estate-glass-system :where(tbody tr:hover) { background-color: color-mix(in srgb, var(--primary) 4%, transparent); }
+.estate-glass-system .ed-shell-panel { box-shadow: 0 1px 12px rgb(30 50 90 / 3%); }
+.estate-glass-system .page-header {
+  position: relative;
+  background-image: linear-gradient(120deg, var(--workspace-sky, #edf4ff), var(--card, #fff) 65%);
+  border-radius: 1.4rem;
+}
+.estate-glass-system .workspace-page-marker { display: inline-grid; place-items: center; margin-right: .6rem; width: 2rem; height: 2rem; border-radius: .7rem; background: var(--workspace-sky, #edf4ff); font-size: 1.2rem; vertical-align: middle; }
+.workspace-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  background: radial-gradient(ellipse at top right, rgb(139 92 246 / 8%), transparent 55%), linear-gradient(120deg, var(--workspace-sky, #edf4ff), var(--card) 65%);
+}
+.workspace-hero[data-kind="caretaker"] { background: radial-gradient(ellipse at top right, rgb(16 185 129 / 9%), transparent 55%), linear-gradient(120deg, var(--workspace-mint), var(--card) 65%); }
+.workspace-hero[data-kind="landlord"] { background: radial-gradient(ellipse at top right, rgb(139 92 246 / 10%), transparent 55%), linear-gradient(120deg, var(--workspace-sky), var(--card) 65%); }
+.workspace-hero__layout { display: grid; gap: 1.25rem; align-items: center; }
+.workspace-hero__eyebrow { display: flex; align-items: center; gap: .6rem; color: var(--muted-foreground); font-size: .68rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.workspace-hero__eyebrow > span { display: inline-grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid var(--border); border-radius: .75rem; background: var(--card); font-size: 1.15rem; letter-spacing: 0; }
+.workspace-hero__title { margin-top: .85rem; font-size: clamp(1.6rem, 3vw, 2.5rem); font-weight: 650; line-height: 1.2; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.workspace-hero__description { max-width: 42rem; margin-top: .85rem; color: var(--muted-foreground); font-size: .875rem; line-height: 1.75; }
+.workspace-hero__details { margin-top: 1rem; }
+.workspace-hero__side { display: flex; flex-direction: column; align-items: flex-start; gap: .75rem; }
+.workspace-hero__actions { display: flex; flex-wrap: wrap; gap: .6rem; width: 100%; }
+.workspace-hero__actions > a { min-height: 2.75rem; flex: 1 1 auto; }
+.workspace-hero__art { position: relative; display: none; width: 10rem; height: 7.5rem; }
+.workspace-hero__art > span { position: absolute; display: grid; place-items: center; width: 5rem; height: 5rem; border: 3px solid var(--card); border-radius: 1.5rem; background: var(--workspace-sky); font-size: 2.5rem; box-shadow: 0 8px 16px rgb(40 60 110 / 7%); transform: rotate(-10deg); }
+.workspace-hero__art > span:nth-child(2) { right: 0; bottom: 0; width: 4.25rem; height: 4.25rem; background: var(--workspace-mint); font-size: 2rem; transform: rotate(10deg); }
+.estate-glass-system .workspace-metric { background: linear-gradient(140deg, var(--metric-surface, var(--workspace-sky)), var(--card) 85%) !important; border-radius: 1.25rem; box-shadow: var(--system-glass-shadow); }
+.workspace-metric-sticker { display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; flex-shrink: 0; border: 1px solid color-mix(in srgb, var(--border) 70%, transparent); border-radius: .9rem; background: var(--card); font-size: 1.4rem; }
+.workspace-identity { align-items: center; gap: .6rem; max-width: 15rem; padding: .25rem .4rem; }
+.workspace-identity__avatar { display: grid; place-items: center; flex-shrink: 0; width: 2.25rem; height: 2.25rem; border-radius: 50%; background: linear-gradient(135deg, var(--workspace-sky), var(--workspace-mint)); border: 1px solid var(--border); color: var(--foreground); font-size: .7rem; font-weight: 700; }
+.estate-glass-system [data-workspace="landlord"] :is(.text-neutral-950, .text-slate-950, .text-neutral-800) { color: var(--foreground); }
+.estate-glass-system [data-workspace="landlord"] :is(.text-neutral-500, .text-slate-500, .text-neutral-600) { color: var(--muted-foreground); }
+.dark .estate-glass-system [data-workspace="landlord"] :is(.bg-neutral-50, .bg-neutral-100, .bg-slate-50) { background: var(--muted); }
+.dark .estate-glass-system [data-workspace="landlord"] :is(.bg-white) { background: var(--card); }
+.dark .estate-glass-system [data-workspace="landlord"] :is(.border-neutral-200, .border-slate-200) { border-color: var(--border); }
+@media (min-width: 900px) {
+  .workspace-hero__layout { grid-template-columns: minmax(0, 1fr) minmax(220px, .35fr); gap: 2rem; }
+  .workspace-hero__side { align-items: flex-end; }
+  .workspace-hero__art { display: block; }
+  .workspace-hero__actions { justify-content: flex-end; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .estate-glass-system :where(button, input, textarea, select, tbody tr) { transition: none; }
+  .workspace-hero__art > span { transform: none; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  body.estate-glass-system { --system-glass-fill: #fff; --system-glass-control: #fff; }
+  .dark body.estate-glass-system { --system-glass-fill: #19263b; --system-glass-control: #1a283e; }
+}
+@media print {
+  .workspace-hero { background: white; color: black; }
+  .workspace-hero__art, .workspace-hero__actions, .workspace-metric-sticker { display: none; }
+}
+.estate-glass-system .modern-auth {
+  background: radial-gradient(ellipse at 10% 10%, rgb(56 139 253 / 8%), transparent 45%), radial-gradient(ellipse at 90% 90%, rgb(139 92 246 / 7%), transparent 45%), var(--background);
+}
+.estate-glass-system .modern-auth :is(div, section, form)[class~="bg-white"][class*="rounded"] {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  box-shadow: var(--system-glass-shadow);
+}
+.dark .estate-glass-system .modern-auth :is(.text-gray-900, .text-gray-800, .text-gray-700, .text-slate-950) { color: var(--foreground); }
+.dark .estate-glass-system .modern-auth :is(.text-gray-600, .text-gray-500) { color: var(--muted-foreground); }
+.estate-glass-system .modern-public-header { box-shadow: 0 4px 24px rgb(30 50 90 / 4%); }
