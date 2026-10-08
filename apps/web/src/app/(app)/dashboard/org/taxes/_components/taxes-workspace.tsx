@@ -52,7 +52,7 @@ export function TaxesWorkspace({
     <div className="org-theme-content ed-mobile-first mx-auto w-full max-w-7xl space-y-4 px-3 pb-24 pt-3 sm:space-y-6 sm:px-6 sm:pt-4 lg:px-8">
       <TaxesHeader orgRole={orgRole} />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-5">
           <TaxesAlerts
             hasKraIntegration={data.hasKraIntegration}

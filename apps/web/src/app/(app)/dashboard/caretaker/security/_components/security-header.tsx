@@ -13,7 +13,7 @@ export function SecurityHeader({
   data: Pick<CaretakerSecurityPageData, "otherSessionCount">;
 }) {
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div className={panelBodyClassName}>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">

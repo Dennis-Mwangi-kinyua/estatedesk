@@ -188,7 +188,7 @@ export function InspectionDetailsWorkspace({
         <StatCard label="Completed at" value={formatDateTime(inspection.completedAt)} />
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-6">
           <section className={panelShellClassName}>
             <div className="border-b border-border px-5 py-4 sm:px-6">

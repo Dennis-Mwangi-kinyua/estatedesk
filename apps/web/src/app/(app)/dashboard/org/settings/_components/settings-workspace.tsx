@@ -25,7 +25,7 @@ export function SettingsWorkspace({
         activeApiKeys={activeApiKeys}
       />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
         <SettingsDirectorySection />
         <SettingsGuidance orgRole={orgRole} />
       </div>

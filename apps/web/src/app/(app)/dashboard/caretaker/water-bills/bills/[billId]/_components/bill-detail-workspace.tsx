@@ -30,7 +30,7 @@ export function BillDetailWorkspace({
         <>
           <BillDetailHeader data={data} />
 
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
             <div className="space-y-5">
               <BillDetailStats data={data} />
               <BillDetailPayments data={data} />

@@ -16,7 +16,7 @@ export function TenantsHeader({
   >;
 }) {
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div className={`${panelBodyClassName} space-y-5`}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 max-w-2xl">

@@ -20,7 +20,7 @@ export function CalendarHeader({
   const nextWeek = buildCalendarWeekHref(shiftWeek(data.weekStart, 1));
 
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div className={panelBodyClassName}>
         <p className="text-sm text-muted-foreground">Field schedule</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">

@@ -21,7 +21,7 @@ export function TodayHeader({
   }).format(new Date());
 
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div className={panelBodyClassName}>
         <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           <CalendarDays className="h-3.5 w-3.5" />

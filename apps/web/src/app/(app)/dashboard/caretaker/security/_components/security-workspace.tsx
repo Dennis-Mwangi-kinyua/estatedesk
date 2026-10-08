@@ -21,7 +21,7 @@ export function SecurityWorkspace({
         <>
           <SecurityStats data={data} />
 
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
             <DevicesPanel sessions={data.sessions} />
             <SecuritySidebar />
           </div>

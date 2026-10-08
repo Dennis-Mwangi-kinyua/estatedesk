@@ -12,7 +12,7 @@ export function VendorsHeader({
   data: CaretakerVendorsPageData;
 }) {
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div className={panelBodyClassName}>
         <p className="text-sm text-muted-foreground">
           <CaretakerI18nLabel labelKey="supplierDirectory" />

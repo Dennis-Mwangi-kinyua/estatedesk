@@ -23,7 +23,7 @@ export function IssuesWorkspace({
       <IssuesHeader membership={data.membership} stats={data.stats} orgRole={orgRole} />
       <IssuesStats stats={data.stats} activeFilter={data.activeFilter} />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-5">
           <section className={`${panelShellClassName} p-4 sm:p-6`}>
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

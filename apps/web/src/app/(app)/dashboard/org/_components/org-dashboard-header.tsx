@@ -35,7 +35,7 @@ export function OrgDashboardHeader({
     data.expenditureApprovalsPending;
 
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div>
         <WorkspaceHero kind="org" eyebrow={orgRole === "ADMIN" ? "Organisation overview" : "Your team workspace"} title={organizationName} description={queueCount > 0 ? `${queueCount} item${queueCount === 1 ? "" : "s"} need attention across payments, maintenance, finance, and operations.` : "Your portfolio queues are clear. Review occupancy, collections, and your next steps below."} actions={<>
           <Link href="/dashboard/org/insights" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><Lightbulb className="h-4 w-4" />Smart insights</Link>

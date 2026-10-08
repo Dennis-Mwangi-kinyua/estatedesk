@@ -23,7 +23,7 @@ export function IssueDetailHeader({ issue }: { issue: CaretakerIssueDetail }) {
     .join(" · ");
 
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div className={panelBodyClassName}>
         <Link
           href="/dashboard/caretaker/issues"

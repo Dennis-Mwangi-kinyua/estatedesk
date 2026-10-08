@@ -16,7 +16,7 @@ export function ReadingDetailHeader({
   const { reading } = data;
 
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div className={panelBodyClassName}>
         <Link
           href="/dashboard/caretaker/water-bills"

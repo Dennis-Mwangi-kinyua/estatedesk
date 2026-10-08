@@ -16,7 +16,7 @@ export function TenantDetailHeader({
   const { tenant, activeLease } = data;
 
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div className={panelBodyClassName}>
         <Link
           href="/dashboard/caretaker/tenants"

@@ -93,7 +93,9 @@ export function RoleMembersHeader({ data }: RoleMembersHeaderProps) {
         </div>
       ) : null}
 
-      <div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
+      <details className="border-t border-border">
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6">💡 How this works</summary>
+<div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
         {ROLE_DIRECTORY_WORKFLOW.map((item) => (
           <div
             key={item.step}
@@ -111,6 +113,7 @@ export function RoleMembersHeader({ data }: RoleMembersHeaderProps) {
           </div>
         ))}
       </div>
+      </details>
     </section>
   );
 }

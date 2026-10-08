@@ -1,3 +1,4 @@
+import { SiteExperience } from "@/components/shared/site-experience";
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
@@ -29,6 +30,7 @@ import {
 import "./globals.css";
 import "./system-glass.css";
 import "./modern-ui.css";
+import "./site-experience.css";
 
 const siteUrl = getSiteUrl();
 const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
@@ -265,6 +267,7 @@ export default async function RootLayout({
           <MarketingAnalytics />
           <WebVitalsReporter />
           <MobileSwipeBack />
+          <SiteExperience />
           <ServiceWorkerRegistration />
           <ServiceWorkerUpdatePrompt />
           <PwaExperience />

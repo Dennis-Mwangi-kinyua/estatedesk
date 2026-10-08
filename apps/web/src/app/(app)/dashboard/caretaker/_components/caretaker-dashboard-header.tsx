@@ -28,7 +28,7 @@ export function CaretakerDashboardHeader({
   const firstName = fullName.trim().split(/\s+/)[0] || "Caretaker";
 
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <WorkspaceHero kind="caretaker" eyebrow="Field operations" title={`Welcome back, ${firstName}`} description={attentionCount > 0 ? `${attentionCount} item${attentionCount === 1 ? "" : "s"} need attention across issues, inspections, and water billing in your assigned scope.` : "Your queues are clear. Review assigned units and stay ready for field updates."} actions={<>
           <Link href="/dashboard/caretaker/today" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><ClipboardList className="h-4 w-4" />Today’s work</Link>
           <Link href="/dashboard/caretaker/inspections" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><ClipboardList className="h-4 w-4" />Inspections</Link>
@@ -68,7 +68,9 @@ export function CaretakerDashboardHeader({
         />
       </div>
 
-      <div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
+      <details className="border-t border-border">
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6">💡 How this works</summary>
+<div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
         {CARETAKER_DASHBOARD_WORKFLOW.map((item) => (
           <div
             key={item.step}
@@ -86,6 +88,7 @@ export function CaretakerDashboardHeader({
           </div>
         ))}
       </div>
+      </details>
     </section>
   );
 }

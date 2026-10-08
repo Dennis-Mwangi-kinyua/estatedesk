@@ -1,0 +1,11 @@
+import { createRoot } from "react-dom/client";
+import { useState } from "react";
+import { SiteExperience } from "../../../apps/web/src/components/shared/site-experience";
+import { Button } from "../../../apps/web/src/components/ui/button";
+import { Input } from "../../../apps/web/src/components/ui/input";
+
+function Fixture() {
+ const [rows,setRows]=useState(["Jane Example","A long tenant name that should wrap neatly on a narrow phone"]);
+ return <><SiteExperience/><main className="estate-workspace p-4"><h1 className="text-2xl font-semibold">Payment records</h1><form className="my-4 space-y-3"><label htmlFor="search">Search records</label><Input id="search" name="search"/><Button type="button" onClick={()=>setRows([...rows,"Alex Added"])}>Add fixture row</Button></form><div className="overflow-x-auto"><table className="min-w-full text-sm" aria-label="Payment records"><thead><tr>{["Tenant","Property","Unit","Amount","Status","Actions"].map(label=><th key={label}>{label}</th>)}</tr></thead><tbody>{rows.map(name=><tr key={name}><td>{name}</td><td>Greenview Residences</td><td>A12</td><td>KES 25,000</td><td>Verified</td><td><button type="button" aria-label={`View payment for ${name}`}>View payment</button></td></tr>)}</tbody></table></div><table aria-label="Comparison" data-table-layout="comparison"><thead><tr><th>Plan</th><th>Price</th></tr></thead><tbody><tr><td>Starter</td><td>500</td></tr></tbody></table><table aria-label="Grouped table"><thead><tr><th colSpan={2}>Grouped columns</th></tr></thead><tbody><tr><td>A</td><td>B</td></tr></tbody></table></main></>;
+}
+createRoot(document.getElementById("fixture")!).render(<Fixture/>);

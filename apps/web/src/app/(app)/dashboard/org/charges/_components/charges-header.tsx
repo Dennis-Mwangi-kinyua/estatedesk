@@ -17,7 +17,7 @@ export function ChargesHeader({
   const { stats, organizationName } = data;
 
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div className="border-b border-border px-5 py-5 sm:px-6 sm:py-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="max-w-3xl">
@@ -84,7 +84,9 @@ export function ChargesHeader({
         </div>
       </div>
 
-      <div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
+      <details className="border-t border-border">
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6">💡 How this works</summary>
+<div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
         {CHARGES_WORKFLOW_STEPS.map((item) => (
           <div
             key={item.step}
@@ -102,6 +104,7 @@ export function ChargesHeader({
           </div>
         ))}
       </div>
+      </details>
     </section>
   );
 }

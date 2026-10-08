@@ -20,7 +20,7 @@ export function IssuesEmptyHeader({
   const canReport = canCreateOrgIssue(role);
 
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div className="border-b border-border px-5 py-5 sm:px-6 sm:py-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
@@ -85,7 +85,9 @@ export function IssuesEmptyHeader({
         </div>
       </div>
 
-      <div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
+      <details className="border-t border-border">
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6">💡 How this works</summary>
+<div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
         {ISSUE_TRACKING_WORKFLOW.map((item) => (
           <div
             key={item.step}
@@ -103,6 +105,7 @@ export function IssuesEmptyHeader({
           </div>
         ))}
       </div>
+      </details>
     </section>
   );
 }

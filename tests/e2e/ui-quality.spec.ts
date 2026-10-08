@@ -1,11 +1,15 @@
 import { expect, test } from "playwright/test";
 
+// Navigation styling checks run independently of service-worker activation reloads.
+test.use({ serviceWorkers: "block" });
+
 for (const theme of ["light", "dark"] as const) {
   test(`public pages have usable ${theme} layouts and labeled form controls`, async ({ page }) => {
     test.setTimeout(180_000);
     await page.addInitScript((value) => localStorage.setItem("theme", value), theme);
     for (const route of ["/", "/login", "/register", "/pricing", "/privacy", "/vacancies"]) {
       const response = await page.goto(route);
+      await page.waitForLoadState("networkidle");
       expect(response?.status(), route).toBe(200);
       await expect(page.locator("html")).toHaveClass(new RegExp(theme));
       await expect(page.locator("h1").first()).toBeAttached();

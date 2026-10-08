@@ -27,7 +27,7 @@ export function AccountingHeader({
   const { org, currentPeriod, booksHealth } = data;
 
   return (
-    <section className={panelShellClassName}>
+    <section data-workspace-header className={panelShellClassName}>
       <div className="px-4 py-4 sm:px-6 sm:py-6">
         <div className="flex flex-col gap-4 sm:gap-5">
           <div className="min-w-0">

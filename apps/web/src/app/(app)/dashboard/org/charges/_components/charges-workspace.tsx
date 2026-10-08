@@ -17,7 +17,7 @@ export function ChargesWorkspace({
       <ChargesHeader data={data} orgRole={orgRole} />
       <ChargesStats stats={data.stats} />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
         <ChargesDirectorySection charges={data.charges} />
         <ChargesGuidance orgRole={orgRole} />
       </div>

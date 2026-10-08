@@ -30,7 +30,7 @@ export default async function NewRoleMemberPage({ params }: Props) {
   const isCaretaker = normalizedRole === "CARETAKER";
 
   return (
-    <div className="grid max-w-6xl gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid max-w-6xl gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>

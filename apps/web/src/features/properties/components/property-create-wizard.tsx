@@ -1,4 +1,5 @@
 "use client";
+import { useStepFocus } from "./_lib/use-step-focus";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PortfolioHierarchy } from "@/components/portfolio/portfolio-hierarchy";
@@ -14,11 +15,7 @@ import { WizardSidebar } from "./_components/wizard-sidebar";
 import { WizardStepNav } from "./_components/wizard-step-nav";
 import { buildReviewSummary } from "./_lib/build-review-summary";
 import { STEPS } from "./_lib/constants";
-import type {
-  LandlordMode,
-  PropertyCreateWizardProps,
-  ReviewSummary,
-} from "./_lib/types";
+import type { LandlordMode, PropertyCreateWizardProps, ReviewSummary } from "./_lib/types";
 import { validateWizardStep } from "./_lib/validation";
 import {
   alertErrorClassName,
@@ -92,12 +89,7 @@ export function PropertyCreateWizard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, currencyCode, landlordProfileMap, taxpayerProfileMap]);
 
-  useEffect(() => {
-    if (currentStep === 1) return;
-    const heading = formRef.current?.querySelector<HTMLElement>('div.block h2');
-    if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
-    formRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
-  }, [currentStep]);
+  useStepFocus(currentStep, formRef);
 
   function handleNext() {
     const form = formRef.current;
