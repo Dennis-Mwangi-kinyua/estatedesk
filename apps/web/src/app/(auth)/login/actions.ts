@@ -203,7 +203,6 @@ export async function loginAction(
             select: {
               id: true,
               email: true,
-              emailVerified: true,
               fullName: true,
               platformRole: true,
               status: true,
@@ -249,11 +248,6 @@ export async function loginAction(
         success: false,
         error: INVALID_CREDENTIALS_MESSAGE,
       };
-    }
-
-    if (user.email && !user.emailVerified && user.platformRole === "USER") {
-      const verificationRequired = await prisma.emailVerificationToken.findFirst({ where: { email: user.email }, select: { token: true } });
-      if (verificationRequired) redirect(`/verify-email?email=${encodeURIComponent(user.email)}`);
     }
 
     // Platform admins do not need org membership or tenant profile
