@@ -1,3 +1,5 @@
+import { OrganizationNameEditor } from "@/components/forms/organization-name-editor";
+import { renameCurrentOrganizationAction } from "@/features/organizations/actions/rename-organization";
 import { CurrencySelect } from "@/components/forms/currency-select";
 import { updateOrganizationAction } from "@/features/settings/actions/settings-actions";
 import {
@@ -31,15 +33,12 @@ export function OrganizationProfileSection({ data }: { data: SettingsPageData })
         />
       }
     >
+      <div className="mb-5"><OrganizationNameEditor name={data.organization.name} action={renameCurrentOrganizationAction} /></div>
       <form
         action={updateOrganizationAction}
         className="grid gap-4 md:grid-cols-2"
       >
-        <InputField
-          label="Organization Name"
-          name="organizationName"
-          defaultValue={data.organization.name}
-        />
+        <input type="hidden" name="organizationName" value={data.organization.name} />
         <InputField
           label="Slug"
           name="slug"

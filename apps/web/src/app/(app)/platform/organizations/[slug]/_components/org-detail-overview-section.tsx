@@ -1,3 +1,5 @@
+import { OrganizationNameEditor } from "@/components/forms/organization-name-editor";
+import { renamePlatformOrganizationAction } from "@/features/organizations/actions/rename-organization";
 import Link from "next/link";
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import {
@@ -57,6 +59,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
 
       <section className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
         <Surface id="organisation-profile" title="Workspace profile">
+          <div className="p-4 sm:px-5"><OrganizationNameEditor name={org.name} orgId={org.id} action={renamePlatformOrganizationAction} /></div>
           <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
             <InfoTile icon={<Building2 className="h-4 w-4" />} label="Slug" value={`/${org.slug}`} />
             <InfoTile icon={<Settings className="h-4 w-4" />} label="Timezone" value={org.timezone} />
