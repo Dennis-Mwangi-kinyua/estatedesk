@@ -1,7 +1,7 @@
 "use client";
 import { Check } from "lucide-react";
 import { STEPS } from "../_lib/constants";
-const stickers=["🏘️","🤝","💧","🚪","✨"];
+const stickers=["🏘️","🤝","💧","🚪","✅"];
 export function WizardStepNav({ currentStep }: { currentStep: number }) {
   return <div className="border-b border-border bg-muted/10 px-4 py-4 sm:px-6">
     <ol aria-label="Property setup steps" className="grid grid-cols-5 gap-1 sm:gap-2">{STEPS.map(step=><li key={step.id} aria-current={currentStep===step.id?"step":undefined} className={`flex min-w-0 flex-col items-center gap-2 rounded-xl px-1 py-3 text-center ${currentStep===step.id?"bg-primary/5":""}`}>

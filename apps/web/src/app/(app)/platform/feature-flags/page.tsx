@@ -80,7 +80,7 @@ function FlagToggle({
           }
         >
           {featureKey}: {enabled ? "On" : "Off"}
-          {globallyForced ? " ★" : ""}
+          {globallyForced ? " · Platform override" : ""}
         </Badge>
       </button>
     </form>

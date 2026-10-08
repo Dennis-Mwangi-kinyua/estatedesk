@@ -7,7 +7,7 @@ import {
 import { formatLedgerCurrency } from "@/lib/ledger";
 import { formatStatusLabel, statusTone } from "../_lib/helpers";
 import type { ReportsPageData } from "../_lib/types";
-import { Stars } from "./reports-ui";
+import { RatingScore } from "./reports-ui";
 
 export function ReportsMatrixSection({ data }: { data: ReportsPageData }) {
   const empty = data.filteredRows.length === 0;
@@ -67,7 +67,7 @@ export function ReportsMatrixSection({ data }: { data: ReportsPageData }) {
                       </span>
                     </div>
                     <div className="mt-2">
-                      <Stars score={row.rating.score} />
+                      <RatingScore score={row.rating.score} />
                       <p className="mt-0.5 text-[11px] text-muted-foreground">
                         {row.rating.label}
                       </p>
@@ -127,7 +127,7 @@ export function ReportsMatrixSection({ data }: { data: ReportsPageData }) {
                     </td>
                     <td className="px-4 py-4">
                       <div className="space-y-1">
-                        <Stars score={row.rating.score} />
+                        <RatingScore score={row.rating.score} />
                         <p className="text-xs text-muted-foreground">
                           {row.rating.label}
                         </p>

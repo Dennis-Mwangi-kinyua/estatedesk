@@ -21,8 +21,9 @@ export function SiteExperience() {
     let frame = 0;
     const enhance = () => {
       const heading = root.querySelector<HTMLElement>("h1");
-      if (heading && !heading.querySelector(".workspace-page-marker") && !/\p{Extended_Pictographic}/u.test(heading.textContent ?? "")) {
-        heading.dataset.pageIcon = pageIcons.find(([pattern]) => pattern.test(pathname ?? ""))?.[1] ?? "✨";
+      if (heading?.dataset.headingIcon === "custom") delete heading.dataset.pageIcon;
+      if (heading && heading.dataset.headingIcon !== "custom" && !heading.querySelector(".workspace-page-marker") && !/\p{Extended_Pictographic}/u.test(heading.textContent ?? "")) {
+        heading.dataset.pageIcon = pageIcons.find(([pattern]) => pattern.test(pathname ?? ""))?.[1] ?? "📋";
       }
       root.querySelectorAll<HTMLTableElement>("table").forEach(table => {
         const headerRows = table.tHead?.rows;

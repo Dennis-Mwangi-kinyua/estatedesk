@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { createUnitAction } from "../actions";
 
-const steps = ["🏡 Identity", "📐 Layout", "💳 Pricing", "✨ Review"];
+const steps = ["🏡 Identity", "📐 Layout", "💳 Pricing", "✅ Review"];
 const button = "min-h-12 rounded-xl bg-primary px-5 py-3 font-semibold text-primary-foreground disabled:opacity-50";
 function SubmitButton() {
   const { pending } = useFormStatus();

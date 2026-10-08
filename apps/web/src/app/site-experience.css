@@ -103,3 +103,28 @@
   .estate-glass-system [data-workspace-header] > .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
   .estate-glass-system [data-workspace-header] > .grid > :last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
+/* Organisation control centre: resilient narrow-screen and older-browser layout. */
+.organisation-detail-page { min-width: 0; word-wrap: break-word; }
+.organisation-detail-page :where(section, article, div, header, a) { min-width: 0; }
+.organisation-detail-page :where(h1, h2, p, dd, span) { word-wrap: break-word; overflow-wrap: anywhere; }
+.organisation-detail-page .platform-badge { max-width: 100%; white-space: normal; }
+@supports not (background: color-mix(in srgb, white, black)) {
+  .organisation-detail-page :where(.bg-primary\/10, .bg-muted\/20) { background: var(--muted); }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .organisation-detail-page .workspace-panel { background: var(--card); }
+}
+@media screen and (max-width: 359px) {
+  .organisation-detail-page .org-summary-card { padding: .75rem; }
+  .organisation-detail-page .org-summary-card > p:nth-of-type(2) { font-size: 1.05rem; }
+  .organisation-detail-page .organisation-profile-card .grid { grid-template-columns: minmax(0, 1fr); }
+}
+body.estate-glass-system .organisation-detail-page :is(.workspace-panel, .org-summary-card) {
+  background: var(--card) !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+@supports not (height: 100dvh) {
+  .estate-glass-system .h-dvh { height: 100vh; }
+  .estate-glass-system .min-h-dvh { min-height: 100vh; }
+}

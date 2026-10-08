@@ -1,4 +1,4 @@
-import { Star, type LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { formatLedgerCurrency } from "@/lib/ledger";
@@ -8,21 +8,8 @@ import type { TenantReportCardProps } from "../_lib/types";
 export const panelShellClassName =
   "overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm";
 
-export function Stars({ score }: { score: number }) {
-  return (
-    <div className="flex items-center gap-0.5" aria-label={`${score} star rating`}>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <Star
-          key={index}
-          className={`h-3.5 w-3.5 ${
-            index < score
-              ? "fill-current text-amber-500"
-              : "text-muted-foreground/40"
-          }`}
-        />
-      ))}
-    </div>
-  );
+export function RatingScore({ score }: { score: number }) {
+  return <span aria-label={`Rating ${score} out of 5`} className="inline-flex rounded-lg border border-border bg-muted/20 px-2 py-1 text-xs font-semibold text-foreground">{score} / 5</span>;
 }
 
 export function ReportFilterLink({
@@ -132,7 +119,7 @@ export function TenantReportCard({
 
               <div className="mt-3 flex items-center justify-between gap-3">
                 <div>
-                  <Stars score={row.rating.score} />
+                  <RatingScore score={row.rating.score} />
                   <p className="mt-1 text-xs text-muted-foreground">{row.rating.detail}</p>
                 </div>
                 <div className="text-right">

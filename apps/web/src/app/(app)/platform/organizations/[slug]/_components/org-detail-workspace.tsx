@@ -6,7 +6,7 @@ export type OrgDetailWorkspaceProps = Awaited<ReturnType<typeof getOrganizationD
 
 export function OrgDetailWorkspace(props: OrgDetailWorkspaceProps) {
   return (
-    <div className="space-y-6">
+    <div className="organisation-detail-page mx-auto w-full max-w-7xl space-y-4 sm:space-y-5">
       <OrgDetailOverviewSection {...props} />
       <OrgDetailActivitySection {...props} />
     </div>

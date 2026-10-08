@@ -21,7 +21,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
         <Surface id="organisation-payments" title="Recent payments">
           <div className="divide-y divide-slate-100 dark:divide-white/10">
             {recentPayments.map((payment) => (
-              <div key={payment.id} className="flex items-start justify-between gap-3 p-4">
+              <div key={payment.id} className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="min-w-0">
                   <p className="break-words font-medium leading-5 text-slate-950 dark:text-white">
                     {payment.payerTenant?.fullName ??
@@ -33,7 +33,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
                     {payment.targetType} • {payment.reference ?? payment.externalReference ?? "-"}
                   </p>
                 </div>
-                <div className="shrink-0 text-right">
+                <div className="min-w-0 text-left sm:text-right">
                   <p className="font-semibold text-slate-950 dark:text-white">
                     {formatCurrency(Number(payment.amount))}
                   </p>
@@ -52,16 +52,16 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
         <Surface id="organisation-members" title="Recent members">
           <div className="divide-y divide-slate-100 dark:divide-white/10">
             {recentMembers.map((member) => (
-              <div key={member.id} className="flex items-start justify-between gap-3 p-4">
+              <div key={member.id} className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="min-w-0">
                   <p className="break-words font-medium leading-5 text-slate-950 dark:text-white">
                     {member.user.fullName}
                   </p>
-                  <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 break-words text-sm text-slate-500 dark:text-slate-400">
                     {member.user.email ?? "-"}
                   </p>
                 </div>
-                <div className="shrink-0 text-right">
+                <div className="min-w-0 text-left sm:text-right">
                   <Badge>{member.role}</Badge>
                   <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                     {formatDateTime(member.user.lastLoginAt)}
@@ -80,7 +80,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
         <div className="divide-y divide-border md:hidden">
           {recentAuditLogs.map((log) => (
             <article key={log.id} className="space-y-2.5 px-3 py-3.5 sm:px-4">
-              <div className="flex items-start justify-between gap-3">
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="min-w-0">
                   <p className="break-words text-sm font-semibold leading-5 text-foreground">
                     {log.actor.fullName}
@@ -89,7 +89,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
                     {log.actor.email ?? "No email"}
                   </p>
                 </div>
-                <p className="shrink-0 text-right text-xs text-muted-foreground">
+                <p className="text-left text-xs sm:text-right text-muted-foreground">
                   {formatDateTime(log.createdAt)}
                 </p>
               </div>
@@ -144,6 +144,8 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
         </div>
       </Surface>
 
+      <details className="rounded-2xl border border-border bg-card">
+        <summary className="flex min-h-12 cursor-pointer items-center px-4 py-3 text-sm font-semibold text-muted-foreground">Advanced organisation actions</summary>
       <Surface
         title="Danger zone"
         description="Archive access or permanently remove this organization."
@@ -209,6 +211,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
           </button>
         </form>
       </Surface>
+      </details>
     </>
   );
 }

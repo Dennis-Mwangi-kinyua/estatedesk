@@ -2,7 +2,7 @@ import {
   AlertTriangle,
   BadgeCheck,
   Receipt,
-  Star,
+  Users,
   TrendingUp,
 } from "lucide-react";
 import { formatLedgerCurrency } from "@/lib/ledger";
@@ -34,7 +34,7 @@ export function ReportsStatsSection({ data }: { data: ReportsPageData }) {
         value={data.paidRows.length.toLocaleString()}
       />
       <ReportStat
-        icon={Star}
+        icon={Users}
         label="Occupants in scope"
         value={data.filteredRows.length.toLocaleString()}
       />

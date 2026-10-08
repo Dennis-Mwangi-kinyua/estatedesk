@@ -1,7 +1,6 @@
 import { OrganizationNameEditor } from "@/components/forms/organization-name-editor";
 import { renamePlatformOrganizationAction } from "@/features/organizations/actions/rename-organization";
 import Link from "next/link";
-import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import {
   ArrowLeft,
   Building2,
@@ -14,7 +13,6 @@ import {
 } from "lucide-react";
 import {
   Badge,
-  StatCard,
   Surface,
   formatCurrency,
   formatDateTime,
@@ -24,7 +22,7 @@ import {
 import { formatSubscriptionSummary } from "../../../_lib/helpers";
 import { formatDate } from "../_lib/helpers";
 import type { OrgDetailWorkspaceProps } from "./org-detail-workspace";
-import { InfoTile, SmallCount } from "./org-detail-ui";
+import { InfoTile, SmallCount, OrgSummaryCard } from "./org-detail-ui";
 
 export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
   const { org, featureKeys, paidTotal, unitCount, recentMessages } = props;
@@ -41,24 +39,24 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
           Organizations
         </Link>
 
-        <div className="workspace-panel overflow-hidden rounded-3xl border border-border bg-card">
-          <WorkspaceHero kind="org" eyebrow="Organisation control centre" title={org.name} description="Your organisation’s profile, billing, people, and operational activity in one clear view." actions={<>
-            <Link href={`/platform/payment-ops?orgId=${encodeURIComponent(org.id)}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><Receipt className="h-4 w-4" />Payment operations</Link>
-            <Link href="#organisation-audit" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><ShieldCheck className="h-4 w-4" />Audit activity</Link>
-          </>}><div className="flex flex-wrap items-center gap-2 text-xs"><Badge tone={toneForStatus(org.status)}>{org.status}</Badge><span className="rounded-full border border-border bg-card/60 px-3 py-1.5 text-muted-foreground">/{org.slug}</span><span className="rounded-full border border-border bg-card/60 px-3 py-1.5 text-muted-foreground">{org.currencyCode} · {org.timezone}</span></div></WorkspaceHero>
-        </div>
+        <header className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+          <div className="flex items-start gap-3"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Building2 aria-hidden="true" className="h-6 w-6"/></span><div className="min-w-0"><p className="text-xs font-medium text-muted-foreground">Organisation workspace</p><h1 data-heading-icon="custom" className="mt-1 break-words text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">{org.name}</h1></div></div>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">Manage the organisation’s profile, billing, people, and operational activity.</p>
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs"><Badge tone={toneForStatus(org.status)}>{org.status}</Badge><span className="break-all rounded-full border border-border bg-muted/20 px-3 py-1.5 text-muted-foreground">/{org.slug}</span><span className="rounded-full border border-border bg-muted/20 px-3 py-1.5 text-muted-foreground">{org.currencyCode} · {org.timezone}</span></div>
+          <div className="mt-5 grid gap-2 sm:grid-cols-2"><Link href={`/platform/payment-ops?orgId=${encodeURIComponent(org.id)}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><Receipt aria-hidden="true" className="h-4 w-4"/>Payment operations</Link><Link href="#organisation-audit" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground"><ShieldCheck aria-hidden="true" className="h-4 w-4"/>Audit activity</Link></div>
+        </header>
       </div>
 
-      <nav aria-label="Organisation sections" className="flex flex-wrap gap-2 rounded-2xl border border-border bg-card p-3">{[["organisation-profile", "🏢", "Profile"], ["organisation-billing", "💳", "Billing"], ["organisation-operations", "⚙️", "Operations"], ["organisation-payments", "🧾", "Payments"], ["organisation-members", "👥", "Members"], ["organisation-audit", "📋", "Audit activity"]].map(([id, emoji, label]) => <Link key={id} href={`#${id}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-muted/20 px-3 text-sm font-medium hover:bg-muted"><span aria-hidden="true">{emoji}</span>{label}</Link>)}</nav>
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Status" value={org.status} note={`Created ${formatDate(org.createdAt)}`} />
-        <StatCard label="Tenants" value={formatNumber(org._count.tenants)} note={`${formatNumber(org._count.leases)} leases`} />
-        <StatCard label="Properties" value={formatNumber(org._count.properties)} note={`${formatNumber(unitCount)} units`} />
-        <StatCard label="Recognized paid" value={formatCurrency(paidTotal)} note={`${formatNumber(org._count.payments)} payments`} />
+      <nav aria-label="Organisation sections" className="grid grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-2 sm:grid-cols-6 sm:p-3">{[{id:"profile",label:"Profile",Icon:Building2},{id:"billing",label:"Billing",Icon:CreditCard},{id:"operations",label:"Operations",Icon:Settings},{id:"payments",label:"Payments",Icon:Receipt},{id:"members",label:"Members",Icon:Users},{id:"audit",label:"Audit activity",Icon:ShieldCheck}].map(({id,label,Icon})=><Link key={id} href={`#organisation-${id}`} className="flex min-h-16 flex-col items-center justify-center gap-1.5 rounded-xl px-1 py-2 text-center text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"><Icon aria-hidden="true" className="h-5 w-5 text-primary"/>{label}</Link>)}</nav>
+      <section className="organisation-summary ed-keep-cols grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <OrgSummaryCard label="Status" value={org.status} note={`Created ${formatDate(org.createdAt)}`} />
+        <OrgSummaryCard label="Tenants" value={formatNumber(org._count.tenants)} note={`${formatNumber(org._count.leases)} leases`} />
+        <OrgSummaryCard label="Properties" value={formatNumber(org._count.properties)} note={`${formatNumber(unitCount)} units`} />
+        <OrgSummaryCard label="Recognized paid" value={formatCurrency(paidTotal)} note={`${formatNumber(org._count.payments)} payments`} />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
-        <Surface id="organisation-profile" title="Workspace profile">
+        <Surface id="organisation-profile" title="Workspace profile" className="organisation-profile-card">
           <div className="p-4 sm:px-5"><OrganizationNameEditor name={org.name} orgId={org.id} action={renamePlatformOrganizationAction} /></div>
           <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
             <InfoTile icon={<Building2 className="h-4 w-4" />} label="Slug" value={`/${org.slug}`} />
@@ -113,7 +111,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
           </div>
         </Surface>
 
-        <Surface title="KRA integration">
+        <Surface id="organisation-kra" title="KRA integration">
           <div className="space-y-3 p-4">
             {org.kraIntegration ? (
               <>
