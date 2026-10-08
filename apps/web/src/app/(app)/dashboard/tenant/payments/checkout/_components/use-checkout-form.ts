@@ -30,6 +30,7 @@ export function useCheckoutForm(searchParams: {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [accountName, setAccountName] = useState("");
   const [transactionId, setTransactionId] = useState("");
+  const [proofImage, setProofImage] = useState<File | undefined>();
   const [proofMessage, setProofMessage] = useState("");
   const [amount, setAmount] = useState(amountParam ?? "");
   const [months, setMonths] = useState(monthsParam ?? "1");
@@ -191,6 +192,7 @@ export function useCheckoutForm(searchParams: {
             ? transactionId.trim()
             : undefined,
           proofMessage: proofMessage.trim() || undefined,
+          proofImage,
           amount: amountToSend,
           months:
             source === "advance_rent" ? Number.parseInt(months, 10) : undefined,
@@ -228,6 +230,8 @@ export function useCheckoutForm(searchParams: {
     setTransactionId,
     proofMessage,
     setProofMessage,
+    proofImage,
+    setProofImage,
     amount,
     setAmount,
     months,

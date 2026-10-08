@@ -1,4 +1,6 @@
 import "server-only";
+import { uploadCloudflareImage } from "@/lib/uploads/cloudflare-images";
+import { validateImageBytes } from "@/lib/uploads/secure-image";
 
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -35,22 +37,29 @@ export async function uploadFinanceRequestReceipt({
     throw new Error("Receipt must be 5MB or smaller.");
   }
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "finance-requests");
-  await mkdir(uploadDir, { recursive: true });
-
-  const ext = path.extname(receipt.name).toLowerCase() || ".jpg";
-  const fileName = `${requestNumber.replace(/[^a-zA-Z0-9-]/g, "-")}-${randomUUID()}${ext}`;
-  const publicKey = `/uploads/finance-requests/${fileName}`;
   const buffer = Buffer.from(await receipt.arrayBuffer());
-
-  await writeFile(path.join(uploadDir, fileName), buffer);
+  const image = receipt.type.startsWith("image/")
+    ? validateImageBytes(buffer, { maxBytes: MAX_BYTES })
+    : null;
+  if (!image && !buffer.subarray(0, 5).equals(Buffer.from("%PDF-"))) {
+    throw new Error("Receipt must be a genuine image or PDF file.");
+  }
+  const ext = image?.extension ?? ".pdf";
+  const fileName = `${requestNumber.replace(/[^a-zA-Z0-9-]/g, "-")}-${randomUUID()}${ext}`;
+  const uploaded = image ? await uploadCloudflareImage(image, fileName) : null;
+  const publicKey = uploaded?.key ?? `/uploads/finance-requests/${fileName}`;
+  if (!uploaded) {
+    const uploadDir = path.join(process.cwd(), "public", "uploads", "finance-requests");
+    await mkdir(uploadDir, { recursive: true });
+    await writeFile(path.join(uploadDir, fileName), buffer);
+  }
 
   await prisma.asset.create({
     data: {
       orgId,
       fileName: receipt.name,
       fileType: receipt.type.startsWith("image/") ? "image" : "document",
-      mimeType: receipt.type,
+      mimeType: image?.mimeType ?? "application/pdf",
       key: publicKey,
       size: receipt.size,
       assetType: AssetType.DOCUMENT,

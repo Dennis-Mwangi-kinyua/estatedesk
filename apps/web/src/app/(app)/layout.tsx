@@ -1,3 +1,4 @@
+import { ProfilePictureProvider } from "@/components/uploads/profile-picture-context";
 import "./workspace.css";
 import { ReactNode } from "react";
 import { headers } from "next/headers";
@@ -83,7 +84,9 @@ export default async function AppLayout({
     }
   }
 
+  const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { profileImageUrl: true } });
   return (
+    <ProfilePictureProvider url={user?.profileImageUrl ?? null}>
     <div className="estate-workspace app-mobile-canvas app-sensitive-surface ed-mobile-surface relative min-h-dvh w-full min-w-0 overflow-x-hidden">
       <SensitiveDataWatermark orgLabel={orgLabel} />
       {children}
@@ -91,5 +94,6 @@ export default async function AppLayout({
       {isSecurityGateRoute ? null : <AppActionFeedback />}
       {isSecurityGateRoute ? null : <DestructiveActionGuard />}
     </div>
+    </ProfilePictureProvider>
   );
 }

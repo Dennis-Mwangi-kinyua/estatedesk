@@ -10,6 +10,7 @@ import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { ensureUnitPublicSlug } from "@/lib/public-vacancy-ensure-slug";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { uploadCloudflareImage, deleteCloudflareImage } from "@/lib/uploads/cloudflare-images";
 import { storage } from "@/lib/storage";
 import { validateImageFile, type ValidatedImage } from "@/lib/uploads/secure-image";
 
@@ -64,6 +65,9 @@ async function storeVacancyImage(input: {
   image: ValidatedImage;
 }) {
   const fileName = `${input.unitId}-${randomUUID()}${input.image.extension}`;
+
+  const cloudflare = await uploadCloudflareImage(input.image, fileName);
+  if (cloudflare) return cloudflare;
 
   if (isS3Configured()) {
     const key = `vacancies/${input.orgId}/${fileName}`;
@@ -283,7 +287,13 @@ export async function deleteUnitVacancyImageAction(
   });
 
   // Best-effort storage cleanup for S3 keys (skip local /public paths).
-  if (asset.key && !asset.key.startsWith("/") && isS3Configured()) {
+  if (asset.key?.startsWith("https://imagedelivery.net/")) {
+    try {
+      await deleteCloudflareImage(asset.key);
+    } catch (error) {
+      console.warn("[vacancy-image] Cloudflare delete failed", error);
+    }
+  } else if (asset.key && !asset.key.startsWith("/") && !asset.key.startsWith("https://") && isS3Configured()) {
     try {
       await storage.deleteFile(asset.key);
     } catch (error) {

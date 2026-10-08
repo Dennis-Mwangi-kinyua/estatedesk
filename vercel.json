@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "npm install",
-  "buildCommand": "npm run build",
+  "buildCommand": "ESTATEDESK_BUILD_WITHOUT_DATABASE=true npm run build",
   "outputDirectory": "apps/web/.next"
 }

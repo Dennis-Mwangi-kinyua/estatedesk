@@ -21,7 +21,4 @@ export function MetricSticker({ label, icon: Icon }: { label?: string; icon?: Co
   return <span aria-hidden="true" className="workspace-metric-sticker">{label ? labelSticker(label) : Icon ? <Icon className="h-5 w-5" /> : "📊"}</span>;
 }
 
-export function WorkspaceIdentity({ name, role }: { name: string; role: string }) {
-  const initials = name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "?";
-  return <div className="workspace-identity hidden sm:flex"><span aria-hidden="true" className="workspace-identity__avatar">{initials}</span><div className="min-w-0"><p className="truncate text-xs font-semibold text-foreground">{name}</p><p className="mt-0.5 truncate text-[10px] text-muted-foreground">{role}</p></div></div>;
-}
+export { WorkspaceIdentity } from "./workspace-identity";

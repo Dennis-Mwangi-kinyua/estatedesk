@@ -1,3 +1,4 @@
+import { uploadCloudflareImage } from "@/lib/uploads/cloudflare-images";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -20,12 +21,15 @@ export async function uploadMeterPhoto({
   submittedByUserId: string;
 }) {
   const uploadDir = path.join(process.cwd(), "public", "uploads", "meters");
-  await mkdir(uploadDir, { recursive: true });
 
   const image = await validateImageFile(photo, { maxBytes: 5 * 1024 * 1024 });
   const fileName = `${unitId}-${period}-${randomUUID()}${image.extension}`;
-  const publicKey = `/uploads/meters/${fileName}`;
-  await writeFile(path.join(uploadDir, fileName), image.buffer);
+  const uploaded = await uploadCloudflareImage(image, fileName);
+  const publicKey = uploaded?.key ?? `/uploads/meters/${fileName}`;
+  if (!uploaded) {
+    await mkdir(uploadDir, { recursive: true });
+    await writeFile(path.join(uploadDir, fileName), image.buffer);
+  }
 
   const asset = await prisma.asset.create({
     data: {

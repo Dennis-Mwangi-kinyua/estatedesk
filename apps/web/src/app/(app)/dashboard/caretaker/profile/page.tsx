@@ -1,3 +1,4 @@
+import { ProfilePicturePanel } from "@/components/uploads/profile-picture-panel";
 import { redirect } from "next/navigation";
 import { requireUserSession } from "@/lib/auth/session";
 import { ProfileWorkspace } from "./_components/profile-workspace";
@@ -26,5 +27,5 @@ export default async function CaretakerStaffProfilePage() {
     redirect("/dashboard/caretaker");
   }
 
-  return <ProfileWorkspace data={data} />;
+  return <><div className="mx-auto max-w-7xl p-4"><ProfilePicturePanel /></div><ProfileWorkspace data={data} /></>;
 }

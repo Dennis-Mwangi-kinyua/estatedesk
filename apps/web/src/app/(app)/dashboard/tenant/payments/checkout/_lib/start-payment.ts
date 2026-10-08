@@ -1,5 +1,8 @@
 "use server";
 
+import { AssetType, Prisma } from "@prisma/client";
+import { validateImageFile } from "@/lib/uploads/secure-image";
+import { uploadCloudflareImage, deleteCloudflareImage } from "@/lib/uploads/cloudflare-images";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { throwSafeActionFailure } from "@/lib/errors/server-error-log";
@@ -140,11 +143,44 @@ export async function startTenantPayment(input: StartPaymentInput) {
   }
 
   const proofMessage = input.proofMessage?.trim() || "";
+  if (input.proofImage && settlementMode !== "manual") {
+    throw new Error("Payment screenshots are supported for manual payments.");
+  }
+  const proofImage = input.proofImage
+    ? await validateImageFile(input.proofImage, { maxBytes: 5 * 1024 * 1024 })
+    : null;
+  let uploadedProofUrl: string | null = null;
   let paymentId: string | null = null;
   let paymentAmount = Number(input.amount ?? 0);
 
   try {
     paymentId = await prisma.$transaction(async (tx) => {
+      const attachProof = async (id: string) => {
+        if (!proofImage) return id;
+        const uploaded = await uploadCloudflareImage(proofImage, `payment-proof${proofImage.extension}`);
+        if (!uploaded) throw new Error("Cloudflare Images must be configured to upload payment proof.");
+        uploadedProofUrl = uploaded.publicUrl;
+        const asset = await tx.asset.create({
+          data: {
+            orgId: session.activeOrgId!,
+            fileName: input.proofImage!.name,
+            fileType: "image",
+            mimeType: proofImage.mimeType,
+            key: uploaded.key,
+            size: proofImage.size,
+            assetType: AssetType.PHOTO,
+            uploadedByUserId: session.userId!,
+            metadata: { publicUrl: uploaded.publicUrl, purpose: "payment_proof", paymentId: id },
+          },
+        });
+        const payment = await tx.payment.findUniqueOrThrow({ where: { id }, select: { callbackRaw: true } });
+        const raw = payment.callbackRaw && typeof payment.callbackRaw === "object" && !Array.isArray(payment.callbackRaw)
+          ? payment.callbackRaw as Prisma.JsonObject : {};
+        await tx.payment.update({ where: { id }, data: {
+          callbackRaw: { ...raw, proofImageUrl: uploaded.publicUrl, proofAssetId: asset.id },
+        } });
+        return id;
+      };
       const ctx: PaymentHandlerContext = {
         tx,
         orgId: session.activeOrgId!,
@@ -171,7 +207,7 @@ export async function startTenantPayment(input: StartPaymentInput) {
               : undefined,
         });
         paymentAmount = Number(input.amount ?? paymentAmount);
-        return result.id;
+        return attachProof(result.id);
       }
 
       if (source === "advance_rent") {
@@ -180,7 +216,7 @@ export async function startTenantPayment(input: StartPaymentInput) {
           months: Number(input.months ?? 1),
         });
         paymentAmount = Number(input.amount ?? 0);
-        return result.id;
+        return attachProof(result.id);
       }
 
       if (source === "water_bill") {
@@ -190,7 +226,7 @@ export async function startTenantPayment(input: StartPaymentInput) {
               ? Number(input.amount)
               : undefined,
         });
-        return result.id;
+        return attachProof(result.id);
       }
 
       if (source === "period_bill") {
@@ -200,11 +236,11 @@ export async function startTenantPayment(input: StartPaymentInput) {
               ? Number(input.amount)
               : undefined,
         });
-        return result.id;
+        return attachProof(result.id);
       }
 
       throw new Error("Unsupported payment source.");
-    });
+    }, { timeout: 45_000 });
 
     // Gateway STK: prompt phone after payment row exists.
     if (isGateway && method === "mpesa-stk" && paymentId) {
@@ -251,6 +287,9 @@ export async function startTenantPayment(input: StartPaymentInput) {
       params.set("status", settlementMode === "manual" ? "pending" : "processing");
     }
   } catch (error) {
+    if (uploadedProofUrl && !paymentId) {
+      try { await deleteCloudflareImage(uploadedProofUrl); } catch { console.warn("Payment proof cleanup failed."); }
+    }
     if (isUniqueConstraintError(error)) {
       throw new Error("That transaction ID has already been submitted.");
     }

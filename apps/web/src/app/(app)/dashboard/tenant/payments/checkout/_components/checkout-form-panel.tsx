@@ -158,6 +158,16 @@ export function CheckoutFormPanel({ form }: CheckoutFormPanelProps) {
         {isKcbPaybill ? <KcbPaybillSection form={form} /> : null}
         {isBank ? <BankPaymentSection form={form} /> : null}
 
+        {!form.isGateway ? (
+          <label className="block text-sm font-medium">
+            Receipt or payment screenshot (optional)
+            <input type="file" accept="image/jpeg,image/png,image/webp" disabled={isPending}
+              onChange={(event) => form.setProofImage(event.target.files?.[0])}
+              className="mt-2 block w-full text-sm" />
+            <span className="mt-1 block text-xs text-muted-foreground">JPG, PNG, or WebP, up to 5MB.</span>
+          </label>
+        ) : null}
+
         {instructionsError ? (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
             {instructionsError}

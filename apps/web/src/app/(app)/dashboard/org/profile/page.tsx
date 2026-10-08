@@ -1,3 +1,4 @@
+import { ProfilePicturePanel } from "@/components/uploads/profile-picture-panel";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
@@ -68,6 +69,7 @@ export default async function OrgStaffProfilePage() {
 
   return (
     <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+      <ProfilePicturePanel />
       <StaffSelfProfileView member={member} variant="org" />
     </div>
   );

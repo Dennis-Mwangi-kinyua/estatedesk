@@ -63,130 +63,39 @@ export default function LoginForm({
   return (
     <>
       <style>{`
-        @keyframes loginSpin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        .login-loading-ring {
-          animation: loginSpin 0.85s linear infinite;
-        }
-
-        .login-loading-dot {
-          width: 0.7rem;
-          height: 0.7rem;
-          border-radius: 9999px;
-          animation-duration: 1.15s;
-          animation-timing-function: ease-in-out;
-          animation-iteration-count: infinite;
-        }
-
-        .login-loading-dot--teal {
-          background: #14b8a6;
-          animation-name: loadingDotGlowTeal;
-        }
-
-        .login-loading-dot--violet {
-          background: #8b5cf6;
-          animation-name: loadingDotGlowViolet;
-          animation-delay: 0.18s;
-        }
-
-        .login-loading-dot--amber {
-          background: #f59e0b;
-          animation-name: loadingDotGlowAmber;
-          animation-delay: 0.36s;
-        }
-
-        @keyframes loadingDotGlowTeal {
-          0%, 80%, 100% {
-            transform: scale(0.7);
-            opacity: 0.4;
-            box-shadow: 0 0 0.15rem rgba(20, 184, 166, 0.2);
-          }
-          40% {
-            transform: scale(1.15);
-            opacity: 1;
-            box-shadow:
-              0 0 0.45rem rgba(20, 184, 166, 0.95),
-              0 0 1rem rgba(45, 212, 191, 0.65),
-              0 0 1.6rem rgba(20, 184, 166, 0.35);
-          }
-        }
-
-        @keyframes loadingDotGlowViolet {
-          0%, 80%, 100% {
-            transform: scale(0.7);
-            opacity: 0.4;
-            box-shadow: 0 0 0.15rem rgba(139, 92, 246, 0.2);
-          }
-          40% {
-            transform: scale(1.15);
-            opacity: 1;
-            box-shadow:
-              0 0 0.45rem rgba(139, 92, 246, 0.95),
-              0 0 1rem rgba(167, 139, 250, 0.65),
-              0 0 1.6rem rgba(139, 92, 246, 0.35);
-          }
-        }
-
-        @keyframes loadingDotGlowAmber {
-          0%, 80%, 100% {
-            transform: scale(0.7);
-            opacity: 0.4;
-            box-shadow: 0 0 0.15rem rgba(245, 158, 11, 0.2);
-          }
-          40% {
-            transform: scale(1.15);
-            opacity: 1;
-            box-shadow:
-              0 0 0.45rem rgba(245, 158, 11, 0.95),
-              0 0 1rem rgba(251, 191, 36, 0.65),
-              0 0 1.6rem rgba(245, 158, 11, 0.35);
-          }
-        }
-
+        @keyframes loginSpin { to { transform: rotate(360deg); } }
+        @keyframes loginCardEnter { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes loginProgress { 0% { transform: translateX(-100%); } 100% { transform: translateX(340%); } }
+        .login-loading-ring { animation: loginSpin 1.1s linear infinite; }
+        .login-auth-card { animation: loginCardEnter .25s ease-out both; }
+        .login-auth-progress { animation: loginProgress 1.8s ease-in-out infinite; }
         .login-auth-overlay {
-          position: fixed;
-          inset: 0;
-          z-index: 9999;
-          display: grid;
-          min-height: 100vh;
-          min-height: 100dvh;
-          place-items: center;
-          background:
-            radial-gradient(circle at center, rgba(255, 255, 255, 0.18), transparent 34%),
-            rgba(15, 23, 42, 0.38);
-          -webkit-backdrop-filter: blur(14px) saturate(1.08);
-          backdrop-filter: blur(14px) saturate(1.08);
+          position: fixed; inset: 0; z-index: 9999; display: grid;
+          min-height: 100vh; min-height: 100dvh; place-items: center;
+          background: rgba(15, 23, 42, .42);
+          -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
         }
-
+        @media (prefers-reduced-motion: reduce) {
+          .login-loading-ring, .login-auth-card, .login-auth-progress { animation: none; }
+        }
       `}</style>
 
       {isPending && typeof document !== "undefined"
         ? createPortal(
-        <div className="login-auth-overlay px-5">
-          <div className="w-full max-w-[300px] rounded-2xl border border-white/80 bg-white/92 px-6 py-7 text-center shadow-[0_28px_90px_rgba(15,23,42,0.28)] ring-1 ring-slate-950/5 backdrop-blur-xl">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-950 shadow-[0_16px_36px_rgba(15,23,42,0.22)]">
-              <div className="login-loading-ring h-9 w-9 rounded-full border-[3px] border-white/30 border-t-white" />
+        <div className="login-auth-overlay px-5" role="status" aria-live="polite" aria-atomic="true">
+          <div className="login-auth-card w-full max-w-[340px] rounded-3xl border border-white/80 bg-white px-8 py-8 text-center shadow-[0_28px_90px_rgba(15,23,42,0.25)]">
+            <div aria-hidden="true" className="relative mx-auto flex h-20 w-20 items-center justify-center">
+              <div className="absolute inset-0 rounded-full border border-slate-100" />
+              <div className="login-loading-ring absolute inset-0 rounded-full border-[3px] border-transparent border-r-sky-200 border-t-sky-600" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-sky-50 text-sky-700">
+                <ShieldCheck className="h-6 w-6" strokeWidth={1.7} />
+              </div>
             </div>
-
-            <h3 className="mt-5 text-lg font-semibold tracking-tight text-slate-950">
-              Verifying details
-            </h3>
-
-            <p className="mt-1.5 text-sm leading-5 text-slate-600">
-              Please wait while we securely log you in.
-            </p>
-
-            <div
-              className="mt-5 flex items-center justify-center gap-2.5"
-              aria-hidden="true"
-            >
-              <span className="login-loading-dot login-loading-dot--teal" />
-              <span className="login-loading-dot login-loading-dot--violet" />
-              <span className="login-loading-dot login-loading-dot--amber" />
+            <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-700">Secure sign-in</p>
+            <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">Verifying details</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-500">Please wait while we securely log you in.</p>
+            <div aria-hidden="true" className="mt-6 h-1 overflow-hidden rounded-full bg-slate-100">
+              <div className="login-auth-progress h-full w-1/3 rounded-full bg-gradient-to-r from-sky-300 to-sky-600" />
             </div>
           </div>
         </div>,

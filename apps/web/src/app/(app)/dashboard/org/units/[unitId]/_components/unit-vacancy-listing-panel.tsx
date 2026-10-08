@@ -223,7 +223,7 @@ export function UnitVacancyListingPanel({
           Upload vacancy images
         </label>
         <p className="mt-1 text-xs text-slate-500">
-          Uses S3 when configured; otherwise stores under /uploads/vacancies.
+          Upload JPG, PNG, or WebP photos, up to 5MB each.
         </p>
         <input
           name="images"

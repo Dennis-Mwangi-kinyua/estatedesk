@@ -1,3 +1,4 @@
+import { ProfilePicturePanel } from "@/components/uploads/profile-picture-panel";
 import { emptyPaymentInstructions } from "@/lib/payments/instructions";
 import { requireUserSession } from "@/lib/auth/session";
 import { getTenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";
@@ -42,6 +43,8 @@ export default async function TenantProfilePage({
   );
 
   return (
+    <>
+    <div className="mx-auto max-w-7xl p-4"><ProfilePicturePanel /></div>
     <ProfileWorkspace
       data={{
         tenant,
@@ -51,5 +54,6 @@ export default async function TenantProfilePage({
         showPasswordUpdated: params?.passwordUpdated === "1",
       }}
     />
+    </>
   );
 }

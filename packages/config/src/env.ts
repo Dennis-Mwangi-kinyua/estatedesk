@@ -438,7 +438,7 @@ export function normalizeDatabaseUrlSslMode(databaseUrl: string) {
 }
 
 export function getDatabaseUrl() {
-  const databaseUrl = getEnvValue("DIRECT_URL") ?? getEnvValue("DATABASE_URL");
+  const databaseUrl = getEnvValue("DATABASE_URL") ?? getEnvValue("DIRECT_URL");
 
   if (databaseUrl) {
     return normalizeDatabaseUrlSslMode(databaseUrl);

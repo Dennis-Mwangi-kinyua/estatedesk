@@ -179,6 +179,7 @@ function PlatformShellInner({
 
                 <div className="flex shrink-0 items-center gap-3">
                   <HeaderThemeToggle />
+                  <Link href="/profile" className="text-sm underline">My profile</Link>
                   <div className="ed-soft-button flex items-center gap-3 rounded-lg border px-4 py-2 shadow-sm">
                     <MessageSquareText className="h-4 w-4 text-muted-foreground" />
                     <span className="max-w-[220px] truncate text-sm font-medium text-foreground">

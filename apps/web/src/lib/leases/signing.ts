@@ -6,6 +6,7 @@ import { throwSafeActionFailure } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 import { absoluteUrl } from "@/lib/seo";
+import { readAssetBytes } from "@/lib/storage/read-asset-bytes";
 import { storage } from "@/lib/storage";
 import type { LeaseSignerRole, LeaseSigningJurisdiction, LeaseSigningOrder, LeaseSignatureMethod } from "@prisma/client";
 
@@ -17,14 +18,7 @@ export const LEASE_CONSENT: Record<LeaseSigningJurisdiction, string> = {
 const tokenHash = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
 const newToken = () => crypto.randomBytes(32).toString("base64url");
 
-async function assetBytes(key: string) {
-  if (/^https?:\/\//.test(key)) {
-    const response = await fetch(key, { cache: "no-store" });
-    if (!response.ok) throw new Error("Unable to read the lease document.");
-    return new Uint8Array(await response.arrayBuffer());
-  }
-  return storage.downloadFile(key);
-}
+const assetBytes = readAssetBytes;
 
 export async function createLeaseSignatureEnvelope(input: {
   leaseId: string;

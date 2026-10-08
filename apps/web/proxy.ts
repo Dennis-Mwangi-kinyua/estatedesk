@@ -12,6 +12,7 @@ type RateLimitEntry = {
 const PROTECTED_PREFIXES = [
   "/change-password",
   "/dashboard",
+  "/profile",
   "/platform",
   "/staff",
   "/properties",

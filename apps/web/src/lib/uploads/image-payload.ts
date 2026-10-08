@@ -1,3 +1,4 @@
+import { uploadCloudflareImage } from "./cloudflare-images";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -40,14 +41,14 @@ export async function saveImagePayloadAsset({
     maxBytes: 5 * 1024 * 1024,
   });
   const fileName = `${filePrefix}-${randomUUID()}${image.extension}`;
-  const publicKey = `/uploads/${uploadDir}/${fileName}`;
+  const uploaded = await uploadCloudflareImage(image, fileName);
+  const publicKey = uploaded?.key ?? `/uploads/${uploadDir}/${fileName}`;
   const absoluteDir = path.join(process.cwd(), "public", "uploads", uploadDir);
 
-  await mkdir(absoluteDir, { recursive: true });
-  await writeFile(
-    path.join(absoluteDir, fileName),
-    image.buffer,
-  );
+  if (!uploaded) {
+    await mkdir(absoluteDir, { recursive: true });
+    await writeFile(path.join(absoluteDir, fileName), image.buffer);
+  }
 
   const asset = await prisma.asset.create({
     data: {

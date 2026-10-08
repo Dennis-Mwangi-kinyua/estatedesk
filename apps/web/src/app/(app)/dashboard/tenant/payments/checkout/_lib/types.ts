@@ -7,6 +7,7 @@ export type StartPaymentInput = {
   transactionId?: string;
   /** Optional full SMS / bank message for org review. */
   proofMessage?: string;
+  proofImage?: File;
   amount?: number;
   months?: number;
 };

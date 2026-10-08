@@ -2,11 +2,15 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
 import type { NextConfig } from "next";
+import { config as loadEnv } from "dotenv";
 
-const isProduction = process.env.NODE_ENV === "production";
 
 /** Monorepo root (estatedesk-main) — keeps Next resolving hoisted node_modules correctly. */
 const monorepoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
+// npm workspace commands run from apps/web; also load the shared root environment.
+// Existing deployment and app-specific values retain precedence.
+loadEnv({ path: path.join(monorepoRoot, ".env"), quiet: true });
+const isProduction = process.env.NODE_ENV === "production";
 const webPackage = JSON.parse(
   readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "package.json"), "utf8"),
 ) as { version: string };
@@ -19,6 +23,8 @@ function vacancyImageRemotePatterns() {
       pathname: "/**",
     },
   ];
+
+  patterns.push({ protocol: "https", hostname: "imagedelivery.net", pathname: "/**" });
 
   const publicBaseUrl = process.env.S3_PUBLIC_BASE_URL?.trim();
   if (publicBaseUrl) {
@@ -153,6 +159,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     cpus: 1,
+    serverActions: { bodySizeLimit: "8mb" },
     optimizePackageImports: ["lucide-react", "react-icons"],
   },
   async redirects() {
@@ -303,6 +310,10 @@ const nextConfig: NextConfig = {
             value: "public, max-age=31536000, immutable",
           },
         ],
+      },
+      {
+        source: "/profile/:path*",
+        headers: PRIVATE_HEADERS,
       },
       {
         source: "/dashboard/:path*",

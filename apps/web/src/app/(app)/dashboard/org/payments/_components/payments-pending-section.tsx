@@ -83,6 +83,10 @@ export function PaymentsPendingSection({
             </thead>
             <tbody>
               {pendingPayments.map((payment) => {
+                const raw = payment.callbackRaw;
+                const proofUrl = raw && typeof raw === "object" && !Array.isArray(raw)
+                  && typeof raw.proofImageUrl === "string" && raw.proofImageUrl.startsWith("https://imagedelivery.net/")
+                  ? raw.proofImageUrl : null;
                 const transactionMessage = getTransactionMessage(payment.callbackRaw);
 
                 return (
@@ -115,6 +119,7 @@ export function PaymentsPendingSection({
                     </td>
                     <td data-label="Message" className="max-w-sm px-4 py-3 text-xs leading-5 text-muted-foreground">
                       {transactionMessage ? transactionMessage : "-"}
+                      {proofUrl ? <a href={proofUrl} target="_blank" rel="noopener noreferrer" className="mt-2 block font-medium text-primary underline">View payment proof</a> : null}
                     </td>
                     <td data-label="Submitted" className="px-4 py-3 text-muted-foreground">
                       {formatLedgerDate(payment.createdAt)}

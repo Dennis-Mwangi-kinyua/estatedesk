@@ -1,5 +1,6 @@
 "use client";
 
+import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
 import { Bell, Menu } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { DeferredLink } from "@/components/navigation/app-links";
@@ -59,6 +60,7 @@ export function CaretakerDashboardHeader({
             <CaretakerLocaleToggle />
             <OfflineQueuePanel compact />
             <HeaderThemeToggle />
+            <WorkspaceIdentity name={fullName} role="Caretaker" />
 
             <DeferredLink
               href="/dashboard/caretaker/notifications"
