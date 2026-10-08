@@ -98,7 +98,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
         </Surface>
       </section>
 
-      <section className="grid items-start gap-4 xl:grid-cols-3">
+      <section className="grid items-start gap-4 lg:grid-cols-2">
         <Surface title="Feature flags">
           <div className="p-4">
             {featureKeys.length ? (
@@ -139,8 +139,11 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
           </div>
         </Surface>
 
+      </section>
+
+      <section aria-label="Organisation operational counts">
         <Surface id="organisation-operations" title="Operational counts">
-          <div className="grid grid-cols-2 gap-3 p-4">
+          <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-5">
             <SmallCount label="Members" value={org._count.memberships} />
             <SmallCount label="API keys" value={org._count.apiKeys} />
             <SmallCount label="Issues" value={org._count.issues} />
