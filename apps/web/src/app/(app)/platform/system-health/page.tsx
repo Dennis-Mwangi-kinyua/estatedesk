@@ -154,7 +154,7 @@ export default async function SystemHealthPage() {
         title="System health"
         description="Queues, payment gateways, subscriptions, crons, KRA, and production readiness gates."
         action={
-          <Link
+          <Link data-workspace-action="true"
             href="/platform/billing"
             className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-card px-4 text-sm font-semibold"
           >

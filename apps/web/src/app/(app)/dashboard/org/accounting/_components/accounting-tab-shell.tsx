@@ -77,7 +77,7 @@ export function AccountingTabShell({
             const selected = activeTab === tab.id;
 
             return (
-              <Link
+              <Link data-workspace-action="true"
                 key={tab.id}
                 href={buildAccountingPageHref({ tab: tab.id })}
                 role="tab"

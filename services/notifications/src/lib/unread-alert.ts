@@ -3,6 +3,8 @@ import "server-only";
 import { NotificationChannel, NotificationStatus, type NotificationType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { resolveNotificationActionUrl } from "@/lib/push/notification-links";
+import { personalNotificationScope } from "@/lib/notifications/recipient-scope";
+import { collapseNotificationCopies } from "@/lib/notifications/collapse-copies";
 
 export type NotificationAlertAudience = "org_staff" | "caretaker" | "tenant";
 
@@ -42,15 +44,7 @@ function unreadWhere(input: {
     readAt: null,
   };
 
-  if (input.audience === "tenant" && input.tenantId) {
-    return { ...base, tenantId: input.tenantId };
-  }
-
-  if (input.audience === "caretaker" && input.userId) {
-    return { ...base, userId: input.userId };
-  }
-
-  return base;
+  return { ...base, ...personalNotificationScope({ userId: input.userId ?? "", tenantId: input.audience === "tenant" ? input.tenantId : null }) };
 }
 
 export async function getUnreadNotificationAlert(input: {
@@ -62,8 +56,8 @@ export async function getUnreadNotificationAlert(input: {
   const where = unreadWhere(input);
   const href = notificationsHub(input.audience);
 
-  const [count, latest] = await Promise.all([
-    prisma.notification.count({ where }),
+  const [unreadRows, latest] = await Promise.all([
+    prisma.notification.findMany({ where, orderBy: { createdAt: "desc" }, select: { type: true, title: true, message: true, createdAt: true } }),
     prisma.notification.findFirst({
       where,
       orderBy: { createdAt: "desc" },
@@ -78,6 +72,7 @@ export async function getUnreadNotificationAlert(input: {
       },
     }),
   ]);
+  const count = collapseNotificationCopies(unreadRows).length;
 
   if (!latest) {
     return { count, href, latest: null };

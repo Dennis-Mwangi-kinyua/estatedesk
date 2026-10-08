@@ -232,7 +232,7 @@ export function PropertyEditWorkspace({
               </div>
 
               <div className="flex flex-wrap gap-3 pt-2">
-                <button type="submit" className={buttonPrimaryClassName}>
+                <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
                   Save Changes
                 </button>
 

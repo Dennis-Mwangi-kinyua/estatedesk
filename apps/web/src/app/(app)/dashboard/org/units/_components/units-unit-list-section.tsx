@@ -1,3 +1,5 @@
+import { UnitNamesEditor } from "@/components/forms/unit-names-editor";
+import type { OrgRole } from "@prisma/client";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { getOrgUnitHref } from "@/lib/units/url";
 import { deleteUnitAction } from "../actions";
@@ -23,8 +25,9 @@ const STATUS_TABS = [
 ] as const;
 
 export function UnitsUnitListSection({
-  data,
+  data, orgRole,
 }: {
+  orgRole?: OrgRole | null;
   data: Extract<UnitsPageData, { view: "units" }>;
 }) {
   const {
@@ -78,6 +81,7 @@ export function UnitsUnitListSection({
         </div>
       </div>
 
+      {orgRole && ["ADMIN", "MANAGER"].includes(orgRole) && <div className="p-4"><UnitNamesEditor propertyId={selectedProperty.id} units={units.map(unit=>({id:unit.id,houseNo:unit.houseNo,buildingName:unit.building?.name}))}/></div>}
       <div className="divide-y divide-border">
         {units.map((unit) => (
           <article
@@ -136,7 +140,7 @@ export function UnitsUnitListSection({
 
               <form action={deleteUnitAction} className="inline">
                 <input type="hidden" name="unitId" value={unit.id} />
-                <button
+                <button data-workspace-action="true"
                   type="submit"
                   className={buttonSecondaryClassName}
                 >

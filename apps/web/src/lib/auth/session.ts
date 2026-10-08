@@ -21,6 +21,7 @@ import { hashOpaqueToken, legacyHashOpaqueToken } from "@/lib/crypto/tokens";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { isSecurityGatePathname } from "@/lib/auth/security-gate";
 import { prisma } from "@/lib/prisma";
+import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 
 export type { OrgRole, PlatformRole, ScopeType };
 
@@ -751,6 +752,14 @@ export async function requireUserSession(): Promise<AppSession> {
 
   if (!session) {
     redirect("/login");
+  }
+
+  const pathname = (await headers()).get("x-estatedesk-pathname");
+  // APIs enforce their own resource permissions; page and action requests also
+  // enforce the workspace boundary before callers can read or mutate data.
+  const hasResourceGuard = pathname?.startsWith("/api/") || pathname === "/api" || pathname?.startsWith("/sign-lease/") || pathname?.startsWith("/print/");
+  if (pathname && !hasResourceGuard && !canAccessWorkspacePath(session, pathname)) {
+    redirect("/access-denied");
   }
 
   return session;

@@ -66,7 +66,7 @@ export function VerifyTenantResultHeader({
                 name="message"
                 value="Please approve transfer of this moved-out tenant record."
               />
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
               >

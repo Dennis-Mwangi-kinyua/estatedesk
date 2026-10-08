@@ -35,7 +35,7 @@ export function IssueCardActions({
       {canStart ? (
         <form action={startCaretakerIssueAction}>
           <input type="hidden" name="issueId" value={issue.id} />
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
@@ -64,7 +64,7 @@ export function IssueCardActions({
             placeholder="What did you check, fix, or follow up on?"
             className="mt-3 w-full rounded-xl border border-border bg-background px-3 py-3 text-sm text-foreground outline-none transition focus:border-primary/40"
           />
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="mt-3 inline-flex items-center justify-center rounded-xl border border-border bg-background px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-muted/30"
           >

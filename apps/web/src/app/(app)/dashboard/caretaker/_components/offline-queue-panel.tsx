@@ -117,7 +117,7 @@ export function OfflineQueuePanel({ compact = false }: { compact?: boolean }) {
     if (items.length === 0) return null;
 
     return (
-      <button
+      <button data-workspace-action="true"
         type="button"
         onClick={handleSync}
         disabled={!navigator.onLine || isPending}
@@ -159,7 +159,7 @@ export function OfflineQueuePanel({ compact = false }: { compact?: boolean }) {
             <CaretakerI18nLabel labelKey="offlineQueueHint" />
           </p>
         </div>
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={handleSync}
           disabled={!navigator.onLine || isPending}
@@ -192,7 +192,7 @@ export function OfflineQueuePanel({ compact = false }: { compact?: boolean }) {
         </p>
       ) : null}
 
-      <button
+      <button data-workspace-action="true"
         type="button"
         onClick={() => {
           clearOfflineQueue();

@@ -7,6 +7,7 @@ type PushPayload = {
   body: string;
   url?: string;
   tag?: string;
+  notificationId?: string;
 };
 
 let configured = false;

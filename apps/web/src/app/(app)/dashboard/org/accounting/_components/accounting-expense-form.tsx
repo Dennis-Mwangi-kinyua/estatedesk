@@ -109,7 +109,7 @@ export function AccountingExpenseForm({
           </label>
         </div>
 
-        <button type="submit" className={buttonPrimaryClassName}>
+        <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
           Post expense
         </button>
       </form>

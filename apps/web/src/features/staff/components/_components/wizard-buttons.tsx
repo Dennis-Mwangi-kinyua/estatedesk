@@ -22,7 +22,7 @@ export const WizardButtons = memo(function WizardButtons({
   return (
     <div className="flex flex-col gap-3 sm:flex-row">
       {currentStep > 0 ? (
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={onBack}
           className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-border bg-background px-5 py-3 text-sm font-medium text-foreground transition hover:bg-muted/30"
@@ -32,7 +32,7 @@ export const WizardButtons = memo(function WizardButtons({
       ) : null}
 
       {isLastStep ? (
-        <button
+        <button data-workspace-action="true"
           type="submit"
           disabled={submitDisabled}
           className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
@@ -40,7 +40,7 @@ export const WizardButtons = memo(function WizardButtons({
           {submitLabel ?? "Create Caretaker"}
         </button>
       ) : (
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={onNext}
           disabled={continueDisabled}

@@ -28,7 +28,7 @@ export function LeasesPagination({
 
       <div className="flex items-center gap-2">
         {currentPage > 1 ? (
-          <DeferredLink
+          <DeferredLink data-workspace-action="true"
             href={buildLeasesPageHref(currentPage - 1)}
             className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
           >
@@ -45,7 +45,7 @@ export function LeasesPagination({
         </span>
 
         {currentPage < totalPages ? (
-          <DeferredLink
+          <DeferredLink data-workspace-action="true"
             href={buildLeasesPageHref(currentPage + 1)}
             className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
           >

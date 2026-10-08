@@ -163,7 +163,7 @@ export function AccountingSettingsWorkspace({
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <button type="submit" className={buttonPrimaryClassName}>
+            <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
               Save settings
             </button>
           </div>
@@ -187,7 +187,7 @@ export function AccountingSettingsWorkspace({
           ) : null}
 
           <form action={syncAccrualsAction}>
-            <button type="submit" className={buttonSecondaryClassName}>
+            <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
               Sync outstanding billing accruals
             </button>
           </form>

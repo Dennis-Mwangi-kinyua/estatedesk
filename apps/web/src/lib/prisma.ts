@@ -12,7 +12,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 /** Bump when schema/client changes so the dev global cache is recreated. */
-const PRISMA_SCHEMA_VERSION = "stability-pool-v3-pooled-runtime";
+const PRISMA_SCHEMA_VERSION = "stability-pool-v4-bnb-listings";
 
 const DATABASE_URL = getDatabaseUrl();
 

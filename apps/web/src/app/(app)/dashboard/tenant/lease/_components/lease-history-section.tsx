@@ -65,14 +65,14 @@ export function LeaseHistorySection({
               </div>
               {hasPdf ? (
                 <div className="mt-4 flex gap-2">
-                  <a
+                  <a data-workspace-action="true"
                     href={tenantLeaseDownloadPath(lease.id)}
                     className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground"
                   >
                     <Download className="h-3.5 w-3.5" />
                     Download
                   </a>
-                  <a
+                  <a data-workspace-action="true"
                     href={tenantLeaseDownloadPath(lease.id, { view: true })}
                     target="_blank"
                     rel="noreferrer"

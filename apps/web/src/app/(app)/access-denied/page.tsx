@@ -24,13 +24,13 @@ export default function AccessDeniedPage() {
         </p>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Link
+          <Link data-workspace-action="true"
             href="/dashboard"
             className="ios-button inline-flex h-12 items-center justify-center rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white"
           >
             Go to my dashboard
           </Link>
-          <Link
+          <Link data-workspace-action="true"
             href="/"
             className="ios-button inline-flex h-12 items-center justify-center rounded-2xl border border-neutral-200 bg-white px-5 text-sm font-semibold text-neutral-800"
           >

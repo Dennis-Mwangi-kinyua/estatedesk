@@ -62,7 +62,7 @@ export function SupportForm() {
           />
         </label>
 
-        <button
+        <button data-workspace-action="true"
           type="submit"
           disabled={pending}
           className={buttonPrimaryClassName}

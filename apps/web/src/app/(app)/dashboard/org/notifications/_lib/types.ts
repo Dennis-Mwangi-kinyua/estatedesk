@@ -8,6 +8,7 @@ export const ALLOWED_ROLES: AllowedRole[] = [
 ];
 
 export type OrgContext = {
+  userId?: string;
   orgId: string;
   role: AllowedRole;
   org: {

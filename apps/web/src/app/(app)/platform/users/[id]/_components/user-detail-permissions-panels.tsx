@@ -105,7 +105,7 @@ export function UserDetailEditPermissionsPanel({
             </label>
           ))}
         </div>
-        <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90">
+        <button data-workspace-action="true" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90">
           <Save className="h-4 w-4" />
           Save permissions
         </button>

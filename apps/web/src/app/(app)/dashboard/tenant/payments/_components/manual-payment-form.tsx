@@ -30,7 +30,7 @@ export function ManualPaymentForm({ data }: { data: TenantPaymentsPageData }) {
             organization verifies).
           </p>
         </div>
-        <Link
+        <Link data-workspace-action="true"
           href={payHref}
           className="inline-flex h-11 shrink-0 items-center justify-center rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
         >

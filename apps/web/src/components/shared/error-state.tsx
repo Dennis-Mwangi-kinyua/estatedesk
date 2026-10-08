@@ -12,8 +12,8 @@ export function ErrorState({ title = "This page could not load", description = "
         <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
         {reference && <p className="mt-4 break-all rounded-xl border border-border p-3 font-mono text-xs text-muted-foreground">Reference: {reference}</p>}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <button type="button" onClick={retry} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"><RefreshCw aria-hidden="true" className="h-4 w-4" />Try again</button>
-          <Link href={homeHref} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-border px-4 py-3 text-sm font-semibold">{homeLabel}</Link>
+          <button data-workspace-action="true" type="button" onClick={retry} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"><RefreshCw aria-hidden="true" className="h-4 w-4" />Try again</button>
+          <Link data-workspace-action="true" href={homeHref} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-border px-4 py-3 text-sm font-semibold">{homeLabel}</Link>
         </div>
       </section>
     </div>

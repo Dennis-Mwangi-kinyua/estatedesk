@@ -25,7 +25,7 @@ export function TenantsFiltersSection({ data }: { data: TenantsPageData }) {
           <input type="hidden" name="pageSize" value={data.pageSize} />
           {data.created ? <input type="hidden" name="created" value="1" /> : null}
 
-          <button type="submit" className={buttonPrimaryClassName}>
+          <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
             Search
           </button>
         </div>
@@ -35,7 +35,7 @@ export function TenantsFiltersSection({ data }: { data: TenantsPageData }) {
             const active = data.status === option;
 
             return (
-              <DeferredLink
+              <DeferredLink data-workspace-action="true"
                 key={option}
                 href={buildFilterHref({
                   search: data.search,

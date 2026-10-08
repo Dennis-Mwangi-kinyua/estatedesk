@@ -114,7 +114,7 @@ export function AccountingDistributionsWorkspace({
             <input name="to" type="date" defaultValue={filters.to} className={fieldClassName} />
           </label>
           <div className="flex items-end">
-            <button type="submit" className={buttonSecondaryClassName}>
+            <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
               Apply
             </button>
           </div>
@@ -145,7 +145,7 @@ export function AccountingDistributionsWorkspace({
                   <input type="hidden" name="landlordId" value={filters.landlordId} />
                   <input type="hidden" name="from" value={filters.from} />
                   <input type="hidden" name="to" value={filters.to} />
-                  <button type="submit" className={buttonPrimaryClassName}>
+                  <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
                     Email statement
                   </button>
                 </form>
@@ -342,7 +342,7 @@ export function AccountingDistributionsWorkspace({
               />
             </label>
             <div className="sm:col-span-2">
-              <button type="submit" className={buttonPrimaryClassName}>
+              <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
                 Post distribution
               </button>
             </div>

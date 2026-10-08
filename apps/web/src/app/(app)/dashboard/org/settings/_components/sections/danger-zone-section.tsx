@@ -10,7 +10,7 @@ export function DangerZoneSection() {
       description="Sensitive organization-level actions. Leave these disabled until you define the exact policy."
     >
       <div className="space-y-3">
-        <button
+        <button data-workspace-action="true"
           type="button"
           disabled
           className="flex w-full items-center justify-between rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-left opacity-60 dark:border-white/10 dark:bg-slate-900"
@@ -26,7 +26,7 @@ export function DangerZoneSection() {
           <ArrowUpRight className="h-4 w-4 text-slate-500 dark:text-slate-400" />
         </button>
 
-        <button
+        <button data-workspace-action="true"
           type="button"
           disabled
           className="flex w-full items-center justify-between rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-left opacity-60 dark:border-white/10 dark:bg-slate-900"

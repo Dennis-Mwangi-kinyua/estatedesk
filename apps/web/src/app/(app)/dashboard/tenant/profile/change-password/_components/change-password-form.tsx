@@ -70,13 +70,13 @@ export function ChangePasswordForm() {
       </p>
 
       <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
-        <Link
+        <Link data-workspace-action="true"
           href="/dashboard/tenant/profile"
           className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-5 text-sm font-semibold text-foreground transition hover:bg-muted/30"
         >
           Cancel
         </Link>
-        <button
+        <button data-workspace-action="true"
           type="submit"
           disabled={pending}
           className="inline-flex h-11 items-center justify-center rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:opacity-60"

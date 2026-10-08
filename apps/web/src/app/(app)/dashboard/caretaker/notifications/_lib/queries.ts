@@ -1,3 +1,5 @@
+import { getPersonalUnreadNotificationCount } from "@/lib/notifications/unread-count";
+import { collapseNotificationCopies } from "@/lib/notifications/collapse-copies";
 import { getPagination } from "@/lib/db/pagination";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
@@ -24,6 +26,7 @@ export async function getCaretakerNotificationsData(args: {
     const where = {
       orgId: args.orgId,
       userId: args.userId,
+      channel: "IN_APP" as const,
     };
 
     const { page: currentPage, skip, take } = getPagination({
@@ -36,12 +39,7 @@ export async function getCaretakerNotificationsData(args: {
         () =>
           Promise.all([
             prisma.notification.count({ where }),
-            prisma.notification.count({
-              where: {
-                ...where,
-                readAt: null,
-              },
-            }),
+            getPersonalUnreadNotificationCount({ orgId: args.orgId, userId: args.userId, orgRole: "CARETAKER" }),
             prisma.notification.findMany({
               where,
               orderBy: { createdAt: "desc" },
@@ -69,7 +67,7 @@ export async function getCaretakerNotificationsData(args: {
 
     return {
       ok: true as const,
-      notifications,
+      notifications: collapseNotificationCopies(notifications),
       unreadCount,
       totalNotifications,
       currentPage: safePage,

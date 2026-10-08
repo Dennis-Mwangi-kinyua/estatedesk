@@ -22,7 +22,7 @@ export const DesktopField = memo(function DesktopField({
         <p className="text-sm text-muted-foreground">{label}</p>
 
         {isSensitive && onReveal ? (
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={onReveal}
             className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-medium text-foreground/80 ring-1 ring-neutral-200 transition hover:bg-neutral-50"

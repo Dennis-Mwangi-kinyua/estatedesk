@@ -148,7 +148,7 @@ export default async function LandlordStatementsPage({
             className="mt-1 min-h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
           />
         </div>
-        <button
+        <button data-workspace-action="true"
           type="submit"
           className="min-h-10 rounded-xl bg-foreground px-4 text-sm font-semibold text-background"
         >

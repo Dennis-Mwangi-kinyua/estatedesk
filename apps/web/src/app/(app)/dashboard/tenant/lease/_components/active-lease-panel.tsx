@@ -50,14 +50,14 @@ export function ActiveLeasePanel({ lease }: { lease: ActiveLease }) {
           <div className="flex flex-col gap-2 sm:flex-row lg:items-end">
             {hasPdfContract ? (
               <>
-                <a
+                <a data-workspace-action="true"
                   href={tenantLeaseDownloadPath(lease.id)}
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
                 >
                   <Download className="h-4 w-4" />
                   Download PDF
                 </a>
-                <a
+                <a data-workspace-action="true"
                   href={tenantLeaseDownloadPath(lease.id, { view: true })}
                   target="_blank"
                   rel="noreferrer"
@@ -74,7 +74,7 @@ export function ActiveLeasePanel({ lease }: { lease: ActiveLease }) {
                   : "Contract not uploaded"}
               </span>
             )}
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/tenant/payments"
               className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >

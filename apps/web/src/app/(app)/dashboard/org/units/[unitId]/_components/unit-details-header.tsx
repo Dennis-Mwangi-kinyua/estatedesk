@@ -19,13 +19,13 @@ export function UnitDetailsHeader({ unit }: { unit: UnitDetailsViewData["unit"] 
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Link
+          <Link data-workspace-action="true"
             href="/dashboard/org/units"
             className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
           >
             Back to Units
           </Link>
-          <Link
+          <Link data-workspace-action="true"
             href={`/dashboard/org/properties/${unit.property.id}`}
             className="inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
           >
@@ -33,7 +33,7 @@ export function UnitDetailsHeader({ unit }: { unit: UnitDetailsViewData["unit"] 
           </Link>
           <form action={deleteUnitAction}>
             <input type="hidden" name="unitId" value={unit.id} />
-            <button
+            <button data-workspace-action="true"
               type="submit"
               className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition hover:bg-rose-100"
             >

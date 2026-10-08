@@ -1,3 +1,4 @@
+import { personalNotificationScope } from "@/lib/notifications/recipient-scope";
 import type { Prisma } from "@prisma/client";
 import type { TenantNotificationFilter } from "./types";
 
@@ -63,7 +64,8 @@ export function getNotificationWhereForFilter(
 ): Prisma.NotificationWhereInput {
   const base = {
     orgId: tenant.orgId,
-    OR: [{ tenantId: tenant.id }, { userId: tenant.userId }],
+    channel: "IN_APP" as const,
+    ...personalNotificationScope({ userId: tenant.userId, tenantId: tenant.id }),
   };
 
   if (filter === "unread") return { ...base, readAt: null };
@@ -76,7 +78,7 @@ export function getNotificationWhereForFilter(
   if (filter === "issues") {
     return {
       ...base,
-      OR: [{ tenantId: tenant.id }, { userId: tenant.userId }],
+      ...personalNotificationScope({ userId: tenant.userId, tenantId: tenant.id }),
       AND: [
         {
           OR: [

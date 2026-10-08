@@ -195,7 +195,7 @@ export function PwaExperience() {
           {slowNavigation ? (
             <div className="mx-auto mt-3 flex w-[min(92vw,28rem)] items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950 shadow-lg">
               <span>This is taking longer than usual. Your connection may be slow.</span>
-              <button type="button" onClick={() => window.location.reload()} className="shrink-0 font-semibold underline">Reload</button>
+              <button data-workspace-action="true" type="button" onClick={() => window.location.reload()} className="shrink-0 font-semibold underline">Reload</button>
             </div>
           ) : null}
         </div>
@@ -208,26 +208,26 @@ export function PwaExperience() {
         </div>
       ) : null}
 
-      <button type="button" onClick={() => setShowInfo(true)} className="fixed bottom-[max(5.5rem,env(safe-area-inset-bottom))] right-4 z-[9000] grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-lg dark:border-white/15 dark:bg-slate-900 dark:text-white" aria-label="PWA app information">
+      <button data-workspace-action="true" type="button" onClick={() => setShowInfo(true)} className="fixed bottom-[max(5.5rem,env(safe-area-inset-bottom))] right-4 z-[9000] grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-lg dark:border-white/15 dark:bg-slate-900 dark:text-white" aria-label="PWA app information">
         <Info className="h-5 w-5" />
       </button>
 
       {showInfo ? (
         <div className="fixed inset-0 z-[10002] grid place-items-end bg-slate-950/45 p-3 sm:place-items-center" role="dialog" aria-modal="true" aria-label="EstateDesk app information">
           <section className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl dark:bg-slate-900">
-            <div className="flex items-start justify-between"><div><p className="font-semibold text-slate-950 dark:text-white">EstateDesk installed app</p><p className="mt-1 text-sm text-slate-500">Version {process.env.NEXT_PUBLIC_APP_VERSION ?? "0.2.0"} · {online ? "Online" : "Offline"}</p></div><button type="button" onClick={() => setShowInfo(false)} aria-label="Close"><X className="h-5 w-5" /></button></div>
+            <div className="flex items-start justify-between"><div><p className="font-semibold text-slate-950 dark:text-white">EstateDesk installed app</p><p className="mt-1 text-sm text-slate-500">Version {process.env.NEXT_PUBLIC_APP_VERSION ?? "0.2.0"} · {online ? "Online" : "Offline"}</p></div><button data-workspace-action="true" type="button" onClick={() => setShowInfo(false)} aria-label="Close"><X className="h-5 w-5" /></button></div>
             <div className="mt-5 grid gap-3">
-              <button type="button" onClick={updateReady ? applyUpdate : checkForUpdates} disabled={checking} className="flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60 dark:bg-white dark:text-slate-950">
+              <button data-workspace-action="true" type="button" onClick={updateReady ? applyUpdate : checkForUpdates} disabled={checking} className="flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60 dark:bg-white dark:text-slate-950">
                 {updateReady ? <Download className="h-4 w-4" /> : <RefreshCw className={`h-4 w-4 ${checking ? "animate-spin" : ""}`} />}{updateReady ? "Install available update" : checking ? "Checking…" : "Check for updates"}
               </button>
               <div className="rounded-xl border border-slate-200 p-4 dark:border-white/15">
                 <div className="flex items-center gap-2 font-medium"><LockKeyhole className="h-4 w-4" />Optional privacy lock</div>
                 <p className="mt-1 text-xs leading-5 text-slate-500">Adds a local screen lock after one minute away. Your EstateDesk login remains the security boundary.</p>
                 {!lockEnabled ? <input value={pin} onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 8))} inputMode="numeric" type="password" placeholder="Choose 4–8 digit PIN" className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-white/20 dark:bg-slate-950" /> : null}
-                <button type="button" onClick={configureLock} className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold dark:border-white/20">{lockEnabled ? "Disable privacy lock" : "Enable privacy lock"}</button>
+                <button data-workspace-action="true" type="button" onClick={configureLock} className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold dark:border-white/20">{lockEnabled ? "Disable privacy lock" : "Enable privacy lock"}</button>
                 {lockMessage ? <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">{lockMessage}</p> : null}
               </div>
-              <button type="button" onClick={() => window.location.reload()} className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold dark:border-white/20"><RefreshCw className="h-4 w-4" />Reload app</button>
+              <button data-workspace-action="true" type="button" onClick={() => window.location.reload()} className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold dark:border-white/20"><RefreshCw className="h-4 w-4" />Reload app</button>
             </div>
           </section>
         </div>
@@ -238,7 +238,7 @@ export function PwaExperience() {
           <section className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
             <ShieldCheck className="mx-auto h-10 w-10 text-teal-700" /><h2 className="mt-3 text-lg font-semibold text-slate-950">EstateDesk is locked</h2><p className="mt-1 text-sm text-slate-600">Enter your app privacy PIN to continue.</p>
             <input autoFocus value={pin} onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 8))} onKeyDown={(event) => { if (event.key === "Enter") void unlock(); }} inputMode="numeric" type="password" className="mt-5 w-full rounded-xl border border-slate-300 px-4 py-3 text-center text-lg tracking-[.35em]" aria-label="Privacy PIN" />
-            {lockMessage ? <p className="mt-2 text-sm text-red-600">{lockMessage}</p> : null}<button type="button" onClick={unlock} className="mt-4 w-full rounded-xl bg-slate-950 px-4 py-3 font-semibold text-white">Unlock</button>
+            {lockMessage ? <p className="mt-2 text-sm text-red-600">{lockMessage}</p> : null}<button data-workspace-action="true" type="button" onClick={unlock} className="mt-4 w-full rounded-xl bg-slate-950 px-4 py-3 font-semibold text-white">Unlock</button>
           </section>
         </div>
       ) : null}

@@ -62,7 +62,7 @@ export default async function PlatformPaymentsPage({
   return (
     <div className="ed-mobile-first min-w-0 max-w-full space-y-4 overflow-x-clip sm:space-y-6">
       <div className="workspace-panel overflow-hidden rounded-3xl border border-border bg-card">
-        <WorkspaceHero kind="payments" eyebrow="Platform ledger" title="Organisation payments" description={`Collection visibility for ${ledger.period}. Review billing, payments, and outstanding balances across your organisations.`} actions={<Link href="/platform/payment-ops" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">Review payment operations<ArrowUpRight className="h-4 w-4" /></Link>}>
+        <WorkspaceHero kind="payments" eyebrow="Platform ledger" title="Organisation payments" description={`Collection visibility for ${ledger.period}. Review billing, payments, and outstanding balances across your organisations.`} actions={<Link data-workspace-action="true" href="/platform/payment-ops" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">Review payment operations<ArrowUpRight className="h-4 w-4" /></Link>}>
           <p className="text-xs text-muted-foreground">Select an organisation below to explore its profile, billing, members, and operational activity.</p>
         </WorkspaceHero>
       </div>
@@ -94,7 +94,7 @@ export default async function PlatformPaymentsPage({
 
         <form className="grid gap-3 border-b border-border p-4 sm:grid-cols-[1fr_auto]">
           <label className="min-w-0 text-sm font-medium">Find an organisation<div className="relative mt-2"><Search aria-hidden="true" className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" /><input name="q" defaultValue={q} maxLength={200} placeholder="Organisation name or slug" className="min-h-11 w-full rounded-xl border border-border bg-card py-3 pl-10 pr-3 text-base font-normal sm:text-sm" /></div></label>
-          <button className="min-h-11 self-end rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">
+          <button data-workspace-action="true" className="min-h-11 self-end rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">
             Apply
           </button>
         </form>

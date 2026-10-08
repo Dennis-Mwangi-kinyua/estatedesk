@@ -26,7 +26,7 @@ export function AccountingRequestsQueue({
               feedback.
             </p>
           </div>
-          <Link
+          <Link data-workspace-action="true"
             href="/dashboard/org/accounting/requests"
             className="inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-muted/30"
           >

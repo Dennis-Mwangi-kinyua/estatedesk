@@ -54,7 +54,7 @@ export function ResolutionForm({
             : "mt-3 w-full rounded-[14px] border border-border bg-card px-3 py-2 text-sm text-foreground outline-none transition focus:border-neutral-400"
         }
       />
-      <button
+      <button data-workspace-action="true"
         type="submit"
         className={
           compact

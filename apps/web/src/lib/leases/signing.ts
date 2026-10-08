@@ -218,7 +218,7 @@ export async function remindLeaseSigner(envelopeId: string, signerId: string, or
   const token = newToken();
   await prisma.$transaction(async (tx) => {
     await tx.leaseSignatureSigner.update({ where: { id: signer.id }, data: { tokenHash: tokenHash(token), lastReminderAt: new Date() } });
-    await notifyInAppAndPush({ db: tx, orgId, recipients: [{ userId: signer.userId, tenantId: signer.role === "TENANT" ? signer.envelope.lease.tenantId : null }], type: "GENERAL", title: "Lease signature reminder", message: `Review and sign your lease: ${absoluteUrl(`/sign-lease/${token}`)}` });
+    await notifyInAppAndPush({ actorUserId: actorUserId, db: tx, orgId, recipients: [{ userId: signer.userId, tenantId: signer.role === "TENANT" ? signer.envelope.lease.tenantId : null }], type: "GENERAL", title: "Lease signature reminder", message: `Review and sign your lease: ${absoluteUrl(`/sign-lease/${token}`)}` });
     await tx.leaseSignatureEvent.create({ data: { envelopeId, signerId, actorUserId, eventType: "REMINDER_SENT" } });
   });
 }

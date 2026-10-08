@@ -203,7 +203,7 @@ export default async function PlatformRateLimitsPage() {
         action={
           canMutate ? (
             <form action={clearExpiredRateLimitBucketsAction}>
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50"
               >
@@ -335,7 +335,7 @@ export default async function PlatformRateLimitsPage() {
               {canMutate ? (
                 <form action={clearRateLimitScopeAction}>
                   <input type="hidden" name="scope" value={scope.scope} />
-                  <button
+                  <button data-workspace-action="true"
                     type="submit"
                     className="min-h-11 w-full rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200"
                   >
@@ -392,7 +392,7 @@ export default async function PlatformRateLimitsPage() {
                     <td className="px-4 py-3">
                       <form action={clearRateLimitScopeAction}>
                         <input type="hidden" name="scope" value={scope.scope} />
-                        <button
+                        <button data-workspace-action="true"
                           type="submit"
                           className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-500/30 dark:bg-slate-950 dark:text-red-300"
                         >
@@ -454,7 +454,7 @@ export default async function PlatformRateLimitsPage() {
               {canMutate ? (
                 <form action={resetRateLimitBucketAction}>
                   <input type="hidden" name="key" value={bucket.key} />
-                  <button
+                  <button data-workspace-action="true"
                     type="submit"
                     className="min-h-11 w-full rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted/50"
                   >
@@ -522,7 +522,7 @@ export default async function PlatformRateLimitsPage() {
                     <td className="px-4 py-3">
                       <form action={resetRateLimitBucketAction}>
                         <input type="hidden" name="key" value={bucket.key} />
-                        <button
+                        <button data-workspace-action="true"
                           type="submit"
                           className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100"
                         >

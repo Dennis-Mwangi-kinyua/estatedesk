@@ -170,7 +170,7 @@ export function VacancyInquiriesWorkspace({
                             </option>
                           ))}
                         </select>
-                        <button
+                        <button data-workspace-action="true"
                           type="submit"
                           className="rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
                         >

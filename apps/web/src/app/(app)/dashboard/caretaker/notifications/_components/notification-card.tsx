@@ -1,3 +1,4 @@
+import { NotificationViewButton } from "@/components/notifications/notification-view-button";
 import { Clock3, Send } from "lucide-react";
 import { markCaretakerNotificationReadAction } from "../actions";
 import {
@@ -66,6 +67,7 @@ export function NotificationCard({
             </span>
           </div>
 
+          <div className="mt-3"><NotificationViewButton notificationId={notification.id} /></div>
           {isUnread ? (
             <form action={markCaretakerNotificationReadAction} className="mt-3">
               <input
@@ -73,7 +75,7 @@ export function NotificationCard({
                 name="notificationId"
                 value={notification.id}
               />
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="inline-flex items-center justify-center rounded-2xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-muted/30"
               >

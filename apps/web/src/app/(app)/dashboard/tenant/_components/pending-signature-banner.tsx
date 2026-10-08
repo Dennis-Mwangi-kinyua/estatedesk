@@ -49,7 +49,7 @@ export function PendingSignatureBanner({
           </div>
         </div>
 
-        <Link
+        <Link data-workspace-action="true"
           href={`/dashboard/tenant/lease/signing?signerId=${primary.id}`}
           className="inline-flex min-h-10 items-center justify-center rounded-2xl bg-amber-900 px-4 text-sm font-semibold text-white transition hover:bg-amber-800"
         >

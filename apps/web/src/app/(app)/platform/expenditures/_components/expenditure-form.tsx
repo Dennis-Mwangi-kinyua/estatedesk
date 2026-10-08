@@ -93,7 +93,7 @@ export function ExpenditureForm({ defaultDate }: { defaultDate: string }) {
         Already paid
       </label>
 
-      <button
+      <button data-workspace-action="true"
         type="submit"
         className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
       >

@@ -1,4 +1,5 @@
 import "server-only";
+import { createHash } from "node:crypto";
 
 import {
   NotificationChannel,
@@ -26,6 +27,8 @@ type NotifyInput = {
   message: string;
   actionUrl?: string;
   providerResponse?: Prisma.InputJsonValue;
+  actorUserId?: string | null;
+  eventKey?: string;
 };
 
 const DEFAULT_CHANNELS = [
@@ -50,12 +53,36 @@ export async function notifyRecipients({
   message,
   actionUrl,
   providerResponse,
+  actorUserId,
+  eventKey,
 }: NotifyInput) {
   const seen = new Set<string>();
   const now = new Date();
   const data: Prisma.NotificationCreateManyInput[] = [];
+  // Normalize linked tenants so {tenantId}, {userId}, and both cannot fan out twice.
+  const tenantIds = recipients.flatMap(r => r.tenantId ? [r.tenantId] : []);
+  const userIds = recipients.flatMap(r => r.userId ? [r.userId] : []);
+  const tenants = await db.tenant.findMany({
+    where: { orgId, deletedAt: null, OR: [{ id: { in: tenantIds } }, { userId: { in: userIds } }] },
+    select: { id: true, userId: true },
+  });
+  const normalized = recipients.map(recipient => {
+    const tenant = recipient.userId
+      ? tenants.find(t => t.userId === recipient.userId)
+      : tenants.find(t => t.id === recipient.tenantId);
+    return { userId: recipient.userId ?? tenant?.userId ?? null, tenantId: tenant?.id ?? null };
+  });
+  const recent = eventKey ? [] : await db.notification.findMany({
+    where: { orgId, type, title, message, createdAt: { gte: new Date(now.getTime() - 600_000) },
+      OR: normalized.map(recipient => ({ userId: recipient.userId, tenantId: recipient.tenantId })) },
+    select: { userId: true, tenantId: true, channel: true },
+  });
+  for (const recipient of recent) seen.add(recipientKey(recipient, recipient.channel));
+  // Content-based repeats are quiet for ten minutes; an explicit event key is permanent.
+  const bucket = Math.floor(now.getTime() / 600_000);
 
-  for (const recipient of recipients) {
+  for (const recipient of normalized) {
+    if (actorUserId && recipient.userId === actorUserId) continue;
     if (!recipient.userId && !recipient.tenantId) {
       continue;
     }
@@ -76,7 +103,10 @@ export async function notifyRecipients({
         actionUrl,
       });
 
+      const identity = JSON.stringify([orgId, channel, recipient.userId ?? recipient.tenantId, eventKey ?? [type, title, message, resolvedActionUrl, bucket]]);
       data.push({
+        id: `ntf_${createHash("sha256").update(identity).digest("hex")}`,
+        createdAt: now,
         orgId,
         userId: recipient.userId ?? null,
         tenantId: recipient.tenantId ?? null,
@@ -103,7 +133,7 @@ export async function notifyRecipients({
     return { count: 0 };
   }
 
-  return db.notification.createMany({ data });
+  return db.notification.createMany({ data, skipDuplicates: true });
 }
 
 export function notifyInAppAndPush(

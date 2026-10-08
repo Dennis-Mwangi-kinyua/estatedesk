@@ -423,7 +423,7 @@ html.light,
   }
 
   :where(p, li, dd, dt, blockquote, figcaption, a, label, td, th) {
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
   }
 
   :where(table) {
@@ -2046,11 +2046,11 @@ html.light,
 
 .ed-mobile-first :where(h1, h2, h3, h4) {
   text-wrap: balance;
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
 }
 
 .ed-mobile-first :where(p, li, dd, label, td, th, span) {
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
   word-break: normal;
 }
 

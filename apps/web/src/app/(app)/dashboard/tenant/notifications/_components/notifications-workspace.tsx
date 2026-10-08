@@ -1,3 +1,4 @@
+import { NotificationViewButton } from "@/components/notifications/notification-view-button";
 import Link from "next/link";
 import { Bell, CheckCircle2, Inbox, Send } from "lucide-react";
 import { PageShell, SurfaceCard } from "@/components/theme/ed-dashboard-shell";
@@ -28,7 +29,7 @@ function FilterLink({
   const active = filter === activeFilter;
 
   return (
-    <Link
+    <Link data-workspace-action="true"
       href={`/dashboard/tenant/notifications?filter=${filter}`}
       className={cn(
         "inline-flex h-10 shrink-0 items-center justify-center rounded-full border px-4 text-sm font-medium transition",
@@ -68,7 +69,7 @@ export function NotificationsWorkspace({
           </div>
 
           <form action={markAllTenantNotificationsReadAction}>
-            <button
+            <button data-workspace-action="true"
               type="submit"
               className="inline-flex h-11 items-center justify-center rounded-2xl bg-neutral-950 px-5 text-sm font-medium text-white transition hover:bg-neutral-800"
             >
@@ -153,7 +154,8 @@ export function NotificationsWorkspace({
                         <p className="text-sm font-semibold text-foreground">
                           {notification.title}
                         </p>
-                        {!notification.readAt ? (
+                        <div className="mt-3"><NotificationViewButton notificationId={notification.id} /></div>
+                      {!notification.readAt ? (
                           <span className="rounded-full bg-neutral-950 px-2 py-0.5 text-[10px] font-medium text-white">
                             New
                           </span>
@@ -172,6 +174,7 @@ export function NotificationsWorkspace({
                         <span>{formatDateTime(notification.createdAt)}</span>
                       </div>
 
+                      <div className="mt-3"><NotificationViewButton notificationId={notification.id} /></div>
                       {!notification.readAt ? (
                         <form
                           action={markTenantNotificationReadAction}
@@ -182,7 +185,7 @@ export function NotificationsWorkspace({
                             name="notificationId"
                             value={notification.id}
                           />
-                          <button
+                          <button data-workspace-action="true"
                             type="submit"
                             className="inline-flex h-9 items-center justify-center rounded-xl border border-border bg-card px-3 text-xs font-medium text-foreground/80 transition hover:bg-muted/30"
                           >

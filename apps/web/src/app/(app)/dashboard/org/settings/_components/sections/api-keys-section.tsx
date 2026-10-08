@@ -40,7 +40,7 @@ export function ApiKeysSection({
 
         <input type="date" name="expiresAt" className={fieldClassName} />
 
-        <button type="submit" className={buttonPrimaryClassName}>
+        <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
           Create API Key
         </button>
       </form>
@@ -94,7 +94,7 @@ export function ApiKeysSection({
                     name="nextActive"
                     value={isActive ? "false" : "true"}
                   />
-                  <button
+                  <button data-workspace-action="true"
                     type="submit"
                     className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
                   >

@@ -120,7 +120,7 @@ export function BillingSection({ data }: { data: SettingsPageData }) {
           defaultValue={data.subscription.billingEmail}
         />
 
-        <button type="submit" className={`w-full ${buttonPrimaryClassName}`}>
+        <button data-workspace-action="true" type="submit" className={`w-full ${buttonPrimaryClassName}`}>
           Update billing contact
         </button>
       </form>
@@ -175,7 +175,7 @@ export function BillingSection({ data }: { data: SettingsPageData }) {
             />
           </div>
 
-          <button type="submit" className={`w-full ${buttonPrimaryClassName}`}>
+          <button data-workspace-action="true" type="submit" className={`w-full ${buttonPrimaryClassName}`}>
             Submit upgrade request
           </button>
         </form>

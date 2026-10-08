@@ -1,5 +1,6 @@
 "use client";
 
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { useState } from "react";
 import { Lock, Mail, Phone, User2 } from "lucide-react";
 import {
@@ -61,7 +62,7 @@ export function NewOrgStepAdmin(props: Props) {
     <section className={panelClass}>
       <div className="mb-6">
         <div className={iconBubbleClass}>
-          <span aria-hidden="true" className="text-2xl">🔑</span>
+          <span aria-hidden="true" className="text-2xl"><WorkspaceIcon label="security" className="inline-block h-5 w-5 shrink-0 align-middle" /></span>
         </div>
         <h2 className={stepTitleClass}>Account owner login</h2>
         <p className={stepDescriptionClass}>
@@ -138,7 +139,7 @@ export function NewOrgStepAdmin(props: Props) {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/30 p-3">
-          <button type="button" onClick={generatePassword} className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm font-semibold">Generate secure password</button>
+          <button data-workspace-action="true" type="button" onClick={generatePassword} className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm font-semibold">Generate secure password</button>
           <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={showPassword} onChange={(event) => setShowPassword(event.target.checked)} />Show passwords</label>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">

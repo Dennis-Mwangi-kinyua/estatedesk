@@ -125,7 +125,7 @@ export function TenantRewardsWorkspace({
                     {item.pointsCost} points · {item.category}
                   </p>
                 </div>
-                <button
+                <button data-workspace-action="true"
                   type="button"
                   disabled={!canAfford || isPending}
                   onClick={() => redeem(item.id)}

@@ -1,3 +1,4 @@
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import Link from "next/link";
 import {
@@ -30,9 +31,9 @@ export function CaretakerDashboardHeader({
   return (
     <section data-workspace-header className={panelShellClassName}>
       <WorkspaceHero kind="caretaker" eyebrow="Field operations" title={`Welcome back, ${firstName}`} description={attentionCount > 0 ? `${attentionCount} item${attentionCount === 1 ? "" : "s"} need attention across issues, inspections, and water billing in your assigned scope.` : "Your queues are clear. Review assigned units and stay ready for field updates."} actions={<>
-          <Link href="/dashboard/caretaker/today" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><ClipboardList className="h-4 w-4" />Today’s work</Link>
-          <Link href="/dashboard/caretaker/inspections" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><ClipboardList className="h-4 w-4" />Inspections</Link>
-          <Link href="/dashboard/caretaker/issues" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><Wrench className="h-4 w-4" />Open issues</Link>
+          <Link data-workspace-action="true" href="/dashboard/caretaker/today" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><ClipboardList className="h-4 w-4" />Today’s work</Link>
+          <Link data-workspace-action="true" href="/dashboard/caretaker/inspections" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><ClipboardList className="h-4 w-4" />Inspections</Link>
+          <Link data-workspace-action="true" href="/dashboard/caretaker/issues" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><Wrench className="h-4 w-4" />Open issues</Link>
         </>}><InAppGuideHint topic="caretaker" workspace="caretaker" /></WorkspaceHero>
 
       <div className="grid gap-3 border-b border-border px-5 py-5 sm:grid-cols-2 lg:grid-cols-4 sm:px-6">
@@ -69,7 +70,7 @@ export function CaretakerDashboardHeader({
       </div>
 
       <details className="border-t border-border">
-        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6">💡 How this works</summary>
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6"><WorkspaceIcon label="help" className="inline-block h-5 w-5 shrink-0 align-middle" /> How this works</summary>
 <div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
         {CARETAKER_DASHBOARD_WORKFLOW.map((item) => (
           <div

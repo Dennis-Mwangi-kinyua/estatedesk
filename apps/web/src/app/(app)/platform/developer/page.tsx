@@ -144,7 +144,7 @@ export default async function DeveloperPortalPage({
         description="Your integrations, background jobs, and platform tools in one clear workspace. Explore a tool below or check what needs attention."
         action={
           <>
-            <Link
+            <Link data-workspace-action="true"
               href="/platform/developer/docs"
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-violet-300 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-900 transition hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-100 dark:hover:bg-violet-500/25"
             >
@@ -152,7 +152,7 @@ export default async function DeveloperPortalPage({
               System docs
             </Link>
             {isSuperAdmin ? (
-              <Link
+              <Link data-workspace-action="true"
                 href="/platform/control"
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
               >
@@ -160,7 +160,7 @@ export default async function DeveloperPortalPage({
                 <ArrowRight className="h-4 w-4 shrink-0" />
               </Link>
             ) : null}
-            <Link
+            <Link data-workspace-action="true"
               href="/platform"
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
             >

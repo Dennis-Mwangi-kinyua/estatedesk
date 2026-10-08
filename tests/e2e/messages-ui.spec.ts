@@ -1,3 +1,4 @@
+import { installWorkspaceStyles } from "./workspace-styles";
 import { expect, test } from "playwright/test";
 import { build } from "esbuild";
 import path from "node:path";
@@ -26,8 +27,10 @@ test("modern messages inbox supports reading, replies, status actions, and mobil
     } }],
   });
   await page.goto("/register");
+  await page.waitForLoadState("networkidle");
   const styles = await page.locator('link[rel="stylesheet"]').evaluateAll(links => links.map(link => (link as HTMLLinkElement).href));
   await page.setContent(`<html><head>${styles.map(href => `<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system"><div class="estate-workspace p-4"><div id="fixture"></div></div></body></html>`);
+  await installWorkspaceStyles(page);
   await page.addScriptTag({ content: bundle.outputFiles[0].text });
   await expect(page.getByRole("heading", { name: "Your support inbox" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Message queues" })).toBeVisible();
@@ -45,7 +48,7 @@ test("modern messages inbox supports reading, replies, status actions, and mobil
   await page.getByRole("dialog").getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { lastMessageAction?: { name: string } }).lastMessageAction?.name)).toBe("read");
-  if (testInfo.project.name === "mobile-chromium") await page.getByRole("button", { name: "Back to messages" }).click();
+  if (await page.getByRole("button", { name: "Back to messages" }).isVisible()) await page.getByRole("button", { name: "Back to messages" }).click();
   await page.getByRole("button", { name: /Riverside Estates.*Subscription question/ }).click();
   await page.getByRole("button", { name: "Reopen message" }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { lastMessageAction?: { name: string } }).lastMessageAction?.name)).toBe("reopen");

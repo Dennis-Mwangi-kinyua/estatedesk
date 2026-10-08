@@ -282,7 +282,7 @@ export function PaymentInstructionsSection({ data }: { data: SettingsPageData })
         </div>
 
         <div className="flex justify-end">
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className={`w-full sm:w-auto ${buttonPrimaryClassName}`}
           >

@@ -72,7 +72,7 @@ export function CaretakerMobileSidebar({
       )}
       inert={!open ? true : undefined}
     >
-      <button
+      <button data-workspace-action="true"
         type="button"
         onClick={handleClose}
         aria-label="Close menu overlay"
@@ -116,7 +116,7 @@ export function CaretakerMobileSidebar({
               </p>
             </div>
 
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={handleClose}
               aria-label="Close menu"
@@ -174,7 +174,7 @@ export function CaretakerMobileSidebar({
 
         <div className="shrink-0 border-t border-border px-3 py-4">
           <form action={logoutAction}>
-            <button
+            <button data-workspace-action="true"
               type="submit"
               className="ios-button flex w-full items-center justify-center gap-2 border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-100"
             >

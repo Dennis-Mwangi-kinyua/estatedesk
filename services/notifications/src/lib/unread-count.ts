@@ -4,6 +4,7 @@ import type { OrgRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { AppSession } from "@/lib/auth/session";
 import { buildPersonalUnreadNotificationWhere } from "./unread-count-query";
+import { collapseNotificationCopies } from "@/lib/notifications/collapse-copies";
 
 export { buildPersonalUnreadNotificationWhere } from "./unread-count-query";
 
@@ -13,9 +14,12 @@ export async function getPersonalUnreadNotificationCount(input: {
   orgRole: OrgRole | null;
   tenantId?: string | null;
 }) {
-  return prisma.notification.count({
+  const rows = await prisma.notification.findMany({
     where: buildPersonalUnreadNotificationWhere(input),
+    orderBy: { createdAt: "desc" },
+    select: { type: true, title: true, message: true, createdAt: true },
   });
+  return collapseNotificationCopies(rows).length;
 }
 
 export async function resolveUnreadBadgeCount(session: AppSession) {

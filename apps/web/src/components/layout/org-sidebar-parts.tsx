@@ -115,7 +115,7 @@ export const LogoutButton = memo(function LogoutButton({
 }) {
   return (
     <form action={logoutAction} onSubmit={onClick}>
-      <button
+      <button data-workspace-action="true"
         type="submit"
         className={[
           "flex w-full items-center gap-3 rounded-lg text-sm font-medium transition-colors",

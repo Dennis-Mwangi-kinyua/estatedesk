@@ -56,14 +56,14 @@ export function ReportsHeader({
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row xl:flex-col">
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org/payments"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >
               <ArrowLeft className="h-4 w-4" />
               Tenant ledger
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href={`/api/org/reports/export?type=rent-roll&period=${data.period}`}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
             >
@@ -94,7 +94,7 @@ export function ReportsHeader({
               className="mt-2 h-11 w-full rounded-2xl border border-border bg-background px-3 text-sm font-medium text-foreground outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/15"
             />
           </div>
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-5 text-sm font-semibold text-foreground transition hover:bg-muted/30"
           >

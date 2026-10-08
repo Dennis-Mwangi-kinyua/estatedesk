@@ -217,7 +217,7 @@ function MethodCard({
   onSelect: (option: PaymentMethodDefinition) => void;
 }) {
   return (
-    <button
+    <button data-workspace-action="true"
       type="button"
       onClick={() => onSelect(option)}
       className="group rounded-3xl border border-border bg-card p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"

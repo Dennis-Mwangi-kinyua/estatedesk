@@ -82,8 +82,8 @@ export function DestructiveActionGuard() {
         </div>
       </div>
       <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <button type="button" autoFocus onClick={cancel} className="min-h-11 rounded-xl border border-border px-4 text-sm font-semibold hover:bg-muted">Cancel</button>
-        <button type="button" onClick={proceed} className={`min-h-11 rounded-xl px-4 text-sm font-semibold text-white ${pending?.destructive ? "bg-red-600 hover:bg-red-700" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}>{pending?.destructive ? "Delete" : "Continue"}</button>
+        <button data-workspace-action="true" type="button" autoFocus onClick={cancel} className="min-h-11 rounded-xl border border-border px-4 text-sm font-semibold hover:bg-muted">Cancel</button>
+        <button data-workspace-action="true" type="button" onClick={proceed} className={`min-h-11 rounded-xl px-4 text-sm font-semibold text-white ${pending?.destructive ? "bg-red-600 hover:bg-red-700" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}>{pending?.destructive ? "Delete" : "Continue"}</button>
       </div>
     </div>
   </dialog>;

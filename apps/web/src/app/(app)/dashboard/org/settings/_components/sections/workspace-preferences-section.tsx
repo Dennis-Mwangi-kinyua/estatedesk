@@ -58,7 +58,7 @@ export function WorkspacePreferencesSection({ data }: { data: SettingsPageData }
         </div>
 
         <div className="flex justify-end pt-2">
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex h-11 w-full items-center justify-center rounded-2xl border border-slate-200 px-5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:w-auto"
           >

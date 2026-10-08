@@ -3,6 +3,7 @@ import { Building2, Home, MessageCircleQuestion, Search, ShieldCheck } from "luc
 
 const footerLinks = [
   { href: "/vacancies", label: "Vacancies" },
+  { href: "/stays", label: "BnB stays" },
   { href: "/services", label: "Services" },
   { href: "/property-management-software-kenya", label: "Kenya" },
   { href: "/landlord-software", label: "Landlords" },
@@ -57,7 +58,7 @@ export function PublicAccessFooter() {
 
         <nav className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:col-span-2 lg:col-span-1 lg:flex lg:flex-wrap lg:items-center lg:justify-end">
           {footerLinks.map((link) => (
-            <Link
+            <Link data-workspace-action="true"
               key={link.href}
               href={link.href}
               className="inline-flex min-h-10 min-w-0 items-center justify-center rounded-xl border border-transparent px-2.5 text-xs font-semibold text-neutral-700 transition hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:border-white/12 dark:bg-white/[0.10] dark:text-[#f8fafc] dark:hover:border-white/25 dark:hover:bg-white/[0.16] dark:focus-visible:ring-white"
@@ -65,7 +66,7 @@ export function PublicAccessFooter() {
               <span className="truncate">{link.label}</span>
             </Link>
           ))}
-          <Link
+          <Link data-workspace-action="true"
             href="/faq"
             className="inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-2 text-xs font-semibold text-neutral-800 shadow-sm transition hover:border-neutral-300 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:border-white/12 dark:bg-white/[0.10] dark:text-[#f8fafc] dark:hover:border-white/25 dark:hover:bg-white/[0.16] dark:focus-visible:ring-white"
           >

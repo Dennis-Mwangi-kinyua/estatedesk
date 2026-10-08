@@ -42,20 +42,20 @@ export function StaffHeader({ data, orgRole }: StaffHeaderProps) {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to dashboard
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href="/staff/previous"
               className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >
               Previous employees
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href="/staff/new"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
             >

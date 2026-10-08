@@ -148,7 +148,7 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
               ))}
             </select>
 
-            <button className="rounded-xl bg-neutral-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800">
+            <button data-workspace-action="true" className="rounded-xl bg-neutral-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800">
               Apply
             </button>
           </form>

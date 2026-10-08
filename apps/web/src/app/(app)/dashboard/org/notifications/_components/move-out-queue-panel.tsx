@@ -157,7 +157,7 @@ export function MoveOutQueuePanel({
                           placeholder="Closeout notes"
                           className={fieldClassName}
                         />
-                        <button
+                        <button data-workspace-action="true"
                           type="submit"
                           className={primaryButtonClassName}
                         >
@@ -165,7 +165,7 @@ export function MoveOutQueuePanel({
                         </button>
                       </form>
                     ) : (
-                      <button
+                      <button data-workspace-action="true"
                         type="button"
                         disabled
                         className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-border bg-muted/10 px-4 py-3 text-sm font-medium text-muted-foreground sm:col-span-2 lg:col-span-1"

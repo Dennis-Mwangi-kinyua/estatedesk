@@ -63,7 +63,7 @@ export function MemberDetailDeactivateSection({ member }: MemberDetailWorkspaceP
           <input name="confirmation" className={inputClassName} />
         </label>
 
-        <button
+        <button data-workspace-action="true"
           type="submit"
           className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
         >

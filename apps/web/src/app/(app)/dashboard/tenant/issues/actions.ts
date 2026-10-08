@@ -87,10 +87,10 @@ export async function confirmIssueResolutionAction(formData: FormData) {
       },
     });
 
-    await notifyInAppAndPush({ db: tx, orgId: report.issue.orgId, recipients: officeMemberships.map(({ userId }) => ({ userId })), type: "ISSUE_RESOLVED", title: "Tenant confirmed issue closure", message: `The tenant confirmed the completion report for "${report.issue.title}". The ticket is now closed.` });
+    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: report.issue.orgId, recipients: officeMemberships.map(({ userId }) => ({ userId })), type: "ISSUE_RESOLVED", title: "Tenant confirmed issue closure", message: `The tenant confirmed the completion report for "${report.issue.title}". The ticket is now closed.` });
 
     if (report.issue.assignedToUserId) {
-      await notifyInAppAndPush({ db: tx, orgId: report.issue.orgId, recipients: [{ userId: report.issue.assignedToUserId }], type: "ISSUE_RESOLVED", title: "Issue confirmed and closed", message: `The tenant confirmed your work for "${report.issue.title}".` });
+      await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: report.issue.orgId, recipients: [{ userId: report.issue.assignedToUserId }], type: "ISSUE_RESOLVED", title: "Issue confirmed and closed", message: `The tenant confirmed your work for "${report.issue.title}".` });
     }
 
     await tx.auditLog.create({

@@ -82,7 +82,7 @@ export async function dispatchCaretakerVendorAction(formData: FormData) {
       },
     });
 
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: session.userId,
       db: tx,
       orgId: session.activeOrgId!,
       recipients: officeRecipients.map((recipient) => ({

@@ -1,6 +1,8 @@
+import { installWorkspaceStyles } from "./workspace-styles";
 import {expect, test} from "playwright/test";
 import {build} from "esbuild";
 import path from "node:path";
+import { expectReadableWords } from "./assert-readable-words";
 test("organisation detail provides scoped operations and section navigation", async ({page}, testInfo) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
@@ -14,6 +16,7 @@ test("organisation detail provides scoped operations and section navigation", as
   await page.waitForLoadState("networkidle");
   const styles = await page.locator('link[rel="stylesheet"]').evaluateAll(links => links.map(link => (link as HTMLLinkElement).href));
   await page.setContent(`<html><head><meta name="viewport" content="width=device-width, initial-scale=1">${styles.map(href => `<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system ed-mobile-first"><main class="estate-workspace platform-theme-content ed-mobile-first-root p-3"><div id="fixture"></div></main></body></html>`);
+  await installWorkspaceStyles(page);
   await page.addScriptTag({content:bundle.outputFiles[0].text});
   for (const theme of ["light","dark"]) {
     await page.locator("html").evaluate((element,value) => element.setAttribute("class",value),theme);
@@ -27,6 +30,7 @@ test("organisation detail provides scoped operations and section navigation", as
     await expect(page.getByRole("button",{name:"Permanently delete organization",includeHidden:true})).toBeAttached();
     expect(await page.locator("body").innerText()).not.toContain("✨");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+    await expectReadableWords(page, ".organisation-detail-page");
     await page.screenshot({path:testInfo.outputPath(`organisation-${theme}.png`),fullPage:true});
   }
   await page.getByText("Advanced organisation actions",{exact:true}).click();
@@ -37,10 +41,11 @@ test("organisation detail provides scoped operations and section navigation", as
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`width ${width}`).toBe(true);
     await expect(page.getByRole("link",{name:"Payment operations",exact:true})).toBeVisible();
     await expect(page.locator("#organisation-operations")).toBeVisible();
-    if(width<768){const cards=await page.locator(".org-summary-card").evaluateAll(elements=>elements.slice(0,2).map(el=>({top:el.getBoundingClientRect().top,left:el.getBoundingClientRect().left})));expect(Math.abs(cards[0].top-cards[1].top)).toBeLessThan(1);expect(cards[1].left).toBeGreaterThan(cards[0].left);}
+    if(width<768){const cards=await page.locator(".org-summary-card").evaluateAll(elements=>elements.slice(0,2).map(el=>({top:el.getBoundingClientRect().top,left:el.getBoundingClientRect().left})));if(width<420){expect(cards[1].top).toBeGreaterThan(cards[0].top);expect(Math.abs(cards[0].left-cards[1].left)).toBeLessThan(1);}else{expect(Math.abs(cards[0].top-cards[1].top)).toBeLessThan(1);expect(cards[1].left).toBeGreaterThan(cards[0].left);}}
 
     const order=await page.evaluate(()=>{const kra=document.getElementById("organisation-kra")!,counts=document.getElementById("organisation-operations")!;return counts.getBoundingClientRect().top>=kra.getBoundingClientRect().bottom;});
     expect(order,`operations below KRA at ${width}`).toBe(true);
+    await expectReadableWords(page, ".organisation-detail-page");
     await page.screenshot({path:testInfo.outputPath(`organisation-${width}.png`),fullPage:true});
   }
   await page.getByRole("button",{name:"Edit name",exact:true}).click();

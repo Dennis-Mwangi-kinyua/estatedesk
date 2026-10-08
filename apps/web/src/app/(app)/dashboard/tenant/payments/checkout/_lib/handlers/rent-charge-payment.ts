@@ -139,7 +139,7 @@ export async function processRentChargePayment(
   });
 
   if (isGateway) {
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: [{ tenantId: tenant.id, userId }],
@@ -148,7 +148,7 @@ export async function processRentChargePayment(
       message: `Enter your M-Pesa PIN to pay ${amount.toFixed(0)} for ${charge.period}. Your bill updates automatically when payment succeeds.`,
     });
   } else {
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: [{ tenantId: tenant.id, userId }],
@@ -157,7 +157,7 @@ export async function processRentChargePayment(
       message: `Your ${charge.chargeType.toLowerCase().replaceAll("_", " ")} payment for ${charge.period} via ${methodLabel} has been submitted and is awaiting organization verification.`,
     });
 
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: await getPaymentReviewRecipients(tx, orgId),

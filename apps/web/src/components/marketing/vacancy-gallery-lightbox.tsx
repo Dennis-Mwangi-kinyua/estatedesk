@@ -65,7 +65,7 @@ export function VacancyGalleryLightbox({
 
   return (
     <div className="space-y-3">
-      <button
+      <button data-workspace-action="true"
         type="button"
         onClick={() => (hasImages ? show(0) : undefined)}
         className="relative block aspect-[16/10] w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 text-left dark:border-white/10 dark:bg-slate-800"
@@ -113,7 +113,7 @@ export function VacancyGalleryLightbox({
       {images.length > 1 ? (
         <div className="grid grid-cols-4 gap-2 sm:gap-3">
           {images.slice(0, 8).map((asset, index) => (
-            <button
+            <button data-workspace-action="true"
               key={`${asset.key}-${index}`}
               type="button"
               onClick={() => show(index)}
@@ -144,7 +144,7 @@ export function VacancyGalleryLightbox({
           aria-label="Vacancy photo gallery"
           onClick={close}
         >
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={close}
             className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
@@ -155,7 +155,7 @@ export function VacancyGalleryLightbox({
 
           {images.length > 1 ? (
             <>
-              <button
+              <button data-workspace-action="true"
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
@@ -166,7 +166,7 @@ export function VacancyGalleryLightbox({
               >
                 <ChevronLeft className="h-6 w-6" />
               </button>
-              <button
+              <button data-workspace-action="true"
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();

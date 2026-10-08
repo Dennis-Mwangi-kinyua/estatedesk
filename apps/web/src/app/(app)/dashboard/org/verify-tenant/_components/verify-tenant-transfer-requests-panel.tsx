@@ -71,7 +71,7 @@ export function VerifyTenantTransferRequestsPanel({
                         name="transferId"
                         value={request.id}
                       />
-                      <button
+                      <button data-workspace-action="true"
                         type="submit"
                         className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
                       >
@@ -90,7 +90,7 @@ export function VerifyTenantTransferRequestsPanel({
                         name="reviewNotes"
                         value="Rejected from verification dashboard."
                       />
-                      <button
+                      <button data-workspace-action="true"
                         type="submit"
                         className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-red-200 bg-card px-4 text-sm font-medium text-red-700 transition hover:bg-red-50"
                       >

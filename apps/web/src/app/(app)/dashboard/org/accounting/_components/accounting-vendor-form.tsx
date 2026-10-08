@@ -41,7 +41,7 @@ export function AccountingVendorForm({ data }: { data: AccountingPageData }) {
           ))}
         </div>
 
-        <button type="submit" className={buttonSecondaryClassName}>
+        <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
           Save vendor
         </button>
       </form>

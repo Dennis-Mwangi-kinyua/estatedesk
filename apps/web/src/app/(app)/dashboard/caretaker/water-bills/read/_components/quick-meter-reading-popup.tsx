@@ -49,7 +49,7 @@ export function QuickMeterReadingPopup({
 
   return (
     <>
-      <button
+      <button data-workspace-action="true"
         type="button"
         onClick={() => setOpen(true)}
         className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
@@ -83,7 +83,7 @@ export function QuickMeterReadingPopup({
                 ) : null}
               </div>
 
-              <button
+              <button data-workspace-action="true"
                 type="button"
                 onClick={() => setOpen(false)}
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:bg-muted/30"
@@ -233,7 +233,7 @@ export function QuickMeterReadingPopup({
                   <p className="text-xs text-muted-foreground">
                     {remainingUnits.length} unit{remainingUnits.length === 1 ? "" : "s"} left for {period}
                   </p>
-                  <button
+                  <button data-workspace-action="true"
                     type="submit"
                     disabled={pending}
                     className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"

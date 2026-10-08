@@ -55,7 +55,7 @@ export function UnitsPaginationSection({ data }: { data: UnitsPageData }) {
 
         <div className="flex items-center gap-3">
           {currentPage > 1 ? (
-            <DeferredLink
+            <DeferredLink data-workspace-action="true"
               href={prevHref}
               className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >
@@ -72,7 +72,7 @@ export function UnitsPaginationSection({ data }: { data: UnitsPageData }) {
           </span>
 
           {currentPage < totalPages ? (
-            <DeferredLink
+            <DeferredLink data-workspace-action="true"
               href={nextHref}
               className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >

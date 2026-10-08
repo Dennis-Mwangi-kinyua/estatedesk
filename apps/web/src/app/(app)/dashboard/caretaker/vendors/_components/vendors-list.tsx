@@ -71,7 +71,7 @@ export function VendorsList({
                         aria-label="Optional vendor dispatch notes"
                         className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary/40"
                       />
-                      <button
+                      <button data-workspace-action="true"
                         type="submit"
                         className="inline-flex rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
                       >

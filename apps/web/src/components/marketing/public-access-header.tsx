@@ -7,6 +7,7 @@ import {
   ArrowRight,
   BookOpen,
   Building2,
+  BedDouble,
   Home,
   LogIn,
   Mail,
@@ -24,13 +25,14 @@ const clientHydration = () => true;
 const serverHydration = () => false;
 
 type PublicAccessHeaderProps = {
-  active?: "home" | "vacancies" | "services" | "pricing" | "contact" | "faq" | "guides";
+  active?: "home" | "vacancies" | "stays" | "services" | "pricing" | "contact" | "faq" | "guides";
   loginHref?: string;
   showPricing?: boolean;
 };
 
 const publicLinks = [
   { href: "/vacancies", label: "Vacancies", key: "vacancies", icon: Home },
+  { href: "/stays", label: "BnB stays", key: "stays", icon: BedDouble },
   { href: "/services", label: "Services", key: "services", icon: Search },
   { href: "/pricing", label: "Pricing", key: "pricing", icon: WalletCards },
   { href: "/guides", label: "Guides", key: "guides", icon: BookOpen },
@@ -93,7 +95,7 @@ export function PublicAccessHeader({
             </Link>
 
             <div ref={mobileMenuRef} className="relative lg:hidden">
-              <button
+              <button data-workspace-action="true"
                 type="button"
                 disabled={!hydrated}
                 aria-expanded={isMenuOpen}
@@ -106,7 +108,7 @@ export function PublicAccessHeader({
                 <X className={`h-5 w-5 ${isMenuOpen ? "block" : "hidden"}`} />
               </button>
               {isMenuOpen ? (
-                <button type="button" aria-label="Close menu overlay" onClick={closeMenu} className="fixed inset-x-0 bottom-0 top-16 z-[105] bg-white/68 backdrop-blur-2xl dark:bg-[#05080d]/82" />
+                <button data-workspace-action="true" type="button" aria-label="Close menu overlay" onClick={closeMenu} className="fixed inset-x-0 bottom-0 top-16 z-[105] bg-white/68 backdrop-blur-2xl dark:bg-[#05080d]/82" />
               ) : null}
               <div
                 ref={panelRef}
@@ -171,7 +173,7 @@ export function PublicAccessHeader({
                     <LogIn className="h-4 w-4 shrink-0" />
                     <span className="truncate">Sign in</span>
                   </Link>
-                  <Link
+                  <Link data-workspace-action="true"
                     href="/register"
                     onClick={() => setIsMenuOpen(false)}
                     className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:bg-emerald-400 dark:text-[#07130f] dark:hover:bg-emerald-300 [&_*]:text-current"
@@ -191,7 +193,7 @@ export function PublicAccessHeader({
                 const isActive = active === item.key;
 
                 return (
-                  <Link
+                  <Link data-workspace-action="true"
                     key={item.href}
                     href={item.href}
                     className={`public-access-nav-link inline-flex min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-lg border px-3 text-sm font-semibold transition xl:px-3.5 ${
@@ -218,7 +220,7 @@ export function PublicAccessHeader({
                 <LogIn className="h-4 w-4 shrink-0" />
                 <span className="truncate">Sign in</span>
               </Link>
-              <Link
+              <Link data-workspace-action="true"
                 href="/register"
                 className="inline-flex min-h-10 min-w-0 items-center justify-center gap-2 rounded-lg bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-[#e5e7eb] dark:focus-visible:ring-white [&_*]:text-current"
               >

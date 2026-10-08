@@ -14,7 +14,11 @@ describe("unread notification count", () => {
     assert.equal(where.orgId, "org_1");
     assert.ok("OR" in where);
     if ("OR" in where) {
-      assert.deepEqual(where.OR, [{ tenantId: "tenant_1" }, { userId: "user_1" }]);
+      assert.deepEqual(where.OR, [
+        { userId: "user_1", tenantId: null },
+        { userId: "user_1", tenantId: "tenant_1" },
+        { userId: null, tenantId: "tenant_1" },
+      ]);
     }
   });
 

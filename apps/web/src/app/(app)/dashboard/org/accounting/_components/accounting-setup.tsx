@@ -47,7 +47,7 @@ export function AccountingSetup({ data }: { data: AccountingPageData }) {
 
         <div className="border-t border-border px-5 py-6 sm:px-6">
           <form action={initializeAccountingAction}>
-            <button type="submit" className={buttonPrimaryClassName}>
+            <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
               Initialize accounting ledger
             </button>
           </form>

@@ -167,7 +167,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       `}</style>
 
       <div className="h-full min-h-0 lg:grid lg:grid-cols-[1.08fr_0.92fr]">
-        <aside className="hidden h-full overflow-hidden lg:block">
+        <aside className="hidden h-full overflow-y-auto lg:block">
           <OperationsShowcase compact />
         </aside>
 

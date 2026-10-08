@@ -118,7 +118,7 @@ export function ExpendituresDirectorySection({
                                 name="expenditureId"
                                 value={expenditure.id}
                               />
-                              <button
+                              <button data-workspace-action="true"
                                 type="submit"
                                 className="w-full rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
                               >
@@ -137,7 +137,7 @@ export function ExpendituresDirectorySection({
                                 placeholder="Rejection reason"
                                 className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/20"
                               />
-                              <button
+                              <button data-workspace-action="true"
                                 type="submit"
                                 className="w-full rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200"
                               >
@@ -158,7 +158,7 @@ export function ExpendituresDirectorySection({
                               defaultValue={new Date().toISOString().slice(0, 10)}
                               className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/20"
                             />
-                            <button
+                            <button data-workspace-action="true"
                               type="submit"
                               className="w-full rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
                             >

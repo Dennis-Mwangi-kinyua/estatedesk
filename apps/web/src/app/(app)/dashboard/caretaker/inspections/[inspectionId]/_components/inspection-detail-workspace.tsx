@@ -99,13 +99,13 @@ export function InspectionDetailWorkspace({
 
               {isCompleted ? (
                 <>
-                  <Link
+                  <Link data-workspace-action="true"
                     href="#inspection-report"
                     className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted/30"
                   >
                     View report
                   </Link>
-                  <Link
+                  <Link data-workspace-action="true"
                     href={`/print/inspections/${encodePublicId(
                       inspection.id,
                       "inspection",
@@ -257,14 +257,14 @@ export function InspectionDetailWorkspace({
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
               >
                 Submit report to office
               </button>
 
-              <Link
+              <Link data-workspace-action="true"
                 href="/dashboard/caretaker/inspections"
                 className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-border bg-background px-5 py-3 text-sm font-medium text-foreground transition hover:bg-muted/30"
               >

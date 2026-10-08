@@ -245,7 +245,7 @@ export function CreateCaretakerForm({
       </section>
 
       <div className="flex flex-col gap-3 border-t border-slate-100 pt-6 sm:flex-row">
-        <button
+        <button data-workspace-action="true"
           type="submit"
           disabled={pending}
           className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"

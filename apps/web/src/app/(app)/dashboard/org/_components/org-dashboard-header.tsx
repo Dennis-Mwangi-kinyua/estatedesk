@@ -38,8 +38,8 @@ export function OrgDashboardHeader({
     <section data-workspace-header className={panelShellClassName}>
       <div>
         <WorkspaceHero kind="org" eyebrow={orgRole === "ADMIN" ? "Organisation overview" : "Your team workspace"} title={organizationName} description={queueCount > 0 ? `${queueCount} item${queueCount === 1 ? "" : "s"} need attention across payments, maintenance, finance, and operations.` : "Your portfolio queues are clear. Review occupancy, collections, and your next steps below."} actions={<>
-          <Link href="/dashboard/org/insights" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><Lightbulb className="h-4 w-4" />Smart insights</Link>
-          {orgRole !== "ACCOUNTANT" && <Link href="/dashboard/org/tenants/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><UserPlus className="h-4 w-4" />Add tenant</Link>}
+          <Link data-workspace-action="true" href="/dashboard/org/insights" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><Lightbulb className="h-4 w-4" />Smart insights</Link>
+          {orgRole !== "ACCOUNTANT" && <Link data-workspace-action="true" href="/dashboard/org/tenants/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><UserPlus className="h-4 w-4" />Add tenant</Link>}
         </>}><InAppGuideHint topic="portfolio" workspace="org" orgRole={orgRole} /></WorkspaceHero>
 
         <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">

@@ -103,7 +103,7 @@ export function AccountingMultiLineJournalForm({
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-sm font-semibold text-foreground">Journal lines</h3>
-          <button type="button" onClick={addLine} className={buttonSecondaryClassName}>
+          <button data-workspace-action="true" type="button" onClick={addLine} className={buttonSecondaryClassName}>
             Add line
           </button>
         </div>
@@ -167,7 +167,7 @@ export function AccountingMultiLineJournalForm({
             </label>
 
             <div className="flex items-end">
-              <button
+              <button data-workspace-action="true"
                 type="button"
                 onClick={() => removeLine(index)}
                 className={buttonSecondaryClassName}
@@ -195,7 +195,7 @@ export function AccountingMultiLineJournalForm({
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <button
+        <button data-workspace-action="true"
           type="submit"
           name="mode"
           value="post"
@@ -204,7 +204,7 @@ export function AccountingMultiLineJournalForm({
         >
           Post journal
         </button>
-        <button
+        <button data-workspace-action="true"
           type="submit"
           name="mode"
           value="draft"

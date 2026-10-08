@@ -155,7 +155,7 @@ export function MixActionLink({
   tone: "success" | "warning";
 }) {
   return (
-    <DeferredLink
+    <DeferredLink data-workspace-action="true"
       href={href}
       className={`inline-flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border px-3 text-xs font-semibold transition ${mixActionToneClassName[tone]}`}
     >

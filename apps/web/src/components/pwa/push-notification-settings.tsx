@@ -252,7 +252,7 @@ export function PushNotificationSettings({
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {state === "subscribed" ? (
           <>
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={sendTestAlert}
               disabled={pending || testing}
@@ -261,7 +261,7 @@ export function PushNotificationSettings({
               <Send className="h-4 w-4" />
               {testing ? "Sending..." : "Send test alert"}
             </button>
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={disablePushNotifications}
               disabled={pending || testing}
@@ -274,7 +274,7 @@ export function PushNotificationSettings({
         ) : null}
 
         {state === "prompt" ? (
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={enablePushNotifications}
             disabled={pending || !pushConfig.publicKey}

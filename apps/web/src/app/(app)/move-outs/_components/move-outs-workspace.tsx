@@ -73,7 +73,7 @@ export function MoveOutsWorkspace({
               />
             </div>
 
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org/inspections"
               className={
                 isOrg
@@ -276,7 +276,7 @@ export function MoveOutsWorkspace({
                                 </option>
                               ))}
                             </select>
-                            <button
+                            <button data-workspace-action="true"
                               type="submit"
                               className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
                             >
@@ -314,7 +314,7 @@ export function MoveOutsWorkspace({
                                 placeholder="Closeout notes"
                                 className="h-10 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-primary"
                               />
-                              <button
+                              <button data-workspace-action="true"
                                 type="submit"
                                 className="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-3 text-xs font-semibold text-white transition hover:bg-slate-800"
                               >

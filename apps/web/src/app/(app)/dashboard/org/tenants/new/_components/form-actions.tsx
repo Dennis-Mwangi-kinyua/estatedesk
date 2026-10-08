@@ -23,7 +23,7 @@ export function FormActionsDesktop({
 
         <div className="flex gap-3">
           {step > 1 ? (
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={onBack}
               disabled={isPending}
@@ -38,7 +38,7 @@ export function FormActionsDesktop({
           )}
 
           {step < 5 ? (
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={onNext}
               disabled={isPending}
@@ -47,7 +47,7 @@ export function FormActionsDesktop({
               Continue
             </button>
           ) : (
-            <button
+            <button data-workspace-action="true"
               type="submit"
               disabled={isPending}
               className={buttonPrimaryClassName}
@@ -79,7 +79,7 @@ export function FormActionsMobile({
 
         <div className="grid grid-cols-2 gap-3">
           {step > 1 ? (
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={onBack}
               disabled={isPending}
@@ -94,7 +94,7 @@ export function FormActionsMobile({
           )}
 
           {step < 5 ? (
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={onNext}
               disabled={isPending}
@@ -103,7 +103,7 @@ export function FormActionsMobile({
               Continue
             </button>
           ) : (
-            <button
+            <button data-workspace-action="true"
               type="submit"
               disabled={isPending}
               className={buttonPrimaryClassName}

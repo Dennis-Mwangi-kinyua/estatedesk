@@ -61,7 +61,7 @@ export function OnboardingRequestPopup({
             >
               Review now
             </Link>
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={dismiss}
               className="inline-flex min-h-9 items-center rounded-lg border border-amber-300 bg-white px-3 text-xs font-semibold text-amber-900 transition hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-900 dark:text-amber-100 dark:hover:bg-amber-800"
@@ -70,7 +70,7 @@ export function OnboardingRequestPopup({
             </button>
           </div>
         </div>
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={dismiss}
           aria-label="Dismiss onboarding request alert"

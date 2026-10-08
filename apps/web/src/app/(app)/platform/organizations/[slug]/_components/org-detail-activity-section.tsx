@@ -172,7 +172,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
               className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-amber-300 focus:ring-2 focus:ring-amber-100 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:focus:border-amber-400 dark:focus:ring-amber-400/20"
             />
           </label>
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/20 dark:focus-visible:ring-offset-slate-900 sm:w-auto"
           >
@@ -203,7 +203,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
               className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-red-300 focus:ring-2 focus:ring-red-100 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:focus:border-red-400 dark:focus:ring-red-400/20"
             />
           </label>
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-red-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:bg-red-500 dark:text-white dark:hover:bg-red-400 dark:focus-visible:ring-offset-slate-900 sm:w-auto"
           >

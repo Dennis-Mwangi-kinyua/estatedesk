@@ -26,7 +26,7 @@ export const PasswordConfirmModal = memo(function PasswordConfirmModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <button
+      <button data-workspace-action="true"
         type="button"
         aria-label="Close modal overlay"
         onClick={onClose}
@@ -48,7 +48,7 @@ export const PasswordConfirmModal = memo(function PasswordConfirmModal({
             </p>
           </div>
 
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={onClose}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 transition hover:bg-neutral-200"
@@ -80,7 +80,7 @@ export const PasswordConfirmModal = memo(function PasswordConfirmModal({
         </div>
 
         <div className="mt-5 flex items-center gap-3">
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={onClose}
             className="flex-1 rounded-2xl border border-neutral-300 bg-card px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50"
@@ -88,7 +88,7 @@ export const PasswordConfirmModal = memo(function PasswordConfirmModal({
             Cancel
           </button>
 
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={onSubmit}
             disabled={isSubmitting || password.trim().length === 0}

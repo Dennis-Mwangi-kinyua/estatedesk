@@ -226,7 +226,7 @@ export function ReadingDetailWorkspace({
             <div className="grid gap-3 sm:grid-cols-2">
               <form action={approveMeterReading}>
                 <input type="hidden" name="readingId" value={reading.id} />
-                <button
+                <button data-workspace-action="true"
                   type="submit"
                   className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
                 >
@@ -253,7 +253,7 @@ export function ReadingDetailWorkspace({
                     className="min-h-[5.5rem] w-full resize-y rounded-2xl border border-border bg-background px-3 py-3 text-sm text-foreground outline-none transition focus:border-primary/40 focus:ring-4 focus:ring-primary/10"
                   />
                 </label>
-                <button
+                <button data-workspace-action="true"
                   type="submit"
                   className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-800 transition hover:bg-rose-100 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200 sm:w-auto sm:px-6"
                 >

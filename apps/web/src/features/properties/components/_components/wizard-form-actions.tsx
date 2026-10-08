@@ -38,7 +38,7 @@ export function WizardFormActions({
 
       <div className="flex flex-col gap-3 sm:flex-row">
         {currentStep > 1 ? (
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={onBack}
             className={buttonSecondaryClassName}
@@ -52,17 +52,17 @@ export function WizardFormActions({
         )}
 
         {!isReviewStep ? (
-          <button type="button" onClick={onNext} className={buttonPrimaryClassName}>
+          <button data-workspace-action="true" type="button" onClick={onNext} className={buttonPrimaryClassName}>
             {nextLabel}
             <ArrowRight className="h-4 w-4" />
           </button>
         ) : reviewConfirmed ? (
-          <button type="submit" className={`gap-2 ${buttonPrimaryClassName}`}>
+          <button data-workspace-action="true" type="submit" className={`gap-2 ${buttonPrimaryClassName}`}>
             <CheckCircle2 className="h-4 w-4" />
             Create property
           </button>
         ) : (
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={onConfirmReview}
             className={`gap-2 ${buttonPrimaryClassName}`}

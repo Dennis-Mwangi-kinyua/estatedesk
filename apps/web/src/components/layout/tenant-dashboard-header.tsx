@@ -22,7 +22,7 @@ export function TenantDashboardHeader({
     <header className="ed-shell-panel fixed left-0 right-0 top-0 z-[110] border-b bg-card/95 shadow-sm backdrop-blur-xl lg:left-72">
       <div className="flex h-[76px] items-center justify-between gap-3 px-3 pt-safe sm:px-6 lg:h-16 lg:px-8 lg:pt-0">
         <div className="flex min-w-0 items-center gap-3">
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={onMenuClick}
             aria-label="Open navigation"
@@ -44,7 +44,7 @@ export function TenantDashboardHeader({
         <div className="ml-2 flex shrink-0 items-center gap-2">
           <HeaderThemeToggle />
 
-          <Link
+          <Link data-workspace-action="true"
             href="/dashboard/tenant/notifications"
             aria-label={
               unreadNotificationCount > 0

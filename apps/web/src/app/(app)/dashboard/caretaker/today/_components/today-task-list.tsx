@@ -144,13 +144,13 @@ export function TodayTaskList({ tasks }: { tasks: TodayTask[] }) {
               <CaretakerI18nLabel labelKey="caughtUpHint" />
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
-              <DeferredLink
+              <DeferredLink data-workspace-action="true"
                 href="/dashboard/caretaker/units"
                 className="inline-flex items-center justify-center rounded-2xl border border-border bg-background px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-muted/30"
               >
                 <CaretakerI18nLabel labelKey="browseUnits" />
               </DeferredLink>
-              <DeferredLink
+              <DeferredLink data-workspace-action="true"
                 href="/dashboard/caretaker"
                 className="inline-flex items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
               >

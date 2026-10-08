@@ -416,7 +416,7 @@ export default async function PlatformBillingPage({
                           className="mt-1 min-h-9 w-full rounded-lg border border-emerald-200 bg-white px-2 text-sm text-foreground dark:border-emerald-500/30 dark:bg-background"
                         />
                       </label>
-                      <button
+                      <button data-workspace-action="true"
                         type="submit"
                         className="min-h-9 w-full rounded-lg bg-emerald-700 px-3 text-sm font-semibold text-white"
                       >
@@ -437,7 +437,7 @@ export default async function PlatformBillingPage({
                           className="mt-1 min-h-9 w-full rounded-lg border border-border bg-background px-2 text-sm text-foreground"
                         />
                       </label>
-                      <button
+                      <button data-workspace-action="true"
                         type="submit"
                         className="min-h-9 w-full rounded-lg border border-border bg-background px-3 text-sm font-semibold text-foreground"
                       >
@@ -484,7 +484,7 @@ export default async function PlatformBillingPage({
               </option>
             ))}
           </select>
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="min-h-11 w-full rounded-xl bg-foreground px-5 text-sm font-semibold text-background sm:rounded-2xl lg:w-auto"
           >

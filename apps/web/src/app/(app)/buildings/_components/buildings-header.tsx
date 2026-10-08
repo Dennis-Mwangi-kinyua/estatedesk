@@ -1,3 +1,4 @@
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "next/link";
 import type { OrgRole } from "@prisma/client";
 import { ArrowLeft, Building2, Home } from "lucide-react";
@@ -28,7 +29,7 @@ export function BuildingsHeader({
             </div>
 
             <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Buildings & blocks 🏢
+              Buildings & blocks
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
@@ -39,20 +40,20 @@ export function BuildingsHeader({
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row xl:flex-col">
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to dashboard
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org/units"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >
               View units
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org/properties"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
             >
@@ -85,7 +86,7 @@ export function BuildingsHeader({
       </div>
 
       <details className="border-t border-border">
-        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6">💡 How this works</summary>
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6"><WorkspaceIcon label="help" className="inline-block h-5 w-5 shrink-0 align-middle" /> How this works</summary>
 <div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
         {BUILDINGS_WORKFLOW_STEPS.map((item) => (
           <div

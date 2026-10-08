@@ -37,6 +37,7 @@ export async function getCurrentOrgContext(): Promise<OrgContext> {
       },
       select: {
         orgId: true,
+        userId: true,
         role: true,
         org: {
           select: {
@@ -58,6 +59,7 @@ export async function getCurrentOrgContext(): Promise<OrgContext> {
     orderBy: { createdAt: "desc" },
     select: {
       orgId: true,
+      userId: true,
       role: true,
       org: {
         select: {

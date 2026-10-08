@@ -32,7 +32,7 @@ export function ListPagination({
 
       <div className="flex items-center gap-2">
         {currentPage > 1 ? (
-          <Link
+          <Link data-workspace-action="true"
             href={buildHref(currentPage - 1)}
             className="inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-muted/30"
           >
@@ -49,7 +49,7 @@ export function ListPagination({
         </span>
 
         {currentPage < totalPages ? (
-          <Link
+          <Link data-workspace-action="true"
             href={buildHref(currentPage + 1)}
             className="inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-muted/30"
           >

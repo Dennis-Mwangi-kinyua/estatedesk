@@ -30,7 +30,7 @@ export function MoveOutsPagination({
 
       <div className="flex items-center gap-2">
         {currentPage > 1 ? (
-          <Link
+          <Link data-workspace-action="true"
             href={buildMoveOutsPageHref(currentPage - 1, basePath)}
             className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted"
           >
@@ -47,7 +47,7 @@ export function MoveOutsPagination({
         </span>
 
         {currentPage < totalPages ? (
-          <Link
+          <Link data-workspace-action="true"
             href={buildMoveOutsPageHref(currentPage + 1, basePath)}
             className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted"
           >

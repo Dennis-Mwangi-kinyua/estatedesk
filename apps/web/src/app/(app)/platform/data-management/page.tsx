@@ -179,7 +179,7 @@ export default async function DataManagementPage() {
                         className="min-h-11 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring/30"
                       />
                     </label>
-                    <button
+                    <button data-workspace-action="true"
                       className="min-h-11 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
                       type="submit"
                     >
@@ -196,7 +196,7 @@ export default async function DataManagementPage() {
                         className="min-h-11 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring/30"
                       />
                     </label>
-                    <button
+                    <button data-workspace-action="true"
                       className="min-h-11 w-full rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-100"
                       type="submit"
                     >
@@ -205,7 +205,7 @@ export default async function DataManagementPage() {
                   </form>
                 </div>
               ) : request.status === "APPROVED" ? (
-                <a
+                <a data-workspace-action="true"
                   href={`/api/data-exports/${request.id}/download`}
                   className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted/50"
                 >
@@ -277,7 +277,7 @@ export default async function DataManagementPage() {
                             placeholder="Approval note"
                             className="h-9 min-w-0 rounded-xl border border-neutral-200 px-3 text-xs outline-none focus:ring-2 focus:ring-neutral-200"
                           />
-                          <button className="h-9 rounded-xl bg-neutral-950 px-3 text-xs font-semibold text-white" type="submit">
+                          <button data-workspace-action="true" className="h-9 rounded-xl bg-neutral-950 px-3 text-xs font-semibold text-white" type="submit">
                             Approve
                           </button>
                         </form>
@@ -288,7 +288,7 @@ export default async function DataManagementPage() {
                             placeholder="Rejection note"
                             className="h-9 min-w-0 rounded-xl border border-neutral-200 px-3 text-xs outline-none focus:ring-2 focus:ring-neutral-200"
                           />
-                          <button className="h-9 rounded-xl border border-neutral-200 px-3 text-xs font-semibold text-neutral-700" type="submit">
+                          <button data-workspace-action="true" className="h-9 rounded-xl border border-neutral-200 px-3 text-xs font-semibold text-neutral-700" type="submit">
                             Reject
                           </button>
                         </form>
@@ -360,7 +360,7 @@ export default async function DataManagementPage() {
               <p className="text-xs text-muted-foreground">
                 Updated <span className="font-medium text-foreground">{formatDateTime(org.updatedAt)}</span>
               </p>
-              <a
+              <a data-workspace-action="true"
                 href={`/api/platform/data-exports/${org.slug}/download`}
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted/50"
               >

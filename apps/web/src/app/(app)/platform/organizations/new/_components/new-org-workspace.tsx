@@ -1,5 +1,6 @@
 "use client";
 
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -54,7 +55,7 @@ export function NewOrganizationWorkspace({
         title="Create organisation"
         description="Create an agency or landlord workspace in three steps. Download the login handover after creation."
         action={
-          <Link
+          <Link data-workspace-action="true"
             href="/platform/organizations"
             data-confirm={(form.organizationName || form.adminFullName) ? "Leave organisation setup? Your details are saved as a draft; passwords will need to be re-entered." : undefined}
             className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:hover:bg-white/10"
@@ -71,7 +72,7 @@ export function NewOrganizationWorkspace({
             const completed = item.id < form.step;
 
             return (
-              <button
+              <button data-workspace-action="true"
                 type="button"
                 disabled={item.id > form.step || (form.pending || form.checking)}
                 onClick={() => { setReviewConfirmed(false); form.setStep(item.id); }}
@@ -86,7 +87,7 @@ export function NewOrganizationWorkspace({
                 }`}
               >
                 <div className="mb-1 text-xs font-medium sm:text-sm">
-                  <span aria-hidden="true" className="mb-1 block text-2xl">{item.id === 1 ? "🏢" : item.id === 2 ? "🔑" : "📋"}</span>Step {item.id}
+                  <span aria-hidden="true" className="mb-1 block text-2xl"><WorkspaceIcon label={item.id === 1 ? "organisation" : item.id === 2 ? "security" : "tasks"} /></span>Step {item.id}
                 </div>
                 <div className="text-sm font-semibold sm:text-base">
                   {item.title}
@@ -100,7 +101,7 @@ export function NewOrganizationWorkspace({
       {(form.state.error || Object.values(form.state.fieldErrors ?? {}).some((errors) => errors?.length)) && (
         <div ref={errorRef} tabIndex={-1} role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-400/30 dark:bg-red-950 dark:text-red-200">
           <p className="font-semibold">{form.state.error || "A few details need attention"}</p>
-          <ul className="mt-2 space-y-2">{Object.entries(form.state.fieldErrors ?? {}).filter(([, errors]) => errors?.length).map(([key, errors]) => <li key={key}><button type="button" onClick={() => { setReviewConfirmed(false); form.setStep(key.startsWith("admin") ? 2 : 1); window.setTimeout(() => contentRef.current?.querySelector<HTMLElement>(`[data-field="${key}"]`)?.focus(), 50); }} className="text-left underline underline-offset-2">{accountFieldLabels[key] ?? key}: {errors?.[0]}</button></li>)}</ul>
+          <ul className="mt-2 space-y-2">{Object.entries(form.state.fieldErrors ?? {}).filter(([, errors]) => errors?.length).map(([key, errors]) => <li key={key}><button data-workspace-action="true" type="button" onClick={() => { setReviewConfirmed(false); form.setStep(key.startsWith("admin") ? 2 : 1); window.setTimeout(() => contentRef.current?.querySelector<HTMLElement>(`[data-field="${key}"]`)?.focus(), 50); }} className="text-left underline underline-offset-2">{accountFieldLabels[key] ?? key}: {errors?.[0]}</button></li>)}</ul>
         </div>
       )}
 
@@ -151,7 +152,7 @@ export function NewOrganizationWorkspace({
         {form.step === 2 ? <NewOrgStepAdmin {...form} /> : null}
         {form.step === 3 ? (
           <div className="space-y-4"><NewOrgStepReview {...form} reviewConfirmed={reviewConfirmed} />
-            <div className="flex flex-wrap gap-3"><button type="button" onClick={() => { setReviewConfirmed(false); form.setStep(1); }} className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm">Edit workspace details</button><button type="button" onClick={() => { setReviewConfirmed(false); form.setStep(2); }} className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm">Edit owner login</button></div>
+            <div className="flex flex-wrap gap-3"><button data-workspace-action="true" type="button" onClick={() => { setReviewConfirmed(false); form.setStep(1); }} className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm">Edit workspace details</button><button data-workspace-action="true" type="button" onClick={() => { setReviewConfirmed(false); form.setStep(2); }} className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm">Edit owner login</button></div>
             <label className="flex items-start gap-3 rounded-xl border border-border p-4 text-sm"><input type="checkbox" className="mt-1" checked={reviewConfirmed} onChange={(event) => setReviewConfirmed(event.target.checked)} /><span>I have checked the workspace and owner’s login details. Create this account.</span></label>
           </div>
         ) : null}
@@ -165,7 +166,7 @@ export function NewOrganizationWorkspace({
               </div>
 
               <div className="flex gap-3">
-                <button
+                <button data-workspace-action="true"
                   type="button"
                   onClick={() => { setReviewConfirmed(false); form.prevStep(); }}
                   disabled={form.step === 1 || (form.pending || form.checking)}
@@ -176,7 +177,7 @@ export function NewOrganizationWorkspace({
                 </button>
 
                 {form.step < 3 ? (
-                  <button
+                  <button data-workspace-action="true"
                     type="button"
                     onClick={() => {
                       const ready = form.step === 1 ? form.canGoStep2() : form.canGoStep3();
@@ -190,7 +191,7 @@ export function NewOrganizationWorkspace({
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 ) : (
-                  <button type="submit" disabled={(form.pending || form.checking) || !reviewConfirmed} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none">
+                  <button data-workspace-action="true" type="submit" disabled={(form.pending || form.checking) || !reviewConfirmed} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none">
                     {(form.pending || form.checking) ? "Creating account…" : "Create account"}<CheckCircle2 aria-hidden="true" className="h-4 w-4" />
                   </button>
                 )}

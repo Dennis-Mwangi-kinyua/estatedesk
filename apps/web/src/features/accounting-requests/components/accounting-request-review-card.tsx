@@ -112,7 +112,7 @@ export function AccountingRequestReviewCard({
           {request.status === "SUBMITTED" ? (
             <form action={startAccountingRequestReviewAction}>
               <input type="hidden" name="requestId" value={request.id} />
-              <button type="submit" className={buttonSecondaryClassName}>
+              <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                 Start review
               </button>
             </form>
@@ -182,7 +182,7 @@ export function AccountingRequestReviewCard({
             ) : (
               <input type="hidden" name="internalNotes" value="" />
             )}
-            <button type="submit" className={buttonPrimaryClassName}>
+            <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
               Approve request
             </button>
           </form>
@@ -200,7 +200,7 @@ export function AccountingRequestReviewCard({
                 className={fieldClassName}
               />
             </label>
-            <button type="submit" className={buttonDangerClassName}>
+            <button data-workspace-action="true" type="submit" className={buttonDangerClassName}>
               Reject request
             </button>
           </form>
@@ -231,7 +231,7 @@ export function AccountingRequestReviewCard({
               </select>
             </label>
           ) : null}
-          <button type="submit" className={buttonPrimaryClassName}>
+          <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
             {request.vendorBillId ? "Mark paid and settle bill" : "Mark as paid"}
           </button>
         </form>

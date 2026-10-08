@@ -312,7 +312,7 @@ export async function verifyTenantPaymentAction(formData: FormData) {
     await postVerifiedPayment(tx, payment.id, session.userId);
 
     if (payment.payerTenant) {
-      await notifyRecipients({
+      await notifyRecipients({ actorUserId: session.userId,
         db: tx,
         orgId: session.activeOrgId!,
         recipients: [

@@ -94,7 +94,7 @@ export function AccountingCoaWorkspace({
                               name="isActive"
                               value={account.isActive ? "false" : "true"}
                             />
-                            <button type="submit" className={buttonSecondaryClassName}>
+                            <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                               {account.isActive ? "Deactivate" : "Activate"}
                             </button>
                           </form>
@@ -141,7 +141,7 @@ export function AccountingCoaWorkspace({
                         />
                       </label>
                       <div className="flex items-end md:col-span-4">
-                        <button type="submit" className={buttonSecondaryClassName}>
+                        <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                           Save account
                         </button>
                       </div>
@@ -194,7 +194,7 @@ export function AccountingCoaWorkspace({
             <input name="description" className={fieldClassName} />
           </label>
           <div className="sm:col-span-2">
-            <button type="submit" className={buttonPrimaryClassName}>
+            <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
               Create account
             </button>
           </div>

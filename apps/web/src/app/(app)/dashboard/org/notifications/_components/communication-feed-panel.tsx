@@ -1,3 +1,4 @@
+import { NotificationViewButton } from "@/components/notifications/notification-view-button";
 import { markAllOrgNotificationsReadAction, markNotificationReadAction } from "@/app/(app)/dashboard/org/notifications/actions";
 import {
   cn,
@@ -50,7 +51,7 @@ export function CommunicationFeedPanel({
           />
 
           <form action={markAllOrgNotificationsReadAction}>
-            <button type="submit" className={`${secondaryButtonClassName} sm:w-auto`}>
+            <button data-workspace-action="true" type="submit" className={`${secondaryButtonClassName} sm:w-auto`}>
               Mark all read
             </button>
           </form>
@@ -96,7 +97,7 @@ export function CommunicationFeedPanel({
                       <p className="min-w-0 text-sm font-semibold text-foreground">
                         {notification.title}
                       </p>
-                      {!notification.readAt && (
+                      {!notification.readAt && notification.user?.id === membership.userId && (
                         <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
                           New
                         </span>
@@ -144,10 +145,11 @@ export function CommunicationFeedPanel({
                       </p>
                     )}
 
-                    {!notification.readAt ? (
+                    {notification.user?.id === membership.userId ? <div className="mt-3"><NotificationViewButton notificationId={notification.id} /></div> : null}
+                    {!notification.readAt && notification.user?.id === membership.userId ? (
                       <form action={markNotificationReadAction} className="mt-3">
                         <input type="hidden" name="notificationId" value={notification.id} />
-                        <button
+                        <button data-workspace-action="true"
                           type="submit"
                           className="inline-flex h-9 items-center justify-center rounded-xl border border-border bg-background px-3 text-xs font-medium text-foreground transition hover:bg-muted/20"
                         >

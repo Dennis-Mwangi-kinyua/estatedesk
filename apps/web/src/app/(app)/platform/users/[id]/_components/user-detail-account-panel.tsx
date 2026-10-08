@@ -33,7 +33,7 @@ export function UserDetailAccountPanel({
           <option value="SUSPENDED">Suspended</option>
           <option value="DISABLED">Disabled</option>
         </select>
-        <button
+        <button data-workspace-action="true"
           type="submit"
           disabled={user.isRootSuperAdmin}
           className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
@@ -59,7 +59,7 @@ export function UserDetailAccountPanel({
             className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400 disabled:bg-neutral-100"
             disabled={!isOrphanUser || user.isRootSuperAdmin}
           />
-          <button
+          <button data-workspace-action="true"
             type="submit"
             disabled={!isOrphanUser || user.isRootSuperAdmin}
             className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"

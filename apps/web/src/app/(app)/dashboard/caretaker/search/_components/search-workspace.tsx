@@ -52,7 +52,7 @@ export function SearchWorkspace({
                       className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
                     />
                   </div>
-                  <button className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">
+                  <button data-workspace-action="true" className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">
                     Search
                   </button>
                 </form>

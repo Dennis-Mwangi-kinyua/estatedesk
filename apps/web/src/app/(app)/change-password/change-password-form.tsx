@@ -114,7 +114,7 @@ export function ChangePasswordForm({
         </div>
       </div>
 
-      <button
+      <button data-workspace-action="true"
         type="submit"
         disabled={pending}
         className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60 dark:bg-emerald-600 dark:hover:bg-emerald-500"

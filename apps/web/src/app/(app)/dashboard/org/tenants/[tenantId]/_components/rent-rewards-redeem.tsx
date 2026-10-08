@@ -72,7 +72,7 @@ export function RentRewardsRedeem({
                   {item.pointsCost} pts · {item.category}
                 </p>
               </div>
-              <button
+              <button data-workspace-action="true"
                 type="button"
                 disabled={isPending}
                 onClick={() => redeem(item.id)}
@@ -108,7 +108,7 @@ export function RentRewardsRedeem({
                 </p>
               </div>
               {row.status === "PENDING" ? (
-                <button
+                <button data-workspace-action="true"
                   type="button"
                   disabled={isPending}
                   onClick={() => fulfill(row.id)}

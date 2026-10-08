@@ -46,7 +46,7 @@ export function SessionRow({ session }: { session: ManagedUserSession }) {
 
       {session.isCurrent ? (
         <form action={logoutAction}>
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-2xl border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-muted/30 sm:w-auto"
           >
@@ -57,7 +57,7 @@ export function SessionRow({ session }: { session: ManagedUserSession }) {
       ) : (
         <form action={revokeSessionAction}>
           <input type="hidden" name="sessionId" value={session.id} />
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex min-h-10 w-full items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200 sm:w-auto"
           >

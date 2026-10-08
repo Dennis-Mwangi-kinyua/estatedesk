@@ -35,7 +35,7 @@ export const RoleSelect = memo(function RoleSelect({
       </select>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {STAFF_ROLES.map((role) => (
-          <button
+          <button data-workspace-action="true"
             key={role}
             type="button"
             onClick={() => onChange(role)}

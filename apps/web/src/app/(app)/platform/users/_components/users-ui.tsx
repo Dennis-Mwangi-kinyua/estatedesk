@@ -184,7 +184,7 @@ export function CreatePlatformUserPanel() {
             </div>
           </div>
 
-          <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 md:w-fit">
+          <button data-workspace-action="true" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 md:w-fit">
             <Plus className="h-4 w-4" />
             Create platform user
           </button>

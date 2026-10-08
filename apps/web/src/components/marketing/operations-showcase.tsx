@@ -368,7 +368,7 @@ function RentalSearchStrip() {
           Choose location
         </span>
       </div>
-      <Link
+      <Link data-workspace-action="true"
         href="/vacancies"
         className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 lg:min-h-11 lg:px-5 dark:bg-emerald-400 dark:text-[#07130f] dark:hover:bg-emerald-300"
       >
@@ -470,13 +470,13 @@ function OperationsPanel({
         <div className="text-xs text-neutral-600 dark:text-slate-300">
           {copy.helperText}
         </div>
-        <Link
+        <Link data-workspace-action="true"
           href={copy.primaryCta.href}
           className="inline-flex w-full min-h-11 items-center justify-center rounded-lg bg-neutral-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:text-xs lg:px-4 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-slate-200 dark:focus-visible:ring-white"
         >
           {copy.primaryCta.label}
         </Link>
-        <Link
+        <Link data-workspace-action="true"
           href={copy.secondaryCta.href}
           className="inline-flex w-full min-h-11 items-center justify-center rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-900 transition hover:border-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:text-xs lg:px-4 dark:border-white/14 dark:bg-white/[0.08] dark:text-slate-100 dark:hover:border-white/26 dark:hover:bg-white/[0.13] dark:focus-visible:ring-white"
         >
@@ -645,8 +645,9 @@ export default function OperationsShowcase({
       <section
         aria-labelledby="operations-showcase-title"
         className={cx(
-          "relative min-h-dvh w-full overflow-x-hidden text-neutral-950 dark:text-slate-50 lg:overflow-hidden",
-          standalone ? "lg:h-[calc(100svh-65px)] lg:min-h-[calc(100svh-65px)]" : "lg:h-screen",
+          "relative w-full overflow-x-hidden text-neutral-950 dark:text-slate-50",
+          compact ? "min-h-full" : "min-h-dvh lg:overflow-hidden",
+          !compact && (standalone ? "lg:h-[calc(100svh-65px)] lg:min-h-[calc(100svh-65px)]" : "lg:h-screen"),
           isRental
             ? "bg-[linear-gradient(180deg,#f8fbff_0%,#eef4fb_48%,#ffffff_100%)] dark:bg-[linear-gradient(180deg,#0d1117_0%,#101923_48%,#0d1117_100%)]"
             : "bg-white dark:bg-[#0d1117]",
@@ -683,7 +684,8 @@ export default function OperationsShowcase({
 
         <main
           className={cx(
-            "flex min-h-0 flex-col gap-4 lg:grid lg:flex-1 lg:grid-rows-[auto_minmax(0,1fr)_auto] lg:gap-5",
+            "flex min-h-0 flex-col gap-4 lg:gap-5",
+            !compact && "lg:grid lg:flex-1 lg:grid-rows-[auto_minmax(0,1fr)_auto]",
             isRental ? "bg-transparent" : "bg-white dark:bg-[#0d1117]",
           )}
         >
@@ -694,12 +696,13 @@ export default function OperationsShowcase({
 
           <div
             className={cx(
-              "grid min-h-0 gap-4 md:gap-5 lg:min-h-[560px] lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.38fr)] xl:min-h-[620px] xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.36fr)]",
+              "grid min-h-0 gap-4 md:gap-5",
+              !compact && "lg:min-h-[560px] lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.38fr)] xl:min-h-[620px] xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.36fr)]",
               isRental ? "bg-transparent" : "bg-white dark:bg-[#0d1117]",
             )}
           >
             <OperationsPanel copy={copy} variant={variant} />
-            <WorkspacePanel copy={copy} variant={variant} />
+            {!compact ? <WorkspacePanel copy={copy} variant={variant} /> : null}
           </div>
 
           {!compact && !isRental ? <PlansSection /> : null}

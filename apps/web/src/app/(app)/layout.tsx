@@ -1,5 +1,7 @@
+import { WorkspaceThemeScope } from "@/components/shared/workspace-theme-scope";
 import { ProfilePictureProvider } from "@/components/uploads/profile-picture-context";
 import "./workspace.css";
+import "./workspace-controls.css";
 import { ReactNode } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -14,6 +16,7 @@ import { PwaAppBadgeSync } from "@/components/pwa/pwa-app-badge-sync";
 import { SensitiveDataWatermark } from "@/components/security/sensitive-data-watermark";
 import { AppActionFeedback } from "@/components/shared/app-action-feedback";
 import { DestructiveActionGuard } from "@/components/shared/destructive-action-guard";
+import { tenantCanAccessWorkspacePath } from "@/lib/permissions/access";
 
 export const metadata = privatePageMetadata;
 
@@ -26,6 +29,10 @@ export default async function AppLayout({
   const headerStore = await headers();
   const rawPath = headerStore.get("x-estatedesk-pathname") ?? "";
   const pathname = rawPath.replace(/\/+$/, "");
+
+  if (pathname && session.activeOrgRole === "TENANT" && !tenantCanAccessWorkspacePath(pathname)) {
+    redirect("/dashboard/tenant");
+  }
 
   // Only force password change / terms acceptance for non-platform users.
   const isPlatformAdmin =
@@ -88,6 +95,7 @@ export default async function AppLayout({
   return (
     <ProfilePictureProvider url={user?.profileImageUrl ?? null}>
     <div className="estate-workspace app-mobile-canvas app-sensitive-surface ed-mobile-surface relative min-h-dvh w-full min-w-0 overflow-x-hidden">
+      <WorkspaceThemeScope />
       <SensitiveDataWatermark orgLabel={orgLabel} />
       {children}
       {isSecurityGateRoute ? null : <PwaAppBadgeSync />}

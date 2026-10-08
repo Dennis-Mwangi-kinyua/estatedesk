@@ -115,14 +115,14 @@ export function VacancyListingGrid({
                 </p>
 
                 <div className="mt-3 grid grid-cols-[2.5rem_1fr] gap-2">
-                  <a
+                  <a data-workspace-action="true"
                     href={listing.callHref}
                     className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/15 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-white/10"
                     aria-label="Call landlord or agent"
                   >
                     <Phone className="h-4 w-4" />
                   </a>
-                  <Link
+                  <Link data-workspace-action="true"
                     href={listing.href}
                     className="inline-flex min-h-10 items-center justify-center rounded-lg bg-slate-950 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
                   >

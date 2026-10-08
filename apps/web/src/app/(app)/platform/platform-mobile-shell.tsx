@@ -114,7 +114,7 @@ export default function PlatformMobileShell({
 
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <HeaderThemeToggle />
-              <button
+              <button data-workspace-action="true"
                 ref={menuButtonRef}
                 type="button"
                 onClick={() => setOpen(true)}
@@ -141,11 +141,11 @@ export default function PlatformMobileShell({
             const active = isNavItemActive(pathname, item.href);
             return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary ${active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"}`}><Icon className="h-5 w-5" /><span>{item.href === "/platform/organizations" ? "Orgs" : item.href === "/platform/developer" ? "Home" : item.label}</span></Link>;
           })}
-          <button type="button" onClick={() => setOpen(true)} aria-label="More navigation" aria-expanded={open} aria-controls={panelId} className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold text-muted-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-primary"><Menu className="h-5 w-5" />More</button>
+          <button data-workspace-action="true" type="button" onClick={() => setOpen(true)} aria-label="More navigation" aria-expanded={open} aria-controls={panelId} className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold text-muted-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-primary"><Menu className="h-5 w-5" />More</button>
         </nav>
       </div>
 
-      <button
+      <button data-workspace-action="true"
         type="button"
         aria-label="Close menu overlay"
         onClick={closeMenu}
@@ -175,7 +175,7 @@ export default function PlatformMobileShell({
               <p className="truncate text-xs text-muted-foreground">{fullName}</p>
             </div>
 
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={closeMenu}
               aria-label="Close menu"
@@ -237,7 +237,7 @@ export default function PlatformMobileShell({
           <div className="space-y-3 border-t border-border p-4">
             <InAppHelpNav workspace="platform" compact />
             <form action={logoutAction}>
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.99]"
               >

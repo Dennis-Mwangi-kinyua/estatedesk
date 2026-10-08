@@ -122,7 +122,7 @@ export async function assignCaretakerAction(formData: FormData) {
     const assignmentMessage = `You have been assigned "${issue.title}" for ${issue.unit?.property.name ?? "a property"}${issue.unit?.houseNo ? ` / Unit ${issue.unit.houseNo}` : ""}.`;
 
     if (isUrgentAssignment) {
-      await notifyInAppAndPush({
+      await notifyInAppAndPush({ actorUserId: session.userId,
         db: tx,
         orgId: membership.orgId,
         recipients: [{ userId: caretakerMembership.user.id }],
@@ -135,7 +135,7 @@ export async function assignCaretakerAction(formData: FormData) {
         actionUrl: caretakerIssueUrl,
       });
     } else {
-      await notifyRecipients({
+      await notifyRecipients({ actorUserId: session.userId,
         db: tx,
         orgId: membership.orgId,
         recipients: [{ userId: caretakerMembership.user.id }],
@@ -146,7 +146,7 @@ export async function assignCaretakerAction(formData: FormData) {
       });
     }
 
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: session.userId,
       db: tx,
       orgId: membership.orgId,
       recipients: [{ userId: issue.reportedByUserId }],
@@ -237,10 +237,10 @@ export async function updateIssueStatusAction(formData: FormData) {
       data,
     });
 
-    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: issue.reportedByUserId }], type: nextStatus === "RESOLVED" || nextStatus === "CLOSED" ? "ISSUE_RESOLVED" : "GENERAL", title: `Issue ${nextStatus.toLowerCase().replaceAll("_", " ")}`, message: `Your issue "${issue.title}" is now ${nextStatus.toLowerCase().replaceAll("_", " ")}.` });
+    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: membership.orgId, recipients: [{ userId: issue.reportedByUserId }], type: nextStatus === "RESOLVED" || nextStatus === "CLOSED" ? "ISSUE_RESOLVED" : "GENERAL", title: `Issue ${nextStatus.toLowerCase().replaceAll("_", " ")}`, message: `Your issue "${issue.title}" is now ${nextStatus.toLowerCase().replaceAll("_", " ")}.` });
 
     if (issue.assignedToUserId && issue.assignedToUserId !== issue.reportedByUserId) {
-      await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: issue.assignedToUserId }], type: nextStatus === "RESOLVED" || nextStatus === "CLOSED" ? "ISSUE_RESOLVED" : "GENERAL", title: "Issue status updated", message: `"${issue.title}" is now ${nextStatus.toLowerCase().replaceAll("_", " ")}.` });
+      await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: membership.orgId, recipients: [{ userId: issue.assignedToUserId }], type: nextStatus === "RESOLVED" || nextStatus === "CLOSED" ? "ISSUE_RESOLVED" : "GENERAL", title: "Issue status updated", message: `"${issue.title}" is now ${nextStatus.toLowerCase().replaceAll("_", " ")}.` });
     }
 
     await tx.auditLog.create({
@@ -351,10 +351,10 @@ export async function approveIssueResolutionReportAction(formData: FormData) {
       },
     });
 
-    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: report.issue.reportedByUserId }], type: "ISSUE_RESOLVED", title: "Confirm completed issue", message: `The office approved the caretaker report for "${report.issue.title}". Please confirm the work so the ticket can be closed.` });
+    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: membership.orgId, recipients: [{ userId: report.issue.reportedByUserId }], type: "ISSUE_RESOLVED", title: "Confirm completed issue", message: `The office approved the caretaker report for "${report.issue.title}". Please confirm the work so the ticket can be closed.` });
 
     if (report.issue.assignedToUserId) {
-      await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: report.issue.assignedToUserId }], type: "GENERAL", title: "Completion report approved", message: `The office approved your completion report for "${report.issue.title}".` });
+      await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: membership.orgId, recipients: [{ userId: report.issue.assignedToUserId }], type: "GENERAL", title: "Completion report approved", message: `The office approved your completion report for "${report.issue.title}".` });
     }
 
     await tx.auditLog.create({
@@ -450,7 +450,7 @@ export async function rejectIssueResolutionReportAction(formData: FormData) {
     });
 
     if (report.issue.assignedToUserId) {
-      await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: report.issue.assignedToUserId }], type: "GENERAL", title: "Completion report needs changes", message: `The office returned the completion report for "${report.issue.title}". Review the notes and submit again.` });
+      await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: membership.orgId, recipients: [{ userId: report.issue.assignedToUserId }], type: "GENERAL", title: "Completion report needs changes", message: `The office returned the completion report for "${report.issue.title}". Review the notes and submit again.` });
     }
 
     await tx.auditLog.create({

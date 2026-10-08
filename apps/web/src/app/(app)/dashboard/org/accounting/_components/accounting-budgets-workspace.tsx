@@ -63,7 +63,7 @@ export function AccountingBudgetsWorkspace({
             <input name="name" required placeholder="FY 2026 operating budget" className={fieldClassName} />
           </label>
           <div className="flex items-end">
-            <button type="submit" className={buttonPrimaryClassName}>
+            <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
               Create budget
             </button>
           </div>
@@ -97,7 +97,7 @@ export function AccountingBudgetsWorkspace({
               {selected.status === "DRAFT" ? (
                 <form action={approveBudgetAction}>
                   <input type="hidden" name="budgetId" value={selected.id} />
-                  <button type="submit" className={buttonSecondaryClassName}>
+                  <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                     Approve budget
                   </button>
                 </form>
@@ -125,7 +125,7 @@ export function AccountingBudgetsWorkspace({
                   <input name="amount" type="number" min="0" step="0.01" required className={fieldClassName} />
                 </label>
                 <div className="flex items-end">
-                  <button type="submit" className={buttonSecondaryClassName}>
+                  <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                     Add line
                   </button>
                 </div>

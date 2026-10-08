@@ -28,7 +28,7 @@ export function ExpendituresPagination({
 
       <div className="flex items-center gap-2">
         {currentPage > 1 ? (
-          <DeferredLink
+          <DeferredLink data-workspace-action="true"
             href={buildExpendituresPageHref(currentPage - 1)}
             className="inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
           >
@@ -45,7 +45,7 @@ export function ExpendituresPagination({
         </span>
 
         {currentPage < totalPages ? (
-          <DeferredLink
+          <DeferredLink data-workspace-action="true"
             href={buildExpendituresPageHref(currentPage + 1)}
             className="inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
           >

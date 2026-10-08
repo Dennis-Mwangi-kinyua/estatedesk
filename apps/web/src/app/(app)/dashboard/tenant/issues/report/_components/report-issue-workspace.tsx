@@ -169,14 +169,14 @@ export function ReportIssueWorkspace({ data }: { data: ReportIssuePageData }) {
               </div>
 
               <div className="mt-5 flex flex-wrap gap-3">
-                <Link
+                <Link data-workspace-action="true"
                   href="/dashboard/tenant/issues"
                   className="inline-flex items-center justify-center rounded-[16px] border border-neutral-300 bg-card px-4 py-3 text-sm font-medium text-foreground/80"
                 >
                   Cancel
                 </Link>
 
-                <button
+                <button data-workspace-action="true"
                   type="submit"
                   className="inline-flex items-center justify-center rounded-[16px] bg-neutral-900 px-4 py-3 text-sm font-medium text-white"
                 >

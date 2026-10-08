@@ -86,7 +86,7 @@ export function IssueResolutionReportSection({
               placeholder="Office note for tenant (optional)"
               className="w-full rounded-[14px] border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
             />
-            <button
+            <button data-workspace-action="true"
               type="submit"
               className="mt-2 inline-flex items-center justify-center rounded-[14px] bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white"
             >
@@ -108,7 +108,7 @@ export function IssueResolutionReportSection({
               placeholder="What should the caretaker fix?"
               className="w-full rounded-[14px] border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
             />
-            <button
+            <button data-workspace-action="true"
               type="submit"
               className="mt-2 inline-flex items-center justify-center rounded-[14px] bg-orange-600 px-4 py-2.5 text-sm font-medium text-white"
             >

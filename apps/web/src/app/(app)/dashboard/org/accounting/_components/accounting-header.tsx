@@ -66,14 +66,14 @@ export function AccountingHeader({
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-3 text-xs font-medium text-foreground transition hover:bg-muted/30 sm:h-10 sm:px-4 sm:text-sm"
             >
               <ArrowLeft className="h-4 w-4 shrink-0" />
               Dashboard
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org/accounting/requests"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-3 text-xs font-medium text-foreground transition hover:bg-muted/30 sm:h-10 sm:px-4 sm:text-sm"
             >
@@ -85,14 +85,14 @@ export function AccountingHeader({
                 </span>
               ) : null}
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org/accounting/reports"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-3 text-xs font-medium text-foreground transition hover:bg-muted/30 sm:h-10 sm:px-4 sm:text-sm"
             >
               <FileSpreadsheet className="h-4 w-4 shrink-0" />
               Statements
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href={buildAccountingPageHref({ tab: "transactions", entry: "expense" })}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 sm:h-10 sm:px-4 sm:text-sm"
             >

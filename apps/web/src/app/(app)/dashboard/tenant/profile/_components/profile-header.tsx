@@ -74,14 +74,14 @@ export function ProfileHeader({
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row xl:min-w-[220px] xl:flex-col">
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/tenant/profile/edit"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
             >
               <PencilLine className="h-4 w-4" />
               Edit profile
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/tenant/profile/change-password"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >
@@ -89,7 +89,7 @@ export function ProfileHeader({
               Change password
             </Link>
             <form action={logoutAction}>
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
               >

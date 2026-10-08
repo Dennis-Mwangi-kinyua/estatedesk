@@ -49,12 +49,12 @@ export function ProfilePictureForm({ url, name = "Your profile" }: { url: string
             }} />
           </label>
           <p className="text-xs leading-5 text-muted-foreground">JPG, PNG, or WebP · Up to 5MB<br />A clear, centered photo works best.</p>
-          {preview ? <div className="flex items-center justify-center gap-2 sm:justify-start"><p className="max-w-56 truncate text-xs text-muted-foreground">{fileName}</p><button type="button" onClick={clearSelection} disabled={pending} aria-label="Discard selected photo" className="rounded-lg p-1 hover:bg-muted"><X className="h-4 w-4" /></button></div> : null}
+          {preview ? <div className="flex items-center justify-center gap-2 sm:justify-start"><p className="max-w-56 truncate text-xs text-muted-foreground">{fileName}</p><button data-workspace-action="true" type="button" onClick={clearSelection} disabled={pending} aria-label="Discard selected photo" className="rounded-lg p-1 hover:bg-muted"><X className="h-4 w-4" /></button></div> : null}
         </div>
       </div>
       <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border pt-4">
-        <button name="operation" value="upload" disabled={pending || !preview} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">{pending ? <LoaderCircle className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <CheckCircle2 className="h-4 w-4" />}{pending ? "Saving…" : "Save picture"}</button>
-        {url ? <button name="operation" value="delete" data-confirm="Delete your profile picture? You can upload a new one at any time." disabled={pending} className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/5 disabled:opacity-50"><Trash2 className="h-4 w-4" />Delete picture</button> : null}
+        <button data-workspace-action="true" name="operation" value="upload" disabled={pending || !preview} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">{pending ? <LoaderCircle className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <CheckCircle2 className="h-4 w-4" />}{pending ? "Saving…" : "Save picture"}</button>
+        {url ? <button data-workspace-action="true" name="operation" value="delete" data-confirm="Delete your profile picture? You can upload a new one at any time." disabled={pending} className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/5 disabled:opacity-50"><Trash2 className="h-4 w-4" />Delete picture</button> : null}
       </div>
       {error ? <p role="alert" className="mt-3 text-sm text-destructive">{error}</p> : null}
       {state.message ? <p role={state.success ? "status" : "alert"} className={`mt-3 text-sm ${state.success ? "text-emerald-700 dark:text-emerald-300" : "text-destructive"}`}>{state.message}</p> : null}

@@ -1,3 +1,5 @@
+import { getPersonalUnreadNotificationCount } from "@/lib/notifications/unread-count";
+import { collapseNotificationCopies } from "@/lib/notifications/collapse-copies";
 import { prisma } from "@/lib/prisma";
 import {
   getNotificationWhereForFilter,
@@ -46,18 +48,12 @@ export async function getTenantNotificationsData(
         createdAt: true,
       },
     }),
-    prisma.notification.count({
-      where: {
-        orgId: tenant.orgId,
-        readAt: null,
-        OR: [{ tenantId: tenant.id }, { userId }],
-      },
-    }),
+    getPersonalUnreadNotificationCount({ orgId, userId, orgRole: "TENANT", tenantId: tenant.id }),
   ]);
 
   return {
     tenant,
-    notifications,
+    notifications: collapseNotificationCopies(notifications),
     unreadCount,
     activeFilter,
   };

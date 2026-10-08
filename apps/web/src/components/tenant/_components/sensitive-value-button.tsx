@@ -40,7 +40,7 @@ export const SensitiveValueButton = memo(function SensitiveValueButton({
           {shownValue}
         </div>
 
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={() => onRequestReveal(fieldKey)}
           className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-neutral-100 hover:text-neutral-800"

@@ -56,7 +56,7 @@ export function ResolutionReportsWorkspace({
               </p>
               <InAppGuideHint topic="issues" workspace="org" orgRole={orgRole} />
             </div>
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org/issues"
               className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >
@@ -192,7 +192,7 @@ export function ResolutionReportsWorkspace({
                             className={`${fieldClassName} min-h-[4.5rem] resize-y`}
                           />
                         </label>
-                        <button
+                        <button data-workspace-action="true"
                           type="submit"
                           className={`${primaryButtonClassName} mt-3`}
                         >
@@ -214,7 +214,7 @@ export function ResolutionReportsWorkspace({
                             className={`${fieldClassName} min-h-[5.5rem] resize-y`}
                           />
                         </label>
-                        <button type="submit" className={secondaryButtonClassName}>
+                        <button data-workspace-action="true" type="submit" className={secondaryButtonClassName}>
                           <XCircle className="h-4 w-4" />
                           Return for more work
                         </button>

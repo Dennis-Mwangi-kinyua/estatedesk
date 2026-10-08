@@ -12,6 +12,13 @@ export type PublicSiteIndexItem = {
 
 export const publicSiteIndexItems: readonly PublicSiteIndexItem[] = [
   {
+    title: "BnB & short stays",
+    path: "/stays",
+    description: "Browse furnished BnBs, compare nightly rates, and enquire directly with hosts.",
+    priority: "0.9",
+    changefreq: "daily",
+  },
+  {
     title: "Home",
     path: "/",
     description:

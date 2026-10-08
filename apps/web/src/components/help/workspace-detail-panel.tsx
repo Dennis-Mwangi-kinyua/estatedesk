@@ -72,7 +72,7 @@ export function WorkspaceDetailPanel({
     open && mounted
       ? createPortal(
           <div className="fixed inset-0 z-[200] flex justify-end">
-            <button
+            <button data-workspace-action="true"
               type="button"
               className="absolute inset-0 bg-black/40"
               aria-label="Close panel"
@@ -97,7 +97,7 @@ export function WorkspaceDetailPanel({
                     {description}
                   </p>
                 ) : null}
-                <button
+                <button data-workspace-action="true"
                   type="button"
                   onClick={close}
                   aria-label="Close"
@@ -121,7 +121,7 @@ export function WorkspaceDetailPanel({
   return (
     <>
       <aside className={className}>
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={() => setOpen(true)}
           className={cn(

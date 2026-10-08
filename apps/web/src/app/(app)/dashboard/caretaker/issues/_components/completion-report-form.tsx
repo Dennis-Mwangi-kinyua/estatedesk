@@ -52,7 +52,7 @@ export function CompletionReportForm({ issueId }: { issueId: string }) {
             className="w-full rounded-xl border border-border bg-background px-3 py-3 text-sm text-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary-foreground"
           />
         </div>
-        <button
+        <button data-workspace-action="true"
           type="submit"
           className="inline-flex w-fit items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
         >

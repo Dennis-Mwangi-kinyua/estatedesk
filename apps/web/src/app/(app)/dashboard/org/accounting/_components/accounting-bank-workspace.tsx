@@ -49,7 +49,7 @@ export function AccountingBankWorkspace({
               No bank accounts yet. Seed the default cash accounts linked to your chart of accounts.
             </p>
             <form action={seedBankAccountsAction} className="mt-4">
-              <button type="submit" className={buttonPrimaryClassName}>
+              <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
                 Set up bank accounts
               </button>
             </form>
@@ -118,7 +118,7 @@ export function AccountingBankWorkspace({
                       className={fieldClassName}
                     />
                   </label>
-                  <button type="submit" className={buttonSecondaryClassName}>
+                  <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                     Import &amp; match
                   </button>
                 </div>
@@ -187,7 +187,7 @@ export function AccountingBankWorkspace({
                   </div>
                 ) : null}
 
-                <button type="submit" className={buttonPrimaryClassName}>
+                <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
                   Save reconciliation draft
                 </button>
               </form>
@@ -227,7 +227,7 @@ export function AccountingBankWorkspace({
                           name="bankAccountId"
                           value={recon.bankAccountId}
                         />
-                        <button type="submit" className={buttonSecondaryClassName}>
+                        <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                           Complete
                         </button>
                       </form>
@@ -274,7 +274,7 @@ export function AccountingBankWorkspace({
                 <input name="accountNumberMasked" className={fieldClassName} />
               </label>
               <div className="sm:col-span-2">
-                <button type="submit" className={buttonSecondaryClassName}>
+                <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                   Add bank account
                 </button>
               </div>

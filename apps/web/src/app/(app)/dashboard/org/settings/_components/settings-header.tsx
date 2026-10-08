@@ -43,7 +43,7 @@ export function SettingsHeader({
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row xl:flex-col">
-            <Link
+            <Link data-workspace-action="true"
               href={backHref}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >

@@ -44,7 +44,7 @@ export function PaymentsPendingSection({
                 placeholder="Search transaction code"
                 className={`${fieldClassName} h-10 min-w-0 flex-1 rounded-2xl py-2`}
               />
-              <button type="submit" className={buttonPrimaryClassName}>
+              <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
                 Search
               </button>
             </form>
@@ -136,7 +136,7 @@ export function PaymentsPendingSection({
                             placeholder="How was it confirmed?"
                             className={`${compactFieldClassName} mb-2 border-emerald-200 focus:border-emerald-400 dark:border-emerald-800`}
                           />
-                          <button
+                          <button data-workspace-action="true"
                             type="submit"
                             className="inline-flex h-9 w-full items-center justify-center rounded-xl bg-emerald-700 px-3 text-xs font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
                           >
@@ -155,7 +155,7 @@ export function PaymentsPendingSection({
                             placeholder="Optional rejection reason"
                             className={compactFieldClassName}
                           />
-                          <button
+                          <button data-workspace-action="true"
                             type="submit"
                             className="inline-flex h-9 items-center justify-center rounded-xl border border-red-200 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-800 dark:text-red-200 dark:hover:bg-red-950/30"
                           >
@@ -184,7 +184,7 @@ export function PaymentsPendingSection({
           placeholder="Search transaction code"
           className={`${fieldClassName} h-10 min-w-0 flex-1 rounded-2xl py-2`}
         />
-        <button type="submit" className={buttonPrimaryClassName}>
+        <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
           Search
         </button>
       </form>

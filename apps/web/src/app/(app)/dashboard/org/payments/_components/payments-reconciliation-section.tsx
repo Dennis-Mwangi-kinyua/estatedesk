@@ -48,13 +48,13 @@ export function PaymentsReconciliationSection({
           </p>
         </div>
         <div className="grid w-full gap-2 min-[420px]:grid-cols-2 lg:w-auto">
-          <Link
+          <Link data-workspace-action="true"
             href={`/api/org/reports/reconciliation?${periodParams.toString()}&status=UNRECONCILED`}
             className="inline-flex items-center justify-center rounded-2xl border border-amber-200 bg-background px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50 dark:border-amber-800 dark:text-amber-200 dark:hover:bg-amber-950/30"
           >
             Unreconciled CSV
           </Link>
-          <Link
+          <Link data-workspace-action="true"
             href={`/api/org/reports/reconciliation?${periodParams.toString()}&status=DISPUTED`}
             className="inline-flex items-center justify-center rounded-2xl border border-red-200 bg-background px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-800 dark:text-red-200 dark:hover:bg-red-950/30"
           >
@@ -106,7 +106,7 @@ export function PaymentsReconciliationSection({
             className="mt-2 min-h-11 w-full rounded-2xl border border-border bg-background p-2 text-sm text-foreground"
           />
         </label>
-        <button className={`${buttonPrimaryClassName} min-h-11 w-full sm:w-auto`}>
+        <button data-workspace-action="true" className={`${buttonPrimaryClassName} min-h-11 w-full sm:w-auto`}>
           Import and match
         </button>
       </form>
@@ -188,7 +188,7 @@ export function PaymentsReconciliationSection({
                         placeholder="Statement note"
                         className={compactFieldClassName}
                       />
-                      <button
+                      <button data-workspace-action="true"
                         type="submit"
                         className="inline-flex h-9 items-center justify-center rounded-xl bg-emerald-700 px-3 text-xs font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
                       >
@@ -205,7 +205,7 @@ export function PaymentsReconciliationSection({
                         placeholder="Issue found"
                         className={compactFieldClassName}
                       />
-                      <button
+                      <button data-workspace-action="true"
                         type="submit"
                         className="inline-flex h-9 items-center justify-center rounded-xl border border-red-200 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-800 dark:text-red-200 dark:hover:bg-red-950/30"
                       >

@@ -146,7 +146,7 @@ export function IssueNewForm({
           <p className="text-xs text-muted-foreground">
             Office reviewers are notified when a new issue is submitted.
           </p>
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex min-h-11 items-center justify-center rounded-xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-black"
           >

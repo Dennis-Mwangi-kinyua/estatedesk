@@ -27,7 +27,7 @@ export function DataExportSection({ data }: { data: SettingsPageData }) {
           />
         </label>
 
-        <button type="submit" className={`w-full gap-2 ${buttonPrimaryClassName}`}>
+        <button data-workspace-action="true" type="submit" className={`w-full gap-2 ${buttonPrimaryClassName}`}>
           <FileArchive className="h-4 w-4" />
           Request CSV Export
         </button>
@@ -82,7 +82,7 @@ export function DataExportSection({ data }: { data: SettingsPageData }) {
                 ) : null}
 
                 {isApproved ? (
-                  <Link
+                  <Link data-workspace-action="true"
                     href={`/api/data-exports/${request.id}/download`}
                     className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
                   >

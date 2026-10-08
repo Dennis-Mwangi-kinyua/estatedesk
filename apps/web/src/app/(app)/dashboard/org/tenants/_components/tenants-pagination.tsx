@@ -43,7 +43,7 @@ export function TenantsPagination({
       </p>
       <div className="flex items-center gap-2">
         {page > 1 ? (
-          <DeferredLink
+          <DeferredLink data-workspace-action="true"
             href={href(Math.max(1, page - 1))}
             className="inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
           >
@@ -58,7 +58,7 @@ export function TenantsPagination({
           {page} / {totalPages}
         </span>
         {page < totalPages ? (
-          <DeferredLink
+          <DeferredLink data-workspace-action="true"
             href={href(Math.min(totalPages, page + 1))}
             className="inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
           >

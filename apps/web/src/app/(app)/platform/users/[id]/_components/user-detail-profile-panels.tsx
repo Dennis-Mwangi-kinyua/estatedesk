@@ -81,7 +81,7 @@ export function UserDetailEditUserPanel({
             Can create platform admins
           </span>
         </label>
-        <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90">
+        <button data-workspace-action="true" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90">
           <Save className="h-4 w-4" />
           Save user
         </button>
@@ -123,7 +123,7 @@ export function UserDetailPasswordPanel({
           className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"
           required
         />
-        <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50">
+        <button data-workspace-action="true" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50">
           <KeyRound className="h-4 w-4" />
           Set temporary password
         </button>

@@ -66,7 +66,7 @@ export function DeleteCaretakerForm({
           />
         </label>
 
-        <button
+        <button data-workspace-action="true"
           type="submit"
           disabled={!canSubmit}
           className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-red-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-200 disabled:text-red-500 sm:w-auto"

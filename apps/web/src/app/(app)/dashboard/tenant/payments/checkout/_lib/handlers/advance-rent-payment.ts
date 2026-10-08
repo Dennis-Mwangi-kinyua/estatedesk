@@ -113,7 +113,7 @@ export async function processAdvanceRentPayment(
   });
 
   if (isGateway) {
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: [{ tenantId: tenant.id, userId }],
@@ -122,7 +122,7 @@ export async function processAdvanceRentPayment(
       message: `Enter your M-Pesa PIN for advance rent. Your ledger updates automatically when payment succeeds.`,
     });
   } else {
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: [{ tenantId: tenant.id, userId }],
@@ -131,7 +131,7 @@ export async function processAdvanceRentPayment(
       message: `Your advance rent payment via ${methodLabel} has been submitted and is awaiting organization verification.`,
     });
 
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: await getPaymentReviewRecipients(tx, orgId),

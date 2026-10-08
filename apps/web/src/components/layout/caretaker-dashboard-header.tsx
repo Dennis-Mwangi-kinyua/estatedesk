@@ -26,7 +26,7 @@ export function CaretakerDashboardHeader({
       <header className="ed-shell-panel sticky top-0 z-40 shrink-0 border-b">
         <div className="flex h-auto min-h-[72px] flex-col gap-3 px-3 py-3 sm:min-h-[68px] sm:flex-row sm:items-center sm:justify-between sm:px-6 xl:px-8">
           <div className="flex min-w-0 items-center gap-3">
-            <button
+            <button data-workspace-action="true"
               ref={menuButtonRef}
               type="button"
               onClick={() => setOpen(true)}
@@ -62,7 +62,7 @@ export function CaretakerDashboardHeader({
             <HeaderThemeToggle />
             <WorkspaceIdentity name={fullName} role="Caretaker" />
 
-            <DeferredLink
+            <DeferredLink data-workspace-action="true"
               href="/dashboard/caretaker/notifications"
               aria-label="View notifications"
               className="ios-button ed-soft-button relative inline-flex h-11 w-11 shrink-0 items-center justify-center border shadow-sm"

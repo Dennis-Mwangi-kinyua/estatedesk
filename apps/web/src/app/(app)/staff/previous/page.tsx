@@ -85,7 +85,7 @@ export default async function PreviousEmployeesPage() {
             </p>
           </div>
 
-          <Link
+          <Link data-workspace-action="true"
             href="/staff"
             className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
           >
@@ -155,7 +155,7 @@ export default async function PreviousEmployeesPage() {
 
                   <form action={reactivateMembershipAction} className="mt-4">
                     <input type="hidden" name="membershipId" value={employee.id} />
-                    <button
+                    <button data-workspace-action="true"
                       type="submit"
                       className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
                     >

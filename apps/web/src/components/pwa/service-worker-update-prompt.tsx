@@ -100,7 +100,7 @@ export function ServiceWorkerUpdatePrompt() {
             EstateDesk {availableVersion ? `version ${availableVersion}` : "has a newer version"} is ready. Refresh to load the latest fixes.
           </p>
         </div>
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={() => setVisible(false)}
           className="rounded-full p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-white/10 dark:hover:text-white"
@@ -110,7 +110,7 @@ export function ServiceWorkerUpdatePrompt() {
         </button>
       </div>
 
-      <button
+      <button data-workspace-action="true"
         type="button"
         onClick={applyUpdate}
         disabled={pending}

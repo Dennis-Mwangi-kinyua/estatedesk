@@ -118,7 +118,7 @@ export function CsvImportForm() {
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-semibold text-foreground">Import dataset</p>
-                <button
+                <button data-workspace-action="true"
                   type="button"
                   onClick={() => downloadTemplate(kind)}
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary underline-offset-2 hover:underline"
@@ -134,7 +134,7 @@ export function CsvImportForm() {
                   const selected = kind === option.value;
 
                   return (
-                    <button
+                    <button data-workspace-action="true"
                       key={option.value}
                       type="button"
                       onClick={() => {
@@ -254,7 +254,7 @@ export function CsvImportForm() {
           </div>
 
           <div className="flex flex-col gap-3 border-t border-border bg-muted/10 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
-            <button
+            <button data-workspace-action="true"
               type="submit"
               name="mode"
               value="dry-run"
@@ -270,7 +270,7 @@ export function CsvImportForm() {
                 "Validate CSV"
               )}
             </button>
-            <button
+            <button data-workspace-action="true"
               type="submit"
               name="mode"
               value="commit"
@@ -368,7 +368,7 @@ export function CsvImportForm() {
 
           {errorReportHref ? (
             <div className="border-t border-border px-5 py-4">
-              <a
+              <a data-workspace-action="true"
                 href={errorReportHref}
                 download={`estatedesk-${state.kind}-import-errors.csv`}
                 className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-2xl border border-border bg-background px-3 text-sm font-semibold text-foreground shadow-sm transition hover:bg-muted/20"

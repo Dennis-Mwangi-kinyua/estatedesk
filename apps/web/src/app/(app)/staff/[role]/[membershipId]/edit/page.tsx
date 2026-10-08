@@ -173,7 +173,7 @@ export default async function EditMemberPage({ params }: Props) {
             </p>
 
             <div className="mt-4">
-              <Link
+              <Link data-workspace-action="true"
                 href={`/staff/${normalizedRole.toLowerCase()}/${safeMember.id}`}
                 className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
               >

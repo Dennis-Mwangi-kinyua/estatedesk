@@ -67,4 +67,11 @@ describe("notification deep links", () => {
     assert.equal(resolveNotificationAudience({ userId: "user-1" }), "org_staff");
     assert.equal(resolveNotificationAudience({}), "default");
   });
+
+  it("keeps tenants inside their portal even with a stored management link", () => {
+    for (const actionUrl of ["/dashboard/org/payments", "/platform", "//evil.example", "/dashboard/tenant/../../org/payments", "/dashboard/tenant%2f..%2forg", "/dashboard/tenantish", "https://evil.example"]) {
+      assert.equal(resolveNotificationActionUrl({ type: "PAYMENT_VERIFIED", audience: "tenant", actionUrl }), "/dashboard/tenant/payments");
+    }
+    assert.equal(resolveNotificationActionUrl({ type: "ISSUE_CREATED", audience: "tenant", actionUrl: "/dashboard/tenant/issues?filter=open" }), "/dashboard/tenant/issues?filter=open");
+  });
 });

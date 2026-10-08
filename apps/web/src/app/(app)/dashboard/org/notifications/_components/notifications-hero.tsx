@@ -62,7 +62,7 @@ export function NotificationsHero({
                 {membership.org.timezone}
               </p>
             </div>
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >
@@ -70,7 +70,7 @@ export function NotificationsHero({
               Back to dashboard
             </Link>
             <form action={sendPaymentRemindersAction}>
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
               >

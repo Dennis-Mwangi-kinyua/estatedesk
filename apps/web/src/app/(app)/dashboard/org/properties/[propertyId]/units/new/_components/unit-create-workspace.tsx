@@ -56,7 +56,7 @@ export function UnitCreateWorkspace({
               Unit Management
             </p>
             <h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground">
-              Add a unit 🏡
+              Add a unit
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
               Create a new rentable unit under{" "}

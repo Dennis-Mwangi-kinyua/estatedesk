@@ -187,7 +187,7 @@ export function CheckoutFormPanel({ form }: CheckoutFormPanelProps) {
           </div>
         ) : null}
 
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={handleSubmit}
           disabled={!canSubmit}

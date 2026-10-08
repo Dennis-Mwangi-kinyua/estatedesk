@@ -216,7 +216,7 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
       <div className="min-h-screen bg-slate-100 print:bg-white">
         <div className="mx-auto max-w-5xl px-4 py-6 print:max-w-none print:px-0 print:py-0">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 print:hidden">
-            <Link
+            <Link data-workspace-action="true"
               href={`/dashboard/org/inspections/${encodePublicId(
                 inspection.id,
                 "inspection",

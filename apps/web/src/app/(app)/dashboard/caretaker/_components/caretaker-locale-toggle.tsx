@@ -34,7 +34,7 @@ export function CaretakerLocaleToggle({ className = "" }: Props) {
       role="group"
       aria-label="Language"
     >
-      <button
+      <button data-workspace-action="true"
         type="button"
         onClick={() => updateLocale("en")}
         className={`rounded-xl px-2.5 py-1.5 text-xs font-semibold transition ${
@@ -45,7 +45,7 @@ export function CaretakerLocaleToggle({ className = "" }: Props) {
       >
         EN
       </button>
-      <button
+      <button data-workspace-action="true"
         type="button"
         onClick={() => updateLocale("sw")}
         className={`rounded-xl px-2.5 py-1.5 text-xs font-semibold transition ${

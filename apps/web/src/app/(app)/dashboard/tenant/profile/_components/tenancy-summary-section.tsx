@@ -37,7 +37,7 @@ export function TenancySummarySection({
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Lease and payment actions appear once a new house is assigned.
         </p>
-        <Link
+        <Link data-workspace-action="true"
           href="/dashboard/tenant/lease"
           className="mt-4 inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
         >
@@ -104,7 +104,7 @@ export function TenancySummarySection({
 
       <div className="flex flex-col gap-2 border-t border-border p-4 sm:p-5">
         {showPayNow ? (
-          <Link
+          <Link data-workspace-action="true"
             href="/dashboard/tenant/payments"
             className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
@@ -113,7 +113,7 @@ export function TenancySummarySection({
           </Link>
         ) : null}
         {hasLeasePdf ? (
-          <a
+          <a data-workspace-action="true"
             href={tenantLeaseDownloadPath(activeLease.id)}
             className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
           >
@@ -121,14 +121,14 @@ export function TenancySummarySection({
             Download lease PDF
           </a>
         ) : null}
-        <Link
+        <Link data-workspace-action="true"
           href="/dashboard/tenant/lease"
           className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
         >
           <FileText className="h-4 w-4" />
           View lease
         </Link>
-        <Link
+        <Link data-workspace-action="true"
           href="/dashboard/tenant"
           className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
         >

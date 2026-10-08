@@ -118,7 +118,7 @@ export function AccountingJournalsWorkspace({
             <input name="to" type="date" defaultValue={filters.to} className={fieldClassName} />
           </label>
           <div className="flex items-end sm:col-span-2 lg:col-span-5">
-            <button type="submit" className={buttonSecondaryClassName}>
+            <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
               Apply filters
             </button>
           </div>
@@ -145,7 +145,7 @@ export function AccountingJournalsWorkspace({
                     {journal.status === "DRAFT" ? (
                       <form action={postDraftJournalAction}>
                         <input type="hidden" name="journalId" value={journal.id} />
-                        <button type="submit" className={buttonSecondaryClassName}>
+                        <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                           Post draft
                         </button>
                       </form>
@@ -160,7 +160,7 @@ export function AccountingJournalsWorkspace({
                           placeholder="Reversal reason"
                           className="h-11 rounded-2xl border border-border bg-background px-3 text-sm"
                         />
-                        <button type="submit" className={buttonSecondaryClassName}>
+                        <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                           Reverse
                         </button>
                       </form>

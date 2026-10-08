@@ -36,7 +36,7 @@ export function SecuritySessionsContent({
 
           {otherSessionCount > 0 ? (
             <form action={revokeOtherSessionsAction}>
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="inline-flex min-h-10 w-full items-center justify-center rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 sm:w-auto"
               >

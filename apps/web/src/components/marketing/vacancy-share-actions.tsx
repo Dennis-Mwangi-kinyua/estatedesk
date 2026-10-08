@@ -95,7 +95,7 @@ export function VacancyShareActions({
         </p>
         <div className="flex flex-wrap items-center gap-1.5">
           {links.map((item) => (
-            <a
+            <a data-workspace-action="true"
               key={item.platform}
               href={item.href}
               target="_blank"
@@ -107,7 +107,7 @@ export function VacancyShareActions({
               <ShareBrandIcon platform={item.platform} className="h-3.5 w-3.5" />
             </a>
           ))}
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={copyLink}
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-white dark:border-white/10 dark:bg-[#111827] dark:text-[#e5e7eb] dark:hover:bg-white/[0.10]"
@@ -116,7 +116,7 @@ export function VacancyShareActions({
           >
             <Copy className="h-3.5 w-3.5" />
           </button>
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={nativeShare}
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#0b0f16] dark:text-[#f8fafc] dark:hover:bg-white/[0.10]"
@@ -136,7 +136,7 @@ export function VacancyShareActions({
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-[#9ca3af]">
           Share
         </p>
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={nativeShare}
           className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#0b0f16] dark:text-[#f8fafc] dark:hover:bg-white/[0.10]"
@@ -148,7 +148,7 @@ export function VacancyShareActions({
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {links.map((item) => (
-          <a
+          <a data-workspace-action="true"
             key={item.platform}
             href={item.href}
             target="_blank"
@@ -162,7 +162,7 @@ export function VacancyShareActions({
         ))}
       </div>
 
-      <button
+      <button data-workspace-action="true"
         type="button"
         onClick={copyLink}
         className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-700 transition hover:bg-white dark:border-white/10 dark:bg-[#111827] dark:text-[#e5e7eb] dark:hover:bg-white/[0.10]"

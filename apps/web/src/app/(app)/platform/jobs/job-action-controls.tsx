@@ -24,7 +24,7 @@ export function JobActionButton({
         : "border-slate-950 bg-slate-950 text-white hover:bg-slate-800 disabled:border-slate-300 disabled:bg-slate-300";
 
   return (
-    <button
+    <button data-workspace-action="true"
       type="submit"
       disabled={pending}
       data-confirm={confirmMessage}

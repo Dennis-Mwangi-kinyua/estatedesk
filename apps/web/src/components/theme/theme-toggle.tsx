@@ -33,7 +33,7 @@ function ThemeToggleButton({
     currentTheme === "system" ? Monitor : isDark ? Sun : Moon;
 
   return (
-    <button
+    <button data-workspace-action="true"
       type="button"
       onClick={() => setTheme(nextTheme[currentTheme])}
       className={className}

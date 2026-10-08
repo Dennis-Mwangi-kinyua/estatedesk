@@ -91,7 +91,7 @@ export function InspectionCheckIn() {
             {state.message}
           </p>
         </div>
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={captureLocation}
           disabled={state.status === "capturing"}

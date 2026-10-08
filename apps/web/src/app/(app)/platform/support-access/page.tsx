@@ -76,7 +76,7 @@ function SupportEnterForm({
           <option value="4">4 hours</option>
           <option value="8">8 hours</option>
         </select>
-        <button
+        <button data-workspace-action="true"
           type="submit"
           disabled={disabled}
           className="min-h-10 w-full rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:opacity-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:min-w-[8.5rem]"
@@ -229,7 +229,7 @@ export default async function SupportAccessPage({
               </p>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
-              <a
+              <a data-workspace-action="true"
                 href="/dashboard/org"
                 className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground sm:w-auto"
               >
@@ -237,7 +237,7 @@ export default async function SupportAccessPage({
               </a>
               <form action={leaveOrgSupportAccessAction} className="w-full sm:w-auto">
                 <input type="hidden" name="returnTo" value="/platform/support-access" />
-                <button
+                <button data-workspace-action="true"
                   type="submit"
                   className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold sm:w-auto"
                 >

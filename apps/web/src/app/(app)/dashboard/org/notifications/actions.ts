@@ -1,5 +1,6 @@
 "use server";
 
+import { readPersonalNotification, readAllPersonalNotifications } from "@/lib/notifications/read";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
@@ -251,9 +252,9 @@ export async function approveMeterReading(formData: FormData) {
       // Accrual posting is best-effort until accounting is initialized.
     }
 
-    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ tenantId: activeLease.tenantId, userId: activeLease.tenant.userId }], type: "WATER_BILL_ISSUED", title: "Water bill issued", message: `Your water bill for ${reading.period} has been issued for ${reading.unit.property.name} / Unit ${reading.unit.houseNo}.` });
+    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: membership.orgId, recipients: [{ tenantId: activeLease.tenantId, userId: activeLease.tenant.userId }], type: "WATER_BILL_ISSUED", title: "Water bill issued", message: `Your water bill for ${reading.period} has been issued for ${reading.unit.property.name} / Unit ${reading.unit.houseNo}.` });
 
-    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: reading.submittedByUserId }], type: "GENERAL", title: "Meter reading approved", message: `The ${reading.period} water reading for ${reading.unit.property.name} / Unit ${reading.unit.houseNo} was approved and the tenant bill has been issued.` });
+    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: membership.orgId, recipients: [{ userId: reading.submittedByUserId }], type: "GENERAL", title: "Meter reading approved", message: `The ${reading.period} water reading for ${reading.unit.property.name} / Unit ${reading.unit.houseNo} was approved and the tenant bill has been issued.` });
   });
 
   revalidatePath("/dashboard/org");
@@ -338,7 +339,7 @@ export async function rejectMeterReading(formData: FormData) {
       },
     });
 
-    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ userId: reading.submittedByUserId }], type: "GENERAL", title: "Meter reading rejected", message: `The ${reading.period} water reading for ${reading.unit.property.name} / Unit ${reading.unit.houseNo} was rejected. Reason: ${rejectionReason}` });
+    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: membership.orgId, recipients: [{ userId: reading.submittedByUserId }], type: "GENERAL", title: "Meter reading rejected", message: `The ${reading.period} water reading for ${reading.unit.property.name} / Unit ${reading.unit.houseNo} was rejected. Reason: ${rejectionReason}` });
   });
 
   revalidatePath("/dashboard/org");
@@ -349,46 +350,17 @@ export async function rejectMeterReading(formData: FormData) {
 }
 
 export async function markNotificationReadAction(formData: FormData) {
-  const { session, membership } = await requireOrgReviewer();
-  const notificationId = String(formData.get("notificationId") ?? "");
-
-  if (!notificationId) {
-    throw new Error("Missing notification id");
-  }
-
-  await prisma.notification.updateMany({
-    where: {
-      id: notificationId,
-      orgId: membership.orgId,
-      OR: [{ userId: session.userId }, { userId: null }],
-    },
-    data: {
-      readAt: new Date(),
-      status: "SENT",
-      sentAt: new Date(),
-    },
-  });
-
-  revalidatePath("/dashboard/org/notifications");
+  const { session } = await requireOrgReviewer();
+  const id = String(formData.get("notificationId") ?? "").trim();
+  if (!id) throw new Error("Missing notification id.");
+  await readPersonalNotification(session, id);
+  revalidatePath("/", "layout");
 }
 
 export async function markAllOrgNotificationsReadAction() {
-  const { session, membership } = await requireOrgReviewer();
-
-  await prisma.notification.updateMany({
-    where: {
-      orgId: membership.orgId,
-      readAt: null,
-      OR: [{ userId: session.userId }, { userId: null }],
-    },
-    data: {
-      readAt: new Date(),
-      status: "SENT",
-      sentAt: new Date(),
-    },
-  });
-
-  revalidatePath("/dashboard/org/notifications");
+  const { session } = await requireOrgReviewer();
+  await readAllPersonalNotifications(session);
+  revalidatePath("/", "layout");
 }
 
 export async function sendPaymentRemindersAction() {
@@ -463,7 +435,7 @@ export async function confirmMoveOutAction(formData: FormData) {
       },
     });
 
-    await notifyInAppAndPush({ db: tx, orgId: membership.orgId, recipients: [{ tenantId: notice.tenantId }], type: "MOVE_OUT_CLOSED", title: "Move-out confirmed", message: `Move-out closeout for ${notice.tenant.fullName} has been confirmed.${notes ? ` Notes: ${notes}` : ""}` });
+    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: membership.orgId, recipients: [{ tenantId: notice.tenantId }], type: "MOVE_OUT_CLOSED", title: "Move-out confirmed", message: `Move-out closeout for ${notice.tenant.fullName} has been confirmed.${notes ? ` Notes: ${notes}` : ""}` });
 
     await tx.auditLog.create({
       data: {

@@ -62,7 +62,7 @@ export function InspectionCard({ inspection }: InspectionCardProps) {
       </div>
 
       <div className="mt-4">
-        <Link
+        <Link data-workspace-action="true"
           href={`/dashboard/caretaker/inspections/${encodePublicId(
             inspection.id,
             "inspection",

@@ -25,7 +25,7 @@ export function RevealValue({
       </p>
 
       {hasValue ? (
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={() => setRevealed((prev) => !prev)}
           className="shrink-0 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-700 transition hover:bg-neutral-50 active:scale-[0.98]"

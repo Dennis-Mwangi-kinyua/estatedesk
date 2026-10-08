@@ -26,7 +26,7 @@ export default async function DeveloperSystemDocsHubPage() {
         title="System documentation"
         description="In-depth operator and engineering reference for how EstateDesk works end-to-end. Visible only to platform admins and super admins — never public, never sitemapped."
         action={
-          <Link
+          <Link data-workspace-action="true"
             href="/platform/developer"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted/40"
           >

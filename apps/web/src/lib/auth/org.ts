@@ -11,8 +11,10 @@ export async function requireCurrentOrgId() {
   const membership = await prisma.membership.findFirst({
     where: {
       userId: session.userId,
+      employmentEndedAt: null,
       org: {
         deletedAt: null,
+        status: "ACTIVE",
       },
       user: {
         deletedAt: null,
@@ -40,8 +42,10 @@ export async function requireOrgAccess(orgId: string) {
     where: {
       userId: session.userId,
       orgId,
+      employmentEndedAt: null,
       org: {
         deletedAt: null,
+        status: "ACTIVE",
       },
       user: {
         deletedAt: null,

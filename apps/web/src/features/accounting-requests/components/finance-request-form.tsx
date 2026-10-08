@@ -127,7 +127,7 @@ export function FinanceRequestForm({
           review.
         </p>
 
-        <button type="submit" className={buttonPrimaryClassName}>
+        <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
           Submit to accounts
         </button>
       </form>

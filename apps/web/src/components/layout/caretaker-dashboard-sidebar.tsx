@@ -74,7 +74,7 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
           <div className="shrink-0 space-y-2 border-t border-border p-3">
             <InAppHelpNav workspace="caretaker" compact />
             <form action={logoutAction}>
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
               >

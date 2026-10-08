@@ -54,7 +54,7 @@ export function GiveNoticeCard({ hasActiveLease }: GiveNoticeCardProps) {
             />
           </div>
 
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex items-center justify-center rounded-[16px] bg-neutral-900 px-4 py-3 text-sm font-medium text-white"
           >

@@ -252,7 +252,7 @@ export async function completeInspectionAction(formData: FormData) {
       },
     });
 
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: session.userId,
       db: tx,
       orgId,
       recipients: officeRecipients.map((recipient) => ({

@@ -61,7 +61,7 @@ function FlagToggle({
         name="nextEnabled"
         value={enabled ? "false" : "true"}
       />
-      <button
+      <button data-workspace-action="true"
         type="submit"
         title={
           globallyForced

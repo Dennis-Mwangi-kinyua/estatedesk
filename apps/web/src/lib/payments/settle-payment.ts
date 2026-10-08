@@ -351,7 +351,7 @@ export async function settleGatewayPayment({
   }
 
   if (payment.payerTenant) {
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: actorUserId,
       db,
       orgId: payment.orgId,
       recipients: [

@@ -127,7 +127,7 @@ const PropertyCarouselCard = memo(function PropertyCarouselCard({
           {property.activeTenants} active tenants
         </p>
 
-        <Link
+        <Link data-workspace-action="true"
           href={`/dashboard/org/properties/${property.id}`}
           className="inline-flex items-center justify-center rounded-2xl bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
         >
@@ -182,7 +182,7 @@ export const PropertiesCarousel = memo(function PropertiesCarousel({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-end gap-2">
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={() => scrollByAmount("left")}
           className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border bg-white text-gray-700 shadow-sm transition hover:bg-slate-50"
@@ -191,7 +191,7 @@ export const PropertiesCarousel = memo(function PropertiesCarousel({
           <ChevronLeft className="h-5 w-5" />
         </button>
 
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={() => scrollByAmount("right")}
           className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border bg-white text-gray-700 shadow-sm transition hover:bg-slate-50"

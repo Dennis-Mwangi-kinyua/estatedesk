@@ -104,7 +104,7 @@ export function StepAccountDetails({
           </label>
         </div>
 
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={onGeneratePassword}
           disabled={isPending}

@@ -1,3 +1,4 @@
+import { installWorkspaceStyles } from "./workspace-styles";
 import { expect, test } from "playwright/test";
 import { build } from "esbuild";
 import path from "node:path";
@@ -25,6 +26,7 @@ test("onboarding cards expose contact and setup actions, save errors, and confir
   await page.goto("/register");
   const styles = await page.locator('link[rel="stylesheet"]').evaluateAll(links => links.map(link => (link as HTMLLinkElement).href));
   await page.setContent(`<html><head>${styles.map(href => `<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system"><div class="estate-workspace p-4"><div id="fixture"></div></div></body></html>`);
+  await installWorkspaceStyles(page);
   await page.addScriptTag({ content: bundle.outputFiles[0].text });
   const card = page.getByRole("article").filter({ has: page.getByRole("heading", { name: "Greenview Properties", exact: true }) });
   await expect(card.getByRole("link", { name: "Email applicant" })).toHaveAttribute("href", /mailto:jane%40example.test/);

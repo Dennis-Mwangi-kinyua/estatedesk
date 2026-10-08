@@ -80,7 +80,7 @@ export function OrganizationProfileSection({ data }: { data: SettingsPageData })
         </label>
 
         <div className="flex justify-end md:col-span-2">
-          <button type="submit" className={buttonPrimaryClassName}>
+          <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
             Update Organization
           </button>
         </div>

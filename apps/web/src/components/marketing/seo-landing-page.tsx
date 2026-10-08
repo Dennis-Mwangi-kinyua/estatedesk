@@ -252,14 +252,14 @@ export function SeoLandingPage({ content }: { content: SeoLandingPageContent }) 
             {content.ctaBody}
           </p>
           <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-            <Link
+            <Link data-workspace-action="true"
               href="/register"
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-black dark:bg-white dark:text-[#10141a] dark:hover:bg-[#e5e7eb]"
             >
               Start with EstateDesk
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href="/contact"
               className="inline-flex min-h-12 items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 text-sm font-semibold text-neutral-800 transition hover:border-neutral-400 dark:border-white/16 dark:bg-white/[0.08] dark:text-[#f8fafc] dark:hover:bg-white/[0.14]"
             >

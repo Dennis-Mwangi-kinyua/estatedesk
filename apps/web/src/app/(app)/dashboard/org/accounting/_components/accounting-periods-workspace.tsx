@@ -100,7 +100,7 @@ export function AccountingPeriodsWorkspace({
               <input type="checkbox" name="openNextYear" defaultChecked />
               Open next fiscal year periods
             </label>
-            <button
+            <button data-workspace-action="true"
               type="submit"
               className={buttonPrimaryClassName}
               disabled={!yearEndPreview.canRun}
@@ -127,7 +127,7 @@ export function AccountingPeriodsWorkspace({
                   className={fieldClassName}
                 />
               </label>
-              <button type="submit" className={buttonPrimaryClassName}>
+              <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
                 Generate periods
               </button>
             </form>
@@ -169,7 +169,7 @@ export function AccountingPeriodsWorkspace({
                       <form action={updatePeriodStatusAction}>
                         <input type="hidden" name="periodId" value={period.id} />
                         <input type="hidden" name="action" value="lock" />
-                        <button type="submit" className={buttonSecondaryClassName}>
+                        <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                           <Lock className="mr-1 inline h-3.5 w-3.5" />
                           Lock
                         </button>
@@ -182,7 +182,7 @@ export function AccountingPeriodsWorkspace({
                           placeholder="Close notes (optional)"
                           className="h-11 rounded-2xl border border-border bg-background px-3 text-sm"
                         />
-                        <button type="submit" className={buttonPrimaryClassName}>
+                        <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
                           Close period
                         </button>
                       </form>
@@ -197,7 +197,7 @@ export function AccountingPeriodsWorkspace({
                         placeholder="Close notes (optional)"
                         className="h-11 rounded-2xl border border-border bg-background px-3 text-sm"
                       />
-                      <button type="submit" className={buttonPrimaryClassName}>
+                      <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
                         Close period
                       </button>
                     </form>
@@ -205,7 +205,7 @@ export function AccountingPeriodsWorkspace({
                   {period.status !== "OPEN" && !closedPeriodIds.has(period.id) ? (
                     <form action={postPeriodCloseEntriesAction}>
                       <input type="hidden" name="periodId" value={period.id} />
-                      <button type="submit" className={buttonPrimaryClassName}>
+                      <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
                         Post closing entries
                       </button>
                     </form>
@@ -219,7 +219,7 @@ export function AccountingPeriodsWorkspace({
                     <form action={updatePeriodStatusAction}>
                       <input type="hidden" name="periodId" value={period.id} />
                       <input type="hidden" name="action" value="reopen" />
-                      <button type="submit" className={buttonSecondaryClassName}>
+                      <button data-workspace-action="true" type="submit" className={buttonSecondaryClassName}>
                         <Unlock className="mr-1 inline h-3.5 w-3.5" />
                         Reopen
                       </button>

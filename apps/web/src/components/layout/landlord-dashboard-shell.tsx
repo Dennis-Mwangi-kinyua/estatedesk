@@ -165,7 +165,7 @@ export function LandlordDashboardShell({
         </div>
 
         <form action={logoutAction} className="absolute inset-x-4 bottom-4">
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
           >
@@ -180,7 +180,7 @@ export function LandlordDashboardShell({
       <header className="ed-shell-panel fixed left-0 right-0 top-0 z-[90] border-b lg:left-72">
         <div className="flex h-[72px] items-center justify-between gap-3 px-3 sm:px-6 lg:h-16 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label="Open navigation"
@@ -207,7 +207,7 @@ export function LandlordDashboardShell({
 
       {mobileOpen ? (
         <div className="fixed inset-0 z-[110] lg:hidden">
-          <button
+          <button data-workspace-action="true"
             type="button"
             aria-label="Close navigation overlay"
             className="absolute inset-0 bg-slate-950/35 backdrop-blur-sm"
@@ -223,7 +223,7 @@ export function LandlordDashboardShell({
                   Landlord workspace
                 </h2>
               </div>
-              <button
+              <button data-workspace-action="true"
                 type="button"
                 onClick={() => setMobileOpen(false)}
                 className="ios-button ed-soft-button inline-flex h-11 w-11 items-center justify-center border shadow-sm"
@@ -249,7 +249,7 @@ export function LandlordDashboardShell({
             </div>
 
             <form action={logoutAction} className="mt-4">
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50"
               >

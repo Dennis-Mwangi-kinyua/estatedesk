@@ -15,7 +15,7 @@ export function HeaderThemeToggle({ className = "" }: { className?: string }) {
   const Icon = dark ? Sun : Moon;
   const label = `Switch to ${dark ? "light" : "dark"} mode`;
   return (
-    <button type="button" className={`workspace-theme-toggle ${className}`} aria-label={label} title={label} disabled={!mounted} onClick={() => setTheme(dark ? "light" : "dark")}>
+    <button data-workspace-action="true" type="button" className={`workspace-theme-toggle ${className}`} aria-label={label} title={label} disabled={!mounted} onClick={() => setTheme(dark ? "light" : "dark")}>
       <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
     </button>
   );

@@ -17,13 +17,12 @@ export async function resolvePushActionUrl(notification: {
 }) {
   const explicitUrl = readNotificationActionUrl(notification.providerResponse);
 
-  if (explicitUrl) {
-    return explicitUrl;
-  }
-
   let audience: NotificationAudience = "default";
 
-  if (notification.tenantId) {
+  const tenantRecipient = notification.tenantId && (!notification.userId || await prisma.tenant.findFirst({
+    where: { id: notification.tenantId, orgId: notification.orgId, userId: notification.userId, deletedAt: null }, select: { id: true },
+  }));
+  if (tenantRecipient) {
     audience = "tenant";
   } else if (notification.userId) {
     const membership = await prisma.membership.findFirst({
@@ -35,7 +34,7 @@ export async function resolvePushActionUrl(notification: {
       select: { role: true },
     });
 
-    audience = membership?.role === "CARETAKER" ? "caretaker" : "org_staff";
+    audience = membership?.role === "TENANT" ? "tenant" : membership?.role === "CARETAKER" ? "caretaker" : "org_staff";
   }
 
   return resolveNotificationActionUrl({
@@ -43,5 +42,6 @@ export async function resolvePushActionUrl(notification: {
     userId: notification.userId,
     tenantId: notification.tenantId,
     audience,
+    actionUrl: explicitUrl,
   });
 }

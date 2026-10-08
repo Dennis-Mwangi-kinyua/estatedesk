@@ -58,7 +58,7 @@ export function ApiKeyCreateForm({
           className="min-h-12 w-full rounded-2xl border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none"
         />
 
-        <button
+        <button data-workspace-action="true"
           type="submit"
           disabled={pending}
           className="min-h-12 w-full rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"

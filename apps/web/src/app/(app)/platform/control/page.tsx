@@ -245,13 +245,13 @@ export default async function WebsiteControlCenterPage({
         description="Full power over the EstateDesk website: incident banners, maintenance, public surfaces, queues, sessions, API keys, organizations, and emergency ops. Every action is audit-logged."
         action={
           <div className="platform-action-group">
-            <Link
+            <Link data-workspace-action="true"
               href="/platform/developer"
               className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground"
             >
               Developer home
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href="/platform/system-health"
               className="inline-flex min-h-10 items-center justify-center rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white"
             >
@@ -395,7 +395,7 @@ export default async function WebsiteControlCenterPage({
             ) : null}
           </div>
 
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-amber-600 px-5 text-sm font-semibold text-white transition hover:bg-amber-500 sm:w-auto"
           >
@@ -504,7 +504,7 @@ export default async function WebsiteControlCenterPage({
             </label>
           </div>
 
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 text-sm font-semibold text-white transition hover:bg-violet-500 sm:w-auto"
           >
@@ -557,21 +557,21 @@ export default async function WebsiteControlCenterPage({
                     className="grid grid-cols-3 gap-2"
                   >
                     <input type="hidden" name="featureKey" value={key} />
-                    <button
+                    <button data-workspace-action="true"
                       name="mode"
                       value="on"
                       className="inline-flex min-h-11 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 px-2 text-xs font-semibold text-emerald-900 transition hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-100"
                     >
                       On
                     </button>
-                    <button
+                    <button data-workspace-action="true"
                       name="mode"
                       value="off"
                       className="inline-flex min-h-11 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-2 text-xs font-semibold text-red-800 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-100"
                     >
                       Off
                     </button>
-                    <button
+                    <button data-workspace-action="true"
                       name="mode"
                       value="inherit"
                       className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-2 text-xs font-semibold text-foreground transition hover:bg-muted/50"
@@ -598,7 +598,7 @@ export default async function WebsiteControlCenterPage({
                       autoComplete="off"
                       className="min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm dark:border-white/10 dark:bg-slate-950"
                     />
-                    <button className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-950 px-3 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">
+                    <button data-workspace-action="true" className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-950 px-3 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">
                       Force ON all orgs
                     </button>
                   </form>
@@ -611,7 +611,7 @@ export default async function WebsiteControlCenterPage({
                       autoComplete="off"
                       className="min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm dark:border-white/10 dark:bg-slate-950"
                     />
-                    <button className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-red-200 bg-red-50 px-3 text-sm font-semibold text-red-800 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-100">
+                    <button data-workspace-action="true" className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-red-200 bg-red-50 px-3 text-sm font-semibold text-red-800 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-100">
                       Force OFF all orgs
                     </button>
                   </form>
@@ -665,21 +665,21 @@ export default async function WebsiteControlCenterPage({
                         className="flex flex-wrap gap-1"
                       >
                         <input type="hidden" name="featureKey" value={key} />
-                        <button
+                        <button data-workspace-action="true"
                           name="mode"
                           value="on"
                           className="rounded-lg border border-emerald-200 px-2 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-50"
                         >
                           On
                         </button>
-                        <button
+                        <button data-workspace-action="true"
                           name="mode"
                           value="off"
                           className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
                         >
                           Off
                         </button>
-                        <button
+                        <button data-workspace-action="true"
                           name="mode"
                           value="inherit"
                           className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
@@ -700,7 +700,7 @@ export default async function WebsiteControlCenterPage({
                           placeholder="FORCE-ALL-ORGS"
                           className="h-8 w-36 rounded-lg border border-slate-200 px-2 text-xs dark:border-white/10 dark:bg-slate-950"
                         />
-                        <button className="rounded-lg bg-slate-950 px-2 py-1 text-xs font-semibold text-white dark:bg-white dark:text-slate-950">
+                        <button data-workspace-action="true" className="rounded-lg bg-slate-950 px-2 py-1 text-xs font-semibold text-white dark:bg-white dark:text-slate-950">
                           Force ON all
                         </button>
                       </form>
@@ -715,7 +715,7 @@ export default async function WebsiteControlCenterPage({
                           placeholder="FORCE-ALL-ORGS"
                           className="h-8 w-36 rounded-lg border border-slate-200 px-2 text-xs dark:border-white/10 dark:bg-slate-950"
                         />
-                        <button className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-50">
+                        <button data-workspace-action="true" className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-50">
                           Force OFF all
                         </button>
                       </form>
@@ -746,7 +746,7 @@ export default async function WebsiteControlCenterPage({
                   placeholder="REVOKE-ALL-SESSIONS"
                   className="h-10 flex-1 rounded-xl border border-red-200 bg-white px-3 text-sm dark:border-red-500/30 dark:bg-slate-950"
                 />
-                <button className="rounded-xl bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-600">
+                <button data-workspace-action="true" className="rounded-xl bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-600">
                   Revoke
                 </button>
               </div>
@@ -764,7 +764,7 @@ export default async function WebsiteControlCenterPage({
                   placeholder="REVOKE-ALL-API-KEYS"
                   className="h-10 flex-1 rounded-xl border border-red-200 bg-white px-3 text-sm dark:border-red-500/30 dark:bg-slate-950"
                 />
-                <button className="rounded-xl bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-600">
+                <button data-workspace-action="true" className="rounded-xl bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-600">
                   Revoke keys
                 </button>
               </div>
@@ -780,7 +780,7 @@ export default async function WebsiteControlCenterPage({
                   placeholder="CLEAR-RATE-LIMITS"
                   className="h-10 flex-1 rounded-xl border border-slate-200 px-3 text-sm dark:border-white/10 dark:bg-slate-950"
                 />
-                <button className="rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">
+                <button data-workspace-action="true" className="rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">
                   Clear
                 </button>
               </div>
@@ -804,7 +804,7 @@ export default async function WebsiteControlCenterPage({
                   placeholder="RUN-ALL-CRONS"
                   className="h-10 flex-1 rounded-xl border border-violet-200 bg-white px-3 text-sm dark:border-violet-500/30 dark:bg-slate-950"
                 />
-                <button className="rounded-xl bg-violet-700 px-4 text-sm font-semibold text-white hover:bg-violet-600">
+                <button data-workspace-action="true" className="rounded-xl bg-violet-700 px-4 text-sm font-semibold text-white hover:bg-violet-600">
                   Run all
                 </button>
               </div>
@@ -823,7 +823,7 @@ export default async function WebsiteControlCenterPage({
                   placeholder="PURGE-FAILED-NOTIFICATIONS"
                   className="h-10 flex-1 rounded-xl border border-slate-200 px-3 text-sm dark:border-white/10 dark:bg-slate-950"
                 />
-                <button className="rounded-xl border border-red-200 px-4 text-sm font-semibold text-red-700 hover:bg-red-50">
+                <button data-workspace-action="true" className="rounded-xl border border-red-200 px-4 text-sm font-semibold text-red-700 hover:bg-red-50">
                   Purge
                 </button>
               </div>
@@ -855,7 +855,7 @@ export default async function WebsiteControlCenterPage({
               <option value="SUSPENDED">SUSPENDED</option>
               <option value="DISABLED">DISABLED</option>
             </select>
-            <button className="h-11 w-full rounded-xl bg-slate-950 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">
+            <button data-workspace-action="true" className="h-11 w-full rounded-xl bg-slate-950 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">
               Apply status
             </button>
           </form>
@@ -870,7 +870,7 @@ export default async function WebsiteControlCenterPage({
               placeholder="email / username / id"
               className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-white/10 dark:bg-slate-950"
             />
-            <button className="h-11 w-full rounded-xl border border-amber-300 bg-amber-50 text-sm font-semibold text-amber-950 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-50">
+            <button data-workspace-action="true" className="h-11 w-full rounded-xl border border-amber-300 bg-amber-50 text-sm font-semibold text-amber-950 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-50">
               Force password change
             </button>
           </form>
@@ -940,7 +940,7 @@ export default async function WebsiteControlCenterPage({
                     <form action={forceOrgStatusAction} className="grid grid-cols-3 gap-2">
                       <input type="hidden" name="orgId" value={org.id} />
                       {(["ACTIVE", "SUSPENDED", "DISABLED"] as const).map((status) => (
-                        <button
+                        <button data-workspace-action="true"
                           key={status}
                           name="status"
                           value={status}
@@ -979,7 +979,7 @@ export default async function WebsiteControlCenterPage({
                         <option value="CANCELLED">CANCELLED</option>
                         <option value="EXPIRED">EXPIRED</option>
                       </select>
-                      <button className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-950 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">
+                      <button data-workspace-action="true" className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-950 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">
                         Override billing
                       </button>
                     </form>
@@ -1008,7 +1008,7 @@ export default async function WebsiteControlCenterPage({
                         <option value="4">4 hours</option>
                         <option value="8">8 hours</option>
                       </select>
-                      <button className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 text-sm font-semibold text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100">
+                      <button data-workspace-action="true" className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 text-sm font-semibold text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100">
                         <Building2 className="h-4 w-4" />
                         Enter as support
                       </button>
@@ -1027,7 +1027,7 @@ export default async function WebsiteControlCenterPage({
                         placeholder={`Type slug: ${org.slug}`}
                         className="min-h-11 w-full rounded-xl border border-red-200 bg-background px-3 text-sm dark:border-red-500/30 dark:bg-slate-950"
                       />
-                      <button className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-red-200 text-sm font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-500/30 dark:text-red-100">
+                      <button data-workspace-action="true" className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-red-200 text-sm font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-500/30 dark:text-red-100">
                         Soft-delete organization
                       </button>
                     </form>
@@ -1077,7 +1077,7 @@ export default async function WebsiteControlCenterPage({
                         <form action={forceOrgStatusAction} className="flex flex-wrap gap-1">
                           <input type="hidden" name="orgId" value={org.id} />
                           {(["ACTIVE", "SUSPENDED", "DISABLED"] as const).map((status) => (
-                            <button
+                            <button data-workspace-action="true"
                               key={status}
                               name="status"
                               value={status}
@@ -1112,7 +1112,7 @@ export default async function WebsiteControlCenterPage({
                             <option value="CANCELLED">CANCELLED</option>
                             <option value="EXPIRED">EXPIRED</option>
                           </select>
-                          <button className="h-8 w-full rounded-lg bg-slate-950 text-[11px] font-semibold text-white dark:bg-white dark:text-slate-950">
+                          <button data-workspace-action="true" className="h-8 w-full rounded-lg bg-slate-950 text-[11px] font-semibold text-white dark:bg-white dark:text-slate-950">
                             Override
                           </button>
                         </form>
@@ -1137,7 +1137,7 @@ export default async function WebsiteControlCenterPage({
                             <option value="4">4h</option>
                             <option value="8">8h</option>
                           </select>
-                          <button className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border border-violet-200 bg-violet-50 text-[11px] font-semibold text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100">
+                          <button data-workspace-action="true" className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border border-violet-200 bg-violet-50 text-[11px] font-semibold text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100">
                             <Building2 className="h-3 w-3" />
                             Enter as support
                           </button>
@@ -1150,7 +1150,7 @@ export default async function WebsiteControlCenterPage({
                             placeholder={org.slug}
                             className="h-8 w-full rounded-lg border border-red-200 px-2 text-xs dark:border-red-500/30 dark:bg-slate-950"
                           />
-                          <button className="h-8 w-full rounded-lg border border-red-200 text-[11px] font-semibold text-red-700 hover:bg-red-50">
+                          <button data-workspace-action="true" className="h-8 w-full rounded-lg border border-red-200 text-[11px] font-semibold text-red-700 hover:bg-red-50">
                             Soft-delete (type slug)
                           </button>
                         </form>
@@ -1182,7 +1182,7 @@ export default async function WebsiteControlCenterPage({
                   </div>
                   <form action={restoreOrgAction} className="w-full sm:w-auto">
                     <input type="hidden" name="orgId" value={org.id} />
-                    <button className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-600 sm:min-h-9 sm:w-auto sm:rounded-lg sm:px-3 sm:py-1.5 sm:text-xs">
+                    <button data-workspace-action="true" className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-600 sm:min-h-9 sm:w-auto sm:rounded-lg sm:px-3 sm:py-1.5 sm:text-xs">
                       Restore
                     </button>
                   </form>

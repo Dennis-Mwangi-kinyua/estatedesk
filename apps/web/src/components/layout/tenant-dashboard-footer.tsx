@@ -15,19 +15,19 @@ export function TenantDashboardFooter({
         </p>
 
         <nav aria-label="Footer navigation" className="flex items-center gap-1">
-          <DeferredLink
+          <DeferredLink data-workspace-action="true"
             href="/dashboard/tenant/profile"
             className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
           >
             Profile
           </DeferredLink>
-          <DeferredLink
+          <DeferredLink data-workspace-action="true"
             href="/dashboard/tenant/payments"
             className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
           >
             Payments
           </DeferredLink>
-          <DeferredLink
+          <DeferredLink data-workspace-action="true"
             href="/dashboard/security"
             className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[11px] font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
           >

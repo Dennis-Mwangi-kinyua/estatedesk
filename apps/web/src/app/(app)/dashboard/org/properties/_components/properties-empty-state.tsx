@@ -28,7 +28,7 @@ export function PropertiesEmptyState({ data }: { data: PropertiesPageData }) {
 
       <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
         {hasFilters ? (
-          <Link
+          <Link data-workspace-action="true"
             href={clearFiltersHref}
             className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-5 text-sm font-medium text-foreground transition hover:bg-muted/30"
           >
@@ -36,7 +36,7 @@ export function PropertiesEmptyState({ data }: { data: PropertiesPageData }) {
           </Link>
         ) : null}
 
-        <Link
+        <Link data-workspace-action="true"
           href="/dashboard/org/properties/new"
           className="inline-flex h-11 items-center justify-center rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
         >

@@ -202,7 +202,7 @@ export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
               Re-sign after lease amendment
             </label>
 
-            <button
+            <button data-workspace-action="true"
               type="submit"
               className={`${buttonPrimaryClassName} sm:col-span-3 sm:w-fit`}
             >
@@ -265,7 +265,7 @@ export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
                           <input type="hidden" name="leaseId" value={lease.id} />
                           <input type="hidden" name="envelopeId" value={envelope.id} />
                           <input type="hidden" name="signerId" value={signer.id} />
-                          <button
+                          <button data-workspace-action="true"
                             type="submit"
                             className="text-xs font-bold text-primary"
                           >
@@ -323,7 +323,7 @@ export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
                     placeholder="Cancellation reason"
                     className={`${fieldClassName} min-w-[12rem] flex-1`}
                   />
-                  <button
+                  <button data-workspace-action="true"
                     type="submit"
                     className="rounded-lg border border-destructive/40 px-3 py-2 text-sm font-bold text-destructive"
                   >

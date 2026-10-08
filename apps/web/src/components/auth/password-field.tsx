@@ -63,7 +63,7 @@ export function PasswordField({
           className={inputClassName}
         />
 
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={() => setVisible((current) => !current)}
           disabled={disabled}

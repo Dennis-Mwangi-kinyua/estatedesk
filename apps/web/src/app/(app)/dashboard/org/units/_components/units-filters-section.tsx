@@ -103,7 +103,7 @@ export function UnitsFiltersSection({ data }: { data: UnitsPageData }) {
         </div>
 
         <div className="flex gap-3">
-          <button type="submit" className={`${buttonPrimaryClassName} flex-1`}>
+          <button data-workspace-action="true" type="submit" className={`${buttonPrimaryClassName} flex-1`}>
             Apply
           </button>
           <DeferredLink href={resetHref} className={buttonSecondaryClassName}>

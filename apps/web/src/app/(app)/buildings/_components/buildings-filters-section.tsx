@@ -31,7 +31,7 @@ export function BuildingsFiltersSection({ data }: { data: BuildingsPageData }) {
           </label>
 
           <div className="flex gap-2">
-            <button type="submit" className={`${buttonPrimaryClassName} flex-1 sm:flex-none`}>
+            <button data-workspace-action="true" type="submit" className={`${buttonPrimaryClassName} flex-1 sm:flex-none`}>
               Search
             </button>
 

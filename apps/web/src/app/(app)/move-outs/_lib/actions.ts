@@ -166,7 +166,7 @@ export async function closeMoveOutAction(formData: FormData) {
       },
     });
 
-    await notifyInAppAndPush({ db: tx, orgId: session.activeOrgId!, recipients: [{ tenantId: notice.tenantId }], type: "MOVE_OUT_CLOSED", title: "Move-out closed", message: `Move-out closeout for ${notice.tenant.fullName} has been completed.${notes ? ` Notes: ${notes}` : ""}` });
+    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: session.activeOrgId!, recipients: [{ tenantId: notice.tenantId }], type: "MOVE_OUT_CLOSED", title: "Move-out closed", message: `Move-out closeout for ${notice.tenant.fullName} has been completed.${notes ? ` Notes: ${notes}` : ""}` });
 
     await tx.auditLog.create({
       data: {

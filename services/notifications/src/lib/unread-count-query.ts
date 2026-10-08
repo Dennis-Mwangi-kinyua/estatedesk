@@ -3,6 +3,7 @@ import {
   NotificationStatus,
   type OrgRole,
 } from "@prisma/client";
+import { personalNotificationScope } from "../../../../apps/web/src/lib/notifications/recipient-scope";
 
 export function buildPersonalUnreadNotificationWhere(input: {
   orgId: string;
@@ -20,12 +21,12 @@ export function buildPersonalUnreadNotificationWhere(input: {
   if (input.orgRole === "TENANT" && input.tenantId) {
     return {
       ...base,
-      OR: [{ tenantId: input.tenantId }, { userId: input.userId }],
+      ...personalNotificationScope(input),
     };
   }
 
   return {
     ...base,
-    userId: input.userId,
+    ...personalNotificationScope({ userId: input.userId }),
   };
 }

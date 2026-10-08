@@ -115,28 +115,28 @@ export function PropertyUnitPlanBuilder({
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap gap-2">
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={() => addRow("APARTMENT")}
           className={buttonSecondaryClassName}
         >
           Add apartment
         </button>
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={() => addRow("BEDSITTER")}
           className={buttonSecondaryClassName}
         >
           Add bedsitter
         </button>
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={() => addRow("STUDIO")}
           className={buttonSecondaryClassName}
         >
           Add studio
         </button>
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={() => addRow("SINGLE_ROOM")}
           className={buttonSecondaryClassName}
@@ -155,7 +155,7 @@ export function PropertyUnitPlanBuilder({
             units that appear on the units page.
           </p>
 
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={() => addRow("APARTMENT")}
             className={`mt-4 ${buttonPrimaryClassName}`}
@@ -186,7 +186,7 @@ export function PropertyUnitPlanBuilder({
                     </h3>
                   </div>
 
-                  <button
+                  <button data-workspace-action="true"
                     type="button"
                     onClick={() => removeRow(row.id)}
                     className={buttonDangerClassName}

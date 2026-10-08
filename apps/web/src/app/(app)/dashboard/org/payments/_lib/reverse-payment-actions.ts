@@ -157,7 +157,7 @@ export async function reverseVerifiedPaymentAction(formData: FormData) {
     });
 
     if (payment.payerTenant) {
-      await notifyRecipients({
+      await notifyRecipients({ actorUserId: session.userId,
         db: tx,
         orgId: session.activeOrgId!,
         recipients: [payment.payerTenant],

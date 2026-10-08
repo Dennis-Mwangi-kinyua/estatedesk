@@ -195,7 +195,7 @@ export function CreateAdminSection() {
               immediately. The password will be securely hashed before saving.
             </div>
 
-            <button
+            <button data-workspace-action="true"
               type="submit"
               className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-foreground px-4 text-sm font-semibold text-background transition hover:opacity-90 sm:w-auto"
             >

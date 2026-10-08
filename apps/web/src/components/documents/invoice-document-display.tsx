@@ -253,7 +253,7 @@ export function InvoiceDocumentDisplay({
         ) : null}
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap">
-          <a
+          <a data-workspace-action="true"
             href={openPdfHref}
             target="_blank"
             rel="noreferrer"
@@ -262,7 +262,7 @@ export function InvoiceDocumentDisplay({
             <FileText className="h-4 w-4 shrink-0" />
             Open PDF
           </a>
-          <a
+          <a data-workspace-action="true"
             href={downloadHref}
             className="ed-invoice-action--ghost inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 shadow-sm transition hover:bg-slate-50"
           >
@@ -270,7 +270,7 @@ export function InvoiceDocumentDisplay({
             Download PDF
           </a>
           {payNowHref ? (
-            <Link
+            <Link data-workspace-action="true"
               href={payNowHref}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 sm:col-span-2 lg:col-span-1"
             >
@@ -279,7 +279,7 @@ export function InvoiceDocumentDisplay({
             </Link>
           ) : null}
           {payWaterHref ? (
-            <Link
+            <Link data-workspace-action="true"
               href={payWaterHref}
               className="ed-invoice-action--water inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-800 transition hover:bg-sky-100 sm:col-span-2 lg:col-span-1"
             >

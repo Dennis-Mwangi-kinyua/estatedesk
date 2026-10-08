@@ -32,7 +32,7 @@ export function StatusActionButton({
           className="w-full rounded-[18px] border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
         />
       ) : null}
-      <button type="submit" className={className}>
+      <button data-workspace-action="true" type="submit" className={className}>
         {label}
       </button>
     </form>

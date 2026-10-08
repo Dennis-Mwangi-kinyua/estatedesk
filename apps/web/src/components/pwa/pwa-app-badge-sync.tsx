@@ -60,6 +60,7 @@ export function PwaAppBadgeSync() {
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("focus", handleFocus);
+    window.addEventListener("estatedesk:notifications-read", refreshAppBadge);
     navigator.serviceWorker?.addEventListener("message", handleServiceWorkerMessage);
 
     const badgeIntervalMs = getPollingIntervalMs(5 * 60 * 1000);
@@ -75,6 +76,7 @@ export function PwaAppBadgeSync() {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("estatedesk:notifications-read", refreshAppBadge);
       navigator.serviceWorker?.removeEventListener(
         "message",
         handleServiceWorkerMessage,

@@ -47,7 +47,7 @@ export function WaterBillsHeader({
             <InAppGuideHint topic="water" workspace="caretaker" />
           </div>
 
-          <Link
+          <Link data-workspace-action="true"
             href="/dashboard/caretaker/water-bills/read"
             className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
           >

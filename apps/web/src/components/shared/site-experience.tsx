@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { workspaceHeadingIcon } from "./workspace-heading-icons";
 import { usePathname } from "next/navigation";
 
 const pageIcons: Array<[RegExp, string]> = [
@@ -21,8 +22,17 @@ export function SiteExperience() {
     let frame = 0;
     const enhance = () => {
       const heading = root.querySelector<HTMLElement>("h1");
+      const isWorkspace = Boolean(heading?.closest(".estate-workspace"));
+      if (isWorkspace) {
+        if (heading) delete heading.dataset.pageIcon;
+        if (heading && heading.dataset.headingIcon !== "custom" && !heading.closest("header, .page-header")) {
+          const icon = workspaceHeadingIcon(pathname ?? "dashboard");
+          heading.dataset.workspaceHeadingIcon = icon.name;
+          heading.style.setProperty("--workspace-heading-icon", icon.mask);
+        }
+      }
       if (heading?.dataset.headingIcon === "custom") delete heading.dataset.pageIcon;
-      if (heading && heading.dataset.headingIcon !== "custom" && !heading.querySelector(".workspace-page-marker") && !/\p{Extended_Pictographic}/u.test(heading.textContent ?? "")) {
+      if (!isWorkspace && heading && heading.dataset.headingIcon !== "custom" && !heading.querySelector(".workspace-page-marker") && !/\p{Extended_Pictographic}/u.test(heading.textContent ?? "")) {
         heading.dataset.pageIcon = pageIcons.find(([pattern]) => pattern.test(pathname ?? ""))?.[1] ?? "📋";
       }
       root.querySelectorAll<HTMLTableElement>("table").forEach(table => {

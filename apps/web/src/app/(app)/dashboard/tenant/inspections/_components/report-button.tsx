@@ -21,7 +21,7 @@ export function ReportButton({
   }
 
   return (
-    <Link
+    <Link data-workspace-action="true"
       href={`/dashboard/tenant/inspections/${encodePublicId(
         inspectionId,
         "inspection",

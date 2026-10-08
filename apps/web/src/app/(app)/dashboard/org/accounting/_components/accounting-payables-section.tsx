@@ -118,7 +118,7 @@ export function AccountingPayablesSection({
                   </label>
 
                   <div className="flex items-end">
-                    <button type="submit" className={`${buttonPrimaryClassName} w-full`}>
+                    <button data-workspace-action="true" type="submit" className={`${buttonPrimaryClassName} w-full`}>
                       Pay bill
                     </button>
                   </div>

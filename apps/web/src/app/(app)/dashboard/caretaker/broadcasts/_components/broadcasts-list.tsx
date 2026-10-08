@@ -67,7 +67,7 @@ export function BroadcastsList({
                       name="notificationId"
                       value={broadcast.id}
                     />
-                    <button
+                    <button data-workspace-action="true"
                       type="submit"
                       className="inline-flex rounded-2xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-muted/30"
                     >

@@ -318,7 +318,7 @@ function VacancyInquiryForm({
             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
           />
         </label>
-        <button
+        <button data-workspace-action="true"
           type="submit"
           className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
         >
@@ -372,7 +372,7 @@ export function VacancyDetailSidebar({
           </div>
         </div>
         <div className="mt-5 grid gap-2">
-          <a
+          <a data-workspace-action="true"
             href={callHref}
             className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
           >
@@ -380,7 +380,7 @@ export function VacancyDetailSidebar({
             Call landlord or agent
           </a>
           {whatsappHref ? (
-            <a
+            <a data-workspace-action="true"
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
@@ -391,7 +391,7 @@ export function VacancyDetailSidebar({
             </a>
           ) : null}
           {mapsHref ? (
-            <a
+            <a data-workspace-action="true"
               href={mapsHref}
               target="_blank"
               rel="noopener noreferrer"

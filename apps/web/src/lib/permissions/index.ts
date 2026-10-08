@@ -70,18 +70,5 @@ export function hasPermission(role: OrgRole | null | undefined, permission: AppP
   if (!role) return false;
   const mapped = legacyToOrgPermission[permission];
   if (!mapped) return false;
-  // Read-style legacy perms: allow if role has the manage permission OR reports.view for reports-like access
-  if (permission.endsWith(".read") && roleHasOrgPermission(role, "reports.view")) {
-    if (
-      permission === "payments.read" ||
-      permission === "charges.read" ||
-      permission === "tenants.read" ||
-      permission === "leases.read" ||
-      permission === "properties.read" ||
-      permission === "units.read"
-    ) {
-      return roleHasOrgPermission(role, mapped) || role === "LANDLORD" || role === "ACCOUNTANT";
-    }
-  }
   return roleHasOrgPermission(role, mapped);
 }

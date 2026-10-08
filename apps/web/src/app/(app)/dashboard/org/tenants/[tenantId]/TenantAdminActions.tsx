@@ -116,7 +116,7 @@ const ActionDialog = memo(function ActionDialog({
             <p className="mt-2 text-sm leading-6 text-neutral-600">{action.description}</p>
           </div>
 
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={onClose}
             disabled={isPending}
@@ -146,7 +146,7 @@ const ActionDialog = memo(function ActionDialog({
           ) : null}
 
           <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={onClose}
               disabled={isPending}
@@ -155,7 +155,7 @@ const ActionDialog = memo(function ActionDialog({
               Cancel
             </button>
 
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={submit}
               disabled={isPending}

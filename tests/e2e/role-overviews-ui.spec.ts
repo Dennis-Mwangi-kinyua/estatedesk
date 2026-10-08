@@ -1,6 +1,8 @@
+import { installWorkspaceStyles } from "./workspace-styles";
 import { expect, test } from "playwright/test";
 import { build } from "esbuild";
 import path from "node:path";
+import { expectReadableWords } from "./assert-readable-words";
 
 test("role overviews preserve actions and data in responsive light and dark layouts", async ({ page }, testInfo) => {
   const errors: string[] = [];
@@ -14,6 +16,7 @@ test("role overviews preserve actions and data in responsive light and dark layo
   await page.waitForLoadState("networkidle");
   const styles = await page.locator('link[rel="stylesheet"]').evaluateAll(links => links.map(link => (link as HTMLLinkElement).href));
   await page.setContent(`<html><head><meta name="viewport" content="width=device-width, initial-scale=1">${styles.map(href => `<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system"><main class="estate-workspace p-4"><div id="fixture"></div></main></body></html>`);
+  await installWorkspaceStyles(page);
   await page.addScriptTag({content: bundle.outputFiles[0].text});
   await page.evaluate(() => new Promise(requestAnimationFrame));
   expect(errors).toEqual([]);
@@ -25,6 +28,7 @@ test("role overviews preserve actions and data in responsive light and dark layo
     await expect(page.getByRole("link", {name: "Today’s work", exact: true})).toHaveAttribute("href", "/dashboard/caretaker/today");
     await expect(page.getByRole("link", {name: "View statements", exact: true})).toHaveAttribute("href", "/dashboard/landlord/statements");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+    await expectReadableWords(page, "[data-workspace-header]");
     await page.screenshot({path: testInfo.outputPath(`roles-${theme}.png`), fullPage: true});
   }
   expect(errors).toEqual([]);

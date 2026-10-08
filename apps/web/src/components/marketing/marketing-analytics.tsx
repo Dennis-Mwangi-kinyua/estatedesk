@@ -128,7 +128,7 @@ export function MarketingAnalytics() {
             We use analytics to measure page performance and lead conversion. You can decline and keep using the site normally.
           </p>
           <div className="mt-3 flex flex-wrap justify-end gap-2">
-            <button
+            <button data-workspace-action="true"
               type="button"
               className="min-h-10 rounded-lg border border-slate-200 px-4 text-sm font-semibold text-slate-800 dark:border-white/10 dark:text-slate-100"
               onClick={() => {
@@ -138,7 +138,7 @@ export function MarketingAnalytics() {
             >
               Decline
             </button>
-            <button
+            <button data-workspace-action="true"
               type="button"
               className="min-h-10 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white dark:bg-white dark:text-slate-950"
               onClick={() => {

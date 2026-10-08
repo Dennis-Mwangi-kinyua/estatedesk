@@ -60,8 +60,8 @@ export function PwaLaunchScreen() {
       <PwaLoadingCard slow={slow} />
       {showRecovery ? (
         <div className="pwa-launch-recovery">
-          <button type="button" onClick={() => window.location.reload()}>Try again</button>
-          <button type="button" onClick={() => { document.documentElement.dataset.pwaLaunch = "ready"; }}>Continue to app</button>
+          <button data-workspace-action="true" type="button" onClick={() => window.location.reload()}>Try again</button>
+          <button data-workspace-action="true" type="button" onClick={() => { document.documentElement.dataset.pwaLaunch = "ready"; }}>Continue to app</button>
         </div>
       ) : null}
       <span className="sr-only">Loading EstateDesk</span>

@@ -40,7 +40,7 @@ export function TenantsHeader({
             </div>
           </div>
 
-          <Link
+          <Link data-workspace-action="true"
             href="/dashboard/caretaker/leases"
             className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30 sm:h-10"
           >
@@ -63,7 +63,7 @@ export function TenantsHeader({
             className="h-12 w-full rounded-2xl border border-border bg-background pl-11 pr-28 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary/40 focus:ring-4 focus:ring-primary/10"
             autoComplete="off"
           />
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="absolute right-2 top-1/2 inline-flex h-8 -translate-y-1/2 items-center rounded-xl bg-primary px-3 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
           >

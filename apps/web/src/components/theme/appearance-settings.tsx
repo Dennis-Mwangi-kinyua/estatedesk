@@ -55,7 +55,7 @@ export function AppearanceSettings() {
           const active = currentTheme === option.value;
 
           return (
-            <button
+            <button data-workspace-action="true"
               key={option.value}
               type="button"
               onClick={() => setTheme(option.value)}

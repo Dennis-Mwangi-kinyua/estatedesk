@@ -95,7 +95,7 @@ export function MemberCaretakerSection({
                           name="membershipId"
                           value={member.id}
                         />
-                        <button
+                        <button data-workspace-action="true"
                           type="submit"
                           className="inline-flex rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-500/15 dark:text-red-300"
                         >

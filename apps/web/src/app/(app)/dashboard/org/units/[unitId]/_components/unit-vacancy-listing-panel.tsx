@@ -210,7 +210,7 @@ export function UnitVacancyListingPanel({
           placeholder="Public and internal property description notes"
           className="rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-500 lg:col-span-3"
         />
-        <button className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 lg:w-fit">
+        <button data-workspace-action="true" className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 lg:w-fit">
           Save listing details
         </button>
       </form>
@@ -232,7 +232,7 @@ export function UnitVacancyListingPanel({
           multiple
           className="mt-3 block w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
         />
-        <button className="mt-3 inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
+        <button data-workspace-action="true" className="mt-3 inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
           Upload images
         </button>
       </form>
@@ -266,14 +266,14 @@ export function UnitVacancyListingPanel({
                 ) : (
                   <form action={setPrimaryAction}>
                     <input type="hidden" name="assetId" value={asset.id} />
-                    <button className="inline-flex min-h-9 w-full items-center justify-center rounded-xl border border-slate-200 px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50">
+                    <button data-workspace-action="true" className="inline-flex min-h-9 w-full items-center justify-center rounded-xl border border-slate-200 px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50">
                       Set primary
                     </button>
                   </form>
                 )}
                 <form action={deleteImageAction}>
                   <input type="hidden" name="assetId" value={asset.id} />
-                  <button className="inline-flex min-h-9 w-full items-center justify-center rounded-xl border border-rose-200 px-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">
+                  <button data-workspace-action="true" className="inline-flex min-h-9 w-full items-center justify-center rounded-xl border border-rose-200 px-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">
                     Delete
                   </button>
                 </form>

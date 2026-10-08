@@ -1,3 +1,4 @@
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
 import type { BarPoint } from "../_lib/types";
@@ -45,7 +46,7 @@ export function MetricCard({
   const content = (
     <div className="platform-glass-metric group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        {emoji && <span aria-hidden="true" className="mr-2 text-lg">{emoji}</span>}{label}
+        {emoji && <span aria-hidden="true" className="mr-2 inline-flex text-primary"><WorkspaceIcon label={label} /></span>}{label}
       </p>
       <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-3">
         <p className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white lg:text-[22px]">
@@ -74,7 +75,7 @@ export function CompactInfoCard({
   const content = (
     <div className="platform-glass-metric group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        {emoji && <span aria-hidden="true" className="mr-2 text-lg">{emoji}</span>}{label}
+        {emoji && <span aria-hidden="true" className="mr-2 inline-flex text-primary"><WorkspaceIcon label={label} /></span>}{label}
       </p>
       <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-3">
         <p className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white lg:text-[22px]">

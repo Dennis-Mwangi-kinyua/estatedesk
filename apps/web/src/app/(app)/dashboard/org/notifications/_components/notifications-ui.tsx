@@ -129,7 +129,7 @@ export function NotificationFilterLink({
   const active = filter === activeFilter;
 
   return (
-    <Link
+    <Link data-workspace-action="true"
       href={`/dashboard/org/notifications?filter=${filter}`}
       className={cn(
         "inline-flex h-10 shrink-0 items-center justify-center rounded-full border px-4 text-sm font-medium transition",

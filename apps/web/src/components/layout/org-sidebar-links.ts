@@ -1,6 +1,7 @@
 import {
   Bell,
   BellRing,
+  BedDouble,
   Building,
   Building2,
   ClipboardCheck,
@@ -23,6 +24,7 @@ import {
   Users,
   Wrench,
 } from "lucide-react";
+import { ORG_WORKSPACE_ROLES } from "@/lib/permissions/workspace-access";
 
 export type OrgRole =
   | "ADMIN"
@@ -63,6 +65,12 @@ export const SIDEBAR_LINKS: readonly SidebarLink[] = [
     href: "/dashboard/org/properties",
     icon: Building,
     roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
+  },
+  {
+    label: "Airbnb",
+    href: "/dashboard/org/airbnb",
+    icon: BedDouble,
+    roles: ["ADMIN", "MANAGER"],
   },
   {
     label: "Buildings",
@@ -214,7 +222,10 @@ export const SIDEBAR_LINKS: readonly SidebarLink[] = [
     icon: Send,
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
   },
-] as const;
+].map((item) => ({
+  ...item,
+  roles: (ORG_WORKSPACE_ROLES[item.href.split("/")[3]] ?? ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"]) as readonly OrgRole[],
+}));
 
 export type { SidebarLink };
 
@@ -227,7 +238,7 @@ export function isActivePath(pathname: string, href: string) {
 }
 export function sidebarGroup(href: string) {
   const path = href.split("/")[3] ?? "";
-  if (["properties", "buildings", "units", "tenants", "verify-tenant", "leases", "vacancy-inquiries", "imports"].includes(path)) return "Portfolio";
+  if (["properties", "airbnb", "buildings", "units", "tenants", "verify-tenant", "leases", "vacancy-inquiries", "imports"].includes(path)) return "Portfolio";
   if (["payments", "accounting", "finance-requests", "water-bills", "expenditures", "charges", "taxes", "reports"].includes(path)) return "Finance";
   if (["move-outs", "inspections", "issues"].includes(path)) return "Operations";
   if (["staff", "notifications", "settings", "security", "support", "profile"].includes(path)) return "Administration";

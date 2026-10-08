@@ -24,7 +24,7 @@ export function PaymentsHeader({ data }: { data: TenantPaymentsPageData }) {
             Track your recent rent, water, service charge, and garbage payments
             in one place.
           </p>
-          <a
+          <a data-workspace-action="true"
             href="/dashboard/tenant/payments/statement"
             className="mt-4 inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-card px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
           >
@@ -59,7 +59,7 @@ export function PaymentsHeader({ data }: { data: TenantPaymentsPageData }) {
               allocate it period by period.
             </p>
           </div>
-          <Link
+          <Link data-workspace-action="true"
             href={`/dashboard/tenant/payments/checkout?source=advance_rent&id=${activeLease.id}&method=mpesa&months=12&amount=${Number(activeLease.monthlyRent) * 12}`}
             className="inline-flex h-10 shrink-0 items-center justify-center rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
           >

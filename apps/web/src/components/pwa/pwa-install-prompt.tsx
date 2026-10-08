@@ -101,7 +101,7 @@ export function PwaInstallPrompt() {
             issue capture.
           </p>
         </div>
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={dismissPrompt}
           className="rounded-full p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-white/10 dark:hover:text-white"
@@ -119,7 +119,7 @@ export function PwaInstallPrompt() {
       ) : null}
 
       {deferredPrompt ? (
-        <button
+        <button data-workspace-action="true"
           type="button"
           onClick={installApp}
           disabled={pending}

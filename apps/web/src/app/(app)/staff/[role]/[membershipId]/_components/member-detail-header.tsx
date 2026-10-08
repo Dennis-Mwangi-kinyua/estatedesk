@@ -64,14 +64,14 @@ export function MemberDetailHeader({
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-            <Link
+            <Link data-workspace-action="true"
               href={`/staff/${roleSlug}`}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to {meta.label.toLowerCase()} directory
             </Link>
-            <Link
+            <Link data-workspace-action="true"
               href={`/staff/${roleSlug}/${member.id}/edit`}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
             >

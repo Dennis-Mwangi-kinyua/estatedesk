@@ -214,7 +214,7 @@ export async function submitManualRentMpesaAction(formData: FormData) {
       },
     });
 
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: session.userId,
       db: tx,
       orgId: session.activeOrgId!,
       recipients: [{ tenantId: tenant.id, userId: tenant.userId }],
@@ -223,7 +223,7 @@ export async function submitManualRentMpesaAction(formData: FormData) {
       message: `Your rent + water bill payment ${transactionCode} has been submitted and is awaiting verification.`,
     });
 
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: session.userId,
       db: tx,
       orgId: session.activeOrgId!,
       recipients: await getPaymentReviewRecipients(tx, session.activeOrgId!),

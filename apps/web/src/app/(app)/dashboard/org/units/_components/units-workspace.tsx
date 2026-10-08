@@ -51,7 +51,7 @@ export function UnitsWorkspace({
               {data.view === "mixes" ? (
                 <UnitsMixGroupsSection data={data} />
               ) : null}
-              {data.view === "units" ? <UnitsUnitListSection data={data} /> : null}
+              {data.view === "units" ? <UnitsUnitListSection data={data} orgRole={orgRole} /> : null}
               <UnitsPaginationSection data={data} />
             </>
           )}

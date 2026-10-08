@@ -130,7 +130,7 @@ export async function submitMoveOutNotice(formData: FormData) {
       },
     });
 
-    await notifyInAppAndPush({
+    await notifyInAppAndPush({ actorUserId: session.userId,
       db: tx,
       orgId: session.activeOrgId!,
       recipients: [{ tenantId: tenant.id, userId: tenant.userId }],
@@ -140,13 +140,10 @@ export async function submitMoveOutNotice(formData: FormData) {
     });
 
     if (orgReviewers.length > 0) {
-      await notifyInAppAndPush({
+      await notifyInAppAndPush({ actorUserId: session.userId,
         db: tx,
         orgId: session.activeOrgId!,
-        recipients: orgReviewers.map(({ userId }) => ({
-          userId,
-          tenantId: tenant.id,
-        })),
+        recipients: orgReviewers.map(({ userId }) => ({ userId })),
         type: "GENERAL",
         title: "New move-out notice",
         message: `${tenant.fullName} submitted a move-out notice for ${unitLabel || "their unit"} on ${formatDate(moveOutDate)}.`,

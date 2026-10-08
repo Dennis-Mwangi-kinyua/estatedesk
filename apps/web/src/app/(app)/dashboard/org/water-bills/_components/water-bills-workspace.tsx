@@ -56,14 +56,14 @@ export function WaterBillsWorkspace({
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row lg:flex-col">
-              <Link
+              <Link data-workspace-action="true"
                 href="/dashboard/org/notifications"
                 className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
               >
                 Operations hub
               </Link>
               {approvalQueueCount > 0 ? (
-                <a
+                <a data-workspace-action="true"
                   href="#approval-queue"
                   className="inline-flex h-11 items-center justify-center rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
                 >

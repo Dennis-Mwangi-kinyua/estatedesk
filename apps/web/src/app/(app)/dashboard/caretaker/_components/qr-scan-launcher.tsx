@@ -134,7 +134,7 @@ export function QrScanLauncher({
 
   return (
     <>
-      <button
+      <button data-workspace-action="true"
         type="button"
         onClick={() => {
           setError(null);
@@ -164,7 +164,7 @@ export function QrScanLauncher({
                   Point the camera at a unit QR code to open the profile.
                 </p>
               </div>
-              <button
+              <button data-workspace-action="true"
                 type="button"
                 onClick={() => setOpen(false)}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border"
@@ -198,7 +198,7 @@ export function QrScanLauncher({
                 placeholder="https://…/dashboard/caretaker/units/…"
                 className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary/40"
               />
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
               >

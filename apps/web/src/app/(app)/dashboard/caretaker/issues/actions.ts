@@ -67,7 +67,7 @@ export async function startCaretakerIssueAction(formData: FormData) {
       },
     });
 
-    await notifyInAppAndPush({
+    await notifyInAppAndPush({ actorUserId: session.userId,
       db: tx,
       orgId: issue.orgId,
       recipients: [{ userId: issue.reportedByUserId }],
@@ -229,7 +229,7 @@ export async function submitIssueResolutionReportAction(formData: FormData) {
     });
     reportId = report.id;
 
-    await notifyInAppAndPush({
+    await notifyInAppAndPush({ actorUserId: session.userId,
       db: tx,
       orgId: issue.orgId,
       recipients: officeMemberships.map(({ userId }) => ({ userId })),

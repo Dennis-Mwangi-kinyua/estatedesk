@@ -46,7 +46,7 @@ export function VacancyPaginationNav({
       </div>
       <div className="grid w-full grid-cols-2 items-center gap-2 sm:grid-cols-[1fr_auto_1fr]">
         {previousHref ? (
-          <Link
+          <Link data-workspace-action="true"
             href={previousHref}
             rel="prev"
             className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-800 dark:border-white/20 dark:bg-slate-950 dark:text-slate-100 dark:hover:border-cyan-200 dark:hover:bg-cyan-200/15 dark:hover:text-cyan-100"
@@ -64,7 +64,7 @@ export function VacancyPaginationNav({
           {pagination.currentPage} / {pagination.pageCount}
         </span>
         {nextHref ? (
-          <Link
+          <Link data-workspace-action="true"
             href={nextHref}
             rel="next"
             className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"

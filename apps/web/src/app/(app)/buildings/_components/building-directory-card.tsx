@@ -132,7 +132,7 @@ export function BuildingDirectoryCard({ building }: { building: Building }) {
       <div className="mt-5 flex justify-end">
         <form action={deleteBuildingAction}>
           <input type="hidden" name="buildingId" value={building.id} />
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-800 dark:bg-red-950/30 dark:text-red-200 dark:hover:bg-red-950/50"
           >

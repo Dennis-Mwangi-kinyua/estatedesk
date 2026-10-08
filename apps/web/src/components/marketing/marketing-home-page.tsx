@@ -344,14 +344,14 @@ function HomepageSeoContent() {
               team about a Custom rollout for a larger property management operation.
             </p>
             <div className="mt-5 grid gap-3">
-              <Link
+              <Link data-workspace-action="true"
                 href="/register"
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-black dark:bg-white dark:text-[#10141a] dark:hover:bg-[#e5e7eb]"
               >
                 Start free
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link
+              <Link data-workspace-action="true"
                 href="/pricing"
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 text-sm font-semibold text-neutral-800 transition hover:border-neutral-400"
               >
@@ -391,7 +391,7 @@ function HomepageSeoContent() {
               </details>
             ))}
           </div>
-          <Link
+          <Link data-workspace-action="true"
             href="/faq"
             className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-black dark:bg-white dark:text-[#10141a] dark:hover:bg-[#e5e7eb]"
           >

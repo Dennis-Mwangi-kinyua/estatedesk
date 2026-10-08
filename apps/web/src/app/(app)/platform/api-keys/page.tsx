@@ -83,7 +83,7 @@ export default async function PlatformApiKeysPage({
               placeholder="Management password"
               className="h-12 w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 text-sm outline-none"
             />
-            <button className="h-12 w-full rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-neutral-800">
+            <button data-workspace-action="true" className="h-12 w-full rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-neutral-800">
               Unlock
             </button>
           </form>
@@ -198,7 +198,7 @@ export default async function PlatformApiKeysPage({
                   <form action={togglePlatformApiKeyStatusAction}>
                     <input type="hidden" name="apiKeyId" value={key.id} />
                     <input type="hidden" name="nextActive" value={isActive ? "false" : "true"} />
-                    <button className="rounded-2xl border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
+                    <button data-workspace-action="true" className="rounded-2xl border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50">
                       {isActive ? "Revoke" : "Reactivate"}
                     </button>
                   </form>
@@ -209,7 +209,7 @@ export default async function PlatformApiKeysPage({
                       className="platform-action-danger"
                     >
                       <input type="hidden" name="apiKeyId" value={key.id} />
-                      <button className="rounded-2xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50">
+                      <button data-workspace-action="true" className="rounded-2xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50">
                         Delete
                       </button>
                     </form>

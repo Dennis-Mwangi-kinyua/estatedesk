@@ -48,7 +48,7 @@ export function ExpendituresEmptyState() {
       </div>
 
       <div className="mt-6">
-        <Link
+        <Link data-workspace-action="true"
           href="/dashboard/org/accounting"
           className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-5 text-sm font-medium text-foreground transition hover:bg-muted/30"
         >

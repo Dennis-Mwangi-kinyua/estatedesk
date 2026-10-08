@@ -109,7 +109,7 @@ export function PaymentsRecentSection({
                         placeholder="Required correction reason"
                         className={`${compactFieldClassName} border-red-200 focus:border-red-400 dark:border-red-800`}
                       />
-                      <button
+                      <button data-workspace-action="true"
                         type="submit"
                         className="h-9 rounded-xl border border-red-200 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-800 dark:text-red-200 dark:hover:bg-red-950/30"
                       >

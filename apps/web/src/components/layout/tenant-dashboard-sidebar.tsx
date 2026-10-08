@@ -164,7 +164,7 @@ export function TenantDashboardSidebar({
           mobileOpen ? "pointer-events-auto" : "pointer-events-none",
         ].join(" ")}
       >
-        <button
+        <button data-workspace-action="true"
           type="button"
           aria-label="Close navigation overlay"
           onClick={closeMobile}
@@ -192,7 +192,7 @@ export function TenantDashboardSidebar({
                   <TenantSidebarBrand organizationName={organizationName} />
                 </div>
 
-                <button
+                <button data-workspace-action="true"
                   type="button"
                   onClick={closeMobile}
                   aria-label="Close navigation"

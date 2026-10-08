@@ -1,3 +1,4 @@
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { ArrowUpRight, ChevronDown, MapPin } from "lucide-react";
 import type { PropertiesPageData } from "../_lib/types";
@@ -16,7 +17,7 @@ export function PropertiesItemsSection({ data }: { data: PropertiesPageData }) {
         <h3 className="mt-1 break-words text-lg font-semibold leading-6"><DeferredLink href={`/dashboard/org/properties/${property.id}`} className="text-foreground hover:text-primary">{property.name}</DeferredLink></h3>
         <p className="mt-2 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" /><span className="break-words">{property.location || property.address || "Location not added"}</span></p>
         <dl className="mt-5 grid grid-cols-3 divide-x divide-border rounded-xl border border-border bg-muted/15 py-3">
-          {[{label:"Buildings", value:property._count.buildings, emoji:"🏢"},{label:"Units",value:property._count.units,emoji:"🚪"},{label:"Issues",value:property._count.issues,emoji:"🛠️"}].map(stat => <div key={stat.label} className="min-w-0 text-center"><dt className="text-[10px] font-medium text-muted-foreground"><span aria-hidden="true">{stat.emoji}</span> {stat.label}</dt><dd className="mt-1 text-lg font-semibold tabular-nums text-foreground">{stat.value}</dd></div>)}
+          {[{label:"Buildings", value:property._count.buildings, emoji:"🏢"},{label:"Units",value:property._count.units,emoji:"🚪"},{label:"Issues",value:property._count.issues,emoji:"🛠️"}].map(stat => <div key={stat.label} className="min-w-0 text-center"><dt className="text-[10px] font-medium text-muted-foreground"><span aria-hidden="true"><WorkspaceIcon label={stat.label} className="inline-block h-4 w-4" /></span> {stat.label}</dt><dd className="mt-1 text-lg font-semibold tabular-nums text-foreground">{stat.value}</dd></div>)}
         </dl>
         <details className="mt-4 text-xs text-muted-foreground">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 font-medium text-foreground">Billing & property details<ChevronDown className="h-4 w-4" /></summary>

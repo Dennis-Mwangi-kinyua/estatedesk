@@ -104,7 +104,7 @@ export function StaffDirectorySection({ data }: StaffDirectorySectionProps) {
                       {member.user.status}
                     </td>
                     <td className="px-5 py-4 sm:px-6">
-                      <Link
+                      <Link data-workspace-action="true"
                         href={`/staff/${member.role.toLowerCase()}/${member.id}`}
                         className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted/20"
                       >

@@ -121,7 +121,7 @@ export function FinanceRequestsList({
                   <form action={cancelAccountingRequestAction} className="mt-4">
                     <input type="hidden" name="requestId" value={request.id} />
                     <input type="hidden" name="workspace" value={workspace} />
-                    <button type="submit" className={buttonDangerClassName}>
+                    <button data-workspace-action="true" type="submit" className={buttonDangerClassName}>
                       Cancel request
                     </button>
                   </form>

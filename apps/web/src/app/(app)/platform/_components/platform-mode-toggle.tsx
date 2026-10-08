@@ -35,7 +35,7 @@ export function PlatformModeToggle({
         const meta = modeMeta[target as PlatformMode];
 
         return (
-          <button
+          <button data-workspace-action="true"
             key={target}
             type="button"
             onClick={() => switchMode(target)}

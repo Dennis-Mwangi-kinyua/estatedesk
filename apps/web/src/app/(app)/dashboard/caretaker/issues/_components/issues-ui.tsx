@@ -104,14 +104,14 @@ export function EmptyStateCard({
       </div>
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
-        <Link
+        <Link data-workspace-action="true"
           href="/dashboard/caretaker/issues/new"
           className="inline-flex items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
         >
           Create new issue
         </Link>
 
-        <Link
+        <Link data-workspace-action="true"
           href="/dashboard/caretaker/issues"
           className="inline-flex items-center justify-center rounded-2xl border border-border bg-background px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-muted/30"
         >

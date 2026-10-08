@@ -2,6 +2,7 @@ import { LeaseStatus, TicketStatus, UnitStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type PropertyUnitItem = {
+  buildingName?: string | null;
   id: string;
   houseNo: string;
   type: string;
@@ -73,12 +74,14 @@ export async function getPropertyDetails(
         },
       },
       units: {
+        where: { deletedAt: null },
         orderBy: {
           houseNo: "asc",
         },
         select: {
           id: true,
           houseNo: true,
+          building: { select: { name: true } },
           type: true,
           status: true,
           rentAmount: true,
@@ -197,6 +200,7 @@ export async function getPropertyDetails(
     units: property.units.map((unit) => ({
       id: unit.id,
       houseNo: unit.houseNo,
+      buildingName: unit.building?.name ?? null,
       type: unit.type,
       status: unit.status,
       rentAmount: Number(unit.rentAmount),

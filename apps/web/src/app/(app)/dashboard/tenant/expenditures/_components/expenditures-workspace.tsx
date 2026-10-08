@@ -85,7 +85,7 @@ export function ExpendituresWorkspace({
             <input name="reference" className={fieldClassName} />
           </label>
         </div>
-        <button className="mt-4 rounded-xl bg-neutral-950 px-4 py-2 text-sm font-semibold text-white">
+        <button data-workspace-action="true" className="mt-4 rounded-xl bg-neutral-950 px-4 py-2 text-sm font-semibold text-white">
           Save expenditure
         </button>
       </form>
@@ -117,7 +117,7 @@ export function ExpendituresWorkspace({
           </p>
           <div className="flex items-center gap-2">
             {currentPage > 1 ? (
-              <Link
+              <Link data-workspace-action="true"
                 href={buildExpendituresPageHref(currentPage - 1)}
                 className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted"
               >
@@ -128,7 +128,7 @@ export function ExpendituresWorkspace({
               {currentPage} / {totalPages}
             </span>
             {currentPage < totalPages ? (
-              <Link
+              <Link data-workspace-action="true"
                 href={buildExpendituresPageHref(currentPage + 1)}
                 className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted"
               >

@@ -153,7 +153,7 @@ export default async function PlatformOrganizationsPage({
             ))}
           </select>
 
-          <button className="rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800">
+          <button data-workspace-action="true" className="rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800">
             Apply
           </button>
         </form>

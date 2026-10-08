@@ -97,7 +97,7 @@ function AdminMatrixCard({ admin }: { admin: AdminRow }) {
           ) : null}
         </div>
 
-        <Link
+        <Link data-workspace-action="true"
           href={href}
           className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-muted/60 active:scale-[0.99] sm:w-auto sm:justify-start"
         >

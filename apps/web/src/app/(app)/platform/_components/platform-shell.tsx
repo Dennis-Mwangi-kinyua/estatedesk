@@ -138,7 +138,7 @@ function PlatformShellInner({
             </div>
 
             <form action={logoutAction}>
-              <button
+              <button data-workspace-action="true"
                 type="submit"
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
               >

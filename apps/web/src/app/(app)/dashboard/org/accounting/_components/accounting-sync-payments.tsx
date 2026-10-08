@@ -57,7 +57,7 @@ export function AccountingSyncPayments({ data }: { data: AccountingPageData }) {
         ) : null}
 
         <form action={syncPaymentsAction}>
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className={buttonPrimaryClassName}
             disabled={unpostedPaymentsCount === 0}

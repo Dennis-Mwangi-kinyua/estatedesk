@@ -109,6 +109,7 @@ export default async function TenantLayout({
         audience="tenant"
         orgId={tenant.org.id}
         tenantId={tenant.id}
+        userId={session.userId}
       />
       {children}
     </TenantDashboardShell>

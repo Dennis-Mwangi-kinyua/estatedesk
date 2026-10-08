@@ -154,7 +154,7 @@ export function ExpendituresForm({
             Leave tenant blank for organization costs. Select a tenant to record
             tenant-linked spend.
           </p>
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex h-11 items-center justify-center rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
           >

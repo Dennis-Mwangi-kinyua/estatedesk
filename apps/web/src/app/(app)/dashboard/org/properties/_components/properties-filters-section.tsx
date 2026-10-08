@@ -66,7 +66,7 @@ export function PropertiesFiltersSection({ data }: { data: PropertiesPageData })
         </label>
 
         <div className="col-span-2 flex items-end gap-3 lg:col-span-1">
-          <button type="submit" className={`${buttonPrimaryClassName} w-full lg:w-auto`}>
+          <button data-workspace-action="true" type="submit" className={`${buttonPrimaryClassName} w-full lg:w-auto`}>
             Search properties
           </button>
           {hasFilters ? (

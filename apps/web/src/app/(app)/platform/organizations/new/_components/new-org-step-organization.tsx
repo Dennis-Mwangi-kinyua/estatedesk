@@ -1,3 +1,4 @@
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { APP_PLANS, type AppPlan, planSupportsTrial } from "@/lib/billing/plans";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { CurrencySelect } from "@/components/forms/currency-select";
@@ -71,7 +72,7 @@ export function NewOrgStepOrganization(props: Props) {
     <section className={panelClass}>
       <div className="mb-6">
         <div className={iconBubbleClass}>
-          <span aria-hidden="true" className="text-2xl">🏢</span>
+          <span aria-hidden="true" className="text-2xl"><WorkspaceIcon label="organisation" className="inline-block h-5 w-5 shrink-0 align-middle" /></span>
         </div>
         <h2 className={stepTitleClass}>Organisation details</h2>
         <p className={stepDescriptionClass}>

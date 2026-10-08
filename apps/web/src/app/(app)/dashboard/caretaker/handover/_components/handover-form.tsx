@@ -85,7 +85,7 @@ export function HandoverForm({
           </p>
         ) : null}
 
-        <button
+        <button data-workspace-action="true"
           type="submit"
           disabled={pending}
           className="inline-flex h-11 items-center justify-center rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"

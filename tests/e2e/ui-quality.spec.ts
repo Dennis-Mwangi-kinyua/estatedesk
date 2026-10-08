@@ -1,4 +1,5 @@
 import { expect, test } from "playwright/test";
+import { expectReadableWords } from "./assert-readable-words";
 
 // Navigation styling checks run independently of service-worker activation reloads.
 test.use({ serviceWorkers: "block" });
@@ -45,4 +46,19 @@ test("small-screen login remains usable when the keyboard reduces viewport heigh
   await password.fill("ui-review-only");
   await expect(password).toBeFocused();
   await expect(page.getByRole("button", { name: "Log in", exact: true })).toBeVisible();
+});
+
+test("login showcase keeps whole words and separates cards on laptop screens", async ({ page }) => {
+  for (const width of [1024, 1280, 1920]) {
+    await page.setViewportSize({ width, height: 600 });
+    await page.goto("/login");
+    await expect(page.getByLabel("Email or username")).toBeVisible();
+    await expectReadableWords(page, "aside");
+    const collisions = await page.locator("aside h3").evaluateAll(headings => headings.filter(heading => {
+      const description = heading.nextElementSibling;
+      return description && heading.getBoundingClientRect().bottom > description.getBoundingClientRect().top + 1;
+    }).map(heading => heading.textContent));
+    expect(collisions).toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  }
 });

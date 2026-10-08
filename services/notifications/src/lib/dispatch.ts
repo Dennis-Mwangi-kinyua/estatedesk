@@ -18,9 +18,10 @@ function getRecipientContact(notification: {
   user: { id: string; phone: string | null; email: string | null } | null;
   tenant: { userId: string | null; phone: string | null; email: string | null } | null;
 }) {
+  const staffRecipient = notification.user && notification.tenant && notification.tenant.userId !== notification.user.id;
   return {
-    phone: notification.tenant?.phone ?? notification.user?.phone ?? null,
-    email: notification.tenant?.email ?? notification.user?.email ?? null,
+    phone: staffRecipient ? notification.user?.phone : notification.tenant?.phone ?? notification.user?.phone ?? null,
+    email: staffRecipient ? notification.user?.email : notification.tenant?.email ?? notification.user?.email ?? null,
     userId: notification.user?.id ?? notification.tenant?.userId ?? null,
   };
 }
@@ -112,6 +113,7 @@ async function sendWebPush({
           body,
           url: actionUrl,
           tag: notificationId,
+          notificationId,
         },
       }),
     ),
@@ -163,6 +165,8 @@ export async function dispatchQueuedNotifications(
   const notifications = await prisma.notification.findMany({
     where: {
       status: NotificationStatus.QUEUED,
+      sentAt: null,
+      OR: [{ channel: { not: NotificationChannel.WEB_PUSH } }, { readAt: null }],
     },
     orderBy: {
       createdAt: "asc",
@@ -190,6 +194,13 @@ export async function dispatchQueuedNotifications(
   let failed = 0;
 
   for (const notification of notifications) {
+    // Atomically claim before provider calls so overlapping workers cannot send twice.
+    const claim = await prisma.notification.updateMany({
+      where: { id: notification.id, status: NotificationStatus.QUEUED, sentAt: null,
+        ...(notification.channel === NotificationChannel.WEB_PUSH ? { readAt: null } : {}) },
+      data: { sentAt: new Date() },
+    });
+    if (claim.count === 0) continue;
     try {
       const contact = getRecipientContact(notification);
       const body = `${notification.title}\n\n${notification.message}`;
@@ -235,7 +246,7 @@ export async function dispatchQueuedNotifications(
           providerResponse:
             providerResponse === undefined
               ? undefined
-              : JSON.parse(JSON.stringify(providerResponse)),
+              : { ...(typeof notification.providerResponse === "object" && notification.providerResponse !== null ? notification.providerResponse : {}), ...JSON.parse(JSON.stringify(providerResponse)) },
         },
       });
 
@@ -248,7 +259,9 @@ export async function dispatchQueuedNotifications(
         where: { id: notification.id },
         data: {
           status: NotificationStatus.FAILED,
+          sentAt: null,
           providerResponse: {
+            ...(typeof notification.providerResponse === "object" && notification.providerResponse !== null ? notification.providerResponse : {}),
             error: safeClientMessage(error, "Notification delivery failed."),
           },
         },

@@ -18,13 +18,13 @@ export function ChargesEmptyState() {
       </p>
 
       <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <Link
+        <Link data-workspace-action="true"
           href="/dashboard/org/leases"
           className="inline-flex h-11 items-center justify-center rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
         >
           Review leases
         </Link>
-        <Link
+        <Link data-workspace-action="true"
           href="/dashboard/org/payments"
           className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-5 text-sm font-medium text-foreground transition hover:bg-muted/30"
         >

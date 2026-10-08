@@ -74,7 +74,7 @@ export function InspectionsWorkspace({
               </p>
               <InAppGuideHint topic="moveOut" workspace="org" orgRole={orgRole} />
             </div>
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org/move-outs"
               className="inline-flex h-11 items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >

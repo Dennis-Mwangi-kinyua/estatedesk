@@ -62,7 +62,7 @@ export function SecureRevealValue({
         </p>
 
         {hasValue ? (
-          <button
+          <button data-workspace-action="true"
             type="button"
             onClick={handleReveal}
             className="shrink-0 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-700 transition hover:bg-neutral-50 active:scale-[0.98]"
@@ -87,7 +87,7 @@ export function SecureRevealValue({
           />
           {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
           <div className="mt-2 flex gap-2">
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={() => {
                 setShowPrompt(false);
@@ -98,7 +98,7 @@ export function SecureRevealValue({
             >
               Cancel
             </button>
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={handleConfirm}
               disabled={isChecking || password.trim().length === 0}

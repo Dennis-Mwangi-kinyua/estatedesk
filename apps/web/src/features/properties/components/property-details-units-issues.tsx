@@ -1,3 +1,4 @@
+import { UnitNamesEditor } from "@/components/forms/unit-names-editor";
 import Link from "next/link";
 import type { PropertyDetails } from "@/features/properties/queries/get-property-details";
 import { getOrgUnitHref } from "@/lib/units/url";
@@ -9,9 +10,10 @@ import {
 } from "./property-details-helpers";
 
 export function PropertyDetailsUnitsIssues({
-  property,
+  property, canRenameUnits = false,
 }: {
   property: PropertyDetails;
+  canRenameUnits?: boolean;
 }) {
   return (
     <section className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
@@ -28,6 +30,7 @@ export function PropertyDetailsUnitsIssues({
           </span>
         </div>
 
+        {canRenameUnits && <div className="mb-5"><UnitNamesEditor propertyId={property.id} units={property.units.map(unit=>({id:unit.id,houseNo:unit.houseNo,buildingName:unit.buildingName}))} scopeLabel="units on this property"/></div>}
         <div className="grid gap-4 md:grid-cols-2">
           {property.units.length ? (
             property.units.map((unit) => (
@@ -39,7 +42,7 @@ export function PropertyDetailsUnitsIssues({
                   <div>
                     <p className="text-lg font-semibold">Unit {unit.houseNo}</p>
                     <p className="text-sm text-gray-500">
-                      {unit.type.replaceAll("_", " ")}
+                      {unit.type.replaceAll("_", " ")}{unit.buildingName ? ` · ${unit.buildingName}` : ""}
                     </p>
                   </div>
 
@@ -73,6 +76,7 @@ export function PropertyDetailsUnitsIssues({
                       id: unit.id,
                       houseNo: unit.houseNo,
                       propertyName: property.name,
+                      buildingName: unit.buildingName,
                     })}
                     className="text-sm font-medium text-gray-500 transition hover:text-black"
                   >

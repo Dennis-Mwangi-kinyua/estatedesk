@@ -27,7 +27,7 @@ export function CaretakerDashboardFocusSection({
       </div>
 
       <div className={`space-y-3 ${panelBodyClassName}`}>
-        <Link
+        <Link data-workspace-action="true"
           href="/dashboard/caretaker/today"
           className="inline-flex items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
         >

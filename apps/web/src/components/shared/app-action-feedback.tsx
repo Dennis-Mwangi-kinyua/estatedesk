@@ -256,7 +256,7 @@ export function AppActionFeedback() {
             ) : null}
           </div>
           {toast.type !== "pending" ? (
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={() => setToast(null)}
               aria-label="Dismiss notification"

@@ -58,7 +58,7 @@ export function IssueAssignmentCard({
             </select>
           </label>
 
-          <button
+          <button data-workspace-action="true"
             type="submit"
             className="inline-flex w-full items-center justify-center rounded-[20px] bg-neutral-900 px-4 py-3.5 text-sm font-medium text-white"
           >

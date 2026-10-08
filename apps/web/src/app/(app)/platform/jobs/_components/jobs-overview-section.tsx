@@ -105,7 +105,7 @@ export function JobsOverviewSection({
             <option value="50">50 rows</option>
             <option value="100">100 rows</option>
           </select>
-          <button className="min-h-11 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950">
+          <button data-workspace-action="true" className="min-h-11 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950">
             Apply
           </button>
         </form>

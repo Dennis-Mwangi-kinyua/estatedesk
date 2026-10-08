@@ -56,7 +56,7 @@ export function Pagination({
       </p>
 
       <div className="flex gap-2">
-        <Link
+        <Link data-workspace-action="true"
           aria-disabled={page <= 1}
           href={page <= 1 ? "#" : previousHref}
           className={`inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-medium dark:border-white/10 ${
@@ -68,7 +68,7 @@ export function Pagination({
           Previous
         </Link>
 
-        <Link
+        <Link data-workspace-action="true"
           aria-disabled={page >= totalPages}
           href={page >= totalPages ? "#" : nextHref}
           className={`inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-medium dark:border-white/10 ${

@@ -314,7 +314,7 @@ export default async function TenantDocumentsPage() {
                 {doc.url || doc.downloadUrl ? (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {doc.url ? (
-                      <a
+                      <a data-workspace-action="true"
                         href={doc.url}
                         target="_blank"
                         rel="noreferrer"
@@ -325,7 +325,7 @@ export default async function TenantDocumentsPage() {
                       </a>
                     ) : null}
                     {doc.downloadUrl ? (
-                      <a
+                      <a data-workspace-action="true"
                         href={doc.downloadUrl}
                         className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-4 text-sm font-semibold text-white transition hover:bg-neutral-800"
                       >

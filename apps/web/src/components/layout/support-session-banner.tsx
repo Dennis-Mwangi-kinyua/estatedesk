@@ -66,7 +66,7 @@ export function SupportSessionBanner({
             Platform org
           </Link>
           <form action={extendOrgSupportAccessAction}>
-            <button
+            <button data-workspace-action="true"
               type="submit"
               className="rounded-lg border border-amber-300 bg-white/80 px-3 py-2 text-xs font-semibold text-amber-950 transition hover:bg-white dark:border-amber-500/40 dark:bg-slate-950/40 dark:text-amber-50"
             >
@@ -75,7 +75,7 @@ export function SupportSessionBanner({
           </form>
           <form action={leaveOrgSupportAccessAction}>
             <input type="hidden" name="returnTo" value="/platform/support-access" />
-            <button
+            <button data-workspace-action="true"
               type="submit"
               className="rounded-lg bg-amber-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-amber-800 dark:bg-amber-200 dark:text-amber-950"
             >

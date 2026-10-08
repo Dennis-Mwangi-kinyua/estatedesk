@@ -1,3 +1,4 @@
+import { installWorkspaceStyles } from "./workspace-styles";
 import { expect, test } from "playwright/test";
 import { build } from "esbuild";
 import path from "node:path";
@@ -16,6 +17,7 @@ test("profile pictures appear after login and uploads preview and validate befor
   await page.goto("/register");
   await page.waitForLoadState("networkidle");
   await page.setContent('<html><head></head><body><div id="fixture"></div></body></html>');
+  await installWorkspaceStyles(page);
   await page.addScriptTag({ content: bundle.outputFiles[0].text });
   await expect(page.getByRole("link", {name:"My profile"}).locator("img")).toHaveAttribute("src", /imagedelivery.net/);
   await expect(page.getByRole("button", {name:"Save picture"})).toBeDisabled();

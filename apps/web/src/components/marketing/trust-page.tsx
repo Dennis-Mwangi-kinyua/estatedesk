@@ -51,7 +51,7 @@ export function TrustPage({
               Last updated: {updatedAt}
             </p>
             {downloadHref ? (
-              <Link
+              <Link data-workspace-action="true"
                 href={downloadHref}
                 className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 sm:w-auto"
               >

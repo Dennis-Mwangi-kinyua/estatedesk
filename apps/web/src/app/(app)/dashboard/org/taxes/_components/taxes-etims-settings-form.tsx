@@ -171,7 +171,7 @@ export function TaxesEtimsSettingsForm({
           </p>
         ) : null}
 
-        <button
+        <button data-workspace-action="true"
           type="submit"
           className="inline-flex h-11 items-center justify-center rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground"
         >

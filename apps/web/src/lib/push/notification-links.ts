@@ -88,13 +88,21 @@ export function resolveNotificationActionUrl(input: {
   actionUrl?: string | null;
   audience?: NotificationAudience;
 }) {
-  if (input.actionUrl) {
+  const audience = input.audience ?? resolveNotificationAudience(input);
+
+  if (input.actionUrl && isNotificationUrlAllowed(input.actionUrl, audience)) {
     return input.actionUrl;
   }
 
-  const audience = input.audience ?? resolveNotificationAudience(input);
-
   return getDefaultNotificationActionUrl(input.type, audience);
+}
+
+export function isNotificationUrlAllowed(url: string, audience: NotificationAudience) {
+  // Reject protocol-relative URLs, backslashes and encoded path separators.
+  if (!url.startsWith("/") || url.startsWith("//") || /[\\\u0000-\u0020]|%2f|%5c/i.test(url)) return false;
+  const pathname = new URL(url, "https://estatedesk.invalid").pathname;
+  const prefix = audience === "tenant" ? "/dashboard/tenant" : audience === "caretaker" ? "/dashboard/caretaker" : null;
+  return !prefix || pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
 export function readNotificationActionUrl(providerResponse: unknown) {

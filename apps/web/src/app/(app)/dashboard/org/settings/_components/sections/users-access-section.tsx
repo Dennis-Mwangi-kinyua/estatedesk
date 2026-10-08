@@ -48,7 +48,7 @@ export function UsersAccessSection({
           <option value="CARETAKER">Caretaker</option>
         </select>
 
-        <button type="submit" className={`gap-2 ${buttonPrimaryClassName}`}>
+        <button data-workspace-action="true" type="submit" className={`gap-2 ${buttonPrimaryClassName}`}>
           <Plus className="h-4 w-4" />
           Invite Member
         </button>

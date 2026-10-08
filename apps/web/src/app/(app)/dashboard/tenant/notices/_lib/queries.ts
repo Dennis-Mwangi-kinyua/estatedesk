@@ -24,6 +24,7 @@ export const tenantNoticesArgs = Prisma.validator<Prisma.TenantDefaultArgs>()({
       },
     },
     notifications: {
+      where: { channel: "IN_APP", userId: null },
       orderBy: {
         createdAt: "desc",
       },
@@ -59,5 +60,12 @@ export async function getTenantNoticesData(userId: string, orgId: string) {
       deletedAt: null,
     },
     ...tenantNoticesArgs,
+    include: {
+      ...tenantNoticesArgs.include,
+      notifications: {
+        ...tenantNoticesArgs.include.notifications,
+        where: { channel: "IN_APP", OR: [{ userId }, { userId: null }] },
+      },
+    },
   });
 }

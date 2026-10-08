@@ -111,7 +111,7 @@ export function AccountingVendorBillForm({
           </label>
         </div>
 
-        <button type="submit" className={buttonPrimaryClassName}>
+        <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
           Post bill to payables
         </button>
       </form>

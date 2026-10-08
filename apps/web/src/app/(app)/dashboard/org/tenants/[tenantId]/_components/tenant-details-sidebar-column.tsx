@@ -53,7 +53,7 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
           </div>
 
           <div className="mt-4 flex flex-col gap-2">
-            <a
+            <a data-workspace-action="true"
               href={`/dashboard/org/tenants/${tenant.id}/tribunal-pack`}
               className="inline-flex items-center justify-center rounded-full border border-teal-700/20 bg-teal-700 px-4 py-2.5 text-center text-xs font-semibold text-white shadow-sm hover:bg-teal-800"
             >
@@ -278,7 +278,7 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
 
                       {String(notice.inspection.status).toUpperCase() === "COMPLETED" ? (
                         <div className="mt-3">
-                          <Link
+                          <Link data-workspace-action="true"
                             href={`/dashboard/org/inspections/${encodePublicId(
                               notice.inspection.id,
                               "inspection",

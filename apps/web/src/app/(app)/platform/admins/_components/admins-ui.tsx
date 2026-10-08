@@ -168,7 +168,7 @@ export function AdminRow({
       <div className="flex flex-col gap-2 border-t border-border pt-3">
         <form action={deletePlatformAdmin} className="w-full">
           <input type="hidden" name="userId" value={admin.id} />
-          <button
+          <button data-workspace-action="true"
             type="submit"
             disabled={!canDelete}
             title={deleteBlockedReason ?? "Delete this platform admin"}

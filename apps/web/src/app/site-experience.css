@@ -1,6 +1,6 @@
 /* Shared mobile-first presentation across public, account, and role pages. */
 .estate-glass-system .ed-mobile-first-root :where(.grid, .flex) > * { min-width: 0; }
-.estate-glass-system .ed-mobile-first-root :where(h1, h2, h3, p, dd) { overflow-wrap: anywhere; }
+.estate-glass-system .ed-mobile-first-root :where(h1, h2, h3, p, dd) { overflow-wrap: normal; }
 .estate-glass-system h1[data-page-icon]::before {
   content: attr(data-page-icon);
   display: inline-grid;
@@ -70,7 +70,7 @@
     padding: 0;
     border: 0;
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
     text-align: start;
   }
   .estate-glass-system table[data-mobile-cards="true"] > tbody > tr > :first-child,
@@ -100,13 +100,13 @@
 .estate-glass-system [data-workspace-header] > details > summary::after { content: "+"; margin-inline-start: auto; font-size: 1.2rem; }
 .estate-glass-system [data-workspace-header] > details[open] > summary::after { content: "−"; }
 @media screen and (max-width: 639px) {
-  .estate-glass-system [data-workspace-header] > .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+  .estate-glass-system [data-workspace-header] > .grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .75rem; }
   .estate-glass-system [data-workspace-header] > .grid > :last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
 /* Organisation control centre: resilient narrow-screen and older-browser layout. */
-.organisation-detail-page { min-width: 0; word-wrap: break-word; }
+.organisation-detail-page { min-width: 0; word-wrap: normal; }
 .organisation-detail-page :where(section, article, div, header, a) { min-width: 0; }
-.organisation-detail-page :where(h1, h2, p, dd, span) { word-wrap: break-word; overflow-wrap: anywhere; }
+.organisation-detail-page :where(h1, h2, p, dd, span) { word-wrap: normal; overflow-wrap: normal; }
 .organisation-detail-page .platform-badge { max-width: 100%; white-space: normal; }
 @supports not (background: color-mix(in srgb, white, black)) {
   .organisation-detail-page :where(.bg-primary\/10, .bg-muted\/20) { background: var(--muted); }
@@ -127,4 +127,19 @@ body.estate-glass-system .organisation-detail-page :is(.workspace-panel, .org-su
 @supports not (height: 100dvh) {
   .estate-glass-system .h-dvh { height: 100vh; }
   .estate-glass-system .min-h-dvh { min-height: 100vh; }
+}
+
+/* Preserve whole labels by giving narrow cards room instead of splitting words. */
+.estate-glass-system :where(button, [role="button"], summary) {
+  word-break: normal;
+  overflow-wrap: normal;
+}
+.estate-glass-system .workspace-metric :where(.text-2xl, .text-3xl) {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+@media screen and (max-width: 419px) {
+  .estate-glass-system table[data-mobile-cards="true"] > tbody > tr {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

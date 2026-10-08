@@ -52,7 +52,7 @@ function SubmitButton({
   const Icon = icon === "plus" ? Plus : Save;
 
   return (
-    <button
+    <button data-workspace-action="true"
       type="submit"
       disabled={pending}
       className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"

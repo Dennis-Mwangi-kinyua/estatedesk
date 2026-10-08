@@ -1,3 +1,4 @@
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { panelClass, stepDescriptionClass, stepTitleClass } from "../_lib/constants";
 import { ReviewCard } from "./new-org-ui";
 import type { NewOrgFormState } from "./use-new-org-form";
@@ -47,7 +48,7 @@ export function NewOrgStepReview(
     <section className={panelClass}>
       <div className="mb-6">
         <div className="inline-flex rounded-full bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-300">
-          <span aria-hidden="true" className="text-2xl">📋</span>
+          <span aria-hidden="true" className="text-2xl"><WorkspaceIcon label="tasks" className="inline-block h-5 w-5 shrink-0 align-middle" /></span>
         </div>
         <h2 className={stepTitleClass}>Review details</h2>
         <p className={stepDescriptionClass}>

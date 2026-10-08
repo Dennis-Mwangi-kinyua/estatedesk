@@ -152,7 +152,7 @@ export async function processPeriodBillPayment(
     .join(" + ");
 
   if (isGateway) {
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: [{ tenantId: tenant.id, userId }],
@@ -161,7 +161,7 @@ export async function processPeriodBillPayment(
       message: `Enter your M-Pesa PIN on your phone to pay ${amount.toFixed(0)} for ${period} (${lineSummary}). Your bill updates automatically when payment succeeds.`,
     });
   } else {
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: [{ tenantId: tenant.id, userId }],
@@ -172,7 +172,7 @@ export async function processPeriodBillPayment(
       message: `Your ${period} bill payment of ${amount.toFixed(0)} via ${methodLabel} has been submitted and is awaiting organization verification. (${lineSummary})`,
     });
 
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: await getPaymentReviewRecipients(tx, orgId),

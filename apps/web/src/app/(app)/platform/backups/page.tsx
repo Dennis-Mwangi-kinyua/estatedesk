@@ -224,7 +224,7 @@ export default async function PlatformBackupsPage({
               placeholder="e.g. Nightly dump validated, SHA256 checked"
               className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
             />
-            <button className="h-11 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground">
+            <button data-workspace-action="true" className="h-11 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground">
               Record checkpoint
             </button>
           </form>
@@ -241,7 +241,7 @@ export default async function PlatformBackupsPage({
               placeholder="Restore drill notes / ticket ID"
               className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
             />
-            <button className="h-11 w-full rounded-xl border border-border bg-card text-sm font-semibold">
+            <button data-workspace-action="true" className="h-11 w-full rounded-xl border border-border bg-card text-sm font-semibold">
               Mark restore drill complete
             </button>
           </form>

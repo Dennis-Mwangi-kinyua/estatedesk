@@ -11,6 +11,8 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: `http://127.0.0.1:${port}`,
+    // UI fixtures replace the document; PWA updates must not reload them.
+    serviceWorkers: "block",
     trace: "on-first-retry",
   },
   projects: [

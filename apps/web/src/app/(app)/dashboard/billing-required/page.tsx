@@ -57,14 +57,14 @@ export default async function BillingRequiredPage() {
         </div>
 
         <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
-          <a
+          <a data-workspace-action="true"
             href="/contact"
             className="ios-button inline-flex h-11 items-center justify-center rounded-2xl border border-neutral-300 bg-white px-5 text-sm font-semibold text-neutral-950"
           >
             Contact support
           </a>
           <form action={logoutAction}>
-            <button
+            <button data-workspace-action="true"
               type="submit"
               className="ios-button inline-flex h-11 w-full items-center justify-center rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white sm:w-auto"
             >

@@ -122,7 +122,7 @@ export async function reportIssueAction(formData: FormData) {
       },
     });
 
-    await notifyInAppAndPush({
+    await notifyInAppAndPush({ actorUserId: session.userId,
       db: tx,
       orgId: session.activeOrgId!,
       recipients: [{ tenantId: tenant.id, userId: session.userId }],
@@ -132,13 +132,10 @@ export async function reportIssueAction(formData: FormData) {
     });
 
     if (orgReviewers.length > 0) {
-      await notifyInAppAndPush({
+      await notifyInAppAndPush({ actorUserId: session.userId,
         db: tx,
         orgId: session.activeOrgId!,
-        recipients: orgReviewers.map(({ userId }) => ({
-          tenantId: tenant.id,
-          userId,
-        })),
+        recipients: orgReviewers.map(({ userId }) => ({ userId })),
         type: "ISSUE_CREATED",
         title: "New tenant issue",
         message: `${tenant.fullName} reported "${title}" for ${unitText || "a unit"}. Priority: ${priority}.`,

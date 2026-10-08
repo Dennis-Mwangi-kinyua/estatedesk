@@ -168,7 +168,7 @@ export async function processWaterBillPayment(
   }
 
   if (isGateway) {
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: [{ tenantId: tenant.id, userId }],
@@ -177,7 +177,7 @@ export async function processWaterBillPayment(
       message: `Enter your M-Pesa PIN to pay water bill ${bill.period}. Your bill updates automatically when payment succeeds.`,
     });
   } else {
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: [{ tenantId: tenant.id, userId }],
@@ -186,7 +186,7 @@ export async function processWaterBillPayment(
       message: `Your water bill payment for ${bill.period} via ${methodLabel} has been submitted and is awaiting organization verification.`,
     });
 
-    await notifyRecipients({
+    await notifyRecipients({ actorUserId: userId,
       db: tx,
       orgId,
       recipients: await getPaymentReviewRecipients(tx, orgId),

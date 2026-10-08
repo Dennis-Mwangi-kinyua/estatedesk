@@ -75,7 +75,7 @@ export function VacancyInquiryAlert({
               </h2>
             </div>
 
-            <button
+            <button data-workspace-action="true"
               type="button"
               onClick={() => dismiss(latest.id)}
               className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted/30 hover:text-foreground"
@@ -106,21 +106,21 @@ export function VacancyInquiryAlert({
           </div>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            <a
+            <a data-workspace-action="true"
               href={`tel:${latest.phone}`}
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
             >
               <Phone className="h-4 w-4" />
               Call
             </a>
-            <DeferredLink
+            <DeferredLink data-workspace-action="true"
               href={`/dashboard/org/units/${latest.unitId}`}
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-muted/20"
             >
               <ExternalLink className="h-4 w-4" />
               View unit
             </DeferredLink>
-            <Link
+            <Link data-workspace-action="true"
               href="/dashboard/org/vacancy-inquiries"
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-muted/20"
             >
@@ -134,7 +134,7 @@ export function VacancyInquiryAlert({
                 {visibleInquiries.length - 1} more new enquiry
                 {visibleInquiries.length - 1 === 1 ? "" : "ies"}
               </p>
-              <button
+              <button data-workspace-action="true"
                 type="button"
                 onClick={dismissAll}
                 className="text-xs font-semibold text-foreground transition hover:text-primary"

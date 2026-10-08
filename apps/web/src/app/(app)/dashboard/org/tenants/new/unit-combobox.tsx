@@ -170,7 +170,7 @@ export function UnitCombobox({
 
   return (
     <div ref={containerRef} className="relative">
-      <button
+      <button data-workspace-action="true"
         type="button"
         onClick={() => {
           if (open) {
@@ -213,7 +213,7 @@ export function UnitCombobox({
 
               <div className="flex items-center justify-between gap-3 sm:hidden">
                 <h3 className="text-sm font-semibold text-foreground">Select unit</h3>
-                <button
+                <button data-workspace-action="true"
                   type="button"
                   onClick={closeCombobox}
                   className="rounded-full px-2 py-1 text-sm text-muted-foreground"
@@ -245,7 +245,7 @@ export function UnitCombobox({
             >
               {filteredUnits.length === 0 ? (
                 <>
-                  <button
+                  <button data-workspace-action="true"
                     type="button"
                     onMouseEnter={() => setActiveIndex(0)}
                     onClick={() => handleSelect("")}

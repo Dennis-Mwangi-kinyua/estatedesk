@@ -94,7 +94,7 @@ export function TenantCard({ tenant }: { tenant: TenantItem }) {
           <ContactActions phone={tenant.phone} email={tenant.email} />
         </div>
 
-        <DeferredLink
+        <DeferredLink data-workspace-action="true"
           href={href}
           className="mt-3 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-2xl border border-border bg-background text-sm font-semibold text-foreground transition hover:bg-muted/30 sm:h-10"
         >

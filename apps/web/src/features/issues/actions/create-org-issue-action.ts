@@ -132,7 +132,7 @@ export async function createOrgIssueAction(formData: FormData) {
     });
 
     if (orgReviewers.length > 0) {
-      await notifyInAppAndPush({
+      await notifyInAppAndPush({ actorUserId: session.userId,
         db: tx,
         orgId,
         recipients: orgReviewers.map(({ userId }) => ({ userId })),
