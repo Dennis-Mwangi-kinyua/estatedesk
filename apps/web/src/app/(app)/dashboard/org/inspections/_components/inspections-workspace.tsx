@@ -116,7 +116,7 @@ export function InspectionsWorkspace({
           </div>
         ) : (
           <>
-          <div className="grid gap-3 bg-muted/10 p-3 sm:p-4 lg:hidden">
+          <div className="grid gap-3 bg-muted/10 p-3 sm:p-4 2xl:hidden">
             {data.inspections.map((inspection) => {
               const isOverdue = inspection.status === "SCHEDULED" && inspection.scheduledAt.getTime() < now;
               const unit = inspection.notice.lease.unit;
@@ -127,7 +127,7 @@ export function InspectionsWorkspace({
               </article>;
             })}
           </div>
-          <div className="hidden overflow-x-auto lg:block">
+          <div className="hidden overflow-x-auto 2xl:block">
             <table className="min-w-[900px] w-full text-sm">
               <thead className="border-b border-border bg-muted/20">
                 <tr className="text-left">

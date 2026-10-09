@@ -105,7 +105,6 @@ export default async function OrgInspectionDetailPage({ params }: PageProps) {
     <InspectionDetailsWorkspace
       canReport={canInspectUnit(memberships, inspection.notice.lease.unit)}
       inspection={inspection}
-      orgRole={session.activeOrgRole}
     />
   );
 }

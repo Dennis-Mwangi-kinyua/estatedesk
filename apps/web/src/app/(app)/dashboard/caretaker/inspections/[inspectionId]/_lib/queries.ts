@@ -66,7 +66,7 @@ export async function getCaretakerInspectionDetail(args: {
                   },
                 },
               },
-              { OR: allocationFilters },
+              { OR: [...allocationFilters, { inspectorUserId: args.userId }] },
             ],
           },
           include: {

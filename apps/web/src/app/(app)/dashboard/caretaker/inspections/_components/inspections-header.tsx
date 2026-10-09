@@ -49,8 +49,8 @@ export function InspectionsHeader({ stats }: InspectionsHeaderProps) {
         </div>
 
         <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100">
-          This page is allocation-based. You can only access inspections tied to
-          your assigned properties and units.
+          Scheduled tasks assigned directly to you and inspections for your
+          allocated properties or units appear here.
         </div>
       </div>
     </section>

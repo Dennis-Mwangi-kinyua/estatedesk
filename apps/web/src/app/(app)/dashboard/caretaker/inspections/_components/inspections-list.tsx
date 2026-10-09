@@ -31,7 +31,7 @@ export function InspectionsList({ inspections }: InspectionsListProps) {
         {inspections.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-muted/10 px-4 py-8 text-center">
             <p className="text-sm text-muted-foreground">
-              No inspections found for your current allocations.
+              No inspections assigned to you or found in your current allocations.
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2">
               <InAppGuideLink topic="moveOut" workspace="caretaker" />

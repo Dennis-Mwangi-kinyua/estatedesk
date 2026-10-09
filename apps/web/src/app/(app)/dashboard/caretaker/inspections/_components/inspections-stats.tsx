@@ -17,7 +17,7 @@ export function InspectionsStats({ stats }: InspectionsStatsProps) {
       <StatCard
         label="Total inspections"
         value={stats.total}
-        note="Allocated to your scope"
+        note="Assigned to you or in your scope"
         icon={ClipboardList}
       />
       <StatCard

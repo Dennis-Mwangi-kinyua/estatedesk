@@ -64,7 +64,7 @@ export function MoveOutsWorkspace({
 
   const isOrg = variant === "org";
   const shellClassName = isOrg
-    ? "org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8"
+    ? "org-theme-content mx-auto w-full max-w-none space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8"
     : "space-y-8 p-6";
   const propertyHref = (propertyId: string) =>
     isOrg
@@ -171,16 +171,16 @@ export function MoveOutsWorkspace({
           <div className="grid gap-3 bg-muted/15 p-3 sm:p-4 lg:gap-4 lg:p-5">
             {notices.map((notice) => (
               <article key={notice.id} className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                <div className="grid min-w-0 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
+                <div className="grid min-w-0 xl:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)]">
                   <div className="min-w-0 p-4 sm:p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex min-w-0 items-start gap-3">
                         <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><Users aria-hidden="true" className="size-5" /></span>
-                        <div className="min-w-0"><h3 className="truncate text-base font-semibold leading-6">{notice.tenant.fullName}</h3><DeferredLink href={propertyHref(notice.lease.unit.property.id)} className="mt-0.5 inline-flex max-w-full items-center gap-1 truncate text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline"><Home aria-hidden="true" className="size-3.5 shrink-0" /><span className="truncate">{notice.lease.unit.property.name}</span></DeferredLink></div>
+                        <div className="min-w-0"><h3 className="break-words text-base font-semibold leading-6">{notice.tenant.fullName}</h3><DeferredLink href={propertyHref(notice.lease.unit.property.id)} className="mt-0.5 inline-flex max-w-full items-center gap-1 break-words text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline"><Home aria-hidden="true" className="size-3.5 shrink-0" /><span className="break-words">{notice.lease.unit.property.name}</span></DeferredLink></div>
                       </div>
                       <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${notice.status === "CLOSED" ? "bg-emerald-500/10 text-emerald-700" : notice.status === "CANCELLED" ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"}`}><span className="size-1.5 rounded-full bg-current" />{statusLabel[notice.status] ?? notice.status}</span>
                     </div>
-                    <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-muted/30 p-3 sm:grid-cols-4">
+                    <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-muted/30 p-3 sm:grid-cols-2 2xl:grid-cols-4">
                       <Detail icon={<MapPin aria-hidden="true" className="size-3.5" />} label="Location" value={[notice.lease.unit.building?.name, `Unit ${notice.lease.unit.houseNo}`].filter(Boolean).join(" · ")} />
                       <Detail icon={<CalendarDays aria-hidden="true" className="size-3.5" />} label="Notice date" value={formatDate(notice.noticeDate)} />
                       <Detail icon={<LogOut aria-hidden="true" className="size-3.5" />} label="Move-out date" value={formatDate(notice.moveOutDate)} />
@@ -189,7 +189,7 @@ export function MoveOutsWorkspace({
                     {notice.inspection?.inspector.fullName ? <p className="mt-3 text-xs text-muted-foreground">Inspector: <span className="font-medium text-foreground">{notice.inspection.inspector.fullName}</span></p> : null}
                     <div className="mt-4 border-t border-border pt-4"><MoveOutProgress status={notice.status} closeout={notice.closeout} /></div>
                   </div>
-                  <div className="min-w-0 border-t border-border bg-muted/10 p-4 sm:p-5 lg:border-l lg:border-t-0">
+                  <div className="min-w-0 border-t border-border bg-muted/10 p-4 sm:p-5 xl:border-l xl:border-t-0">
                     <div className="flex items-center justify-between gap-3"><h4 className="text-sm font-semibold">Next steps & settlement</h4><a className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary hover:underline" href={`/api/move-outs/${notice.id}/report`}><FileText aria-hidden="true" className="size-3.5" />{notice.status === "CLOSED" ? "Final statement" : "Move-out report"}</a></div>
                     <p className="mt-2 text-xs text-muted-foreground">{notice.financialStatus.replaceAll("_", " ")} <span aria-hidden="true">·</span> Current amount owed <span className="font-semibold text-foreground">{notice.currentAmountOwed.toFixed(2)}</span></p>
                     <div className="mt-3"><SettlementSummary closeout={notice.closeout} /></div>

@@ -5,7 +5,6 @@ import {
 import type { CaretakerInspectionsPageData } from "../_lib/queries";
 import { InspectionsHeader } from "./inspections-header";
 import { InspectionsList } from "./inspections-list";
-import { InspectionsSidebar } from "./inspections-sidebar";
 import { InspectionsStats } from "./inspections-stats";
 
 export type InspectionsWorkspaceProps = {
@@ -14,7 +13,7 @@ export type InspectionsWorkspaceProps = {
 
 export function InspectionsWorkspace({ data }: InspectionsWorkspaceProps) {
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-5 pb-6 sm:space-y-6" data-workspace="caretaker">
+    <div className="mx-auto w-full max-w-none space-y-5 pb-6 sm:space-y-6" data-workspace="caretaker">
       {data.ok ? <InspectionsHeader stats={data.stats} /> : null}
 
       {!data.ok ? (
@@ -30,14 +29,11 @@ export function InspectionsWorkspace({ data }: InspectionsWorkspaceProps) {
         <>
           <InspectionsStats stats={data.stats} />
 
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
-            <InspectionsList inspections={data.inspections} />
-            <InspectionsSidebar />
-          </div>
+          <InspectionsList inspections={data.inspections} />
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Allocation-based move-out inspection tracking" />
+      <CaretakerWorkspaceFooter note="Inspection tasks assigned to you and within your caretaker scope" />
     </div>
   );
 }

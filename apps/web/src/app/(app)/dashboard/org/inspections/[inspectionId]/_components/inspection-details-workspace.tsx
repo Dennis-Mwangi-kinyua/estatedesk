@@ -1,13 +1,11 @@
 import { InspectionReportForm } from "@/features/inspections/inspection-report-form";
 import Link from "next/link";
-import type { OrgRole } from "@prisma/client";
 import { encodePublicId } from "@/lib/public-id";
 import {
   buttonPrimaryClassName,
   panelShellClassName,
   StatCard,
 } from "@/app/(app)/dashboard/org/properties/_components/properties-ui";
-import { InspectionDetailsGuidance } from "./inspection-details-guidance";
 
 export type InspectionDetailsData = {
   id: string;
@@ -117,11 +115,9 @@ function ReportField({
 
 export function InspectionDetailsWorkspace({
   inspection,
-  orgRole,
   canReport = false,
 }: {
   inspection: InspectionDetailsData;
-  orgRole?: OrgRole | null;
   canReport?: boolean;
 }) {
   const report = (inspection.checklist ?? {}) as Record<string, unknown>;
@@ -135,7 +131,7 @@ export function InspectionDetailsWorkspace({
     .join(" — ");
 
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content mx-auto w-full max-w-none space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
       <section className={`${panelShellClassName} p-5 sm:p-6`}>
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -191,8 +187,7 @@ export function InspectionDetailsWorkspace({
         <StatCard label="Completed at" value={formatDateTime(inspection.completedAt)} />
       </section>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="space-y-6">
+      <div className="space-y-6">
           <section className={panelShellClassName}>
             <div className="border-b border-border px-5 py-4 sm:px-6">
               <h2 className="text-base font-semibold text-foreground sm:text-lg">
@@ -292,9 +287,6 @@ export function InspectionDetailsWorkspace({
               )}
             </div>
           </section>
-        </div>
-
-        <InspectionDetailsGuidance orgRole={orgRole} />
       </div>
     </div>
   );
