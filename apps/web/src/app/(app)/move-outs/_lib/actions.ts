@@ -5,7 +5,6 @@ import { recordMoveOutRefund } from "@/lib/move-outs/refund";
 import { canInspectUnit } from "@/lib/move-outs/inspection-scope";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
@@ -140,7 +139,6 @@ export async function closeMoveOutAction(formData: FormData) {
   revalidatePath("/dashboard/org/tenants");
   revalidatePath("/dashboard/tenant");
   revalidatePublicVacancies();
-  redirect("/dashboard/org/move-outs");
 }
 
 
@@ -161,7 +159,6 @@ export async function recordMoveOutRefundAction(form: FormData) {
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");
   revalidatePath("/dashboard/tenant/notices");
-  redirect("/dashboard/org/move-outs");
 }
 
 export async function releaseMoveOutUnitAction(form: FormData) {
@@ -179,5 +176,4 @@ export async function releaseMoveOutUnitAction(form: FormData) {
   revalidatePath("/dashboard/org/move-outs");
   revalidatePath("/dashboard/org/units");
   revalidatePublicVacancies();
-  redirect("/dashboard/org/move-outs");
 }

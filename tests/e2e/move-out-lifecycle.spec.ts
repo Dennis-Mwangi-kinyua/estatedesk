@@ -35,7 +35,7 @@ test("move-out handover, private refund proof, report permissions and retained r
     expect(bytes.subarray(0, 4).toString()).toBe("%PDF");
     await form.getByLabel("I generated and reviewed", { exact: false }).check();
     console.log("Closing handover");
-    await form.getByRole("button", { name: "Confirm handover and close", exact: true }).click();
+    await Promise.all([page.waitForNavigation({ waitUntil: "domcontentloaded" }), form.getByRole("button", { name: "Confirm handover and close", exact: true }).click()]);
     await expect(page.getByText("Financial status: REFUND PENDING", { exact: false })).toBeVisible();
     await page.waitForLoadState("networkidle");
     expect((await db.unit.findUniqueOrThrow({ where: { id: fixture.unitId } })).status).toBe("UNDER_MAINTENANCE");
@@ -47,14 +47,15 @@ test("move-out handover, private refund proof, report permissions and retained r
     await page.getByLabel("Paid refund reference").fill(`BROWSER-${fixture.noticeId}`);
     await page.getByLabel("Refund payment proof").setInputFiles({ name: "proof.png", mimeType: "image/png", buffer: image });
     await page.getByLabel("I confirm this refund has already been paid.").check();
-    await page.getByRole("button", { name: "Record paid refund", exact: true }).click();
+    await Promise.all([page.waitForNavigation({ waitUntil: "domcontentloaded" }), page.getByRole("button", { name: "Record paid refund", exact: true }).click()]);
     await expect(page.getByText("Financial status: SETTLED", { exact: false })).toBeVisible();
     await page.waitForLoadState("networkidle");
     await page.getByLabel("Repairs and cleaning completed", { exact: false }).check();
     await page.getByRole("button", { name: "Mark unit vacant and ready" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Unit is vacant and ready to let." })).toBeVisible();
     await expect(page.getByRole("button", { name: "Mark unit vacant and ready" })).toHaveCount(0);
     expect((await db.unit.findUniqueOrThrow({ where: { id: fixture.unitId } })).status).toBe("VACANT");
-    const tenantContext = await browser.newContext({ ignoreHTTPSErrors: new URL(baseURL!).hostname === "127.0.0.1" });
+    const tenantContext = await browser.newContext({ ignoreHTTPSErrors: new URL(baseURL!).hostname === "127.0.0.1", extraHTTPHeaders: { Cookie: `${fixture.cookies.tenant.name}=${fixture.cookies.tenant.value}` } });
     await tenantContext.addCookies([{ ...fixture.cookies.tenant, url: cookieUrl }]);
     const tenantReport = await tenantContext.request.get(`${baseURL}/api/move-outs/${fixture.noticeId}/report`);
     expect(tenantReport.status()).toBe(200); expect(tenantReport.headers()["content-type"]).toContain("application/pdf");
@@ -63,7 +64,7 @@ test("move-out handover, private refund proof, report permissions and retained r
     const tenantReceipt = await tenantContext.request.get(`${baseURL}/dashboard/tenant/receipts/${receipt.id}`);
     expect(tenantReceipt.status()).toBe(200); expect(tenantReceipt.headers()["content-type"]).toContain("application/pdf");
     await tenantContext.close();
-    const otherContext = await browser.newContext({ ignoreHTTPSErrors: new URL(baseURL!).hostname === "127.0.0.1" });
+    const otherContext = await browser.newContext({ ignoreHTTPSErrors: new URL(baseURL!).hostname === "127.0.0.1", extraHTTPHeaders: { Cookie: `${fixture.cookies.outsider.name}=${fixture.cookies.outsider.value}` } });
     await otherContext.addCookies([{ ...fixture.cookies.outsider, url: cookieUrl }]);
     for (const suffix of ["report", "refund-proof"]) {
       const response = await otherContext.request.get(`${baseURL}/api/move-outs/${fixture.noticeId}/${suffix}`, { maxRedirects: 0 });

@@ -10,7 +10,7 @@ Validation used disposable PostgreSQL at `127.0.0.1:55439/estatedesk_moveout_tes
 - Chromium lifecycle test passes: itemised PDF report, required handover confirmations, closure, private refund evidence upload/download, refund settlement, vacancy readiness, retained tenant receipt, and denial of another tenant's document access.
 - Fixed handover and refund checkboxes shrinking to zero width in narrow layouts.
 - Fixed production middleware redirecting authenticated report/proof download links as generic API navigation; added a regression test.
-- Handover, refund, and vacancy release navigate back to the canonical workspace after saving so staff see the persisted state.
+- Handover and refund navigate back to the canonical workspace after saving. Vacancy release confirms success locally after the server commits, disables repeated submission while pending, and displays errors inline.
 
 ## Production release verification
 
@@ -18,6 +18,7 @@ Validation used disposable PostgreSQL at `127.0.0.1:55439/estatedesk_moveout_tes
 - All three pending migrations were successfully applied to production on 9 October 2026.
 - Refund evidence now uses the configured Cloudflare Images account, with `requireSignedURLs=true`. Download stays behind the authenticated application route. The existing token allows signing-key access but denies original exports, so downloads fall back to a short-lived signed delivery request made server-side.
 - A synthetic image verified private upload, signed download, and unsigned access denial (403) against the configured Cloudflare account. The image was removed afterward.
+- The complete Chromium lifecycle also passes against the optimized production build with the configured Cloudflare provider and disposable local database, including private proof download, tenant receipts, and unrelated-tenant denial.
 - `PAYMENT_PROOF_BUCKET` remains an optional private S3 alternative when Cloudflare Images is not configured. Local private filesystem storage is development-only.
 
 ## Reproducing isolated tests

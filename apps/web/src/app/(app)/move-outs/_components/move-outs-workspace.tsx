@@ -1,4 +1,4 @@
-import { releaseMoveOutUnitAction } from "../_lib/actions";
+import { ReleaseUnitForm } from "@/features/move-outs/components/release-unit-form";
 import { ScheduleForm } from "@/features/move-outs/components/schedule-form";
 import { SettlementSummary } from "@/features/move-outs/components/settlement-summary";
 import { RefundForm } from "@/features/move-outs/components/refund-form";
@@ -253,7 +253,7 @@ export function MoveOutsWorkspace({
                         <SettlementSummary closeout={notice.closeout} />
                         <p className="my-2 text-xs">Financial status: {notice.financialStatus.replaceAll("_", " ")} · Current amount owed: {notice.currentAmountOwed.toFixed(2)}</p>
                         <a className="text-xs underline" href={`/api/move-outs/${notice.id}/report`}>{notice.status === "CLOSED" ? "Download final statement" : "Generate pre-handover report"}</a>
-                        {notice.status === "CLOSED" && notice.lease.unit.status === "UNDER_MAINTENANCE" ? <form action={releaseMoveOutUnitAction} className="mt-2 text-xs"><input name="noticeId" type="hidden" value={notice.id} /><label className="flex gap-2"><input type="checkbox" className="mt-0.5 size-4 shrink-0" name="readyConfirmed" required />Repairs and cleaning completed; unit ready to let.</label><button className="mt-2 rounded border px-3 py-2">Mark unit vacant and ready</button></form> : null}
+                        {notice.status === "CLOSED" && notice.lease.unit.status === "UNDER_MAINTENANCE" ? <ReleaseUnitForm noticeId={notice.id} /> : null}
                         {notice.status === "CLOSED" && notice.closeout && typeof notice.closeout === "object" && !Array.isArray(notice.closeout) && notice.closeout.refundStatus === "PENDING" ? <RefundForm noticeId={notice.id} /> : null}</div>
                       {["SUBMITTED", "INSPECTION_SCHEDULED"].includes(notice.status) ? (
                         inspectors.some(inspector => canInspectUnit([inspector], notice.lease.unit)) ? (

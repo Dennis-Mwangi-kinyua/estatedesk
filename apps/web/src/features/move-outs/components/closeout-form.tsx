@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { getSettlementPreview } from "../settlement-preview-action";
 import { calculateSettlement, moneyCents } from "@/lib/move-outs/settlement";
 
@@ -11,7 +10,6 @@ export function CloseoutForm({ noticeId, deposit = "0", dateLimit, action }: { n
   const [error, setError] = useState("");
   useEffect(() => { let active = true; getSettlementPreview(noticeId).then(value => { if (active) { setPreview(value); setHeld(value.depositHeld.toFixed(2)); } }).catch(failure => { if (active) setError(failure instanceof Error ? failure.message : "Could not load final balances."); }); return () => { active = false; }; }, [noticeId]);
   const [pending, startTransition] = useTransition();
-  const router = useRouter();
   let refund = 0;
   let amountOwed = 0;
   let totalCosts = 0;
@@ -22,7 +20,7 @@ export function CloseoutForm({ noticeId, deposit = "0", dateLimit, action }: { n
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     setError("");
-    startTransition(async () => { try { await action(form); router.refresh(); } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not close this move-out. Please try again."); } });
+    startTransition(async () => { try { await action(form); window.location.assign("/dashboard/org/move-outs"); } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not close this move-out. Please try again."); } });
   }}>
     <input type="hidden" name="noticeId" value={noticeId} />
     <input type="hidden" name="costItems" value={JSON.stringify(costs)} />
