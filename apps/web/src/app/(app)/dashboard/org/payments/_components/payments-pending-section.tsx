@@ -85,7 +85,7 @@ export function PaymentsPendingSection({
               {pendingPayments.map((payment) => {
                 const raw = payment.callbackRaw;
                 const proofUrl = raw && typeof raw === "object" && !Array.isArray(raw)
-                  && typeof raw.proofImageUrl === "string" && raw.proofImageUrl.startsWith("https://imagedelivery.net/")
+                  && typeof raw.proofImageUrl === "string" && (raw.proofImageUrl.startsWith("https://imagedelivery.net/") || raw.proofImageUrl.startsWith("/uploads/payment-proof/"))
                   ? raw.proofImageUrl : null;
                 const transactionMessage = getTransactionMessage(payment.callbackRaw);
 

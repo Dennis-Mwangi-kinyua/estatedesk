@@ -7,6 +7,7 @@ import { getAccountingSettings, usesAccrualRecognition } from "@/lib/accounting/
 type AccountingDb = PrismaClient | Prisma.TransactionClient;
 
 function cashSystemKey(method: string) {
+  if (method === "DEPOSIT_OFFSET") return "TENANT_DEPOSITS";
   return method.startsWith("MPESA") ? "MPESA" : method === "CASH" ? "CASH" : "BANK";
 }
 

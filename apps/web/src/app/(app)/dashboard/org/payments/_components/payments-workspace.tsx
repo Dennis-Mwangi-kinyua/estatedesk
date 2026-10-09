@@ -1,3 +1,6 @@
+import { RecordCashPaymentForm } from "./record-cash-payment-form";
+import { roleHasOrgPermission } from "@/lib/permissions/role-matrix";
+import { nairobiDate } from "@/lib/move-outs/validation";
 import type { OrgRole } from "@prisma/client";
 import type { PaymentsPageData } from "../_lib/types";
 import { PaymentsGuidance } from "./payments-guidance";
@@ -109,6 +112,8 @@ export function PaymentsWorkspace({
         pendingPayments={pendingPayments}
         reconciliationQueue={reconciliationQueue}
       />
+
+      {roleHasOrgPermission(orgRole, "payments.record") ? <RecordCashPaymentForm leases={data.cashLeases} period={ledger.period} dateLimit={nairobiDate()} /> : null}
 
       <PaymentsPendingSection pendingPayments={pendingPayments} q={q} />
 

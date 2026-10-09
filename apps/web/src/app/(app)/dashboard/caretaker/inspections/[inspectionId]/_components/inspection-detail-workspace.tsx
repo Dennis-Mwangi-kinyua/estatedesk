@@ -1,6 +1,6 @@
+import { InspectionReportForm } from "@/features/inspections/inspection-report-form";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { completeInspectionAction } from "../_lib/complete-inspection-action";
 import { encodePublicId } from "@/lib/public-id";
 import {
   CaretakerWorkspaceFooter,
@@ -10,7 +10,7 @@ import {
   SectionIntro,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import { badgeClass } from "../../_lib/helpers";
-import { inspectionChecklistFields, reportChecklistItems } from "../_lib/constants";
+import { reportChecklistItems } from "../_lib/constants";
 import {
   formatDate,
   formatDateTime,
@@ -19,8 +19,7 @@ import {
   type ReportData,
 } from "../_lib/helpers";
 import type { getCaretakerInspectionDetail } from "../_lib/queries";
-import { ChecklistInput, DetailCard, ReportCard } from "./detail-cards";
-import { InspectionCheckIn } from "./inspection-check-in";
+import { DetailCard, ReportCard } from "./detail-cards";
 
 type InspectionDetailResult = Awaited<
   ReturnType<typeof getCaretakerInspectionDetail>
@@ -190,7 +189,7 @@ export function InspectionDetailWorkspace({
             />
           </div>
         </section>
-      ) : (
+      ) : inspection.status === "SCHEDULED" ? (
         <section className={panelShellClassName}>
           <SectionIntro
             eyebrow="Field work"
@@ -201,79 +200,9 @@ export function InspectionDetailWorkspace({
             Complete the checklist and submit the report to the office.
           </p>
 
-          <form
-            action={completeInspectionAction}
-            encType="multipart/form-data"
-            className={`space-y-6 ${panelBodyClassName}`}
-          >
-            <input type="hidden" name="inspectionId" value={inspection.id} />
-
-            <InspectionCheckIn />
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {inspectionChecklistFields.map((field) => (
-                <ChecklistInput
-                  key={field.name}
-                  name={field.name}
-                  label={field.label}
-                  photoName={`photo_${field.name}`}
-                />
-              ))}
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="summary"
-                  className="mb-2 block text-sm font-medium text-foreground"
-                >
-                  Inspection summary
-                </label>
-                <textarea
-                  id="summary"
-                  name="summary"
-                  rows={5}
-                  required
-                  placeholder="Write the overall apartment inspection summary"
-                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary/40"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="recommendations"
-                  className="mb-2 block text-sm font-medium text-foreground"
-                >
-                  Recommendations for office
-                </label>
-                <textarea
-                  id="recommendations"
-                  name="recommendations"
-                  rows={4}
-                  placeholder="Add repair notes, deductions, or office follow-up actions"
-                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary/40"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <button data-workspace-action="true"
-                type="submit"
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-              >
-                Submit report to office
-              </button>
-
-              <Link data-workspace-action="true"
-                href="/dashboard/caretaker/inspections"
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-border bg-background px-5 py-3 text-sm font-medium text-foreground transition hover:bg-muted/30"
-              >
-                Cancel
-              </Link>
-            </div>
-          </form>
+          <div className={panelBodyClassName}><InspectionReportForm inspectionId={inspection.id} /></div>
         </section>
-      )}
+      ) : <p className="text-sm text-muted-foreground">This inspection was cancelled.</p>}
 
       <CaretakerWorkspaceFooter note="Move-out inspection detail" />
     </div>

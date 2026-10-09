@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const databaseUrl = process.env.TEST_DATABASE_URL;
+import { configureTestDatabase } from "./database-safety";
+const databaseUrl = configureTestDatabase();
 
 test(
   "manual payment: submit, reject duplicate, verify, allocate, and issue receipt",
@@ -98,3 +99,24 @@ test(
     }
   },
 );
+
+test("terminated lease debt payment does not create recurring charges", { skip: databaseUrl ? false : "TEST_DATABASE_URL is not configured" }, async () => {
+  process.env.DATABASE_URL = databaseUrl;
+  process.env.DIRECT_URL = databaseUrl;
+  const [{ prisma }, { allocateCombinedPeriodPayment }] = await Promise.all([import("../../apps/web/src/lib/prisma"), import("../../apps/web/src/lib/ledger")]);
+  const suffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const org = await prisma.organization.create({ data: { name: `Moveout ${suffix}`, slug: `moveout-${suffix}` } });
+  try {
+    const property = await prisma.property.create({ data: { orgId: org.id, name: "Moveout property" } });
+    const unit = await prisma.unit.create({ data: { propertyId: property.id, houseNo: "1", rentAmount: 15000, serviceCharge: 1000, status: "VACANT" } });
+    const tenant = await prisma.tenant.create({ data: { orgId: org.id, fullName: "Former tenant", phone: `2547${Date.now().toString().slice(-8)}`, status: "INACTIVE" } });
+    const lease = await prisma.lease.create({ data: { orgId: org.id, unitId: unit.id, tenantId: tenant.id, startDate: new Date("2026-01-01"), endDate: new Date("2026-10-09"), monthlyRent: 15000, status: "TERMINATED" } });
+    const debt = await prisma.rentCharge.create({ data: { orgId: org.id, leaseId: lease.id, period: "2026-10", chargeType: "OTHER", amountDue: 3000, amountPaid: 0, balance: 3000, dueDate: new Date("2026-10-09") } });
+    const payment = await prisma.payment.create({ data: { orgId: org.id, payerTenantId: tenant.id, method: "CASH", targetType: "COMBINED", amount: 3000, gatewayStatus: "SUCCESS", verificationStatus: "VERIFIED" } });
+    await prisma.$transaction(tx => allocateCombinedPeriodPayment({ db: tx, orgId: org.id, leaseId: lease.id, period: "2026-10", paymentId: payment.id, amount: payment.amount }));
+    assert.equal(Number((await prisma.rentCharge.findUniqueOrThrow({ where: { id: debt.id } })).balance), 0);
+    assert.equal(await prisma.rentCharge.count({ where: { leaseId: lease.id } }), 1);
+    assert.equal((await prisma.lease.findUniqueOrThrow({ where: { id: lease.id } })).status, "TERMINATED");
+    assert.equal((await prisma.unit.findUniqueOrThrow({ where: { id: unit.id } })).status, "VACANT");
+  } finally { await prisma.organization.delete({ where: { id: org.id } }); await prisma.$disconnect(); }
+});

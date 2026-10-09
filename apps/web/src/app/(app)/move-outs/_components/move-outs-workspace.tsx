@@ -1,10 +1,18 @@
+import { releaseMoveOutUnitAction } from "../_lib/actions";
+import { ScheduleForm } from "@/features/move-outs/components/schedule-form";
+import { SettlementSummary } from "@/features/move-outs/components/settlement-summary";
+import { RefundForm } from "@/features/move-outs/components/refund-form";
+import { canInspectUnit } from "@/lib/move-outs/inspection-scope";
+import { nairobiDate } from "@/lib/move-outs/validation";
+import { CloseoutForm } from "@/features/move-outs/components/closeout-form";
+import { MoveOutProgress } from "@/features/move-outs/components/progress";
 import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { encodePublicId } from "@/lib/public-id";
-import { closeMoveOutAction, scheduleInspectionAction } from "../_lib/actions";
+import { closeMoveOutAction } from "../_lib/actions";
 import { formatDate, formatDateTime } from "../_lib/helpers";
 import type { MoveOutsPageData } from "../_lib/types";
 import { MoveOutsPagination } from "./move-outs-pagination";
@@ -64,7 +72,7 @@ export function MoveOutsWorkspace({
                 Move-outs
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                Track tenant move-out notices and inspections.
+                Review notices, schedule inspections, and confirm the final handover and deposit settlement.
               </p>
               <InAppGuideHint
                 topic="moveOut"
@@ -241,51 +249,18 @@ export function MoveOutsWorkspace({
                     </td>
 
                     <td className="min-w-[340px] px-4 py-3">
-                      {!notice.inspection && notice.status === "SUBMITTED" ? (
-                        inspectors.length > 0 ? (
-                          <form
-                            action={scheduleInspectionAction}
-                            className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]"
-                          >
-                            <input
-                              type="hidden"
-                              name="noticeId"
-                              value={notice.id}
-                            />
-                            <input
-                              type="datetime-local"
-                              name="scheduledAt"
-                              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-primary"
-                              required
-                            />
-                            <select
-                              name="inspectorUserId"
-                              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-primary"
-                              required
-                              defaultValue=""
-                            >
-                              <option value="" disabled>
-                                Inspector
-                              </option>
-                              {inspectors.map((inspector) => (
-                                <option
-                                  key={`${inspector.userId}-${inspector.role}`}
-                                  value={inspector.userId}
-                                >
-                                  {inspector.user.fullName} ({inspector.role})
-                                </option>
-                              ))}
-                            </select>
-                            <button data-workspace-action="true"
-                              type="submit"
-                              className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
-                            >
-                              Schedule
-                            </button>
-                          </form>
+                      <div className="mb-3"><MoveOutProgress status={notice.status} closeout={notice.closeout} />
+                        <SettlementSummary closeout={notice.closeout} />
+                        <p className="my-2 text-xs">Financial status: {notice.financialStatus.replaceAll("_", " ")} · Current amount owed: {notice.currentAmountOwed.toFixed(2)}</p>
+                        <a className="text-xs underline" href={`/api/move-outs/${notice.id}/report`}>{notice.status === "CLOSED" ? "Download final statement" : "Generate pre-handover report"}</a>
+                        {notice.status === "CLOSED" && notice.lease.unit.status === "UNDER_MAINTENANCE" ? <form action={releaseMoveOutUnitAction} className="mt-2 text-xs"><input name="noticeId" type="hidden" value={notice.id} /><label className="flex gap-2"><input type="checkbox" className="mt-0.5 size-4 shrink-0" name="readyConfirmed" required />Repairs and cleaning completed; unit ready to let.</label><button className="mt-2 rounded border px-3 py-2">Mark unit vacant and ready</button></form> : null}
+                        {notice.status === "CLOSED" && notice.closeout && typeof notice.closeout === "object" && !Array.isArray(notice.closeout) && notice.closeout.refundStatus === "PENDING" ? <RefundForm noticeId={notice.id} /> : null}</div>
+                      {["SUBMITTED", "INSPECTION_SCHEDULED"].includes(notice.status) ? (
+                        inspectors.some(inspector => canInspectUnit([inspector], notice.lease.unit)) ? (
+                          <ScheduleForm noticeId={notice.id} reschedule={Boolean(notice.inspection)} inspectors={Array.from(new Map(inspectors.filter(inspector => canInspectUnit([inspector], notice.lease.unit)).map(inspector => [inspector.userId, { id: inspector.userId, label: `${inspector.user.fullName} (${inspector.role})` }])).values())} />
                         ) : (
                           <span className="text-xs text-muted-foreground">
-                            Add a caretaker or manager before scheduling.
+                            Add active staff in this unit’s scope before scheduling.
                           </span>
                         )
                       ) : notice.inspection ? (
@@ -300,27 +275,7 @@ export function MoveOutsWorkspace({
                             Open report
                           </Link>
                           {notice.status === "INSPECTION_COMPLETED" ? (
-                            <form
-                              action={closeMoveOutAction}
-                              className="grid gap-2 sm:grid-cols-[1fr_auto]"
-                            >
-                              <input
-                                type="hidden"
-                                name="noticeId"
-                                value={notice.id}
-                              />
-                              <input
-                                name="notes"
-                                placeholder="Closeout notes"
-                                className="h-10 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-primary"
-                              />
-                              <button data-workspace-action="true"
-                                type="submit"
-                                className="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-3 text-xs font-semibold text-white transition hover:bg-slate-800"
-                              >
-                                Close
-                              </button>
-                            </form>
+                            <CloseoutForm dateLimit={nairobiDate()} noticeId={notice.id} deposit={notice.lease.deposit?.toString() ?? "0"} action={closeMoveOutAction} />
                           ) : null}
                         </div>
                       ) : (

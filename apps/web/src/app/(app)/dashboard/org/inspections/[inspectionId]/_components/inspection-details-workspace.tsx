@@ -1,3 +1,4 @@
+import { InspectionReportForm } from "@/features/inspections/inspection-report-form";
 import Link from "next/link";
 import type { OrgRole } from "@prisma/client";
 import { encodePublicId } from "@/lib/public-id";
@@ -117,9 +118,11 @@ function ReportField({
 export function InspectionDetailsWorkspace({
   inspection,
   orgRole,
+  canReport = false,
 }: {
   inspection: InspectionDetailsData;
   orgRole?: OrgRole | null;
+  canReport?: boolean;
 }) {
   const report = (inspection.checklist ?? {}) as Record<string, unknown>;
   const isCompleted = inspection.status === "COMPLETED";
@@ -226,7 +229,7 @@ export function InspectionDetailsWorkspace({
                 Inspection report
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Submitted by the assigned caretaker for office review.
+                Record and review the inspection before confirming handover.
               </p>
             </div>
 
@@ -282,9 +285,9 @@ export function InspectionDetailsWorkspace({
                     </p>
                   </div>
                 </>
-              ) : (
+              ) : canReport && inspection.status === "SCHEDULED" ? <InspectionReportForm inspectionId={inspection.id} /> : (
                 <div className="rounded-2xl border border-dashed border-border bg-muted/10 px-4 py-6 text-sm text-muted-foreground">
-                  The caretaker has not submitted the inspection report yet.
+                  The inspection report has not been submitted yet.
                 </div>
               )}
             </div>

@@ -1,0 +1,2 @@
+import { defineConfig, devices } from "playwright/test";
+export default defineConfig({ testDir: "./tests/e2e", testMatch: "move-out-lifecycle.spec.ts", timeout: 120000, expect: { timeout: 30000 }, workers: 1, reporter: "list", use: { baseURL: "http://127.0.0.1:3100", actionTimeout: 10000, serviceWorkers: "block", launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }, trace: "retain-on-failure" }, projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }] });

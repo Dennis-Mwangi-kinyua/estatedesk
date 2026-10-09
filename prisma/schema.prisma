@@ -1512,7 +1512,7 @@ model Payment {
   reversedByUserId        String?
   reversalReason          String?
   unappliedAmount         Decimal                     @default(0) @db.Decimal(12, 2)
-  coveredPeriods          String[]
+  coveredPeriods          String[]                    @default([])
   createdAt               DateTime                    @default(now())
   updatedAt               DateTime                    @updatedAt
   payerName               String?
@@ -2041,6 +2041,9 @@ model MoveOutNotice {
   moveOutDate DateTime
   status      NoticeStatus @default(SUBMITTED)
   notes       String?
+  actualMoveOutDate DateTime?
+  closedAt    DateTime?
+  closeout    Json?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   inspection  Inspection?
@@ -2521,6 +2524,7 @@ enum BillStatus {
 }
 
 enum PaymentMethod {
+  DEPOSIT_OFFSET
   MPESA_STK
   MPESA_MANUAL
   BANK

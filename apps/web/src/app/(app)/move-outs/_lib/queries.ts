@@ -1,4 +1,5 @@
-import { OrgRole } from "@prisma/client";
+import { loadMoveOutBalances } from "@/lib/move-outs/balances";
+import { financialStatus } from "@/lib/move-outs/financial-status";
 import { getPagination } from "@/lib/db/pagination";
 import { prisma } from "@/lib/prisma";
 import { PAGE_SIZE } from "./types";
@@ -17,13 +18,20 @@ const noticeInclude = {
   lease: {
     select: {
       id: true,
+      orgId: true,
+      tenantId: true,
+      unitId: true,
       status: true,
       startDate: true,
       endDate: true,
       monthlyRent: true,
+      deposit: true,
       unit: {
         select: {
           id: true,
+          status: true,
+          propertyId: true,
+          buildingId: true,
           houseNo: true,
           property: {
             select: {
@@ -107,20 +115,23 @@ export async function getMoveOutsPageData(
     prisma.membership.findMany({
       where: {
         orgId,
-        role: {
-          in: [OrgRole.CARETAKER, OrgRole.MANAGER, OrgRole.OFFICE, OrgRole.ADMIN],
-        },
+        employmentEndedAt: null,
+        deactivatedAt: null,
+        role: { not: "TENANT" },
         user: {
           deletedAt: null,
+          status: "ACTIVE",
         },
       },
-      distinct: ["userId"],
+      distinct: ["userId", "scopeType", "scopeId"],
       orderBy: {
         createdAt: "asc",
       },
       select: {
         userId: true,
         role: true,
+        scopeType: true,
+        scopeId: true,
         user: {
           select: {
             fullName: true,
@@ -130,6 +141,11 @@ export async function getMoveOutsPageData(
     }),
   ]);
 
+  const financials = new Map(await Promise.all(notices.map(async notice => {
+    const balance = await loadMoveOutBalances(prisma, notice.lease);
+    const closeout = notice.closeout && typeof notice.closeout === "object" && !Array.isArray(notice.closeout) ? notice.closeout : {};
+    return [notice.id, { currentAmountOwed: balance.totalCents / 100, financialStatus: notice.status === "CLOSED" ? financialStatus(balance.totalCents, closeout.refundStatus === "PENDING") : "PRELIMINARY" }] as const;
+  })));
   const totalPages = Math.max(1, Math.ceil(totalNotices / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
   const showingFrom = totalNotices === 0 ? 0 : skip + 1;
@@ -137,7 +153,7 @@ export async function getMoveOutsPageData(
 
   return {
     session,
-    notices,
+    notices: notices.map(notice => ({ ...notice, ...financials.get(notice.id)! })),
     inspectors,
     totalNotices,
     submittedCount,

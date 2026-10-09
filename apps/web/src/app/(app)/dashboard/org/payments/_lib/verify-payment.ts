@@ -1,0 +1,338 @@
+import { Prisma } from "@prisma/client";
+import {
+  asObject,
+  getNumber,
+  getString,
+} from "@/lib/payments/metadata";
+import { postVerifiedPayment } from "@/lib/accounting/payments";
+import { issueDocumentRecord } from "@/lib/documents/registry";
+import { createReceiptSnapshot } from "@/lib/documents/receipt-snapshot";
+import {
+  allocateCombinedPeriodPayment,
+  allocateRentPayment,
+  getCurrentPeriod,
+} from "@/lib/ledger";
+import { notifyRecipients } from "@/lib/notifications/notify";
+
+import type { AppSession } from "@/lib/auth/session";
+
+export async function verifyPayment(tx: Prisma.TransactionClient, session: AppSession, paymentId: string, verificationNote: string) {
+    const payment = await tx.payment.findFirst({
+      where: {
+        id: paymentId,
+        orgId: session.activeOrgId!,
+      },
+      include: {
+        rentCharge: {
+          select: {
+            id: true,
+            period: true,
+            leaseId: true,
+            amountPaid: true,
+            balance: true,
+          },
+        },
+        waterBill: {
+          select: {
+            id: true,
+            period: true,
+            total: true,
+            amountPaid: true,
+            balance: true,
+            status: true,
+          },
+        },
+        receipt: {
+          select: {
+            id: true,
+            receiptNo: true,
+            documentId: true,
+          },
+        },
+        payerTenant: {
+          select: {
+            id: true,
+            fullName: true,
+            userId: true,
+          },
+        },
+      },
+    });
+
+    if (!payment) {
+      throw new Error("Payment not found.");
+    }
+
+    if (payment.verificationStatus === "VERIFIED") {
+      return;
+    }
+
+    if (payment.verificationStatus === "REJECTED") {
+      throw new Error("Rejected payments cannot be verified.");
+    }
+
+    const metadata = asObject(payment.callbackRaw);
+    const now = new Date();
+
+    await tx.payment.update({
+      where: { id: payment.id },
+      data: {
+        gatewayStatus: "SUCCESS",
+        verificationStatus: "VERIFIED",
+        reconciliationStatus: "UNRECONCILED",
+        paidAt: payment.paidAt ?? now,
+        notes: payment.notes
+          ? `${payment.notes} Verified by organization: ${verificationNote}`
+          : `Verified by organization: ${verificationNote}`,
+      },
+    });
+
+    let receiptNumber = payment.receipt?.receiptNo ?? "";
+
+    if (!payment.receipt?.documentId) {
+      const document = await issueDocumentRecord({
+        db: tx,
+        orgId: session.activeOrgId!,
+        documentType: "RECEIPT",
+        entityType: "Payment",
+        entityId: payment.id,
+        title: "Verified payment receipt",
+        issuedByUserId: session.userId,
+        issuedAt: now,
+        preferredSerialNumber: payment.receipt?.receiptNo,
+        metadata: {
+          paymentId: payment.id,
+          targetType: payment.targetType,
+        },
+      });
+      receiptNumber = document.serialNumber;
+
+      if (payment.receipt) {
+        await tx.receipt.update({
+          where: { id: payment.receipt.id },
+          data: { documentId: document.id },
+        });
+      } else {
+        await tx.receipt.create({
+          data: {
+            paymentId: payment.id,
+            documentId: document.id,
+            receiptNo: document.serialNumber,
+          },
+        });
+      }
+    } else if (!receiptNumber) {
+      throw new Error("Receipt identity is incomplete.");
+    }
+
+    const isCombined =
+      payment.targetType === "COMBINED" ||
+      metadata.combined === true ||
+      metadata.source === "period_bill";
+
+    if (isCombined) {
+      const leaseId =
+        getString(metadata, "leaseId") || payment.rentCharge?.leaseId || null;
+      const period =
+        getString(metadata, "period") ||
+        payment.rentCharge?.period ||
+        payment.waterBill?.period ||
+        getCurrentPeriod();
+
+      if (!leaseId) {
+        throw new Error("This combined bill payment is missing lease metadata.");
+      }
+
+      await allocateCombinedPeriodPayment({
+        db: tx,
+        orgId: session.activeOrgId!,
+        paymentId: payment.id,
+        leaseId,
+        period,
+        amount: payment.amount,
+        waterBillId:
+          payment.waterBill?.id ?? getString(metadata, "waterBillId") ?? null,
+      });
+    } else if (payment.rentCharge) {
+      const balance = new Prisma.Decimal(payment.rentCharge.balance);
+      const paymentAmount = new Prisma.Decimal(payment.amount);
+      const allocationAmount = paymentAmount.gt(balance) ? balance : paymentAmount;
+      const nextPaid = new Prisma.Decimal(payment.rentCharge.amountPaid).add(
+        allocationAmount,
+      );
+      const nextBalance = balance.sub(allocationAmount);
+
+      await tx.paymentAllocation.upsert({
+        where: {
+          paymentId_rentChargeId: {
+            paymentId: payment.id,
+            rentChargeId: payment.rentCharge.id,
+          },
+        },
+        update: {
+          amount: {
+            increment: allocationAmount,
+          },
+        },
+        create: {
+          orgId: session.activeOrgId!,
+          paymentId: payment.id,
+          rentChargeId: payment.rentCharge.id,
+          period: payment.rentCharge.period,
+          amount: allocationAmount,
+        },
+      });
+
+      await tx.rentCharge.update({
+        where: { id: payment.rentCharge.id },
+        data: {
+          amountPaid: nextPaid,
+          balance: nextBalance,
+          status: nextBalance.lte(0) ? "PAID" : "PARTIAL",
+        },
+      });
+
+      // Remainder of a rent-linked payment can still reduce water for same period.
+      let remainder = paymentAmount.sub(allocationAmount);
+      if (remainder.gt(0) && payment.waterBill) {
+        const waterBalance = new Prisma.Decimal(
+          payment.waterBill.balance != null &&
+            Number(payment.waterBill.balance) > 0
+            ? payment.waterBill.balance
+            : payment.waterBill.total,
+        );
+        if (waterBalance.gt(0)) {
+          const waterApply = remainder.lt(waterBalance) ? remainder : waterBalance;
+          const nextWaterPaid = new Prisma.Decimal(
+            payment.waterBill.amountPaid ?? 0,
+          ).add(waterApply);
+          const nextWaterBalance = waterBalance.sub(waterApply);
+          await tx.waterBill.update({
+            where: { id: payment.waterBill.id },
+            data: {
+              amountPaid: nextWaterPaid,
+              balance: nextWaterBalance.lt(0) ? new Prisma.Decimal(0) : nextWaterBalance,
+              status: nextWaterBalance.lte(0) ? "PAID_VERIFIED" : "ISSUED",
+            },
+          });
+          remainder = remainder.sub(waterApply);
+        }
+      }
+
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          unappliedAmount: remainder,
+          coveredPeriods: [payment.rentCharge.period],
+        },
+      });
+    } else if (payment.targetType === "RENT") {
+      const leaseId = getString(metadata, "leaseId");
+      const months = getNumber(metadata, "months") ?? 1;
+      const startPeriod = getString(metadata, "startPeriod") || getCurrentPeriod();
+
+      if (!leaseId) {
+        throw new Error("This rent payment is missing lease metadata.");
+      }
+
+      await allocateRentPayment({
+        db: tx,
+        orgId: session.activeOrgId!,
+        paymentId: payment.id,
+        leaseId,
+        amount: payment.amount,
+        startPeriod,
+        months,
+      });
+    } else if (payment.waterBill) {
+      const waterBalance = new Prisma.Decimal(
+        payment.waterBill.balance != null && Number(payment.waterBill.balance) > 0
+          ? payment.waterBill.balance
+          : payment.waterBill.total,
+      );
+      const paymentAmount = new Prisma.Decimal(payment.amount);
+      const apply = paymentAmount.gt(waterBalance) ? waterBalance : paymentAmount;
+      const nextPaid = new Prisma.Decimal(payment.waterBill.amountPaid ?? 0).add(
+        apply,
+      );
+      const nextBalance = waterBalance.sub(apply);
+
+      await tx.waterBill.update({
+        where: { id: payment.waterBill.id },
+        data: {
+          amountPaid: nextPaid,
+          balance: nextBalance.lt(0) ? new Prisma.Decimal(0) : nextBalance,
+          status: nextBalance.lte(0) ? "PAID_VERIFIED" : "ISSUED",
+        },
+      });
+
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          unappliedAmount: paymentAmount.sub(apply),
+          coveredPeriods: [payment.waterBill.period],
+        },
+      });
+    }
+
+    if (payment.receipt?.documentId || receiptNumber) {
+      const snapshot = await createReceiptSnapshot(tx, payment.id, session.userId);
+      await tx.documentRecord.update({
+        where: payment.receipt?.documentId
+          ? { id: payment.receipt.documentId }
+          : { serialNumber: receiptNumber },
+        data: {
+          metadata: {
+            paymentId: payment.id,
+            targetType: payment.targetType,
+            receiptSnapshot: snapshot,
+          },
+        },
+      });
+    }
+
+    await postVerifiedPayment(tx, payment.id, session.userId);
+
+    if (payment.payerTenant) {
+      await notifyRecipients({ actorUserId: session.userId,
+        db: tx,
+        orgId: session.activeOrgId!,
+        recipients: [
+          {
+            tenantId: payment.payerTenant.id,
+            userId: payment.payerTenant.userId,
+          },
+        ],
+        type: "PAYMENT_VERIFIED",
+        title: "Payment verified",
+        message: `Your payment of ${new Intl.NumberFormat("en-KE", {
+          style: "currency",
+          currency: "KES",
+          maximumFractionDigits: 0,
+        }).format(Number(payment.amount))} has been verified. Receipt ${receiptNumber} is available in EstateDesk.`,
+      });
+    }
+
+    await tx.auditLog.create({
+      data: {
+        orgId: session.activeOrgId!,
+        actorUserId: session.userId,
+        action: "PAYMENT_VERIFIED",
+        entityType: "Payment",
+        entityId: payment.id,
+        metadata: {
+          amount: Number(payment.amount),
+          method: payment.method,
+          reference:
+            payment.externalReference ?? payment.reference ?? payment.checkoutRequestId,
+          receiptNumber,
+          verificationNote,
+        },
+        beforeState: { verificationStatus: payment.verificationStatus },
+        afterState: {
+          verificationStatus: "VERIFIED",
+          reconciliationStatus: "UNRECONCILED",
+        },
+      },
+    });
+}

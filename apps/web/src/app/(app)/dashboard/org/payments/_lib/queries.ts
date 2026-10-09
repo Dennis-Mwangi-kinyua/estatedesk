@@ -2,12 +2,14 @@ import { getOrgLedger } from "@/lib/ledger";
 import { prisma } from "@/lib/prisma";
 
 export async function loadPaymentsPageData(orgId: string, q = "") {
-  const [ledger, organization] = await Promise.all([
+  const [ledger, organization, cashLeases] = await Promise.all([
     getOrgLedger(orgId),
+
     prisma.organization.findUnique({
       where: { id: orgId },
       select: { name: true, currencyCode: true },
     }),
+    prisma.lease.findMany({ where: { orgId, deletedAt: null, status: { in: ["ACTIVE", "TERMINATED"] }, tenant: { deletedAt: null } }, orderBy: { tenant: { fullName: "asc" } }, select: { id: true, tenant: { select: { fullName: true } }, unit: { select: { houseNo: true, property: { select: { name: true } } } } } }),
   ]);
   const periodParams = new URLSearchParams({ period: ledger.period });
   const [yearValue, monthValue] = ledger.period.split("-").map(Number);
@@ -117,6 +119,7 @@ export async function loadPaymentsPageData(orgId: string, q = "") {
 
   return {
     ledger,
+    cashLeases: cashLeases.map(lease => ({ id: lease.id, label: `${lease.tenant.fullName} · ${lease.unit.property.name} / ${lease.unit.houseNo}` })),
     organizationName: organization?.name ?? "Organisation",
     currencyCode: organization?.currencyCode ?? "KES",
     q,

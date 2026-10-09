@@ -4,6 +4,12 @@ import { canAccessWorkspacePath, ORG_WORKSPACE_ROLES } from "../../apps/web/src/
 import type { OrgRole } from "@prisma/client";
 const roles: OrgRole[] = ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "TENANT", "LANDLORD"];
 const session = (role: OrgRole) => ({ platformRole: "USER" as const, activeOrgId: "org", activeOrgRole: role });
+it("allows staff to open a shared inspection report while keeping tenants out", () => {
+  for (const role of roles) {
+    assert.equal(canAccessWorkspacePath(session(role), "/inspections/inspection-id"), role !== "TENANT");
+  }
+  assert.equal(canAccessWorkspacePath(session("CARETAKER"), "/inspections/inspection-id/edit"), false);
+});
 it("enforces every section allowlist for dashboard and legacy URLs, including nested actions", () => {
   for (const role of roles) for (const [section, allowed] of Object.entries(ORG_WORKSPACE_ROLES)) {
     for (const path of [`/dashboard/org/${section}`, `/dashboard/org/${section}/record/edit`, `/${section}/record/edit`]) {

@@ -1,0 +1,10 @@
+"use client";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { recordMoveOutRefundAction } from "@/app/(app)/move-outs/_lib/actions";
+export function RefundForm({ noticeId }: { noticeId: string }) {
+  const [error, setError] = useState("");
+  const [pending, start] = useTransition();
+  const router = useRouter();
+  return <form className="mt-3 grid gap-2" onSubmit={event => { event.preventDefault(); const form = new FormData(event.currentTarget); setError(""); start(async () => { try { await recordMoveOutRefundAction(form); router.refresh(); } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not record the refund."); } }); }}><input type="hidden" name="noticeId" value={noticeId} /><label className="grid gap-1 text-xs">Paid refund reference<input name="refundReference" required maxLength={200} className="min-h-10 rounded-xl border border-border bg-background px-3 text-sm" placeholder="Payment reference or receipt number" /></label><label className="grid gap-1 text-xs">Refund method<select name="refundMethod" required><option value="BANK">Bank</option><option value="MPESA">M-Pesa</option><option value="CASH">Cash</option></select></label><label className="grid gap-1 text-xs">Refund payment proof<input type="file" name="proof" required accept="image/jpeg,image/png,image/webp" /></label><label className="flex gap-2 text-xs"><input type="checkbox" className="mt-0.5 size-4 shrink-0" required name="refundPaid" />I confirm this refund has already been paid.</label>{error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}<button disabled={pending} type="submit" className="min-h-10 rounded-xl border border-border px-3 text-xs font-semibold">{pending ? "Recording…" : "Record paid refund"}</button></form>;
+}

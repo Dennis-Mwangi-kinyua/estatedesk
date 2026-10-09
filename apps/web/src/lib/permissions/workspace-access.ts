@@ -41,6 +41,7 @@ export function canAccessWorkspacePath(
   if (path === "/api-keys") return platform || (Boolean(session.activeOrgId) && session.activeOrgRole === "ADMIN");
   if (!session.activeOrgId || !session.activeOrgRole) return false;
   const role = session.activeOrgRole;
+  if (/^\/inspections\/[^/]+$/.test(path)) return role !== "TENANT";
   if (role === "TENANT") return tenantCanAccessWorkspacePath(path);
   if (under(path, "/dashboard/tenant")) return false;
   if (under(path, "/dashboard/caretaker")) return role === "CARETAKER";

@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { requireOrgPermission } from "@/lib/permissions/guards";
 
@@ -17,25 +16,8 @@ export function readString(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-export function asObject(
-  value: Prisma.JsonValue | null | undefined,
-): Record<string, Prisma.JsonValue> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return {};
-  }
+export { asObject, getString, getNumber } from "@/lib/payments/metadata";
 
-  return value as Record<string, Prisma.JsonValue>;
-}
-
-export function getString(source: Record<string, Prisma.JsonValue>, key: string) {
-  return typeof source[key] === "string" ? source[key] : "";
-}
-
-export function getNumber(source: Record<string, Prisma.JsonValue>, key: string) {
-  return typeof source[key] === "number" ? source[key] : undefined;
-}
-
-/** Verify / reject — ADMIN + ACCOUNTANT (role-matrix payments.verify). */
 export async function requirePaymentReviewer() {
   const session = await requireOrgPermission("payments.verify");
 
@@ -60,6 +42,10 @@ export async function requirePaymentManager() {
 export function revalidatePaymentSurfaces() {
   revalidatePath(PAYMENTS_PATH);
   revalidatePath("/dashboard/org/charges");
+  revalidatePath("/dashboard/org/move-outs");
+  revalidatePath("/move-outs");
+  revalidatePath("/dashboard/org");
+  revalidatePath("/dashboard/tenant");
   revalidatePath("/dashboard/org/notifications");
   revalidatePath("/dashboard/tenant/payments");
   revalidatePath("/dashboard/tenant/invoice");

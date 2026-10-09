@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { queueDuePaymentNotifications } from "@/lib/ledger";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
-import { recordVacatedTenancy } from "@/lib/tenants/identity";
+import { closeMoveOut } from "@/lib/move-outs/closeout";
 import { postWaterBillAccrual } from "@/lib/accounting/billing";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 
@@ -376,80 +376,11 @@ export async function sendPaymentRemindersAction() {
 export async function confirmMoveOutAction(formData: FormData) {
   const { session, membership } = await requireOrgReviewer();
   const noticeId = String(formData.get("noticeId") ?? "").trim();
-  const notes = String(formData.get("notes") ?? "").trim();
-
   if (!noticeId) {
     throw new Error("Move-out notice is required.");
   }
 
-  await prisma.$transaction(async (tx) => {
-    const notice = await tx.moveOutNotice.findFirst({
-      where: {
-        id: noticeId,
-        status: "INSPECTION_COMPLETED",
-        lease: {
-          orgId: membership.orgId,
-        },
-      },
-      select: {
-        id: true,
-        tenantId: true,
-        leaseId: true,
-        tenant: {
-          select: {
-            fullName: true,
-          },
-        },
-      },
-    });
-
-    if (!notice) {
-      throw new Error("Only inspection-completed move-outs can be confirmed.");
-    }
-
-    await tx.moveOutNotice.update({
-      where: { id: notice.id },
-      data: {
-        status: "CLOSED",
-        notes: notes || undefined,
-      },
-    });
-
-    await recordVacatedTenancy(tx, {
-      tenantId: notice.tenantId,
-      leaseId: notice.leaseId,
-      moveOutNoticeId: notice.id,
-      actorUserId: session.userId,
-      notes: notes || "Move-out confirmed by organization.",
-    });
-
-    await tx.tenantHistoryRecord.updateMany({
-      where: {
-        tenantId: notice.tenantId,
-        leaseId: notice.leaseId,
-        moveOutNoticeId: notice.id,
-      },
-      data: {
-        status: "ARCHIVED",
-        notes: notes || undefined,
-      },
-    });
-
-    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: membership.orgId, recipients: [{ tenantId: notice.tenantId }], type: "MOVE_OUT_CLOSED", title: "Move-out confirmed", message: `Move-out closeout for ${notice.tenant.fullName} has been confirmed.${notes ? ` Notes: ${notes}` : ""}` });
-
-    await tx.auditLog.create({
-      data: {
-        orgId: membership.orgId,
-        actorUserId: session.userId,
-        action: "MOVE_OUT_CLOSED",
-        entityType: "MoveOutNotice",
-        entityId: notice.id,
-        metadata: {
-          notes,
-        },
-      },
-    });
-  });
+  await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: membership.orgId, actorUserId: session.userId, form: formData }), { isolationLevel: "Serializable" });
 
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");

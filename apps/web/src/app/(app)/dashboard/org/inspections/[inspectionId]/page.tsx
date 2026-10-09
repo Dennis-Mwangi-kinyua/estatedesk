@@ -1,3 +1,4 @@
+import { canInspectUnit } from "@/lib/move-outs/inspection-scope";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
@@ -65,6 +66,8 @@ export default async function OrgInspectionDetailPage({ params }: PageProps) {
               unit: {
                 select: {
                   id: true,
+                  propertyId: true,
+                  buildingId: true,
                   houseNo: true,
                   property: {
                     select: {
@@ -97,8 +100,10 @@ export default async function OrgInspectionDetailPage({ params }: PageProps) {
     );
   }
 
+  const memberships = await prisma.membership.findMany({ where: { orgId, userId: session.userId, employmentEndedAt: null, deactivatedAt: null } });
   return (
     <InspectionDetailsWorkspace
+      canReport={canInspectUnit(memberships, inspection.notice.lease.unit)}
       inspection={inspection}
       orgRole={session.activeOrgRole}
     />

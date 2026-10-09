@@ -1,11 +1,16 @@
 "use server";
 
+import { saveRefundProof } from "@/lib/move-outs/refund-proof";
+import { recordMoveOutRefund } from "@/lib/move-outs/refund";
+import { canInspectUnit } from "@/lib/move-outs/inspection-scope";
+
 import { revalidatePath } from "next/cache";
-import { OrgRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
-import { recordVacatedTenancy } from "@/lib/tenants/identity";
+import { closeMoveOut } from "@/lib/move-outs/closeout";
+import { encodePublicId } from "@/lib/public-id";
+import { parseInspectionDate } from "@/lib/move-outs/validation";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 
 export async function scheduleInspectionAction(formData: FormData) {
@@ -20,7 +25,7 @@ export async function scheduleInspectionAction(formData: FormData) {
     throw new Error("Notice, inspector, and scheduled time are required.");
   }
 
-  const scheduledAt = new Date(scheduledAtRaw);
+  const scheduledAt = parseInspectionDate(scheduledAtRaw);
   if (Number.isNaN(scheduledAt.getTime())) {
     throw new Error("Inspection date is invalid.");
   }
@@ -29,43 +34,48 @@ export async function scheduleInspectionAction(formData: FormData) {
     const notice = await tx.moveOutNotice.findFirst({
       where: {
         id: noticeId,
-        status: "SUBMITTED",
+        status: { in: ["SUBMITTED", "INSPECTION_SCHEDULED"] },
         lease: {
           orgId: session.activeOrgId!,
         },
       },
       select: {
         id: true,
+        tenantId: true,
+        lease: { select: { unit: { select: { id: true, propertyId: true, buildingId: true } } } },
         inspection: {
-          select: { id: true },
+          select: { id: true, status: true },
         },
       },
     });
 
-    if (!notice || notice.inspection) {
+    if (!notice || (notice.inspection && notice.inspection.status !== "SCHEDULED")) {
       throw new Error("This move-out notice cannot be scheduled.");
     }
 
-    const inspector = await tx.membership.findFirst({
+    const inspector = await tx.membership.findMany({
       where: {
         orgId: session.activeOrgId!,
+        employmentEndedAt: null,
+        deactivatedAt: null,
         userId: inspectorUserId,
-        role: {
-          in: [OrgRole.CARETAKER, OrgRole.MANAGER, OrgRole.OFFICE, OrgRole.ADMIN],
-        },
+        role: { not: "TENANT" },
         user: {
           deletedAt: null,
+          status: "ACTIVE",
         },
       },
-      select: { userId: true },
+      select: { userId: true, role: true, scopeType: true, scopeId: true },
     });
 
-    if (!inspector) {
+    if (!canInspectUnit(inspector, notice.lease.unit)) {
       throw new Error("Selected inspector is not available in this organisation.");
     }
 
-    await tx.inspection.create({
-      data: {
+    const inspection = await tx.inspection.upsert({
+      where: { noticeId: notice.id },
+      update: { inspectorUserId, scheduledAt },
+      create: {
         noticeId: notice.id,
         inspectorUserId,
         scheduledAt,
@@ -77,6 +87,10 @@ export async function scheduleInspectionAction(formData: FormData) {
       where: { id: notice.id },
       data: { status: "INSPECTION_SCHEDULED" },
     });
+
+    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: session.activeOrgId!, recipients: [{ userId: inspectorUserId }], actionUrl: `/inspections/${encodePublicId(inspection.id, "inspection")}`, type: "GENERAL", title: "Move-out inspection scheduled", message: `Your inspection is scheduled for ${scheduledAt.toLocaleString("en-KE", { timeZone: "Africa/Nairobi" })} (Nairobi time). Report: /inspections/${encodePublicId(inspection.id, "inspection")}` });
+
+    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: session.activeOrgId!, recipients: [{ tenantId: notice.tenantId }], type: "GENERAL", title: "Move-out inspection scheduled", message: `Your inspection is scheduled for ${scheduledAt.toLocaleString("en-KE", { timeZone: "Africa/Nairobi" })} (Nairobi time).`, actionUrl: "/dashboard/tenant/notices" });
 
     await tx.auditLog.create({
       data: {
@@ -91,7 +105,7 @@ export async function scheduleInspectionAction(formData: FormData) {
         },
       },
     });
-  });
+  }, { isolationLevel: "Serializable" });
 
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");
@@ -100,6 +114,7 @@ export async function scheduleInspectionAction(formData: FormData) {
   revalidatePath("/dashboard/org/notifications");
   revalidatePath("/dashboard/caretaker/inspections");
   revalidatePath("/dashboard/tenant/inspections");
+  revalidatePath("/dashboard/tenant/notices");
 }
 
 export async function closeMoveOutAction(formData: FormData) {
@@ -107,80 +122,12 @@ export async function closeMoveOutAction(formData: FormData) {
 
   const session = await requireManagementAccess();
   const noticeId = String(formData.get("noticeId") ?? "").trim();
-  const notes = String(formData.get("notes") ?? "").trim();
 
   if (!noticeId) {
     throw new Error("Move-out notice is required.");
   }
 
-  await prisma.$transaction(async (tx) => {
-    const notice = await tx.moveOutNotice.findFirst({
-      where: {
-        id: noticeId,
-        status: "INSPECTION_COMPLETED",
-        lease: {
-          orgId: session.activeOrgId!,
-        },
-      },
-      select: {
-        id: true,
-        tenantId: true,
-        leaseId: true,
-        tenant: {
-          select: {
-            fullName: true,
-          },
-        },
-      },
-    });
-
-    if (!notice) {
-      throw new Error("Only inspection-completed move-outs can be closed.");
-    }
-
-    await tx.moveOutNotice.update({
-      where: { id: notice.id },
-      data: {
-        status: "CLOSED",
-        notes: notes || undefined,
-      },
-    });
-
-    await recordVacatedTenancy(tx, {
-      tenantId: notice.tenantId,
-      leaseId: notice.leaseId,
-      moveOutNoticeId: notice.id,
-      actorUserId: session.userId,
-      notes: notes || "Move-out confirmed by organization.",
-    });
-
-    await tx.tenantHistoryRecord.updateMany({
-      where: {
-        tenantId: notice.tenantId,
-        leaseId: notice.leaseId,
-        moveOutNoticeId: notice.id,
-      },
-      data: {
-        status: "ARCHIVED",
-        notes: notes || undefined,
-      },
-    });
-
-    await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: session.activeOrgId!, recipients: [{ tenantId: notice.tenantId }], type: "MOVE_OUT_CLOSED", title: "Move-out closed", message: `Move-out closeout for ${notice.tenant.fullName} has been completed.${notes ? ` Notes: ${notes}` : ""}` });
-
-    await tx.auditLog.create({
-      data: {
-        orgId: session.activeOrgId!,
-        actorUserId: session.userId,
-        action: "MOVE_OUT_CLOSED",
-        entityType: "MoveOutNotice",
-        entityId: notice.id,
-        metadata: {
-          notes,
-        },
-      },
-    });
-  });
+  await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: session.activeOrgId!, actorUserId: session.userId, form: formData }), { isolationLevel: "Serializable" });
 
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");
@@ -194,3 +141,39 @@ export async function closeMoveOutAction(formData: FormData) {
   revalidatePublicVacancies();
 }
 
+
+
+export async function recordMoveOutRefundAction(form: FormData) {
+  const session = await requireManagementAccess();
+  const noticeId = String(form.get("noticeId") ?? "").trim();
+  const reference = String(form.get("refundReference") ?? "").trim();
+  if (!reference || reference.length > 200 || form.get("refundPaid") !== "on") throw new Error("Confirm payment and enter a refund reference (up to 200 characters).");
+  const eligible = await prisma.moveOutNotice.findFirst({ where: { id: noticeId, status: "CLOSED", lease: { orgId: session.activeOrgId! } }, include: { lease: true } });
+  if (!eligible) throw new Error("Move-out not found.");
+  const proof = form.get("proof");
+  if (!(proof instanceof File) || proof.size <= 0 || proof.size > 2 * 1024 * 1024) throw new Error("Attach refund payment proof (image, up to 2MB).");
+  const method = String(form.get("refundMethod") ?? "");
+  if (!["CASH", "BANK", "MPESA"].includes(method)) throw new Error("Select the refund payment method.");
+  const proofAssetId = await saveRefundProof(proof, { noticeId, orgId: session.activeOrgId!, unitId: eligible.lease.unitId, actorUserId: session.userId });
+  await prisma.$transaction(tx => recordMoveOutRefund(tx, { noticeId, orgId: session.activeOrgId!, actorUserId: session.userId, reference, method, proofAssetId }), { isolationLevel: "Serializable" });
+  revalidatePath("/move-outs");
+  revalidatePath("/dashboard/org/move-outs");
+  revalidatePath("/dashboard/tenant/notices");
+}
+
+export async function releaseMoveOutUnitAction(form: FormData) {
+  const session = await requireManagementAccess();
+  if (form.get("readyConfirmed") !== "on") throw new Error("Confirm repairs and cleaning are complete.");
+  await prisma.$transaction(async tx => {
+    const notice = await tx.moveOutNotice.findFirst({ where: { id: String(form.get("noticeId") ?? ""), status: "CLOSED", lease: { orgId: session.activeOrgId! } }, include: { lease: true } });
+    if (!notice) throw new Error("Closed move-out not found.");
+    if (await tx.lease.findFirst({ where: { unitId: notice.lease.unitId, status: { in: ["ACTIVE", "PENDING"] }, deletedAt: null } })) throw new Error("Unit has another active or pending lease.");
+    const changed = await tx.unit.updateMany({ where: { id: notice.lease.unitId, status: "UNDER_MAINTENANCE" }, data: { status: "VACANT" } });
+    if (changed.count !== 1) throw new Error("Unit is no longer awaiting maintenance.");
+    await tx.auditLog.create({ data: { orgId: session.activeOrgId!, actorUserId: session.userId, action: "MOVE_OUT_UNIT_READY", entityType: "Unit", entityId: notice.lease.unitId, metadata: { noticeId: notice.id } } });
+  }, { isolationLevel: "Serializable" });
+  revalidatePath("/move-outs");
+  revalidatePath("/dashboard/org/move-outs");
+  revalidatePath("/dashboard/org/units");
+  revalidatePublicVacancies();
+}

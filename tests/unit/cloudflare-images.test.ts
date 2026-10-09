@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { it } from "node:test";
-import { uploadCloudflareImage, deleteCloudflareImage } from "../../apps/web/src/lib/uploads/cloudflare-images";
+import { uploadCloudflareImage, deleteCloudflareImage, uploadPrivateCloudflareImage, readPrivateCloudflareImage } from "../../apps/web/src/lib/uploads/cloudflare-images";
+import { createHmac } from "node:crypto";
 import { validateImageBytes } from "../../apps/web/src/lib/uploads/secure-image";
 
 it("uploads validated bytes, rejects failed uploads and missing variants, and scopes deletion", async () => {
@@ -39,6 +40,39 @@ it("uploads validated bytes, rejects failed uploads and missing variants, and sc
     };
     await assert.rejects(uploadCloudflareImage(image, "photo.jpg"), /variant/);
     assert.ok(deleted);
+  } finally {
+    globalThis.fetch = originalFetch;
+    for (const name of Object.keys(process.env)) if (!(name in originalEnv)) delete process.env[name];
+    Object.assign(process.env, originalEnv);
+  }
+});
+
+it("keeps refund images private and signs server-side downloads when exports are forbidden", async () => {
+  const originalEnv = { ...process.env };
+  const originalFetch = globalThis.fetch;
+  try {
+    Object.assign(process.env, { CF_IMAGES_API_TOKEN: "test-token", CF_IMAGES_ACCOUNT_ID: "account", CF_IMAGES_HASH: "hash", NEXT_PUBLIC_CF_IMAGES_PUBLIC_VARIANT: "public" });
+    const image = validateImageBytes(Buffer.from([0xff, 0xd8, 0xff]));
+    globalThis.fetch = async (_input, options) => {
+      assert.equal((options?.body as FormData).get("requireSignedURLs"), "true");
+      return Response.json({ success: true, result: { id: "private-id", requireSignedURLs: true } });
+    };
+    assert.equal((await uploadPrivateCloudflareImage(image, "proof.jpg"))?.storage, "cloudflare-private");
+    globalThis.fetch = async (input, options) => {
+      const url = new URL(String(input));
+      assert.equal(options?.cache, "no-store");
+      if (url.pathname.endsWith("/blob")) return new Response(null, { status: 403 });
+      if (url.pathname.endsWith("/keys")) return Response.json({ success: true, result: { keys: [{ value: "signing-secret" }] } });
+      assert.equal(url.origin, "https://imagedelivery.net");
+      const signature = url.searchParams.get("sig");
+      url.searchParams.delete("sig");
+      assert.equal(signature, createHmac("sha256", "signing-secret").update(`${url.pathname}?${url.searchParams}`).digest("hex"));
+      assert.ok(Number(url.searchParams.get("exp")) > Date.now() / 1000);
+      return new Response(new Uint8Array(image.buffer));
+    };
+    assert.deepEqual(await readPrivateCloudflareImage("private-id"), image.buffer);
+    globalThis.fetch = async () => Response.json({ success: true, result: { id: "unsafe-id", requireSignedURLs: false } });
+    await assert.rejects(uploadPrivateCloudflareImage(image, "proof.jpg"), /Private Cloudflare/);
   } finally {
     globalThis.fetch = originalFetch;
     for (const name of Object.keys(process.env)) if (!(name in originalEnv)) delete process.env[name];

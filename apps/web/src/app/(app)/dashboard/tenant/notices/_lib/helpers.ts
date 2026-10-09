@@ -32,6 +32,8 @@ export function getMoveOutStatusClasses(status: NoticeStatus) {
 
 export function getErrorMessage(error?: string) {
   switch (error) {
+    case "cannot_withdraw":
+      return "Only notices awaiting an inspection can be withdrawn. Contact your organisation for assistance.";
     case "missing_move_out_date":
       return "Please select your intended move-out date.";
     case "no_active_lease":
@@ -47,6 +49,8 @@ export function getErrorMessage(error?: string) {
 
 export function getSuccessMessage(success?: string) {
   switch (success) {
+    case "notice_withdrawn":
+      return "Your notice was withdrawn. Your lease remains active.";
     case "notice_submitted":
       return "Your move-out notice has been submitted successfully.";
     default:

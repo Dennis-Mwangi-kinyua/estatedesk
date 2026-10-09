@@ -127,7 +127,7 @@ export async function recordVacatedTenancy(
         });
 
   const notice = lease.moveOutNotices[0] ?? null;
-  const moveOutDate = notice?.moveOutDate ?? lease.endDate ?? new Date();
+  const moveOutDate = notice?.actualMoveOutDate ?? notice?.moveOutDate ?? lease.endDate ?? new Date();
 
   const paidPayments = await tx.payment.findMany({
     where: {
@@ -163,7 +163,7 @@ export async function recordVacatedTenancy(
     buildingName: lease.unit.building?.name ?? null,
     unitHouseNo: lease.unit.houseNo,
     leaseStartDate: lease.startDate,
-    leaseEndDate: lease.endDate ?? moveOutDate,
+    leaseEndDate: moveOutDate,
     moveOutDate,
     monthlyRent: lease.monthlyRent,
     deposit: lease.deposit,
@@ -186,7 +186,7 @@ export async function recordVacatedTenancy(
       },
       lease: {
         startDate: lease.startDate.toISOString(),
-        endDate: (lease.endDate ?? moveOutDate).toISOString(),
+        endDate: moveOutDate.toISOString(),
         monthlyRent: lease.monthlyRent.toString(),
         deposit: lease.deposit?.toString() ?? null,
       },
@@ -217,7 +217,7 @@ export async function recordVacatedTenancy(
     where: { id: lease.id },
     data: {
       status: "TERMINATED",
-      endDate: lease.endDate ?? moveOutDate,
+      endDate: moveOutDate,
     },
   });
 
@@ -229,11 +229,13 @@ export async function recordVacatedTenancy(
     },
   });
 
+  const remainingLease = await tx.lease.findFirst({ where: { tenantId: lease.tenantId, status: "ACTIVE", deletedAt: null, id: { not: lease.id } }, select: { id: true } });
+
   await tx.tenant.update({
     where: { id: lease.tenantId },
     data: {
-      status: lease.tenant.status === "BLACKLISTED" ? "BLACKLISTED" : "INACTIVE",
-      archivedAt: lease.tenant.archivedAt ?? moveOutDate,
+      status: lease.tenant.status === "BLACKLISTED" ? "BLACKLISTED" : remainingLease ? "ACTIVE" : "INACTIVE",
+      archivedAt: remainingLease ? null : lease.tenant.archivedAt ?? moveOutDate,
       identityId: identity.id,
     },
   });

@@ -1,3 +1,5 @@
+import { nairobiDate } from "@/lib/move-outs/validation";
+import { CloseoutForm } from "@/features/move-outs/components/closeout-form";
 import Link from "next/link";
 import { confirmMoveOutAction } from "@/app/(app)/dashboard/org/notifications/actions";
 import {
@@ -13,7 +15,6 @@ import type {
 import {
   EmptyState,
   PanelHeader,
-  fieldClassName,
   panelBodyClassName,
   panelChipClassName,
   panelItemClassName,
@@ -147,23 +148,7 @@ export function MoveOutQueuePanel({
                       </Link>
                     )}
                     {notice.status === "INSPECTION_COMPLETED" ? (
-                      <form
-                        action={confirmMoveOutAction}
-                        className="grid gap-2 sm:col-span-2 lg:col-span-1"
-                      >
-                        <input type="hidden" name="noticeId" value={notice.id} />
-                        <input
-                          name="notes"
-                          placeholder="Closeout notes"
-                          className={fieldClassName}
-                        />
-                        <button data-workspace-action="true"
-                          type="submit"
-                          className={primaryButtonClassName}
-                        >
-                          Confirm move-out
-                        </button>
-                      </form>
+                      <CloseoutForm dateLimit={nairobiDate()} noticeId={notice.id} action={confirmMoveOutAction} />
                     ) : (
                       <button data-workspace-action="true"
                         type="button"

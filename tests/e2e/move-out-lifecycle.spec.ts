@@ -1,0 +1,72 @@
+import { test, expect } from "playwright/test";
+import { readFile } from "node:fs/promises";
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { configureTestDatabase } from "../integration/database-safety";
+
+test("move-out handover, private refund proof, report permissions and retained receipts", async ({ page, browser, baseURL }) => {
+  test.skip(!process.env.MOVEOUT_BROWSER_FIXTURE, "Requires an explicitly seeded isolated local database");
+  const databaseUrl = configureTestDatabase();
+  if (!databaseUrl) throw new Error("TEST_DATABASE_URL required");
+  const fixture = JSON.parse(await readFile(process.env.MOVEOUT_BROWSER_FIXTURE!, "utf8"));
+  const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: databaseUrl }) });
+  await page.context().addCookies([{ ...fixture.cookies.manager, url: baseURL! }]);
+  try {
+    console.log("Opening move-out workspace");
+    await page.goto("/move-outs");
+    const form = page.getByRole("heading", { name: "Confirm handover and settlement" }).locator("..");
+    await expect(form.getByLabel("Deposit actually held")).toHaveValue("12000.00");
+    console.log("Filling handover form");
+    await form.getByLabel("Actual handover date").fill(fixture.day);
+    await form.getByRole("button", { name: "Add cost", exact: true }).click();
+    await form.getByLabel("Cost description").fill("Door repair");
+    await form.getByLabel("Amount", { exact: true }).fill("500");
+    await form.getByLabel("Final balance and handover notes").fill("Final bills reviewed, door repair agreed and keys returned.");
+    await form.getByLabel("Keys have been returned", { exact: false }).check();
+    await form.getByLabel("Final rent, water", { exact: false }).check();
+    await form.getByLabel("Final meter readings", { exact: false }).check();
+    console.log("Generating report");
+    const downloadEvent = page.waitForEvent("download");
+    await form.getByRole("link", { name: "Generate report with these itemised costs" }).click();
+    const report = await downloadEvent;
+    const bytes = await readFile((await report.path())!);
+    expect(bytes.subarray(0, 4).toString()).toBe("%PDF");
+    await form.getByLabel("I generated and reviewed", { exact: false }).check();
+    console.log("Closing handover");
+    await form.getByRole("button", { name: "Confirm handover and close", exact: true }).click();
+    await expect(page.getByText("Financial status: REFUND PENDING", { exact: false })).toBeVisible();
+    expect((await db.unit.findUniqueOrThrow({ where: { id: fixture.unitId } })).status).toBe("UNDER_MAINTENANCE");
+    const notice = await db.moveOutNotice.findUniqueOrThrow({ where: { id: fixture.noticeId } });
+    const closeout = notice.closeout as Record<string, unknown>;
+    const receipt = await db.receipt.findUniqueOrThrow({ where: { paymentId: String(closeout.depositPaymentId) } });
+    const image = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64");
+    console.log("Recording refund");
+    await page.getByLabel("Paid refund reference").fill(`BROWSER-${fixture.noticeId}`);
+    await page.getByLabel("Refund payment proof").setInputFiles({ name: "proof.png", mimeType: "image/png", buffer: image });
+    await page.getByLabel("I confirm this refund has already been paid.").check();
+    await page.getByRole("button", { name: "Record paid refund", exact: true }).click();
+    await expect(page.getByText("Financial status: SETTLED", { exact: false })).toBeVisible();
+    await page.getByLabel("Repairs and cleaning completed", { exact: false }).check();
+    await page.getByRole("button", { name: "Mark unit vacant and ready" }).click();
+    await expect(page.getByRole("button", { name: "Mark unit vacant and ready" })).toHaveCount(0);
+    expect((await db.unit.findUniqueOrThrow({ where: { id: fixture.unitId } })).status).toBe("VACANT");
+    const tenantContext = await browser.newContext();
+    await tenantContext.addCookies([{ ...fixture.cookies.tenant, url: baseURL! }]);
+    const tenantReport = await tenantContext.request.get(`${baseURL}/api/move-outs/${fixture.noticeId}/report`);
+    expect(tenantReport.status()).toBe(200); expect(tenantReport.headers()["content-type"]).toContain("application/pdf");
+    const tenantProof = await tenantContext.request.get(`${baseURL}/api/move-outs/${fixture.noticeId}/refund-proof`);
+    expect(tenantProof.status()).toBe(200); expect(await tenantProof.body()).toEqual(image);
+    const tenantReceipt = await tenantContext.request.get(`${baseURL}/dashboard/tenant/receipts/${receipt.id}`);
+    expect(tenantReceipt.status()).toBe(200); expect(tenantReceipt.headers()["content-type"]).toContain("application/pdf");
+    await tenantContext.close();
+    const otherContext = await browser.newContext();
+    await otherContext.addCookies([{ ...fixture.cookies.outsider, url: baseURL! }]);
+    for (const suffix of ["report", "refund-proof"]) {
+      const response = await otherContext.request.get(`${baseURL}/api/move-outs/${fixture.noticeId}/${suffix}`, { maxRedirects: 0 });
+      expect([303, 307, 401, 403, 404]).toContain(response.status());
+    }
+    const otherReceipt = await otherContext.request.get(`${baseURL}/dashboard/tenant/receipts/${receipt.id}`, { maxRedirects: 0 });
+    expect([303, 307, 401, 403, 404]).toContain(otherReceipt.status());
+    await otherContext.close();
+  } finally { await db.$disconnect(); }
+});

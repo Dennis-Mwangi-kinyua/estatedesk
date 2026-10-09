@@ -9,6 +9,7 @@ export const ORG_PERMISSIONS = [
   "leases.manage",
   "payments.manage",
   "payments.verify",
+  "payments.record",
   "reports.view",
   "reports.export",
   "maintenance.manage",
@@ -21,6 +22,8 @@ export type OrgPermission = (typeof ORG_PERMISSIONS)[number];
 export const ORG_ROLE_PERMISSIONS: Record<OrgRole, readonly OrgPermission[]> = {
   ADMIN: ORG_PERMISSIONS,
   MANAGER: [
+    "payments.record",
+    "payments.verify",
     "properties.manage",
     "tenants.manage",
     "leases.manage",
@@ -29,6 +32,7 @@ export const ORG_ROLE_PERMISSIONS: Record<OrgRole, readonly OrgPermission[]> = {
     "inspections.manage",
   ],
   OFFICE: [
+    "payments.record",
     "tenants.manage",
     "leases.manage",
     "reports.view",
@@ -36,6 +40,7 @@ export const ORG_ROLE_PERMISSIONS: Record<OrgRole, readonly OrgPermission[]> = {
     "inspections.manage",
   ],
   ACCOUNTANT: [
+    "payments.record",
     "payments.manage",
     "payments.verify",
     "reports.view",

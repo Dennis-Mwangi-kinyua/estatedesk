@@ -14,7 +14,7 @@
     "lint": "npm run lint -w @estatedesk/web",
     "typecheck": "npm run typecheck -w @estatedesk/web",
     "test": "node --import tsx --test tests/**/*.test.ts",
-    "test:integration": "node --import tsx --test tests/integration/**/*.integration.ts",
+    "test:integration": "TSX_TSCONFIG_PATH=apps/web/tsconfig.json node --conditions=react-server --import tsx --test tests/integration/**/*.integration.ts",
     "test:e2e": "playwright test",
     "load:test": "node scripts/load-test.mjs",
     "backup:database": "bash scripts/backup-database.sh",
