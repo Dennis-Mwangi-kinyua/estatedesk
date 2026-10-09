@@ -1,6 +1,6 @@
 import { SettlementSummary } from "@/features/move-outs/components/settlement-summary";
 import { MoveOutProgress } from "@/features/move-outs/components/progress";
-import { withdrawMoveOutNotice } from "../actions";
+import { CancelNoticeForm } from "./cancel-notice-form";
 import { CalendarDays, CheckCircle2 } from "lucide-react";
 import { SurfaceCard, StatCard } from "@/components/theme/ed-dashboard-shell";
 import { formatDate, formatDateTime } from "@/lib/formatters";
@@ -76,7 +76,7 @@ export function GivenNoticesCard({
                     Inspection
                   </p>
                   <p className="mt-1 text-sm font-semibold text-foreground">
-                    {notice.inspection
+                    {notice.inspection?.status === "CANCELLED" ? "Cancelled" : notice.inspection
                       ? formatDateTime(notice.inspection.scheduledAt)
                       : "Not scheduled"}
                   </p>
@@ -85,7 +85,7 @@ export function GivenNoticesCard({
 
               <div className="mt-3"><MoveOutProgress status={notice.status} closeout={notice.closeout} />
                 <SettlementSummary closeout={notice.closeout} /><a className="mt-2 inline-block text-xs underline" href={`/api/move-outs/${notice.id}/report`}>{notice.status === "CLOSED" ? "Download final statement and current balance" : "Download move-out report"}</a></div>
-              {["SUBMITTED", "INSPECTION_SCHEDULED"].includes(notice.status) ? <form action={withdrawMoveOutNotice} className="mt-3"><input type="hidden" name="noticeId" value={notice.id} /><button type="submit" className="min-h-10 rounded-xl border border-border px-3 py-2 text-xs font-medium">Withdraw notice and cancel inspection</button></form> : null}
+              {["SUBMITTED", "INSPECTION_SCHEDULED"].includes(notice.status) ? <CancelNoticeForm noticeId={notice.id} inspectionScheduled={notice.inspection?.status === "SCHEDULED"} /> : null}
               {notice.status === "INSPECTION_COMPLETED" ? <p className="mt-3 text-xs text-muted-foreground">The inspection is complete. Your lease continues until management confirms key handover and the final settlement.</p> : null}
               {notice.notes ? (
                 <div className="mt-3 rounded-[16px] border border-border/60 bg-card px-3 py-3">

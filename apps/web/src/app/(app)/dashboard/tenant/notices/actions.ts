@@ -164,16 +164,19 @@ export async function submitMoveOutNotice(formData: FormData) {
 export async function withdrawMoveOutNotice(formData: FormData) {
   const session = await requireTenantAccess();
   const noticeId = String(formData.get("noticeId") ?? "").trim();
-  await prisma.$transaction(async tx => {
+  if (!noticeId || !session.activeOrgId) return { ok: false as const, error: "We could not find an active move-out notice to cancel." };
+  const withdrawn = await prisma.$transaction(async tx => {
     const notice = await tx.moveOutNotice.findFirst({ where: { id: noticeId, tenant: { userId: session.userId, orgId: session.activeOrgId!, deletedAt: null }, lease: { status: "ACTIVE", deletedAt: null }, status: { in: ["SUBMITTED", "INSPECTION_SCHEDULED"] } }, include: { inspection: true } });
-    if (!notice) redirect("/dashboard/tenant/notices?error=cannot_withdraw");
+    if (!notice) return false;
     const changed = await tx.moveOutNotice.updateMany({ where: { id: notice.id, status: notice.status }, data: { status: "CANCELLED" } });
     if (changed.count !== 1) throw new Error("This notice has changed. Refresh and try again.");
     await tx.inspection.updateMany({ where: { noticeId: notice.id, status: "SCHEDULED" }, data: { status: "CANCELLED" } });
     const reviewers = await tx.membership.findMany({ where: { orgId: session.activeOrgId!, role: { in: ["ADMIN", "MANAGER", "OFFICE"] }, employmentEndedAt: null, deactivatedAt: null }, select: { userId: true } });
     await notifyInAppAndPush({ actorUserId: session.userId, db: tx, orgId: session.activeOrgId!, recipients: [...reviewers.map(item => ({ userId: item.userId })), ...(notice.inspection ? [{ userId: notice.inspection.inspectorUserId }] : [])], type: "GENERAL", title: "Move-out notice withdrawn", message: "The tenant withdrew their move-out notice. Any scheduled inspection is cancelled and the lease remains active." });
     await tx.auditLog.create({ data: { orgId: session.activeOrgId!, actorUserId: session.userId, action: "MOVE_OUT_NOTICE_WITHDRAWN", entityType: "MoveOutNotice", entityId: notice.id } });
+    return true;
   }, { isolationLevel: "Serializable" });
+  if (!withdrawn) return { ok: false as const, error: "This notice can no longer be cancelled. Only notices awaiting inspection can be cancelled." };
   for (const path of ["/dashboard/tenant/notices", "/dashboard/tenant/inspections", "/dashboard/org/move-outs", "/dashboard/org/notifications", "/dashboard/org/inspections", "/dashboard/caretaker/inspections"]) revalidatePath(path);
-  redirect("/dashboard/tenant/notices?success=notice_withdrawn");
+  return { ok: true as const };
 }

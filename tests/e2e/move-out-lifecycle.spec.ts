@@ -5,6 +5,48 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { validateImageBytes } from "../../apps/web/src/lib/uploads/secure-image";
 import { configureTestDatabase } from "../integration/database-safety";
 
+test("tenant cancels a notice and scheduled inspection without losing their session", async ({ page, baseURL }) => {
+  test.skip(!process.env.MOVEOUT_BROWSER_FIXTURE, "Requires an explicitly seeded isolated local database");
+  const databaseUrl = configureTestDatabase();
+  if (!databaseUrl) throw new Error("TEST_DATABASE_URL required");
+  const fixture = JSON.parse(await readFile(process.env.MOVEOUT_BROWSER_FIXTURE!, "utf8"));
+  const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: databaseUrl }) });
+  const cookieUrl = fixture.cookies.tenant.secure ? baseURL!.replace("http:", "https:") : baseURL!;
+  const originalNotice = await db.moveOutNotice.findUniqueOrThrow({ where: { id: fixture.noticeId }, include: { inspection: true } });
+  await page.context().addCookies([{ ...fixture.cookies.tenant, url: cookieUrl }]);
+  try {
+    const tenant = await db.tenant.findUniqueOrThrow({ where: { id: fixture.tenantId } });
+    const sessionsBefore = await db.userSession.findMany({ where: { userId: tenant.userId! }, select: { id: true, tokenHash: true } });
+    for (const scheduled of [true, false]) {
+      await db.moveOutNotice.update({ where: { id: fixture.noticeId }, data: { status: scheduled ? "INSPECTION_SCHEDULED" : "SUBMITTED" } });
+      await db.inspection.updateMany({ where: { noticeId: fixture.noticeId }, data: { status: scheduled ? "SCHEDULED" : "CANCELLED", completedAt: null } });
+      await page.goto("/dashboard/tenant/notices");
+      await page.getByRole("button", { name: "Cancel move-out notice", exact: true }).click();
+      await expect(page.getByText("Your lease will stay active.", { exact: false })).toBeVisible();
+      if (scheduled) await expect(page.getByText("Your scheduled move-out inspection will also be cancelled.", { exact: false })).toBeVisible();
+      await page.getByRole("button", { name: "Keep notice", exact: true }).click();
+      expect((await db.moveOutNotice.findUniqueOrThrow({ where: { id: fixture.noticeId } })).status).toBe(scheduled ? "INSPECTION_SCHEDULED" : "SUBMITTED");
+      await page.getByRole("button", { name: "Cancel move-out notice", exact: true }).click();
+      await Promise.all([page.waitForNavigation({ waitUntil: "domcontentloaded" }), page.getByRole("button", { name: "Yes, cancel notice", exact: true }).click()]);
+      await expect(page).toHaveURL(/\/dashboard\/tenant\/notices(?:\?success=notice_withdrawn)?$/);
+      await expect(page.getByText("Notice withdrawn. The lease continues.", { exact: true })).toBeVisible();
+      const notice = await db.moveOutNotice.findUniqueOrThrow({ where: { id: fixture.noticeId }, include: { inspection: true, lease: true } });
+      expect(notice.status).toBe("CANCELLED");
+      expect(notice.inspection?.status).toBe("CANCELLED");
+      expect(notice.lease.status).toBe("ACTIVE");
+      await expect(page.getByRole("button", { name: "Cancel move-out notice", exact: true })).toHaveCount(0);
+    }
+    expect(await db.userSession.findMany({ where: { userId: tenant.userId! }, select: { id: true, tokenHash: true } })).toEqual(sessionsBefore);
+    expect((await db.tenant.findUniqueOrThrow({ where: { id: tenant.id } })).status).toBe("ACTIVE");
+    await page.goto("/dashboard/tenant/lease");
+    await expect(page).toHaveURL(/\/dashboard\/tenant\/lease/);
+  } finally {
+    await db.moveOutNotice.update({ where: { id: fixture.noticeId }, data: { status: originalNotice.status } });
+    if (originalNotice.inspection) await db.inspection.update({ where: { id: originalNotice.inspection.id }, data: { status: originalNotice.inspection.status, completedAt: originalNotice.inspection.completedAt } });
+    await db.$disconnect();
+  }
+});
+
 test("move-out handover, private refund proof, report permissions and retained receipts", async ({ page, browser, baseURL }) => {
   test.skip(!process.env.MOVEOUT_BROWSER_FIXTURE, "Requires an explicitly seeded isolated local database");
   const databaseUrl = configureTestDatabase();
