@@ -73,7 +73,6 @@ const operatorGates = [
   "Kenya legal counsel sign-off → docs/KENYA_LEGAL_REVIEW.md",
   "Disposable backup restore drill → docs/RESTORE_DRILL_EVIDENCE.md",
   "Live M-Pesa STK E2E on production domain",
-  "Enable production crons (notifications, retention, owner statements)",
   "External uptime on /api/health and /api/health?deep=1",
   "Submit sitemap-index.xml to GSC/Bing",
   "Manual accessibility QA matrix → docs/ACCESSIBILITY_QA.md",

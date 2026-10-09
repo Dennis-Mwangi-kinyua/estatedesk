@@ -605,7 +605,7 @@ Org approveMeterReading / water-approval-queue
       {
         heading: "Cron",
         paragraphs: [
-          "Cron routes under /api/cron/* require CRON_SECRET (lib/cron/auth.ts). Jobs include notifications dispatch, owner statements, retention, and other scheduled work registered in lib/cron/jobs.ts.",
+          "Automatic cron schedules and /api/cron/* routes have been removed. Use authenticated platform manual controls for notifications, owner statements, and retention. CRON_SECRET still protects readiness checks.",
           "PlatformControl.cronDisabled blocks execution. CronJobRun records successes/failures for Jobs UI (/platform/jobs, SUPER_ADMIN).",
         ],
       },
