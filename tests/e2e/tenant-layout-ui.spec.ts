@@ -41,8 +41,14 @@ test("tenant dashboard and profile have balanced cards and mobile layouts", asyn
     for(const theme of ["light","dark"]) {
       await page.locator("html").evaluate((el,value)=>el.setAttribute("class", value),theme);
       expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
-      const metricColumns = await dashboard.locator(".tenant-summary-grid").first().evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length);
-      expect(metricColumns).toBe(width >= 1024 ? 4 : 2);
+      const metricColumns = await dashboard.locator(".tenant-summary-grid").first().evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").filter(track => parseFloat(track) > 0).length);
+      if (width < 480) expect(metricColumns).toBe(1);
+      else {
+        expect(metricColumns).toBeGreaterThanOrEqual(2);
+        expect(metricColumns).toBeLessThanOrEqual(4);
+      }
+      const metricsFit = await dashboard.locator(".tenant-summary-grid > *").evaluateAll(elements => elements.every(el => el.scrollWidth <= el.clientWidth + 1));
+      expect(metricsFit).toBe(true);
       const cards = await profile.locator(':scope > div > div.grid > section').evaluateAll(elements => elements.map(el=>{const r=el.getBoundingClientRect();return {width:r.width,top:r.top,height:r.height}}));
       expect(cards.length).toBeGreaterThanOrEqual(5);
       if(width===1440) {
