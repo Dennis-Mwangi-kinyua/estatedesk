@@ -142,14 +142,27 @@ export async function getMoveOutsPageData(
     }),
   ]), { label: "organization move-outs page load" });
 
-  const financials = new Map(await Promise.all(notices.map(async notice => {
-    const balance = await retryTransientDatabaseOperation(
-      () => loadMoveOutBalances(prisma, notice.lease),
-      { label: "organization move-outs financial balance" },
-    );
-    const closeout = notice.closeout && typeof notice.closeout === "object" && !Array.isArray(notice.closeout) ? notice.closeout : {};
-    return [notice.id, { currentAmountOwed: balance.totalCents / 100, financialStatus: notice.status === "CLOSED" ? financialStatus(balance.totalCents, closeout.refundStatus === "PENDING") : "PRELIMINARY" }] as const;
-  })));
+  const financialRows: (readonly [string, {
+    currentAmountOwed: number;
+    financialStatus: string;
+  }])[] = [];
+  for (let index = 0; index < notices.length; index += 4) {
+    const batch = notices.slice(index, index + 4);
+    financialRows.push(...(await Promise.all(batch.map(async notice => {
+      const balance = await retryTransientDatabaseOperation(
+        () => loadMoveOutBalances(prisma, notice.lease),
+        { label: "organization move-outs financial balance" },
+      );
+      const closeout = notice.closeout && typeof notice.closeout === "object" && !Array.isArray(notice.closeout) ? notice.closeout : {};
+      return [notice.id, {
+        currentAmountOwed: balance.totalCents / 100,
+        financialStatus: notice.status === "CLOSED"
+          ? financialStatus(balance.totalCents, closeout.refundStatus === "PENDING")
+          : "PRELIMINARY",
+      }] as const;
+    }))));
+  }
+  const financials = new Map(financialRows);
   const totalPages = Math.max(1, Math.ceil(totalNotices / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
   const showingFrom = totalNotices === 0 ? 0 : skip + 1;

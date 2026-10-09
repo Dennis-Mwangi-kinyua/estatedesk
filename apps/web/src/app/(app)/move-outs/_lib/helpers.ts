@@ -19,6 +19,7 @@ export function formatDate(value: Date | string | null | undefined) {
     year: "numeric",
     month: "short",
     day: "2-digit",
+    timeZone: "Africa/Nairobi",
   }).format(date);
 }
 
@@ -34,6 +35,7 @@ export function formatDateTime(value: Date | string | null | undefined) {
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Africa/Nairobi",
   }).format(date);
 }
 
