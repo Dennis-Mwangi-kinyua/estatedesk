@@ -87,34 +87,34 @@ export function TenantsDirectorySection({ data }: { data: TenantsPageData }) {
                       <td className="px-5 py-4">
                         <DeferredLink
                           href={`/dashboard/org/tenants/${tenant.id}`}
-                          className="font-semibold text-foreground transition hover:text-primary"
+                          className="font-semibold text-foreground transition hover:text-primary [overflow-wrap:anywhere]"
                         >
                           {tenant.fullName}
                         </DeferredLink>
                         <p className="mt-1 text-xs text-muted-foreground">{tenant.phone}</p>
-                        <p className="mt-1 max-w-[180px] truncate text-xs text-muted-foreground">
+                        <p className="mt-1 max-w-[180px] text-xs text-muted-foreground [overflow-wrap:anywhere]">
                           {tenant.email ?? "No email"}
                         </p>
                       </td>
                       <td className="px-5 py-4">
-                        <p className="font-medium text-foreground">{details.property}</p>
-                        <p className="mt-1 max-w-[180px] text-xs leading-5 text-muted-foreground">
+                        <p className="font-medium text-foreground [overflow-wrap:anywhere]">{details.property}</p>
+                        <p className="mt-1 max-w-[180px] text-xs leading-5 text-muted-foreground [overflow-wrap:anywhere]">
                           {details.location}
                         </p>
                       </td>
-                      <td className="px-5 py-4 text-muted-foreground">
+                      <td className="px-5 py-4 text-muted-foreground [overflow-wrap:anywhere]">
                         {details.apartment}
                       </td>
                       <td className="px-5 py-4">
-                        <p className="font-medium text-foreground">{details.unit}</p>
+                        <p className="font-medium text-foreground [overflow-wrap:anywhere]">{details.unit}</p>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {details.unitType}
                         </p>
                       </td>
                       <td className="px-5 py-4">
-                        <p className="font-medium text-foreground">{details.caretaker}</p>
+                        <p className="font-medium text-foreground [overflow-wrap:anywhere]">{details.caretaker}</p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {details.caretakerContact}
+                          <span className="[overflow-wrap:anywhere]">{details.caretakerContact}</span>
                         </p>
                       </td>
                       <td className="px-5 py-4">

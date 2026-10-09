@@ -14,21 +14,19 @@ export function TenantsHeader({
   data: TenantsPageData;
   orgRole?: OrgRole | null;
 }) {
-  const { organizationName, stats } = data;
-  const totalTenants =
-    stats.activeTenants + stats.inactiveTenants + stats.blacklistedTenants;
+  const { organizationName } = data;
 
   return (
     <section data-workspace-header className={panelShellClassName}>
       <div className="border-b border-border px-5 py-5 sm:px-6 sm:py-6">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div className="max-w-3xl">
+        <div className="flex min-w-0 flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+          <div className="min-w-0 max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               <Users className="h-3.5 w-3.5" />
               Tenant operations
             </div>
 
-            <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:mt-4 sm:text-3xl">
               Tenants
             </h1>
 
@@ -62,31 +60,6 @@ export function TenantsHeader({
               Create new tenant
             </Link>
           </div>
-        </div>
-      </div>
-
-      <div className="grid gap-3 border-b border-border px-5 py-5 sm:grid-cols-3 sm:px-6">
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            All tenants
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">{totalTenants}</p>
-        </div>
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Active tenants
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {stats.activeTenants}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Assigned units
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {stats.assignedTenants}
-          </p>
         </div>
       </div>
 

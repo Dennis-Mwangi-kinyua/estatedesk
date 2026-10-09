@@ -7,7 +7,7 @@ export function TenantsStats({ data }: { data: TenantsPageData }) {
     stats.activeTenants + stats.inactiveTenants + stats.blacklistedTenants;
 
   return (
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <section className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 xl:grid-cols-5">
       <StatCard label="All tenants" value={totalTenants} />
       <StatCard
         label="Active"

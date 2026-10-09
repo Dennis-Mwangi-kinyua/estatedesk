@@ -9,15 +9,17 @@ import {
 
 export function TenantsFiltersSection({ data }: { data: TenantsPageData }) {
   return (
-    <section className={`${panelShellClassName} p-5 sm:p-6`}>
+    <section className={`${panelShellClassName} p-3.5 sm:p-5 lg:p-6`}>
       <form className="space-y-3">
-        <div className="flex flex-col gap-2 lg:flex-row">
+        <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+          <label htmlFor="tenant-directory-search" className="sr-only">Search tenants</label>
           <input
+            id="tenant-directory-search"
             type="text"
             name="search"
             defaultValue={data.search}
             placeholder="Search tenant, phone, property, apartment, unit, location, or caretaker"
-            className={fieldClassName}
+            className={`${fieldClassName} min-w-0`}
           />
 
           <input type="hidden" name="status" value={data.status} />
@@ -25,12 +27,12 @@ export function TenantsFiltersSection({ data }: { data: TenantsPageData }) {
           <input type="hidden" name="pageSize" value={data.pageSize} />
           {data.created ? <input type="hidden" name="created" value="1" /> : null}
 
-          <button data-workspace-action="true" type="submit" className={buttonPrimaryClassName}>
+          <button data-workspace-action="true" type="submit" className={`${buttonPrimaryClassName} w-full sm:w-auto`}>
             Search
           </button>
         </div>
 
-        <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        <div className="flex flex-wrap gap-2">
           {STATUS_OPTIONS.map((option) => {
             const active = data.status === option;
 
@@ -44,7 +46,7 @@ export function TenantsFiltersSection({ data }: { data: TenantsPageData }) {
                   pageSize: data.pageSize,
                 })}
                 className={[
-                  "inline-flex h-10 shrink-0 items-center justify-center rounded-full border px-4 text-sm font-medium transition",
+                  "inline-flex min-h-10 max-w-full items-center justify-center rounded-full border px-3 py-2 text-center text-xs font-medium leading-4 transition sm:px-4 sm:text-sm",
                   active
                     ? "border-primary bg-primary text-primary-foreground shadow-sm"
                     : "border-border bg-muted/20 text-foreground hover:bg-muted/40",

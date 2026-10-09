@@ -14,9 +14,10 @@ describe("move-out workflow", () => {
     assert.equal(nairobiDate(new Date("2026-10-08T22:00:00Z")), "2026-10-09");
     assert.equal(parseMoveOutDate("2026-10-09").toISOString(), "2026-10-08T21:00:00.000Z");
     assert.equal(parseInspectionDate("2026-10-09T16:30", now).toISOString(), "2026-10-09T13:30:00.000Z");
+    assert.equal(parseInspectionDate("2026-10-09T11:59", now).toISOString(), "2026-10-09T08:59:00.000Z");
     assert.throws(() => parseMoveOutDate("2026-02-30"));
     assert.throws(() => parseMoveOutDate("2026-10-09T10:00"));
-    assert.throws(() => parseInspectionDate("2026-10-09T14:59", now), /future/);
+    assert.throws(() => parseInspectionDate("2026-10-08T23:59", now), /past date/);
     assert.throws(() => parseInspectionDate("2026-10-09T25:00", now));
   });
   it("permits active staff of different roles only within their unit scope", () => {

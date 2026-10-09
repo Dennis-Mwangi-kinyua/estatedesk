@@ -13,7 +13,9 @@ export function parseInspectionDate(value: string, now = new Date()) {
   parseMoveOutDate(value.slice(0, 10));
   if (Number(value.slice(11, 13)) > 23 || Number(value.slice(14)) > 59) throw new Error("Choose a valid inspection time.");
   const date = new Date(`${value}:00+03:00`);
-  if (date <= now) throw new Error("Schedule the inspection in the future (Nairobi time).");
+  if (nairobiDate(date) < nairobiDate(now)) {
+    throw new Error("An inspection cannot be scheduled for a past date. Choose today or a later date (Nairobi time).");
+  }
   return date;
 }
 export function parseCloseout(form: FormData, now = new Date(), outstandingBillsCents = 0) {

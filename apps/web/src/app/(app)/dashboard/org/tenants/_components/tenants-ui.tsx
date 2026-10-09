@@ -55,15 +55,15 @@ export function StatCard({
         : "text-foreground";
 
   return (
-    <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+    <div className="min-w-0 rounded-2xl border border-border bg-muted/10 px-3 py-3 sm:px-4 sm:py-4">
+      <p className="text-[11px] font-semibold uppercase leading-4 tracking-[0.1em] text-muted-foreground sm:text-xs sm:tracking-[0.14em]">
         {label}
       </p>
-      <p className={`mt-2 text-2xl font-semibold ${valueClassName}`}>
+      <p className={`mt-1 text-xl font-semibold tabular-nums sm:mt-2 sm:text-2xl ${valueClassName}`}>
         {displayValue}
       </p>
       {note ? (
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">{note}</p>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm sm:leading-6">{note}</p>
       ) : null}
     </div>
   );
@@ -81,11 +81,13 @@ export function TenantStatusPill({ status }: { status: string }) {
 
 function InfoLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-3">
-      <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+    <div className="min-w-0 rounded-xl bg-muted/20 px-3 py-2.5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
         {label}
-      </span>
-      <span className="text-right text-sm font-medium text-foreground">{value}</span>
+      </p>
+      <p className="mt-1 text-sm font-medium leading-5 text-foreground [overflow-wrap:anywhere]">
+        {value}
+      </p>
     </div>
   );
 }
@@ -100,24 +102,29 @@ export function TenantCard({
   const details = getTenantDetails(tenant, currencyCode);
 
   return (
-    <DeferredLink
-      href={`/dashboard/org/tenants/${tenant.id}`}
-      className="block rounded-2xl border border-border bg-card p-4 transition hover:border-ring hover:bg-muted/10"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="truncate text-sm font-semibold text-foreground">
-            {tenant.fullName}
-          </h3>
-          <p className="mt-1 truncate text-xs text-muted-foreground">
-            {tenant.phone} · {tenant.email ?? "No email"}
-          </p>
+    <article className="min-w-0 rounded-2xl border border-border bg-card p-3.5 shadow-sm transition hover:border-ring hover:shadow-md sm:rounded-3xl sm:p-5">
+      <div className="flex min-w-0 items-start gap-3">
+        <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-2xl bg-primary/10 text-sm font-bold text-primary">
+          {tenant.fullName.trim().slice(0, 1).toLocaleUpperCase() || "T"}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
+            <DeferredLink
+              href={`/dashboard/org/tenants/${tenant.id}`}
+              className="min-w-0 flex-1 text-sm font-semibold leading-5 text-foreground hover:text-primary sm:text-base [overflow-wrap:anywhere]"
+            >
+              {tenant.fullName}
+            </DeferredLink>
+            <TenantStatusPill status={String(tenant.status)} />
+          </div>
+          <div className="mt-2 grid min-w-0 gap-1.5 text-xs leading-5 text-muted-foreground sm:grid-cols-2 sm:gap-x-4">
+            <p className="min-w-0 [overflow-wrap:anywhere]">Phone: <span className="font-medium text-foreground">{tenant.phone || "Not provided"}</span></p>
+            <p className="min-w-0 [overflow-wrap:anywhere]">Email: <span className="font-medium text-foreground">{tenant.email || "No email"}</span></p>
+          </div>
         </div>
-
-        <TenantStatusPill status={String(tenant.status)} />
       </div>
 
-      <div className="mt-4 grid gap-3 rounded-2xl border border-border bg-muted/10 p-3">
+      <div className="mt-4 grid min-w-0 gap-2 sm:grid-cols-2">
         <InfoLine label="Property" value={details.property} />
         <InfoLine label="Location" value={details.location} />
         <InfoLine label="Apartment" value={details.apartment} />
@@ -125,6 +132,13 @@ export function TenantCard({
         <InfoLine label="Caretaker" value={details.caretaker} />
         <InfoLine label="Lease" value={`${details.rent} · Due day ${details.dueDay}`} />
       </div>
-    </DeferredLink>
+
+      <DeferredLink
+        href={`/dashboard/org/tenants/${tenant.id}`}
+        className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto sm:px-5"
+      >
+        View tenant
+      </DeferredLink>
+    </article>
   );
 }
