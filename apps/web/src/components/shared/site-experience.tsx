@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { workspaceHeadingIcon } from "./workspace-heading-icons";
 import { usePathname } from "next/navigation";
-import { stickerFor } from "@/lib/presentation/stickers";
 
 /** Adds presentation metadata without replacing controls, content, or table structure. */
 export function SiteExperience() {
@@ -21,18 +20,24 @@ export function SiteExperience() {
         if (heading && heading.dataset.headingIcon !== "custom" && !heading.closest("header, .page-header")) {
           const icon = workspaceHeadingIcon(pathname ?? "dashboard");
           heading.dataset.workspaceHeadingIcon = icon.name;
-          heading.dataset.stickerEmoji = stickerFor(pathname ?? "dashboard").emoji;
+          delete heading.dataset.stickerEmoji;
           heading.style.setProperty("--workspace-heading-icon", icon.mask);
         }
       }
       if (heading?.dataset.headingIcon === "custom") delete heading.dataset.pageIcon;
       if (!isWorkspace && heading && heading.dataset.headingIcon !== "custom" && !heading.querySelector(".workspace-page-marker") && !/\p{Extended_Pictographic}/u.test(heading.textContent ?? "")) {
-        heading.dataset.pageIcon = stickerFor(pathname ?? "dashboard").emoji;
+        const icon = workspaceHeadingIcon(pathname ?? "dashboard");
+        heading.dataset.pageIcon = icon.name;
+        heading.style.setProperty("--workspace-heading-icon", icon.mask);
       }
       root.querySelectorAll<HTMLElement>(".workspace-metric").forEach(metric => {
         if (metric.querySelector(".workspace-metric-sticker")) return;
         const label = metric.querySelector("h2, h3, [data-metric-label], p")?.textContent;
-        if (label) metric.dataset.metricEmoji = stickerFor(label).emoji;
+        if (label) {
+          delete metric.dataset.metricEmoji;
+          metric.dataset.metricIcon = workspaceHeadingIcon(label).name;
+          metric.style.setProperty("--workspace-metric-icon", workspaceHeadingIcon(label).mask);
+        }
       });
       root.querySelectorAll<HTMLTableElement>("table").forEach(table => {
         const headerRows = table.tHead?.rows;

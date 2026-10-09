@@ -22,7 +22,7 @@ export function CancelNoticeForm({ noticeId, inspectionScheduled }: { noticeId: 
       try {
         const result = await withdrawMoveOutNotice(form);
         if (!result.ok) { setError(result.error); return; }
-        window.location.assign("/dashboard/tenant/notices?success=notice_withdrawn");
+        window.location.assign("/dashboard/tenant/move-out?success=notice_withdrawn");
       } catch {
         setError("We could not cancel your notice. Please try again.");
       }

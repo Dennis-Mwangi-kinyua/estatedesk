@@ -19,7 +19,7 @@ export function LeaseHeader({
     <section data-workspace-header className={panelShellClassName}>
       <div className="border-b border-border px-5 py-5 sm:px-6 sm:py-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div className="max-w-3xl">
+          <div className="min-w-0 max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               <FileText className="h-3.5 w-3.5" />
               Tenancy records
@@ -37,17 +37,17 @@ export function LeaseHeader({
             <InAppGuideHint topic="rent" workspace="tenant" />
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row xl:flex-col">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap xl:flex-col">
             <Link data-workspace-action="true"
               href="/dashboard/tenant"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
+              className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted/30 sm:px-4"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to dashboard
             </Link>
             <Link data-workspace-action="true"
               href="/dashboard/tenant/payments"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
+              className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted/30 sm:px-4"
             >
               <CreditCard className="h-4 w-4" />
               View payments
@@ -55,7 +55,7 @@ export function LeaseHeader({
             {activeLease && hasPdfContract ? (
               <a data-workspace-action="true"
                 href={tenantLeaseDownloadPath(activeLease.id)}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+                className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-2xl bg-primary px-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 sm:px-5"
               >
                 <Download className="h-4 w-4" />
                 Download lease PDF

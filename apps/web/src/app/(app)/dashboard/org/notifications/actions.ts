@@ -9,6 +9,7 @@ import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { closeMoveOut } from "@/lib/move-outs/closeout";
 import { postWaterBillAccrual } from "@/lib/accounting/billing";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
+import { safeServerActionError } from "@/lib/errors/server-error-log";
 
 async function requireOrgReviewer() {
   const session = await requireUserSession();
@@ -377,10 +378,21 @@ export async function confirmMoveOutAction(formData: FormData) {
   const { session, membership } = await requireOrgReviewer();
   const noticeId = String(formData.get("noticeId") ?? "").trim();
   if (!noticeId) {
-    throw new Error("Move-out notice is required.");
+    return { ok: false as const, error: "Move-out notice is required." };
   }
 
-  await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: membership.orgId, actorUserId: session.userId, form: formData }), { isolationLevel: "Serializable" });
+  try {
+    await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: membership.orgId, actorUserId: session.userId, form: formData }), { isolationLevel: "Serializable" });
+  } catch (error) {
+    return {
+      ok: false as const,
+      error: safeServerActionError(
+        "move-outs.closeout",
+        error,
+        "Could not close this move-out. Refresh the settlement and report, then try again. If it continues, contact support.",
+      ),
+    };
+  }
 
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");
@@ -392,4 +404,5 @@ export async function confirmMoveOutAction(formData: FormData) {
   revalidatePath("/dashboard/org/tenants");
   revalidatePath("/dashboard/tenant");
   revalidatePublicVacancies();
+  return { ok: true as const };
 }

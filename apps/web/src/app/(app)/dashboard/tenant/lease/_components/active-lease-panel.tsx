@@ -84,7 +84,7 @@ export function ActiveLeasePanel({ lease }: { lease: ActiveLease }) {
         </div>
       </div>
 
-      <div className="grid gap-3 border-b border-border px-5 py-5 sm:grid-cols-2 lg:grid-cols-5 sm:px-6">
+      <div className="grid grid-cols-2 gap-3 border-b border-border px-4 py-4 sm:px-6 sm:py-5 xl:grid-cols-5">
         <SummaryMetric label="Monthly rent" value={formatMoney(lease.monthlyRent)} />
         <SummaryMetric label="Deposit" value={formatMoney(lease.deposit)} />
         <SummaryMetric label="Start date" value={formatDate(lease.startDate)} />
@@ -118,8 +118,8 @@ export function ActiveLeasePanel({ lease }: { lease: ActiveLease }) {
                 key={label}
                 className="flex items-start justify-between gap-4 border-b border-border/60 pb-3 last:border-b-0 last:pb-0"
               >
-                <dt className="text-sm text-muted-foreground">{label}</dt>
-                <dd className="max-w-[55%] text-right text-sm font-semibold text-foreground">
+                <dt className="min-w-0 shrink-0 text-sm text-muted-foreground">{label}</dt>
+                <dd className="min-w-0 max-w-[65%] break-words text-right text-sm font-semibold text-foreground [overflow-wrap:anywhere]">
                   {value}
                 </dd>
               </div>

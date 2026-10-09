@@ -41,7 +41,7 @@ export function TenantDashboardPayments({
             </div>
           </div>
         ) : (
-          recentPayments.map((payment) => {
+          recentPayments.slice(0, 3).map((payment) => {
             const receiptHref = payment.receipt?.id
               ? `/dashboard/tenant/receipts/${payment.receipt.id}`
               : null;

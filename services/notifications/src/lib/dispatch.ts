@@ -166,7 +166,7 @@ export async function dispatchQueuedNotifications(
     where: {
       status: NotificationStatus.QUEUED,
       sentAt: null,
-      OR: [{ channel: { not: NotificationChannel.WEB_PUSH } }, { readAt: null }],
+      channel: { not: NotificationChannel.WEB_PUSH },
     },
     orderBy: {
       createdAt: "asc",

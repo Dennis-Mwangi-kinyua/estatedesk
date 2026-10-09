@@ -11,7 +11,6 @@ type TokenPurpose =
 function getTokenHashSecret() {
   return (
     process.env.AUTH_SECRET ??
-    process.env.CRON_SECRET ??
     process.env.DATABASE_URL ??
     "estatedesk-local-token-hash-secret"
   );

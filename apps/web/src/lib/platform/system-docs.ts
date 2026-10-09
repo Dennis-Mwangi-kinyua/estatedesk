@@ -468,7 +468,7 @@ Org approveMeterReading / water-approval-queue
       {
         heading: "notifyRecipients",
         paragraphs: [
-          "services/notifications (and apps/web re-exports under lib/notifications) expose notifyRecipients. It creates one row per recipient per channel (IN_APP, SMS, WHATSAPP, EMAIL, WEB_PUSH by default or per call overrides).",
+          "services/notifications (and apps/web re-exports under lib/notifications) expose notifyRecipients. It creates one row per recipient per requested channel. The default is IN_APP so new alerts appear in the EstateDesk notification center.",
           "IN_APP is typically marked SENT immediately so the product feed updates. Other channels are QUEUED for dispatch workers / cron (dispatch.ts).",
         ],
       },
@@ -487,7 +487,7 @@ Org approveMeterReading / water-approval-queue
       {
         heading: "Debugging delivery",
         paragraphs: [
-          "Check Notification status QUEUED vs FAILED vs SENT. Failed SMS/WhatsApp usually means provider credentials or rate limits. Platform developer home shows queued/failed counts. Web-push needs VAPID keys and active PushSubscription rows.",
+          "Check Notification status QUEUED vs FAILED vs SENT. Failed SMS/WhatsApp usually means provider credentials or rate limits. Platform developer home shows queued/failed counts. Browser push notifications are disabled; use the EstateDesk notification center for system alerts.",
         ],
       },
     ],

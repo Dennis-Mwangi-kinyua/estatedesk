@@ -73,7 +73,7 @@ export function TenancySummarySection({
         <p className="mt-1 text-sm text-muted-foreground">{tenant.org.name}</p>
       </div>
 
-      <div className="grid gap-3 p-4 sm:p-5">
+      <div className="grid grid-cols-2 gap-3 p-4 sm:p-5">
         <SummaryMetric
           label="Monthly rent"
           value={formatMoney(activeLease.monthlyRent)}

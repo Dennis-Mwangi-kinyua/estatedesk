@@ -3,6 +3,7 @@
 
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { TenantMobileNav } from "./tenant-mobile-nav";
 import { TenantDashboardFooter } from "./tenant-dashboard-footer";
 import { TenantDashboardHeader } from "./tenant-dashboard-header";
 import { TenantDashboardSidebar } from "./tenant-dashboard-sidebar";
@@ -40,9 +41,11 @@ export function TenantDashboardShell({
         onMenuClick={() => setMobileOpen(true)}
       />
 
+      <TenantMobileNav hasActiveLease={hasActiveLease} onMenuClick={() => setMobileOpen(true)} />
+
       <div className="lg:pl-72">
         <div className="flex min-h-dvh flex-col pt-[calc(4.75rem+env(safe-area-inset-top))] lg:pt-16">
-          <main className="org-mobile-main-offset flex-1 px-3 py-3 sm:px-5 sm:py-4 lg:px-8 lg:pb-16">
+          <main className="org-mobile-main-offset flex-1 px-3 pt-3 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-5 sm:pt-4 lg:px-8 lg:pb-16">
             <div className="app-content-shell org-theme-content relative z-0 w-full min-w-0 space-y-4 text-slate-950 sm:space-y-6 dark:text-slate-100">
 
               {children}

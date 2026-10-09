@@ -7,7 +7,6 @@ const TAG_BYTES = 16;
 function getPublicIdKey() {
   const secret =
     process.env.AUTH_SECRET ??
-    process.env.CRON_SECRET ??
     process.env.DATABASE_URL ??
     "estatedesk-local-public-id-key";
 

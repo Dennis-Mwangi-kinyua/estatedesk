@@ -21,7 +21,7 @@ test("organisation detail provides scoped operations and section navigation", as
   for (const theme of ["light","dark"]) {
     await page.locator("html").evaluate((element,value) => element.setAttribute("class",value),theme);
     await expect(page.getByRole("heading",{name:"TSA Properties"})).toBeVisible();
-    await expect(page.getByRole("link",{name:"Payment operations",exact:true})).toHaveAttribute("href","/platform/payment-ops?orgId=org-tsa");
+    await expect(page.getByRole("link",{name:"Payment operations",exact:true})).toHaveAttribute("href","/platform/payment-ops?orgId=tsa");
     const navigation = page.getByRole("navigation",{name:"Organisation sections"});
     for (const section of ["profile","billing","operations","payments","members","audit"]) {
       await expect(page.locator(`#organisation-${section}`)).toBeAttached();

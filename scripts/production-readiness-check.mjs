@@ -48,7 +48,6 @@ const checks = [
     label: "Public app URL",
     alt: "APP_URL",
   },
-  { key: "CRON_SECRET", required: true, label: "Cron secret" },
   {
     key: "SECURITY_ALERT_WEBHOOK_URL",
     required: false,

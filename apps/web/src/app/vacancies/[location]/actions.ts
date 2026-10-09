@@ -149,10 +149,9 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
       recipients: unit.property.org.memberships.map((member) => ({
         userId: member.userId,
       })),
-      // Queue multi-channel delivery (cron/workers send EMAIL/SMS/WhatsApp/push).
+      // Queue the in-app notification and configured external channels.
       channels: [
         NotificationChannel.IN_APP,
-        NotificationChannel.WEB_PUSH,
         NotificationChannel.EMAIL,
         NotificationChannel.SMS,
         NotificationChannel.WHATSAPP,

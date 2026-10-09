@@ -7,7 +7,7 @@ import { panelShellClassName } from "./profile-ui";
 
 export function NextOfKinSection({ tenant }: { tenant: TenantProfileRecord }) {
   return (
-    <section className={panelShellClassName}>
+    <section className={`${panelShellClassName} xl:col-span-2`}>
       <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4 sm:px-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -31,7 +31,7 @@ export function NextOfKinSection({ tenant }: { tenant: TenantProfileRecord }) {
           No next of kin information has been added yet.
         </div>
       ) : (
-        <div className="divide-y divide-border sm:grid sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+        <div className="divide-y divide-border sm:grid sm:grid-cols-2 xl:grid-cols-4 sm:divide-x sm:divide-y-0">
           <InfoRow label="Name" value={tenant.nextOfKin.name} />
           <InfoRow label="Relationship" value={tenant.nextOfKin.relationship} />
           <InfoRow

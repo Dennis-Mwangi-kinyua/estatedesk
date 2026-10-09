@@ -29,6 +29,9 @@ describe("middleware wiring", () => {
     );
 
     assert.match(middleware, /proxy as middleware/);
-    assert.match(healthRoute, /isCronAuthorized\(request\)/);
+    assert.match(healthRoute, /await getUserSession\(\)/);
+    assert.match(healthRoute, /\["SUPER_ADMIN", "PLATFORM_ADMIN"\]\.includes\(session.platformRole\)/);
+    assert.match(healthRoute, /session.mustChangePassword \|\| session.requiresTermsAcceptance/);
+    assert.doesNotMatch(healthRoute, /isCronAuthorized|CRON_SECRET/);
   });
 });

@@ -199,3 +199,46 @@ body.estate-glass-system .organisation-detail-page :is(.workspace-panel, .org-su
 @media print { .visual-sticker, .workspace-metric[data-metric-emoji]::after, h1[data-sticker-emoji]::before { display: none !important; } }
 .public-access-nav-link .visual-sticker { width: 1.5rem; height: 1.5rem; border-radius: .5rem; }
 .public-access-nav-link .visual-sticker__emoji { font-size: .95rem; }
+
+/* Consistent outline icons for headings and automatically enhanced metrics. */
+.estate-glass-system h1[data-page-icon]::before,
+.estate-workspace h1[data-workspace-heading-icon]::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-inline-end: .45em;
+  border: 0;
+  border-radius: 0;
+  background: currentColor;
+  mask: var(--workspace-heading-icon) center / contain no-repeat;
+  vertical-align: -.1em;
+}
+.workspace-metric[data-metric-icon] { position: relative; padding-inline-end: 3.5rem; }
+.workspace-metric[data-metric-icon]::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 1rem;
+  inset-inline-end: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: currentColor;
+  opacity: .65;
+  mask: var(--workspace-metric-icon) center / contain no-repeat;
+  pointer-events: none;
+}
+@media print {
+  .workspace-metric[data-metric-icon]::after { display: none; }
+}
+
+/* Keep concise tenant metrics paired on phones despite generic grid fallbacks. */
+.estate-glass-system [data-workspace-header] > .tenant-summary-grid,
+.estate-glass-system .tenant-summary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 1024px) {
+  .estate-glass-system [data-workspace-header] > .tenant-summary-grid,
+.estate-glass-system .tenant-summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

@@ -5,9 +5,10 @@ import { EmptySection } from "@/app/(app)/dashboard/tenant/notices/_components/e
 
 type GiveNoticeCardProps = {
   hasActiveLease: boolean;
+  hasOpenNotice?: boolean;
 };
 
-export function GiveNoticeCard({ hasActiveLease }: GiveNoticeCardProps) {
+export function GiveNoticeCard({ hasActiveLease, hasOpenNotice = false }: GiveNoticeCardProps) {
   return (
     <SurfaceCard className="p-5 sm:p-6">
       <div className="mb-4">
@@ -15,27 +16,38 @@ export function GiveNoticeCard({ hasActiveLease }: GiveNoticeCardProps) {
           Give Notice
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Submit a move-out notice and alert your organisation for review.
+          Send your intended handover date to management. Your lease stays active until the handover is completed.
         </p>
       </div>
 
-      {hasActiveLease ? (
+      {hasActiveLease && hasOpenNotice ? (
+        <EmptySection
+          title="Move-out already in progress"
+          description="Track the open request below. You can withdraw it while inspection is still pending, then submit a new date if your plans change."
+          guideTopic="moveOut"
+        />
+      ) : hasActiveLease ? (
         <form action={submitMoveOutNotice} className="space-y-4">
           <div>
             <label
               htmlFor="moveOutDate"
               className="mb-2 block text-sm font-medium text-foreground/80"
             >
-              Intended move-out date
+              Intended handover date
             </label>
             <input
               id="moveOutDate"
               name="moveOutDate"
               type="date"
+              min={new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Nairobi", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())}
               required
               className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition focus:border-neutral-400"
             />
           </div>
+
+          <p className="text-xs leading-5 text-muted-foreground">
+            Choose a date that follows your lease notice terms. Management will review the request and arrange an inspection.
+          </p>
 
           <div>
             <label
@@ -59,7 +71,7 @@ export function GiveNoticeCard({ hasActiveLease }: GiveNoticeCardProps) {
             className="inline-flex items-center justify-center rounded-[16px] bg-neutral-900 px-4 py-3 text-sm font-medium text-white"
           >
             <Send className="mr-2 h-4 w-4" />
-            Submit Notice
+            Start move-out
           </button>
         </form>
       ) : (

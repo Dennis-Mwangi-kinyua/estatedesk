@@ -105,16 +105,6 @@ export async function getProductionReadinessReport() {
   });
 
   checks.push({
-    id: "cron-secret",
-    label: "Cron authorization",
-    status: envConfigured("CRON_SECRET") ? "pass" : "warn",
-    detail: envConfigured("CRON_SECRET")
-      ? "CRON_SECRET set for /api/cron/* and deep health."
-      : "CRON_SECRET missing — cron and deep health are not secured.",
-    blocking: true,
-  });
-
-  checks.push({
     id: "security-alerts",
     label: "Security alert webhook",
     status:

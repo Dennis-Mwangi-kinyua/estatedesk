@@ -1,4 +1,4 @@
-const CACHE_VERSION = "estatedesk-pwa-v0.2.1";
+const CACHE_VERSION = "estatedesk-pwa-v0.2.2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const OFFLINE_FALLBACKS = ["/offline", "/offline-shell.html"];
 const CARETAKER_OFFLINE_SYNC_TAG = "caretaker-offline-queue-sync";
@@ -108,73 +108,6 @@ self.addEventListener("sync", (event) => {
         ),
       ),
   );
-});
-
-self.addEventListener("push", (event) => {
-  let payload = {};
-
-  try {
-    payload = event.data?.json?.() ?? {};
-  } catch {
-    payload = {};
-  }
-
-  const title = typeof payload.title === "string" ? payload.title : "EstateDesk";
-  const body =
-    typeof payload.body === "string"
-      ? payload.body
-      : "You have a new EstateDesk notification.";
-  const url = typeof payload.url === "string" ? payload.url : "/dashboard";
-  const tag = typeof payload.tag === "string" ? payload.tag : undefined;
-
-  event.waitUntil(
-    Promise.all([
-      self.registration.showNotification(title, {
-        body,
-        tag,
-        icon: "/icons/icon-192.png",
-        badge: "/icons/icon-192.png",
-        vibrate: [120, 60, 120],
-        data: { url, notificationId: payload.notificationId },
-        actions: [
-          { action: "open", title: "Open" },
-          { action: "dismiss", title: "Dismiss" },
-        ],
-      }),
-      requestBadgeSync(),
-    ]),
-  );
-});
-
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-
-  if (event.action === "dismiss") {
-    return;
-  }
-
-  const targetUrl = new URL(
-    event.notification.data?.url || "/dashboard",
-    self.location.origin,
-  ).href;
-
-  event.waitUntil((async () => {
-    let destination = targetUrl;
-    if (event.notification.data?.notificationId) {
-      try {
-        const response = await fetch("/api/notifications/read", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: event.notification.data.notificationId }),
-        });
-        if (response.ok) {
-          const result = await response.json();
-          if (result.actionUrl) destination = new URL(result.actionUrl, self.location.origin).href;
-        }
-      } catch { /* Offline: opening the portal still lets the user review their inbox. */ }
-    }
-    await openOrFocusClient(destination);
-    await requestBadgeSync();
-  })());
 });
 
 async function precacheUrls(cache, urls) {

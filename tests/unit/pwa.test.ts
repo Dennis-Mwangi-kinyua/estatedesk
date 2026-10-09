@@ -95,13 +95,13 @@ describe("service worker", () => {
     assert.match(serviceWorker, /\/offline-shell\.html/);
     assert.match(serviceWorker, /Promise\.allSettled/);
     assert.match(serviceWorker, /openOrFocusClient/);
-    assert.match(serviceWorker, /action: "open", title: "Open"/);
-    assert.match(serviceWorker, /action: "dismiss", title: "Dismiss"/);
+    assert.doesNotMatch(serviceWorker, /self\.addEventListener\("push"/);
+    assert.doesNotMatch(serviceWorker, /self\.addEventListener\("notificationclick"/);
   });
 });
 
 describe("push test delivery", () => {
-  it("exposes a server helper and API route for test alerts", () => {
+  it("keeps browser push test delivery disabled", async () => {
     const helper = readFileSync(
       resolve(process.cwd(), "apps/web/src/lib/push/send-test-push.ts"),
       "utf8",
@@ -113,7 +113,10 @@ describe("push test delivery", () => {
 
     assert.match(helper, /sendTestPushToUser/);
     assert.match(helper, /estatedesk-push-test/);
-    assert.match(route, /sendTestPushToUser/);
-    assert.match(route, /Unauthorized/);
+    assert.doesNotMatch(route, /sendTestPushToUser/);
+    const { POST } = await import("../../apps/web/src/app/api/push/test/route");
+    const response = await POST();
+    assert.equal(response.status, 410);
+    assert.match((await response.json()).error, /Browser push notifications are disabled/);
   });
 });

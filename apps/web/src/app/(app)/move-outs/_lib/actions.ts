@@ -13,6 +13,7 @@ import { encodePublicId } from "@/lib/public-id";
 import { parseInspectionDate } from "@/lib/move-outs/validation";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 import { createEstateDeskReference } from "@/lib/estatedesk-reference";
+import { safeServerActionError } from "@/lib/errors/server-error-log";
 
 class ScheduleInspectionError extends Error {
   constructor(message: string) {
@@ -153,10 +154,21 @@ export async function closeMoveOutAction(formData: FormData) {
   const noticeId = String(formData.get("noticeId") ?? "").trim();
 
   if (!noticeId) {
-    throw new Error("Move-out notice is required.");
+    return { ok: false as const, error: "Move-out notice is required." };
   }
 
-  await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: session.activeOrgId!, actorUserId: session.userId, form: formData }), { isolationLevel: "Serializable" });
+  try {
+    await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: session.activeOrgId!, actorUserId: session.userId, form: formData }), { isolationLevel: "Serializable" });
+  } catch (error) {
+    return {
+      ok: false as const,
+      error: safeServerActionError(
+        "move-outs.closeout",
+        error,
+        "Could not close this move-out. Refresh the settlement and report, then try again. If it continues, contact support.",
+      ),
+    };
+  }
 
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");
@@ -168,6 +180,7 @@ export async function closeMoveOutAction(formData: FormData) {
   revalidatePath("/dashboard/org/tenants");
   revalidatePath("/dashboard/tenant");
   revalidatePublicVacancies();
+  return { ok: true as const };
 }
 
 

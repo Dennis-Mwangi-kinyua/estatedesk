@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getRuntimeEnvReport } from "@/lib/config/env";
-import { isCronAuthorized } from "@/lib/cron/auth";
+import { getUserSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -42,7 +42,8 @@ export async function GET(request: Request) {
     | { checked: false } = { checked: false };
 
   if (deep) {
-    if (!isCronAuthorized(request)) {
+    const session = await getUserSession();
+    if (!session || !["SUPER_ADMIN", "PLATFORM_ADMIN"].includes(session.platformRole) || session.mustChangePassword || session.requiresTermsAcceptance) {
       return jsonResponse({ error: "Unauthorized" }, 401);
     }
 

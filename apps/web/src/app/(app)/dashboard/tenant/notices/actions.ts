@@ -24,7 +24,7 @@ export async function submitMoveOutNotice(formData: FormData) {
   const notes = String(formData.get("notes") ?? "").trim();
 
   if (!moveOutDateRaw) {
-    redirect("/dashboard/tenant/notices?error=missing_move_out_date");
+    redirect("/dashboard/tenant/move-out?error=missing_move_out_date");
   }
 
   const tenant = await prisma.tenant.findFirst({
@@ -50,12 +50,12 @@ export async function submitMoveOutNotice(formData: FormData) {
   const activeLease = tenant?.leases[0];
 
   if (!tenant || !activeLease) {
-    redirect("/dashboard/tenant/notices?error=no_active_lease");
+    redirect("/dashboard/tenant/move-out?error=no_active_lease");
   }
 
   let moveOutDate: Date;
-  try { moveOutDate = parseMoveOutDate(moveOutDateRaw); } catch { redirect("/dashboard/tenant/notices?error=invalid_move_out_date"); }
-  if (moveOutDateRaw < nairobiDate() || moveOutDate < activeLease.startDate || notes.length > 1000) redirect("/dashboard/tenant/notices?error=invalid_move_out_date");
+  try { moveOutDate = parseMoveOutDate(moveOutDateRaw); } catch { redirect("/dashboard/tenant/move-out?error=invalid_move_out_date"); }
+  if (moveOutDateRaw < nairobiDate() || moveOutDate < activeLease.startDate || notes.length > 1000) redirect("/dashboard/tenant/move-out?error=invalid_move_out_date");
 
   const existingNotice = await prisma.moveOutNotice.findFirst({
     where: {
@@ -68,7 +68,7 @@ export async function submitMoveOutNotice(formData: FormData) {
   });
 
   if (existingNotice) {
-    redirect("/dashboard/tenant/notices?error=duplicate_open_notice");
+    redirect("/dashboard/tenant/move-out?error=duplicate_open_notice");
   }
 
   const leaseDetails = await prisma.lease.findUnique({
@@ -122,7 +122,7 @@ export async function submitMoveOutNotice(formData: FormData) {
 
   await prisma.$transaction(async (tx) => {
     const open = await tx.moveOutNotice.findFirst({ where: { leaseId: activeLease.id, status: { in: ["SUBMITTED", "INSPECTION_SCHEDULED", "INSPECTION_COMPLETED"] } }, select: { id: true } });
-    if (open) redirect("/dashboard/tenant/notices?error=duplicate_open_notice");
+    if (open) redirect("/dashboard/tenant/move-out?error=duplicate_open_notice");
     const notice = await tx.moveOutNotice.create({
       data: {
         referenceCode: createEstateDeskReference(),
@@ -156,11 +156,12 @@ export async function submitMoveOutNotice(formData: FormData) {
   }, { isolationLevel: "Serializable" });
 
   revalidatePath("/dashboard/tenant/notices");
+  revalidatePath("/dashboard/tenant/move-out");
   revalidatePath("/dashboard/tenant/inspections");
   revalidatePath("/dashboard/org/notifications");
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");
-  redirect("/dashboard/tenant/notices?success=notice_submitted");
+  redirect("/dashboard/tenant/move-out?success=notice_submitted");
 }
 
 export async function withdrawMoveOutNotice(formData: FormData) {
@@ -179,6 +180,6 @@ export async function withdrawMoveOutNotice(formData: FormData) {
     return true;
   }, { isolationLevel: "Serializable" });
   if (!withdrawn) return { ok: false as const, error: "This notice can no longer be cancelled. Only notices awaiting inspection can be cancelled." };
-  for (const path of ["/dashboard/tenant/notices", "/dashboard/tenant/inspections", "/dashboard/org/move-outs", "/dashboard/org/notifications", "/dashboard/org/inspections", "/dashboard/caretaker/inspections"]) revalidatePath(path);
+  for (const path of ["/dashboard/tenant/notices", "/dashboard/tenant/move-out", "/dashboard/tenant/inspections", "/dashboard/org/move-outs", "/dashboard/org/notifications", "/dashboard/org/inspections", "/dashboard/caretaker/inspections"]) revalidatePath(path);
   return { ok: true as const };
 }

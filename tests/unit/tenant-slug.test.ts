@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { decodePublicId } from "../../apps/web/src/lib/public-id";
 import { slugifyTenantName } from "../../apps/web/src/lib/tenants/slug";
 import { getCaretakerTenantHref } from "../../apps/web/src/app/(app)/dashboard/caretaker/_lib/paths";
 
@@ -14,8 +15,7 @@ test("caretaker tenant href prefers slug over encoded id", () => {
     getCaretakerTenantHref({ id: "clxyz123", slug: "faith-wanjiku" }),
     "/dashboard/caretaker/tenants/faith-wanjiku",
   );
-  assert.match(
-    getCaretakerTenantHref({ id: "clxyz123", slug: null }),
-    /^\/dashboard\/caretaker\/tenants\/ed_/,
-  );
+  const fallback = getCaretakerTenantHref({ id: "clxyz123", slug: null });
+  assert.match(fallback, /^\/dashboard\/caretaker\/tenants\/tenant--ed_/);
+  assert.equal(decodePublicId(fallback.split("/").at(-1)!, "tenant"), "clxyz123");
 });

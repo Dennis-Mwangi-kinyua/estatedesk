@@ -3,7 +3,7 @@ import { useEffect, useState, useTransition } from "react";
 import { getSettlementPreview } from "../settlement-preview-action";
 import { calculateSettlement, moneyCents } from "@/lib/move-outs/settlement";
 
-export function CloseoutForm({ noticeId, deposit = "0", dateLimit, action }: { noticeId: string; deposit?: string; dateLimit: string; action: (form: FormData) => Promise<void> }) {
+export function CloseoutForm({ noticeId, deposit = "0", dateLimit, action }: { noticeId: string; deposit?: string; dateLimit: string; action: (form: FormData) => Promise<void | { ok: boolean; error?: string }> }) {
   const [held, setHeld] = useState(deposit);
   const [costs, setCosts] = useState<{ description: string; amount: string }[]>([]);
   const [preview, setPreview] = useState<Awaited<ReturnType<typeof getSettlementPreview>> | null>(null);
@@ -20,7 +20,7 @@ export function CloseoutForm({ noticeId, deposit = "0", dateLimit, action }: { n
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     setError("");
-    startTransition(async () => { try { await action(form); window.location.assign("/dashboard/org/move-outs"); } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not close this move-out. Please try again."); } });
+    startTransition(async () => { try { const result = await action(form); if (result && !result.ok) { setError(result.error || "Could not close this move-out. Please try again."); return; } window.location.assign("/dashboard/org/move-outs"); } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not close this move-out. Please try again."); } });
   }}>
     <input type="hidden" name="noticeId" value={noticeId} />
     <input type="hidden" name="costItems" value={JSON.stringify(costs)} />

@@ -16,7 +16,7 @@ test("organisation payment operations scope every metric and queue query", async
       builder.onResolve({ filter: /^next\/link$/ }, () => ({ path: "next-link", namespace: "fixture" }));
       builder.onLoad({ filter: /.*/, namespace: "fixture" }, args => {
         const mocks: Record<string, string> = {
-          "@/lib/prisma": 'globalThis.paymentScopes = []; const record = async args => {globalThis.paymentScopes.push(args.where); return 0;}; export const prisma = {payment:{count:record,findMany: async args => {await record(args); return [];}}};',
+          "@/lib/prisma": 'globalThis.paymentScopes = []; const record = async args => {globalThis.paymentScopes.push(args.where); return 0;}; export const prisma = {organization:{findFirst:async () => ({id:"org-tsa"})},payment:{count:record,findMany: async args => {await record(args); return [];}}};',
           "@/lib/db/retry": 'export const retryTransientDatabaseOperation = async fn => fn(); export const isTransientDatabaseError = () => false;',
           "@/lib/permissions/guards": 'export const requirePlatformRole = async () => ({ platformRole: "SUPER_ADMIN" });',
           "next-link": 'import React from "react"; export default function Link(props) { return React.createElement("a", props); }',

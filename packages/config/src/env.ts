@@ -20,7 +20,6 @@ export type RuntimeEnvKey =
   | "WEB_PUSH_PRIVATE_KEY"
   | "WEB_PUSH_SUBJECT"
   | "AUTH_SECRET"
-  | "CRON_SECRET"
   | "PLATFORM_API_KEYS_PAGE_PASSWORD"
   | "ALERT_WEBHOOK_URL"
   | "SECURITY_ALERT_WEBHOOK_URL"
@@ -104,12 +103,6 @@ export const runtimeEnvChecks = [
     importance: "required",
   },
   {
-    key: "CRON_SECRET",
-    label: "Cron endpoint secret",
-    group: "Security",
-    importance: "required",
-  },
-  {
     key: "PLATFORM_API_KEYS_PAGE_PASSWORD",
     label: "Platform API key vault password",
     group: "Security",
@@ -173,36 +166,6 @@ export const runtimeEnvChecks = [
     key: "NEXT_PUBLIC_ANALYTICS_DEBUG",
     label: "Analytics debug reporting",
     group: "Core",
-    importance: "optional",
-  },
-  {
-    key: "S3_BUCKET",
-    label: "S3 bucket",
-    group: "Storage",
-    importance: "recommended",
-  },
-  {
-    key: "S3_REGION",
-    label: "S3 region",
-    group: "Storage",
-    importance: "recommended",
-  },
-  {
-    key: "S3_ACCESS_KEY_ID",
-    label: "S3 access key",
-    group: "Storage",
-    importance: "recommended",
-  },
-  {
-    key: "S3_SECRET_ACCESS_KEY",
-    label: "S3 secret key",
-    group: "Storage",
-    importance: "recommended",
-  },
-  {
-    key: "S3_PUBLIC_BASE_URL",
-    label: "S3 public base URL",
-    group: "Storage",
     importance: "optional",
   },
   {

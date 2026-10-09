@@ -43,9 +43,8 @@ export default async function TenantProfilePage({
   );
 
   return (
-    <>
-    <div className="mx-auto max-w-7xl p-4"><ProfilePicturePanel /></div>
     <ProfileWorkspace
+      profilePicture={<ProfilePicturePanel />}
       data={{
         tenant,
         paymentHealth,
@@ -54,6 +53,5 @@ export default async function TenantProfilePage({
         showPasswordUpdated: params?.passwordUpdated === "1",
       }}
     />
-    </>
   );
 }

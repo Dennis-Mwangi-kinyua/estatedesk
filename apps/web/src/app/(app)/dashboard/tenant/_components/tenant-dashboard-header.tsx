@@ -1,9 +1,12 @@
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import Link from "next/link";
 import {
+  Bell,
   CreditCard,
   FileText,
   MapPin,
+  MessageSquareText,
+  WalletCards,
   Wrench,
 } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
@@ -106,22 +109,18 @@ export function TenantDashboardHeader({
           <InAppGuideHint topic="rent" workspace="tenant" />
         </WorkspaceHero>
 
-      <div className="grid gap-3 px-5 py-5 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
-        <div className="workspace-metric rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Monthly rent
-          </p>
+      <div className="tenant-summary-grid ed-keep-cols grid grid-cols-2 gap-3 px-4 py-4 sm:px-6 sm:py-5 lg:grid-cols-4">
+        <Link href="/dashboard/tenant/lease" className="workspace-metric group min-w-0 rounded-2xl border border-border bg-muted/10 p-3 transition hover:border-primary/30 hover:bg-muted/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-4">
+          <div className="flex items-center justify-between gap-2"><p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-xs">Monthly rent</p><WalletCards className="size-4 shrink-0 text-primary" aria-hidden="true" /></div>
           <p className="mt-2 text-2xl font-semibold text-foreground">
             {formatCurrency(monthlyRent as never)}
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             Due day {dueDay ?? "—"}
           </p>
-        </div>
-        <div className="workspace-metric rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Balance
-          </p>
+        </Link>
+        <Link href="/dashboard/tenant/payments" className="workspace-metric group min-w-0 rounded-2xl border border-border bg-muted/10 p-3 transition hover:border-primary/30 hover:bg-muted/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-4">
+          <div className="flex items-center justify-between gap-2"><p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-xs">Balance</p><CreditCard className="size-4 shrink-0 text-primary" aria-hidden="true" /></div>
           <p
             className={`mt-2 text-2xl font-semibold ${
               portalContext.paymentHealth?.tone === "settled"
@@ -133,14 +132,12 @@ export function TenantDashboardHeader({
               ? formatCurrency(portalContext.paymentHealth.deficit as never)
               : "—"}
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             {portalContext.paymentHealth?.paymentStatus ?? "No ledger data"}
           </p>
-        </div>
-        <div className="workspace-metric rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Open requests
-          </p>
+        </Link>
+        <Link href="/dashboard/tenant/issues" className="workspace-metric group min-w-0 rounded-2xl border border-border bg-muted/10 p-3 transition hover:border-primary/30 hover:bg-muted/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-4">
+          <div className="flex items-center justify-between gap-2"><p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-xs">Open requests</p><MessageSquareText className="size-4 shrink-0 text-primary" aria-hidden="true" /></div>
           <p
             className={`mt-2 text-2xl font-semibold ${
               openIssuesCount > 0
@@ -150,14 +147,12 @@ export function TenantDashboardHeader({
           >
             {openIssuesCount}
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             Maintenance in progress
           </p>
-        </div>
-        <div className="workspace-metric rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Notifications
-          </p>
+        </Link>
+        <Link href="/dashboard/tenant/notifications" className="workspace-metric group min-w-0 rounded-2xl border border-border bg-muted/10 p-3 transition hover:border-primary/30 hover:bg-muted/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-4">
+          <div className="flex items-center justify-between gap-2"><p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-xs">Notifications</p><Bell className="size-4 shrink-0 text-primary" aria-hidden="true" /></div>
           <p
             className={`mt-2 text-2xl font-semibold ${
               unreadNotificationCount > 0
@@ -167,8 +162,8 @@ export function TenantDashboardHeader({
           >
             {unreadNotificationCount}
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">Unread updates</p>
-        </div>
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">Unread updates</p>
+        </Link>
       </div>
     </section>
   );

@@ -29,7 +29,7 @@ function getCookieSigningSecret() {
     throw new Error("AUTH_SECRET is required in production for cookie signing.");
   }
 
-  return secret ?? process.env.CRON_SECRET ?? "estatedesk-dev-cookie-secret";
+  return secret ?? "estatedesk-dev-cookie-secret";
 }
 
 function signPayload(payload: string, purpose: string) {

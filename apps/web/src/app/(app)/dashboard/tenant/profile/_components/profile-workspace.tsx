@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { PortalOfficeContact } from "@/components/tenant/portal-office-contact";
 import { TenantWorkspace } from "@/components/theme/ed-dashboard-shell";
 import type { TenantProfilePageData } from "../_lib/types";
@@ -10,7 +11,7 @@ import { ProfileHeader } from "./profile-header";
 import { ProfileStatusBanner } from "./profile-status-banner";
 import { TenancySummarySection } from "./tenancy-summary-section";
 
-export function ProfileWorkspace({ data }: { data: TenantProfilePageData }) {
+export function ProfileWorkspace({ data, profilePicture }: { data: TenantProfilePageData; profilePicture?: ReactNode }) {
   const {
     tenant,
     paymentHealth,
@@ -29,25 +30,23 @@ export function ProfileWorkspace({ data }: { data: TenantProfilePageData }) {
 
       {paymentHealth ? <PaymentHealthBanner paymentHealth={paymentHealth} /> : null}
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="space-y-5">
-          <PersonalInfoSection tenant={tenant} />
-          <AccountSection tenant={tenant} />
-          <NextOfKinSection tenant={tenant} />
-        </div>
-
-        <aside className="space-y-5 lg:sticky lg:top-24">
-          <TenancySummarySection tenant={tenant} paymentHealth={paymentHealth} />
-          <ProfileGuidance />
-        </aside>
+      <div className="grid gap-4 sm:gap-5 xl:grid-cols-2 [&>section]:h-full">
+        <PersonalInfoSection tenant={tenant} />
+        {profilePicture}
+        <AccountSection tenant={tenant} />
+        <TenancySummarySection tenant={tenant} paymentHealth={paymentHealth} />
+        <NextOfKinSection tenant={tenant} />
       </div>
 
+      <div className="grid items-start gap-4 sm:gap-5 xl:grid-cols-2">
+      <ProfileGuidance />
       <PortalOfficeContact
         org={tenant.org}
         paymentInstructions={paymentInstructions}
         caretakerContact={portalContext.caretakerContact}
-        layout="strip"
+        layout="compact"
       />
+      </div>
     </TenantWorkspace>
   );
 }

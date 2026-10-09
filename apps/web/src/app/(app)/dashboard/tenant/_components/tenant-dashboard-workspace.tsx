@@ -56,39 +56,33 @@ export function TenantDashboardWorkspace({ data }: { data: TenantDashboardActive
         portalContext={portalContext}
       />
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="space-y-5">
-          <TenantTenancyPanel
-            propertyName={propertyName}
-            buildingName={buildingName}
-            houseNo={houseNo}
-            leaseStatus={leaseStatus}
-            monthlyRent={monthlyRent}
-            dueDay={dueDay}
-            images={images}
+      <TenantDashboardQuickActions />
+
+      <TenantTenancyPanel
+        propertyName={propertyName}
+        buildingName={buildingName}
+        houseNo={houseNo}
+        leaseStatus={leaseStatus}
+        monthlyRent={monthlyRent}
+        dueDay={dueDay}
+        images={images}
+      />
+
+      <div className="grid gap-4 sm:gap-5 xl:grid-cols-2 [&>section]:h-full">
+        <TenantDashboardPayments recentPayments={recentPayments} />
+        <TenantDashboardUpdates notifications={notifications} issues={issues} />
+      </div>
+
+      <div className="grid items-start gap-4 sm:gap-5 xl:grid-cols-2">
+        <TenantDashboardGuidance />
+        {portalContext.tenant ? (
+          <PortalOfficeContact
+            org={portalContext.tenant.org}
+            paymentInstructions={portalContext.paymentInstructions}
+            caretakerContact={portalContext.caretakerContact}
+            layout="compact"
           />
-
-          <div className="grid gap-5 lg:grid-cols-2">
-            <TenantDashboardPayments recentPayments={recentPayments} />
-            <TenantDashboardUpdates
-              notifications={notifications}
-              issues={issues}
-            />
-          </div>
-        </div>
-
-        <aside className="space-y-5 lg:sticky lg:top-24">
-          <TenantDashboardQuickActions />
-          <TenantDashboardGuidance />
-          {portalContext.tenant ? (
-            <PortalOfficeContact
-              org={portalContext.tenant.org}
-              paymentInstructions={portalContext.paymentInstructions}
-              caretakerContact={portalContext.caretakerContact}
-              layout="compact"
-            />
-          ) : null}
-        </aside>
+        ) : null}
       </div>
     </TenantWorkspace>
   );

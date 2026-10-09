@@ -4,12 +4,13 @@ import { build } from "esbuild";
 import path from "node:path";
 async function mount(page: Page, tenant: boolean | "unit" | "verify" | "verify-empty" | "leases" | "leases-empty"=false) {
  const bundle = await build({entryPoints:[path.resolve("tests/e2e/fixtures/portfolio.tsx")],bundle:true,write:false,platform:"browser",format:"iife",jsx:"automatic",tsconfig:"apps/web/tsconfig.json",define:{"process.env.NODE_ENV":'"production"',"process.env":"{}"},plugins:[{name:"portfolio-mocks",setup(builder){
+ builder.onResolve({filter:/^@\/lib\/public-id$/},()=>({path:"public-id",namespace:"fixture"}));
  builder.onResolve({filter:/^next\/link$/},()=>({path:"link",namespace:"fixture"}));
  builder.onResolve({filter:/^next\/navigation$/},()=>({path:"navigation",namespace:"fixture"}));
  builder.onResolve({filter:/^\.\.\/actions$/},()=>({path:"unit-action",namespace:"fixture"}));
  builder.onResolve({filter:/create-tenant-action$/},()=>({path:"action",namespace:"fixture"}));
  builder.onResolve({filter:/^@\/components\/navigation\/app-links$/},()=>({path:"links",namespace:"fixture"}));
- builder.onLoad({filter:/.*/,namespace:"fixture"},args=>({contents:args.path==="unit-action"?'export const createUnitAction=async()=>{}; export const requestTenantTransferAction=async()=>{}; export const approveTenantTransferAction=async()=>{}; export const rejectTenantTransferAction=async()=>{};':args.path==="navigation"?'export const useRouter=()=>({prefetch(){},push(){}}); export const usePathname=()=>"/dashboard/org/properties";':args.path==="action"?'export const createTenantAction=async()=>({status:"error",message:"Simulated server error"});':args.path==="links"?'import React from "react"; export function DeferredLink(props){return React.createElement("a",props);} export const HoverPrefetchLink=DeferredLink;':'import React from "react"; export default function Link(props){return React.createElement("a",props);}',loader:"js",resolveDir:process.cwd()}));
+ builder.onLoad({filter:/.*/,namespace:"fixture"},args=>({contents:args.path==="public-id"?'export const encodePublicId=id=>id; export const encodePublicSlug=id=>id; export const decodePublicId=id=>id;':args.path==="unit-action"?'export const createUnitAction=async()=>{}; export const requestTenantTransferAction=async()=>{}; export const approveTenantTransferAction=async()=>{}; export const rejectTenantTransferAction=async()=>{};':args.path==="navigation"?'export const useRouter=()=>({prefetch(){},push(){}}); export const usePathname=()=>"/dashboard/org/properties";':args.path==="action"?'export const createTenantAction=async()=>({status:"error",message:"Simulated server error"});':args.path==="links"?'import React from "react"; export function DeferredLink(props){return React.createElement("a",props);} export const HoverPrefetchLink=DeferredLink;':'import React from "react"; export default function Link(props){return React.createElement("a",props);}',loader:"js",resolveDir:process.cwd()}));
  }}]});
  await page.goto(`/register${typeof tenant === "string" ? `#${tenant}` : tenant?"#tenant":""}`); await page.waitForLoadState("networkidle");
  const styles=await page.locator('link[rel="stylesheet"]').evaluateAll(links=>links.map(link=>(link as HTMLLinkElement).href));
@@ -81,7 +82,7 @@ test("leases show responsive cards, agreement navigation, details and pagination
  await expect(card.getByRole("link",{name:"View lease for Jane Example"})).toHaveAttribute("href","/dashboard/org/leases/lease-0");
  await card.locator("summary").click();
  await expect(card.getByText("Day 5 each month")).toBeVisible();
- await expect(card.getByRole("link",{name:"Pat Example"})).toHaveAttribute("href","/staff/staff-0");
+ await expect(card.getByText("Pat Example", {exact:true})).toBeVisible();
  await expect(page.getByRole("link",{name:"Next",exact:true})).toHaveAttribute("href","/dashboard/org/leases?page=2");
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.locator("html").evaluate(el=>el.classList.add("dark"));

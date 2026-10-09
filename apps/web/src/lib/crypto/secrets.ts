@@ -16,7 +16,6 @@ const PREFIX = "edsec1:";
 function getSecretsKey() {
   const secret =
     process.env.AUTH_SECRET?.trim() ||
-    process.env.CRON_SECRET?.trim() ||
     process.env.DATABASE_URL?.trim() ||
     "estatedesk-local-secrets-key";
   return createHash("sha256").update(`secrets\0${secret}`).digest();

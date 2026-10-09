@@ -87,7 +87,7 @@ export function TenantTenancyPanel({
         </div>
       ) : null}
 
-      <div className="grid gap-3 px-5 py-5 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+      <div className="tenant-summary-grid ed-keep-cols grid grid-cols-2 gap-3 px-5 py-5 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
         <SummaryMetric
           label="Property"
           value={propertyName ?? "—"}

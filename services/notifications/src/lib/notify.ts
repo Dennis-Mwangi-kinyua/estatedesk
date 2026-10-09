@@ -31,13 +31,7 @@ type NotifyInput = {
   eventKey?: string;
 };
 
-const DEFAULT_CHANNELS = [
-  NotificationChannel.IN_APP,
-  NotificationChannel.SMS,
-  NotificationChannel.WHATSAPP,
-  NotificationChannel.EMAIL,
-  NotificationChannel.WEB_PUSH,
-] as const;
+const DEFAULT_CHANNELS = [NotificationChannel.IN_APP] as const;
 
 function recipientKey(recipient: NotificationRecipient, channel: NotificationChannel) {
   return [channel, recipient.userId ?? "", recipient.tenantId ?? ""].join(":");
@@ -141,7 +135,7 @@ export function notifyInAppAndPush(
 ) {
   return notifyRecipients({
     ...input,
-    channels: [NotificationChannel.IN_APP, NotificationChannel.WEB_PUSH],
+    channels: [NotificationChannel.IN_APP],
   });
 }
 
