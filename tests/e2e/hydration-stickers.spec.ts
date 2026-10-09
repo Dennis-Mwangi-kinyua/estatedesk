@@ -22,14 +22,13 @@ test("hydrates dates and stored dismissals without mismatches and renders profes
   new Function("require", "module", "exports", server.outputFiles[0].text)(fixtureRequire, module, module.exports);
   const { renderToString } = fixtureRequire("react-dom/server");
   const markup = renderToString(module.exports.renderFixture());
-  const client = await build({ stdin: { contents: `import {hydrateRoot} from "react-dom/client"; import {renderFixture} from ${JSON.stringify(fixture)}; window.hydrationErrors=[]; hydrateRoot(document.getElementById("fixture"),renderFixture(),{onRecoverableError(error){window.hydrationErrors.push(error.message)}});`, resolveDir: process.cwd(), loader: "tsx" }, bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", tsconfig: "apps/web/tsconfig.json", define: { "process.env.NODE_ENV": '"production"' }, plugins: [plugin] });
-  await page.goto("/register");
-  await page.waitForLoadState("networkidle");
-  const styles = await page.locator('link[rel="stylesheet"]').evaluateAll(links => links.map(link => (link as HTMLLinkElement).href));
-  await page.setContent(`<html><head><meta name="viewport" content="width=device-width, initial-scale=1">${styles.map(href => `<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system"><div id="fixture">${markup}</div></body></html>`);
+  const client = await build({ stdin: { contents: `import {hydrateRoot} from "react-dom/client"; import {renderFixture} from ${JSON.stringify(fixture)}; window.hydrationErrors=[]; hydrateRoot(document.getElementById("fixture"),renderFixture(),{onRecoverableError(error){window.hydrationErrors.push(error.message)}});`, resolveDir: process.cwd(), loader: "tsx" }, bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", tsconfig: "apps/web/tsconfig.json", define: { "process.env.NODE_ENV": '"production"', "process.env": "{}" }, plugins: [plugin] });
+  await page.route("http://hydration.test/", route => route.fulfill({ contentType: "text/html; charset=utf-8", body: `<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body class="estate-glass-system"><div id="fixture">${markup}</div></body></html>` }));
+  await page.goto("http://hydration.test/");
   await installWorkspaceStyles(page);
   await page.evaluate(() => sessionStorage.setItem("estatedesk:v1:vacancy-inquiries-dismissed:hydration-test", '["inquiry"]'));
   await page.addScriptTag({ content: client.outputFiles[0].text });
+  expect(errors).toEqual([]);
   await expect(page.getByText("Example Guest wants a vacant house")).toHaveCount(0);
   const hydrationErrors = await page.evaluate(() => (window as typeof window & { hydrationErrors: string[] }).hydrationErrors);
   expect(hydrationErrors).toEqual([]);

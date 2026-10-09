@@ -122,5 +122,19 @@ See `docs/INTEGRATION_READINESS.md` for provider readiness expectations.
 2. Set `NEXT_PUBLIC_APP_URL` and `APP_URL` to the live domain
 3. Configure `CRON_SECRET` for authenticated cron API calls. GitHub scheduled cron jobs are removed; configure an external scheduler separately if needed.
 4. Configure `HEALTHCHECK_ENABLED=true` and `HEALTHCHECK_URL` for `.github/workflows/uptime.yml`
-5. Configure S3 before enabling uploads, receipts, or vacancy images
+5. Configure Cloudflare Images for profile photos, BnB photos, and image uploads; configure S3 for file storage where required
 6. Review `docs/PRE_LAUNCH_STATUS.md` before commercial launch
+
+## Cloudflare Images on Vercel
+
+The root `.env` is local and is not included in production deployments. Set `CF_IMAGES_API_TOKEN`, `CF_IMAGES_ACCOUNT_ID`, `CF_IMAGES_HASH`, and `NEXT_PUBLIC_CF_IMAGES_PUBLIC_VARIANT` in the Vercel project's Production environment. The token needs Images Read/Edit access, and the delivery variant must exist in that account (`public` by default).
+
+To copy only these four settings from the local `.env`, authenticate and link the EstateDesk project first:
+
+```bash
+npx vercel@latest login
+npx vercel@latest link
+node scripts/sync-cloudflare-images-env.mjs production
+```
+
+Redeploy production after changing the variables. Never commit `.env` or paste API tokens into issue reports.
