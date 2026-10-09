@@ -10,27 +10,27 @@ type ReceivedNoticesCardProps = {
 
 export function ReceivedNoticesCard({ notifications }: ReceivedNoticesCardProps) {
   return (
-    <SurfaceCard className="p-5 sm:p-6">
+    <SurfaceCard className="min-w-0 p-5 sm:p-6">
       <div className="mb-4">
         <h2 className="text-[22px] font-semibold tracking-tight text-foreground">
           Received Notices
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Notifications sent to your tenant account. Notifications belong directly
-          to the tenant in your schema.
+          Updates and announcements from your property management team.
         </p>
       </div>
 
-      <div className="space-y-3">
+      <div className="tenant-received-notices-grid grid gap-3">
         {notifications.length > 0 ? (
           notifications.map((notification) => (
             <div
               key={notification.id}
-              className="rounded-[20px] ed-theme-card border border-border bg-muted/35 p-4"
+              data-received-notice
+              className="flex min-w-0 flex-col rounded-[20px] ed-theme-card border border-border bg-muted/35 p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">
+                  <p className="break-words text-sm font-semibold text-foreground">
                     {notification.title}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -40,7 +40,7 @@ export function ReceivedNoticesCard({ notifications }: ReceivedNoticesCardProps)
                 </div>
 
                 <span
-                  className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getNotificationStatusClasses(
+                  className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getNotificationStatusClasses(
                     notification.status,
                   )}`}
                 >
@@ -48,11 +48,11 @@ export function ReceivedNoticesCard({ notifications }: ReceivedNoticesCardProps)
                 </span>
               </div>
 
-              <div className="mt-3 rounded-[16px] border border-border/60 bg-card px-3 py-3">
-                <p className="text-sm text-foreground/80">{notification.message}</p>
+              <div className="mt-3 mb-3 flex-1 rounded-[16px] border border-border/60 bg-card px-3 py-3">
+                <p className="whitespace-pre-wrap break-words text-sm leading-6 text-foreground/80 [overflow-wrap:anywhere]">{notification.message}</p>
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-[16px] border border-border/60 bg-card px-3 py-3">
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                     Created
@@ -74,11 +74,11 @@ export function ReceivedNoticesCard({ notifications }: ReceivedNoticesCardProps)
             </div>
           ))
         ) : (
-          <EmptySection
+          <div className="col-span-full"><EmptySection
             title="No received notices"
             description="You do not have any tenant notifications yet."
             guideTopic="rent"
-          />
+          /></div>
         )}
       </div>
     </SurfaceCard>

@@ -69,7 +69,7 @@ export default async function TenantNoticesPage({
 
   return (
     <PageShell>
-      <div className="space-y-4 sm:space-y-6">
+      <div className="tenant-notices-page space-y-4 sm:space-y-6">
         <NoticesHeader activeUnit={activeLease?.unit ?? null} />
         <FlashMessages
           successMessage={successMessage}
@@ -82,17 +82,15 @@ export default async function TenantNoticesPage({
           totalMoveOutNotices={moveOutNotices.length}
         />
 
-        <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+        <div className="tenant-notices-content space-y-4 sm:space-y-6">
           <ReceivedNoticesCard notifications={notifications} />
-          <div className="space-y-4">
-            <GiveNoticeCard hasActiveLease={Boolean(activeLease)} />
-            <GivenNoticesCard
-              moveOutNotices={moveOutNotices}
-              activeMoveOutNotices={activeMoveOutNotices}
-              closedMoveOutNotices={closedMoveOutNotices}
-            />
-          </div>
-        </section>
+          <GiveNoticeCard hasActiveLease={Boolean(activeLease)} />
+          <GivenNoticesCard
+            moveOutNotices={moveOutNotices}
+            activeMoveOutNotices={activeMoveOutNotices}
+            closedMoveOutNotices={closedMoveOutNotices}
+          />
+        </div>
       </div>
     </PageShell>
   );

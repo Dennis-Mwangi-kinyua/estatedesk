@@ -22,31 +22,33 @@ export function GivenNoticesCard({
   closedMoveOutNotices,
 }: GivenNoticesCardProps) {
   return (
-    <SurfaceCard className="p-5 sm:p-6">
-      <div className="mb-4">
-        <h2 className="text-[22px] font-semibold tracking-tight text-foreground">
-          Given Notices
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Your submitted move-out notices and their progress.
-        </p>
+    <SurfaceCard className="min-w-0 p-5 sm:p-6">
+      <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-[22px] font-semibold tracking-tight text-foreground">
+            Given Notices
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your submitted move-out notices and their progress.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 lg:w-80 lg:shrink-0">
+          <StatCard icon={<CalendarDays className="h-4 w-4" />} label="Active" value={activeMoveOutNotices} />
+          <StatCard icon={<CheckCircle2 className="h-4 w-4" />} label="Closed" value={closedMoveOutNotices} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <StatCard icon={<CalendarDays className="h-4 w-4" />} label="Active" value={activeMoveOutNotices} />
-        <StatCard icon={<CheckCircle2 className="h-4 w-4" />} label="Closed" value={closedMoveOutNotices} />
-      </div>
-
-      <div className="mt-4 space-y-3">
+      <div className="space-y-3">
         {moveOutNotices.length > 0 ? (
           moveOutNotices.map((notice) => (
             <div
               key={notice.id}
-              className="rounded-[20px] ed-theme-card border border-border bg-muted/35 p-4"
+              className="min-w-0 rounded-[20px] ed-theme-card border border-border bg-muted/35 p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">
+                  <p className="break-words text-sm font-semibold text-foreground">
                     {notice.lease.unit.property.name} • Unit {notice.lease.unit.houseNo}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -55,7 +57,7 @@ export function GivenNoticesCard({
                 </div>
 
                 <span
-                  className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getMoveOutStatusClasses(
+                  className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getMoveOutStatusClasses(
                     notice.status,
                   )}`}
                 >
@@ -103,7 +105,7 @@ export function GivenNoticesCard({
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                     Notes
                   </p>
-                  <p className="mt-1 text-sm text-foreground/80">{notice.notes}</p>
+                  <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground/80">{notice.notes}</p>
                 </div>
               ) : null}
             </div>

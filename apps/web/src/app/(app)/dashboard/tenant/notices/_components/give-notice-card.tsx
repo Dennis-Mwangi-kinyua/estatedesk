@@ -10,7 +10,7 @@ type GiveNoticeCardProps = {
 
 export function GiveNoticeCard({ hasActiveLease, hasOpenNotice = false }: GiveNoticeCardProps) {
   return (
-    <SurfaceCard className="p-5 sm:p-6">
+    <SurfaceCard className="min-w-0 p-5 sm:p-6">
       <div className="mb-4">
         <h2 className="text-[22px] font-semibold tracking-tight text-foreground">
           Give Notice
@@ -28,42 +28,36 @@ export function GiveNoticeCard({ hasActiveLease, hasOpenNotice = false }: GiveNo
         />
       ) : hasActiveLease ? (
         <form action={submitMoveOutNotice} className="space-y-4">
-          <div>
-            <label
-              htmlFor="moveOutDate"
-              className="mb-2 block text-sm font-medium text-foreground/80"
-            >
-              Intended handover date
-            </label>
-            <input
-              id="moveOutDate"
-              name="moveOutDate"
-              type="date"
-              min={new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Nairobi", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())}
-              required
-              className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition focus:border-neutral-400"
-            />
-          </div>
-
-          <p className="text-xs leading-5 text-muted-foreground">
-            Choose a date that follows your lease notice terms. Management will review the request and arrange an inspection.
-          </p>
-
-          <div>
-            <label
-              htmlFor="notes"
-              className="mb-2 block text-sm font-medium text-foreground/80"
-            >
-              Notes
-            </label>
-            <textarea
-              id="notes"
-              name="notes"
-              rows={4}
-              maxLength={1000}
-              placeholder="Add any move-out details or requests."
-              className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition focus:border-neutral-400"
-            />
+          <div className="tenant-notice-form-fields grid gap-4">
+            <div className="min-w-0">
+              <label htmlFor="moveOutDate" className="mb-2 block text-sm font-medium text-foreground/80">
+                Intended handover date
+              </label>
+              <input
+                id="moveOutDate"
+                name="moveOutDate"
+                type="date"
+                min={new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Nairobi", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())}
+                required
+                className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition focus:border-ring"
+              />
+              <p className="mt-4 text-xs leading-5 text-muted-foreground">
+                Choose a date that follows your lease notice terms. Management will review the request and arrange an inspection.
+              </p>
+            </div>
+            <div className="min-w-0">
+              <label htmlFor="notes" className="mb-2 block text-sm font-medium text-foreground/80">
+                Notes
+              </label>
+              <textarea
+                id="notes"
+                name="notes"
+                rows={4}
+                maxLength={1000}
+                placeholder="Add any move-out details or requests."
+                className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition focus:border-ring"
+              />
+            </div>
           </div>
 
           <button data-workspace-action="true"
