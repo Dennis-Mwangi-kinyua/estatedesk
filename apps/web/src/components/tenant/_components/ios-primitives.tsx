@@ -1,25 +1,10 @@
 "use client";
 
+import { VisualSticker } from "@/components/shared/visual-sticker";
+
 import Link from "next/link";
 import { memo, type ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
-
-export const MobileEmoji = memo(function MobileEmoji({
-  symbol,
-  className = "",
-}: {
-  symbol: string;
-  className?: string;
-}) {
-  return (
-    <span
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-[12px] bg-neutral-100 text-base ${className}`}
-      aria-hidden="true"
-    >
-      {symbol}
-    </span>
-  );
-});
 
 export const IOSDivider = memo(function IOSDivider() {
   return <div className="ml-16 h-px bg-neutral-200 sm:ml-5" />;
@@ -51,20 +36,14 @@ export const IOSRow = memo(function IOSRow({
   label,
   value,
   href,
-  emoji,
 }: {
   label: string;
   value: ReactNode;
   href?: string;
-  emoji?: string;
 }) {
   const content = (
     <div className="flex items-center gap-3 px-4 py-4 sm:px-5">
-      {emoji ? (
-        <div className="shrink-0 lg:hidden">
-          <MobileEmoji symbol={emoji} />
-        </div>
-      ) : null}
+      <VisualSticker label={label} className="lg:hidden" />
 
       <div className="min-w-0 flex-1">
         <p className="text-[15px] text-foreground">{label}</p>

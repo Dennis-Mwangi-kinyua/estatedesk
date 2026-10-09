@@ -25,7 +25,6 @@ type RoleMeta = {
   label: string;
   shortLabel: string;
   description: string;
-  emoji: string;
   badgeClass: string;
   cardClass: string;
 };
@@ -35,7 +34,6 @@ export const ROLE_META: Record<OrgRole, RoleMeta> = {
     label: "Admin",
     shortLabel: "AD",
     description: "Organisation oversight, access control, and configuration.",
-    emoji: "👑",
     badgeClass: "border-slate-200 bg-slate-100 text-slate-700",
     cardClass: "from-white to-slate-50",
   },
@@ -44,7 +42,6 @@ export const ROLE_META: Record<OrgRole, RoleMeta> = {
     label: "Manager",
     shortLabel: "MG",
     description: "Day-to-day supervision across properties and operations.",
-    emoji: "📋",
     badgeClass: "border-blue-200 bg-blue-50 text-blue-700",
     cardClass: "from-white to-blue-50",
   },
@@ -53,7 +50,6 @@ export const ROLE_META: Record<OrgRole, RoleMeta> = {
     label: "Office",
     shortLabel: "OF",
     description: "Administrative coordination, support, and records workflow.",
-    emoji: "🏢",
     badgeClass: "border-violet-200 bg-violet-50 text-violet-700",
     cardClass: "from-white to-violet-50",
   },
@@ -62,7 +58,6 @@ export const ROLE_META: Record<OrgRole, RoleMeta> = {
     label: "Accountant",
     shortLabel: "AC",
     description: "Finance operations, billing, reconciliation, and reporting.",
-    emoji: "💰",
     badgeClass: "border-emerald-200 bg-emerald-50 text-emerald-700",
     cardClass: "from-white to-emerald-50",
   },
@@ -72,7 +67,6 @@ export const ROLE_META: Record<OrgRole, RoleMeta> = {
     shortLabel: "CT",
     description:
       "On-site property support, maintenance coordination, and follow-up.",
-    emoji: "🛠️",
     badgeClass: "border-orange-200 bg-orange-50 text-orange-700",
     cardClass: "from-white to-orange-50",
   },
@@ -81,7 +75,6 @@ export const ROLE_META: Record<OrgRole, RoleMeta> = {
     label: "Tenant",
     shortLabel: "TN",
     description: "Residents and occupants linked to the organisation.",
-    emoji: "🏠",
     badgeClass: "border-sky-200 bg-sky-50 text-sky-700",
     cardClass: "from-white to-sky-50",
   },

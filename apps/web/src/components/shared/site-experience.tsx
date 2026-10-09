@@ -25,13 +25,17 @@ export function SiteExperience() {
         }
       }
       if (heading?.dataset.headingIcon === "custom") delete heading.dataset.pageIcon;
-      if (!isWorkspace && heading && heading.dataset.headingIcon !== "custom" && !heading.querySelector(".workspace-page-marker") && !/\p{Extended_Pictographic}/u.test(heading.textContent ?? "")) {
+      if (!isWorkspace && heading && heading.dataset.headingIcon !== "custom" && !heading.querySelector(".workspace-page-marker, .visual-sticker, svg") && !/\p{Extended_Pictographic}/u.test(heading.textContent ?? "")) {
         const icon = workspaceHeadingIcon(pathname ?? "dashboard");
         heading.dataset.pageIcon = icon.name;
         heading.style.setProperty("--workspace-heading-icon", icon.mask);
       }
       root.querySelectorAll<HTMLElement>(".workspace-metric").forEach(metric => {
-        if (metric.querySelector(".workspace-metric-sticker")) return;
+        if (metric.querySelector(".workspace-metric-sticker, .visual-sticker, svg")) {
+          delete metric.dataset.metricIcon;
+          metric.style.removeProperty("--workspace-metric-icon");
+          return;
+        }
         const label = metric.querySelector("h2, h3, [data-metric-label], p")?.textContent;
         if (label) {
           delete metric.dataset.metricEmoji;

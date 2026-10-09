@@ -1,3 +1,5 @@
+
+import { VisualSticker } from "@/components/shared/visual-sticker";
 export const panelShellClassName =
   "overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm";
 
@@ -31,7 +33,7 @@ export function StatCard({
   return (
     <div className="rounded-2xl border border-border bg-card px-4 py-4 shadow-sm">
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        <span aria-hidden="true" className="mb-2 block text-xl">{label === "Total properties" ? "🏘️" : label === "Active" ? "✅" : label === "Buildings" ? "🏢" : "🚪"}</span>
+        <VisualSticker label={label} className="mb-2" />
         {label}
       </p>
       <p className={`mt-2 text-2xl font-semibold ${valueClassName}`}>{value}</p>

@@ -15,23 +15,23 @@ export function LeasesStats({ data }: { data: OrgLeasesPageData }) {
 
   return (
     <section className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-      <StatCard label="📄 Total leases" value={totalLeases} />
+      <StatCard label="Total leases" value={totalLeases} />
       <StatCard
-        label="✅ Active"
+        label="Active"
         value={activeLeases}
         highlight={activeLeases > 0 ? "success" : "default"}
         note="Currently billing"
       />
       <StatCard
-        label="⏳ Pending"
+        label="Pending"
         value={pendingLeases}
         highlight={pendingLeases > 0 ? "warning" : "default"}
         note="Awaiting activation"
       />
-      <StatCard label="📅 Expired" value={expiredLeases} note="Ended by date" />
-      <StatCard label="🔒 Terminated" value={terminatedLeases} note="Ended early" />
+      <StatCard label="Expired" value={expiredLeases} note="Ended by date" />
+      <StatCard label="Terminated" value={terminatedLeases} note="Ended early" />
       <StatCard
-        label="💳 Monthly rent"
+        label="Monthly rent"
         value={formatCurrency(totalMonthlyRent, currencyCode)}
         note="Across all leases"
       />

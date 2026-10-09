@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
+import { VisualSticker } from "./visual-sticker";
 
 type WorkspaceAction = { label: string; description: string; href: string };
 
@@ -44,9 +45,9 @@ function actionsForWorkspace(path: string, role?: string): WorkspaceAction[] {
 export function WorkspaceActions({ role }: { role?: string }) {
   const actions = actionsForWorkspace(usePathname(), role);
   if (!actions.length) return null;
-  return <section aria-label="Quick actions" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+  return <section aria-label="Quick actions" className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
     {actions.map(action => <Link key={action.href} href={action.href} className="group flex min-h-20 items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-sm transition hover:border-primary/40 hover:bg-muted/40 focus-visible:outline-2 focus-visible:outline-primary">
-      <div className="min-w-0"><span className="block text-sm font-semibold text-foreground">{action.label}</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">{action.description}</span></div>
+      <VisualSticker label={action.label} /><div className="min-w-0 flex-1"><span className="block text-sm font-semibold text-foreground">{action.label}</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">{action.description}</span></div>
       <ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" />
     </Link>)}
   </section>;

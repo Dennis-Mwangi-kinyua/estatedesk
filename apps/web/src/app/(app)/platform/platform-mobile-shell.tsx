@@ -15,7 +15,7 @@ import {
   type PlatformMode,
   type PlatformNavItem,
 } from "./_lib/nav";
-import { platformNavIconMap } from "./_lib/icons";
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { PlatformModeToggle } from "./_components/platform-mode-toggle";
 
 export default function PlatformMobileShell({
@@ -137,9 +137,8 @@ export default function PlatformMobileShell({
         <div inert={open} className="min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
         <nav aria-label="Quick navigation" inert={open} className="ed-shell-panel grid shrink-0 grid-cols-4 border-t border-border px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:hidden">
           {tabs.map((item) => {
-            const Icon = platformNavIconMap[item.icon];
             const active = isNavItemActive(pathname, item.href);
-            return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary ${active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"}`}><Icon className="h-5 w-5" /><span>{item.href === "/platform/organizations" ? "Orgs" : item.href === "/platform/developer" ? "Home" : item.label}</span></Link>;
+            return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary ${active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"}`}><WorkspaceIcon label={item.href} className="h-5 w-5" /><span>{item.href === "/platform/organizations" ? "Orgs" : item.href === "/platform/developer" ? "Home" : item.label}</span></Link>;
           })}
           <button data-workspace-action="true" type="button" onClick={() => setOpen(true)} aria-label="More navigation" aria-expanded={open} aria-controls={panelId} className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold text-muted-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-primary"><Menu className="h-5 w-5" />More</button>
         </nav>

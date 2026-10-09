@@ -1,40 +1,39 @@
-import { createElement } from "react";
 import {
-  Activity, Archive, Bell, BookOpen, Building2, CalendarDays, ChartNoAxesCombined,
-  CircleCheck, ClipboardList, CreditCard, DoorOpen, Droplets, FileText,
-  Gauge, LayoutDashboard, LifeBuoy, LockKeyhole, Megaphone, MessageSquare,
-  Search, Settings2, ShieldCheck, Users, Wrench,
+  Activity, Archive, ArchiveRestore, BadgeDollarSign, BadgePercent, BedDouble,
+  BellRing, BookOpen, BookOpenCheck, Braces, Building, Building2,
+  CalendarDays, ChartNoAxesCombined, CircleCheck, CircleHelp, CirclePlus, ClipboardCheck,
+  ClipboardList, Clock3, ContactRound, DoorOpen, Download, Droplets,
+  FileCheck2, Files, Gauge, Globe, Handshake, HeartHandshake,
+  House, Inbox, KeyRound, Landmark, LayoutDashboard, LifeBuoy,
+  LogIn, LogOut, Mail, MapPinned, Megaphone, MessageSquareText,
+  Package, PencilLine, Phone, ReceiptText, Ruler, Save,
+  Search, ShieldCheck, ShieldUser, SlidersHorizontal, Trash2,
+  Upload, UserRound, UserRoundCog, UserRoundPlus, UsersRound, Vault,
+  Wallet, WalletCards, Wrench, type LucideIcon,
 } from "lucide-react";
+import { stickerFor, type WorkspaceIconName } from "../../lib/presentation/stickers";
 
-/** Shared outline icon vocabulary for navigation, headings and metrics. */
+export const WORKSPACE_ICONS = {
+  Activity, Archive, ArchiveRestore, BadgeDollarSign, BadgePercent, BedDouble,
+  BellRing, BookOpen, BookOpenCheck, Braces, Building, Building2,
+  CalendarDays, ChartNoAxesCombined, CircleCheck, CircleHelp, CirclePlus, ClipboardCheck,
+  ClipboardList, Clock3, ContactRound, DoorOpen, Download, Droplets,
+  FileCheck2, Files, Gauge, Globe, Handshake, HeartHandshake,
+  House, Inbox, KeyRound, Landmark, LayoutDashboard, LifeBuoy,
+  LogIn, LogOut, Mail, MapPinned, Megaphone, MessageSquareText,
+  Package, PencilLine, Phone, ReceiptText, Ruler, Save,
+  Search, ShieldCheck, ShieldUser, SlidersHorizontal, Trash2,
+  Upload, UserRound, UserRoundCog, UserRoundPlus, UsersRound, Vault,
+  Wallet, WalletCards, Wrench,
+} satisfies Record<WorkspaceIconName, LucideIcon>;
+
 export function workspaceIconFor(label: string) {
-  const text = label.toLowerCase();
-  if (/water|meter|reading/.test(text)) return Droplets;
-  if (/issue|maintenance|repair|inspection|task/.test(text)) return Wrench;
-  if (/payment|rent|income|revenue|balance|billing|finance|collection|payout|expenditure|expense|tax|budget|accounting/.test(text)) return CreditCard;
-  if (/tenant|staff|employee|user|people|member|onboarding|resident|agent|landlord|profile/.test(text)) return Users;
-  if (/propert|organisation|organization|portfolio|building/.test(text)) return Building2;
-  if (/unit|occupied|vacan|occupancy/.test(text)) return DoorOpen;
-  if (/lease|document|invoice|agreement|export/.test(text)) return FileText;
-  if (/notification/.test(text)) return Bell;
-  if (/message|inbox|whatsapp|sms|email/.test(text)) return MessageSquare;
-  if (/notice|broadcast|marketing/.test(text)) return Megaphone;
-  if (/security|permission|admin/.test(text)) return ShieldCheck;
-  if (/key|password|login|invite/.test(text)) return LockKeyhole;
-  if (/setting|integration|api|control|feature/.test(text)) return Settings2;
-  if (/calendar|today/.test(text)) return CalendarDays;
-  if (/complete|closed|resolved|success|verified/.test(text)) return CircleCheck;
-  if (/report|analytic|statement|distribution/.test(text)) return ChartNoAxesCombined;
-  if (/health/.test(text)) return Activity;
-  if (/limit/.test(text)) return Gauge;
-  if (/backup|archive|data-management|move-out/.test(text)) return Archive;
-  if (/help|support|contact/.test(text)) return LifeBuoy;
-  if (/guide|docs/.test(text)) return BookOpen;
-  if (/search/.test(text)) return Search;
-  if (/job|queue|pending|audit/.test(text)) return ClipboardList;
-  return LayoutDashboard;
+  return WORKSPACE_ICONS[stickerFor(label).icon];
 }
 
+/** Decorative SVG; visible text on its parent supplies the accessible name. */
 export function WorkspaceIcon({ label, className = "h-5 w-5" }: { label: string; className?: string }) {
-  return createElement(workspaceIconFor(label), { "aria-hidden": true, className, strokeWidth: 1.75 });
+  const { icon } = stickerFor(label);
+  const Icon = WORKSPACE_ICONS[icon];
+  return <Icon aria-hidden="true" focusable="false" data-workspace-icon={icon} className={`shrink-0 ${className}`} strokeWidth={1.75} />;
 }

@@ -1,3 +1,5 @@
+
+import { VisualSticker } from "@/components/shared/visual-sticker";
 import { getLeaseStatusClass } from "../_lib/helpers";
 
 export const panelShellClassName =
@@ -24,7 +26,7 @@ export function StatCard({
   return (
     <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        {label}
+        <VisualSticker label={label} size="xs" className="mb-2 mr-2" />{label}
       </p>
       <p className={`mt-2 break-words text-xl font-semibold sm:text-2xl ${valueClassName}`}>{value}</p>
       {note ? (

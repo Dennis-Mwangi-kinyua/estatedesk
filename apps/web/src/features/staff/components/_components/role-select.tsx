@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import { VisualSticker } from "@/components/shared/visual-sticker";
 import {
   ROLE_META,
   STAFF_ROLES,
@@ -35,17 +36,19 @@ export const RoleSelect = memo(function RoleSelect({
       </select>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {STAFF_ROLES.map((role) => (
-          <button data-workspace-action="true"
+          <button
             key={role}
             type="button"
             onClick={() => onChange(role)}
-            className={`rounded-2xl border p-3 text-left transition ${
+            aria-pressed={selectedRole === role}
+            className={`min-h-24 rounded-2xl border p-4 text-left transition focus-visible:outline-2 focus-visible:outline-ring ${
               selectedRole === role
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-muted/15 text-foreground hover:border-primary/30"
             }`}
           >
-            <span className="block text-sm font-semibold">
+            <span className="flex items-center gap-2 text-sm font-semibold">
+              <VisualSticker label={ROLE_META[role].label} size="xs" />
               {ROLE_META[role].label}
             </span>
             <span

@@ -1,3 +1,5 @@
+
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "next/link";
 import { VisualSticker } from "@/components/shared/visual-sticker";
 import {
@@ -183,7 +185,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   href="/"
                   className="flex w-full items-center justify-center text-[15px] font-semibold tracking-[-0.02em] text-slate-950"
                 >
-                  <span className="mr-2 text-lg">🏠</span>
+                  <WorkspaceIcon label="home" className="mr-2 h-5 w-5" />
                   <span>EstateDesk</span>
                 </Link>
               </div>

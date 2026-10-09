@@ -1,10 +1,11 @@
 "use client";
 
+import { VisualSticker } from "@/components/shared/visual-sticker";
+
 import { memo } from "react";
 import { EyeOff, LockKeyhole } from "lucide-react";
 import { getVisibleValue } from "../_lib/helpers";
 import type { SensitiveFieldKey } from "../_lib/types";
-import { MobileEmoji } from "./ios-primitives";
 
 export const SensitiveValueButton = memo(function SensitiveValueButton({
   label,
@@ -12,24 +13,18 @@ export const SensitiveValueButton = memo(function SensitiveValueButton({
   fieldKey,
   revealed,
   onRequestReveal,
-  emoji,
 }: {
   label: string;
   value?: string | null;
   fieldKey: SensitiveFieldKey;
   revealed: boolean;
   onRequestReveal: (field: SensitiveFieldKey) => void;
-  emoji?: string;
 }) {
   const shownValue = getVisibleValue(revealed, fieldKey, value);
 
   return (
     <div className="flex items-center gap-3 px-4 py-4 sm:px-5">
-      {emoji ? (
-        <div className="shrink-0 lg:hidden">
-          <MobileEmoji symbol={emoji} />
-        </div>
-      ) : null}
+      <VisualSticker label={label} className="lg:hidden" />
 
       <div className="min-w-0 flex-1">
         <p className="text-[15px] text-foreground">{label}</p>

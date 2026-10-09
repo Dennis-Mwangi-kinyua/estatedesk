@@ -26,10 +26,9 @@ export const MobileProfileSections = memo(function MobileProfileSections({
           label="Full Name"
           value={displayValue(tenant.fullName)}
           href="/dashboard/tenant/profile/edit"
-          emoji="👤"
         />
         <IOSDivider />
-        <IOSRow label="Tenant Type" value={tenantTypeLabel} emoji="🏠" />
+        <IOSRow label="Tenant Type" value={tenantTypeLabel} />
         <IOSDivider />
         <SensitiveValueButton
           label="Phone"
@@ -37,7 +36,6 @@ export const MobileProfileSections = memo(function MobileProfileSections({
           fieldKey="phone"
           revealed={revealed.phone}
           onRequestReveal={onRequestReveal}
-          emoji="📞"
         />
         <IOSDivider />
         <SensitiveValueButton
@@ -46,10 +44,9 @@ export const MobileProfileSections = memo(function MobileProfileSections({
           fieldKey="email"
           revealed={revealed.email}
           onRequestReveal={onRequestReveal}
-          emoji="✉️"
         />
         <IOSDivider />
-        <IOSRow label="Status" value={statusLabel} emoji="✅" />
+        <IOSRow label="Status" value={statusLabel} />
       </IOSGroup>
 
       <IOSGroup title="Identity">
@@ -59,7 +56,6 @@ export const MobileProfileSections = memo(function MobileProfileSections({
           fieldKey="nationalId"
           revealed={revealed.nationalId}
           onRequestReveal={onRequestReveal}
-          emoji="🪪"
         />
         <IOSDivider />
         <SensitiveValueButton
@@ -68,7 +64,6 @@ export const MobileProfileSections = memo(function MobileProfileSections({
           fieldKey="kraPin"
           revealed={revealed.kraPin}
           onRequestReveal={onRequestReveal}
-          emoji="🧾"
         />
         {tenant.type === "COMPANY" ? (
           <>
@@ -76,7 +71,6 @@ export const MobileProfileSections = memo(function MobileProfileSections({
             <IOSRow
               label="Company Name"
               value={displayValue(tenant.companyName)}
-              emoji="🏢"
             />
           </>
         ) : null}
@@ -86,13 +80,11 @@ export const MobileProfileSections = memo(function MobileProfileSections({
         <IOSRow
           label="Data Consent"
           value={tenant.dataConsent ? "Granted" : "Not granted"}
-          emoji="🔒"
         />
         <IOSDivider />
         <IOSRow
           label="Marketing Consent"
           value={tenant.marketingConsent ? "Granted" : "Not granted"}
-          emoji="📣"
         />
       </IOSGroup>
 
@@ -102,13 +94,11 @@ export const MobileProfileSections = memo(function MobileProfileSections({
             <IOSRow
               label="Name"
               value={displayValue(tenant.nextOfKin.name)}
-              emoji="🧑‍🤝‍🧑"
             />
             <IOSDivider />
             <IOSRow
               label="Relationship"
               value={displayValue(tenant.nextOfKin.relationship)}
-              emoji="💛"
             />
             <IOSDivider />
             <SensitiveValueButton
@@ -117,7 +107,6 @@ export const MobileProfileSections = memo(function MobileProfileSections({
               fieldKey="nextOfKinPhone"
               revealed={revealed.nextOfKinPhone}
               onRequestReveal={onRequestReveal}
-              emoji="📱"
             />
             <IOSDivider />
             <SensitiveValueButton
@@ -126,7 +115,6 @@ export const MobileProfileSections = memo(function MobileProfileSections({
               fieldKey="nextOfKinEmail"
               revealed={revealed.nextOfKinEmail}
               onRequestReveal={onRequestReveal}
-              emoji="📧"
             />
           </>
         ) : (

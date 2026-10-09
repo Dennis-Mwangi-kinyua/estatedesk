@@ -1,11 +1,13 @@
 "use client";
 
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
+
 import { Children, cloneElement, isValidElement, useRef, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { createUnitAction } from "../actions";
 
-const steps = ["🏡 Identity", "📐 Layout", "💳 Pricing", "✅ Review"];
+const steps = ["Identity", "Layout", "Pricing", "Review"];
 const button = "min-h-12 rounded-xl bg-primary px-5 py-3 font-semibold text-primary-foreground disabled:opacity-50";
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -39,7 +41,7 @@ export function UnitSetupForm({ children, propertyName, cancelHref }: { children
     move(step + 1);
   }
   return <form ref={form} action={createUnitAction} noValidate className="space-y-6" onSubmit={event => { if (step !== 4) { event.preventDefault(); advance(); } }}>
-    <ol className="grid grid-cols-4 gap-2" aria-label="Unit setup steps">{steps.map((label, index) => <li key={label} aria-current={step === index + 1 ? "step" : undefined} className={`rounded-xl border p-2 text-center text-xs sm:text-sm ${step === index + 1 ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground"}`}><span className="block sm:hidden" aria-hidden="true">{label.split(" ")[0]}</span><span className="hidden sm:block">{label}</span><span className="block sm:hidden">{index + 1}</span></li>)}</ol>
+    <ol className="grid grid-cols-4 gap-2" aria-label="Unit setup steps">{steps.map((label, index) => <li key={label} aria-current={step === index + 1 ? "step" : undefined} className={`rounded-xl border p-2 text-center text-xs sm:text-sm ${step === index + 1 ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground"}`}><WorkspaceIcon label={label} className="mx-auto mb-1 h-5 w-5" /><span className="hidden sm:block">{label}</span><span className="block sm:hidden">{index + 1}</span></li>)}</ol>
     <div role="progressbar" aria-label="Unit setup progress" aria-valuemin={1} aria-valuemax={4} aria-valuenow={step} className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary transition-all" style={{width: `${step / 4 * 100}%`}} /></div>
     <h3 ref={heading} tabIndex={-1} className="text-lg font-semibold outline-none">Step {step} of 4 · {steps[step - 1]}</h3>
     {error && <p role="alert" className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
