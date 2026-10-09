@@ -13,6 +13,13 @@ import { encodePublicId } from "@/lib/public-id";
 import { parseInspectionDate } from "@/lib/move-outs/validation";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 
+class ScheduleInspectionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ScheduleInspectionError";
+  }
+}
+
 export async function scheduleInspectionAction(formData: FormData) {
   "use server";
 
@@ -22,15 +29,24 @@ export async function scheduleInspectionAction(formData: FormData) {
   const scheduledAtRaw = String(formData.get("scheduledAt") ?? "").trim();
 
   if (!noticeId || !inspectorUserId || !scheduledAtRaw) {
-    throw new Error("Notice, inspector, and scheduled time are required.");
+    return { ok: false as const, error: "Choose an inspection date, time, and inspector." };
   }
 
-  const scheduledAt = parseInspectionDate(scheduledAtRaw);
+  let scheduledAt: Date;
+  try {
+    scheduledAt = parseInspectionDate(scheduledAtRaw);
+  } catch (error) {
+    return {
+      ok: false as const,
+      error: error instanceof Error ? error.message : "Choose a valid inspection date and time.",
+    };
+  }
   if (Number.isNaN(scheduledAt.getTime())) {
-    throw new Error("Inspection date is invalid.");
+    return { ok: false as const, error: "Choose a valid inspection date and time." };
   }
 
-  await prisma.$transaction(async (tx) => {
+  try {
+    await prisma.$transaction(async (tx) => {
     const notice = await tx.moveOutNotice.findFirst({
       where: {
         id: noticeId,
@@ -50,7 +66,7 @@ export async function scheduleInspectionAction(formData: FormData) {
     });
 
     if (!notice || (notice.inspection && notice.inspection.status !== "SCHEDULED")) {
-      throw new Error("This move-out notice cannot be scheduled.");
+      throw new ScheduleInspectionError("This move-out notice can no longer be scheduled. Refresh the page and try again.");
     }
 
     const inspector = await tx.membership.findMany({
@@ -69,7 +85,7 @@ export async function scheduleInspectionAction(formData: FormData) {
     });
 
     if (!canInspectUnit(inspector, notice.lease.unit)) {
-      throw new Error("Selected inspector is not available in this organisation.");
+      throw new ScheduleInspectionError("Selected inspector is not available for this unit. Choose another inspector.");
     }
 
     const inspection = await tx.inspection.upsert({
@@ -105,7 +121,17 @@ export async function scheduleInspectionAction(formData: FormData) {
         },
       },
     });
-  }, { isolationLevel: "Serializable" });
+    }, { isolationLevel: "Serializable" });
+  } catch (error) {
+    if (error instanceof ScheduleInspectionError) {
+      return { ok: false as const, error: error.message };
+    }
+    console.error("[move-outs] schedule inspection failed", error);
+    return {
+      ok: false as const,
+      error: "The inspection could not be scheduled. Please try again, or contact support if this continues.",
+    };
+  }
 
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");
@@ -115,6 +141,7 @@ export async function scheduleInspectionAction(formData: FormData) {
   revalidatePath("/dashboard/caretaker/inspections");
   revalidatePath("/dashboard/tenant/inspections");
   revalidatePath("/dashboard/tenant/notices");
+  return { ok: true as const };
 }
 
 export async function closeMoveOutAction(formData: FormData) {
