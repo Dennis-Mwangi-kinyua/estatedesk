@@ -10,12 +10,12 @@ async function main() {
   const tenantUser = await f.prisma.user.create({ data: { fullName: "Moveout tenant", email: `tenant-${f.notice.id}@example.test`, passwordHash: "not-a-login-password", termsAcceptedAt: new Date() } });
   await f.prisma.tenant.update({ where: { id: f.tenant.id }, data: { userId: tenantUser.id } });
   const outsider = await f.prisma.user.create({ data: { fullName: "Other tenant", email: `other-${f.notice.id}@example.test`, passwordHash: "not-a-login-password", termsAcceptedAt: new Date() } });
-  const cookies: Record<string, { name: string; value: string }> = {};
+  const cookies: Record<string, { name: string; value: string; secure: boolean }> = {};
   for (const [label, userId, role] of [["manager", f.actor.id, "MANAGER"], ["tenant", tenantUser.id, "TENANT"], ["outsider", outsider.id, "TENANT"]] as const) {
     const membership = await f.prisma.membership.create({ data: { orgId: f.org.id, userId, role } });
     const token = randomBytes(32).toString("hex");
     await f.prisma.userSession.create({ data: { userId, activeMembershipId: membership.id, tokenHash: hashOpaqueToken(token, "session"), expiresAt: new Date(Date.now() + 86400000) } });
-    cookies[label] = { name: getSessionCookieName(), value: createSessionCookieValue(token) };
+    cookies[label] = { name: getSessionCookieName(), value: createSessionCookieValue(token), secure: process.env.NODE_ENV === "production" };
   }
   await writeFile("/tmp/estatedesk-moveout-browser-fixture.json", JSON.stringify({ noticeId: f.notice.id, orgId: f.org.id, tenantId: f.tenant.id, unitId: f.unit.id, day: nairobiDate(), cookies }), { mode: 0o600 });
   await f.prisma.$disconnect();

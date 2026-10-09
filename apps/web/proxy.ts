@@ -189,6 +189,8 @@ function applySecurityHeaders(response: NextResponse, pathname: string) {
 
 function isBrowserApiNavigation(req: NextRequest) {
   if (req.method !== "GET" && req.method !== "HEAD") return false;
+  // These authenticated routes intentionally serve browser downloads.
+  if (/^\/api\/move-outs\/[^/]+\/(report|refund-proof)\/?$/.test(req.nextUrl.pathname)) return false;
 
   const accept = req.headers.get("accept") ?? "";
   const destination = req.headers.get("sec-fetch-dest") ?? "";

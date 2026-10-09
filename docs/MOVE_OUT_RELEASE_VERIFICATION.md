@@ -5,10 +5,12 @@ Validation used disposable PostgreSQL at `127.0.0.1:55439/estatedesk_moveout_tes
 ## Verified locally
 
 - Pending migrations applied successfully, including the empty `Payment.coveredPeriods` default for new cash and deposit-offset payments.
-- 358 unit tests, typecheck, and 8 PostgreSQL integration tests pass. Lint passes with 0 errors and 115 warnings.
+- 359 unit tests, typecheck, and 8 PostgreSQL integration tests pass. Lint passes with 0 errors and 115 warnings.
 - Integration coverage includes deposit application, preserved history and receipts, later debt payments without new recurring bills, refund journal reconciliation, simultaneous closeouts/refunds, payment racing handover, and another active lease.
 - Chromium lifecycle test passes: itemised PDF report, required handover confirmations, closure, private refund evidence upload/download, refund settlement, vacancy readiness, retained tenant receipt, and denial of another tenant's document access.
 - Fixed handover and refund checkboxes shrinking to zero width in narrow layouts.
+- Fixed production middleware redirecting authenticated report/proof download links as generic API navigation; added a regression test.
+- Handover, refund, and vacancy release navigate back to the canonical workspace after saving so staff see the persisted state.
 
 ## Production release verification
 
