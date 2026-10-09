@@ -58,14 +58,14 @@ export function IssuesStageBoard({
   return (
     <section
       className={[
-        "flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 xl:grid xl:overflow-visible",
-        activeFilter === "all" ? "xl:grid-cols-4" : "xl:grid-cols-1",
+        "flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 lg:grid lg:overflow-visible",
+        activeFilter === "all" ? "lg:grid-cols-2 2xl:grid-cols-4" : "lg:grid-cols-1",
       ].join(" ")}
     >
       {columns.map((column) => (
         <div
           key={column.key}
-          className="w-[84vw] max-w-sm shrink-0 snap-center rounded-[28px] border border-border bg-white p-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] xl:w-auto xl:max-w-none"
+          className="w-[84vw] max-w-sm shrink-0 snap-center rounded-[28px] border border-border bg-white p-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] lg:w-auto lg:max-w-none"
         >
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>

@@ -73,6 +73,10 @@ export function MoveOutsWorkspace({
 
   return (
     <div className={shellClassName}>
+      {isOrg ? <nav aria-label="Move-out workspace" className="flex gap-2 overflow-x-auto rounded-2xl border border-border bg-card p-1.5">
+        <Link href="/dashboard/org/move-outs" aria-current="page" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><FileText aria-hidden="true" className="size-4" />Move-out notices</Link>
+        <Link href="/dashboard/org/inspections" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-muted/50 px-4 text-sm font-semibold text-foreground"><CalendarDays aria-hidden="true" className="size-4" />Inspection schedule</Link>
+      </nav> : null}
       <section className={isOrg ? panelShellClassName : undefined}>
         <div className={isOrg ? "border-b border-border px-5 py-5 sm:px-6" : undefined}>
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">

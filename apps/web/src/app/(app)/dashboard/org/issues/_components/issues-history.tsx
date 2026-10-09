@@ -21,7 +21,7 @@ export function IssuesHistory({
 }) {
   return (
     <>
-      <div className="mt-5 space-y-3 lg:hidden">
+      <div className="mt-5 space-y-3 2xl:hidden">
         {issues.map((issue) => {
           const selected = selectedIssueId === issue.id;
 
@@ -38,7 +38,7 @@ export function IssuesHistory({
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-neutral-950">
+                  <p className="break-words text-sm font-semibold text-neutral-950">
                     {issue.title}
                   </p>
                   <p className="mt-1 text-xs text-neutral-500">
@@ -94,8 +94,8 @@ export function IssuesHistory({
         })}
       </div>
 
-      <div className="mt-5 hidden overflow-hidden rounded-[28px] border border-border bg-white lg:block">
-        <table className="min-w-full text-sm">
+      <div className="mt-5 hidden overflow-x-auto rounded-[28px] border border-border bg-white 2xl:block">
+        <table className="min-w-[1100px] text-sm">
           <thead className="border-b border-neutral-200 bg-muted/50">
             <tr className="text-left text-neutral-500">
               <th className="px-5 py-4 font-medium">Issue</th>
@@ -125,7 +125,7 @@ export function IssuesHistory({
                     >
                       {issue.title}
                     </DeferredLink>
-                    <p className="mt-1 text-neutral-500">{issue.description}</p>
+                    <p className="mt-1 line-clamp-2 break-words text-neutral-500">{issue.description}</p>
                   </td>
                   <td className="px-5 py-4 text-neutral-600">
                     {getIssueUnitLabel(issue)}

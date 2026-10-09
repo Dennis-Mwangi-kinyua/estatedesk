@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { OrgRole } from "@prisma/client";
-import { ClipboardCheck } from "lucide-react";
+import { CalendarDays, ClipboardCheck, Clock3, MapPin, UserRound } from "lucide-react";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { encodePublicId } from "@/lib/public-id";
@@ -57,6 +57,10 @@ export function InspectionsWorkspace({
 
   return (
     <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+      <nav aria-label="Move-out workspace" className="flex gap-2 overflow-x-auto rounded-2xl border border-border bg-card p-1.5">
+        <Link href="/dashboard/org/move-outs" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-muted/50 px-4 text-sm font-semibold text-foreground">Move-out notices</Link>
+        <Link href="/dashboard/org/inspections" aria-current="page" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><CalendarDays className="size-4" />Inspection schedule</Link>
+      </nav>
       <section className={panelShellClassName}>
         <div className="border-b border-border px-5 py-5 sm:px-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -83,7 +87,7 @@ export function InspectionsWorkspace({
           </div>
         </div>
 
-        <div className="grid gap-3 px-5 py-5 sm:grid-cols-2 lg:grid-cols-4 sm:px-6">
+        <div className="grid grid-cols-2 gap-3 px-4 py-4 sm:grid-cols-4 sm:px-6 sm:py-5">
           <Stat label="Total" value={data.totalInspections} />
           <Stat label="Scheduled" value={data.scheduledCount} />
           <Stat
@@ -96,7 +100,7 @@ export function InspectionsWorkspace({
       </section>
 
       <section className={panelShellClassName}>
-        <div className="border-b border-border px-5 py-4 sm:px-6">
+        <div className="border-b border-border px-4 py-4 sm:px-6">
           <h2 className="text-lg font-semibold text-foreground">Inspection register</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Showing {data.showingFrom}–{data.showingTo} of {data.totalInspections}
@@ -104,13 +108,27 @@ export function InspectionsWorkspace({
         </div>
 
         {data.inspections.length === 0 ? (
-          <div className="px-5 py-10 text-sm text-muted-foreground sm:px-6">
-            No inspections scheduled yet. Move-out notices will create inspection
-            records when scheduled.
+          <div className="px-5 py-12 text-center sm:px-6">
+            <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary"><CalendarDays className="size-6" /></span>
+            <h3 className="mt-4 font-semibold text-foreground">Your inspection schedule is clear</h3>
+            <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">Schedule an inspection from a move-out notice and it will appear here with its time, inspector, and status.</p>
+            <Link href="/dashboard/org/move-outs" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">Review move-out notices</Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
+          <>
+          <div className="grid gap-3 bg-muted/10 p-3 sm:p-4 lg:hidden">
+            {data.inspections.map((inspection) => {
+              const isOverdue = inspection.status === "SCHEDULED" && inspection.scheduledAt.getTime() < now;
+              const unit = inspection.notice.lease.unit;
+              return <article key={inspection.id} className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-xs font-medium text-muted-foreground">{formatDateTime(inspection.scheduledAt)}</p><DeferredLink href={`/dashboard/org/inspections/${encodePublicId(inspection.id, "inspection")}`} className="mt-1 block break-words text-base font-semibold text-foreground hover:text-primary">{inspection.notice.tenant.fullName}</DeferredLink></div><span className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClasses(inspection.status, isOverdue)}`}>{isOverdue ? "Overdue" : inspection.status.toLowerCase()}</span></div>
+                <div className="mt-4 grid gap-2 border-t border-border pt-3 text-sm text-muted-foreground"><p className="flex min-w-0 items-center gap-2"><MapPin className="size-4 shrink-0" /><span className="break-words">{unit.property.name} · Unit {unit.houseNo}</span></p><p className="flex items-center gap-2"><UserRound className="size-4 shrink-0" />{inspection.inspector.fullName}</p><p className="flex items-center gap-2"><Clock3 className="size-4 shrink-0" />Move-out {formatDate(inspection.notice.moveOutDate)}</p></div>
+                <DeferredLink href={`/dashboard/org/inspections/${encodePublicId(inspection.id, "inspection")}`} className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-primary">Open inspection</DeferredLink>
+              </article>;
+            })}
+          </div>
+          <div className="hidden overflow-x-auto lg:block">
+            <table className="min-w-[900px] w-full text-sm">
               <thead className="border-b border-border bg-muted/20">
                 <tr className="text-left">
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -174,7 +192,7 @@ export function InspectionsWorkspace({
                 })}
               </tbody>
             </table>
-          </div>
+          </div></>
         )}
 
         {data.totalPages > 1 ? (

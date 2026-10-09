@@ -77,7 +77,7 @@ export function IssuesHeader({
         </div>
       </div>
 
-      <div className="grid gap-3 border-b border-border px-5 py-5 sm:grid-cols-4 sm:px-6">
+      <div className="grid grid-cols-2 gap-3 border-b border-border px-5 py-5 sm:grid-cols-4 sm:px-6">
         <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Total issues

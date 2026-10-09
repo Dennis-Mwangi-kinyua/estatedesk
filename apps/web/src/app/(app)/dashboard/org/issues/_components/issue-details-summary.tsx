@@ -30,11 +30,11 @@ export function IssueDetailsSummary({ issue }: { issue: OrgIssue }) {
         </span>
       </div>
 
-      <h2 className="mt-3 text-[26px] font-semibold tracking-tight text-neutral-950">
+      <h2 className="mt-3 break-words text-[26px] font-semibold tracking-tight text-neutral-950">
         {issue.title}
       </h2>
 
-      <p className="mt-2 text-sm leading-6 text-neutral-500">
+      <p className="mt-2 break-words text-sm leading-6 text-neutral-500">
         {issue.description}
       </p>
 
