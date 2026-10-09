@@ -87,7 +87,10 @@ function envFlagEnabled(name: string, defaultInProduction: boolean) {
   return isProduction() && defaultInProduction;
 }
 
-const ENFORCE_USER_AGENT_MATCH = envFlagEnabled("SESSION_BIND_USER_AGENT", true);
+// User-agent strings can change after browser updates and are shared by many
+// browser versions. Treat this as an optional hardening check rather than a
+// production default so routine client updates do not revoke valid sessions.
+const ENFORCE_USER_AGENT_MATCH = envFlagEnabled("SESSION_BIND_USER_AGENT", false);
 // Mobile clients routinely change public IPs as they move between Wi-Fi and
 // cellular networks. Binding a session to that address turns those legitimate
 // network changes into logouts. Deployments that have a stable trusted proxy

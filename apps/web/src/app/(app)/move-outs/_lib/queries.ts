@@ -1,6 +1,7 @@
 import { loadMoveOutBalances } from "@/lib/move-outs/balances";
 import { financialStatus } from "@/lib/move-outs/financial-status";
 import { getPagination } from "@/lib/db/pagination";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
 import { PAGE_SIZE } from "./types";
 import type { SessionWithScope } from "./types";
@@ -89,7 +90,7 @@ export async function getMoveOutsPageData(
     closedCount,
     notices,
     inspectors,
-  ] = await Promise.all([
+  ] = await retryTransientDatabaseOperation(() => Promise.all([
     prisma.moveOutNotice.count({ where: noticeWhere }),
     prisma.moveOutNotice.count({
       where: { ...noticeWhere, status: "SUBMITTED" },
@@ -139,10 +140,13 @@ export async function getMoveOutsPageData(
         },
       },
     }),
-  ]);
+  ]), { label: "organization move-outs page load" });
 
   const financials = new Map(await Promise.all(notices.map(async notice => {
-    const balance = await loadMoveOutBalances(prisma, notice.lease);
+    const balance = await retryTransientDatabaseOperation(
+      () => loadMoveOutBalances(prisma, notice.lease),
+      { label: "organization move-outs financial balance" },
+    );
     const closeout = notice.closeout && typeof notice.closeout === "object" && !Array.isArray(notice.closeout) ? notice.closeout : {};
     return [notice.id, { currentAmountOwed: balance.totalCents / 100, financialStatus: notice.status === "CLOSED" ? financialStatus(balance.totalCents, closeout.refundStatus === "PENDING") : "PRELIMINARY" }] as const;
   })));
