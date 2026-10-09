@@ -95,7 +95,6 @@ export async function getOrgDashboardSummary(
     vacancyInquiries,
     approvedExpendituresAwaitingPayment,
     verifiedPaymentsForPosting,
-    postedPaymentJournals,
     recentActivityRows,
   ] = await retryTransientDatabaseOperation(
     () =>
@@ -352,15 +351,6 @@ export async function getOrgDashboardSummary(
       take: 500,
     }),
 
-    prisma.accountingJournalEntry.findMany({
-      where: {
-        orgId,
-        sourceType: "PAYMENT",
-        sourceId: { not: null },
-      },
-      select: { sourceId: true },
-    }),
-
     prisma.auditLog.findMany({
       where: { orgId },
       orderBy: { createdAt: "desc" },
@@ -379,6 +369,24 @@ export async function getOrgDashboardSummary(
       ]),
     { label: "org-dashboard-summary" },
   );
+
+  const verifiedPaymentIds = verifiedPaymentsForPosting.map(
+    (payment) => payment.id,
+  );
+  const postedPaymentJournals = verifiedPaymentIds.length
+    ? await retryTransientDatabaseOperation(
+        () =>
+          prisma.accountingJournalEntry.findMany({
+            where: {
+              orgId,
+              sourceType: "PAYMENT",
+              sourceId: { in: verifiedPaymentIds },
+            },
+            select: { sourceId: true },
+          }),
+        { label: "org-dashboard-posted-payment-check" },
+      )
+    : [];
 
   const totalUnits = unitGroups.reduce((sum, item) => sum + item._count._all, 0);
 

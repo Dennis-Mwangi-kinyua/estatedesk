@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import {
   formatDate,
   formatDateTime,
@@ -6,13 +7,13 @@ import {
 } from "@/app/(app)/dashboard/tenant/inspections/_lib/helpers";
 import {
   HISTORY_PAGE_SIZE,
-  tenantInspectionsArgs,
+  tenantInspectionNoticeArgs,
   type PreparedNotice,
-  type TenantInspectionsResult,
+  type TenantInspectionNoticeResult,
 } from "@/app/(app)/dashboard/tenant/inspections/_lib/types";
 
 function prepareNotice(
-  notice: TenantInspectionsResult["moveOutNotices"][number],
+  notice: TenantInspectionNoticeResult,
 ): PreparedNotice {
   return {
     id: notice.id,
@@ -34,52 +35,114 @@ function prepareNotice(
   };
 }
 
-export async function getTenantInspectionsData(userId: string, orgId: string) {
-  const tenant: TenantInspectionsResult | null = await prisma.tenant.findFirst({
-    where: {
-      userId,
-      orgId,
-      deletedAt: null,
-    },
-    ...tenantInspectionsArgs,
-  });
+export async function getTenantInspectionsData(
+  userId: string,
+  orgId: string,
+  requestedPage = 1,
+) {
+  const tenant =
+    await retryTransientDatabaseOperation(
+      () =>
+        prisma.tenant.findFirst({
+          where: {
+            userId,
+            orgId,
+            deletedAt: null,
+          },
+          select: { id: true },
+        }),
+      { label: "tenant-inspections-page" },
+    );
 
-  const notices = tenant?.moveOutNotices ?? [];
+  if (!tenant) return null;
 
-  if (!tenant || notices.length === 0) {
-    return null;
-  }
-
-  const preparedNotices = notices.map(prepareNotice);
-  const noticesWithInspections = preparedNotices.filter(
-    (notice) => notice.inspectionStatus !== null,
+  const noticeWhere = { tenantId: tenant.id };
+  const totalNotices = await retryTransientDatabaseOperation(
+    () => prisma.moveOutNotice.count({ where: noticeWhere }),
+    { label: "tenant-inspections-notice-count" },
   );
 
-  const totals = notices.reduce(
-    (acc, notice) => {
-      acc.totalNotices += 1;
+  if (totalNotices === 0) return null;
 
-      if (notice.inspection?.status === "SCHEDULED") acc.scheduled += 1;
-      if (notice.inspection?.status === "COMPLETED") acc.completed += 1;
-      if (notice.inspection?.status === "CANCELLED") acc.cancelled += 1;
-
-      return acc;
-    },
-    {
-      totalNotices: 0,
-      scheduled: 0,
-      completed: 0,
-      cancelled: 0,
-    },
+  const totalPages = Math.max(1, Math.ceil(totalNotices / HISTORY_PAGE_SIZE));
+  const currentPage = Math.min(
+    totalPages,
+    Number.isFinite(requestedPage) ? Math.max(1, Math.floor(requestedPage)) : 1,
   );
+  const skip = (currentPage - 1) * HISTORY_PAGE_SIZE;
+
+  const [notices, latestInspection, inspectionGroups] =
+    await retryTransientDatabaseOperation(
+      () =>
+        Promise.all([
+          prisma.moveOutNotice.findMany({
+            where: noticeWhere,
+            orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+            skip,
+            take: HISTORY_PAGE_SIZE,
+            ...tenantInspectionNoticeArgs,
+          }),
+          prisma.inspection.findFirst({
+            where: { notice: noticeWhere },
+            orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+            select: {
+              id: true,
+              scheduledAt: true,
+              completedAt: true,
+              status: true,
+              notes: true,
+              notice: {
+                select: {
+                  id: true,
+                  moveOutDate: true,
+                  noticeDate: true,
+                  status: true,
+                  notes: true,
+                  lease: {
+                    select: {
+                      unit: {
+                        select: {
+                          houseNo: true,
+                          property: { select: { name: true } },
+                          building: { select: { name: true } },
+                        },
+                      },
+                    },
+                  },
+                  tenantId: true,
+                },
+              },
+              inspector: { select: { fullName: true } },
+            },
+          }),
+          prisma.inspection.groupBy({
+            by: ["status"],
+            where: { notice: noticeWhere },
+            _count: { _all: true },
+          }),
+        ]),
+      { label: "tenant-inspections-history" },
+    );
+
+  const inspectionCounts = new Map(
+    inspectionGroups.map((group) => [group.status, group._count._all]),
+  );
+  const totals = {
+    totalNotices,
+    scheduled: inspectionCounts.get("SCHEDULED") ?? 0,
+    completed: inspectionCounts.get("COMPLETED") ?? 0,
+    cancelled: inspectionCounts.get("CANCELLED") ?? 0,
+  };
+  const latestInspectionNotice = latestInspection
+    ? prepareNotice({ ...latestInspection.notice, inspection: latestInspection })
+    : null;
 
   return {
-    preparedNotices,
-    latestInspectionNotice: noticesWithInspections[0] ?? null,
+    preparedNotices: notices.map(prepareNotice),
+    latestInspectionNotice,
     totals,
-    totalPages: Math.max(
-      1,
-      Math.ceil(preparedNotices.length / HISTORY_PAGE_SIZE),
-    ),
+    currentPage,
+    totalPages,
+    totalNotices,
   };
 }

@@ -139,14 +139,16 @@ export function InspectionsHistorySection({
   preparedNotices,
   currentPage,
   totalPages,
+  totalNotices,
 }: {
   preparedNotices: PreparedNotice[];
   currentPage: number;
   totalPages: number;
+  totalNotices: number;
 }) {
   const historyStart = (currentPage - 1) * HISTORY_PAGE_SIZE;
-  const historyEnd = historyStart + HISTORY_PAGE_SIZE;
-  const paginatedNotices = preparedNotices.slice(historyStart, historyEnd);
+  const historyEnd = historyStart + preparedNotices.length;
+  const paginatedNotices = preparedNotices;
 
   return (
     <SurfaceCard className="p-4 sm:p-6 xl:p-7">
@@ -246,8 +248,7 @@ export function InspectionsHistorySection({
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4">
         <p className="text-sm text-muted-foreground">
           Showing {historyStart + 1}–
-          {Math.min(historyEnd, preparedNotices.length)} of{" "}
-          {preparedNotices.length}
+          {Math.min(historyEnd, totalNotices)} of {totalNotices}
         </p>
 
         <div className="flex flex-wrap gap-2">

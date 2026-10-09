@@ -1,5 +1,5 @@
 import { InspectionStatus, NoticeStatus } from "@prisma/client";
-import type { TenantInspectionsResult } from "@/app/(app)/dashboard/tenant/inspections/_lib/types";
+import type { TenantInspectionNoticeResult } from "@/app/(app)/dashboard/tenant/inspections/_lib/types";
 
 export function formatDate(value: Date | string | null | undefined) {
   if (!value) return "—";
@@ -60,7 +60,7 @@ export function clampPage(page: number, totalPages: number) {
 }
 
 export function getUnitLabel(
-  notice: TenantInspectionsResult["moveOutNotices"][number],
+  notice: TenantInspectionNoticeResult,
 ) {
   const unit = notice.lease.unit;
   return `${unit.property.name} • Unit ${unit.houseNo}${

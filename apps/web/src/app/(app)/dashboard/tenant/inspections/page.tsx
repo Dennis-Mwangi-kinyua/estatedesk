@@ -6,7 +6,6 @@ import { HowInspectionsWork } from "@/app/(app)/dashboard/tenant/inspections/_co
 import { InspectionsHeader } from "@/app/(app)/dashboard/tenant/inspections/_components/inspections-header";
 import { InspectionsHistorySection } from "@/app/(app)/dashboard/tenant/inspections/_components/inspections-history-section";
 import { InspectionsStats } from "@/app/(app)/dashboard/tenant/inspections/_components/inspections-stats";
-import { clampPage } from "@/app/(app)/dashboard/tenant/inspections/_lib/helpers";
 import { getTenantInspectionsData } from "@/app/(app)/dashboard/tenant/inspections/_lib/queries";
 import type { TenantInspectionsPageProps } from "@/app/(app)/dashboard/tenant/inspections/_lib/types";
 
@@ -29,6 +28,7 @@ export default async function TenantInspectionsPage({
   const data = await getTenantInspectionsData(
     session.userId,
     session.activeOrgId,
+    requestedPage,
   );
 
   if (!data) {
@@ -39,8 +39,6 @@ export default async function TenantInspectionsPage({
     );
   }
 
-  const currentPage = clampPage(requestedPage, data.totalPages);
-
   return (
     <PageShell>
       <div className="space-y-4 sm:space-y-6">
@@ -50,8 +48,9 @@ export default async function TenantInspectionsPage({
         <InspectionsStats totals={data.totals} />
         <InspectionsHistorySection
           preparedNotices={data.preparedNotices}
-          currentPage={currentPage}
+          currentPage={data.currentPage}
           totalPages={data.totalPages}
+          totalNotices={data.totalNotices}
         />
         <HowInspectionsWork />
       </div>

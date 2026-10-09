@@ -6,42 +6,40 @@ export type TenantInspectionsPageProps = {
   }>;
 };
 
-export const tenantInspectionsArgs = Prisma.validator<Prisma.TenantDefaultArgs>()({
-  include: {
-    moveOutNotices: {
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        lease: {
-          include: {
-            unit: {
-              include: {
-                property: true,
-                building: true,
-              },
+export const tenantInspectionNoticeArgs =
+  Prisma.validator<Prisma.MoveOutNoticeDefaultArgs>()({
+    select: {
+      id: true,
+      moveOutDate: true,
+      noticeDate: true,
+      status: true,
+      notes: true,
+      lease: {
+        select: {
+          unit: {
+            select: {
+              houseNo: true,
+              property: { select: { name: true } },
+              building: { select: { name: true } },
             },
           },
         },
-        inspection: {
-          include: {
-            inspector: {
-              select: {
-                id: true,
-                fullName: true,
-                email: true,
-                phone: true,
-              },
-            },
-          },
+      },
+      inspection: {
+        select: {
+          id: true,
+          scheduledAt: true,
+          completedAt: true,
+          status: true,
+          notes: true,
+          inspector: { select: { fullName: true } },
         },
       },
     },
-  },
-});
+  });
 
-export type TenantInspectionsResult = Prisma.TenantGetPayload<
-  typeof tenantInspectionsArgs
+export type TenantInspectionNoticeResult = Prisma.MoveOutNoticeGetPayload<
+  typeof tenantInspectionNoticeArgs
 >;
 
 export type PreparedNotice = {

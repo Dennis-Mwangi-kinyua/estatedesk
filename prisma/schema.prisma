@@ -943,7 +943,7 @@ model TenantHistoryRecord {
   tenant          Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([orgId, createdAt])
-  @@index([tenantId, createdAt])
+  @@index([tenantId, createdAt, id])
   @@index([identityId, createdAt])
   @@index([leaseId])
   @@index([moveOutNoticeId])
@@ -2053,6 +2053,7 @@ model MoveOutNotice {
 
   @@index([leaseId, status])
   @@index([tenantId, status])
+  @@index([tenantId, createdAt])
   @@index([moveOutDate])
   @@index([tenantId, moveOutDate])
   @@index([leaseId, moveOutDate])

@@ -63,35 +63,42 @@ export async function getPeriodCloseChecklist(
     throw new Error("Accounting period was not found.");
   }
 
-  const [draftJournals, openBills, verifiedPayments, postedPaymentJournals] =
-    await Promise.all([
-      db.accountingJournalEntry.count({
+  const [draftJournals, openBills, verifiedPayments] = await Promise.all([
+    db.accountingJournalEntry.count({
+      where: {
+        orgId,
+        status: "DRAFT",
+        entryDate: { gte: period.startsAt, lte: period.endsAt },
+      },
+    }),
+    db.accountingVendorBill.count({
+      where: {
+        orgId,
+        status: { in: ["APPROVED", "PARTIAL"] },
+        billDate: { gte: period.startsAt, lte: period.endsAt },
+      },
+    }),
+    db.payment.findMany({
+      where: {
+        orgId,
+        verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
+        paidAt: { gte: period.startsAt, lte: period.endsAt },
+      },
+      select: { id: true },
+    }),
+  ]);
+
+  const verifiedPaymentIds = verifiedPayments.map((payment) => payment.id);
+  const postedPaymentJournals = verifiedPaymentIds.length
+    ? await db.accountingJournalEntry.findMany({
         where: {
           orgId,
-          status: "DRAFT",
-          entryDate: { gte: period.startsAt, lte: period.endsAt },
+          sourceType: "PAYMENT",
+          sourceId: { in: verifiedPaymentIds },
         },
-      }),
-      db.accountingVendorBill.count({
-        where: {
-          orgId,
-          status: { in: ["APPROVED", "PARTIAL"] },
-          billDate: { gte: period.startsAt, lte: period.endsAt },
-        },
-      }),
-      db.payment.findMany({
-        where: {
-          orgId,
-          verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
-          paidAt: { gte: period.startsAt, lte: period.endsAt },
-        },
-        select: { id: true },
-      }),
-      db.accountingJournalEntry.findMany({
-        where: { orgId, sourceType: "PAYMENT", sourceId: { not: null } },
         select: { sourceId: true },
-      }),
-    ]);
+      })
+    : [];
 
   const postedPaymentIds = new Set(
     postedPaymentJournals
