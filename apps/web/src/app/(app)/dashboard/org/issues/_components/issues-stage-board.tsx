@@ -91,7 +91,7 @@ export function IssuesStageBoard({
                 return (
                   <DeferredLink
                     key={issue.id}
-                    href={buildIssuesHref(currentPage, issue.id, activeFilter)}
+                    href={buildIssuesHref(currentPage, issue.id, activeFilter, issue.title)}
                     className={[
                       "block rounded-[22px] border p-4 transition",
                       selected

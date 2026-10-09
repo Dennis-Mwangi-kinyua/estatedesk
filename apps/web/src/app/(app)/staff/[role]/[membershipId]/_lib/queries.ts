@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getOnlineSince } from "@/lib/auth/presence";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
+import { decodePublicId } from "@/lib/public-id";
 import {
   ROLE_META,
   normalizeStaffRole,
@@ -13,7 +14,7 @@ export async function getMemberDetailData(
   membershipIdParam: string,
 ) {
   const role = roleParam;
-  const membershipId = membershipIdParam;
+  const membershipId = decodePublicId(membershipIdParam, "membership");
   const normalizedRole = normalizeStaffRole(role);
 
   if (!normalizedRole) notFound();

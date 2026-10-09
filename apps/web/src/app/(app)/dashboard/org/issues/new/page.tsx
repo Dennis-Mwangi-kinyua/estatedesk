@@ -1,6 +1,7 @@
 import { requireOrgPermission } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { IssueNewWorkspace } from "../_components/issue-new-workspace";
+import { decodePublicId } from "@/lib/public-id";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -35,8 +36,12 @@ export default async function NewOrgIssuePage({ searchParams }: PageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
   const sharedTitle = resolvedSearchParams.title?.slice(0, 120) ?? "";
   const sharedDescription = resolvedSearchParams.description?.slice(0, 2000) ?? "";
-  const selectedPropertyId = resolvedSearchParams.propertyId ?? "";
-  const selectedUnitId = resolvedSearchParams.unitId ?? "";
+  const selectedPropertyId = resolvedSearchParams.propertyId
+    ? decodePublicId(resolvedSearchParams.propertyId, "property")
+    : "";
+  const selectedUnitId = resolvedSearchParams.unitId
+    ? decodePublicId(resolvedSearchParams.unitId, "unit")
+    : "";
   const isSharedDraft = resolvedSearchParams.shared === "1";
   const errorMessage = getErrorMessage(resolvedSearchParams.error);
 

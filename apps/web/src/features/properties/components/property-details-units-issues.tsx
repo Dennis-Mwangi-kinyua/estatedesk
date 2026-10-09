@@ -2,6 +2,7 @@ import { UnitNamesEditor } from "@/components/forms/unit-names-editor";
 import Link from "next/link";
 import type { PropertyDetails } from "@/features/properties/queries/get-property-details";
 import { getOrgUnitHref } from "@/lib/units/url";
+import { encodePublicSlug } from "@/lib/public-id";
 import {
   formatCurrency,
   formatDate,
@@ -103,7 +104,7 @@ export function PropertyDetailsUnitsIssues({
           </div>
 
           <Link
-            href={`/issues?propertyId=${property.id}`}
+            href="/dashboard/org/issues"
             className="text-sm font-medium text-gray-500 transition hover:text-black"
           >
             View all
@@ -142,7 +143,7 @@ export function PropertyDetailsUnitsIssues({
                   </span>
 
                   <Link
-                    href={`/issues/${issue.id}`}
+                    href={`/print/issues/${encodePublicSlug(issue.id, "issue", issue.title)}`}
                     className="text-sm font-medium text-gray-500 transition hover:text-black"
                   >
                     Open →

@@ -194,6 +194,7 @@ export async function loadNotificationsPageData(
       tenant: {
         select: {
           id: true,
+          slug: true,
           fullName: true,
           phone: true,
           email: true,

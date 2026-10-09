@@ -472,14 +472,14 @@ export default async function InspectionPrintPage({ params }: PageProps) {
                 <div className="min-w-[280px] rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                     <div>
-                      <p className="text-slate-500">Inspection ID</p>
+                      <p className="text-slate-500">Inspection reference</p>
                       <p className="font-semibold text-slate-950">
                         {inspection.referenceCode}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-slate-500">Notice ID</p>
+                      <p className="text-slate-500">Notice reference</p>
                       <p className="font-semibold text-slate-950">
                         {inspection.notice.referenceCode}
                       </p>

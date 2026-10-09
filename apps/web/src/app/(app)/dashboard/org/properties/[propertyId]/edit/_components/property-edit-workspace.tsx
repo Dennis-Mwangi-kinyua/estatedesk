@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { encodePublicId } from "@/lib/public-id";
 import { PropertyType, type OrgRole } from "@prisma/client";
 import { PropertiesGuidance } from "../../../_components/properties-guidance";
 import {
@@ -38,7 +39,7 @@ export function PropertyEditWorkspace({
   property: PropertyEditData;
   orgRole?: OrgRole | null;
 }) {
-  const propertyBasePath = `/dashboard/org/properties/${property.id}`;
+  const propertyBasePath = `/dashboard/org/properties/${encodePublicId(property.id, "property")}`;
 
   return (
     <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
@@ -280,7 +281,7 @@ export function PropertyEditWorkspace({
                 Add a unit
               </Link>
               <Link
-                href={`/dashboard/org/issues/new?propertyId=${property.id}`}
+                href={`/dashboard/org/issues/new?propertyId=${encodeURIComponent(encodePublicId(property.id, "property"))}`}
                 className={buttonSecondaryClassName}
               >
                 Report an issue

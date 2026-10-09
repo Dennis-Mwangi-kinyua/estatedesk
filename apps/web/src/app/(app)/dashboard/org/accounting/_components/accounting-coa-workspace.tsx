@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookCopy } from "lucide-react";
+import { encodePublicId } from "@/lib/public-id";
 import {
   createAccountingAccountAction,
   setAccountingAccountActiveAction,
@@ -58,7 +59,7 @@ export function AccountingCoaWorkspace({
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <Link
-                            href={`/dashboard/org/accounting/accounts/${account.id}`}
+                            href={`/dashboard/org/accounting/accounts/${encodePublicId(account.id, "account")}`}
                             className="text-sm font-semibold text-foreground hover:text-primary"
                           >
                             {account.code} · {account.name}

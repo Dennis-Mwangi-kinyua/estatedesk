@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { deleteUnitAction } from "../../actions";
 import type { UnitDetailsViewData } from "../_lib/types";
+import { encodePublicId } from "@/lib/public-id";
 
 export function UnitDetailsHeader({ unit }: { unit: UnitDetailsViewData["unit"] }) {
   return (
@@ -26,7 +27,7 @@ export function UnitDetailsHeader({ unit }: { unit: UnitDetailsViewData["unit"] 
             Back to Units
           </Link>
           <Link data-workspace-action="true"
-            href={`/dashboard/org/properties/${unit.property.id}`}
+            href={`/dashboard/org/properties/${encodePublicId(unit.property.id, "property")}`}
             className="inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
           >
             View Property

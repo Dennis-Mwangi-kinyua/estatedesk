@@ -6,6 +6,7 @@ import { buildOrganizationCsvZip } from "@/lib/data-export/org-export";
 import { DataExportTooLargeError } from "@/lib/data-export/limits";
 import { writeAuditLog } from "@/lib/audit/security";
 import { sendSecurityAlert } from "@/lib/security/alerts";
+import { decodePublicId } from "@/lib/public-id";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,8 @@ function isOrgExportRole(role: string | null) {
 
 export async function GET(_request: Request, context: RouteContext) {
   const session = await requireUserSession();
-  const { requestId } = await context.params;
+  const { requestId: publicRequestId } = await context.params;
+  const requestId = decodePublicId(publicRequestId, "data-export");
 
   const exportRequest = await prisma.dataExportRequest.findUnique({
     where: { id: requestId },

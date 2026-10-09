@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { updateMembership } from "@/features/staff/actions/update-membership";
 import { MemberForm } from "@/features/staff/components/member-form";
+import { decodePublicId, encodePublicId } from "@/lib/public-id";
 import {
   ROLE_META,
   normalizeStaffRole,
@@ -15,7 +16,8 @@ type Props = {
 };
 
 export default async function EditMemberPage({ params }: Props) {
-  const { role, membershipId } = await params;
+  const { role, membershipId: rawMembershipId } = await params;
+  const membershipId = decodePublicId(rawMembershipId, "membership");
 
   const orgId = await requireCurrentOrgId();
   const normalizedRole = normalizeStaffRole(role);
@@ -81,7 +83,7 @@ export default async function EditMemberPage({ params }: Props) {
       <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="space-y-5 p-5 sm:p-6">
           <Link
-            href={`/staff/${normalizedRole.toLowerCase()}/${safeMember.id}`}
+            href={`/staff/${normalizedRole.toLowerCase()}/${encodePublicId(safeMember.id, "membership")}`}
             className="inline-flex w-fit items-center text-sm font-medium text-slate-600 transition hover:text-slate-950"
           >
             <span className="mr-2" aria-hidden="true">
@@ -174,7 +176,7 @@ export default async function EditMemberPage({ params }: Props) {
 
             <div className="mt-4">
               <Link data-workspace-action="true"
-                href={`/staff/${normalizedRole.toLowerCase()}/${safeMember.id}`}
+                href={`/staff/${normalizedRole.toLowerCase()}/${encodePublicId(safeMember.id, "membership")}`}
                 className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
               >
                 View caretaker profile and allocations

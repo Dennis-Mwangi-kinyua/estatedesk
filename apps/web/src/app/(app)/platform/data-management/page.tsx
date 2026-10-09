@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { encodePublicId } from "@/lib/public-id";
 import {
   approveDataExportRequestAction,
   rejectDataExportRequestAction,
@@ -206,7 +207,7 @@ export default async function DataManagementPage() {
                 </div>
               ) : request.status === "APPROVED" ? (
                 <a data-workspace-action="true"
-                  href={`/api/data-exports/${request.id}/download`}
+                  href={`/api/data-exports/${encodePublicId(request.id, "data-export")}/download`}
                   className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted/50"
                 >
                   Download ZIP
@@ -295,7 +296,7 @@ export default async function DataManagementPage() {
                       </div>
                     ) : request.status === "APPROVED" ? (
                       <a
-                        href={`/api/data-exports/${request.id}/download`}
+                        href={`/api/data-exports/${encodePublicId(request.id, "data-export")}/download`}
                         className="inline-flex h-9 items-center rounded-xl border border-neutral-200 px-3 text-xs font-semibold text-neutral-700 hover:bg-neutral-50"
                       >
                         Download ZIP

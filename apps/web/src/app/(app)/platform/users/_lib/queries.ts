@@ -29,6 +29,7 @@ export async function getPlatformUsersPageData(searchParams: {
         take,
         select: {
           id: true,
+          slug: true,
           fullName: true,
           email: true,
           phone: true,

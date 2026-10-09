@@ -2,6 +2,7 @@ import { requireUserSession } from "@/lib/auth/session";
 import { loadTenantDetailsData } from "./_lib/queries";
 import type { TenantDetailsPageProps } from "./_lib/types";
 import { TenantDetailsWorkspace } from "./_components/tenant-details-workspace";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,10 @@ export default async function TenantDetailsPage({ params }: TenantDetailsPagePro
     tenantId,
     session.activeOrgRole,
   );
+
+  if (tenantId !== data.canonicalSlug) {
+    redirect(`/dashboard/org/tenants/${encodeURIComponent(data.canonicalSlug)}`);
+  }
 
   return <TenantDetailsWorkspace data={data} orgRole={session.activeOrgRole} />;
 }

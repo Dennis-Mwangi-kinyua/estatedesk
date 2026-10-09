@@ -29,7 +29,7 @@ export function IssuesHistory({
           return (
             <DeferredLink
               key={issue.id}
-              href={buildIssuesHref(currentPage, issue.id, activeFilter)}
+              href={buildIssuesHref(currentPage, issue.id, activeFilter, issue.title)}
               className={[
                 "block rounded-[24px] border p-4 transition",
                 selected
@@ -115,7 +115,7 @@ export function IssuesHistory({
                 >
                   <td className="px-5 py-4">
                     <DeferredLink
-                      href={buildIssuesHref(currentPage, issue.id, activeFilter)}
+                      href={buildIssuesHref(currentPage, issue.id, activeFilter, issue.title)}
                       className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
                     >
                       {issue.title}

@@ -49,7 +49,7 @@ export function IssuesTable({
                 <td className="px-5 py-4">
                   <div>
                     <DeferredLink
-                      href={buildIssuesHref(currentPage, issue.id)}
+                      href={buildIssuesHref(currentPage, issue.id, "all", issue.title)}
                       className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
                     >
                       {issue.title}

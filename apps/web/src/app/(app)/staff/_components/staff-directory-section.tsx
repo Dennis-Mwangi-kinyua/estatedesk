@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { UserPlus } from "lucide-react";
+import { encodePublicId } from "@/lib/public-id";
 import { formatDateTime, formatRelative } from "../_lib/helpers";
 import type { getStaffDirectoryData } from "../_lib/queries";
 import {
@@ -51,7 +52,7 @@ export function StaffDirectorySection({ data }: StaffDirectorySectionProps) {
             {rows.map((member) => (
               <StaffCard
                 key={member.id}
-                href={`/staff/${member.role.toLowerCase()}/${member.id}`}
+                href={`/staff/${member.role.toLowerCase()}/${encodePublicId(member.id, "membership")}`}
                 name={member.user.fullName}
                 email={member.user.email}
                 phone={member.user.phone}
@@ -105,7 +106,7 @@ export function StaffDirectorySection({ data }: StaffDirectorySectionProps) {
                     </td>
                     <td className="px-5 py-4 sm:px-6">
                       <Link data-workspace-action="true"
-                        href={`/staff/${member.role.toLowerCase()}/${member.id}`}
+                        href={`/staff/${member.role.toLowerCase()}/${encodePublicId(member.id, "membership")}`}
                         className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted/20"
                       >
                         Open

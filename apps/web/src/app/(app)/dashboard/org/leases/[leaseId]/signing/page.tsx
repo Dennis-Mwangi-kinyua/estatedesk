@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { LeaseSigningWorkspace } from "./_components/lease-signing-workspace";
+import { decodePublicId } from "@/lib/public-id";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,8 @@ export default async function LeaseSigningPage({
   params: Promise<{ leaseId: string }>;
 }) {
   const session = await requireOrgRole(["ADMIN", "MANAGER"]);
-  const { leaseId } = await params;
+  const { leaseId: publicLeaseId } = await params;
+  const leaseId = decodePublicId(publicLeaseId, "lease");
 
   const lease = await prisma.lease.findFirst({
     where: {

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { ensureTenantSlug } from "@/lib/tenants/slug";
 import {
   formatCurrency,
   formatDate,
@@ -15,11 +16,12 @@ export async function loadTenantDetailsData(orgId: string, tenantId: string, act
 
   const tenant = await prisma.tenant.findFirst({
     where: {
-      id: tenantId,
+      OR: [{ id: tenantId }, { slug: tenantId }],
       orgId,
     },
     select: {
       id: true,
+      slug: true,
       fullName: true,
       email: true,
       phone: true,
@@ -246,6 +248,13 @@ export async function loadTenantDetailsData(orgId: string, tenantId: string, act
 
   if (!tenant) notFound();
 
+  const canonicalSlug = await ensureTenantSlug(prisma, {
+    id: tenant.id,
+    orgId,
+    fullName: tenant.fullName,
+    slug: tenant.slug,
+  });
+
   const activeLease =
     tenant.leases.find((lease) => String(lease.status).toUpperCase() === "ACTIVE") ??
     tenant.leases[0] ??
@@ -331,6 +340,7 @@ export async function loadTenantDetailsData(orgId: string, tenantId: string, act
 
   return {
     tenant,
+    canonicalSlug,
     canManage,
     activeLease,
     hasActiveLease,

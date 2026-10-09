@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
+import { encodePublicId } from "@/lib/public-id";
 
 const PATH = "/dashboard/org/accounting/budgets";
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
@@ -42,7 +43,7 @@ export async function createBudgetAction(formData: FormData) {
   });
 
   revalidateBudgets();
-  redirect(`${PATH}?budgetId=${budget.id}&message=Budget ${name} created`);
+  redirect(`${PATH}?budgetId=${encodeURIComponent(encodePublicId(budget.id, "budget"))}&message=Budget ${name} created`);
 }
 
 export async function upsertBudgetLineAction(formData: FormData) {
@@ -82,7 +83,7 @@ export async function upsertBudgetLineAction(formData: FormData) {
   }
 
   revalidateBudgets();
-  redirect(`${PATH}?budgetId=${budgetId}&message=Budget line saved`);
+  redirect(`${PATH}?budgetId=${encodeURIComponent(encodePublicId(budgetId, "budget"))}&message=Budget line saved`);
 }
 
 export async function approveBudgetAction(formData: FormData) {
@@ -113,5 +114,5 @@ export async function approveBudgetAction(formData: FormData) {
   });
 
   revalidateBudgets();
-  redirect(`${PATH}?budgetId=${budgetId}&message=Budget approved`);
+  redirect(`${PATH}?budgetId=${encodeURIComponent(encodePublicId(budgetId, "budget"))}&message=Budget approved`);
 }

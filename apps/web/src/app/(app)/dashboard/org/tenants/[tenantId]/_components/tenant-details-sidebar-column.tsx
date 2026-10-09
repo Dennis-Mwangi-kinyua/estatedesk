@@ -54,7 +54,7 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
 
           <div className="mt-4 flex flex-col gap-2">
             <a data-workspace-action="true"
-              href={`/dashboard/org/tenants/${tenant.id}/tribunal-pack`}
+              href={`/dashboard/org/tenants/${encodeURIComponent(tenant.slug ?? tenant.id)}/tribunal-pack`}
               className="inline-flex items-center justify-center rounded-full border border-teal-700/20 bg-teal-700 px-4 py-2.5 text-center text-xs font-semibold text-white shadow-sm hover:bg-teal-800"
             >
               Download tribunal pack (PDF)

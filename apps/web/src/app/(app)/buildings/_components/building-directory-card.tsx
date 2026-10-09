@@ -1,5 +1,6 @@
 import { DeferredLink } from "@/components/navigation/app-links";
 import { deleteBuildingAction } from "@/app/(app)/dashboard/org/buildings/actions";
+import { encodePublicId } from "@/lib/public-id";
 import { formatDate } from "../_lib/helpers";
 import type { getBuildingsPageData } from "../_lib/queries";
 import { BuildingStatusPill } from "./buildings-ui";
@@ -54,7 +55,7 @@ export function BuildingDirectoryCard({ building }: { building: Building }) {
             <p>
               <span className="font-medium text-foreground">Property:</span>{" "}
               <DeferredLink
-                href={`/dashboard/org/properties/${building.property.id}`}
+                href={`/dashboard/org/properties/${encodePublicId(building.property.id, "property")}`}
                 className="font-medium text-primary transition hover:text-primary/80"
               >
                 {building.property.name}

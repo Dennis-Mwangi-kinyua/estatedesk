@@ -4,6 +4,7 @@ import { AccountingSetup } from "../_components/accounting-setup";
 import { AccountingSubNav } from "../_components/accounting-sub-nav";
 import { getBudgetsPageData } from "../_lib/budget-queries";
 import { getAccountingPageData } from "../_lib/queries";
+import { decodePublicId } from "@/lib/public-id";
 
 export const dynamic = "force-dynamic";
 
@@ -15,9 +16,12 @@ export default async function AccountingBudgetsPage({
   const session = await requireOrgRole(["ADMIN", "MANAGER", "ACCOUNTANT"]);
   const orgId = session.activeOrgId!;
   const resolvedSearchParams = (await searchParams) ?? {};
+  const budgetId = resolvedSearchParams.budgetId
+    ? decodePublicId(resolvedSearchParams.budgetId, "budget")
+    : undefined;
   const [setup, data] = await Promise.all([
     getAccountingPageData(orgId),
-    getBudgetsPageData(orgId, resolvedSearchParams.budgetId),
+    getBudgetsPageData(orgId, budgetId),
   ]);
 
   if (!setup.isInitialized) {

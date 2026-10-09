@@ -1,6 +1,7 @@
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { AccountingRequestsReviewWorkspace } from "@/features/accounting-requests/components/accounting-requests-review-workspace";
 import { getAccountingRequestsReviewPageData } from "@/features/accounting-requests/_lib/queries";
+import { decodePublicId } from "@/lib/public-id";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,7 @@ export default async function AccountingRequestsPage({ searchParams }: PageProps
     <AccountingRequestsReviewWorkspace
       data={data}
       message={resolved.message}
-      focusId={resolved.focus}
+      focusId={resolved.focus ? decodePublicId(resolved.focus, "accounting-request") : undefined}
     />
   );
 }

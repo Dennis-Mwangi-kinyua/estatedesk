@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import { encodePublicId } from "@/lib/public-id";
 import {
   PageHeader,
   StatCard,
@@ -44,7 +45,7 @@ export function SearchWorkspace({
     primary: user.fullName,
     secondary: user.email ?? user.username ?? user.phone ?? "—",
     status: user.platformRole,
-    href: `/platform/users/${user.username ?? user.id}`,
+    href: `/platform/users/${encodeURIComponent(user.slug ?? user.username ?? encodePublicId(user.id, "user"))}`,
     date: user.updatedAt,
   }));
 

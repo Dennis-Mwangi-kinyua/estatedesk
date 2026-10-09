@@ -6,6 +6,7 @@ import { AccountingAccountWorkspace } from "../../_components/accounting-account
 import { AccountingSetup } from "../../_components/accounting-setup";
 import { AccountingSubNav } from "../../_components/accounting-sub-nav";
 import { getAccountingPageData } from "../../_lib/queries";
+import { decodePublicId } from "@/lib/public-id";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,8 @@ export default async function AccountingAccountPage({
 }) {
   const session = await requireOrgRole(["ADMIN", "MANAGER", "ACCOUNTANT"]);
   const orgId = session.activeOrgId!;
-  const { accountId } = await params;
+  const { accountId: publicAccountId } = await params;
+  const accountId = decodePublicId(publicAccountId, "account");
   const data = await getAccountingPageData(orgId);
 
   if (!data.isInitialized) {

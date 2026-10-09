@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
-import { decodePublicId } from "@/lib/public-id";
+import { decodePublicSlug } from "@/lib/public-id";
 import { getCaretakerManageableIssue } from "@/app/(app)/dashboard/caretaker/issues/_lib/access";
 import { getIssueSlaState } from "@/app/(app)/dashboard/caretaker/_lib/sla";
 import AutoPrint from "../../inspections/[inspectionId]/AutoPrint";
@@ -35,7 +35,7 @@ export default async function PrintIssueWorkOrderPage({ params }: PageProps) {
     notFound();
   }
 
-  const issueId = decodePublicId(publicIssueId, "issue");
+  const issueId = decodePublicSlug(publicIssueId, "issue");
   const manageable = await getCaretakerManageableIssue({
     orgId: session.activeOrgId,
     caretakerUserId: session.userId,

@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { decodePublicId } from "@/lib/public-id";
 
 export async function getPlatformUserDetails(id: string) {
+  const userRef = decodePublicId(id, "user");
   const user = await prisma.user.findFirst({
     where: {
-      OR: [{ id }, { username: id }, { slug: id }],
+      OR: [{ id: userRef }, { username: userRef }, { slug: userRef }],
       deletedAt: null,
     },
     include: {

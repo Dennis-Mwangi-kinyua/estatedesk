@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { encodePublicId } from "@/lib/public-id";
 import { formatMoney } from "../_lib/helpers";
 import type { AccountingPageData } from "../_lib/types";
 import { panelShellClassName } from "./accounting-ui";
@@ -51,7 +52,7 @@ export function AccountingChartOfAccounts({ data }: { data: AccountingPageData }
                 >
                   {accountIdByCode.get(row.code) ? (
                     <Link
-                      href={`/dashboard/org/accounting/accounts/${accountIdByCode.get(row.code)}`}
+                      href={`/dashboard/org/accounting/accounts/${encodePublicId(accountIdByCode.get(row.code)!, "account")}`}
                       className="font-medium text-foreground hover:text-primary"
                     >
                       {row.code} · {row.name}

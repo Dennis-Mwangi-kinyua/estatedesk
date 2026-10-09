@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { UnitDetailsViewData } from "../_lib/types";
 import { DetailItem, formatCurrency } from "./unit-details-ui";
+import { encodePublicId } from "@/lib/public-id";
 
 export function UnitPropertyContextPanel({
   unit,
@@ -25,7 +26,7 @@ export function UnitPropertyContextPanel({
                 label="Property"
                 value={
                   <Link
-                    href={`/dashboard/org/properties/${unit.property.id}`}
+                    href={`/dashboard/org/properties/${encodePublicId(unit.property.id, "property")}`}
                     className="text-slate-900 hover:text-slate-700"
                   >
                     {unit.property.name}

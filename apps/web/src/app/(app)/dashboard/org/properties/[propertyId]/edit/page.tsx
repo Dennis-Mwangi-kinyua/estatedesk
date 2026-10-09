@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { PropertyEditWorkspace } from "./_components/property-edit-workspace";
+import { decodePublicId } from "@/lib/public-id";
 
 type EditPropertyPageProps = {
   params: Promise<{
@@ -13,7 +14,8 @@ export default async function EditPropertyPage({
   params,
 }: EditPropertyPageProps) {
   const session = await requireManagementAccess();
-  const { propertyId } = await params;
+  const { propertyId: rawPropertyId } = await params;
+  const propertyId = decodePublicId(rawPropertyId, "property");
 
   const property = await prisma.property.findFirst({
     where: {

@@ -44,6 +44,7 @@ export async function loadTenantsPageData(
       take,
       select: {
         id: true,
+        slug: true,
         fullName: true,
         email: true,
         phone: true,

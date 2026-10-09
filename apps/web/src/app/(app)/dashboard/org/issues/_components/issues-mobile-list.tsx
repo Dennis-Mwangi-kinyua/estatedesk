@@ -38,7 +38,7 @@ export function IssuesMobileList({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <DeferredLink
-                  href={buildIssuesHref(currentPage, issue.id)}
+                  href={buildIssuesHref(currentPage, issue.id, "all", issue.title)}
                   className="text-sm font-semibold text-neutral-950 underline-offset-4 hover:underline"
                 >
                   {issue.title}
@@ -131,7 +131,7 @@ export function IssuesMobileList({
 
             <div className="mt-3 flex flex-wrap gap-2">
               <DeferredLink
-                href={buildIssuesHref(currentPage, issue.id)}
+                href={buildIssuesHref(currentPage, issue.id, "all", issue.title)}
                 className="inline-flex items-center rounded-[16px] border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-50"
               >
                 <Wrench className="mr-2 h-4 w-4" />

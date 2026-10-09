@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireOrgPermission } from "@/lib/permissions/guards";
 import { generateLeaseAgreementPdf } from "@/lib/documents/lease-agreement-pdf";
+import { encodePublicId } from "@/lib/public-id";
 export async function saveLeaseAgreement(_state: { message: string }, form: FormData) {
   const session = await requireOrgPermission("leases.manage");
   const leaseId = String(form.get("leaseId") || "");
@@ -34,7 +35,7 @@ export async function saveLeaseAgreement(_state: { message: string }, form: Form
       } });
       await tx.lease.update({ where: { id: lease.id }, data: { contractDocumentId: asset.id } });
     }, { timeout: 15000 });
-    revalidatePath(`/dashboard/org/leases/${leaseId}`);
+    revalidatePath(`/dashboard/org/leases/${encodePublicId(leaseId, "lease")}`);
     revalidatePath("/dashboard/tenant/lease"); revalidatePath("/dashboard/tenant/documents");
     return { message: "Agreement saved. Management and the tenant can now download it." };
   } catch (error) {

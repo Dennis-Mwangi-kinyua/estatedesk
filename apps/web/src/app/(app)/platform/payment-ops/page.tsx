@@ -126,7 +126,14 @@ export default async function PaymentOpsPage({ searchParams }: { searchParams?: 
   });
 
   const params = searchParams ? await searchParams : {};
-  const scope = params.orgId ? { orgId: params.orgId.slice(0, 100) } : {};
+  const orgRef = params.orgId?.slice(0, 100);
+  const scopedOrg = orgRef
+    ? await prisma.organization.findFirst({
+        where: { OR: [{ slug: orgRef }, { id: orgRef }], deletedAt: null },
+        select: { id: true },
+      })
+    : null;
+  const scope = orgRef ? { orgId: scopedOrg?.id ?? "__invalid_org_scope__" } : {};
 
   let pending: number;
   let failed: number;

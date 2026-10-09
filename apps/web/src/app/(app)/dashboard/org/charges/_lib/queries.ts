@@ -27,6 +27,7 @@ export async function getChargesPageData(orgId: string): Promise<ChargesPageData
             tenant: {
               select: {
                 id: true,
+                slug: true,
                 fullName: true,
               },
             },

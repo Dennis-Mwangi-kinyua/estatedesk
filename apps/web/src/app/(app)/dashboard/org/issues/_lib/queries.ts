@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { TicketStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
+import { decodePublicSlug } from "@/lib/public-id";
 import {
   HISTORY_PAGE_SIZE,
   ORG_ISSUE_ROLES,
@@ -17,6 +18,7 @@ import {
 } from "./types";
 import {
   buildIssueFilterWhere,
+  buildIssuesHref,
   canAssignCaretakerRole,
   clampPage,
   normalizeIssueStatusFilter,
@@ -123,6 +125,14 @@ export async function getOrgIssuesPageData(
 ): Promise<OrgIssuesPageData> {
   const membership = await getCurrentOrgContext();
   const resolvedSearchParams = (await searchParamsPromise) ?? {};
+  let selectedIssueId: string | undefined;
+  if (resolvedSearchParams.issueId) {
+    try {
+      selectedIssueId = decodePublicSlug(resolvedSearchParams.issueId, "issue");
+    } catch {
+      selectedIssueId = undefined;
+    }
+  }
   const requestedPage = Number(resolvedSearchParams.page ?? "1");
   const canAssignCaretaker = canAssignCaretakerRole(membership.role);
   const activeFilter = normalizeIssueStatusFilter(resolvedSearchParams.status);
@@ -160,10 +170,10 @@ export async function getOrgIssuesPageData(
       },
     }),
     loadStageBoardIssues(membership.orgId, activeFilter),
-    resolvedSearchParams.issueId
+    selectedIssueId
       ? prisma.issueTicket.findFirst({
           where: {
-            id: resolvedSearchParams.issueId,
+            id: selectedIssueId,
             orgId: membership.orgId,
           },
           ...orgIssueArgs,
@@ -189,10 +199,14 @@ export async function getOrgIssuesPageData(
   const selectedIssue =
     selectedIssueById ??
     paginatedIssues.find(
-      (issue) => issue.id === resolvedSearchParams.issueId,
+      (issue) => issue.id === selectedIssueId,
     ) ??
     paginatedIssues[0] ??
     null;
+
+  if (resolvedSearchParams.issueId && selectedIssue && !resolvedSearchParams.issueId.includes("--ed_")) {
+    redirect(buildIssuesHref(currentPage, selectedIssue.id, activeFilter, selectedIssue.title));
+  }
 
   return {
     membership,

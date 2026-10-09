@@ -4,6 +4,7 @@ import { AccountingSetup } from "../_components/accounting-setup";
 import { AccountingSubNav } from "../_components/accounting-sub-nav";
 import { getBankPageData } from "../_lib/bank-queries";
 import { getAccountingPageData } from "../_lib/queries";
+import { decodePublicId } from "@/lib/public-id";
 
 export const dynamic = "force-dynamic";
 
@@ -15,9 +16,12 @@ export default async function AccountingBankPage({
   const session = await requireOrgRole(["ADMIN", "MANAGER", "ACCOUNTANT"]);
   const orgId = session.activeOrgId!;
   const resolvedSearchParams = (await searchParams) ?? {};
+  const bankAccountId = resolvedSearchParams.bankAccountId
+    ? decodePublicId(resolvedSearchParams.bankAccountId, "bank-account")
+    : undefined;
   const [setup, data] = await Promise.all([
     getAccountingPageData(orgId),
-    getBankPageData(orgId, resolvedSearchParams.bankAccountId),
+    getBankPageData(orgId, bankAccountId),
   ]);
 
   if (!setup.isInitialized) {
@@ -38,7 +42,7 @@ export default async function AccountingBankPage({
       <AccountingBankWorkspace
         data={data}
         message={resolvedSearchParams.message}
-        bankAccountId={resolvedSearchParams.bankAccountId}
+        bankAccountId={bankAccountId}
         assetAccounts={assetAccounts}
       />
     </div>

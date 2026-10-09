@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { encodePublicId } from "@/lib/public-id";
 import type { PropertyDetails } from "@/features/properties/queries/get-property-details";
 import {
   formatCurrency,
@@ -59,28 +60,28 @@ export function PropertyDetailsOverview({
 
         <div className="flex flex-wrap gap-3 xl:justify-end">
           <Link
-            href={`/properties/${property.id}/edit`}
+              href={`/dashboard/org/properties/${encodePublicId(property.id, "property")}/edit`}
             className="inline-flex items-center rounded-xl border px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 hover:text-black"
           >
             Edit Property
           </Link>
 
           <Link
-            href={`/properties/${property.id}/units/new`}
+              href={`/dashboard/org/properties/${encodePublicId(property.id, "property")}/units/new`}
             className="inline-flex items-center rounded-xl border px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 hover:text-black"
           >
             Add Unit
           </Link>
 
           <Link
-            href={`/staff?propertyId=${property.id}`}
+              href="/staff"
             className="inline-flex items-center rounded-xl border px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 hover:text-black"
           >
             Assign Caretaker
           </Link>
 
           <Link
-            href={`/issues/new?propertyId=${property.id}`}
+              href={`/issues/new?propertyId=${encodeURIComponent(encodePublicId(property.id, "property"))}`}
             className="inline-flex items-center rounded-xl bg-black px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
           >
             Report Issue

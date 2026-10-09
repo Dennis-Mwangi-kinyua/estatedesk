@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { requireUserSession } from "@/lib/auth/session";
 import { getOwnerStatement } from "@/lib/accounting/owner-statements";
 import { prisma } from "@/lib/prisma";
+import { encodePublicId } from "@/lib/public-id";
 
 export const dynamic = "force-dynamic";
 
@@ -115,7 +116,7 @@ export default async function LandlordStatementsPage({
             Payouts
           </Link>
           <Link
-            href={`/print/owner-statements?landlordId=${profile.id}&from=${fromValue}&to=${toValue}`}
+            href={`/print/owner-statements?landlordId=${encodeURIComponent(encodePublicId(profile.id, "landlord-profile"))}&from=${fromValue}&to=${toValue}`}
             className="inline-flex min-h-10 items-center rounded-xl bg-foreground px-3 text-sm font-semibold text-background"
           >
             Print / PDF

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { encodePublicId } from "@/lib/public-id";
 import { ArrowUpRight, KeyRound, Shield, UserCog } from "lucide-react";
 import {
   Badge,
@@ -25,7 +26,7 @@ function adminOverrides(admin: AdminRow) {
 function AdminMatrixCard({ admin }: { admin: AdminRow }) {
   const { granted, revoked } = adminOverrides(admin);
   const contact = admin.email ?? admin.username ?? "—";
-  const href = `/platform/users/${admin.username ?? admin.id}`;
+  const href = `/platform/users/${encodeURIComponent(admin.slug ?? admin.username ?? encodePublicId(admin.id, "user"))}`;
 
   return (
     <article className="min-w-0 border-b border-border last:border-b-0">
@@ -156,7 +157,7 @@ function AdminMatrixTableRow({ admin }: { admin: AdminRow }) {
       </td>
       <td className="px-4 py-3">
         <Link
-          href={`/platform/users/${admin.username ?? admin.id}`}
+          href={`/platform/users/${encodeURIComponent(admin.slug ?? admin.username ?? encodePublicId(admin.id, "user"))}`}
           className="inline-flex items-center gap-1 text-sm font-medium text-foreground underline-offset-4 hover:underline"
         >
           Open

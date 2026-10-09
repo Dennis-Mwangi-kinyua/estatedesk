@@ -13,6 +13,7 @@ import { parseBankStatement } from "@/lib/payments/bank-statement";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import type { AccountingBankAccountType } from "@prisma/client";
+import { encodePublicId } from "@/lib/public-id";
 
 const PATH = "/dashboard/org/accounting/bank";
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
@@ -99,7 +100,7 @@ export async function startBankReconciliationAction(formData: FormData) {
 
   revalidateBank();
   redirect(
-    `${PATH}?bankAccountId=${bankAccountId}&message=Reconciliation draft ${reconciliation.id.slice(0, 8)} started`,
+    `${PATH}?bankAccountId=${encodeURIComponent(encodePublicId(bankAccountId, "bank-account"))}&message=Reconciliation draft ${reconciliation.id.slice(0, 8)} started`,
   );
 }
 
@@ -112,7 +113,7 @@ export async function completeBankReconciliationAction(formData: FormData) {
   await completeBankReconciliation(prisma, orgId, reconciliationId, session.userId);
 
   revalidateBank();
-  redirect(`${PATH}?bankAccountId=${bankAccountId}&message=Reconciliation completed`);
+  redirect(`${PATH}?bankAccountId=${encodeURIComponent(encodePublicId(bankAccountId, "bank-account"))}&message=Reconciliation completed`);
 }
 
 export async function importGlBankStatementAction(formData: FormData) {
@@ -139,7 +140,7 @@ export async function importGlBankStatementAction(formData: FormData) {
 
   revalidateBank();
   redirect(
-    `${PATH}?bankAccountId=${bankAccountId}&message=Statement import: ${result.matched} matched, ${result.unmatched} unmatched`,
+    `${PATH}?bankAccountId=${encodeURIComponent(encodePublicId(bankAccountId, "bank-account"))}&message=Statement import: ${result.matched} matched, ${result.unmatched} unmatched`,
   );
 }
 

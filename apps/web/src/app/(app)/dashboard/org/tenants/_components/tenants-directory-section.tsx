@@ -86,7 +86,7 @@ export function TenantsDirectorySection({ data }: { data: TenantsPageData }) {
                     >
                       <td className="px-5 py-4">
                         <DeferredLink
-                          href={`/dashboard/org/tenants/${tenant.id}`}
+                          href={`/dashboard/org/tenants/${encodeURIComponent(tenant.slug ?? tenant.id)}`}
                           className="font-semibold text-foreground transition hover:text-primary [overflow-wrap:anywhere]"
                         >
                           {tenant.fullName}
@@ -128,7 +128,7 @@ export function TenantsDirectorySection({ data }: { data: TenantsPageData }) {
                       </td>
                       <td className="px-5 py-4">
                         <DeferredLink
-                          href={`/dashboard/org/tenants/${tenant.id}`}
+                          href={`/dashboard/org/tenants/${encodeURIComponent(tenant.slug ?? tenant.id)}`}
                           className={buttonSecondaryClassName}
                         >
                           View

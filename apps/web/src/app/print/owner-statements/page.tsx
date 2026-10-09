@@ -3,6 +3,7 @@ import { requireOrgRole } from "@/lib/permissions/guards";
 import { getOwnerStatement } from "@/lib/accounting/owner-statements";
 import { prisma } from "@/lib/prisma";
 import { OwnerStatementPrintControls } from "./owner-statement-print-controls";
+import { decodePublicId } from "@/lib/public-id";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +41,9 @@ export default async function OwnerStatementPrintPage({
   ]);
   const orgId = session.activeOrgId!;
   const resolved = (await searchParams) ?? {};
-  const landlordId = resolved.landlordId;
+  const landlordId = resolved.landlordId
+    ? decodePublicId(resolved.landlordId, "landlord-profile")
+    : undefined;
 
   if (!landlordId) {
     notFound();

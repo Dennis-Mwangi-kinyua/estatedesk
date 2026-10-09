@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getOrgUnitHref } from "@/lib/units/url";
 import { formatDate } from "../_lib/helpers";
+import { encodePublicId } from "@/lib/public-id";
 import type { LeaseDetailsData } from "../_lib/types";
 
 export function LeaseOverviewPanels({ lease }: { lease: LeaseDetailsData["lease"] }) {
@@ -11,8 +12,8 @@ export function LeaseOverviewPanels({ lease }: { lease: LeaseDetailsData["lease"
 
         <dl className="mt-4 space-y-3 text-sm">
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Lease ID</dt>
-            <dd className="font-medium">{lease.id}</dd>
+            <dt className="text-muted-foreground">Lease reference</dt>
+            <dd className="font-medium">{lease.tenant.fullName} · Unit {lease.unit.houseNo}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
@@ -57,7 +58,7 @@ export function LeaseOverviewPanels({ lease }: { lease: LeaseDetailsData["lease"
             <dt className="text-muted-foreground">Name</dt>
             <dd className="text-right font-medium">
               <Link
-                href={`/dashboard/org/tenants/${lease.tenant.id}`}
+                href={`/dashboard/org/tenants/${encodeURIComponent(lease.tenant.slug ?? lease.tenant.id)}`}
                 className="underline underline-offset-4"
               >
                 {lease.tenant.fullName}
@@ -124,7 +125,7 @@ export function LeaseOverviewPanels({ lease }: { lease: LeaseDetailsData["lease"
             <dt className="text-muted-foreground">Property</dt>
             <dd className="max-w-[60%] text-right font-medium">
               <Link
-                href={`/properties/${lease.unit.property.id}`}
+                href={`/dashboard/org/properties/${encodePublicId(lease.unit.property.id, "property")}`}
                 className="underline underline-offset-4"
               >
                 {lease.unit.property.name}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Building2, Landmark } from "lucide-react";
+import { encodePublicId } from "@/lib/public-id";
 import {
   completeBankReconciliationAction,
   createBankAccountAction,
@@ -61,7 +62,7 @@ export function AccountingBankWorkspace({
             {balances.map((balance) => (
               <Link
                 key={balance.id}
-                href={`/dashboard/org/accounting/bank?bankAccountId=${balance.id}`}
+                href={`/dashboard/org/accounting/bank?bankAccountId=${encodeURIComponent(encodePublicId(balance.id, "bank-account"))}`}
               >
                 <StatCard
                   label={balance.name}

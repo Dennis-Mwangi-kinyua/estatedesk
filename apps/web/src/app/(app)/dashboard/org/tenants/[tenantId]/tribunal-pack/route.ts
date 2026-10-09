@@ -24,11 +24,11 @@ export async function GET(
     return new Response("Forbidden.", { status: 403 });
   }
 
-  const { tenantId } = await context.params;
+  const { tenantId: tenantRef } = await context.params;
   const orgId = String(session.activeOrgId);
 
   const tenant = await prisma.tenant.findFirst({
-    where: { id: tenantId, orgId, deletedAt: null },
+    where: { OR: [{ id: tenantRef }, { slug: tenantRef }], orgId, deletedAt: null },
     select: {
       id: true,
       userId: true,

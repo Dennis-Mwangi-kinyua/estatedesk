@@ -11,7 +11,7 @@ export function LeaseDetailsHeader({ lease }: { lease: LeaseDetailsData["lease"]
             Leases
           </Link>
           <span>/</span>
-          <span>{lease.id}</span>
+          <span>{lease.tenant.fullName} · Unit {lease.unit.houseNo}</span>
         </div>
 
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">

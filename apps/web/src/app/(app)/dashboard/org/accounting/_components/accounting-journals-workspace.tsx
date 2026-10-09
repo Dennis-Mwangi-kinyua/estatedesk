@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FileSpreadsheet, NotebookPen } from "lucide-react";
+import { encodePublicId } from "@/lib/public-id";
 import { postDraftJournalAction, reverseJournalAction } from "../journal-actions";
 import type { getJournalRegister } from "@/lib/accounting/journal-queries";
 import {
@@ -175,7 +176,7 @@ export function AccountingJournalsWorkspace({
                       className="flex items-center justify-between gap-4 text-xs text-muted-foreground"
                     >
                       <Link
-                        href={`/dashboard/org/accounting/accounts/${line.accountId}`}
+                        href={`/dashboard/org/accounting/accounts/${encodePublicId(line.accountId, "account")}`}
                         className="hover:text-foreground"
                       >
                         {line.account.code} · {line.account.name}

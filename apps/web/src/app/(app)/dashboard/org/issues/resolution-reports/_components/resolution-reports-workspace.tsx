@@ -9,6 +9,7 @@ import {
 } from "@/app/(app)/dashboard/org/issues/actions";
 import {
   formatDate,
+  buildIssueDetailHref,
   getIssueUnitLabel,
   getPriorityClasses,
 } from "@/app/(app)/dashboard/org/issues/_lib/helpers";
@@ -171,7 +172,7 @@ export function ResolutionReportsWorkspace({
                       </div>
 
                       <DeferredLink
-                        href={`/dashboard/org/issues/${issue.id}`}
+                        href={buildIssueDetailHref(issue.id, issue.title)}
                         className="mt-4 inline-flex text-sm font-medium text-primary"
                       >
                         Open issue detail

@@ -8,10 +8,12 @@ import { loadMoveOutBalances } from "@/lib/move-outs/balances";
 import { depositHeldCents, finalBillingIssues } from "@/lib/move-outs/readiness";
 import { financialStatus } from "@/lib/move-outs/financial-status";
 import { nairobiDate } from "@/lib/move-outs/validation";
+import { decodePublicId } from "@/lib/public-id";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ noticeId: string }> }) {
   const session = await requireUserSession();
-  const { noticeId } = await params;
+  const { noticeId: publicNoticeId } = await params;
+  const noticeId = decodePublicId(publicNoticeId, "move-out-notice");
   const notice = await prisma.moveOutNotice.findUnique({ where: { id: noticeId }, include: { tenant: true, inspection: true, lease: { include: { org: true, unit: { include: { property: true } } } } } });
   if (!notice) return new NextResponse("Not found", { status: 404 });
   if (notice.tenant.userId !== session.userId) {
@@ -36,5 +38,5 @@ export async function GET(_request: Request, { params }: { params: Promise<{ not
     for (const chunk of chunks) { if (y < 45) { page = pdf.addPage(); y = page.getHeight() - 45; } page.drawText(chunk.trim(), { x: 40, y, size: 10, font }); y -= 15; }
   }
   if (!closed && notice.tenant.userId !== session.userId) await prisma.auditLog.create({ data: { orgId: notice.lease.orgId, actorUserId: session.userId, action: "MOVE_OUT_REPORT_GENERATED", entityType: "MoveOutNotice", entityId: notice.id, metadata: { outstandingBills: balances.totalCents / 100, itemisedCosts: preview.itemisedCosts, depositHeld: held / 100, issues } } });
-  return new NextResponse(Buffer.from(await pdf.save()), { headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="move-out-${notice.id}.pdf"`, "Cache-Control": "private, no-store" } });
+  return new NextResponse(Buffer.from(await pdf.save()), { headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="move-out-${notice.referenceCode}.pdf"`, "Cache-Control": "private, no-store" } });
 }

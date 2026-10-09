@@ -55,6 +55,7 @@ export type MoveOutQueueItem = {
   notes: string | null;
   tenant: {
     id: string;
+    slug: string | null;
     fullName: string;
     phone: string;
     email: string | null;

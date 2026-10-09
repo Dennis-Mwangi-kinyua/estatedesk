@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PieChart } from "lucide-react";
+import { encodePublicId } from "@/lib/public-id";
 import {
   DataCard,
   DataCardRow,
@@ -73,7 +74,7 @@ export function AccountingBudgetsWorkspace({
           {budgets.map((budget) => (
             <Link
               key={budget.id}
-              href={`/dashboard/org/accounting/budgets?budgetId=${budget.id}`}
+              href={`/dashboard/org/accounting/budgets?budgetId=${encodeURIComponent(encodePublicId(budget.id, "budget"))}`}
               className={
                 budget.id === selected?.id
                   ? "inline-flex h-9 items-center rounded-xl bg-primary px-3.5 text-xs font-semibold text-primary-foreground"

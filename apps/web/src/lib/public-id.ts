@@ -14,7 +14,7 @@ function getPublicIdKey() {
   return createHash("sha256").update(secret).digest();
 }
 
-export function encodePublicId(id: string, scope: string) {
+export function encodePublicId(id: string, scope: string, label = scope) {
   const key = getPublicIdKey();
   const iv = createHmac("sha256", key)
     .update(scope)
@@ -32,15 +32,18 @@ export function encodePublicId(id: string, scope: string) {
   const tag = cipher.getAuthTag();
   const payload = Buffer.concat([iv, tag, encrypted]).toString("base64url");
 
-  return `${TOKEN_PREFIX}_${payload}`;
+  return `${slugifyLabel(label)}--${TOKEN_PREFIX}_${payload}`;
 }
 
 export function decodePublicId(value: string, scope: string) {
-  if (!value.startsWith(`${TOKEN_PREFIX}_`)) {
+  const slugMarker = `--${TOKEN_PREFIX}_`;
+  const slugIndex = value.lastIndexOf(slugMarker);
+  const token = slugIndex >= 0 ? value.slice(slugIndex + 2) : value;
+  if (!token.startsWith(`${TOKEN_PREFIX}_`)) {
     return value;
   }
 
-  const payload = Buffer.from(value.slice(TOKEN_PREFIX.length + 1), "base64url");
+  const payload = Buffer.from(token.slice(TOKEN_PREFIX.length + 1), "base64url");
 
   if (payload.length <= IV_BYTES + TAG_BYTES) {
     throw new Error("Invalid public id token.");
@@ -60,5 +63,20 @@ export function decodePublicId(value: string, scope: string) {
 }
 
 export function isEncodedPublicId(value: string) {
-  return value.startsWith(`${TOKEN_PREFIX}_`);
+  return value.startsWith(`${TOKEN_PREFIX}_`) || value.includes(`--${TOKEN_PREFIX}_`);
+}
+
+function slugifyLabel(label: string) {
+  return label.normalize("NFKD").toLowerCase().replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "record";
+}
+
+export function encodePublicSlug(id: string, scope: string, label: string) {
+  return `${slugifyLabel(label)}--${encodePublicId(id, scope)}`;
+}
+
+export function decodePublicSlug(value: string, scope: string) {
+  const marker = `--${TOKEN_PREFIX}_`;
+  const markerIndex = value.lastIndexOf(marker);
+  return markerIndex < 0 ? decodePublicId(value, scope) : decodePublicId(value.slice(markerIndex + 2), scope);
 }

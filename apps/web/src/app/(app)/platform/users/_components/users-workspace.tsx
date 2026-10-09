@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { encodePublicId } from "@/lib/public-id";
 import {
   ArrowUpRight,
   Crown,
@@ -265,7 +266,7 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
                           </td>
                           <td className="px-4 py-3">
                             <Link
-                              href={`/platform/users/${user.username ?? user.id}`}
+                              href={`/platform/users/${encodeURIComponent(user.slug ?? user.username ?? encodePublicId(user.id, "user"))}`}
                               className="inline-flex items-center gap-1 text-sm font-medium text-neutral-700 transition hover:text-neutral-950"
                             >
                               Open
@@ -289,7 +290,7 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
                   return (
                     <Link
                       key={user.id}
-                      href={`/platform/users/${user.username ?? user.id}`}
+                      href={`/platform/users/${encodeURIComponent(user.slug ?? user.username ?? encodePublicId(user.id, "user"))}`}
                       className={`relative flex min-w-0 items-start justify-between gap-3 overflow-hidden py-4 pl-5 pr-4 transition hover:brightness-[0.98] ${color.surface}`}
                     >
                       <span

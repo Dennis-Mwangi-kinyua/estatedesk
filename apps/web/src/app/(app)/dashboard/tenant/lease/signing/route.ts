@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { issuePendingLeaseSigningUrl } from "@/lib/tenant/get-tenant-portal-context";
+import { decodePublicId } from "@/lib/public-id";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,8 @@ export async function GET(request: Request) {
     redirect("/login");
   }
 
-  const signerId = new URL(request.url).searchParams.get("signerId");
+  const signerRef = new URL(request.url).searchParams.get("signerId");
+  const signerId = signerRef ? decodePublicId(signerRef, "lease-signer") : null;
 
   if (!signerId) {
     redirect("/dashboard/tenant/lease");

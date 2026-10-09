@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { encodePublicId } from "@/lib/public-id";
 import {
   UnitStatus,
   UnitType,
@@ -38,7 +39,7 @@ export function UnitCreateWorkspace({
   property: UnitCreatePropertyData;
   orgRole?: OrgRole | null;
 }) {
-  const propertyBasePath = `/dashboard/org/properties/${property.id}`;
+  const propertyBasePath = `/dashboard/org/properties/${encodePublicId(property.id, "property")}`;
 
   return (
     <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">

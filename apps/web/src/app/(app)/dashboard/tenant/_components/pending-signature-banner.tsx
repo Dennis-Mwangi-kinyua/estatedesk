@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileSignature } from "lucide-react";
 import type { TenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";
+import { encodePublicId } from "@/lib/public-id";
 
 type PendingSignatureBannerProps = {
   pendingSignatures: TenantPortalContext["pendingLeaseSignatures"];
@@ -50,7 +51,7 @@ export function PendingSignatureBanner({
         </div>
 
         <Link data-workspace-action="true"
-          href={`/dashboard/tenant/lease/signing?signerId=${primary.id}`}
+          href={`/dashboard/tenant/lease/signing?signerId=${encodeURIComponent(encodePublicId(primary.id, "lease-signer"))}`}
           className="inline-flex min-h-10 items-center justify-center rounded-2xl bg-amber-900 px-4 text-sm font-semibold text-white transition hover:bg-amber-800"
         >
           Review & sign

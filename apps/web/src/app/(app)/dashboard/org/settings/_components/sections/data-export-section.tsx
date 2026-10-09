@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { encodePublicId } from "@/lib/public-id";
 import { Download, FileArchive } from "lucide-react";
 import { requestDataExportAction } from "@/features/settings/actions/settings-actions";
 import {
@@ -83,7 +84,7 @@ export function DataExportSection({ data }: { data: SettingsPageData }) {
 
                 {isApproved ? (
                   <Link data-workspace-action="true"
-                    href={`/api/data-exports/${request.id}/download`}
+                    href={`/api/data-exports/${encodePublicId(request.id, "data-export")}/download`}
                     className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
                     <Download className="h-4 w-4" />

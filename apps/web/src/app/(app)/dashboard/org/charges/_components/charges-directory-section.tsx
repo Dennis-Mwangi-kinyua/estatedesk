@@ -3,6 +3,7 @@ import { formatCurrency, formatDate } from "../_lib/helpers";
 import type { OrgRentCharge } from "../_lib/types";
 import { ChargeStatusPill, panelShellClassName } from "./charges-ui";
 import { ChargesEmptyState } from "./charges-empty-state";
+import { encodePublicId } from "@/lib/public-id";
 
 export function ChargesDirectorySection({ charges }: { charges: OrgRentCharge[] }) {
   return (
@@ -76,7 +77,7 @@ export function ChargesDirectorySection({ charges }: { charges: OrgRentCharge[] 
                   </td>
                   <td className="px-4 py-3">
                     <DeferredLink
-                      href={`/dashboard/org/tenants/${charge.lease.tenant.id}`}
+                      href={`/dashboard/org/tenants/${encodeURIComponent(charge.lease.tenant.slug ?? charge.lease.tenant.id)}`}
                       className="font-medium text-foreground transition hover:text-primary"
                     >
                       {charge.lease.tenant.fullName}
@@ -84,7 +85,7 @@ export function ChargesDirectorySection({ charges }: { charges: OrgRentCharge[] 
                   </td>
                   <td className="px-4 py-3">
                     <DeferredLink
-                      href={`/dashboard/org/properties/${charge.lease.unit.property.id}`}
+                      href={`/dashboard/org/properties/${encodePublicId(charge.lease.unit.property.id, "property")}`}
                       className="font-medium text-foreground transition hover:text-primary"
                     >
                       {charge.lease.unit.property.name}
@@ -113,7 +114,7 @@ export function ChargesDirectorySection({ charges }: { charges: OrgRentCharge[] 
                   </td>
                   <td className="px-4 py-3">
                     <DeferredLink
-                      href={`/dashboard/org/leases/${charge.lease.id}`}
+                      href={`/dashboard/org/leases/${encodePublicId(charge.lease.id, "lease")}`}
                       className="text-sm font-medium text-primary transition hover:text-primary/80"
                     >
                       View lease

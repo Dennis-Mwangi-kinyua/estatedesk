@@ -53,11 +53,32 @@ export async function ensureTenantSlug(
 ) {
   if (tenant.slug?.trim()) return tenant.slug.trim();
 
-  const slug = await allocateTenantSlug(db, tenant.orgId, tenant.fullName, tenant.id);
-  await db.tenant.update({
-    where: { id: tenant.id },
-    data: { slug },
-    select: { id: true },
-  });
-  return slug;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const slug = await allocateTenantSlug(db, tenant.orgId, tenant.fullName, tenant.id);
+    try {
+      await db.tenant.updateMany({
+        where: {
+          id: tenant.id,
+          orgId: tenant.orgId,
+          slug: tenant.slug ?? null,
+        },
+        data: { slug },
+      });
+    } catch (error) {
+      if (
+        typeof error !== "object" || error === null ||
+        !("code" in error) || error.code !== "P2002"
+      ) throw error;
+      continue;
+    }
+
+    const current = await db.tenant.findUnique({
+      where: { id: tenant.id },
+      select: { slug: true },
+    });
+    if (current?.slug) return current.slug;
+    if (!current) throw new Error("Tenant no longer exists while assigning its slug.");
+  }
+
+  throw new Error("Could not assign a unique tenant slug after several attempts.");
 }

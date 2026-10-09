@@ -190,7 +190,7 @@ export function MoveOutsWorkspace({
                     <div className="mt-4 border-t border-border pt-4"><MoveOutProgress status={notice.status} closeout={notice.closeout} /></div>
                   </div>
                   <div className="min-w-0 border-t border-border bg-muted/10 p-4 sm:p-5 xl:border-l xl:border-t-0">
-                    <div className="flex items-center justify-between gap-3"><h4 className="text-sm font-semibold">Next steps & settlement</h4><a className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary hover:underline" href={`/api/move-outs/${notice.id}/report`}><FileText aria-hidden="true" className="size-3.5" />{notice.status === "CLOSED" ? "Final statement" : "Move-out report"}</a></div>
+                    <div className="flex items-center justify-between gap-3"><h4 className="text-sm font-semibold">Next steps & settlement</h4><a className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary hover:underline" href={`/api/move-outs/${encodePublicId(notice.id, "move-out-notice")}/report`}><FileText aria-hidden="true" className="size-3.5" />{notice.status === "CLOSED" ? "Final statement" : "Move-out report"}</a></div>
                     <p className="mt-2 text-xs text-muted-foreground">{notice.financialStatus.replaceAll("_", " ")} <span aria-hidden="true">·</span> Current amount owed <span className="font-semibold text-foreground">{notice.currentAmountOwed.toFixed(2)}</span></p>
                     <div className="mt-3"><SettlementSummary closeout={notice.closeout} /></div>
                     {notice.status === "CLOSED" && notice.lease.unit.status === "UNDER_MAINTENANCE" ? <ReleaseUnitForm noticeId={notice.id} /> : null}

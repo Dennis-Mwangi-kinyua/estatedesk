@@ -14,6 +14,7 @@ const leaseInclude = {
   tenant: {
     select: {
       id: true,
+      slug: true,
       fullName: true,
       phone: true,
       email: true,

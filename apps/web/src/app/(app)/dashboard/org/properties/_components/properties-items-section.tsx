@@ -4,6 +4,7 @@ import { ArrowUpRight, ChevronDown, MapPin } from "lucide-react";
 import type { PropertiesPageData } from "../_lib/types";
 import { formatDate, formatMoney, formatPropertyType } from "../_lib/helpers";
 import { PropertyStatusPill } from "./properties-ui";
+import { encodePublicId } from "@/lib/public-id";
 const stickers: Record<string, string> = { RESIDENTIAL: "🏡", COMMERCIAL: "🏢", MIXED_USE: "🏙️", GODOWN: "📦" };
 export function PropertiesItemsSection({ data }: { data: PropertiesPageData }) {
   return <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -14,7 +15,7 @@ export function PropertiesItemsSection({ data }: { data: PropertiesPageData }) {
       </div>
       <div className="flex flex-1 flex-col p-5 pt-3">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{formatPropertyType(property.type)}</p>
-        <h3 className="mt-1 break-words text-lg font-semibold leading-6"><DeferredLink href={`/dashboard/org/properties/${property.id}`} className="text-foreground hover:text-primary">{property.name}</DeferredLink></h3>
+        <h3 className="mt-1 break-words text-lg font-semibold leading-6"><DeferredLink href={`/dashboard/org/properties/${encodePublicId(property.id, "property")}`} className="text-foreground hover:text-primary">{property.name}</DeferredLink></h3>
         <p className="mt-2 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground"><MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" /><span className="break-words">{property.location || property.address || "Location not added"}</span></p>
         <dl className="mt-5 grid grid-cols-3 divide-x divide-border rounded-xl border border-border bg-muted/15 py-3">
           {[{label:"Buildings", value:property._count.buildings, emoji:"🏢"},{label:"Units",value:property._count.units,emoji:"🚪"},{label:"Issues",value:property._count.issues,emoji:"🛠️"}].map(stat => <div key={stat.label} className="min-w-0 text-center"><dt className="text-[10px] font-medium text-muted-foreground"><span aria-hidden="true"><WorkspaceIcon label={stat.label} className="inline-block h-4 w-4" /></span> {stat.label}</dt><dd className="mt-1 text-lg font-semibold tabular-nums text-foreground">{stat.value}</dd></div>)}
@@ -29,7 +30,7 @@ export function PropertiesItemsSection({ data }: { data: PropertiesPageData }) {
             <div><dt className="font-medium text-foreground">Added</dt><dd className="mt-1">{formatDate(property.createdAt)}</dd></div>
           </dl>
         </details>
-        <DeferredLink href={`/dashboard/org/properties/${property.id}`} aria-label={`View ${property.name}`} className="mt-4 flex min-h-11 items-center justify-between rounded-xl border border-border bg-background px-3 text-sm font-semibold text-foreground transition group-hover:border-primary/20 hover:bg-primary/5">View property<ArrowUpRight className="h-4 w-4 text-primary" /></DeferredLink>
+        <DeferredLink href={`/dashboard/org/properties/${encodePublicId(property.id, "property")}`} aria-label={`View ${property.name}`} className="mt-4 flex min-h-11 items-center justify-between rounded-xl border border-border bg-background px-3 text-sm font-semibold text-foreground transition group-hover:border-primary/20 hover:bg-primary/5">View property<ArrowUpRight className="h-4 w-4 text-primary" /></DeferredLink>
       </div>
     </article>)}
   </div>;

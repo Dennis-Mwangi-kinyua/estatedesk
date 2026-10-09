@@ -58,9 +58,6 @@ export function UserDetailPermissionsListPanel({
                 </span>
               </div>
 
-              <div className="mt-3 text-xs text-neutral-500">
-                Permission ID: {permission.id}
-              </div>
             </div>
           ))}
         </div>

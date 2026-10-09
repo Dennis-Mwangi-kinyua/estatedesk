@@ -50,6 +50,7 @@ export async function getGlobalSearchResults(q: string) {
       orderBy: { fullName: "asc" },
       select: {
         id: true,
+        slug: true,
         fullName: true,
         email: true,
         username: true,

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { encodePublicId } from "@/lib/public-id";
 import {
   approveAccountingRequestAction,
   markAccountingRequestPaidAction,
@@ -240,7 +241,7 @@ export function AccountingRequestReviewCard({
       {!compact ? (
         <p className="mt-3 text-xs text-muted-foreground">
           <Link
-            href={`/dashboard/org/accounting/requests?focus=${request.id}`}
+            href={`/dashboard/org/accounting/requests?focus=${encodeURIComponent(encodePublicId(request.id, "accounting-request"))}`}
             className="font-medium text-primary hover:text-primary/80"
           >
             Open full review

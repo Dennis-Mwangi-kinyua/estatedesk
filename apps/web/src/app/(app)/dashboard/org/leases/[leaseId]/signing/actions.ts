@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { cancelLeaseSignatureEnvelope, createLeaseSignatureEnvelope, remindLeaseSigner } from "@/lib/leases/signing";
 import { requireOrgRole } from "@/lib/permissions/guards";
+import { encodePublicId } from "@/lib/public-id";
 
 export async function createSigningRequestAction(formData: FormData) {
   const session = await requireOrgRole(["ADMIN", "MANAGER"]);
@@ -22,12 +23,12 @@ export async function cancelSigningRequestAction(formData: FormData) {
   const session = await requireOrgRole(["ADMIN", "MANAGER"]);
   const leaseId = String(formData.get("leaseId") ?? "");
   await cancelLeaseSignatureEnvelope(String(formData.get("envelopeId") ?? ""), session.activeOrgId!, session.userId, String(formData.get("reason") ?? ""));
-  revalidatePath(`/dashboard/org/leases/${leaseId}/signing`);
+  revalidatePath(`/dashboard/org/leases/${encodePublicId(leaseId, "lease")}/signing`);
 }
 
 export async function remindSignerAction(formData: FormData) {
   const session = await requireOrgRole(["ADMIN", "MANAGER"]);
   const leaseId = String(formData.get("leaseId") ?? "");
   await remindLeaseSigner(String(formData.get("envelopeId") ?? ""), String(formData.get("signerId") ?? ""), session.activeOrgId!, session.userId);
-  revalidatePath(`/dashboard/org/leases/${leaseId}/signing`);
+  revalidatePath(`/dashboard/org/leases/${encodePublicId(leaseId, "lease")}/signing`);
 }

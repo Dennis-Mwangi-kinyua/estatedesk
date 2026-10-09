@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { UserPlus } from "lucide-react";
+import { encodePublicId } from "@/lib/public-id";
 import { DeferredLink } from "@/components/navigation/app-links";
 import {
   ROLE_META,
@@ -130,7 +131,7 @@ export function RoleMembersDirectorySection({
             {rows.map((member) => (
               <RoleMemberCard
                 key={member.id}
-                href={`/staff/${roleSlug}/${member.id}`}
+                href={`/staff/${roleSlug}/${encodePublicId(member.id, "membership")}`}
                 name={member.user.fullName}
                 email={member.user.email}
                 phone={member.user.phone}
@@ -197,7 +198,7 @@ export function RoleMembersDirectorySection({
                     </td>
                     <td className="px-5 py-4 sm:px-6">
                       <Link data-workspace-action="true"
-                        href={`/staff/${roleSlug}/${member.id}`}
+                        href={`/staff/${roleSlug}/${encodePublicId(member.id, "membership")}`}
                         className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted/20"
                       >
                         Open

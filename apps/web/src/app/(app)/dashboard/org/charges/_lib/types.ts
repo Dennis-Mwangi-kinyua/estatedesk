@@ -14,6 +14,7 @@ export type OrgRentCharge = {
     startDate: Date;
     tenant: {
       id: string;
+      slug: string | null;
       fullName: string;
     };
     unit: {

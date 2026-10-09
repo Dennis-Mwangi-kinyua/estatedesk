@@ -1,4 +1,5 @@
 import { Prisma, TicketPriority, TicketStatus } from "@prisma/client";
+import { encodePublicSlug, isEncodedPublicId } from "@/lib/public-id";
 import {
   ISSUE_PAGE_PATH,
   ORG_ASSIGNMENT_ROLES,
@@ -142,6 +143,7 @@ export function buildIssuesHref(
   page: number,
   issueId?: string,
   status: IssueStatusFilter = "all",
+  issueLabel?: string,
 ) {
   const params = new URLSearchParams();
   params.set("page", String(page));
@@ -151,10 +153,16 @@ export function buildIssuesHref(
   }
 
   if (issueId) {
-    params.set("issueId", issueId);
+    params.set("issueId", isEncodedPublicId(issueId) || issueId.includes("--ed_")
+      ? issueId
+      : encodePublicSlug(issueId, "issue", issueLabel ?? "issue"));
   }
 
   return `${ISSUE_PAGE_PATH}?${params.toString()}`;
+}
+
+export function buildIssueDetailHref(issueId: string, title = "issue") {
+  return `${ISSUE_PAGE_PATH}/${encodePublicSlug(issueId, "issue", title)}`;
 }
 
 export function canAssignCaretakerRole(role: string) {

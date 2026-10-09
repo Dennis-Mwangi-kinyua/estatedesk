@@ -24,7 +24,7 @@ export function OrgDashboardHeader({
 }: OrgDashboardHeaderProps) {
   return (
     <header className="ed-shell-panel fixed left-0 right-0 top-0 z-[110] border-b bg-card/95 shadow-sm backdrop-blur-xl lg:left-72">
-      <div className="flex h-[76px] items-center justify-between gap-3 px-3 pt-safe sm:px-6 lg:h-16 lg:px-8 lg:pt-0">
+      <div className="flex h-[68px] items-center justify-between gap-3 px-3 pt-safe sm:px-6 lg:h-16 lg:px-8 lg:pt-0">
         <div className="flex min-w-0 items-center gap-3">
           <button data-workspace-action="true"
             type="button"
@@ -36,11 +36,14 @@ export function OrgDashboardHeader({
           </button>
 
           <div className="min-w-0">
-            <h1 className="truncate text-base font-semibold tracking-tight text-slate-950 dark:text-white sm:text-lg">
+            <h1 className="hidden truncate text-base font-semibold tracking-tight text-slate-950 dark:text-white lg:block lg:text-lg">
               {title}
             </h1>
-            <p className="truncate text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+            <p className="hidden truncate text-xs text-slate-500 dark:text-slate-400 lg:block lg:text-sm">
               {subtitle}
+            </p>
+            <p className="text-sm font-semibold tracking-tight text-slate-950 dark:text-white lg:hidden">
+              Organisation
             </p>
           </div>
         </div>
@@ -59,6 +62,11 @@ export function OrgDashboardHeader({
 
           <WorkspaceIdentity name={userName} role={userRole} />
         </div>
+      </div>
+      <div className="border-t border-slate-200/70 bg-slate-50/90 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950/90 lg:hidden">
+        <p className="whitespace-normal break-words text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100 [overflow-wrap:anywhere]">
+          {title}
+        </p>
       </div>
     </header>
   );

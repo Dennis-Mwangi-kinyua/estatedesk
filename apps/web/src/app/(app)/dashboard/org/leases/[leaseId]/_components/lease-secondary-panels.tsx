@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatCurrency, formatDate } from "../_lib/helpers";
 import type { LeaseDetailsData } from "../_lib/types";
+import { encodePublicId } from "@/lib/public-id";
 
 export function LeaseSecondaryPanels({
   lease,
@@ -47,7 +48,7 @@ export function LeaseSecondaryPanels({
       <div className="rounded-xl border bg-background p-5 shadow-sm">
         <h2 className="text-base font-semibold">Contract Document</h2>
 
-        <Link href={`/dashboard/org/leases/${lease.id}/signing`} className="mt-3 inline-flex rounded-lg border px-3 py-2 text-sm font-semibold">
+        <Link href={`/dashboard/org/leases/${encodePublicId(lease.id, "lease")}/signing`} className="mt-3 inline-flex rounded-lg border px-3 py-2 text-sm font-semibold">
           Manage online signing
         </Link>
 

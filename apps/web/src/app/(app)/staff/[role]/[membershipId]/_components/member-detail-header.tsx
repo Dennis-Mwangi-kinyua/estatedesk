@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { encodePublicId } from "@/lib/public-id";
 import { ArrowLeft, Pencil } from "lucide-react";
 import { PresencePill, RolePill } from "@/app/(app)/staff/_components/staff-ui";
 import { formatRelative } from "@/app/(app)/staff/_lib/helpers";
@@ -72,7 +73,7 @@ export function MemberDetailHeader({
               Back to {meta.label.toLowerCase()} directory
             </Link>
             <Link data-workspace-action="true"
-              href={`/staff/${roleSlug}/${member.id}/edit`}
+              href={`/staff/${roleSlug}/${encodePublicId(member.id, "membership")}/edit`}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
             >
               <Pencil className="h-4 w-4" />

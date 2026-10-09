@@ -86,7 +86,7 @@ export function GivenNoticesCard({
               </div>
 
               <div className="mt-3"><MoveOutProgress status={notice.status} closeout={notice.closeout} />
-                <SettlementSummary closeout={notice.closeout} /><a className="mt-2 inline-block text-xs underline" href={`/api/move-outs/${notice.id}/report`}>{notice.status === "CLOSED" ? "Download final statement and current balance" : "Download move-out report"}</a>
+                <SettlementSummary closeout={notice.closeout} /><a className="mt-2 inline-block text-xs underline" href={`/api/move-outs/${encodePublicId(notice.id, "move-out-notice")}/report`}>{notice.status === "CLOSED" ? "Download final statement and current balance" : "Download move-out report"}</a>
                 {notice.inspection?.status === "COMPLETED" ? (
                   <Link
                     className="mt-3 inline-flex min-h-10 items-center rounded-xl border border-border bg-card px-3 text-sm font-medium text-primary hover:bg-muted"

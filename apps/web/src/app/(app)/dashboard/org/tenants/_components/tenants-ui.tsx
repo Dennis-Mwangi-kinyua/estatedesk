@@ -110,7 +110,7 @@ export function TenantCard({
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
             <DeferredLink
-              href={`/dashboard/org/tenants/${tenant.id}`}
+              href={`/dashboard/org/tenants/${encodeURIComponent(tenant.slug ?? tenant.id)}`}
               className="min-w-0 flex-1 text-sm font-semibold leading-5 text-foreground hover:text-primary sm:text-base [overflow-wrap:anywhere]"
             >
               {tenant.fullName}
@@ -134,7 +134,7 @@ export function TenantCard({
       </div>
 
       <DeferredLink
-        href={`/dashboard/org/tenants/${tenant.id}`}
+        href={`/dashboard/org/tenants/${encodeURIComponent(tenant.slug ?? tenant.id)}`}
         className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto sm:px-5"
       >
         View tenant

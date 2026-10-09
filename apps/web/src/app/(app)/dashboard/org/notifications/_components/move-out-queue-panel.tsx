@@ -126,7 +126,7 @@ export function MoveOutQueuePanel({
                   </div>
 
                   <div className="grid w-full gap-2 sm:grid-cols-2 lg:max-w-xs lg:grid-cols-1">
-                    <Link href={`/dashboard/org/tenants/${notice.tenant.id}`} className={primaryButtonClassName}>
+                    <Link href={`/dashboard/org/tenants/${encodeURIComponent(notice.tenant.slug ?? notice.tenant.id)}`} className={primaryButtonClassName}>
                       Review tenant
                     </Link>
                     {notice.inspection ? (

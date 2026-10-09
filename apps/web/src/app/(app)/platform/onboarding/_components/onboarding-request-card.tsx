@@ -6,7 +6,7 @@ import { ArrowRight, Building2, CheckCircle2, Mail, Phone, Trash2 } from "lucide
 import { deleteOnboardingRequestAction, quickUpdateOnboardingStatusAction, updateOnboardingRequestAction } from "../actions";
 
 export type OnboardingRequestCardData = {
-  id: string; companyName: string; fullName: string; workEmail: string; phone: string | null;
+  id: string; publicId: string; companyName: string; fullName: string; workEmail: string; phone: string | null;
   managedPropertyType: string; status: string; message: string | null; internalNotes: string | null;
   commissionRate?: string | null; createdAt: string; handledAt: string | null; handledBy: string | null; referral: string | null;
 };
@@ -47,7 +47,7 @@ export function OnboardingRequestCard({ request }: { request: OnboardingRequestC
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1"><a className={buttonClass} href={`mailto:${encodeURIComponent(request.workEmail)}?subject=${encodeURIComponent("Your EstateDesk onboarding request")}`}><Mail className="h-4 w-4" />Email applicant</a>{request.phone && <a className={buttonClass} href={`tel:${request.phone.replace(/[^+0-9]/g, "")}`}><Phone className="h-4 w-4" />Call applicant</a>}</div>
         {request.status === "NEW" && <ActionForm action={quickUpdateOnboardingStatusAction} requestId={request.id} status="CONTACTED"><button data-workspace-action="true" className={`${buttonClass} w-full border-primary/30 text-primary`}><CheckCircle2 className="h-4 w-4" />Mark contacted</button></ActionForm>}
         {request.status === "CONTACTED" && <ActionForm action={quickUpdateOnboardingStatusAction} requestId={request.id} status="QUALIFIED"><button data-workspace-action="true" className={`${buttonClass} w-full border-primary/30 text-primary`}><CheckCircle2 className="h-4 w-4" />Mark qualified</button></ActionForm>}
-        {request.status === "QUALIFIED" && <Link data-workspace-action="true" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" href={`/platform/organizations/new?requestId=${encodeURIComponent(request.id)}`}><Building2 className="h-4 w-4" />Create organisation<ArrowRight className="h-4 w-4" /></Link>}
+        {request.status === "QUALIFIED" && <Link data-workspace-action="true" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" href={`/platform/organizations/new?requestId=${encodeURIComponent(request.publicId)}`}><Building2 className="h-4 w-4" />Create organisation<ArrowRight className="h-4 w-4" /></Link>}
       </div>
     </div>
     <details className="border-t border-border"><summary className="cursor-pointer px-4 py-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-primary sm:px-5">Manage status and team notes{request.internalNotes ? " · Notes saved" : ""}</summary><div className="grid gap-4 px-4 pb-4 sm:px-5 lg:grid-cols-[minmax(0,1fr)_auto]">
