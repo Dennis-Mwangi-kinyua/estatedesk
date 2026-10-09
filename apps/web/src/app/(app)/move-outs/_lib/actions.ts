@@ -12,6 +12,7 @@ import { closeMoveOut } from "@/lib/move-outs/closeout";
 import { encodePublicId } from "@/lib/public-id";
 import { parseInspectionDate } from "@/lib/move-outs/validation";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
+import { createEstateDeskReference } from "@/lib/estatedesk-reference";
 
 class ScheduleInspectionError extends Error {
   constructor(message: string) {
@@ -92,6 +93,7 @@ export async function scheduleInspectionAction(formData: FormData) {
       where: { noticeId: notice.id },
       update: { inspectorUserId, scheduledAt },
       create: {
+        referenceCode: createEstateDeskReference(),
         noticeId: notice.id,
         inspectorUserId,
         scheduledAt,

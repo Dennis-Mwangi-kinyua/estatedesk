@@ -180,7 +180,7 @@ export function MoveOutsWorkspace({
                       </div>
                       <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${notice.status === "CLOSED" ? "bg-emerald-500/10 text-emerald-700" : notice.status === "CANCELLED" ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"}`}><span className="size-1.5 rounded-full bg-current" />{statusLabel[notice.status] ?? notice.status}</span>
                     </div>
-                    <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-muted/30 p-3 sm:grid-cols-2 2xl:grid-cols-4">
+                    <div className="mt-4 grid grid-cols-1 gap-2 rounded-xl bg-muted/30 p-3 sm:grid-cols-2 sm:gap-3 2xl:grid-cols-4">
                       <Detail icon={<MapPin aria-hidden="true" className="size-3.5" />} label="Location" value={[notice.lease.unit.building?.name, `Unit ${notice.lease.unit.houseNo}`].filter(Boolean).join(" · ")} />
                       <Detail icon={<CalendarDays aria-hidden="true" className="size-3.5" />} label="Notice date" value={formatDate(notice.noticeDate)} />
                       <Detail icon={<LogOut aria-hidden="true" className="size-3.5" />} label="Move-out date" value={formatDate(notice.moveOutDate)} />
@@ -230,12 +230,12 @@ function Detail({
   value: string;
 }) {
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 rounded-xl bg-background/70 p-3">
       <p className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-[11px]">
         {icon}
         {label}
       </p>
-      <p className="mt-1 truncate text-xs font-semibold text-foreground sm:text-sm" title={value}>
+      <p className="mt-1 whitespace-normal break-words text-sm font-semibold leading-5 text-foreground">
         {value}
       </p>
     </div>

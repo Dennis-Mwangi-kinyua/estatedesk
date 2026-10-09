@@ -279,6 +279,17 @@ export function InspectionDetailsWorkspace({
                       {String(report.recommendations ?? "—")}
                     </p>
                   </div>
+
+                  <div className="rounded-2xl border border-primary/20 bg-primary/[0.03] p-4 sm:p-5">
+                    <h3 className="text-sm font-semibold text-foreground">Next: review and close out the move-out</h3>
+                    <ol className="mt-2 list-inside list-decimal space-y-1 text-sm leading-6 text-muted-foreground">
+                      <li>Review inspection findings and post final rent and utility charges.</li>
+                      <li>Generate and review the settlement, reconcile the deposit, and record the actual handover date and keys returned.</li>
+                      <li>After close-out, record any refund with proof and mark the unit ready after repairs and cleaning.</li>
+                    </ol>
+                    <p className="mt-2 text-sm text-muted-foreground">The lease stays active until management records the close-out.</p>
+                    <Link href="/dashboard/org/move-outs" className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90 sm:w-auto">Open move-out desk</Link>
+                  </div>
                 </>
               ) : canReport && inspection.status === "SCHEDULED" ? <InspectionReportForm inspectionId={inspection.id} /> : (
                 <div className="rounded-2xl border border-dashed border-border bg-muted/10 px-4 py-6 text-sm text-muted-foreground">

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 import { parseMoveOutDate, nairobiDate } from "@/lib/move-outs/validation";
 import { formatDate } from "@/lib/formatters";
+import { createEstateDeskReference } from "@/lib/estatedesk-reference";
 
 export async function submitMoveOutNotice(formData: FormData) {
   const session = await requireTenantAccess();
@@ -124,6 +125,7 @@ export async function submitMoveOutNotice(formData: FormData) {
     if (open) redirect("/dashboard/tenant/notices?error=duplicate_open_notice");
     const notice = await tx.moveOutNotice.create({
       data: {
+        referenceCode: createEstateDeskReference(),
         leaseId: activeLease.id,
         tenantId: tenant.id,
         moveOutDate,

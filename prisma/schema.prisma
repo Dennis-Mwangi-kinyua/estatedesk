@@ -2034,7 +2034,8 @@ model PushSubscription {
 
 /// Tenant move-out notice and inspection lifecycle trigger.
 model MoveOutNotice {
-  id          String       @id @default(cuid())
+  id            String       @id @default(cuid())
+  referenceCode String       @unique
   leaseId     String
   tenantId    String
   noticeDate  DateTime     @default(now())
@@ -2060,6 +2061,7 @@ model MoveOutNotice {
 /// Move-out or property inspection record.
 model Inspection {
   id              String           @id @default(cuid())
+  referenceCode   String           @unique
   noticeId        String           @unique
   scheduledAt     DateTime
   inspectorUserId String

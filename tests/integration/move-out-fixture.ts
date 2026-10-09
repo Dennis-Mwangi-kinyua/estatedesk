@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 export async function fixture(deposit = 12000) {
-  const [{ prisma }, { ensureAccountingFoundation, postJournalEntry }, { postRentChargeAccrual, postWaterBillAccrual }, { closeMoveOut }, { recordMoveOutRefund }, { verifyPayment }, { nairobiDate, parseMoveOutDate }] = await Promise.all([
-    import("../../apps/web/src/lib/prisma"), import("../../apps/web/src/lib/accounting/engine"), import("../../apps/web/src/lib/accounting/billing"), import("../../apps/web/src/lib/move-outs/closeout"), import("../../apps/web/src/lib/move-outs/refund"), import("../../apps/web/src/app/(app)/dashboard/org/payments/_lib/verify-payment"), import("../../apps/web/src/lib/move-outs/validation"),
+  const [{ prisma }, { ensureAccountingFoundation, postJournalEntry }, { postRentChargeAccrual, postWaterBillAccrual }, { closeMoveOut }, { recordMoveOutRefund }, { verifyPayment }, { nairobiDate, parseMoveOutDate }, { createEstateDeskReference }] = await Promise.all([
+    import("../../apps/web/src/lib/prisma"), import("../../apps/web/src/lib/accounting/engine"), import("../../apps/web/src/lib/accounting/billing"), import("../../apps/web/src/lib/move-outs/closeout"), import("../../apps/web/src/lib/move-outs/refund"), import("../../apps/web/src/app/(app)/dashboard/org/payments/_lib/verify-payment"), import("../../apps/web/src/lib/move-outs/validation"), import("../../apps/web/src/lib/estatedesk-reference"),
   ]);
   const suffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const day = nairobiDate(); const date = parseMoveOutDate(day); const period = day.slice(0, 7);
@@ -11,7 +11,7 @@ export async function fixture(deposit = 12000) {
   const unit = await prisma.unit.create({ data: { propertyId: property.id, houseNo: "A1", status: "OCCUPIED", rentAmount: 10000 } });
   const tenant = await prisma.tenant.create({ data: { orgId: org.id, fullName: "Moveout tenant", phone: `2547${Date.now().toString().slice(-8)}` } });
   const lease = await prisma.lease.create({ data: { orgId: org.id, tenantId: tenant.id, unitId: unit.id, monthlyRent: 10000, deposit, startDate: new Date(date.getTime() - 60 * 86400000) } });
-  const notice = await prisma.moveOutNotice.create({ data: { tenantId: tenant.id, leaseId: lease.id, moveOutDate: date, status: "INSPECTION_COMPLETED", inspection: { create: { scheduledAt: date, completedAt: new Date(), inspectorUserId: actor.id, status: "COMPLETED", checklist: { meterReadingsTaken: true }, notes: "Damage inspected" } } } });
+  const notice = await prisma.moveOutNotice.create({ data: { referenceCode: createEstateDeskReference(), tenantId: tenant.id, leaseId: lease.id, moveOutDate: date, status: "INSPECTION_COMPLETED", inspection: { create: { referenceCode: createEstateDeskReference(), scheduledAt: date, completedAt: new Date(), inspectorUserId: actor.id, status: "COMPLETED", checklist: { meterReadingsTaken: true }, notes: "Damage inspected" } } } });
   await ensureAccountingFoundation(prisma, org.id);
   const dimensions = { tenantId: tenant.id, unitId: unit.id };
   await postJournalEntry({ db: prisma, orgId: org.id, entryDate: date, sourceType: "ADJUSTMENT", sourceId: `deposit-${notice.id}`, description: "Opening deposit actually received", userId: actor.id, lines: [{ systemKey: "BANK", debit: deposit, ...dimensions }, { systemKey: "TENANT_DEPOSITS", credit: deposit, ...dimensions }] });

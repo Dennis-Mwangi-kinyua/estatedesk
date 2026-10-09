@@ -38,6 +38,7 @@ import {
 } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { normalizeDatabaseUrlSslMode } from "../apps/web/src/lib/config/env";
+import { createEstateDeskReference } from "../apps/web/src/lib/estatedesk-reference";
 
 const connectionString = process.env.DATABASE_URL
   ? normalizeDatabaseUrlSslMode(process.env.DATABASE_URL)
@@ -779,6 +780,7 @@ async function main() {
   // ------------------------------
   const moveOutNotice = await prisma.moveOutNotice.create({
     data: {
+      referenceCode: createEstateDeskReference(),
       leaseId: lease.id,
       tenantId: tenant.id,
       noticeDate: new Date("2026-11-01T00:00:00.000Z"),
@@ -790,6 +792,7 @@ async function main() {
 
   await prisma.inspection.create({
     data: {
+      referenceCode: createEstateDeskReference(),
       noticeId: moveOutNotice.id,
       scheduledAt: new Date("2026-11-25T10:00:00.000Z"),
       inspectorUserId: caretakerUser.id,

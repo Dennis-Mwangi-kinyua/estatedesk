@@ -7,6 +7,8 @@ import { formatDate, formatDateTime } from "@/lib/formatters";
 import type { TenantNoticesResult } from "@/app/(app)/dashboard/tenant/notices/_lib/queries";
 import { getMoveOutStatusClasses } from "@/app/(app)/dashboard/tenant/notices/_lib/helpers";
 import { EmptySection } from "@/app/(app)/dashboard/tenant/notices/_components/empty-section";
+import Link from "next/link";
+import { encodePublicId } from "@/lib/public-id";
 
 type GivenNoticesCardProps = {
   moveOutNotices: TenantNoticesResult["moveOutNotices"];
@@ -84,7 +86,16 @@ export function GivenNoticesCard({
               </div>
 
               <div className="mt-3"><MoveOutProgress status={notice.status} closeout={notice.closeout} />
-                <SettlementSummary closeout={notice.closeout} /><a className="mt-2 inline-block text-xs underline" href={`/api/move-outs/${notice.id}/report`}>{notice.status === "CLOSED" ? "Download final statement and current balance" : "Download move-out report"}</a></div>
+                <SettlementSummary closeout={notice.closeout} /><a className="mt-2 inline-block text-xs underline" href={`/api/move-outs/${notice.id}/report`}>{notice.status === "CLOSED" ? "Download final statement and current balance" : "Download move-out report"}</a>
+                {notice.inspection?.status === "COMPLETED" ? (
+                  <Link
+                    className="mt-3 inline-flex min-h-10 items-center rounded-xl border border-border bg-card px-3 text-sm font-medium text-primary hover:bg-muted"
+                    href={`/print/inspections/${encodePublicId(notice.inspection.id, "inspection")}`}
+                  >
+                    Download inspection report (Save as PDF)
+                  </Link>
+                ) : null}
+              </div>
               {["SUBMITTED", "INSPECTION_SCHEDULED"].includes(notice.status) ? <CancelNoticeForm noticeId={notice.id} inspectionScheduled={notice.inspection?.status === "SCHEDULED"} /> : null}
               {notice.status === "INSPECTION_COMPLETED" ? <p className="mt-3 text-xs text-muted-foreground">The inspection is complete. Your lease continues until management confirms key handover and the final settlement.</p> : null}
               {notice.notes ? (

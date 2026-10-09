@@ -1,5 +1,6 @@
 import { DeferredLink } from "@/components/navigation/app-links";
 import type { IssueStatusFilter, OrgIssue } from "../_lib/types";
+import { IssueSlaBadge } from "@/components/issues/issue-sla-badge";
 import {
   buildIssuesHref,
   formatDate,
@@ -64,31 +65,25 @@ export function IssuesHistory({
                 </div>
               </div>
 
-              <p className="mt-3 line-clamp-2 text-sm leading-6 text-neutral-600">
+              <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-neutral-700">
                 {issue.description}
               </p>
 
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-[18px] bg-white px-3 py-3">
-                  <p className="text-[11px] uppercase tracking-wide text-neutral-500">
-                    Allocated To
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-neutral-950">
-                    {issue.assignedTo?.fullName ??
-                      issue.assignedTo?.email ??
-                      "Unassigned"}
-                  </p>
-                </div>
-
-                <div className="rounded-[18px] bg-white px-3 py-3">
-                  <p className="text-[11px] uppercase tracking-wide text-neutral-500">
-                    Resolved
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-neutral-950">
-                    {formatDate(issue.resolvedAt)}
-                  </p>
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <IssueDetail label="Property" value={issue.property?.name ?? "Property unavailable"} />
+                <IssueDetail label="Unit" value={getIssueUnitLabel(issue)} />
+                <IssueDetail label="Priority" value={issue.priority} />
+                <IssueDetail label="Status" value={issue.status.replaceAll("_", " ")} />
+                <IssueDetail label="Assigned to" value={issue.assignedTo?.fullName ?? issue.assignedTo?.email ?? "Unassigned"} />
+                <IssueDetail label="Reported by" value={issue.reportedBy?.fullName ?? issue.reportedBy?.email ?? "Unknown"} />
+                <IssueDetail label="Reported" value={formatDate(issue.createdAt)} />
+                <IssueDetail label="Resolved" value={formatDate(issue.resolvedAt)} />
+                <div className="min-w-0 rounded-2xl border border-border/70 bg-background px-3 py-3">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Response time</p>
+                  <div className="mt-2"><IssueSlaBadge createdAt={issue.createdAt} priority={issue.priority} status={issue.status} /></div>
                 </div>
               </div>
+              {issue.resolutionNotes ? <IssueDetail label="Resolution notes" value={issue.resolutionNotes} className="mt-3" /> : null}
             </DeferredLink>
           );
         })}
@@ -169,4 +164,11 @@ export function IssuesHistory({
       </div>
     </>
   );
+}
+
+function IssueDetail({ label, value, className = "" }: { label: string; value: string; className?: string }) {
+  return <div className={`min-w-0 rounded-2xl border border-border/70 bg-background px-3 py-3 ${className}`}>
+    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+    <p className="mt-1 whitespace-pre-wrap break-words text-sm font-semibold leading-5 text-foreground">{value || "—"}</p>
+  </div>;
 }
