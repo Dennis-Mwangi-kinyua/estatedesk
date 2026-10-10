@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { PortalOfficeContact } from "@/components/tenant/portal-office-contact";
 import { TenantWorkspace } from "@/components/theme/ed-dashboard-shell";
 import { PaymentHealthBanner } from "../profile/_components/payment-health-banner";
@@ -10,7 +11,7 @@ import { TenantDashboardQuickActions } from "./tenant-dashboard-quick-actions";
 import { TenantDashboardUpdates } from "./tenant-dashboard-updates";
 import { TenantTenancyPanel } from "./tenant-tenancy-panel";
 
-export function TenantDashboardWorkspace({ data }: { data: TenantDashboardActiveData }) {
+export function TenantDashboardWorkspace({ data, initialCharges }: { data: TenantDashboardActiveData; initialCharges?: ReactNode }) {
   const {
     fullName,
     propertyName,
@@ -56,6 +57,7 @@ export function TenantDashboardWorkspace({ data }: { data: TenantDashboardActive
         portalContext={portalContext}
       />
 
+      {initialCharges}
       <TenantDashboardQuickActions />
 
       <TenantTenancyPanel

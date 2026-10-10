@@ -2,6 +2,7 @@ import { hash } from "bcryptjs";
 import { Prisma, TenantStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ensureTenantIdentity } from "@/lib/tenants/identity";
+import { createInitialLeaseCharges } from "@/lib/billing/initial-lease-charges";
 import { normalizeUsername } from "./credentials";
 
 type CreateTenantTransactionInput = {
@@ -176,7 +177,7 @@ export async function executeCreateTenantTransaction(
       const effectiveMonthlyRent = input.monthlyRent ?? unit.rentAmount;
       const effectiveDeposit = input.deposit ?? unit.depositAmount ?? null;
 
-      await tx.lease.create({
+      const lease = await tx.lease.create({
         data: {
           orgId: input.orgId,
           unitId: unit.id,
@@ -188,6 +189,8 @@ export async function executeCreateTenantTransaction(
           status: "ACTIVE",
         },
       });
+
+      await createInitialLeaseCharges(tx, lease);
 
       await tx.unit.update({
         where: {
@@ -204,5 +207,5 @@ export async function executeCreateTenantTransaction(
       tenantName: tenant.fullName,
       username: user.username ?? username,
     };
-  });
+  }, { timeout: 15_000 });
 }

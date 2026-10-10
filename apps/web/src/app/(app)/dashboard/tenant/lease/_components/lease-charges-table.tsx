@@ -27,7 +27,7 @@ export function LeaseChargesTable({ charges }: { charges: LeaseCharge[] }) {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-foreground">
-                  {charge.period}
+                  {charge.period} · {charge.chargeType === "DEPOSIT" ? "Deposit" : charge.chargeType.replaceAll("_", " ")}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Due {formatDate(charge.dueDate)}
@@ -92,7 +92,7 @@ export function LeaseChargesTable({ charges }: { charges: LeaseCharge[] }) {
                 className="border-b border-border/70 last:border-0"
               >
                 <td className="px-4 py-3 font-medium text-foreground">
-                  {charge.period}
+                  {charge.period} · {charge.chargeType === "DEPOSIT" ? "Deposit" : charge.chargeType.replaceAll("_", " ")}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
                   {formatDate(charge.dueDate)}

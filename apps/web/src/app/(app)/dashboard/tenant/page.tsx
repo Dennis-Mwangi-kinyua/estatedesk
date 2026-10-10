@@ -1,3 +1,4 @@
+import { InitialChargesPanel } from "@/features/charges/components/initial-charges-panel";
 import { getCurrentTenantWithActiveLease } from "@/lib/tenant/get-current-tenant";
 import { getTenantDashboardData } from "@/lib/tenant/get-tenant-dashboard-data";
 import { getTenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";
@@ -61,6 +62,7 @@ export default async function TenantDashboardPage() {
 
   return (
     <TenantDashboardWorkspace
+      initialCharges={<InitialChargesPanel orgId={tenant.orgId} tenantId={tenant.id} />}
       data={{
         fullName: tenant.fullName,
         propertyName: unit?.property?.name,

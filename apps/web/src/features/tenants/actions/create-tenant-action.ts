@@ -148,6 +148,11 @@ export async function createTenantAction(
     revalidatePath("/dashboard/org/units");
     revalidatePath("/dashboard/org/properties");
     revalidatePath("/dashboard/org");
+    revalidatePath("/dashboard/org/charges");
+    revalidatePath("/dashboard/org/payments");
+    revalidatePath("/dashboard/tenant");
+    revalidatePath("/dashboard/tenant/payments");
+    revalidatePath("/dashboard/tenant/invoice");
 
     if (unitId) {
       revalidatePublicVacancies();

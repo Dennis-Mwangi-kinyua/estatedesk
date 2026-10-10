@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { OrgRole } from "@prisma/client";
 import type { TenantDetailsData } from "../_lib/types";
 import { TenantHeroCard, getInitials } from "./tenant-details-ui";
@@ -7,9 +8,11 @@ import { TenantDetailsSidebarColumn } from "./tenant-details-sidebar-column";
 export function TenantDetailsWorkspace({
   data,
   orgRole,
+  initialCharges,
 }: {
   data: TenantDetailsData;
   orgRole?: OrgRole | null;
+  initialCharges?: ReactNode;
 }) {
   const { tenant, canManage, hasActiveLease, isDeleted, isBlacklisted, isArchived, currentUnit, currentRent } = data;
   return (
@@ -31,6 +34,8 @@ export function TenantDetailsWorkspace({
           isBlacklisted={isBlacklisted}
           isArchived={isArchived}
         />
+
+        {initialCharges}
 
         <div className="grid gap-5 xl:grid-cols-[1.45fr_0.95fr]">
           <TenantDetailsMainColumn data={data} />

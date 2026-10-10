@@ -2,6 +2,7 @@ import { Prisma, PropertyType, TenantStatus, TenantType, UnitStatus, UnitType } 
 import { parseCsv, type CsvRow } from "@/lib/csv";
 import type { ImportKind } from "@/lib/imports/types";
 import { prisma } from "@/lib/prisma";
+import { createInitialLeaseCharges } from "@/lib/billing/initial-lease-charges";
 
 export type ImportResult = {
   ok: boolean;
@@ -302,7 +303,7 @@ export async function importCsv({
           });
 
           if (unit) {
-            await tx.lease.create({
+            const lease = await tx.lease.create({
               data: {
                 orgId,
                 tenantId: tenant.id,
@@ -315,6 +316,7 @@ export async function importCsv({
                 notes: "Created by CSV import.",
               },
             });
+            await createInitialLeaseCharges(tx, lease);
             await tx.unit.update({
               where: { id: unit.id },
               data: { status: "OCCUPIED" },
@@ -325,7 +327,7 @@ export async function importCsv({
         created += 1;
       }
     }
-  });
+  }, { timeout: 60_000 });
 
   return {
     ok: true,

@@ -60,7 +60,7 @@ export function TenantDetailsMainColumn({ data }: { data: TenantDetailsData }) {
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-foreground">
+                        <p className="ed-full-name min-w-0 whitespace-normal break-words text-sm font-semibold text-foreground">
                           {getLeaseUnitLabel(lease)}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">

@@ -1,3 +1,4 @@
+import { InitialChargesPanel } from "@/features/charges/components/initial-charges-panel";
 import { PageShell } from "@/components/theme/ed-dashboard-shell";
 import { redirect } from "next/navigation";
 import { requireTenantAccess } from "@/lib/permissions/guards";
@@ -38,6 +39,7 @@ export default async function TenantPaymentsPage() {
     <PageShell>
       <div className="space-y-4 sm:space-y-6">
         <PaymentsHeader data={data} />
+        <InitialChargesPanel orgId={session.activeOrgId} tenantId={data.tenant.id} />
         <ManualPaymentForm data={data} />
         <PaymentsStats data={data} />
         <LedgerCard data={data} />

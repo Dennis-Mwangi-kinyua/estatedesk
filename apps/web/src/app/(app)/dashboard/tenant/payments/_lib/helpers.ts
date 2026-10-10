@@ -159,13 +159,14 @@ export function filterTenantPayments(payments: PaymentItem[]) {
     if (payment.waterBill) return true;
 
     if (payment.rentCharge?.chargeType) {
-      return ["RENT", "SERVICE_CHARGE", "OTHER", "WATER"].includes(
+      return ["RENT", "DEPOSIT", "SERVICE_CHARGE", "SECURITY", "OTHER", "WATER"].includes(
         payment.rentCharge.chargeType,
       );
     }
 
     return (
       payment.targetType === "RENT" ||
+      payment.targetType === "DEPOSIT" ||
       payment.targetType === "WATER" ||
       payment.targetType === "COMBINED" ||
       payment.targetType === "OTHER"
