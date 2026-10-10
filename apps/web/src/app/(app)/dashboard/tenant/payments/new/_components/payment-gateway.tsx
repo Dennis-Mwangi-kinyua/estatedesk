@@ -67,7 +67,7 @@ export function PaymentGateway({ availableMethods }: PaymentGatewayProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full min-w-0 max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8 rounded-3xl border border-border bg-card p-6 shadow-sm">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -141,7 +141,7 @@ export function PaymentGateway({ availableMethods }: PaymentGatewayProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 items-stretch gap-5 xl:grid-cols-2">
               {instantMethods.map((option) => (
                 <MethodCard
                   key={option.id}
@@ -171,7 +171,7 @@ export function PaymentGateway({ availableMethods }: PaymentGatewayProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 items-stretch gap-5 xl:grid-cols-2">
               {manualMethods.map((option) => (
                 <MethodCard
                   key={option.id}
@@ -212,7 +212,7 @@ function MethodCard({
     <button data-workspace-action="true"
       type="button"
       onClick={() => onSelect(option)}
-      className="group rounded-3xl border border-border bg-card p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
+      className="group flex h-full min-w-0 flex-col rounded-3xl border border-border bg-card p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg sm:p-6"
     >
       <div className="mb-4 flex items-start justify-between gap-4">
         <div
@@ -224,17 +224,17 @@ function MethodCard({
           {createElement(getOptionIcon(option), { className: "h-5 w-5" })}
         </div>
       </div>
-      <h3 className="text-lg font-semibold text-foreground">{option.name}</h3>
-      <p className="mt-2 text-sm leading-6 text-foreground/75">
+      <h3 className="break-words text-lg font-semibold text-foreground">{option.name}</h3>
+      <p className="mt-2 break-words text-sm leading-7 text-foreground/75">
         {option.description}
       </p>
-      <div className="mt-5 flex items-center justify-between gap-2">
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-6">
         <span
-          className={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${badgeClass}`}
+          className={`rounded-full px-3 py-1.5 text-xs font-medium ${badgeClass}`}
         >
           {badge}
         </span>
-        <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
+        <span className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary">
           {option.id === "mpesa-stk" ? "Send STK push" : "Enter code / upload proof"}
           <ChevronRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
         </span>

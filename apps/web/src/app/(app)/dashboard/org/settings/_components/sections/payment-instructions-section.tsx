@@ -1,3 +1,4 @@
+import { BankDetailsSearch } from "./bank-details-search";
 import { updatePaymentInstructionsAction } from "@/features/settings/actions/settings-actions";
 import {
   DEFAULT_KCB_PAYBILL,
@@ -209,8 +210,7 @@ export function PaymentInstructionsSection({ data }: { data: SettingsPageData })
             account details. Tenants will only see the banks you enable.
           </p>
 
-          <div className="mt-4 space-y-3">
-            {bankMethods
+          <BankDetailsSearch banks={bankMethods
               .filter((method) => method.id !== "kcb")
               .map((method) => {
                 const isOn = enabled.has(method.id);
@@ -218,7 +218,7 @@ export function PaymentInstructionsSection({ data }: { data: SettingsPageData })
                   getBankAccountForMethod(instructions, method.id) ??
                   instructions.bankAccounts[method.id];
 
-                return (
+                return { id: method.id, name: method.name, enabled: isOn, details: (
                   <div
                     key={method.id}
                     className="rounded-2xl border border-border bg-card p-4"
@@ -276,9 +276,8 @@ export function PaymentInstructionsSection({ data }: { data: SettingsPageData })
                       </div>
                     </div>
                   </div>
-                );
-              })}
-          </div>
+                ) };
+              })} />
         </div>
 
         <div className="flex justify-end">
