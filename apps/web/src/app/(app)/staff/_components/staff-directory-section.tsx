@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { UserRoundPlus as UserPlus } from "lucide-react";
+import { ChevronRight, ContactRound, UserRoundPlus as UserPlus } from "lucide-react";
 import { encodePublicId } from "@/lib/public-id";
 import { formatDateTime, formatRelative } from "../_lib/helpers";
 import type { getStaffDirectoryData } from "../_lib/queries";
@@ -23,7 +23,7 @@ export function StaffDirectorySection({ data }: StaffDirectorySectionProps) {
   return (
     <section className={panelShellClassName}>
       <div className={`border-b border-border ${panelBodyClassName}`}>
-        <h2 className="text-lg font-semibold text-foreground sm:text-xl">All staff</h2>
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground sm:text-xl"><ContactRound aria-hidden="true" className="h-5 w-5 text-primary" />All staff</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Open a staff member to manage details or caretaker assignments.
         </p>
@@ -48,7 +48,7 @@ export function StaffDirectorySection({ data }: StaffDirectorySectionProps) {
         </div>
       ) : (
         <>
-          <div className="grid gap-3 p-4 lg:hidden">
+          <div className="grid min-w-0 gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:hidden">
             {rows.map((member) => (
               <StaffCard
                 key={member.id}
@@ -83,7 +83,7 @@ export function StaffDirectorySection({ data }: StaffDirectorySectionProps) {
                       <p className="font-semibold text-foreground">
                         {member.user.fullName}
                       </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
+                      <p className="mt-1 text-xs text-muted-foreground" style={{ overflowWrap: "anywhere" }}>
                         {member.user.email ?? member.user.phone ?? "No contact"}
                       </p>
                     </td>
@@ -107,9 +107,9 @@ export function StaffDirectorySection({ data }: StaffDirectorySectionProps) {
                     <td className="px-5 py-4 sm:px-6">
                       <Link data-workspace-action="true"
                         href={`/staff/${member.role.toLowerCase()}/${encodePublicId(member.id, "membership")}`}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted/20"
+                        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted/20"
                       >
-                        Open
+                        Open<ChevronRight aria-hidden="true" className="h-4 w-4" />
                       </Link>
                     </td>
                   </tr>
