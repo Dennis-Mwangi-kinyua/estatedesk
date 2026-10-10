@@ -1,6 +1,13 @@
 import type { MpesaStkPushInput, MpesaStkPushResult } from "./types";
 import { getMpesaConfigForOrg, type MpesaConfig } from "./config";
 
+export class MpesaRequestError extends Error {
+  constructor(message: string, public readonly rejected: boolean) {
+    super(message);
+    this.name = "MpesaRequestError";
+  }
+}
+
 export function normalizeMpesaPhone(phone: string) {
   const cleaned = phone.replace(/\D+/g, "");
   if (/^254[17]\d{8}$/.test(cleaned)) return cleaned;
@@ -39,10 +46,10 @@ async function darajaFetch(url: string, init: RequestInit) {
   });
   const payload = (await response.json().catch(() => ({}))) as Record<string, unknown>;
   if (!response.ok) {
-    throw new Error(
-      typeof payload.errorMessage === "string"
-        ? payload.errorMessage
-        : `Daraja request failed with HTTP ${response.status}.`,
+    const detail = typeof payload.errorMessage === "string" ? payload.errorMessage.trim() : "";
+    throw new MpesaRequestError(
+      detail || `M-Pesa is temporarily unavailable (HTTP ${response.status}${payload.errorCode ? `, code ${payload.errorCode}` : ""}). Check the payment status before trying again.`,
+      response.status >= 400 && response.status < 500 && ![408, 429].includes(response.status),
     );
   }
   return payload;
@@ -104,6 +111,13 @@ export async function requestMpesaStkPush(
     },
   );
 
+  if (String(payload.ResponseCode) !== "0" || !payload.CheckoutRequestID) {
+    throw new MpesaRequestError(
+      String(payload.ResponseDescription || payload.errorMessage || "M-Pesa did not accept the STK request. Please try again."),
+      true,
+    );
+  }
+
   return {
     merchantRequestId: String(payload.MerchantRequestID ?? ""),
     checkoutRequestId: String(payload.CheckoutRequestID ?? ""),
@@ -111,4 +125,24 @@ export async function requestMpesaStkPush(
     responseDescription: String(payload.ResponseDescription ?? ""),
     customerMessage: String(payload.CustomerMessage ?? ""),
   };
+}
+
+export async function queryMpesaStkPush(orgId: string, checkoutRequestId: string) {
+  const config = getMpesaConfigForOrg(orgId);
+  if (!config) throw new Error("M-Pesa is not configured for this organisation.");
+  const timestamp = darajaTimestamp();
+  const token = await getAccessToken(config);
+  const payload = await darajaFetch(`${darajaBaseUrl(config)}/mpesa/stkpushquery/v1/query`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      BusinessShortCode: config.shortcode,
+      Password: Buffer.from(`${config.shortcode}${config.passkey}${timestamp}`).toString("base64"),
+      Timestamp: timestamp,
+      CheckoutRequestID: checkoutRequestId,
+    }),
+  });
+  const code = String(payload.ResultCode ?? "");
+  if (!/^\d+$/.test(code)) return { resultCode: null, description: "M-Pesa has not confirmed the result yet. Check again shortly." };
+  return { resultCode: Number(code), description: String(payload.ResultDesc || "M-Pesa returned a payment result.") };
 }

@@ -1,4 +1,5 @@
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
+import { StkStatusCheck } from "./stk-status-check";
 import { ArrowUpRight, ReceiptText } from "lucide-react";
 import {
   formatDate,
@@ -15,6 +16,8 @@ import type { TenantPaymentsPageData } from "@/app/(app)/dashboard/tenant/paymen
 
 export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
   const { filteredPayments } = data;
+  const latestStk = filteredPayments.find(payment => payment.method === "MPESA_STK");
+  const pendingStk = latestStk && ["PENDING", "INITIATED"].includes(latestStk.gatewayStatus) ? latestStk : undefined;
 
   return (
     <SurfaceCard className="p-4 sm:p-6 xl:p-7">
@@ -29,6 +32,8 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
         </div>
       </div>
 
+      {pendingStk ? <StkStatusCheck paymentId={pendingStk.id} /> : null}
+      {!pendingStk && latestStk?.gatewayStatus === "FAILED" && latestStk.notes ? <p role="status" className="mt-4 rounded-xl border border-border p-4 text-sm">{latestStk.notes}</p> : null}
       <div className="mt-5 space-y-3 lg:hidden">
         {filteredPayments.map((payment) => {
           const receiptHref = getReceiptHref(payment);

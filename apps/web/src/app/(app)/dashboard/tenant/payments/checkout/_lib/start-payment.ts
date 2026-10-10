@@ -26,7 +26,7 @@ import {
   validateCheckoutTransactionId,
 } from "@/lib/payments/method-flow";
 import { isUniqueConstraintError } from "@/lib/payments/transaction-reference";
-import { requestMpesaStkPush } from "@/lib/mpesa/client";
+import { requestMpesaStkPush, normalizeMpesaPhone, MpesaRequestError } from "@/lib/mpesa/client";
 import { processAdvanceRentPayment } from "./handlers/advance-rent-payment";
 import { processPeriodBillPayment } from "./handlers/period-bill-payment";
 import { processRentChargePayment } from "./handlers/rent-charge-payment";
@@ -102,6 +102,7 @@ export async function startTenantPayment(input: StartPaymentInput) {
   if (requiresPhoneForCheckout(method) && !phoneNumber?.trim()) {
     throw new Error("Phone number is required for this payment method.");
   }
+  if (method === "mpesa-stk") normalizeMpesaPhone(phoneNumber!);
 
   if (requiresAccountNameForCheckout(method) && !accountName?.trim()) {
     throw new Error("Sender / account name is required for bank transfers.");
@@ -255,6 +256,17 @@ export async function startTenantPayment(input: StartPaymentInput) {
         phone: phoneNumber!.trim(),
         accountReference: payment?.reference ?? id.slice(0, 12),
         transactionDesc: "EstateDesk bill",
+      }).catch(async (error: unknown) => {
+        const rejected = error instanceof MpesaRequestError && error.rejected;
+        await prisma.payment.updateMany({
+          where: { id: paymentId!, gatewayStatus: "INITIATED", verificationStatus: "NOT_REQUIRED" },
+          data: {
+            gatewayStatus: rejected ? "FAILED" : "INITIATED",
+            verificationStatus: rejected ? "REJECTED" : "NOT_REQUIRED",
+            notes: rejected ? "M-Pesa rejected the STK request. No payment was confirmed." : "STK request result is unknown. Check its status before trying again.",
+          },
+        });
+        throw error;
       });
 
       if (!stk.checkoutRequestId) {
