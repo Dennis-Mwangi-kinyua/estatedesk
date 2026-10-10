@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { queryMpesaStkPush, MpesaRequestError } from "@/lib/mpesa/client";
+import { mpesaFailureMessage } from "@/lib/mpesa/result-message";
 
 export async function checkTenantStkStatus(paymentId: string) {
   const session = await requireTenantAccess();
@@ -20,9 +21,7 @@ export async function checkTenantStkStatus(paymentId: string) {
     const result = await queryMpesaStkPush(payment.orgId, payment.checkoutRequestId);
     if (result.resultCode === null) return { message: result.description };
     if (result.resultCode === 0) return { message: "M-Pesa reports success. Waiting for the receipt callback to confirm the amount and clear your bill." };
-    const message = result.resultCode === 1037
-      ? "M-Pesa could not reach your phone. Check the Safaricom number and SIM network coverage, then retry."
-      : result.resultCode === 1032 ? "The M-Pesa request was cancelled. You can retry when ready." : result.description;
+    const message = mpesaFailureMessage(result.resultCode, result.description);
     // A callback may have settled the payment while the query was in flight.
     await prisma.payment.updateMany({
       where: { id: payment.id, gatewayStatus: { in: ["PENDING", "INITIATED"] }, verificationStatus: "NOT_REQUIRED", reversedAt: null },

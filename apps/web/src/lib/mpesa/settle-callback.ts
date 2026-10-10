@@ -2,6 +2,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { buildMpesaTransactionKey } from "@/lib/payments/transaction-reference";
 import { settleGatewayPayment } from "@/lib/payments/settle-payment";
+import { mpesaFailureMessage } from "./result-message";
 
 export type StkCallback = {
   MerchantRequestID?: string; CheckoutRequestID: string; ResultCode: number; ResultDesc?: string;
@@ -17,7 +18,8 @@ export async function settleMpesaCallback(tx: Prisma.TransactionClient, orgId: s
   if (payment.merchantRequestId && callback.MerchantRequestID !== payment.merchantRequestId) throw new Error("Merchant request mismatch.");
   const metadata = payment.callbackRaw && typeof payment.callbackRaw === "object" && !Array.isArray(payment.callbackRaw) ? payment.callbackRaw : {};
   if (callback.ResultCode !== 0) {
-    await tx.payment.update({ where: { id: payment.id }, data: { gatewayStatus: "FAILED", verificationStatus: "REJECTED", reconciliationStatus: "DISPUTED", reconciliationNotes: callback.ResultDesc ?? "Daraja payment failed.", callbackRaw: { ...metadata, mpesaCallback: callback as Prisma.InputJsonValue } } });
+    const message = mpesaFailureMessage(callback.ResultCode, callback.ResultDesc);
+    await tx.payment.update({ where: { id: payment.id }, data: { gatewayStatus: "FAILED", verificationStatus: "REJECTED", reconciliationStatus: "DISPUTED", reconciliationNotes: message, notes: message, callbackRaw: { ...metadata, mpesaCallback: callback as Prisma.InputJsonValue } } });
     return { matched: true };
   }
   const items = callback.CallbackMetadata?.Item ?? [];

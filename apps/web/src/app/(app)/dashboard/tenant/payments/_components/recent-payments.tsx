@@ -1,5 +1,6 @@
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { StkStatusCheck } from "./stk-status-check";
+import { mpesaFailureMessage } from "@/lib/mpesa/result-message";
 import { ArrowUpRight, ReceiptText } from "lucide-react";
 import {
   formatDate,
@@ -18,6 +19,10 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
   const { filteredPayments } = data;
   const latestStk = filteredPayments.find(payment => payment.method === "MPESA_STK");
   const pendingStk = latestStk && ["PENDING", "INITIATED"].includes(latestStk.gatewayStatus) ? latestStk : undefined;
+  const callback = latestStk?.callbackRaw && typeof latestStk.callbackRaw === "object" && !Array.isArray(latestStk.callbackRaw) ? latestStk.callbackRaw.mpesaCallback : null;
+  const failureMessage = callback && typeof callback === "object" && !Array.isArray(callback) && typeof callback.ResultCode === "number"
+    ? mpesaFailureMessage(callback.ResultCode, typeof callback.ResultDesc === "string" ? callback.ResultDesc : undefined)
+    : latestStk?.reconciliationNotes || latestStk?.notes;
 
   return (
     <SurfaceCard className="p-4 sm:p-6 xl:p-7">
@@ -33,7 +38,7 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
       </div>
 
       {pendingStk ? <StkStatusCheck paymentId={pendingStk.id} /> : null}
-      {!pendingStk && latestStk?.gatewayStatus === "FAILED" && latestStk.notes ? <p role="status" className="mt-4 rounded-xl border border-border p-4 text-sm">{latestStk.notes}</p> : null}
+      {!pendingStk && latestStk?.gatewayStatus === "FAILED" && failureMessage ? <p role="status" className="mt-4 rounded-xl border border-border p-4 text-sm">{failureMessage}</p> : null}
       <div className="mt-5 space-y-3 lg:hidden">
         {filteredPayments.map((payment) => {
           const receiptHref = getReceiptHref(payment);
