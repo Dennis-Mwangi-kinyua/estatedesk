@@ -1,5 +1,4 @@
 import { BackfillChargesButton } from "./backfill-charges-button";
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { nairobiDate } from "@/lib/move-outs/validation";
 import { ConfirmChargePaymentForm } from "./confirm-charge-payment-form";
@@ -28,7 +27,7 @@ export async function InitialChargesPanel({ orgId, tenantId, canConfirm = false 
       <p className="text-xs text-muted-foreground">Tenancy started {nairobiDate(leases.find(item => item.id === charge.leaseId)!.startDate)}</p>
       <dl className="grid grid-cols-2 gap-3 text-sm"><div><dt className="text-muted-foreground">Amount due</dt><dd className="break-words font-semibold">{money(charge.amountDue)}</dd></div><div><dt className="text-muted-foreground">Paid</dt><dd className="break-words font-semibold">{money(charge.amountPaid)}</dd></div><div><dt className="text-muted-foreground">Balance</dt><dd className="break-words font-semibold">{money(charge.balance)}</dd></div><div><dt className="text-muted-foreground">Due date</dt><dd>{nairobiDate(charge.dueDate)}</dd></div></dl>
       {canConfirm && charge.status !== "WAIVED" && charge.balance.gt(0) ? <ConfirmChargePaymentForm chargeId={charge.id} amount={charge.balance.toFixed(2)} dateLimit={nairobiDate()} /> : null}
-      <div className="flex flex-col gap-2">{Array.from(new Map(charge.paymentAllocations.flatMap(allocation => allocation.payment.receipt ? [[allocation.payment.receipt.id, allocation.payment.receipt] as const] : [])).values()).map(receipt => <Link key={receipt.id} href={`/api/receipts/${receipt.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 break-words text-sm font-semibold text-primary"><ReceiptText className="h-4 w-4 shrink-0" />Receipt {receipt.receiptNo}</Link>)}</div>
+      <div className="flex flex-col gap-2">{Array.from(new Map(charge.paymentAllocations.flatMap(allocation => allocation.payment.receipt ? [[allocation.payment.receipt.id, allocation.payment.receipt] as const] : [])).values()).map(receipt => <a download key={receipt.id} href={`/api/receipts/${receipt.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 break-words text-sm font-semibold text-primary"><ReceiptText className="h-4 w-4 shrink-0" />Receipt {receipt.receiptNo}</a>)}</div>
     </article>)}</div>
     <p className="text-sm font-semibold">Credit available for next bills: {money(credit._sum.unappliedAmount ?? 0)}</p>
     <p className="text-sm font-semibold">Total remaining: {money(charges.reduce((sum, charge) => sum + (charge.status === "WAIVED" ? 0 : Number(charge.balance)), 0))}</p>

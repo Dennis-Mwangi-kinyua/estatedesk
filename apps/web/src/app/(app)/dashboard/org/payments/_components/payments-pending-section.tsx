@@ -1,3 +1,4 @@
+import { PaymentReviewSubmit } from "./payment-review-submit";
 import {
   rejectTenantPaymentAction,
   verifyTenantPaymentAction,
@@ -5,7 +6,6 @@ import {
 import type { PaymentsPageData } from "../_lib/types";
 import {
   buttonPrimaryClassName,
-  compactFieldClassName,
   fieldClassName,
   formatStatus,
   getTransactionMessage,
@@ -51,124 +51,46 @@ export function PaymentsPendingSection({
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="payments-responsive-table min-w-full text-sm">
-            <thead className="border-b border-border bg-muted/20 text-left">
-              <tr>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Payer
-                </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Method
-                </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Target
-                </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Amount
-                </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Reference
-                </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Message
-                </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Submitted
-                </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingPayments.map((payment) => {
-                const raw = payment.callbackRaw;
-                const proofUrl = raw && typeof raw === "object" && !Array.isArray(raw)
-                  && typeof raw.proofImageUrl === "string" && (raw.proofImageUrl.startsWith("https://imagedelivery.net/") || raw.proofImageUrl.startsWith("/uploads/payment-proof/"))
-                  ? raw.proofImageUrl : null;
-                const transactionMessage = getTransactionMessage(payment.callbackRaw);
-
-                return (
-                  <tr
-                    key={payment.id}
-                    className="border-b border-border/70 transition hover:bg-muted/10"
-                  >
-                    <td data-label="Payer" className="px-4 py-3 font-medium text-foreground">
-                      {payment.payerTenant?.fullName ??
-                        payment.payerUser?.fullName ??
-                        payment.payerName ??
-                        payment.payerType}
-                    </td>
-                    <td data-label="Method" className="px-4 py-3 text-muted-foreground">
-                      {getCheckoutMethodLabel(payment.method, payment.callbackRaw)}
-                    </td>
-                    <td data-label="Target" className="px-4 py-3 text-muted-foreground">
-                      {formatStatus(payment.targetType)}
-                    </td>
-                    <td data-label="Amount" className="px-4 py-3 font-semibold text-foreground">
-                      {formatLedgerCurrency(payment.amount)}
-                    </td>
-                    <td data-label="Reference" className="px-4 py-3 text-muted-foreground">
-                      <span className="font-semibold text-foreground">
-                        {payment.externalReference ??
-                          payment.reference ??
-                          payment.checkoutRequestId ??
-                          "-"}
-                      </span>
-                    </td>
-                    <td data-label="Message" className="max-w-sm px-4 py-3 text-xs leading-5 text-muted-foreground">
-                      {transactionMessage ? transactionMessage : "-"}
-                      {proofUrl ? <a href={proofUrl} target="_blank" rel="noopener noreferrer" className="mt-2 block font-medium text-primary underline">View payment proof</a> : null}
-                    </td>
-                    <td data-label="Submitted" className="px-4 py-3 text-muted-foreground">
-                      {formatLedgerDate(payment.createdAt)}
-                    </td>
-                    <td data-label="Actions" data-mobile-block="true" className="px-4 py-3">
-                      <div className="flex min-w-64 flex-col gap-2">
-                        <form action={verifyTenantPaymentAction}>
-                          <input type="hidden" name="paymentId" value={payment.id} />
-                          <input
-                            type="text"
-                            name="verificationNote"
-                            required
-                            minLength={5}
-                            placeholder="How was it confirmed?"
-                            className={`${compactFieldClassName} mb-2 border-emerald-200 focus:border-emerald-400 dark:border-emerald-800`}
-                          />
-                          <button data-workspace-action="true"
-                            type="submit"
-                            className="inline-flex h-9 w-full items-center justify-center rounded-xl bg-emerald-700 px-3 text-xs font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-                          >
-                            Verify & Allocate
-                          </button>
-                        </form>
-
-                        <form
-                          action={rejectTenantPaymentAction}
-                          className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]"
-                        >
-                          <input type="hidden" name="paymentId" value={payment.id} />
-                          <input
-                            type="text"
-                            name="reason"
-                            placeholder="Optional rejection reason"
-                            className={compactFieldClassName}
-                          />
-                          <button data-workspace-action="true"
-                            type="submit"
-                            className="inline-flex h-9 items-center justify-center rounded-xl border border-red-200 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-800 dark:text-red-200 dark:hover:bg-red-950/30"
-                          >
-                            Reject
-                          </button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="grid min-w-0 gap-4 p-4 sm:p-6 xl:grid-cols-2">
+          {pendingPayments.map(payment => {
+            const raw = payment.callbackRaw;
+            const proofUrl = raw && typeof raw === "object" && !Array.isArray(raw)
+              && typeof raw.proofImageUrl === "string" && (raw.proofImageUrl.startsWith("https://imagedelivery.net/") || raw.proofImageUrl.startsWith("/uploads/payment-proof/"))
+              ? raw.proofImageUrl : null;
+            const message = getTransactionMessage(raw);
+            const payer = payment.payerTenant?.fullName ?? payment.payerUser?.fullName ?? payment.payerName ?? payment.payerType;
+            return <article key={payment.id} aria-label={`Review payment from ${payer}`} className="min-w-0 space-y-5 rounded-2xl border border-border bg-background p-4 sm:p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0"><h3 className="break-words font-semibold">{payer}</h3><p className="mt-1 text-sm text-muted-foreground">{getCheckoutMethodLabel(payment.method, raw)} · {formatStatus(payment.targetType)}</p></div>
+                <p className="text-xl font-bold">{formatLedgerCurrency(payment.amount)}</p>
+              </div>
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div className="min-w-0"><dt className="text-muted-foreground">Transaction reference</dt><dd className="mt-1 break-all font-semibold">{payment.externalReference ?? payment.reference ?? payment.checkoutRequestId ?? "Not supplied"}</dd></div>
+                <div><dt className="text-muted-foreground">Submitted</dt><dd className="mt-1">{formatLedgerDate(payment.createdAt)}</dd></div>
+              </dl>
+              <section className="space-y-3 rounded-xl border border-border p-3" aria-label="Payment evidence">
+                <h4 className="text-sm font-semibold">1. Review payment evidence</h4>
+                <p className="whitespace-pre-wrap break-words text-sm leading-6 text-muted-foreground">{message || "No confirmation message supplied."}</p>
+                {proofUrl ? <a href={proofUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center rounded-xl border border-border px-4 text-sm font-semibold text-primary">Open receipt / screenshot</a> : <p className="text-xs text-muted-foreground">No screenshot supplied. Check the transaction against your payment statement.</p>}
+              </section>
+              <form action={verifyTenantPaymentAction} className="space-y-3">
+                <input type="hidden" name="paymentId" value={payment.id} />
+                <label className="grid gap-2 text-sm font-semibold">2. Record how you confirmed payment
+                  <textarea name="verificationNote" required minLength={5} maxLength={2000} rows={3} placeholder="e.g. Matched the reference and amount on the M-Pesa statement" className={fieldClassName} />
+                </label>
+                <p className="text-xs leading-5 text-muted-foreground">Verification applies the payment to the bill and issues a receipt for the tenant and organisation.</p>
+                <PaymentReviewSubmit />
+              </form>
+              <details className="rounded-xl border border-border p-3">
+                <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-red-700 dark:text-red-200">Payment cannot be confirmed?</summary>
+                <form action={rejectTenantPaymentAction} className="mt-3 space-y-3">
+                  <input type="hidden" name="paymentId" value={payment.id} />
+                  <label className="grid gap-2 text-sm">Rejection reason<textarea name="reason" rows={2} maxLength={2000} placeholder="Explain the issue to the tenant" className={fieldClassName} /></label>
+                  <PaymentReviewSubmit reject />
+                </form>
+              </details>
+            </article>;
+          })}
         </div>
       </section>
     );

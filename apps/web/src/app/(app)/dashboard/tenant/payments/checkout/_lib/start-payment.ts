@@ -82,7 +82,7 @@ export async function startTenantPayment(input: StartPaymentInput) {
     where: { orgId: session.activeOrgId },
     select: { customFields: true },
   });
-  const instructions = parsePaymentInstructions(settings?.customFields);
+  const instructions = { ...parsePaymentInstructions(settings?.customFields), mpesaStkEnabled: isMpesaStkConfigured(session.activeOrgId) };
 
   if (!isPaymentMethodAvailable(instructions, method)) {
     throw new Error(

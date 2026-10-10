@@ -27,6 +27,8 @@ export async function loadPaymentsPageData(orgId: string, q = "") {
       where: {
         orgId,
         verificationStatus: "PENDING",
+        method: { not: "MPESA_STK" },
+        reversedAt: null,
         ...(q
           ? {
               OR: [

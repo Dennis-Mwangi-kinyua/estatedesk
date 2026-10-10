@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { ArrowUpRight, ReceiptText } from "lucide-react";
 import {
@@ -114,13 +113,13 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
 
               {receiptHref ? (
                 <div className="mt-3">
-                  <Link
+                  <a download
                     href={receiptHref}
                     className="inline-flex items-center gap-2 rounded-[18px] border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition hover:bg-muted/40"
                   >
                     <ReceiptText className="h-4 w-4" />
                     Download Receipt
-                  </Link>
+                  </a>
                 </div>
               ) : null}
             </div>
@@ -200,13 +199,13 @@ export function RecentPayments({ data }: { data: TenantPaymentsPageData }) {
 
                   <td className="px-5 py-4">
                     {receiptHref ? (
-                      <Link
+                      <a download
                         href={receiptHref}
                         className="inline-flex items-center gap-1 font-medium text-foreground hover:text-foreground/80"
                       >
                         Download
                         <ArrowUpRight className="h-4 w-4" />
-                      </Link>
+                      </a>
                     ) : (
                       <span className="text-foreground/50">—</span>
                     )}

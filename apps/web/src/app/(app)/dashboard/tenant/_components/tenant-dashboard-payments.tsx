@@ -43,7 +43,7 @@ export function TenantDashboardPayments({
         ) : (
           recentPayments.slice(0, 3).map((payment) => {
             const receiptHref = payment.receipt?.id
-              ? `/dashboard/tenant/receipts/${payment.receipt.id}`
+              ? `/api/receipts/${payment.receipt.id}`
               : null;
 
             return (
@@ -76,13 +76,13 @@ export function TenantDashboardPayments({
                     Gateway: {payment.gatewayStatus}
                   </span>
                   {receiptHref ? (
-                    <Link
+                    <a download
                       href={receiptHref}
                       className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/15 px-3 py-1 text-xs font-medium text-foreground transition hover:bg-muted/30"
                     >
                       <ReceiptText className="h-3.5 w-3.5" />
                       Receipt
-                    </Link>
+                    </a>
                   ) : null}
                 </div>
               </article>

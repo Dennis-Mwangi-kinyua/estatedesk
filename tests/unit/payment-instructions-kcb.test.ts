@@ -136,3 +136,12 @@ test("missing KCB fields default to empty / disabled", () => {
   assert.equal(isKcbPaybillAvailable(parsed), false);
   assert.deepEqual(listAvailablePaymentMethods(parsed), []);
 });
+
+test("configured STK does not require manual paybill details or enable manual collection", () => {
+  const instructions = { ...emptyPaymentInstructions, mpesaStkEnabled: true };
+  assert.equal(isPaymentMethodAvailable(instructions, "mpesa-stk"), true);
+  assert.equal(isPaymentMethodAvailable(instructions, "manual-mpesa"), false);
+  assert.deepEqual(listAvailablePaymentMethods(instructions).map(method => method.id), ["mpesa-stk"]);
+  assert.deepEqual(listAvailablePaymentMethods(emptyPaymentInstructions), []);
+  assert.equal(parsePaymentInstructions({ paymentInstructions: { mpesaStkEnabled: true } }).mpesaStkEnabled, undefined);
+});

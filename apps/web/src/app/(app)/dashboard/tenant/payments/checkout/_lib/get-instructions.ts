@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/permissions/guards";
+import { isMpesaStkConfigured } from "@/lib/payments/method-flow";
 import { parsePaymentInstructions } from "@/lib/payments/instructions";
 
 export async function getTenantPaymentInstructions() {
@@ -18,5 +19,5 @@ export async function getTenantPaymentInstructions() {
     },
   });
 
-  return parsePaymentInstructions(settings?.customFields);
+  return { ...parsePaymentInstructions(settings?.customFields), mpesaStkEnabled: isMpesaStkConfigured(session.activeOrgId) };
 }

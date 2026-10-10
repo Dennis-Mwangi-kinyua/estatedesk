@@ -17,6 +17,8 @@ export type OrgBankAccountDetails = {
 };
 
 export type PaymentInstructions = {
+  /** Derived on the server; never a stored integration credential. */
+  mpesaStkEnabled?: boolean;
   /** Method ids tenants may use (org-scoped). Empty falls back to legacy flags. */
   enabledMethods: string[];
   mpesaEnabled: boolean;
@@ -224,8 +226,8 @@ export function isPaymentMethodAvailable(
 ): boolean {
   // Virtual methods derived from org pay targets (shown on the eCitizen-style chooser).
   if (methodId === "mpesa-stk") {
-    // STK env check is applied by the tenant chooser (server); here we only need pay targets.
-    return hasMpesaPayTarget(instructions);
+    // STK uses the integration shortcode; manual paybill instructions are separate.
+    return instructions.mpesaStkEnabled === true || hasMpesaPayTarget(instructions);
   }
   if (methodId === "manual-mpesa") {
     return (

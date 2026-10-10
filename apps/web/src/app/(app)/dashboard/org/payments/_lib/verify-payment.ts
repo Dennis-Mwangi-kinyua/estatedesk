@@ -67,6 +67,10 @@ export async function verifyPayment(tx: Prisma.TransactionClient, session: AppSe
       return;
     }
 
+    if (payment.method === "MPESA_STK") {
+      throw new Error("STK payments are confirmed automatically by M-Pesa. Check the gateway result before recording any separate payment.");
+    }
+
     if (payment.verificationStatus === "REJECTED") {
       throw new Error("Rejected payments cannot be verified.");
     }

@@ -273,13 +273,13 @@ function BillActions({ bill }: { bill: CombinedBill }) {
 
       {bill.isPaid ? (
         bill.receiptUrl ? (
-          <Link
+          <a download
             href={bill.receiptUrl}
             className="inline-flex items-center gap-2 rounded-[16px] bg-neutral-900 px-4 py-3 text-sm font-medium text-white"
           >
             <Receipt className="h-4 w-4" />
             Download Receipt
-          </Link>
+          </a>
         ) : (
           <span className="inline-flex items-center rounded-[16px] border border-neutral-300 bg-card px-4 py-3 text-sm text-muted-foreground">
             Paid
@@ -331,12 +331,12 @@ function BillActionsTable({ bill }: { bill: CombinedBill }) {
 
       {bill.isPaid ? (
         bill.receiptUrl ? (
-          <Link
+          <a download
             href={bill.receiptUrl}
             className="inline-flex items-center rounded-xl bg-neutral-900 px-3 py-2 text-sm font-medium text-white"
           >
             Receipt
-          </Link>
+          </a>
         ) : (
           <span className="text-sm text-muted-foreground">Paid</span>
         )

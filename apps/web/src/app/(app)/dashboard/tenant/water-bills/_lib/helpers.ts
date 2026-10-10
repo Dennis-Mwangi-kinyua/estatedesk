@@ -71,7 +71,7 @@ export function getReceiptHref(bill: WaterBillItem) {
     return null;
   }
 
-  return `/dashboard/tenant/receipts/${paymentWithReceipt.receipt.id}`;
+  return `/api/receipts/${paymentWithReceipt.receipt.id}`;
 }
 
 export function getOutstandingAmount(bill: WaterBillItem) {

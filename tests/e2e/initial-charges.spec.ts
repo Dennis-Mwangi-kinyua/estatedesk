@@ -32,6 +32,16 @@ test("first rent and deposit appear in both portals; confirmation issues shared 
     await expect(tenantPage.getByRole("region", { name: "First rent and deposit" })).toBeVisible();
     const deposit = await db.rentCharge.findFirstOrThrow({ where: { leaseId: fixture.leaseId, chargeType: "DEPOSIT" } });
     const pending = await db.payment.create({ data: { orgId: fixture.orgId, payerTenantId: fixture.tenantId, rentChargeId: deposit.id, targetType: "DEPOSIT", method: "CASH", amount: 15000, gatewayStatus: "PENDING", verificationStatus: "PENDING" } });
+    const reviewPage = await page.context().newPage();
+    await reviewPage.goto("/dashboard/org/payments", { waitUntil: "domcontentloaded" });
+    const review = reviewPage.getByRole("article", { name: "Review payment from New tenancy browser tenant" });
+    await expect(review).toBeVisible();
+    await expect(review.getByLabel("2. Record how you confirmed payment")).toBeVisible();
+    await expect(review.getByRole("button", { name: "Verify payment & issue receipt" })).toBeVisible();
+    await review.getByText("Payment cannot be confirmed?", { exact: true }).click();
+    await expect(review.getByLabel("Rejection reason")).toBeVisible();
+    expect(await reviewPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await reviewPage.close();
     const depositCard = panel.getByRole("article").filter({ has: page.getByRole("heading", { name: "Security deposit", exact: true }) });
     await depositCard.getByRole("button", { name: "Confirm paid", exact: true }).click();
     await depositCard.getByLabel("Payment reference / cash receipt number").fill(`DEPOSIT-${fixture.leaseId}`);
@@ -77,6 +87,17 @@ test("first rent and deposit appear in both portals; confirmation issues shared 
     await expect(tenantPanel.getByText("Tenancy started 2025-01-01", { exact: true })).toBeVisible();
     await expect(tenantPanel.getByText("Waived", { exact: true })).toBeVisible();
     await expect(tenantPanel.getByRole("link", { name: /Receipt / })).toHaveCount(3);
+    const [download] = await Promise.all([
+      tenantPage.waitForEvent("download"),
+      tenantPanel.getByRole("link", { name: /Receipt / }).first().click(),
+    ]);
+    expect(download.suggestedFilename()).toMatch(/\.pdf$/);
+    expect(await download.failure()).toBeNull();
+    expect(tenantPage.url()).toContain("/dashboard/tenant/payments");
+    const dashboard = await tenantPage.goto("/dashboard/tenant");
+    expect(dashboard?.status()).toBe(200);
+    expect(tenantPage.url()).toContain("/dashboard/tenant");
+    expect(tenantPage.url()).not.toMatch(/login|are-you-lost/);
     expect(await tenantPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const payments = await db.payment.findMany({ where: { payerTenantId: fixture.tenantId }, include: { allocations: true } });
     expect(payments).toHaveLength(3);

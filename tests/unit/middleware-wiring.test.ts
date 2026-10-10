@@ -21,6 +21,16 @@ describe("middleware wiring", () => {
     assert.equal(blocked.status, 307);
     assert.equal(new URL(blocked.headers.get("location")!).pathname, "/are-you-lost");
   });
+  it("allows receipt browser downloads without clearing the session and still requires authentication", () => {
+    const cookie = `${getSessionCookieName()}=v1.${"a".repeat(64)}.${"b".repeat(32)}`;
+    for (const headers of [new Headers({ accept: "text/html", cookie }), new Headers({ "sec-fetch-dest": "document", cookie })]) {
+      const response = proxy(new NextRequest("https://example.test/api/receipts/receipt-id", { headers }));
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get("location"), null);
+      assert.equal(response.headers.get("set-cookie"), null);
+    }
+    assert.equal(proxy(new NextRequest("https://example.test/api/receipts/receipt-id", { headers: { accept: "text/html" } })).status, 401);
+  });
   it("delegates to proxy security middleware", () => {
     const middleware = readFileSync(join(ROOT, "apps/web/middleware.ts"), "utf8");
     const healthRoute = readFileSync(

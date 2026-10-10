@@ -93,7 +93,7 @@ async function resolveTenantContext(
   });
 
   const receiptPath = latestReceipt
-    ? `/dashboard/tenant/receipts/${latestReceipt.id}`
+    ? `/api/receipts/${latestReceipt.id}`
     : null;
 
   return {

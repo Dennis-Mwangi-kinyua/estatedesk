@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { ReceiptText } from "lucide-react";
 import { getBillStatusClasses } from "@/app/(app)/dashboard/tenant/water-bills/_lib/helpers";
@@ -103,13 +102,13 @@ export function BillsHistorySection({
 
             {bill.receiptHref ? (
               <div className="mt-3">
-                <Link
+                <a download
                   href={bill.receiptHref}
                   className="inline-flex items-center gap-2 rounded-[18px] border border-black/10 bg-card px-4 py-3 text-sm font-medium text-neutral-800"
                 >
                   <ReceiptText className="h-4 w-4" />
                   Download Receipt
-                </Link>
+                </a>
               </div>
             ) : null}
           </div>
@@ -161,12 +160,12 @@ export function BillsHistorySection({
                 </td>
                 <td className="px-5 py-4">
                   {bill.receiptHref ? (
-                    <Link
+                    <a download
                       href={bill.receiptHref}
                       className="inline-flex items-center gap-1 font-medium text-foreground hover:text-foreground/80"
                     >
                       Download
-                    </Link>
+                    </a>
                   ) : (
                     <span className="text-neutral-400">—</span>
                   )}

@@ -192,6 +192,8 @@ function isBrowserApiNavigation(req: NextRequest) {
   // These authenticated routes intentionally serve browser downloads.
   if (/^\/api\/move-outs\/[^/]+\/(report|refund-proof)\/?$/.test(req.nextUrl.pathname)) return false;
 
+  if (/^\/api\/receipts\/[^/]+\/?$/.test(req.nextUrl.pathname)) return false;
+
   const accept = req.headers.get("accept") ?? "";
   const destination = req.headers.get("sec-fetch-dest") ?? "";
 

@@ -1,4 +1,3 @@
-import Link from "next/link";
 
 export function ReceiptAction({ href }: { href: string | null }) {
   if (!href) {
@@ -10,11 +9,11 @@ export function ReceiptAction({ href }: { href: string | null }) {
   }
 
   return (
-    <Link
+    <a download
       href={href}
       className="inline-flex items-center rounded-[16px] bg-neutral-900 px-4 py-3 text-sm font-medium text-white"
     >
       Download Receipt
-    </Link>
+    </a>
   );
 }

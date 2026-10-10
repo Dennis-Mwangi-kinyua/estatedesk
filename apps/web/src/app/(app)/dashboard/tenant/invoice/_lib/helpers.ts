@@ -134,7 +134,7 @@ function getLatestReceiptUrlFromPayments(
     return null;
   }
 
-  return `/dashboard/tenant/receipts/${matchingPayment.receipt.id}`;
+  return `/api/receipts/${matchingPayment.receipt.id}`;
 }
 
 export function buildCombinedBills(

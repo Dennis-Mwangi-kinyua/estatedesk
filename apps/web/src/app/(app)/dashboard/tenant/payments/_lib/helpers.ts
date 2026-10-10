@@ -149,7 +149,7 @@ export function getPaymentCategory(payment: PaymentItem) {
 
 export function getReceiptHref(payment: PaymentItem) {
   if (payment.receipt?.id) {
-    return `/dashboard/tenant/receipts/${payment.receipt.id}`;
+    return `/api/receipts/${payment.receipt.id}`;
   }
   return null;
 }
