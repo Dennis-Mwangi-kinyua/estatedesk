@@ -30,6 +30,17 @@ test("first rent and deposit appear in both portals; confirmation issues shared 
     const tenantPage = await tenant.newPage();
     await tenantPage.goto("/dashboard/tenant", { waitUntil: "domcontentloaded" });
     await expect(tenantPage.getByRole("region", { name: "First rent and deposit" })).toBeVisible();
+    const startingCharges = tenantPage.getByRole("region", { name: "First rent and deposit" });
+    await expect(startingCharges.getByRole("link", { name: "Pay now", exact: true })).toHaveCount(2);
+    for (const type of ["RENT", "DEPOSIT"] as const) {
+      const charge = await db.rentCharge.findFirstOrThrow({ where: { leaseId: fixture.leaseId, chargeType: type } });
+      const card = startingCharges.getByRole("article").filter({ has: tenantPage.getByRole("heading", { name: type === "RENT" ? "First month rent" : "Security deposit", exact: true }) }).filter({ hasNot: tenantPage.getByText("Waived", { exact: true }) });
+      const href = await card.getByRole("link", { name: "Pay now", exact: true }).getAttribute("href");
+      const url = new URL(href!, baseURL);
+      expect(url.searchParams.get("source")).toBe("rent_charge");
+      expect(url.searchParams.get("id")).toBe(charge.id);
+      expect(url.searchParams.get("amount")).toBe("15000.00");
+    }
     const deposit = await db.rentCharge.findFirstOrThrow({ where: { leaseId: fixture.leaseId, chargeType: "DEPOSIT" } });
     const pending = await db.payment.create({ data: { orgId: fixture.orgId, payerTenantId: fixture.tenantId, rentChargeId: deposit.id, targetType: "DEPOSIT", method: "CASH", amount: 15000, gatewayStatus: "PENDING", verificationStatus: "PENDING" } });
     const reviewPage = await page.context().newPage();
@@ -87,6 +98,7 @@ test("first rent and deposit appear in both portals; confirmation issues shared 
     await expect(tenantPanel.getByText("Tenancy started 2025-01-01", { exact: true })).toBeVisible();
     await expect(tenantPanel.getByText("Waived", { exact: true })).toBeVisible();
     await expect(tenantPanel.getByRole("link", { name: /Receipt / })).toHaveCount(3);
+    await expect(tenantPanel.getByRole("link", { name: "Pay now", exact: true })).toHaveCount(0);
     const [download] = await Promise.all([
       tenantPage.waitForEvent("download"),
       tenantPanel.getByRole("link", { name: /Receipt / }).first().click(),

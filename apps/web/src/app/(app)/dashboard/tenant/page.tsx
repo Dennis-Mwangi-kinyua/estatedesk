@@ -62,7 +62,7 @@ export default async function TenantDashboardPage() {
 
   return (
     <TenantDashboardWorkspace
-      initialCharges={<InitialChargesPanel orgId={tenant.orgId} tenantId={tenant.id} />}
+      initialCharges={<InitialChargesPanel canPay orgId={tenant.orgId} tenantId={tenant.id} />}
       data={{
         fullName: tenant.fullName,
         propertyName: unit?.property?.name,

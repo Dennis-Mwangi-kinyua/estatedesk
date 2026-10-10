@@ -39,7 +39,7 @@ export default async function TenantPaymentsPage() {
     <PageShell>
       <div className="space-y-4 sm:space-y-6">
         <PaymentsHeader data={data} />
-        <InitialChargesPanel orgId={session.activeOrgId} tenantId={data.tenant.id} />
+        <InitialChargesPanel canPay orgId={session.activeOrgId} tenantId={data.tenant.id} />
         <ManualPaymentForm data={data} />
         <PaymentsStats data={data} />
         <LedgerCard data={data} />

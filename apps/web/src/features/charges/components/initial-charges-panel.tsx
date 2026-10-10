@@ -1,10 +1,11 @@
+import Link from "next/link";
 import { BackfillChargesButton } from "./backfill-charges-button";
 import { prisma } from "@/lib/prisma";
 import { nairobiDate } from "@/lib/move-outs/validation";
 import { ConfirmChargePaymentForm } from "./confirm-charge-payment-form";
 import { ReceiptText, WalletCards } from "lucide-react";
 
-export async function InitialChargesPanel({ orgId, tenantId, canConfirm = false }: { orgId: string; tenantId: string; canConfirm?: boolean }) {
+export async function InitialChargesPanel({ orgId, tenantId, canConfirm = false, canPay = false }: { orgId: string; tenantId: string; canConfirm?: boolean; canPay?: boolean }) {
   const leases = await prisma.lease.findMany({ where: { orgId, tenantId, deletedAt: null, status: { in: ["ACTIVE", "TERMINATED"] } }, orderBy: { startDate: "desc" }, select: { id: true, startDate: true, monthlyRent: true, deposit: true, org: { select: { currencyCode: true } } } });
   if (!leases.length) return null;
   const lease = leases[0];
@@ -26,6 +27,7 @@ export async function InitialChargesPanel({ orgId, tenantId, canConfirm = false 
       <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-semibold">{charge.chargeType === "DEPOSIT" ? "Security deposit" : "First month rent"}</h3><span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">{charge.status === "WAIVED" ? "Waived" : charge.balance.lte(0) ? "Paid" : charge.amountPaid.gt(0) ? "Partially paid" : "Unpaid"}</span></div>
       <p className="text-xs text-muted-foreground">Tenancy started {nairobiDate(leases.find(item => item.id === charge.leaseId)!.startDate)}</p>
       <dl className="grid grid-cols-2 gap-3 text-sm"><div><dt className="text-muted-foreground">Amount due</dt><dd className="break-words font-semibold">{money(charge.amountDue)}</dd></div><div><dt className="text-muted-foreground">Paid</dt><dd className="break-words font-semibold">{money(charge.amountPaid)}</dd></div><div><dt className="text-muted-foreground">Balance</dt><dd className="break-words font-semibold">{money(charge.balance)}</dd></div><div><dt className="text-muted-foreground">Due date</dt><dd>{nairobiDate(charge.dueDate)}</dd></div></dl>
+      {canPay && charge.status !== "WAIVED" && charge.balance.gt(0) ? <Link href={`/dashboard/tenant/payments/new?${new URLSearchParams({ source: "rent_charge", id: charge.id, amount: charge.balance.toFixed(2) })}`} className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground">Pay now</Link> : null}
       {canConfirm && charge.status !== "WAIVED" && charge.balance.gt(0) ? <ConfirmChargePaymentForm chargeId={charge.id} amount={charge.balance.toFixed(2)} dateLimit={nairobiDate()} /> : null}
       <div className="flex flex-col gap-2">{Array.from(new Map(charge.paymentAllocations.flatMap(allocation => allocation.payment.receipt ? [[allocation.payment.receipt.id, allocation.payment.receipt] as const] : [])).values()).map(receipt => <a download key={receipt.id} href={`/api/receipts/${receipt.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 break-words text-sm font-semibold text-primary"><ReceiptText className="h-4 w-4 shrink-0" />Receipt {receipt.receiptNo}</a>)}</div>
     </article>)}</div>
