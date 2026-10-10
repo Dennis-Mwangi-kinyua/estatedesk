@@ -11,11 +11,13 @@ Verified on 10 October 2026 (Africa/Nairobi).
 - Move-out shows final billing and unapplied-credit blockers before submission. Reports open separately so entered costs and notes are preserved.
 - Management close-out transactions use a 15-second timeout, matching the lifecycle integration tests.
 - Vacant-unit confirmation survives server revalidation after release.
+- Move-out PDFs have an EstateDesk and organisation header, full tenant details, aligned bills and settlement amounts, itemised costs, final notes, an authenticated QR link, and numbered pages.
+- CI applies migrations to a disposable PostgreSQL service before its public-page browser checks.
 - Browser fixtures use clean same-origin documents so development hot reload cannot replace an active fixture.
 
 ## Evidence
 
-- 360 unit tests passed.
+- 361 unit tests passed, including move-out PDF pagination with long names and 90 itemised costs.
 - 8 integration tests passed against a disposable local PostgreSQL database with all repository migrations applied.
 - All 32 general mobile browser scenarios passed. The two authenticated move-out scenarios passed on their final isolated rerun.
 - Desktop browser suite: 31 passed; the mobile-menu-only check was intentionally skipped.
@@ -24,6 +26,7 @@ Verified on 10 October 2026 (Africa/Nairobi).
 - Authenticated move-out checks cover cancellation without losing sessions, PDF reports, handover, deposit settlement, private refund proof, unit release, retained receipts, and cross-account download restrictions.
 - Repository lint completed with no errors and 117 existing warnings.
 - Typecheck and the production build passed.
+- Ten live production mobile checks passed across five public routes at 320 and 390 pixels; health and protected-route redirects also passed.
 
 Screenshots are generated under `test-results/` by the corresponding Playwright tests.
 
