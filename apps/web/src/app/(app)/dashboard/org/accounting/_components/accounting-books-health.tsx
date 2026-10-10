@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   AlertTriangle,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   ClipboardList,
   FileClock,
   Scale,

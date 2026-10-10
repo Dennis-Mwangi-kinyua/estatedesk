@@ -2,11 +2,11 @@ import {
   BarChart3,
   Building2,
   ClipboardList,
-  Home,
+  House as Home,
   Receipt,
   TrendingUp,
   UserRoundCheck,
-  Users,
+  UsersRound as Users,
 } from "lucide-react";
 import {
   formatCurrency,
@@ -169,7 +169,7 @@ export function ReportsTenantsSection({
                 className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <p className="min-w-0 truncate text-sm font-semibold text-neutral-950">
+                  <p className="min-w-0 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-neutral-950">
                     {report.name}
                   </p>
                   <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-600 ring-1 ring-neutral-200">
@@ -232,7 +232,7 @@ export function ReportsTenantsSection({
                     .map((part) => part[0]?.toUpperCase())
                     .join("") || "T"}
                 </span>
-                <p className="min-w-0 truncate text-sm font-semibold text-neutral-950">
+                <p className="min-w-0 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-neutral-950">
                   {tenantName}
                 </p>
               </div>

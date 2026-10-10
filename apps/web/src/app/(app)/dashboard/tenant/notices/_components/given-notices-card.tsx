@@ -1,7 +1,7 @@
 import { SettlementSummary } from "@/features/move-outs/components/settlement-summary";
 import { MoveOutProgress } from "@/features/move-outs/components/progress";
 import { CancelNoticeForm } from "./cancel-notice-form";
-import { CalendarDays, CheckCircle2 } from "lucide-react";
+import { CalendarDays, CircleCheck as CheckCircle2 } from "lucide-react";
 import { SurfaceCard, StatCard } from "@/components/theme/ed-dashboard-shell";
 import { formatDate, formatDateTime } from "@/lib/formatters";
 import type { TenantNoticesResult } from "@/app/(app)/dashboard/tenant/notices/_lib/queries";

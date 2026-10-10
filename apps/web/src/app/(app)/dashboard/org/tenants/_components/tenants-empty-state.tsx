@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { UsersRound as Users } from "lucide-react";
 
 export function TenantsEmptyState({ hasSearch }: { hasSearch: boolean }) {
   return (

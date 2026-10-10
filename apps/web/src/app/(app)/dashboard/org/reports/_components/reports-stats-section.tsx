@@ -2,7 +2,7 @@ import {
   AlertTriangle,
   BadgeCheck,
   Receipt,
-  Users,
+  UsersRound as Users,
   TrendingUp,
 } from "lucide-react";
 import { formatLedgerCurrency } from "@/lib/ledger";

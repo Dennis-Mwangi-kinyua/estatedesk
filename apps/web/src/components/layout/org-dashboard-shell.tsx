@@ -34,7 +34,7 @@ export function OrgDashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div data-workspace="org" className="ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden">
+    <div data-workspace="org" className="ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-clip">
       <OrgDashboardSidebar
         organizationName={organizationName}
         mobileOpen={mobileOpen}
@@ -52,7 +52,7 @@ export function OrgDashboardShell({
       />
 
       <div className="lg:pl-72">
-        <div className="flex min-h-dvh flex-col pt-[calc(7.125rem+env(safe-area-inset-top))] lg:pt-16">
+        <div className="flex min-h-[calc(100dvh-4rem)] flex-col">
           {supportSession ? <SupportSessionBanner session={supportSession} /> : null}
           <main className="org-mobile-main-offset flex-1 px-3 py-3 sm:px-5 sm:py-4 lg:px-8 lg:pb-16">
             <div className="app-content-shell org-theme-content relative z-0 w-full min-w-0 space-y-4 text-slate-950 sm:space-y-6 dark:text-slate-100">

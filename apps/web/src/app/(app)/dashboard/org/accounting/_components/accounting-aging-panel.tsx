@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarClock, HandCoins, Users } from "lucide-react";
+import { CalendarClock, HandCoins, UsersRound as Users } from "lucide-react";
 import type { AgingSummary } from "@/lib/accounting/aging";
 import {
   DataCard,

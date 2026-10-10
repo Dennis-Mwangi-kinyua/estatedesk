@@ -97,7 +97,7 @@ export const SidebarBrand = memo(function SidebarBrand({
       </div>
 
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+        <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-slate-950 dark:text-white">
           {organizationName}
         </p>
         <p className="text-xs text-slate-500 dark:text-slate-400">Organization workspace</p>

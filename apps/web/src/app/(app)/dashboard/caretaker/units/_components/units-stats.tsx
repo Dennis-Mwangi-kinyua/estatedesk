@@ -1,4 +1,4 @@
-import { Building2, Home, Users } from "lucide-react";
+import { Building2, House as Home, UsersRound as Users } from "lucide-react";
 import { StatCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerUnitsPageData } from "../_lib/types";
 

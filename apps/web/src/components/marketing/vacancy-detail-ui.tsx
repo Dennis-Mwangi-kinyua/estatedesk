@@ -5,7 +5,7 @@ import {
   Bath,
   BedDouble,
   Building2,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   ChevronRight,
   Coins,
   ExternalLink,
@@ -368,7 +368,7 @@ export function VacancyDetailSidebar({
           </div>
           <div className="flex items-center justify-between gap-3">
             <span className="text-slate-600 dark:text-slate-300">Manager</span>
-            <span className="truncate font-semibold text-slate-950 dark:text-white">{managerName}</span>
+            <span className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] font-semibold text-slate-950 dark:text-white">{managerName}</span>
           </div>
         </div>
         <div className="mt-5 grid gap-2">

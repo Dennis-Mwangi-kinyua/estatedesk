@@ -1,7 +1,7 @@
 import { StatCard } from "@/components/theme/ed-dashboard-shell";
 import {
   AlertCircle,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   Clock3,
   MessageSquareWarning,
 } from "lucide-react";

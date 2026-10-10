@@ -1,4 +1,4 @@
-import { Activity, Bell, Building2, Droplets, Files, History, KeyRound, Mail, MessagesSquare, TriangleAlert, Users, Wallet, FileText, type LucideIcon } from "lucide-react";
+import { Activity, BellRing as Bell, Building2, Droplets, Files, History, KeyRound, Mail, MessagesSquare, TriangleAlert, UsersRound as Users, Wallet, FileText, type LucideIcon } from "lucide-react";
 
 const icons: Record<string, LucideIcon> = {Status:Activity,Tenants:Users,Properties:Building2,"Recognized paid":Wallet,Members:Users,"API keys":KeyRound,Issues:TriangleAlert,Messages:MessagesSquare,Notifications:Bell,Assets:Files,"Water bills":Droplets,Leases:FileText,Invitations:Mail,"Audit records":History};
 import { formatNumber } from "../../../_components/control-plane";

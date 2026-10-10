@@ -1,8 +1,8 @@
 import {
   ClipboardList,
   FileText,
-  Home,
-  Users,
+  House as Home,
+  UsersRound as Users,
   Wrench,
 } from "lucide-react";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";

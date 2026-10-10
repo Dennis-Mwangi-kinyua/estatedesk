@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { Camera, CheckCircle2, ImagePlus, LoaderCircle, Trash2, X } from "lucide-react";
+import { Camera, CircleCheck as CheckCircle2, ImagePlus, LoaderCircle, Trash2, X } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfilePicture } from "@/app/(app)/profile/actions";
@@ -49,7 +49,7 @@ export function ProfilePictureForm({ url, name = "Your profile" }: { url: string
             }} />
           </label>
           <p className="text-xs leading-5 text-muted-foreground">JPG, PNG, or WebP · Up to 5MB<br />A clear, centered photo works best.</p>
-          {preview ? <div className="flex items-center justify-center gap-2 sm:justify-start"><p className="max-w-56 truncate text-xs text-muted-foreground">{fileName}</p><button data-workspace-action="true" type="button" onClick={clearSelection} disabled={pending} aria-label="Discard selected photo" className="rounded-lg p-1 hover:bg-muted"><X className="h-4 w-4" /></button></div> : null}
+          {preview ? <div className="flex items-center justify-center gap-2 sm:justify-start"><p className="max-w-56 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-xs text-muted-foreground">{fileName}</p><button data-workspace-action="true" type="button" onClick={clearSelection} disabled={pending} aria-label="Discard selected photo" className="rounded-lg p-1 hover:bg-muted"><X className="h-4 w-4" /></button></div> : null}
         </div>
       </div>
       <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border pt-4">

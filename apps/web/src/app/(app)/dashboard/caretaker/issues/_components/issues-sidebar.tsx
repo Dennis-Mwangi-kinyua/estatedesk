@@ -2,7 +2,7 @@ import {
   AlertCircle,
   ClipboardList,
   Hammer,
-  Home,
+  House as Home,
   Plus,
 } from "lucide-react";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";

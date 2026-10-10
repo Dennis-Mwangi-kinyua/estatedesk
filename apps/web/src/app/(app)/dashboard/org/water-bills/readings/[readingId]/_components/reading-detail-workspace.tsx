@@ -2,8 +2,8 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Camera,
-  CheckCircle2,
-  Home,
+  CircleCheck as CheckCircle2,
+  House as Home,
   UserRound,
   XCircle,
 } from "lucide-react";

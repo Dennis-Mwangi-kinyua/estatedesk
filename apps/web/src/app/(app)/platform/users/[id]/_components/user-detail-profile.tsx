@@ -5,7 +5,7 @@ import {
   BadgeCheck,
   Building2,
   CalendarDays,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   Crown,
   KeyRound,
   LogIn,
@@ -15,7 +15,7 @@ import {
   Shield,
   Trash2,
   User2,
-  Users,
+  UsersRound as Users,
   XCircle,
 } from "lucide-react";
 import {

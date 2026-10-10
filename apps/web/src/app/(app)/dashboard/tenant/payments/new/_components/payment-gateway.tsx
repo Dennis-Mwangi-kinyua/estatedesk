@@ -6,7 +6,7 @@ import {
   Search,
   Smartphone,
   Landmark,
-  CreditCard,
+  WalletCards as CreditCard,
   ChevronRight,
   Zap,
   ClipboardPaste,

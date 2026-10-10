@@ -1,4 +1,4 @@
-import { Bell, Droplets, Home, Wrench } from "lucide-react";
+import { BellRing as Bell, Droplets, House as Home, Wrench } from "lucide-react";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import {
   FocusTaskCard,

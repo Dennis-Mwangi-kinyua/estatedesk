@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { cache } from "react";
-import { BedDouble, Bath, Users, MapPin, Check, Phone, Mail } from "lucide-react";
+import { BedDouble, Bath, UsersRound as Users, MapPin, Check, Phone, Mail } from "lucide-react";
 import { getPublicBnb } from "@/features/bnb/queries";
 import { bnbPhotoUrl, bnbMoney } from "@/features/bnb/validation";
 import { StayGallery } from "@/features/bnb/components/stay-gallery";

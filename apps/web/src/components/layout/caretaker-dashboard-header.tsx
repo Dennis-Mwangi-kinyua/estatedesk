@@ -1,7 +1,7 @@
 "use client";
 
 import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
-import { Bell, Menu } from "lucide-react";
+import { BellRing as Bell, Menu } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { CaretakerMobileSidebar } from "@/components/layout/caretaker-mobile-nav";
@@ -49,7 +49,7 @@ export function CaretakerDashboardHeader({
                 </span>
               </div>
 
-              <h1 className="mt-0.5 truncate text-sm font-semibold text-foreground sm:text-base lg:text-lg">
+              <h1 className="mt-0.5 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground sm:text-base lg:text-lg">
                 Welcome back, {fullName}
               </h1>
             </div>

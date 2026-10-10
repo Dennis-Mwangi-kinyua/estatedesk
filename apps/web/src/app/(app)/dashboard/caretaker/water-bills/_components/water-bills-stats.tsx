@@ -1,6 +1,6 @@
 import {
   AlertCircle,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   Clock3,
   Send,
 } from "lucide-react";

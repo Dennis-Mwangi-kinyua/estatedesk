@@ -31,7 +31,7 @@ export function VerifyTenantIdentityHistorySection({
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-foreground">
+                <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-medium text-foreground">
                   {record.org.name}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">

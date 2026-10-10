@@ -2,7 +2,7 @@
 
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CircleCheck as CheckCircle2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { PageHeader } from "../../../_components/control-plane";
 import { accountFieldLabels } from "../_lib/form-validation";

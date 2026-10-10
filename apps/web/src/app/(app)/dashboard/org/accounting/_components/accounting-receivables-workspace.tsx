@@ -91,7 +91,7 @@ export function AccountingReceivablesWorkspace({
                     <DataCard>
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold">
+                          <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold">
                             {row.tenantName}
                           </p>
                           <p className="mt-0.5 truncate text-xs text-muted-foreground">

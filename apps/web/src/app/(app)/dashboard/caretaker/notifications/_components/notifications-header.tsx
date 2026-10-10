@@ -1,4 +1,4 @@
-import { Bell, CheckCircle2 } from "lucide-react";
+import { BellRing as Bell, CircleCheck as CheckCircle2 } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
   panelBodyClassName,

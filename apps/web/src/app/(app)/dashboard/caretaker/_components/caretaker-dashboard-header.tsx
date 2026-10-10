@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   AlertCircle,
   Building2,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   ClipboardList,
   Droplets,
   Wrench,

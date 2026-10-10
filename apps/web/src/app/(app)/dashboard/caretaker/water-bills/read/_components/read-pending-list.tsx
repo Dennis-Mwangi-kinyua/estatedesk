@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Home } from "lucide-react";
+import { ArrowRight, House as Home } from "lucide-react";
 import {
   panelShellClassName,
   SectionIntro,
@@ -49,15 +49,15 @@ export function ReadPendingList({
                         <Home className="h-4 w-4" />
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate text-base font-semibold text-foreground">
+                        <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-base font-semibold text-foreground">
                           Unit {unit.houseNo}
                         </p>
-                        <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                        <p className="mt-0.5 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm text-muted-foreground">
                           {unit.tenantName}
                         </p>
                       </div>
                     </div>
-                    <p className="mt-2 truncate text-xs text-muted-foreground">
+                    <p className="mt-2 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-xs text-muted-foreground">
                       {[unit.propertyName, unit.buildingName]
                         .filter(Boolean)
                         .join(" · ") || "Assigned unit"}

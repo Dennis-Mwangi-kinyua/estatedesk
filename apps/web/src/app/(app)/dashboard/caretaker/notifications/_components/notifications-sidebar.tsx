@@ -1,7 +1,7 @@
 import {
   ClipboardList,
   Droplets,
-  Home,
+  House as Home,
   Wrench,
 } from "lucide-react";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";

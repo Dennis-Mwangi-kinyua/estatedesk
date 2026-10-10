@@ -124,7 +124,7 @@ export default async function PreviousEmployeesPage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h2 className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                      <h2 className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-slate-950 dark:text-white">
                         {employee.user.fullName}
                       </h2>
                       <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">

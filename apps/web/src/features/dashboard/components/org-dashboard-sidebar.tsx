@@ -1,12 +1,12 @@
 import {
   ArrowRight,
-  Bell,
+  BellRing as Bell,
   CircleAlert,
-  CreditCard,
-  CheckCircle2,
+  WalletCards as CreditCard,
+  CircleCheck as CheckCircle2,
   Banknote,
-  Home,
-  Users,
+  House as Home,
+  UsersRound as Users,
 } from "lucide-react";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import {

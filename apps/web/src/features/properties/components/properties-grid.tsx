@@ -56,7 +56,7 @@ const PropertyCard = memo(function PropertyCard({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="truncate text-xl font-semibold tracking-tight text-slate-950 group-hover:underline">
+            <h2 className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-xl font-semibold tracking-tight text-slate-950 group-hover:underline">
               {property.name}
             </h2>
 

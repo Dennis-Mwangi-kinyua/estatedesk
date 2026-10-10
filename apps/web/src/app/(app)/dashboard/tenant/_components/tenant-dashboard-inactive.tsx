@@ -1,4 +1,4 @@
-import { Building2, CalendarDays, Home, ShieldCheck } from "lucide-react";
+import { Building2, CalendarDays, House as Home, ShieldCheck } from "lucide-react";
 import { StatCard, SurfaceCard, TenantWorkspace } from "@/components/theme/ed-dashboard-shell";
 import type { TenantDashboardHistoryRecord } from "../_lib/types";
 import { panelShellClassName, SummaryMetric } from "./tenant-dashboard-ui";
@@ -92,7 +92,7 @@ export function TenantDashboardInactive({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-foreground">
+                    <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground">
                       {record.propertyName ?? record.org.name}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">

@@ -7,7 +7,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Building2,
-  CreditCard,
+  WalletCards as CreditCard,
   Droplets,
   ClipboardList,
   Users2,

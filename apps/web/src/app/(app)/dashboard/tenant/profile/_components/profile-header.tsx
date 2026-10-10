@@ -106,7 +106,7 @@ export function ProfileHeader({
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Username
           </p>
-          <p className="mt-2 truncate font-mono text-sm font-semibold text-foreground">
+          <p className="mt-2 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] font-mono text-sm font-semibold text-foreground">
             {user?.username ?? "—"}
           </p>
         </div>

@@ -1,4 +1,4 @@
-import { Building2, HandCoins, Receipt, Scale, Users } from "lucide-react";
+import { Building2, HandCoins, Receipt, Scale, UsersRound as Users } from "lucide-react";
 import { formatMoney } from "../_lib/helpers";
 import type { AccountingPageData } from "../_lib/types";
 import { StatCard, panelShellClassName } from "./accounting-ui";

@@ -218,7 +218,7 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
                                     </Badge>
                                   ) : null}
                                 </div>
-                                <p className="mt-1 truncate text-xs text-neutral-500">
+                                <p className="mt-1 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-xs text-neutral-500">
                                   {user.email ?? user.username ?? "No email"}
                                 </p>
                                 {user.phone ? (
@@ -315,7 +315,7 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
                               </Badge>
                             ) : null}
                           </div>
-                          <p className="mt-1 truncate text-xs text-neutral-500">
+                          <p className="mt-1 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-xs text-neutral-500">
                             {user.email ?? user.username ?? "No email"}
                           </p>
                           <div className="mt-2 flex flex-wrap gap-2">

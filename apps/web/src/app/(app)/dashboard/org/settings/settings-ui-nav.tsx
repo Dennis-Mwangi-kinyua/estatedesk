@@ -1,13 +1,13 @@
 import {
   BadgeCheck,
   Building2,
-  CreditCard,
+  WalletCards as CreditCard,
   FileArchive,
   Globe2,
   KeyRound,
   Settings2,
   ShieldCheck,
-  Users,
+  UsersRound as Users,
   Wallet,
 } from "lucide-react";
 

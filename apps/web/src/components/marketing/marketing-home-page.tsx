@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { VisualSticker } from "@/components/shared/visual-sticker";
-import { ArrowRight, CheckCircle2, HelpCircle, Layers3, Users } from "lucide-react";
+import { ArrowRight, CircleCheck as CheckCircle2, CircleHelp as HelpCircle, Layers3, UsersRound as Users } from "lucide-react";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import OperationsShowcase from "@/components/marketing/operations-showcase";
 import { siteContentDepth } from "@/lib/content-depth/site-topics";

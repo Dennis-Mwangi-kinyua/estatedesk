@@ -2406,3 +2406,18 @@ html.light,
   min-height: var(--ed-touch, 2.75rem);
   min-width: var(--ed-touch, 2.75rem);
 }
+
+/* Let the document scroll so growing workspace headers remain sticky. */
+body.ed-mobile-first {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+/* Names must survive the shared whole-word typography rules, even without spaces. */
+body.ed-mobile-first .ed-full-name {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-overflow: clip;
+}

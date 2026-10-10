@@ -1,11 +1,11 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Bell,
+  BellRing as Bell,
   Building2,
   CircleAlert,
-  Home,
-  Users,
+  House as Home,
+  UsersRound as Users,
   Wallet,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";

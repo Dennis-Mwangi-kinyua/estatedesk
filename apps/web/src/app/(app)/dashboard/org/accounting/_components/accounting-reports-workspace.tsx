@@ -86,7 +86,7 @@ export function AccountingReportsWorkspace({ data }: { data: AccountingPageData 
                       key={row.code}
                       className="flex items-center justify-between gap-3 text-sm"
                     >
-                      <span className="min-w-0 truncate text-muted-foreground">
+                      <span className="min-w-0 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-muted-foreground">
                         {row.code} {row.name}
                       </span>
                       <span className="shrink-0 font-medium tabular-nums text-foreground">

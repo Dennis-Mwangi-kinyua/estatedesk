@@ -5,6 +5,11 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { validateImageBytes } from "../../apps/web/src/lib/uploads/secure-image";
 import { configureTestDatabase } from "../integration/database-safety";
 
+// Authenticated routes compile on first use in the development browser server.
+test.setTimeout(120_000);
+test.use({ actionTimeout: 30_000 });
+
+
 test("tenant cancels a notice and scheduled inspection without losing their session", async ({ page, baseURL }) => {
   test.skip(!process.env.MOVEOUT_BROWSER_FIXTURE, "Requires an explicitly seeded isolated local database");
   const databaseUrl = configureTestDatabase();
@@ -28,7 +33,7 @@ test("tenant cancels a notice and scheduled inspection without losing their sess
       expect((await db.moveOutNotice.findUniqueOrThrow({ where: { id: fixture.noticeId } })).status).toBe(scheduled ? "INSPECTION_SCHEDULED" : "SUBMITTED");
       await page.getByRole("button", { name: "Cancel move-out notice", exact: true }).click();
       await Promise.all([page.waitForNavigation({ waitUntil: "domcontentloaded" }), page.getByRole("button", { name: "Yes, cancel notice", exact: true }).click()]);
-      await expect(page).toHaveURL(/\/dashboard\/tenant\/notices(?:\?success=notice_withdrawn)?$/);
+      await expect(page).toHaveURL(/\/dashboard\/tenant\/move-out(?:\?success=notice_withdrawn)?$/);
       await expect(page.getByText("Notice withdrawn. The lease continues.", { exact: true })).toBeVisible();
       const notice = await db.moveOutNotice.findUniqueOrThrow({ where: { id: fixture.noticeId }, include: { inspection: true, lease: true } });
       expect(notice.status).toBe("CANCELLED");
@@ -59,7 +64,7 @@ test("move-out handover, private refund proof, report permissions and retained r
     console.log("Opening move-out workspace");
     await page.goto("/dashboard/org/move-outs");
     const form = page.getByRole("heading", { name: "Confirm handover and settlement" }).locator("..");
-    await expect(form.getByLabel("Deposit actually held")).toHaveValue("12000.00");
+    await expect(form.getByLabel("Deposit actually held")).toHaveValue("12000.00", { timeout: 30_000 });
     console.log("Filling handover form");
     await form.getByLabel("Actual handover date").fill(fixture.day);
     await form.getByRole("button", { name: "Add cost", exact: true }).click();
@@ -71,14 +76,14 @@ test("move-out handover, private refund proof, report permissions and retained r
     await form.getByLabel("Final meter readings", { exact: false }).check();
     console.log("Generating report");
     const downloadEvent = page.waitForEvent("download");
-    await form.getByRole("link", { name: "Generate report with these itemised costs" }).click();
+    await form.getByRole("link", { name: "Open move-out report with these costs (new tab)" }).click();
     const report = await downloadEvent;
     const bytes = await readFile((await report.path())!);
     expect(bytes.subarray(0, 4).toString()).toBe("%PDF");
     await form.getByLabel("I generated and reviewed", { exact: false }).check();
     console.log("Closing handover");
     await Promise.all([page.waitForNavigation({ waitUntil: "domcontentloaded" }), form.getByRole("button", { name: "Confirm handover and close", exact: true }).click()]);
-    await expect(page.getByText("Financial status: REFUND PENDING", { exact: false })).toBeVisible();
+    await expect(page.getByText(/^REFUND PENDING · Current amount owed/)).toBeVisible();
     await page.waitForLoadState("networkidle");
     expect((await db.unit.findUniqueOrThrow({ where: { id: fixture.unitId } })).status).toBe("UNDER_MAINTENANCE");
     const notice = await db.moveOutNotice.findUniqueOrThrow({ where: { id: fixture.noticeId } });
@@ -90,7 +95,7 @@ test("move-out handover, private refund proof, report permissions and retained r
     await page.getByLabel("Refund payment proof").setInputFiles({ name: "proof.png", mimeType: "image/png", buffer: image });
     await page.getByLabel("I confirm this refund has already been paid.").check();
     await Promise.all([page.waitForNavigation({ waitUntil: "domcontentloaded" }), page.getByRole("button", { name: "Record paid refund", exact: true }).click()]);
-    await expect(page.getByText("Financial status: SETTLED", { exact: false })).toBeVisible();
+    await expect(page.getByText(/^SETTLED · Current amount owed/)).toBeVisible();
     await page.waitForLoadState("networkidle");
     await page.getByLabel("Repairs and cleaning completed", { exact: false }).check();
     await page.getByRole("button", { name: "Mark unit vacant and ready" }).click();

@@ -1,7 +1,7 @@
 import { expect, test } from "playwright/test";
 import { build } from "esbuild";
 import path from "node:path";
-import { installWorkspaceStyles } from "./workspace-styles";
+import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 
 test("tenant notices give cards and progress steps enough room on laptops and phones", async ({page},testInfo)=>{
   const errors:string[]=[];
@@ -25,7 +25,7 @@ test("tenant notices give cards and progress steps enough room on laptops and ph
   await page.goto("/register");
   await page.waitForLoadState("networkidle");
   const styles=await page.locator('link[rel="stylesheet"]').evaluateAll(links=>links.map(link=>(link as HTMLLinkElement).href));
-  await page.setContent(`<html><head><meta name="viewport" content="width=device-width,initial-scale=1">${styles.map(href=>`<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system ed-mobile-first"><div id="fixture"></div></body></html>`);
+  await setFixtureContent(page, `<html><head><meta name="viewport" content="width=device-width,initial-scale=1">${styles.map(href=>`<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system ed-mobile-first"><div id="fixture"></div></body></html>`);
   await installWorkspaceStyles(page);
   await page.addScriptTag({content:bundle.outputFiles[0].text});
   await expect(page.getByRole("heading",{name:"Received Notices",exact:true})).toBeVisible();
@@ -39,7 +39,7 @@ test("tenant notices give cards and progress steps enough room on laptops and ph
         await page.locator("html").evaluate((el,value)=>el.setAttribute("class",value),theme);
         expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
         // Include actual sidebar space at laptop widths; the content is narrower than the viewport.
-        const cards=await page.locator('.tenant-notices-page > .tenant-notices-content > section').evaluateAll(elements=>elements.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width}}));
+        const cards=await page.locator('.tenant-notices-page > .tenant-notices-content > *').evaluateAll(elements=>elements.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width}}));
         expect(cards).toHaveLength(3);
         expect(Math.abs(cards[0].width-cards[1].width)).toBeLessThan(2);
         expect(Math.abs(cards[1].width-cards[2].width)).toBeLessThan(2);

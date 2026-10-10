@@ -1,9 +1,9 @@
 import {
-  Home,
+  House as Home,
   Building,
   Briefcase,
-  UserCog,
-  Users,
+  UserRoundCog as UserCog,
+  UsersRound as Users,
   Wifi,
   FileText,
 } from "lucide-react";

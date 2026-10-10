@@ -2,7 +2,7 @@ import type { ComponentType } from "react";
 import Link from "next/link";
 import type { OrgRole } from "@prisma/client";
 import {
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   Droplets,
   Inbox,
   XCircle,

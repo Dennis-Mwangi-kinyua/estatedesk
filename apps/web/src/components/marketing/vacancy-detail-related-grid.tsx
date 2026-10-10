@@ -47,7 +47,7 @@ function RelatedVacancyCard({ listing }: { listing: RelatedVacancyListingCard })
         )}
       </div>
       <div className="space-y-2 p-4">
-        <h3 className="line-clamp-2 text-sm font-semibold leading-5 text-slate-950 dark:text-white">
+        <h3 className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold leading-5 text-slate-950 dark:text-white">
           {listing.propertyName} · Unit {listing.houseNo}
         </h3>
         <p className="truncate text-xs text-slate-600 dark:text-slate-300">{listing.place}</p>

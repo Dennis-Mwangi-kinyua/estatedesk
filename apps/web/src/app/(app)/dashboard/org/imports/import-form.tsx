@@ -3,7 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import {
   AlertCircle,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   Download,
   FileUp,
   Loader2,

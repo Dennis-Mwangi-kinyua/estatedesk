@@ -127,7 +127,7 @@ export const TenantHeroCard = memo(function TenantHeroCard({
           </Link>
 
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <h1 className="truncate text-lg font-semibold text-foreground sm:text-2xl">
+            <h1 className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-lg font-semibold text-foreground sm:text-2xl">
               {fullName}
             </h1>
 

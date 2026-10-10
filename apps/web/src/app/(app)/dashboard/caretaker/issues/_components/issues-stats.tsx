@@ -1,6 +1,6 @@
 import {
   AlertCircle,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   Hammer,
   Zap,
 } from "lucide-react";

@@ -105,7 +105,7 @@ export function TenantReportCard({
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-foreground">
+                  <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground">
                     {row.tenantName}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">{row.unitLabel}</p>

@@ -1,4 +1,4 @@
-import { Bell, Mail } from "lucide-react";
+import { BellRing as Bell, Mail } from "lucide-react";
 import { StatCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerNotificationsPageData } from "../_lib/types";
 

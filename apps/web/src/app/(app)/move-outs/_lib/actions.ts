@@ -158,7 +158,7 @@ export async function closeMoveOutAction(formData: FormData) {
   }
 
   try {
-    await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: session.activeOrgId!, actorUserId: session.userId, form: formData }), { isolationLevel: "Serializable" });
+    await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: session.activeOrgId!, actorUserId: session.userId, form: formData }), { isolationLevel: "Serializable", timeout: 15000 });
   } catch (error) {
     return {
       ok: false as const,

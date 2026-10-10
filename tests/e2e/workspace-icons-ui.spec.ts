@@ -1,7 +1,7 @@
 import { expect, test } from "playwright/test";
 import { build } from "esbuild";
 import path from "node:path";
-import { installWorkspaceStyles } from "./workspace-styles";
+import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 
 test("semantic icons remain readable, labelled and aligned across workspaces", async ({page}, testInfo) => {
   const errors: string[] = [];
@@ -24,7 +24,7 @@ test("semantic icons remain readable, labelled and aligned across workspaces", a
   await page.goto("/register");
   await page.waitForLoadState("networkidle");
   const styles = await page.locator('link[rel="stylesheet"]').evaluateAll(links=>links.map(link=>(link as HTMLLinkElement).href));
-  await page.setContent(`<html><head><meta name="viewport" content="width=device-width,initial-scale=1">${styles.map(href=>`<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system ed-mobile-first"><div id="fixture"></div></body></html>`);
+  await setFixtureContent(page, `<html><head><meta name="viewport" content="width=device-width,initial-scale=1">${styles.map(href=>`<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system ed-mobile-first"><div id="fixture"></div></body></html>`);
   await installWorkspaceStyles(page);
   await page.addScriptTag({content:bundle.outputFiles[0].text});
   await expect(page.getByRole("navigation",{name:"Organisation"})).toBeVisible();
@@ -46,6 +46,7 @@ test("semantic icons remain readable, labelled and aligned across workspaces", a
       expect(Math.min(...contrast)).toBeGreaterThanOrEqual(3);
       const icons=page.locator("svg[data-workspace-icon]");
       expect(await icons.count()).toBeGreaterThan(30);
+      expect(await page.locator("svg.lucide").evaluateAll(elements => elements.every(el => parseFloat(getComputedStyle(el).strokeWidth) === 1.75))).toBe(true);
       expect(await icons.evaluateAll(elements=>elements.every(el=>el.getAttribute("aria-hidden")==="true" && el.getAttribute("focusable")==="false"))).toBe(true);
       const dimensions=await page.locator(".sidebar-sticker svg").evaluateAll(elements=>elements.map(el=>el.getBoundingClientRect().width));
       expect(Math.min(...dimensions)).toBeGreaterThanOrEqual(16);

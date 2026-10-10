@@ -9,8 +9,8 @@ export function OrgDashboardFooter({
 }: OrgDashboardFooterProps) {
   return (
     <footer className="fixed bottom-0 left-0 right-0 z-[85] border-t border-white/60 bg-white/78 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/78 lg:left-72">
-      <div className="flex h-10 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <p className="truncate text-[11px] text-neutral-500 dark:text-neutral-400">
+      <div className="flex min-h-10 items-center justify-between gap-3 py-2 px-4 sm:px-6 lg:px-8">
+        <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-[11px] text-neutral-500 dark:text-neutral-400">
           © {new Date().getFullYear()} {organizationName}
         </p>
 

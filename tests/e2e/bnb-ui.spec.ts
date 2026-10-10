@@ -1,7 +1,7 @@
 import { expect, test } from "playwright/test";
 import { build } from "esbuild";
 import path from "node:path";
-import { installWorkspaceStyles } from "./workspace-styles";
+import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 
 test("BnB editing preserves saved values, previews photos, and handles save feedback", async ({ page }, testInfo) => {
   const errors: string[] = [];
@@ -14,7 +14,7 @@ test("BnB editing preserves saved values, previews photos, and handles save feed
   await page.goto("/register");
   await page.waitForLoadState("networkidle");
   const styles = await page.locator('link[rel="stylesheet"]').evaluateAll((links) => links.map((link) => (link as HTMLLinkElement).href));
-  await page.setContent(`<html><head><meta name="viewport" content="width=device-width, initial-scale=1">${styles.map((href) => `<link rel="stylesheet" href="${href}">`).join("")}</head><body><main class="estate-workspace mx-auto max-w-5xl p-4"><h1>Edit BnB listing</h1><div id="fixture"></div></main></body></html>`);
+  await setFixtureContent(page, `<html><head><meta name="viewport" content="width=device-width, initial-scale=1">${styles.map((href) => `<link rel="stylesheet" href="${href}">`).join("")}</head><body><main class="estate-workspace mx-auto max-w-5xl p-4"><h1>Edit BnB listing</h1><div id="fixture"></div></main></body></html>`);
   await installWorkspaceStyles(page);
   await page.addScriptTag({ content: bundle.outputFiles[0].text });
   await expect(page.getByLabel("Bedrooms", { exact: true })).toHaveValue("0");

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, HelpCircle, Search } from "lucide-react";
+import { ArrowRight, CircleHelp as HelpCircle, Search } from "lucide-react";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";

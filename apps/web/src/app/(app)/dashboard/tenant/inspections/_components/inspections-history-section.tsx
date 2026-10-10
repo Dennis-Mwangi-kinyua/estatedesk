@@ -1,5 +1,5 @@
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
-import { Home } from "lucide-react";
+import { House as Home } from "lucide-react";
 import { PaginationLink } from "@/app/(app)/dashboard/tenant/inspections/_components/pagination-link";
 import { ReportButton } from "@/app/(app)/dashboard/tenant/inspections/_components/report-button";
 import {

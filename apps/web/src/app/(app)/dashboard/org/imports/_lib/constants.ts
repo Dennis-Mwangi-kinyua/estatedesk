@@ -1,4 +1,4 @@
-import { Building2, Home, Users, type LucideIcon } from "lucide-react";
+import { Building2, House as Home, UsersRound as Users, type LucideIcon } from "lucide-react";
 import type { ImportKind } from "@/lib/imports/types";
 
 export type ImportKindOption = {

@@ -1,6 +1,6 @@
 import {
-  Bell,
-  Home,
+  BellRing as Bell,
+  House as Home,
   KeyRound,
   ShieldCheck,
 } from "lucide-react";

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { memo, useCallback, useMemo, useRef } from "react";
-import { ChevronLeft, ChevronRight, MapPin, Users, Building2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, UsersRound as Users, Building2 } from "lucide-react";
 
 type PropertyCardItem = {
   id: string;
@@ -49,13 +49,13 @@ const PropertyCarouselCard = memo(function PropertyCarouselCard({
             {property.type}
           </p>
 
-          <h3 className="mt-3 truncate text-lg font-semibold tracking-tight text-gray-950">
+          <h3 className="mt-3 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-lg font-semibold tracking-tight text-gray-950">
             {property.name}
           </h3>
 
           <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
             <MapPin className="h-4 w-4 shrink-0" />
-            <span className="truncate">
+            <span className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere]">
               {property.location || property.address || "No location provided"}
             </span>
           </div>

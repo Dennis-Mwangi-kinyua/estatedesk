@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, Home, MessageCircleQuestion, Search, ShieldCheck } from "lucide-react";
+import { Building2, House as Home, MessageCircleQuestion, Search, ShieldCheck } from "lucide-react";
 
 const footerLinks = [
   { href: "/vacancies", label: "Vacancies" },

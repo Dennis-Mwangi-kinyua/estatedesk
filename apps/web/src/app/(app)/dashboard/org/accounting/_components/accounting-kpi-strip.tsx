@@ -5,7 +5,7 @@ import {
   Scale,
   TrendingDown,
   TrendingUp,
-  Users,
+  UsersRound as Users,
   Wallet,
 } from "lucide-react";
 import { formatMoney } from "../_lib/helpers";

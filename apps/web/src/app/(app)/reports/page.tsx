@@ -5,7 +5,7 @@ import {
   Building2,
   ClipboardList,
   Download,
-  Home,
+  House as Home,
   Receipt,
   TrendingUp,
 } from "lucide-react";

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
-import { Bell, Menu, Search } from "lucide-react";
+import { BellRing as Bell, Menu, Search } from "lucide-react";
 import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 
 type OrgDashboardHeaderProps = {
@@ -23,9 +23,9 @@ export function OrgDashboardHeader({
   unreadCount = 0,
 }: OrgDashboardHeaderProps) {
   return (
-    <header className="ed-shell-panel fixed left-0 right-0 top-0 z-[110] border-b bg-card/95 shadow-sm backdrop-blur-xl lg:left-72">
-      <div className="flex h-[68px] items-center justify-between gap-3 px-3 pt-safe sm:px-6 lg:h-16 lg:px-8 lg:pt-0">
-        <div className="flex min-w-0 items-center gap-3">
+    <header className="ed-shell-panel sticky top-0 z-[110] border-b bg-card/95 shadow-sm backdrop-blur-xl lg:ml-72">
+      <div className="flex min-h-[68px] items-center justify-between gap-3 px-3 pt-safe sm:px-6 lg:min-h-16 lg:px-8 lg:pt-0">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <button data-workspace-action="true"
             type="button"
             onClick={onMenuClick}
@@ -35,8 +35,8 @@ export function OrgDashboardHeader({
             <Menu className="h-5 w-5" />
           </button>
 
-          <div className="min-w-0">
-            <h1 className="hidden truncate text-base font-semibold tracking-tight text-slate-950 dark:text-white lg:block lg:text-lg">
+          <div className="min-w-0 flex-1 py-2">
+            <h1 className="hidden ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-base font-semibold tracking-tight text-slate-950 dark:text-white lg:block lg:text-lg">
               {title}
             </h1>
             <p className="hidden truncate text-xs text-slate-500 dark:text-slate-400 lg:block lg:text-sm">

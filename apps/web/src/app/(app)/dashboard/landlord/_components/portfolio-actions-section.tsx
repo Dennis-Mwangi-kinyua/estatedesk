@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CircleCheck as CheckCircle2 } from "lucide-react";
 import {
   formatCurrency,
   formatPercent,
@@ -79,7 +79,7 @@ export function PortfolioActionsSection({
                 className="flex items-center justify-between gap-3 rounded-2xl border border-red-100 bg-red-50 px-3 py-3"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-red-950">
+                  <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-red-950">
                     {unit.tenantName} · Unit {unit.houseNo}
                   </p>
                   <p className="mt-0.5 text-xs text-red-700">

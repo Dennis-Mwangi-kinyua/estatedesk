@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { UserPlus } from "lucide-react";
+import { UserRoundPlus as UserPlus } from "lucide-react";
 import { encodePublicId } from "@/lib/public-id";
 import { formatDateTime, formatRelative } from "../_lib/helpers";
 import type { getStaffDirectoryData } from "../_lib/queries";

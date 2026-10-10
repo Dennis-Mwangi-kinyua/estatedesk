@@ -1,5 +1,5 @@
 import { PlatformPermissionType } from "@prisma/client";
-import { CheckCircle2, Save, Shield, User2, XCircle } from "lucide-react";
+import { CircleCheck as CheckCircle2, Save, Shield, User2, XCircle } from "lucide-react";
 import { updatePlatformUserPermissions } from "../actions";
 import { EmptyState, SummaryRow } from "./user-detail-ui";
 import type { UserDetailWorkspaceProps } from "./user-detail-sidebar";

@@ -1,7 +1,7 @@
 import { test, expect } from "playwright/test";
 import { build } from "esbuild";
 import path from "node:path";
-import { installWorkspaceStyles } from "./workspace-styles";
+import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 
 test("dashboard cards fit their available width and mobile actions clear the dock", async ({ page }, testInfo) => {
   const bundle = await build({
@@ -17,8 +17,9 @@ test("dashboard cards fit their available width and mobile actions clear the doc
     } }],
   });
   await page.goto("/register");
+  await page.waitForLoadState("networkidle");
   const styles = await page.locator('link[rel="stylesheet"]').evaluateAll(links => links.map(link => (link as HTMLLinkElement).href));
-  await page.setContent(`<html><head><meta name="viewport" content="width=device-width,initial-scale=1">${styles.map(href => `<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system ed-mobile-first"><div id="fixture"></div></body></html>`);
+  await setFixtureContent(page, `<html><head><meta name="viewport" content="width=device-width,initial-scale=1">${styles.map(href => `<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system ed-mobile-first"><div id="fixture"></div></body></html>`);
   await installWorkspaceStyles(page);
   await page.addScriptTag({ content: bundle.outputFiles[0].text });
   for (const width of [320, 360, 390, 768, 1024, 1440]) {

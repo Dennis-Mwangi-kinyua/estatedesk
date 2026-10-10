@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, X } from "lucide-react";
+import { BellRing as Bell, X } from "lucide-react";
 import type { UnreadNotificationAlert } from "@/lib/notifications/unread-alert";
 import { NotificationViewButton } from "./notification-view-button";
 

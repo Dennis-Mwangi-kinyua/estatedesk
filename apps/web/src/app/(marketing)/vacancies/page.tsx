@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  Home,
+  House as Home,
   MapPin,
   Search,
   Building2,

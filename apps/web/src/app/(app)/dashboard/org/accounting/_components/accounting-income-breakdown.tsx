@@ -1,6 +1,6 @@
 import {
   Droplets,
-  Home,
+  House as Home,
   Percent,
   ReceiptText,
   Scale,

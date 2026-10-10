@@ -13,7 +13,7 @@ import {
   NotebookPen,
   Search,
   Truck,
-  Users,
+  UsersRound as Users,
   Wrench,
 } from "lucide-react";
 import { encodePublicId } from "@/lib/public-id";
@@ -132,7 +132,7 @@ export function CaretakerDashboardSidebar({
                 className="flex items-start justify-between gap-3 rounded-2xl border border-border bg-muted/10 p-3 text-sm transition hover:border-primary/25 hover:bg-muted/20"
               >
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-foreground">
+                  <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] font-semibold text-foreground">
                     {inspection.notice.tenant.fullName}
                   </p>
                   <p className="mt-1 truncate text-xs text-muted-foreground">

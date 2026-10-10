@@ -5,7 +5,7 @@ import {
   KeyRound,
   Power,
   ShieldAlert,
-  Users,
+  UsersRound as Users,
   Zap,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";

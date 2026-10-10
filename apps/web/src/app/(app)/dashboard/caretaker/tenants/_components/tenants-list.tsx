@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search, Users } from "lucide-react";
+import { Search, UsersRound as Users } from "lucide-react";
 import { ListPagination } from "@/app/(app)/dashboard/caretaker/_components/list-pagination";
 import {
   ErrorStateCard,

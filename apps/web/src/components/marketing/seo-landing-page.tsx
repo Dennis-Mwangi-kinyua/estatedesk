@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, HelpCircle, Layers3, ListChecks } from "lucide-react";
+import { ArrowRight, CircleCheck as CheckCircle2, CircleHelp as HelpCircle, Layers3, ListChecks } from "lucide-react";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";

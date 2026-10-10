@@ -1,4 +1,4 @@
-import { installWorkspaceStyles } from "./workspace-styles";
+import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 import { expect, test } from "playwright/test";
 import { build } from "esbuild";
 import path from "node:path";
@@ -8,12 +8,12 @@ test("shared presentation keeps table labels, controls and dynamic rows usable",
  const bundle=await build({entryPoints:[path.resolve("tests/e2e/fixtures/site-experience.tsx")],bundle:true,write:false,platform:"browser",format:"iife",jsx:"automatic",tsconfig:"apps/web/tsconfig.json",define:{"process.env.NODE_ENV":'"production"'},plugins:[{name:"navigation",setup(builder){builder.onResolve({filter:/^next\/navigation$/},()=>({path:"navigation",namespace:"fixture"}));builder.onLoad({filter:/.*/,namespace:"fixture"},()=>({contents:'export const usePathname=()=>"/dashboard/org/payments";',loader:"js"}));}}]});
  await page.goto("/register");await page.waitForLoadState("networkidle");
  const styles=await page.locator('link[rel="stylesheet"]').evaluateAll(links=>links.map(link=>(link as HTMLLinkElement).href));
- await page.setContent(`<html><head><meta name="viewport" content="width=device-width,initial-scale=1">${styles.map(href=>`<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system ed-mobile-first"><div id="main-content" class="estate-workspace ed-mobile-first-root"><div id="fixture"></div></div></body></html>`);
+ await setFixtureContent(page, `<html><head><meta name="viewport" content="width=device-width,initial-scale=1">${styles.map(href=>`<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system ed-mobile-first"><div id="main-content" class="estate-workspace ed-mobile-first-root"><div id="fixture"></div></div></body></html>`);
  await installWorkspaceStyles(page);
   await page.addScriptTag({content:bundle.outputFiles[0].text});
  const table=page.getByRole("table",{name:"Payment records",exact:true});
  await expect(table).toHaveAttribute("data-mobile-cards","true");
- await expect(page.getByRole("heading",{level:1})).toHaveAttribute("data-workspace-heading-icon","CreditCard");
+ await expect(page.getByRole("heading",{level:1})).toHaveAttribute("data-workspace-heading-icon","WalletCards");
  await expect(table.locator("tbody tr")).toHaveCount(2);
  await expect(table.locator("tbody td").first()).toHaveAttribute("data-column-label","Tenant");
  await page.getByRole("button",{name:"Add fixture row"}).click();

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CreditCard, Download, FileText } from "lucide-react";
+import { ArrowLeft, WalletCards as CreditCard, Download, FileText } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { isPdfLeaseAsset, tenantLeaseDownloadPath } from "../_lib/download";
 import type { TenantLeasePageData } from "../_lib/types";

@@ -80,7 +80,7 @@ export function IssuesEmptyHeader({
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Organization
           </p>
-          <p className="mt-2 truncate text-lg font-semibold text-foreground">
+          <p className="mt-2 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-lg font-semibold text-foreground">
             {organizationName}
           </p>
         </div>

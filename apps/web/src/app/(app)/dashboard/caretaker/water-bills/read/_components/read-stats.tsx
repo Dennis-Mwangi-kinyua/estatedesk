@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock3, Droplets } from "lucide-react";
+import { CircleCheck as CheckCircle2, Clock3, Droplets } from "lucide-react";
 import { StatCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerMeterReadPageData } from "../_lib/types";
 

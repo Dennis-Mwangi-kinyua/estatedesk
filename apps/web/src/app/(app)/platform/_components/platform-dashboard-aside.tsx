@@ -1,9 +1,9 @@
 import {
   Code2,
-  CreditCard,
+  WalletCards as CreditCard,
   Plus,
   SlidersHorizontal,
-  Users,
+  UsersRound as Users,
 } from "lucide-react";
 import { formatNumber } from "../_lib/helpers";
 import type { PlatformDashboardData } from "../_lib/queries";

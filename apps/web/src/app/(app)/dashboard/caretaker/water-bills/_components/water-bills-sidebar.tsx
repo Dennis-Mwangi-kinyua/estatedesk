@@ -1,4 +1,4 @@
-import { ClipboardList, Droplets, FileText, Home, Wrench } from "lucide-react";
+import { ClipboardList, Droplets, FileText, House as Home, Wrench } from "lucide-react";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import {

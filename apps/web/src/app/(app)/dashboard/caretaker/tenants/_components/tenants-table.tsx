@@ -73,11 +73,11 @@ export function TenantsTable({ tenants }: TenantsTableProps) {
                     <div className="min-w-0">
                       <DeferredLink
                         href={href}
-                        className="block truncate font-semibold text-foreground hover:text-primary hover:underline"
+                        className="block ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] font-semibold text-foreground hover:text-primary hover:underline"
                       >
                         {tenant.fullName}
                       </DeferredLink>
-                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      <p className="mt-0.5 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-xs text-muted-foreground">
                         {property || tenant.phone || "—"}
                       </p>
                     </div>
@@ -85,13 +85,13 @@ export function TenantsTable({ tenants }: TenantsTableProps) {
                 </td>
 
                 <td className={`${tdClass} text-foreground`}>
-                  <span className="block truncate" title={building}>
+                  <span className="block ed-full-name whitespace-normal break-words [overflow-wrap:anywhere]" title={building}>
                     {building}
                   </span>
                 </td>
 
                 <td className={`${tdClass} font-medium text-foreground`}>
-                  <span className="block truncate" title={unit}>
+                  <span className="block ed-full-name whitespace-normal break-words [overflow-wrap:anywhere]" title={unit}>
                     {unit}
                   </span>
                 </td>

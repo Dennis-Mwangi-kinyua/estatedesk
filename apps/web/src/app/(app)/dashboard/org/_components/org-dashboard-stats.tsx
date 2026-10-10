@@ -2,9 +2,9 @@ import {
   Briefcase,
   Building,
   FileText,
-  Home,
-  UserCog,
-  Users,
+  House as Home,
+  UserRoundCog as UserCog,
+  UsersRound as Users,
   Wifi,
 } from "lucide-react";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";

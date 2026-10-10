@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Building2,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   Shield,
 } from "lucide-react";
 import type { getPlatformUserDetails } from "../_lib/queries";

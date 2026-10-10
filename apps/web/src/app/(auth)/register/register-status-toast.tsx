@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, CheckCircle2, X } from "lucide-react";
+import { AlertTriangle, CircleCheck as CheckCircle2, X } from "lucide-react";
 
 type RegisterStatusToastProps = {
   message: {

@@ -1,4 +1,4 @@
-import { CreditCard } from "lucide-react";
+import { WalletCards as CreditCard } from "lucide-react";
 import {
   formatDateTime,
   formatEnumLabel,
@@ -64,7 +64,7 @@ export function OperationsSidebar({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <p className="truncate text-sm font-semibold text-foreground">
+                        <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground">
                           {payment.payerTenant.fullName}
                         </p>
                         <p className="mt-1 text-sm text-muted-foreground">

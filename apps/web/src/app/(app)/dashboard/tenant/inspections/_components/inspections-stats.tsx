@@ -1,6 +1,6 @@
 import { StatCard } from "@/components/theme/ed-dashboard-shell";
 import {
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   ClipboardCheck,
   Clock3,
   XCircle,

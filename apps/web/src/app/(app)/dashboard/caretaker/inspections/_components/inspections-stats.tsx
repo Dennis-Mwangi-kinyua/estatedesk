@@ -1,6 +1,6 @@
 import {
   CalendarClock,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   ClipboardList,
   XCircle,
 } from "lucide-react";

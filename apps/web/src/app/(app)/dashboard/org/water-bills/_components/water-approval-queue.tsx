@@ -3,7 +3,7 @@ import {
   ArrowRight,
   Camera,
   Droplets,
-  Home,
+  House as Home,
   UserRound,
 } from "lucide-react";
 import {

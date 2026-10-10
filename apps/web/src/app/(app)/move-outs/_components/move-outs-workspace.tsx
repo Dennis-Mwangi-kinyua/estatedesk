@@ -11,13 +11,13 @@ import type { ReactNode } from "react";
 import {
   ArrowUpRight,
   CalendarDays,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   ClipboardList,
   FileText,
-  Home,
+  House as Home,
   LogOut,
   MapPin,
-  Users,
+  UsersRound as Users,
 } from "lucide-react";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
@@ -194,6 +194,7 @@ export function MoveOutsWorkspace({
                     <p className="mt-2 text-xs text-muted-foreground">{notice.financialStatus.replaceAll("_", " ")} <span aria-hidden="true">·</span> Current amount owed <span className="font-semibold text-foreground">{notice.currentAmountOwed.toFixed(2)}</span></p>
                     <div className="mt-3"><SettlementSummary closeout={notice.closeout} /></div>
                     {notice.status === "CLOSED" && notice.lease.unit.status === "UNDER_MAINTENANCE" ? <ReleaseUnitForm noticeId={notice.id} /> : null}
+                    {notice.status === "CLOSED" && notice.lease.unit.status === "VACANT" ? <p role="status" className="mt-2 text-xs">Unit is vacant and ready to let.</p> : null}
                     {notice.status === "CLOSED" && notice.closeout && typeof notice.closeout === "object" && !Array.isArray(notice.closeout) && notice.closeout.refundStatus === "PENDING" ? <RefundForm noticeId={notice.id} /> : null}
                     {["SUBMITTED", "INSPECTION_SCHEDULED"].includes(notice.status) ? (
                       inspectors.some(inspector => canInspectUnit([inspector], notice.lease.unit)) ? <ScheduleForm noticeId={notice.id} reschedule={Boolean(notice.inspection)} inspectors={Array.from(new Map(inspectors.filter(inspector => canInspectUnit([inspector], notice.lease.unit)).map(inspector => [inspector.userId, { id: inspector.userId, label: `${inspector.user.fullName} (${inspector.role})` }])).values())} /> : <p className="mt-3 rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">Add active staff in this unit’s scope before scheduling.</p>

@@ -66,7 +66,7 @@ export function VerifyTenantResultSidebar({
                 key={record.id}
                 className="flex items-center justify-between gap-3 text-sm"
               >
-                <span className="min-w-0 truncate text-foreground/80">
+                <span className="min-w-0 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-foreground/80">
                   {record.org.name}
                 </span>
                 <span className="shrink-0 font-medium text-foreground">

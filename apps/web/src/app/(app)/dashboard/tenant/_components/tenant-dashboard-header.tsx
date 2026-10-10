@@ -1,8 +1,8 @@
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import Link from "next/link";
 import {
-  Bell,
-  CreditCard,
+  BellRing as Bell,
+  WalletCards as CreditCard,
   FileText,
   MapPin,
   MessageSquareText,

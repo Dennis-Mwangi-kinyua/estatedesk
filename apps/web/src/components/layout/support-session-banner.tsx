@@ -46,7 +46,7 @@ export function SupportSessionBanner({
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <LifeBuoy className="h-4 w-4 shrink-0" />
-            <span className="truncate">Support session · {session.orgName}</span>
+            <span className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere]">Support session · {session.orgName}</span>
           </div>
           <p className="mt-1 text-xs leading-5 text-amber-900/90 dark:text-amber-50/90">
             Reason: {session.reason}. You are acting as org ADMIN for this workspace.

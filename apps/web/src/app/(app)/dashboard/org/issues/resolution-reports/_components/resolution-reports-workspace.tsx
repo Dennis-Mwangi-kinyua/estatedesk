@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { OrgRole } from "@prisma/client";
-import { CheckCircle2, ClipboardList, XCircle } from "lucide-react";
+import { CircleCheck as CheckCircle2, ClipboardList, XCircle } from "lucide-react";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {

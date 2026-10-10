@@ -1,4 +1,4 @@
-import { Building2, CreditCard, KeyRound, Users } from "lucide-react";
+import { Building2, WalletCards as CreditCard, KeyRound, UsersRound as Users } from "lucide-react";
 import { formatLabel, type SettingsPageData } from "../settings-data";
 import { StatCard } from "./settings-ui";
 

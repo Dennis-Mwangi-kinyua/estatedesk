@@ -57,7 +57,7 @@ export function SecureRevealValue({
   return (
     <div className="mt-2 space-y-2">
       <div className="flex items-center justify-between gap-3">
-        <p className="truncate text-sm font-semibold text-neutral-950">
+        <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-neutral-950">
           {displayValue}
         </p>
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { UserPlus } from "lucide-react";
+import { UserRoundPlus as UserPlus } from "lucide-react";
 import { encodePublicId } from "@/lib/public-id";
 import { DeferredLink } from "@/components/navigation/app-links";
 import {
@@ -52,7 +52,7 @@ function RoleMemberCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-foreground">{name}</p>
+          <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground">{name}</p>
           <p className="mt-1 truncate text-xs text-muted-foreground">
             {email ?? phone ?? "No contact"}
           </p>

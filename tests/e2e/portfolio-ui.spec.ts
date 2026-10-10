@@ -1,4 +1,4 @@
-import { installWorkspaceStyles } from "./workspace-styles";
+import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 import { expect, test, type Page } from "playwright/test";
 import { build } from "esbuild";
 import path from "node:path";
@@ -14,7 +14,7 @@ async function mount(page: Page, tenant: boolean | "unit" | "verify" | "verify-e
  }}]});
  await page.goto(`/register${typeof tenant === "string" ? `#${tenant}` : tenant?"#tenant":""}`); await page.waitForLoadState("networkidle");
  const styles=await page.locator('link[rel="stylesheet"]').evaluateAll(links=>links.map(link=>(link as HTMLLinkElement).href));
- await page.setContent(`<html><head>${styles.map(href=>`<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system"><div class="estate-workspace"><div id="fixture"></div></div></body></html>`);
+ await setFixtureContent(page, `<html><head>${styles.map(href=>`<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system"><div class="estate-workspace"><div id="fixture"></div></div></body></html>`);
  await installWorkspaceStyles(page);
   await page.addScriptTag({content:bundle.outputFiles[0].text});
 }

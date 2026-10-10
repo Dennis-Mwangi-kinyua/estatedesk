@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Download, FileText, Home, Wallet } from "lucide-react";
+import { Download, FileText, House as Home, Wallet } from "lucide-react";
 import {
   formatLedgerCurrency,
   formatLedgerDate,

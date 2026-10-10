@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertTriangle, Shield } from "lucide-react";
+import { CircleCheck as CheckCircle2, AlertTriangle, Shield } from "lucide-react";
 
 type Readiness = {
   configured: boolean;

@@ -50,7 +50,7 @@ export const IOSRow = memo(function IOSRow({
       </div>
 
       <div className="flex min-w-0 items-center gap-2">
-        <div className="max-w-[180px] truncate text-right text-[15px] font-medium text-muted-foreground sm:max-w-none">
+        <div className="min-w-0 max-w-[180px] ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-right text-[15px] font-medium text-muted-foreground sm:max-w-none">
           {value}
         </div>
         {href ? (

@@ -51,7 +51,7 @@ export function SecuritySessionsContent({
             <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
               Signed in as
             </p>
-            <p className="mt-2 truncate text-sm font-semibold text-foreground">
+            <p className="mt-2 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground">
               {fullName}
             </p>
           </div>

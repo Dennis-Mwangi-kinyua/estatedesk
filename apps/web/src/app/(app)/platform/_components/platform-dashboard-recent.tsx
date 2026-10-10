@@ -98,7 +98,7 @@ export function PlatformDashboardRecent({
                       <Clock3 className="h-3.5 w-3.5 shrink-0" />
                       <span>{formatDate(request.createdAt)}</span>
                     </span>
-                    <span className="truncate">
+                    <span className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere]">
                       {request.marketer
                         ? `${request.marketer.fullName} (${request.marketer.referralCode})`
                         : request.referralCode
@@ -149,10 +149,10 @@ export function PlatformDashboardRecent({
                 className="platform-glass-inset group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                  <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-slate-950 dark:text-white">
                     {payment.payerTenant?.fullName ?? "Tenant payment"}
                   </p>
-                  <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                  <p className="mt-0.5 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-xs text-slate-500 dark:text-slate-400">
                     {payment.org?.name ?? "Unknown organization"}
                   </p>
                 </div>

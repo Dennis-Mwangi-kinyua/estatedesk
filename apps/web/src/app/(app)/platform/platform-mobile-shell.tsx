@@ -171,7 +171,7 @@ export default function PlatformMobileShell({
               <h2 className="truncate text-base font-semibold tracking-tight text-foreground">
                 {meta.headerTitle}
               </h2>
-              <p className="truncate text-xs text-muted-foreground">{fullName}</p>
+              <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-xs text-muted-foreground">{fullName}</p>
             </div>
 
             <button data-workspace-action="true"

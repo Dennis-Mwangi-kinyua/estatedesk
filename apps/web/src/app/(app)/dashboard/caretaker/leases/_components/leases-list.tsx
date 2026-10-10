@@ -3,9 +3,9 @@ import {
   ArrowRight,
   Banknote,
   CalendarDays,
-  Home,
+  House as Home,
   Phone,
-  Users,
+  UsersRound as Users,
 } from "lucide-react";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { ListPagination } from "@/app/(app)/dashboard/caretaker/_components/list-pagination";
@@ -76,12 +76,12 @@ export function LeasesList({ data }: { data: CaretakerLeasesPageData }) {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="truncate text-base font-semibold text-foreground">
+                        <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-base font-semibold text-foreground">
                           {lease.tenant?.fullName ?? "Unassigned tenant"}
                         </p>
                         <div className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
                           <Home className="h-3.5 w-3.5 shrink-0" />
-                          <span className="truncate">
+                          <span className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere]">
                             {[
                               lease.unit?.property?.name,
                               lease.unit?.building?.name,
@@ -129,7 +129,7 @@ export function LeasesList({ data }: { data: CaretakerLeasesPageData }) {
                     <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/10 px-3 py-2.5">
                       <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
                         <CalendarDays className="h-4 w-4 shrink-0" />
-                        <span className="truncate">
+                        <span className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere]">
                           {formatDate(lease.startDate)} - {formatDate(lease.endDate)}
                         </span>
                       </div>

@@ -1,4 +1,4 @@
-import { BadgeCheck, Ban, UserRound, Users } from "lucide-react";
+import { BadgeCheck, Ban, UserRound, UsersRound as Users } from "lucide-react";
 import { StatCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerTenantsPageData } from "../_lib/types";
 

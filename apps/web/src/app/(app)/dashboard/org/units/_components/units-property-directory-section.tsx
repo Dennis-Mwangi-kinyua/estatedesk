@@ -41,7 +41,7 @@ export function UnitsPropertyDirectorySection({
                   <Building2 className="h-3.5 w-3.5" />
                   Property
                 </div>
-                <h3 className="mt-3 truncate text-lg font-semibold text-foreground group-hover:text-primary">
+                <h3 className="mt-3 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-lg font-semibold text-foreground group-hover:text-primary">
                   {item.property.name}
                 </h3>
                 <p className="mt-1 truncate text-sm text-muted-foreground">

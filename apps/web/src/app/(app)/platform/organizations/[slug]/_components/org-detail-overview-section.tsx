@@ -4,12 +4,12 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Building2,
-  CreditCard,
+  WalletCards as CreditCard,
   FileText,
   Receipt,
   Settings,
   ShieldCheck,
-  Users,
+  UsersRound as Users,
 } from "lucide-react";
 import {
   Badge,

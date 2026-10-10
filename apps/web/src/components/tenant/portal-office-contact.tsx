@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Building2, CreditCard, Phone, UserRound } from "lucide-react";
+import { ArrowUpRight, Building2, WalletCards as CreditCard, Phone, UserRound } from "lucide-react";
 import { WorkspaceDetailPanel } from "@/components/help/workspace-detail-panel";
 import {
   getBankAccountForMethod,

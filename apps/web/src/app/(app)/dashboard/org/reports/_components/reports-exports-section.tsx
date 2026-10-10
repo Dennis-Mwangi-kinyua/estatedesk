@@ -63,7 +63,7 @@ export function ReportsExportsSection({ data }: { data: ReportsPageData }) {
               <p className="truncate text-sm font-semibold text-foreground">
                 {item.reportType}
               </p>
-              <p className="mt-1 truncate text-xs text-muted-foreground">{item.fileName}</p>
+              <p className="mt-1 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-xs text-muted-foreground">{item.fileName}</p>
               <p className="mt-2 text-xs text-muted-foreground">
                 {item.period ?? "Current"} •{" "}
                 {item.createdAt.toLocaleString("en-KE", {

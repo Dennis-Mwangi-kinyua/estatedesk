@@ -20,6 +20,6 @@ export function ReleaseUnitForm({ noticeId }: { noticeId: string }) {
     <input name="noticeId" type="hidden" value={noticeId} />
     <label className="flex gap-2"><input type="checkbox" className="mt-0.5 size-4 shrink-0" name="readyConfirmed" required />Repairs and cleaning completed; unit ready to let.</label>
     {error ? <p role="alert" className="mt-2 text-destructive">{error}</p> : null}
-    <button type="submit" disabled={pending} className="mt-2 rounded border px-3 py-2">{pending ? "Releasing unit…" : "Mark unit vacant and ready"}</button>
+    <button type="submit" disabled={pending} className="mt-2 min-h-11 w-full rounded-xl border px-3 py-2 sm:w-auto">{pending ? "Releasing unit…" : "Mark unit vacant and ready"}</button>
   </form>;
 }

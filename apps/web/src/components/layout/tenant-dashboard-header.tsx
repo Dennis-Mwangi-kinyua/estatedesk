@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
-import { Bell, Menu } from "lucide-react";
+import { BellRing as Bell, Menu } from "lucide-react";
 import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 
 type TenantDashboardHeaderProps = {
@@ -19,9 +19,9 @@ export function TenantDashboardHeader({
   onMenuClick,
 }: TenantDashboardHeaderProps) {
   return (
-    <header className="ed-shell-panel fixed left-0 right-0 top-0 z-[110] border-b bg-card/95 shadow-sm backdrop-blur-xl lg:left-72">
-      <div className="flex h-[76px] items-center justify-between gap-3 px-3 pt-safe sm:px-6 lg:h-16 lg:px-8 lg:pt-0">
-        <div className="flex min-w-0 items-center gap-3">
+    <header className="ed-shell-panel sticky top-0 z-[110] border-b bg-card/95 shadow-sm backdrop-blur-xl lg:ml-72">
+      <div className="flex min-h-[76px] items-center justify-between gap-3 px-3 pt-safe sm:px-6 lg:min-h-16 lg:px-8 lg:pt-0">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <button data-workspace-action="true"
             type="button"
             onClick={onMenuClick}
@@ -31,13 +31,14 @@ export function TenantDashboardHeader({
             <Menu className="h-5 w-5" />
           </button>
 
-          <div className="min-w-0">
-            <h1 className="truncate text-base font-semibold tracking-tight text-slate-950 dark:text-white sm:text-lg">
+          <div className="min-w-0 flex-1 py-2">
+            <h1 className="hidden ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-base lg:block font-semibold tracking-tight text-slate-950 dark:text-white sm:text-lg">
               {organizationName}
             </h1>
-            <p className="truncate text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+            <p className="hidden text-xs lg:block text-slate-500 dark:text-slate-400 sm:text-sm">
               Tenant workspace
             </p>
+            <p className="text-sm font-semibold tracking-tight text-slate-950 dark:text-white lg:hidden">Tenant</p>
           </div>
         </div>
 
@@ -63,6 +64,9 @@ export function TenantDashboardHeader({
 
           <WorkspaceIdentity name={userName} role="Tenant account" />
         </div>
+      </div>
+      <div className="border-t border-slate-200/70 bg-slate-50/90 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950/90 lg:hidden">
+        <h1 className="ed-full-name whitespace-normal break-words text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100 [overflow-wrap:anywhere]">{organizationName}</h1>
       </div>
     </header>
   );

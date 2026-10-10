@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { encodePublicId } from "@/lib/public-id";
-import { ArrowUpRight, KeyRound, Shield, UserCog } from "lucide-react";
+import { ArrowUpRight, KeyRound, Shield, UserRoundCog as UserCog } from "lucide-react";
 import {
   Badge,
   PageHeader,

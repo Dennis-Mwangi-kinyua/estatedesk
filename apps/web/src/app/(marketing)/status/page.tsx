@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Activity, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Activity, ArrowRight, CircleCheck as CheckCircle2 } from "lucide-react";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { sharedTopicGuides } from "@/lib/content-depth/site-topics";

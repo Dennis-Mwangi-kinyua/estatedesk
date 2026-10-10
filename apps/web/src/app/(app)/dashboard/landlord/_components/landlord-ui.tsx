@@ -113,7 +113,7 @@ export function PaymentReportList({
               className="flex items-center justify-between gap-3 rounded-2xl bg-neutral-50 px-3 py-3 ring-1 ring-neutral-200"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-neutral-950">
+                <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-neutral-950">
                   {unit.tenantName}
                 </p>
                 <p className="mt-0.5 text-xs text-neutral-500">

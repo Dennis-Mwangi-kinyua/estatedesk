@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, House as Home } from "lucide-react";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { ContactActions } from "@/app/(app)/dashboard/caretaker/_components/contact-actions";
 import { getCaretakerTenantHref } from "@/app/(app)/dashboard/caretaker/_lib/paths";
@@ -41,13 +41,13 @@ export function TenantCard({ tenant }: { tenant: TenantItem }) {
               <div className="min-w-0">
                 <DeferredLink
                   href={href}
-                  className="block truncate text-base font-semibold tracking-tight text-foreground transition group-hover:text-primary sm:text-lg"
+                  className="block ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-base font-semibold tracking-tight text-foreground transition group-hover:text-primary sm:text-lg"
                 >
                   {tenant.fullName}
                 </DeferredLink>
                 <div className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
                   <Home className="h-3.5 w-3.5 shrink-0 opacity-70" />
-                  <span className="truncate">{property}</span>
+                  <span className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere]">{property}</span>
                 </div>
               </div>
 

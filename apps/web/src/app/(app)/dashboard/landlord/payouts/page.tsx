@@ -225,7 +225,7 @@ export default async function LandlordPayoutsPage() {
                   <p className="text-sm font-semibold text-foreground">
                     {formatDateTime(row.entryDate)}
                   </p>
-                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                  <p className="mt-0.5 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-xs text-muted-foreground">
                     {row.memo || row.reference || "Owner distribution"}
                     {row.propertyNames.length
                       ? ` · ${row.propertyNames.join(", ")}`

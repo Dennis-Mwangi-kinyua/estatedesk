@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home } from "lucide-react";
+import { House as Home } from "lucide-react";
 import type { PropertiesPageData } from "../_lib/types";
 import { buildPageHref } from "../_lib/helpers";
 

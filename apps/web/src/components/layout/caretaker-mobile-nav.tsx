@@ -111,7 +111,7 @@ export function CaretakerMobileSidebar({
                 Navigation
               </h2>
 
-              <p className="mt-1 truncate text-sm text-muted-foreground">
+              <p className="mt-1 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm text-muted-foreground">
                 {fullName}
               </p>
             </div>

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import {
   ArrowRight,
   Building2,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   ClipboardList,
   Landmark,
   Mail,

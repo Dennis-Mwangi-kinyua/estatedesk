@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Users } from "lucide-react";
+import { MapPin, UsersRound as Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { publicBnbWhere, bnbImages } from "@/features/bnb/queries";
 import { bnbPhotoUrl, bnbMoney } from "@/features/bnb/validation";

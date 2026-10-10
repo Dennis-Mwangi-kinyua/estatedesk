@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Layers3 } from "lucide-react";
+import { ArrowRight, CircleCheck as CheckCircle2, Layers3 } from "lucide-react";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import OperationsShowcase from "@/components/marketing/operations-showcase";
 import { siteContentDepth } from "@/lib/content-depth/site-topics";

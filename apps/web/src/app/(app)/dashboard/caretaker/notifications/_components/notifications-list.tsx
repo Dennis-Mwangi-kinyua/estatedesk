@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+import { BellRing as Bell } from "lucide-react";
 import { ListPagination } from "@/app/(app)/dashboard/caretaker/_components/list-pagination";
 import { ErrorStateCard } from "@/app/(app)/dashboard/caretaker/issues/_components/issues-ui";
 import {

@@ -1,6 +1,6 @@
 import { NotificationViewButton } from "@/components/notifications/notification-view-button";
 import Link from "next/link";
-import { Bell, CheckCircle2, Inbox, Send } from "lucide-react";
+import { BellRing as Bell, CircleCheck as CheckCircle2, Inbox, Send } from "lucide-react";
 import { PageShell, SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import {
   markAllTenantNotificationsReadAction,

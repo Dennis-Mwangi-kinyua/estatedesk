@@ -14,7 +14,7 @@ export const TopSummaryCard = memo(function TopSummaryCard({
       <p className="text-xs uppercase tracking-wide text-muted-foreground">
         {label}
       </p>
-      <p className="mt-1 truncate text-sm font-semibold text-foreground">
+      <p className="mt-1 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground">
         {value}
       </p>
     </div>

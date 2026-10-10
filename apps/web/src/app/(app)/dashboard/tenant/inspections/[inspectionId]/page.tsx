@@ -5,7 +5,7 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { PageShell, SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { Prisma } from "@prisma/client";
-import { ArrowDownToLine, ArrowLeft, CalendarDays, CheckCircle2, ClipboardCheck, Home, User2 } from "lucide-react";
+import { ArrowDownToLine, ArrowLeft, CalendarDays, CircleCheck as CheckCircle2, ClipboardCheck, House as Home, User2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { reportChecklistItems } from "@/app/(app)/dashboard/caretaker/inspections/[inspectionId]/_lib/constants";

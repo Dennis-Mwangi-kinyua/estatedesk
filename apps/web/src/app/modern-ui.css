@@ -135,3 +135,18 @@ body.estate-glass-system {
 .dark .estate-glass-system .modern-auth :is(.text-gray-900, .text-gray-800, .text-gray-700, .text-slate-950) { color: var(--foreground); }
 .dark .estate-glass-system .modern-auth :is(.text-gray-600, .text-gray-500) { color: var(--muted-foreground); }
 .estate-glass-system .modern-public-header { box-shadow: 0 4px 24px rgb(30 50 90 / 4%); }
+
+/* One rounded outline icon style across public pages and every portal. */
+.estate-glass-system svg.lucide {
+  flex-shrink: 0;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.estate-glass-system :is(button, a, summary) svg.lucide:is(.h-4, .h-5) {
+  min-width: 1.125rem;
+  min-height: 1.125rem;
+}
+.estate-glass-system :is(button, a):focus-visible svg.lucide {
+  opacity: 1;
+}

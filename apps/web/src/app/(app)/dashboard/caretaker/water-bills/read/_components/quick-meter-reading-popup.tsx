@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
-import { CheckCircle2, Droplets, X } from "lucide-react";
+import { CircleCheck as CheckCircle2, Droplets, X } from "lucide-react";
 import { quickSubmitMeterReading } from "../[unitId]/_lib/quick-submit-meter-reading";
 import type { QuickMeterReadingState } from "../[unitId]/_lib/types";
 import type { QuickEntryUnit } from "../_lib/types";
@@ -162,7 +162,7 @@ export function QuickMeterReadingPopup({
                     <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                       Tenant
                     </p>
-                    <p className="mt-1 truncate text-sm font-semibold text-foreground">
+                    <p className="mt-1 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground">
                       {activeUnit.tenantName}
                     </p>
                   </div>

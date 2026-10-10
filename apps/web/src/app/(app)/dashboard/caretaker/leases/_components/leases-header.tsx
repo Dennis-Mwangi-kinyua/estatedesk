@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, Users } from "lucide-react";
+import { FileText, UsersRound as Users } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
   panelBodyClassName,

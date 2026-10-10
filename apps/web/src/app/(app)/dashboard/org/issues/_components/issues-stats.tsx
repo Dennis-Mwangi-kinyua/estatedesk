@@ -1,6 +1,6 @@
 import { DeferredLink } from "@/components/navigation/app-links";
 import type { ReactNode } from "react";
-import { CheckCircle2, Clock3, ListTodo, XCircle } from "lucide-react";
+import { CircleCheck as CheckCircle2, Clock3, ListTodo, XCircle } from "lucide-react";
 import type {
   IssueStatusFilter,
   IssuesStats as IssuesStatsType,

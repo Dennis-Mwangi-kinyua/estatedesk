@@ -5,7 +5,7 @@ import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 import { useCallback, useMemo, useRef } from "react";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 import { usePathname } from "next/navigation";
-import { Home, X, ChevronRight } from "lucide-react";
+import { House as Home, X, ChevronRight } from "lucide-react";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { LogoutButton } from "./org-sidebar-parts";
@@ -34,7 +34,7 @@ function TenantSidebarBrand({
       </div>
 
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+        <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-slate-950 dark:text-white">
           {organizationName}
         </p>
         <p className="text-xs text-slate-500 dark:text-slate-400">Tenant portal</p>

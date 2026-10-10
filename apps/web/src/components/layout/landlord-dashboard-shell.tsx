@@ -11,12 +11,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
   Building2,
-  Home,
+  House as Home,
   LogOut,
   Menu,
   Receipt,
   ShieldCheck,
-  Users,
+  UsersRound as Users,
   X,
 } from "lucide-react";
 import { logoutAction } from "@/features/auth/actions/logout-action";
@@ -140,7 +140,7 @@ export function LandlordDashboardShell({
             <Building2 className="h-5 w-5" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-950">
+            <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-slate-950">
               {organizationName}
             </p>
             <p className="text-xs text-slate-500">Landlord workspace</p>
@@ -151,7 +151,7 @@ export function LandlordDashboardShell({
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
             Signed in as
           </p>
-          <p className="mt-1 truncate text-sm font-semibold text-slate-950">
+          <p className="mt-1 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-slate-950">
             {displayName}
           </p>
         </div>
@@ -234,7 +234,7 @@ export function LandlordDashboardShell({
             </div>
 
             <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
-              <p className="truncate text-sm font-semibold text-slate-950">
+              <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-slate-950">
                 {displayName}
               </p>
               <p className="mt-1 text-xs text-slate-500">{organizationName}</p>
@@ -271,8 +271,8 @@ export function LandlordDashboardShell({
           </main>
 
           <footer className="fixed bottom-0 left-0 right-0 z-[85] border-t border-white/60 bg-white/78 backdrop-blur-2xl lg:left-72">
-            <div className="flex h-10 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-              <p className="truncate text-[11px] text-neutral-500">
+            <div className="flex min-h-10 items-center justify-between gap-4 py-2 px-4 sm:px-6 lg:px-8">
+              <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-[11px] text-neutral-500">
                 © {currentYear} {organizationName}
               </p>
               <div className="flex items-center gap-2 text-[11px] text-neutral-500">

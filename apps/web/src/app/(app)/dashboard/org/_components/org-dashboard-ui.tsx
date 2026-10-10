@@ -82,7 +82,7 @@ export function QuickLinkCard({
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-foreground">{title}</p>
+          <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground">{title}</p>
           <p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">
             {description}
           </p>

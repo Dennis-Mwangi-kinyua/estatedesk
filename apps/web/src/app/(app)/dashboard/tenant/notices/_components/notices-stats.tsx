@@ -1,4 +1,4 @@
-import { Bell, CheckCircle2, Clock3, Megaphone } from "lucide-react";
+import { BellRing as Bell, CircleCheck as CheckCircle2, Clock3, Megaphone } from "lucide-react";
 import { StatCard } from "@/components/theme/ed-dashboard-shell";
 
 type NoticesStatsProps = {

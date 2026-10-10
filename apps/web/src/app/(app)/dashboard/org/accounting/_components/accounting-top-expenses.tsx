@@ -63,7 +63,7 @@ export function AccountingTopExpenses({ data }: { data: AccountingPageData }) {
               <div key={row.code} className="grid grid-cols-[1fr_auto] items-center gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center justify-between gap-2 text-sm">
-                    <span className="truncate font-medium text-foreground">
+                    <span className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] font-medium text-foreground">
                       {row.code} · {row.name}
                     </span>
                     <span className="shrink-0 font-semibold tabular-nums text-foreground">

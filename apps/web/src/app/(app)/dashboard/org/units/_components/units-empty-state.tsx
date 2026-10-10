@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import type { OrgRole } from "@prisma/client";
-import { Home } from "lucide-react";
+import { House as Home } from "lucide-react";
 import type { UnitsPageData } from "../_lib/types";
 import { panelShellClassName } from "./units-ui";
 

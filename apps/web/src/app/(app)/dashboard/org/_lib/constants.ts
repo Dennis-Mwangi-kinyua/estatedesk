@@ -1,4 +1,4 @@
-import { Bell, CircleAlert, Wallet } from "lucide-react";
+import { BellRing as Bell, CircleAlert, Wallet } from "lucide-react";
 
 export const DASHBOARD_WORKFLOW_STEPS = [
   {

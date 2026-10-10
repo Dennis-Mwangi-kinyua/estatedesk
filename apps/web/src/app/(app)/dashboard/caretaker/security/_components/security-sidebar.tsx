@@ -1,4 +1,4 @@
-import { Bell, Home, KeyRound, UserRound } from "lucide-react";
+import { BellRing as Bell, House as Home, KeyRound, UserRound } from "lucide-react";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import {
   FocusTaskCard,

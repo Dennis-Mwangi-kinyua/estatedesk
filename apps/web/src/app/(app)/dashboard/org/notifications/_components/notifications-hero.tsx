@@ -2,7 +2,7 @@ import Link from "next/link";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
   ArrowLeft,
-  Bell,
+  BellRing as Bell,
   Clock3,
   Droplets,
   Megaphone,

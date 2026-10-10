@@ -73,10 +73,10 @@ export function VacancyListingGrid({
 
             <div className="flex flex-1 flex-col gap-3 p-3">
               <div className="min-w-0">
-                <p className="truncate text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600 dark:text-slate-300">
+                <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600 dark:text-slate-300">
                   {listing.managerName}
                 </p>
-                <h2 className="mt-1 line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-5 text-slate-950 dark:text-white">
+                <h2 className="mt-1 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] min-h-[2.5rem] text-sm font-semibold leading-5 text-slate-950 dark:text-white">
                   {listing.propertyName} · Unit {listing.houseNo}
                 </h2>
               </div>

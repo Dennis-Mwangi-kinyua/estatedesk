@@ -3,7 +3,7 @@ import { serializeJsonForHtml } from "@/lib/security/safe-json";
 import {
   Building2,
   Check,
-  CreditCard,
+  WalletCards as CreditCard,
   ShieldCheck,
   Layers3,
   ClipboardList,

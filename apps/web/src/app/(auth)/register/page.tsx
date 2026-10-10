@@ -1,13 +1,13 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Bell,
+  BellRing as Bell,
   Building2,
-  CheckCircle2,
+  CircleCheck as CheckCircle2,
   ClipboardCheck,
   Droplets,
   FileText,
-  Home,
+  House as Home,
   KeyRound,
   Landmark,
   LockKeyhole,
