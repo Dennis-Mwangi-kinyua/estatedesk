@@ -1,11 +1,5 @@
 import type { MpesaStkPushInput, MpesaStkPushResult } from "./types";
-import { isMpesaStkConfigured } from "@/lib/payments/method-flow";
-
-function required(name: string) {
-  const value = process.env[name]?.trim();
-  if (!value) throw new Error(`M-Pesa Daraja is missing ${name}.`);
-  return value;
-}
+import { getMpesaConfigForOrg, type MpesaConfig } from "./config";
 
 export function normalizeMpesaPhone(phone: string) {
   const cleaned = phone.replace(/\D+/g, "");
@@ -15,8 +9,8 @@ export function normalizeMpesaPhone(phone: string) {
   throw new Error("Enter a valid Kenyan M-Pesa phone number.");
 }
 
-function darajaBaseUrl() {
-  return process.env.MPESA_ENVIRONMENT === "production"
+function darajaBaseUrl(config: MpesaConfig) {
+  return config.environment === "production"
     ? "https://api.safaricom.co.ke"
     : "https://sandbox.safaricom.co.ke";
 }
@@ -54,12 +48,12 @@ async function darajaFetch(url: string, init: RequestInit) {
   return payload;
 }
 
-async function getAccessToken() {
+async function getAccessToken(config: MpesaConfig) {
   const credentials = Buffer.from(
-    `${required("MPESA_CONSUMER_KEY")}:${required("MPESA_CONSUMER_SECRET")}`,
+    `${config.consumerKey}:${config.consumerSecret}`,
   ).toString("base64");
   const payload = await darajaFetch(
-    `${darajaBaseUrl()}/oauth/v1/generate?grant_type=client_credentials`,
+    `${darajaBaseUrl(config)}/oauth/v1/generate?grant_type=client_credentials`,
     { headers: { Authorization: `Basic ${credentials}` } },
   );
   if (typeof payload.access_token !== "string") {
@@ -71,22 +65,23 @@ async function getAccessToken() {
 export async function requestMpesaStkPush(
   input: MpesaStkPushInput & { orgId: string },
 ): Promise<MpesaStkPushResult> {
-  if (!isMpesaStkConfigured(input.orgId)) {
+  const config = getMpesaConfigForOrg(input.orgId);
+  if (!config) {
     throw new Error("M-Pesa is not configured for this organisation.");
   }
   if (!Number.isFinite(input.amount) || input.amount < 1 || !Number.isInteger(input.amount)) {
     throw new Error("M-Pesa amount must be a whole number of shillings, at least KES 1.");
   }
 
-  const shortcode = required("MPESA_SHORTCODE");
+  const shortcode = config.shortcode;
   const timestamp = darajaTimestamp();
   const password = Buffer.from(
-    `${shortcode}${required("MPESA_PASSKEY")}${timestamp}`,
+    `${shortcode}${config.passkey}${timestamp}`,
   ).toString("base64");
   const phone = normalizeMpesaPhone(input.phone);
-  const token = await getAccessToken();
+  const token = await getAccessToken(config);
   const payload = await darajaFetch(
-    `${darajaBaseUrl()}/mpesa/stkpush/v1/processrequest`,
+    `${darajaBaseUrl(config)}/mpesa/stkpush/v1/processrequest`,
     {
       method: "POST",
       headers: {
@@ -102,7 +97,7 @@ export async function requestMpesaStkPush(
         PartyA: phone,
         PartyB: shortcode,
         PhoneNumber: phone,
-        CallBackURL: required("MPESA_CALLBACK_URL"),
+        CallBackURL: config.callbackUrl,
         AccountReference: input.accountReference.slice(0, 12),
         TransactionDesc: input.transactionDesc.slice(0, 13),
       }),

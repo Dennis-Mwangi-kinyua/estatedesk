@@ -1,3 +1,4 @@
+import { getMpesaConfigForOrg } from "../mpesa/config";
 import {
   getPaymentMethodDefinition,
   type PaymentSettlementMode,
@@ -111,15 +112,7 @@ export function checkoutMethodLabel(method: string) {
 }
 
 export function isMpesaStkConfigured(orgId?: string | null) {
-  return Boolean(
-    orgId && process.env.MPESA_ORG_ID?.trim() === orgId &&
-      process.env.MPESA_CONSUMER_KEY?.trim() &&
-      process.env.MPESA_CONSUMER_SECRET?.trim() &&
-      process.env.MPESA_SHORTCODE?.trim() &&
-      process.env.MPESA_PASSKEY?.trim() &&
-      process.env.MPESA_CALLBACK_SECRET?.trim() &&
-      process.env.MPESA_CALLBACK_URL?.trim(),
-  );
+  return Boolean(getMpesaConfigForOrg(orgId));
 }
 
 export function validateCheckoutTransactionId(

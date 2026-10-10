@@ -1,4 +1,5 @@
 import "server-only";
+import { getMpesaConfigForOrg } from "@/lib/mpesa/config";
 
 import { Prisma, type PrismaClient } from "@prisma/client";
 import {
@@ -288,7 +289,7 @@ export async function settleGatewayPayment({
 
       let etimsSubmission: Prisma.InputJsonValue | undefined;
       try {
-        if (payment.method === "MPESA_STK" && process.env.MPESA_ENVIRONMENT !== "production") throw new Error("Sandbox payments are excluded from fiscal submission.");
+        if (payment.method === "MPESA_STK" && getMpesaConfigForOrg(payment.orgId)?.environment !== "production") throw new Error("Sandbox payments are excluded from fiscal submission.");
         const { submitEtimsSalesReceipt } = await import("@/lib/tax/etims-client");
         const { getEtimsClientConfigForOrg } = await import(
           "@/lib/tax/org-etims-config"

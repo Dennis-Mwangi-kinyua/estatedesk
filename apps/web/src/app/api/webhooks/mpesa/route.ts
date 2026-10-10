@@ -1,3 +1,4 @@
+import { getMpesaConfigs, getMpesaConfigForCallback } from "@/lib/mpesa/config";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { getPlatformControl } from "@/lib/platform/control";
@@ -39,19 +40,13 @@ export async function POST(request: Request) {
     );
   }
 
-  const expectedSecret = process.env.MPESA_CALLBACK_SECRET?.trim();
-  if (!expectedSecret || !process.env.MPESA_ORG_ID?.trim()) {
+  if (getMpesaConfigs().length === 0) {
     return Response.json({ ok: false, error: "M-Pesa callback is not configured." }, { status: 503 });
   }
-  if (expectedSecret) {
-    const supplied = new URL(request.url).searchParams.get("secret");
-    if (supplied !== expectedSecret) {
-      await recordWebhookSample({
-        statusCode: 401,
-        summary: "Unauthorized callback secret",
-      });
-      return new Response("Unauthorized", { status: 401 });
-    }
+  const config = getMpesaConfigForCallback(new URL(request.url).searchParams.get("secret"));
+  if (!config) {
+    await recordWebhookSample({ statusCode: 401, summary: "Unauthorized callback secret" });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   const payload = (await request.json().catch(() => null)) as {
@@ -77,7 +72,7 @@ export async function POST(request: Request) {
 
   try {
     const { settleMpesaCallback } = await import("@/lib/mpesa/settle-callback");
-    const result = await prisma.$transaction(tx => settleMpesaCallback(tx, process.env.MPESA_ORG_ID!.trim(), callback as import("@/lib/mpesa/settle-callback").StkCallback), { isolationLevel: "Serializable", timeout: 30_000 });
+    const result = await prisma.$transaction(tx => settleMpesaCallback(tx, config.orgId, callback as import("@/lib/mpesa/settle-callback").StkCallback), { isolationLevel: "Serializable", timeout: 30_000 });
     return Response.json({ ok: true, ...result });
   } catch (error) {
     logServerError("mpesa.webhook.settle", error);

@@ -100,11 +100,23 @@ Integration variables are grouped by provider. Most are approval-gated and optio
 | --- | --- |
 | KRA eTIMS | `KRA_ETIMS_*` |
 | M-Pesa | `MPESA_*` |
+
 | Aani | `AANI_*` |
 | Dubai Ejari | `DLD_EJARI_*` |
 | Banking | `BANKING_*` |
 | Screening / KYC | `SCREENING_*`, `AECB_*`, `KYC_AML_PROVIDER` |
 | FX / AI / escrow / e-sign / market data | `FX_*`, `AI_ASSISTANT_*`, `ESCROW_*`, `E_SIGNATURE_*`, `MARKET_DATA_*`, `INVESTMENT_COMPLIANCE_PROVIDER` |
+
+M-Pesa STK credentials are bound to `MPESA_ORG_ID`. To add another organisation,
+set `MPESA_ADDITIONAL_PREFIXES=MPESA_FARENHEIGHT` (comma-separated for more
+connections) and provide the same variables under that prefix, including
+`MPESA_FARENHEIGHT_ORG_ID`, `ENVIRONMENT`, `CONSUMER_KEY`, `CONSUMER_SECRET`,
+`SHORTCODE`, `PASSKEY`, `CALLBACK_URL`, and `CALLBACK_SECRET`. Each callback URL
+must point to `/api/webhooks/mpesa?secret=<that connection's callback secret>`.
+Use a unique secret for each connection. Duplicate organisation bindings or
+callback secrets are rejected. Deploy the code and environment variables together
+and restart the application to activate a new connection. Sandbox payments are
+excluded from fiscal submission according to their organisation's environment.
 
 See `docs/INTEGRATION_READINESS.md` for provider readiness expectations.
 
