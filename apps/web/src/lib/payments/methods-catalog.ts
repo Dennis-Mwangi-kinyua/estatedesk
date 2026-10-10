@@ -37,7 +37,7 @@ export const PAYMENT_METHOD_CATALOG: PaymentMethodDefinition[] = [
     type: "manual",
     settlement: "manual",
     description:
-      "Pay via Lipa na M-Pesa, then paste the SMS or 10-character code. Awaits organization verification.",
+      "Already paid? Enter your M-Pesa code, paste the SMS, and upload a receipt screenshot for organisation verification.",
     accent: "from-emerald-600 to-teal-700",
     logoText: "M",
   },

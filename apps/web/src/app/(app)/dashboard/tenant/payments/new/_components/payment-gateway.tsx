@@ -64,25 +64,6 @@ export function PaymentGateway({ availableMethods }: PaymentGatewayProps) {
     router.push(`/dashboard/tenant/payments/checkout?${params.toString()}`);
   };
 
-  if (availableMethods.length === 0) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-          <div className="rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
-            <CreditCard className="mx-auto h-10 w-10 text-foreground/50" />
-            <h1 className="mt-4 text-xl font-semibold text-foreground">
-              No payment methods available
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-foreground/75">
-              Your organization has not enabled any payment methods yet. Contact
-              your property manager to set up M-Pesa, KCB paybill, or bank
-              details.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,16 +79,9 @@ export function PaymentGateway({ availableMethods }: PaymentGatewayProps) {
                 Payment methods
               </h1>
               <p className="mt-2 max-w-2xl text-sm text-foreground/75 sm:text-base">
-                Like eCitizen: pick an{" "}
-                <span className="font-semibold text-foreground">
-                  instant gateway
-                </span>{" "}
-                (bill updates automatically) or{" "}
-                <span className="font-semibold text-foreground">
-                  manual M-Pesa / bank
-                </span>{" "}
-                (paste your confirmation — pending until your organization
-                verifies).
+                Send an M-Pesa STK prompt to your phone, or submit a payment
+                you have already made using its transaction code, confirmation
+                message, and an optional receipt screenshot.
               </p>
               {source && id ? (
                 <p className="mt-3 text-xs font-medium text-foreground/65">
@@ -133,6 +107,24 @@ export function PaymentGateway({ availableMethods }: PaymentGatewayProps) {
             ) : null}
           </div>
         </div>
+
+        {!availableMethods.some(option => option.id === "mpesa-stk") ? (
+          <section aria-label="M-Pesa STK Push" className="mb-8 rounded-3xl border border-border bg-card p-6">
+            <h2 className="text-xl font-semibold">M-Pesa STK Push</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              STK Push is awaiting setup for your organisation. Contact your property manager to enable it, or submit proof of a payment below.
+            </p>
+            <button type="button" disabled className="mt-4 min-h-11 rounded-xl bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground">
+              Send STK push — unavailable
+            </button>
+          </section>
+        ) : null}
+
+        {availableMethods.length === 0 ? (
+          <p role="status" className="mb-8 rounded-2xl border border-border p-4 text-sm text-muted-foreground">
+            Your organisation has not added payment details yet. Contact your property manager to enable payment and proof submission.
+          </p>
+        ) : null}
 
         {instantMethods.length > 0 ? (
           <section className="mb-10">
@@ -169,10 +161,10 @@ export function PaymentGateway({ availableMethods }: PaymentGatewayProps) {
               <ClipboardPaste className="h-5 w-5 text-amber-600 dark:text-amber-300" />
               <div>
                 <h2 className="text-xl font-semibold text-foreground">
-                  Manual M-Pesa / bank
+                  Submit payment proof
                 </h2>
                 <p className="text-sm text-foreground/70">
-                  Pay outside the app, paste your transaction code or SMS. Status
+                  Enter your M-Pesa code or bank reference, paste the confirmation SMS, and upload a receipt screenshot. Status
                   stays <span className="font-semibold">pending</span> until the
                   organization verifies.
                 </p>
@@ -243,7 +235,7 @@ function MethodCard({
           {badge}
         </span>
         <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-          Select
+          {option.id === "mpesa-stk" ? "Send STK push" : "Enter code / upload proof"}
           <ChevronRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
         </span>
       </div>
