@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import type { PaymentInstructions } from "@/lib/payments/instructions";
 import { isPaymentMethodAvailable } from "@/lib/payments/instructions";
 import {
@@ -198,6 +199,7 @@ export function useCheckoutForm(searchParams: {
             source === "advance_rent" ? Number.parseInt(months, 10) : undefined,
         });
       } catch (err) {
+        if (isRedirectError(err)) throw err;
         setError(err instanceof Error ? err.message : "Failed to start payment.");
       }
     });
