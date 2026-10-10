@@ -136,6 +136,8 @@ function checkRateLimit(key: string) {
 }
 
 function isPublicPath(pathname: string) {
+  // Daraja has no browser session. The webhook authenticates its own callback secret.
+  if (pathname === "/api/webhooks/mpesa" || pathname === "/api/webhooks/mpesa/") return true;
   return PUBLIC_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
