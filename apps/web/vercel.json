@@ -2,5 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "cd ../.. && npm install",
   "buildCommand": "prisma generate --schema ../../prisma/schema.prisma && ESTATEDESK_BUILD_WITHOUT_DATABASE=true next build",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/tenant-credit",
+      "schedule": "5 21 * * *"
+    }
+  ]
 }

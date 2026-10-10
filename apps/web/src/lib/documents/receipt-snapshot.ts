@@ -37,6 +37,7 @@ export type ReceiptSnapshot = {
   allocations: ReceiptAllocationSnapshot[];
   previousBalance: number | null;
   remainingBalance: number | null;
+  creditCarriedForward?: number;
   verifiedBy: string | null;
 };
 
@@ -90,8 +91,9 @@ export async function createReceiptSnapshot(
     description: allocation.rentCharge.description ?? allocation.rentCharge.chargeType,
     amount: Number(allocation.amount),
   }));
-  if (!allocations.length && payment.waterBill) {
-    allocations.push({ period: payment.waterBill.period, description: "Water bill", amount: Number(payment.amount) });
+  const chargeAllocated = allocations.reduce((sum, allocation) => sum + allocation.amount, 0);
+  if (payment.waterBill && Number(payment.amount.sub(payment.unappliedAmount)) > chargeAllocated) {
+    allocations.push({ period: payment.waterBill.period, description: "Water bill", amount: Number(payment.amount.sub(payment.unappliedAmount)) - chargeAllocated });
   }
   if (!allocations.length && payment.taxCharge) {
     allocations.push({ period: payment.taxCharge.period, description: payment.taxCharge.taxType, amount: Number(payment.amount) });
@@ -99,7 +101,13 @@ export async function createReceiptSnapshot(
   const allocatedCharges = [...new Map(
     payment.allocations.map((allocation) => [allocation.rentCharge.id, allocation.rentCharge]),
   ).values()];
-  const remainingBalance = payment.rentCharge
+  const metadata = payment.callbackRaw && typeof payment.callbackRaw === "object" && !Array.isArray(payment.callbackRaw) ? payment.callbackRaw : {};
+  const appliedAmount = Number(payment.amount.sub(payment.unappliedAmount));
+  const remainingBalance = typeof metadata.balanceBefore === "number"
+    ? Math.max(metadata.balanceBefore - appliedAmount, 0)
+    : payment.waterBill && !payment.rentCharge && !allocatedCharges.length
+      ? Number(payment.waterBill.balance)
+    : payment.rentCharge
     ? Number(payment.rentCharge.balance)
     : allocatedCharges.length
       ? allocatedCharges.reduce((sum, charge) => sum + Number(charge.balance), 0)
@@ -152,6 +160,7 @@ export async function createReceiptSnapshot(
     allocations,
     previousBalance: remainingBalance === null ? null : remainingBalance + allocatedAmount,
     remainingBalance,
+    creditCarriedForward: Number(payment.unappliedAmount),
     verifiedBy: verifiedBy?.fullName ?? null,
   };
 }

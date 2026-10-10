@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { CircleCheck, ReceiptText } from "lucide-react";
 import { confirmChargePaymentAction } from "../confirm-charge-payment-action";
 
-export function ConfirmChargePaymentForm({ chargeId, amount, dateLimit }: { chargeId: string; amount: string; dateLimit: string }) {
-  const [open, setOpen] = useState(false);
+export function ConfirmChargePaymentForm({ chargeId, amount, dateLimit, initiallyOpen = false }: { chargeId: string; amount: string; dateLimit: string; initiallyOpen?: boolean }) {
+  const [open, setOpen] = useState(initiallyOpen);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
   const [receiptId, setReceiptId] = useState("");
@@ -26,8 +26,8 @@ export function ConfirmChargePaymentForm({ chargeId, amount, dateLimit }: { char
       });
     }}>
       <input type="hidden" name="chargeId" value={chargeId} /><input type="hidden" name="expectedBalance" value={amount} />
-      <p className="text-sm text-muted-foreground">Remaining balance: {Number(amount).toLocaleString("en-KE", { minimumFractionDigits: 2 })}. Enter the amount actually received.</p>
-      <label className="grid gap-1 text-sm">Amount received<input name="amount" type="number" min="0.01" max={amount} step="0.01" required value={paymentAmount} onChange={event => setPaymentAmount(event.target.value)} className={field} /></label>
+      <p className="text-sm text-muted-foreground">Remaining balance: {Number(amount).toLocaleString("en-KE", { minimumFractionDigits: 2 })}. Enter the amount actually received. Any excess becomes tenant credit.</p>
+      <label className="grid gap-1 text-sm">Amount received<input name="amount" type="number" min="0.01" step="0.01" required value={paymentAmount} onChange={event => setPaymentAmount(event.target.value)} className={field} /></label>
       <label className="grid gap-1 text-sm">Payment method<select name="paymentMethod" required defaultValue="CASH" className={field}><option value="CASH">Cash</option><option value="MPESA_MANUAL">M-Pesa</option><option value="BANK">Bank transfer</option></select></label>
       <label className="grid gap-1 text-sm">Payment reference / cash receipt number<input name="reference" required maxLength={100} value={reference} onChange={event => setReference(event.target.value)} className={field} /></label>
       <label className="grid gap-1 text-sm">Payment date<input name="paidAt" type="date" required max={dateLimit} defaultValue={dateLimit} className={field} /></label>

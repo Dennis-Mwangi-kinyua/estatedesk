@@ -104,12 +104,6 @@ export async function processWaterBillPayment(
     throw new Error("Enter a valid payment amount.");
   }
 
-  if (requested > outstanding + 0.001) {
-    throw new Error(
-      `Amount cannot exceed the outstanding balance of ${outstanding.toFixed(0)}.`,
-    );
-  }
-
   const amount = Math.round(requested * 100) / 100;
   const methodLabel = checkoutMethodLabel(checkoutMethod);
 

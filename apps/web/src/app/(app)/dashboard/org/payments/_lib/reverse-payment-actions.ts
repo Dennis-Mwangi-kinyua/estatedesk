@@ -11,6 +11,7 @@ import {
   requirePaymentManager,
   revalidatePaymentSurfaces,
 } from "./payment-action-shared";
+import { reverseJournalEntry } from "@/lib/accounting/engine";
 import { reversePaymentPosting } from "@/lib/accounting/payments";
 import { prisma } from "@/lib/prisma";
 import { notifyRecipients } from "@/lib/notifications/notify";
@@ -72,12 +73,23 @@ export async function reverseVerifiedPaymentAction(formData: FormData) {
 
     await tx.paymentAllocation.deleteMany({ where: { paymentId: payment.id } });
 
+    const metadata = asObject(payment.callbackRaw);
+    const creditWaterUses = Array.isArray(metadata.creditWaterApplications) ? metadata.creditWaterApplications as { waterBillId: string; amount: string }[] : [];
+    for (const use of creditWaterUses) {
+      const bill = await tx.waterBill.findFirstOrThrow({ where: { id: use.waterBillId, orgId: payment.orgId, tenantId: payment.payerTenantId ?? undefined } });
+      const nextPaid = Prisma.Decimal.max(bill.amountPaid.sub(use.amount), 0);
+      const balance = Prisma.Decimal.max(bill.total.sub(nextPaid), 0);
+      await tx.waterBill.update({ where: { id: bill.id }, data: { amountPaid: nextPaid, balance, status: balance.lte(0) ? "PAID_VERIFIED" : "ISSUED" } });
+    }
+    const creditJournals = await tx.accountingJournalEntry.findMany({ where: { orgId: payment.orgId, sourceType: "ADJUSTMENT", sourceId: { startsWith: `${payment.id}:credit:` }, status: "POSTED" } });
+    for (const entry of creditJournals) await reverseJournalEntry({ db: tx, orgId: payment.orgId, sourceEntryId: entry.id, sourceId: `reverse:${entry.id}`, reason, userId: session.userId });
+
     if (payment.waterBill) {
       const allocationTotal = payment.allocations.reduce(
         (sum, row) => sum + Number(row.amount),
         0,
       );
-      const waterPortion = Math.max(Number(payment.amount) - allocationTotal, 0);
+      const waterPortion = Math.max(Number(payment.amount) - allocationTotal - Number(payment.unappliedAmount) - creditWaterUses.reduce((sum, use) => sum + Number(use.amount), 0), 0);
       const currentPaid = Number(
         (payment.waterBill as { amountPaid?: unknown }).amountPaid ?? 0,
       );

@@ -66,12 +66,6 @@ export async function processPeriodBillPayment(
     throw new Error("Enter a valid payment amount.");
   }
 
-  if (requested > periodBill.balance + 0.001) {
-    throw new Error(
-      `Amount cannot exceed the outstanding balance of ${periodBill.balance.toFixed(0)}.`,
-    );
-  }
-
   const amount = Math.round(requested * 100) / 100;
   const methodLabel = checkoutMethodLabel(checkoutMethod);
   const isPartial = amount + 0.001 < periodBill.balance;

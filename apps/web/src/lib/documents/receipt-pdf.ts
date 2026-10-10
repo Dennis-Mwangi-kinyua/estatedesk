@@ -32,6 +32,7 @@ export type ReceiptPdfData = {
   allocations?: Array<{ period: string; description: string; amount: number }>;
   previousBalance?: number | null;
   remainingBalance?: number | null;
+  creditCarriedForward?: number;
   verifiedBy?: string | null;
 };
 
@@ -272,6 +273,8 @@ async function generateEnhancedReceiptPdf(data: ReceiptPdfData) {
   const balanceY = 218;
   page.drawText(`Previous balance: ${data.previousBalance == null ? "Not applicable" : formatMoney(data.previousBalance, data.currencyCode)}`, { x, y: balanceY, size: 8, font: regular, color: muted });
   page.drawText(`Remaining balance: ${data.remainingBalance == null ? "Not applicable" : formatMoney(data.remainingBalance, data.currencyCode)}`, { x: 310, y: balanceY, size: 8, font: bold, color: ink });
+
+  if (data.creditCarriedForward !== undefined) page.drawText(`Credit carried forward: ${formatMoney(data.creditCarriedForward ?? 0, data.currencyCode)}`, { x, y: 201, size: 8, font: bold, color: ink });
 
   page.drawRectangle({ x, y: 60, width: 503, height: 130, borderColor: line, borderWidth: 1 });
   page.drawImage(qrImage, { x: 62, y: 76, width: 98, height: 98 });

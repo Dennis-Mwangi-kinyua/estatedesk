@@ -103,14 +103,13 @@ export function CheckoutFormPanel({ form }: CheckoutFormPanelProps) {
                 Amount to pay
               </span>
               <p className="mb-2 text-xs text-sky-900/90 dark:text-sky-100/80">
-                Pay the full balance or enter a smaller amount for a partial
-                payment. Partials reduce rent first, then water.
+                Enter the amount to pay. Partial payments reduce your balance;
+                overpayments become credit for your next bills.
               </p>
               <input
                 type="number"
                 min="1"
                 step="1"
-                max={checkoutSummary?.amount ?? undefined}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="h-12 w-full rounded-lg border border-border bg-background px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"

@@ -4,10 +4,34 @@ import { emptyPaymentInstructions } from "../../apps/web/src/lib/payments/instru
 import {
   buildCheckoutTransactionKey,
   classifyCheckoutMethod,
+  isMpesaStkConfigured,
   mapCheckoutMethodToPaymentMethod,
   requiresTransactionIdForCheckout,
   validateCheckoutTransactionId,
 } from "../../apps/web/src/lib/payments/method-flow";
+
+test("STK credentials are available only to their bound organisation and require a callback", () => {
+  const keys = ["MPESA_ORG_ID", "MPESA_CONSUMER_KEY", "MPESA_CONSUMER_SECRET", "MPESA_SHORTCODE", "MPESA_PASSKEY", "MPESA_CALLBACK_SECRET", "MPESA_CALLBACK_URL"];
+  const previous = Object.fromEntries(keys.map(key => [key, process.env[key]]));
+  try {
+    for (const key of keys) process.env[key] = "test-only";
+    process.env.MPESA_ORG_ID = "benannabel-test";
+    process.env.MPESA_CALLBACK_URL = "https://sandbox.example.test/callback";
+    assert.equal(isMpesaStkConfigured("benannabel-test"), true);
+    assert.equal(isMpesaStkConfigured("another-org"), false);
+    assert.equal(isMpesaStkConfigured(), false);
+    delete process.env.MPESA_ORG_ID;
+    assert.equal(isMpesaStkConfigured("benannabel-test"), false);
+    process.env.MPESA_ORG_ID = "benannabel-test";
+    delete process.env.MPESA_CALLBACK_URL;
+    assert.equal(isMpesaStkConfigured("benannabel-test"), false);
+  } finally {
+    for (const key of keys) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  }
+});
 
 test("classifies checkout methods correctly", () => {
   assert.equal(classifyCheckoutMethod("mpesa"), "mpesa");

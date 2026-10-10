@@ -1,4 +1,5 @@
 import type { MpesaStkPushInput, MpesaStkPushResult } from "./types";
+import { isMpesaStkConfigured } from "@/lib/payments/method-flow";
 
 function required(name: string) {
   const value = process.env[name]?.trim();
@@ -68,10 +69,13 @@ async function getAccessToken() {
 }
 
 export async function requestMpesaStkPush(
-  input: MpesaStkPushInput,
+  input: MpesaStkPushInput & { orgId: string },
 ): Promise<MpesaStkPushResult> {
-  if (!Number.isFinite(input.amount) || input.amount < 1) {
-    throw new Error("M-Pesa amount must be at least KES 1.");
+  if (!isMpesaStkConfigured(input.orgId)) {
+    throw new Error("M-Pesa is not configured for this organisation.");
+  }
+  if (!Number.isFinite(input.amount) || input.amount < 1 || !Number.isInteger(input.amount)) {
+    throw new Error("M-Pesa amount must be a whole number of shillings, at least KES 1.");
   }
 
   const shortcode = required("MPESA_SHORTCODE");

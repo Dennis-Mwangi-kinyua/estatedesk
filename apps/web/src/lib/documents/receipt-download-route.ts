@@ -133,6 +133,7 @@ export async function GET(
     allocations: snapshot?.allocations,
     previousBalance: snapshot?.previousBalance,
     remainingBalance: snapshot?.remainingBalance,
+    creditCarriedForward: snapshot?.creditCarriedForward,
     verifiedBy: snapshot?.verifiedBy,
   });
   const contentHash = hashDocumentContent(pdfBytes);

@@ -30,7 +30,7 @@ export async function confirmChargePaymentAction(form: FormData) {
       const rawAmount = String(form.get("amount") ?? "").trim();
       if (!/^\d{1,10}(\.\d{1,2})?$/.test(rawAmount)) throw new Error("Enter a valid payment amount with up to two decimal places.");
       const amount = new Prisma.Decimal(rawAmount);
-      if (amount.lte(0) || amount.gt(charge.balance)) throw new Error("Payment must be greater than zero and no more than the remaining balance.");
+      if (amount.lte(0)) throw new Error("Payment must be greater than zero.");
       const pending = await tx.payment.findFirst({ where: { orgId, payerTenantId: charge.lease.tenantId, OR: [{ rentChargeId: charge.id }, { targetType: "COMBINED", AND: [{ callbackRaw: { path: ["leaseId"], equals: charge.leaseId } }, { callbackRaw: { path: ["period"], equals: charge.period } }] }], verificationStatus: "PENDING", gatewayStatus: { in: ["PENDING", "INITIATED", "SUCCESS"] }, reversedAt: null }, select: { id: true } });
       if (pending) throw new Error("A submitted payment is awaiting review. Verify it in Payments to avoid recording it twice.");
       if (await tx.payment.findFirst({ where: { orgId, method: method as "CASH" | "BANK" | "MPESA_MANUAL", externalReference: reference, verificationStatus: { not: "REJECTED" }, reversedAt: null }, select: { id: true } })) throw new Error("This payment reference has already been recorded.");

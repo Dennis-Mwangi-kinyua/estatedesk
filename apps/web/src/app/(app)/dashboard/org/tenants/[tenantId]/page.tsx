@@ -1,3 +1,4 @@
+import { RecordOrgPayment } from "@/features/charges/components/record-org-payment";
 import { InitialChargesPanel } from "@/features/charges/components/initial-charges-panel";
 import { roleHasOrgPermission } from "@/lib/permissions/role-matrix";
 import { requireUserSession } from "@/lib/auth/session";
@@ -41,5 +42,5 @@ export default async function TenantDetailsPage({ params }: TenantDetailsPagePro
     redirect(`/dashboard/org/tenants/${encodeURIComponent(data.canonicalSlug)}`);
   }
 
-  return <TenantDetailsWorkspace data={data} orgRole={session.activeOrgRole} initialCharges={<InitialChargesPanel orgId={session.activeOrgId} tenantId={data.tenant.id} canConfirm={roleHasOrgPermission(session.activeOrgRole, "payments.verify")} />} />;
+  return <TenantDetailsWorkspace data={data} orgRole={session.activeOrgRole} initialCharges={<>{roleHasOrgPermission(session.activeOrgRole, "payments.verify") ? <RecordOrgPayment orgId={session.activeOrgId} tenantId={data.tenant.id} /> : null}<InitialChargesPanel orgId={session.activeOrgId} tenantId={data.tenant.id} canConfirm={roleHasOrgPermission(session.activeOrgRole, "payments.verify")} /></>} />;
 }

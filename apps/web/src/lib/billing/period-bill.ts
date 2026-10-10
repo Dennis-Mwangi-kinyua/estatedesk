@@ -5,6 +5,7 @@ import {
   isPayableWaterBillStatus,
   tenantVisibleWaterBillWhere,
 } from "@/lib/water-bills/status";
+import { applyTenantCredit, applyTenantCreditWithRetry } from "@/lib/payments/tenant-credit";
 import { toLedgerNumber } from "@/lib/ledger-utils";
 import { sortPeriodBillLinesForDisplay } from "@/lib/billing/allocation-priority";
 
@@ -91,6 +92,11 @@ export async function getPeriodBillForTenant({
   /** Invoice UI: include water bills awaiting org approval (not payable). */
   showPendingWater?: boolean;
 }): Promise<PeriodBill | null> {
+  if ("$transaction" in db) {
+    await applyTenantCreditWithRetry(db as PrismaClient, orgId, tenantId);
+  } else {
+    await applyTenantCredit(db, orgId, tenantId);
+  }
   const lease = await db.lease.findFirst({
     where: {
       orgId,

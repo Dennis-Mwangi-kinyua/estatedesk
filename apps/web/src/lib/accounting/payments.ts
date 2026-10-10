@@ -82,13 +82,15 @@ export async function postVerifiedPayment(db: AccountingDb, paymentId: string, u
         unitId,
         tenantId,
       },
-      {
+      ...(payment.amount.sub(payment.unappliedAmount).gt(0) ? [{
         systemKey: creditSystemKey(payment.targetType, settings),
-        credit: payment.amount,
-        propertyId: unit?.propertyId,
-        unitId,
-        tenantId,
-      },
+        credit: payment.amount.sub(payment.unappliedAmount),
+        propertyId: unit?.propertyId, unitId, tenantId,
+      }] : []),
+      ...(payment.unappliedAmount.gt(0) ? [{
+        systemKey: "TENANT_CREDITS", credit: payment.unappliedAmount,
+        propertyId: unit?.propertyId, unitId, tenantId,
+      }] : []),
     ],
   });
 }

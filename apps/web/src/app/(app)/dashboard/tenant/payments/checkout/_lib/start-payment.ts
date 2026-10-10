@@ -93,7 +93,7 @@ export async function startTenantPayment(input: StartPaymentInput) {
   const settlementMode = getCheckoutSettlementMode(method);
   const isGateway = isGatewayCheckoutMethod(method);
 
-  if (isGateway && method === "mpesa-stk" && !isMpesaStkConfigured()) {
+  if (isGateway && method === "mpesa-stk" && !isMpesaStkConfigured(session.activeOrgId)) {
     throw new Error(
       "M-Pesa STK is not configured on this server. Use Manual M-Pesa instead.",
     );
@@ -250,6 +250,7 @@ export async function startTenantPayment(input: StartPaymentInput) {
       });
       const amount = Number(payment?.amount ?? paymentAmount);
       const stk = await requestMpesaStkPush({
+        orgId: session.activeOrgId!,
         amount,
         phone: phoneNumber!.trim(),
         accountReference: payment?.reference ?? id.slice(0, 12),

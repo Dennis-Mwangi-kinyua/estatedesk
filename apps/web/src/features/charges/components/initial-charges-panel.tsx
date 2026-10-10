@@ -17,7 +17,8 @@ export async function InitialChargesPanel({ orgId, tenantId, canConfirm = false 
   const missing = leases.some(item => (["RENT", "DEPOSIT"] as const).some(type =>
     (type === "RENT" ? item.monthlyRent : item.deposit)?.gt(0) &&
     !charges.some(charge => charge.leaseId === item.id && charge.chargeType === type)));
-  if (!charges.length && !canConfirm) return null;
+  const credit = await prisma.payment.aggregate({ where: { orgId, payerTenantId: tenantId, verificationStatus: "VERIFIED", gatewayStatus: "SUCCESS", reversedAt: null }, _sum: { unappliedAmount: true } });
+  if (!charges.length && !canConfirm && !credit._sum.unappliedAmount?.gt(0)) return null;
   const money = (value: unknown) => new Intl.NumberFormat("en-KE", { style: "currency", currency: lease.org.currencyCode }).format(Number(value));
   return <section className="min-w-0 space-y-4 rounded-2xl border border-border bg-card p-4 sm:p-6" aria-label="First rent and deposit">
     <div className="flex items-start gap-3"><WalletCards className="mt-1 h-5 w-5 shrink-0 text-primary" /><div><h2 className="text-lg font-semibold">First rent and deposit</h2><p className="text-sm text-muted-foreground">Initial charges across your tenancies</p></div></div>
@@ -29,6 +30,7 @@ export async function InitialChargesPanel({ orgId, tenantId, canConfirm = false 
       {canConfirm && charge.status !== "WAIVED" && charge.balance.gt(0) ? <ConfirmChargePaymentForm chargeId={charge.id} amount={charge.balance.toFixed(2)} dateLimit={nairobiDate()} /> : null}
       <div className="flex flex-col gap-2">{Array.from(new Map(charge.paymentAllocations.flatMap(allocation => allocation.payment.receipt ? [[allocation.payment.receipt.id, allocation.payment.receipt] as const] : [])).values()).map(receipt => <Link key={receipt.id} href={`/api/receipts/${receipt.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 break-words text-sm font-semibold text-primary"><ReceiptText className="h-4 w-4 shrink-0" />Receipt {receipt.receiptNo}</Link>)}</div>
     </article>)}</div>
+    <p className="text-sm font-semibold">Credit available for next bills: {money(credit._sum.unappliedAmount ?? 0)}</p>
     <p className="text-sm font-semibold">Total remaining: {money(charges.reduce((sum, charge) => sum + (charge.status === "WAIVED" ? 0 : Number(charge.balance)), 0))}</p>
   </section>;
 }

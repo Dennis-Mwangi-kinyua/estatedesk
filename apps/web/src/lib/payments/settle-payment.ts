@@ -79,7 +79,7 @@ export async function settleGatewayPayment({
     return { alreadySettled: true as const, paymentId };
   }
 
-  if (payment.gatewayStatus === "FAILED" || payment.gatewayStatus === "CANCELLED") {
+  if (payment.gatewayStatus !== "SUCCESS" || payment.reversedAt || payment.verificationStatus === "REVERSED") {
     throw new Error("Cannot settle a failed payment.");
   }
 
@@ -150,6 +150,7 @@ export async function settleGatewayPayment({
       payment.waterBill?.period ||
       getCurrentPeriod();
 
+    if (!leaseId) throw new Error("Combined payment is missing its lease.");
     if (leaseId) {
       await allocateCombinedPeriodPayment({
         db,
@@ -287,6 +288,7 @@ export async function settleGatewayPayment({
 
       let etimsSubmission: Prisma.InputJsonValue | undefined;
       try {
+        if (payment.method === "MPESA_STK" && process.env.MPESA_ENVIRONMENT !== "production") throw new Error("Sandbox payments are excluded from fiscal submission.");
         const { submitEtimsSalesReceipt } = await import("@/lib/tax/etims-client");
         const { getEtimsClientConfigForOrg } = await import(
           "@/lib/tax/org-etims-config"
@@ -340,14 +342,14 @@ export async function settleGatewayPayment({
         },
       });
     } catch {
-      // Snapshot is best-effort for gateway auto-settle.
+      throw new Error("Could not create the immutable receipt snapshot.");
     }
   }
 
   try {
     await postVerifiedPayment(db, payment.id, actorUserId);
   } catch {
-    // Accounting may not be initialized.
+    throw new Error("Could not post payment accounting.");
   }
 
   if (payment.payerTenant) {

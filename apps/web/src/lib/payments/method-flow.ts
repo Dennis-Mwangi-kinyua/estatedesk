@@ -110,12 +110,14 @@ export function checkoutMethodLabel(method: string) {
   return getPaymentMethodDefinition(method)?.name ?? method;
 }
 
-export function isMpesaStkConfigured() {
+export function isMpesaStkConfigured(orgId?: string | null) {
   return Boolean(
-    process.env.MPESA_CONSUMER_KEY?.trim() &&
+    orgId && process.env.MPESA_ORG_ID?.trim() === orgId &&
+      process.env.MPESA_CONSUMER_KEY?.trim() &&
       process.env.MPESA_CONSUMER_SECRET?.trim() &&
       process.env.MPESA_SHORTCODE?.trim() &&
       process.env.MPESA_PASSKEY?.trim() &&
+      process.env.MPESA_CALLBACK_SECRET?.trim() &&
       process.env.MPESA_CALLBACK_URL?.trim(),
   );
 }

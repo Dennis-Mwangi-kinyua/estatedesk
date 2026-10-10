@@ -2,5 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "npm install",
   "buildCommand": "ESTATEDESK_BUILD_WITHOUT_DATABASE=true npm run build",
-  "outputDirectory": "apps/web/.next"
+  "outputDirectory": "apps/web/.next",
+  "crons": [
+    {
+      "path": "/api/cron/tenant-credit",
+      "schedule": "5 21 * * *"
+    }
+  ]
 }

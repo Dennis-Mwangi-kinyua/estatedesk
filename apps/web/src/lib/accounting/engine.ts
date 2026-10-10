@@ -19,6 +19,7 @@ const DEFAULT_ACCOUNTS = [
   ["1100", "Tenant receivables", "ASSET", "DEBIT", "TENANT_RECEIVABLES", true],
   ["2000", "Accounts payable", "LIABILITY", "CREDIT", "ACCOUNTS_PAYABLE", true],
   ["2100", "Tenant deposits held", "LIABILITY", "CREDIT", "TENANT_DEPOSITS", true],
+  ["2110", "Tenant credit carried forward", "LIABILITY", "CREDIT", "TENANT_CREDITS", true],
   ["2200", "Owner funds payable", "LIABILITY", "CREDIT", "OWNER_PAYABLE", true],
   ["2300", "Tax payable", "LIABILITY", "CREDIT", "TAX_PAYABLE", true],
   ["3000", "Opening balance equity", "EQUITY", "CREDIT", "OPENING_EQUITY", true],
