@@ -1,14 +1,11 @@
 import { PlatformRole } from "@prisma/client";
 import { Plus } from "lucide-react";
 import { VisualSticker } from "@/components/shared/visual-sticker";
-import { KeyRound } from "@/components/shared/colored-icons";
-import { createPlatformUserAction } from "../actions";
 import {
-  PLATFORM_PERMISSION_VALUES,
   PLATFORM_ROLE_META,
   ROLE_VALUES,
 } from "../_lib/constants";
-import { formatPermission } from "../_lib/helpers";
+import Link from "@/components/navigation/workspace-link";
 
 function roleIcon(role: PlatformRole) {
   return <VisualSticker label={role === "USER" ? "user" : "security"} size="xs" />;
@@ -49,160 +46,11 @@ export function RoleGuidePanel() {
 }
 
 export function CreatePlatformUserPanel() {
-  return (
-    <section className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
-      <details>
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
-          <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-neutral-950">
-              Add platform user
-            </h2>
-            <p className="mt-1 text-xs leading-5 text-neutral-500">
-              Create users, admins, or super admins.
-            </p>
-          </div>
-          <span className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-neutral-950 px-3 py-2 text-xs font-semibold text-white">
-            <Plus className="h-3.5 w-3.5" />
-            Add user
-          </span>
-        </summary>
-
-        <form action={createPlatformUserAction} className="grid gap-5 border-t border-neutral-200 p-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Full name">
-              <input
-                name="fullName"
-                required
-                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
-                placeholder="Jane Admin"
-              />
-            </Field>
-            <Field label="Username">
-              <input
-                name="username"
-                required
-                minLength={3}
-                maxLength={30}
-                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
-                placeholder="jane.admin"
-              />
-            </Field>
-            <Field label="Email">
-              <input
-                name="email"
-                type="email"
-                required
-                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
-                placeholder="jane@example.com"
-              />
-            </Field>
-            <Field label="Phone">
-              <input
-                name="phone"
-                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
-                placeholder="+254700000000"
-              />
-            </Field>
-            <Field label="Temporary password">
-              <input
-                name="password"
-                type="password"
-                required
-                minLength={8}
-                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
-              />
-            </Field>
-            <Field label="Confirm password">
-              <input
-                name="confirmPassword"
-                type="password"
-                required
-                minLength={8}
-                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
-              />
-            </Field>
-            <Field label="System role">
-              <select
-                name="platformRole"
-                defaultValue={PlatformRole.USER}
-                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm outline-none focus:border-neutral-400"
-              >
-                {ROLE_VALUES.map((role) => (
-                  <option key={role} value={role}>
-                    {PLATFORM_ROLE_META[role].title}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <label className="flex items-start gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
-              <input
-                type="checkbox"
-                name="canCreatePlatformAdmins"
-                className="mt-1 h-4 w-4 rounded border-neutral-300"
-              />
-              <span>
-                <span className="block text-sm font-semibold text-neutral-950">
-                  Can create platform admins
-                </span>
-                <span className="mt-1 block text-xs leading-5 text-neutral-600">
-                  Allows this account to create other control-plane admins.
-                </span>
-              </span>
-            </label>
-          </div>
-
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
-            <div className="flex items-center gap-2">
-              <KeyRound className="h-4 w-4 text-neutral-600" />
-              <h3 className="text-sm font-semibold text-neutral-950">
-                Platform permissions
-              </h3>
-            </div>
-            <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-              {PLATFORM_PERMISSION_VALUES.map((permission) => (
-                <label
-                  key={permission}
-                  className="flex items-start gap-3 rounded-2xl border border-neutral-200 bg-white p-3"
-                >
-                  <input
-                    type="checkbox"
-                    name="permissions"
-                    value={permission}
-                    className="mt-1 h-4 w-4 rounded border-neutral-300"
-                  />
-                  <span className="text-sm font-medium text-neutral-800">
-                    {formatPermission(permission)}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <button data-workspace-action="true" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 md:w-fit">
-            <Plus className="h-4 w-4" />
-            Create platform user
-          </button>
-        </form>
-      </details>
-    </section>
-  );
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-sm font-medium text-neutral-800">
-        {label}
-      </span>
-      {children}
-    </label>
-  );
+  return <section className="rounded-xl border border-border bg-card p-4">
+    <div className="mb-3 flex items-center gap-2"><VisualSticker label="add user" size="xs" /><h2 className="text-sm font-semibold text-foreground">Add platform user</h2></div>
+    <p className="mb-4 text-xs leading-5 text-muted-foreground">Set up account details and access in a dedicated workspace.</p>
+    <Link data-workspace-action="true" href="/platform/users/new" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"><Plus aria-hidden="true" className="h-4 w-4" />Add user</Link>
+  </section>;
 }
 
 export function InfoPill({

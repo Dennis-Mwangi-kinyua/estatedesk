@@ -1,3 +1,5 @@
+import Link from "@/components/navigation/workspace-link";
+import { Plus } from "lucide-react";
 import { Search } from "@/components/shared/colored-icons";
 import { PageHeader, PaginationControls, StatCard, Surface, formatNumber } from "../../_components/control-plane";
 import { PlatformUserCard } from "./platform-user-card";
@@ -36,6 +38,7 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
         eyebrow="Identity directory"
         title="Platform users"
         description="Find people, review account status, and check workspace access."
+        action={<Link href="/platform/users/new" data-workspace-action="true" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"><Plus aria-hidden="true" className="h-4 w-4" />Add platform user</Link>}
       />
 
       {params.created ? (

@@ -159,7 +159,7 @@ function PlatformShellInner({
               <div className="platform-content-frame ios-panel h-full min-w-0 overflow-hidden rounded-none border-0 border-border bg-card/90 shadow-none backdrop-blur-sm dark:bg-card/80 sm:rounded-xl sm:border sm:shadow-sm">
                 <div className="platform-theme-content ed-mobile-content h-full min-w-0 overflow-x-hidden overflow-y-auto overscroll-y-contain p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-foreground sm:p-5 lg:p-6">
                   <DeveloperSensitiveBanner isSuperAdmin={isSuperAdmin} />
-                  {pathname !== "/platform" && pathname !== "/platform/developer" && <WorkspaceActions />}
+                  {pathname !== "/platform" && pathname !== "/platform/developer" && pathname !== "/platform/users/new" && <WorkspaceActions />}
                   {children}
                 </div>
               </div>

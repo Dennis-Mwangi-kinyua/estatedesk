@@ -52,19 +52,19 @@ export async function createPlatformUserAction(formData: FormData) {
     );
 
   if (!fullName || !username || !email) {
-    redirect("/platform/users?createError=missing");
+    redirect("/platform/users/new?createError=missing");
   }
 
   if (!/^[a-z0-9._-]{3,30}$/.test(username)) {
-    redirect("/platform/users?createError=username");
+    redirect("/platform/users/new?createError=username");
   }
 
   if (password.length < 8 || password !== confirmPassword) {
-    redirect("/platform/users?createError=password");
+    redirect("/platform/users/new?createError=password");
   }
 
   if (platformRole === PlatformRole.SUPER_ADMIN && session.platformRole !== "SUPER_ADMIN") {
-    redirect("/platform/users?createError=super-admin");
+    redirect("/platform/users/new?createError=super-admin");
   }
 
   const existingUser = await prisma.user.findFirst({
@@ -75,7 +75,7 @@ export async function createPlatformUserAction(formData: FormData) {
   });
 
   if (existingUser) {
-    redirect("/platform/users?createError=duplicate");
+    redirect("/platform/users/new?createError=duplicate");
   }
 
   const passwordHash = await hash(password, 12);
