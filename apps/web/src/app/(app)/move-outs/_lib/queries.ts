@@ -89,7 +89,7 @@ export async function getMoveOutsPageData(
     completedCount,
     closedCount,
     notices,
-    inspectors,
+    organization,
   ] = await retryTransientDatabaseOperation(() => Promise.all([
     prisma.moveOutNotice.count({ where: noticeWhere }),
     prisma.moveOutNotice.count({
@@ -113,33 +113,7 @@ export async function getMoveOutsPageData(
       take,
       include: noticeInclude,
     }),
-    prisma.membership.findMany({
-      where: {
-        orgId,
-        employmentEndedAt: null,
-        deactivatedAt: null,
-        role: { not: "TENANT" },
-        user: {
-          deletedAt: null,
-          status: "ACTIVE",
-        },
-      },
-      distinct: ["userId", "scopeType", "scopeId"],
-      orderBy: {
-        createdAt: "asc",
-      },
-      select: {
-        userId: true,
-        role: true,
-        scopeType: true,
-        scopeId: true,
-        user: {
-          select: {
-            fullName: true,
-          },
-        },
-      },
-    }),
+    prisma.organization.findUniqueOrThrow({ where: { id: orgId }, select: { currencyCode: true } }),
   ]), { label: "organization move-outs page load" });
 
   const financialRows: (readonly [string, {
@@ -170,8 +144,8 @@ export async function getMoveOutsPageData(
 
   return {
     session,
+    currencyCode: organization.currencyCode,
     notices: notices.map(notice => ({ ...notice, ...financials.get(notice.id)! })),
-    inspectors,
     totalNotices,
     submittedCount,
     scheduledCount,
@@ -182,4 +156,34 @@ export async function getMoveOutsPageData(
     showingFrom,
     showingTo,
   };
+}
+
+export function getMoveOutInspectors(orgId: string) {
+  return prisma.membership.findMany({
+      where: {
+        orgId,
+        employmentEndedAt: null,
+        deactivatedAt: null,
+        role: { not: "TENANT" },
+        user: {
+          deletedAt: null,
+          status: "ACTIVE",
+        },
+      },
+      distinct: ["userId", "scopeType", "scopeId"],
+      orderBy: {
+        createdAt: "asc",
+      },
+      select: {
+        userId: true,
+        role: true,
+        scopeType: true,
+        scopeId: true,
+        user: {
+          select: {
+            fullName: true,
+          },
+        },
+      },
+    });
 }

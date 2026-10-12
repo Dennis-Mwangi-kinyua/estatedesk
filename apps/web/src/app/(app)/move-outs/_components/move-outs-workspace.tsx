@@ -1,12 +1,6 @@
-import { ReleaseUnitForm } from "@/features/move-outs/components/release-unit-form";
-import { ScheduleForm } from "@/features/move-outs/components/schedule-form";
-import { SettlementSummary } from "@/features/move-outs/components/settlement-summary";
-import { RefundForm } from "@/features/move-outs/components/refund-form";
-import { canInspectUnit } from "@/lib/move-outs/inspection-scope";
-import { MoveOutProgress } from "@/features/move-outs/components/progress";
 import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
-import { ArrowUpRight, FileText, MapPin } from "lucide-react";
+import { ArrowUpRight, FileText } from "lucide-react";
 import { CalendarDays, CircleCheck as CheckCircle2, ClipboardList, House as Home, LogOut, UsersRound as Users } from "@/components/shared/colored-icons";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
@@ -38,7 +32,6 @@ export function MoveOutsWorkspace({
   const {
     session,
     notices,
-    inspectors,
     totalNotices,
     submittedCount,
     scheduledCount,
@@ -52,7 +45,7 @@ export function MoveOutsWorkspace({
 
   const isOrg = variant === "org";
   const shellClassName = isOrg
-    ? "org-theme-content mx-auto w-full max-w-none space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8"
+    ? "org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8"
     : "space-y-8 p-6";
   const propertyHref = (propertyId: string) =>
     isOrg
@@ -80,10 +73,10 @@ export function MoveOutsWorkspace({
                   isOrg ? "mt-4 text-2xl sm:text-3xl" : "text-3xl"
                 }`}
               >
-                Move-outs
+                Move-out notices
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                Review notices, plan inspections, and track each handover through settlement.
+                Review tenant notices at a glance. Open a notice to manage inspection, clearance, and handover.
               </p>
               <InAppGuideHint
                 topic="moveOut"
@@ -113,11 +106,11 @@ export function MoveOutsWorkspace({
           }
         >
           {[
-            { label: "Total notices", count: totalNotices, Icon: Users, tone: "text-sky-700 bg-sky-500/10" },
-            { label: "Submitted", count: submittedCount, Icon: FileText, tone: "text-amber-700 bg-amber-500/10" },
-            { label: "Inspection scheduled", count: scheduledCount, Icon: CalendarDays, tone: "text-violet-700 bg-violet-500/10" },
-            { label: "Inspection complete", count: completedCount, Icon: ClipboardList, tone: "text-blue-700 bg-blue-500/10" },
-            { label: "Closed", count: closedCount, Icon: CheckCircle2, tone: "text-emerald-700 bg-emerald-500/10" },
+            { label: "Total notices", count: totalNotices, Icon: Users, tone: "text-sky-700 dark:text-sky-300 bg-sky-500/10" },
+            { label: "Submitted", count: submittedCount, Icon: FileText, tone: "text-amber-700 dark:text-amber-300 bg-amber-500/10" },
+            { label: "Inspection scheduled", count: scheduledCount, Icon: CalendarDays, tone: "text-violet-700 dark:text-violet-300 bg-violet-500/10" },
+            { label: "Inspection complete", count: completedCount, Icon: ClipboardList, tone: "text-blue-700 dark:text-blue-300 bg-blue-500/10" },
+            { label: "Closed", count: closedCount, Icon: CheckCircle2, tone: "text-emerald-700 dark:text-emerald-300 bg-emerald-500/10" },
           ].map(({ label, count, Icon, tone }) => (
             <div key={label} className="min-w-0 rounded-2xl border border-border bg-background/70 p-3 sm:p-4">
               <div className="flex items-center gap-2.5">
@@ -156,43 +149,42 @@ export function MoveOutsWorkspace({
             </div>
           </div>
         ) : (
-          <div className="grid gap-3 bg-muted/15 p-3 sm:p-4 lg:gap-4 lg:p-5">
-            {notices.map((notice) => (
-              <article key={notice.id} className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                <div className="grid min-w-0 xl:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)]">
-                  <div className="min-w-0 p-4 sm:p-5">
+          <div className="grid items-stretch gap-4 bg-muted/15 p-4 sm:p-5 xl:grid-cols-2">
+            {notices.map((notice) => {
+              const noticeHref = `/dashboard/org/move-outs/${encodePublicId(notice.id, "move-out-notice")}`;
+              const nextStep = notice.status === "SUBMITTED" ? "Schedule the move-out inspection."
+                : notice.status === "INSPECTION_SCHEDULED" ? "Complete the scheduled inspection."
+                : notice.status === "INSPECTION_COMPLETED" ? "Review settlement and proceed to handover."
+                : notice.status === "CANCELLED" ? "Notice withdrawn. The lease continues."
+                : "Review the final statement and deposit settlement.";
+              return (
+                <article key={notice.id} className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                  <div className="flex-1 space-y-5 p-5 sm:p-6">
                     <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="flex min-w-0 items-start gap-3">
-                        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><Users aria-hidden="true" className="size-5" /></span>
-                        <div className="min-w-0"><h3 className="break-words text-base font-semibold leading-6">{notice.tenant.fullName}</h3><DeferredLink href={propertyHref(notice.lease.unit.property.id)} className="mt-0.5 inline-flex max-w-full items-center gap-1 break-words text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline"><Home aria-hidden="true" className="size-3.5 shrink-0" /><span className="break-words">{notice.lease.unit.property.name}</span></DeferredLink></div>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary"><Users aria-hidden="true" className="size-5" /></span>
+                        <div className="min-w-0"><h3 className="break-words text-base font-semibold"><Link href={noticeHref} className="hover:text-primary hover:underline">{notice.tenant.fullName}</Link></h3><p className="mt-1 text-sm text-muted-foreground">Unit {notice.lease.unit.houseNo}</p></div>
                       </div>
-                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${notice.status === "CLOSED" ? "bg-emerald-500/10 text-emerald-700" : notice.status === "CANCELLED" ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"}`}><span className="size-1.5 rounded-full bg-current" />{statusLabel[notice.status] ?? notice.status}</span>
+                      <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${notice.status === "CLOSED" ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200" : notice.status === "CANCELLED" ? "border-border bg-muted text-muted-foreground" : "border-primary/20 bg-primary/10 text-primary"}`}>{statusLabel[notice.status] ?? notice.status}</span>
                     </div>
-                    <div className="mt-4 grid grid-cols-1 gap-2 rounded-xl bg-muted/30 p-3 sm:grid-cols-2 sm:gap-3 2xl:grid-cols-4">
-                      <Detail icon={<MapPin aria-hidden="true" className="size-3.5" />} label="Location" value={[notice.lease.unit.building?.name, `Unit ${notice.lease.unit.houseNo}`].filter(Boolean).join(" · ")} />
-                      <Detail icon={<CalendarDays aria-hidden="true" className="size-3.5" />} label="Notice date" value={formatDate(notice.noticeDate)} />
-                      <Detail icon={<LogOut aria-hidden="true" className="size-3.5" />} label="Move-out date" value={formatDate(notice.moveOutDate)} />
-                      <Detail icon={<ClipboardList aria-hidden="true" className="size-3.5" />} label="Inspection" value={notice.inspection ? formatDateTime(notice.inspection.scheduledAt) : "Not scheduled"} />
+                    <DeferredLink href={propertyHref(notice.lease.unit.property.id)} className="flex items-start gap-2 text-sm text-muted-foreground hover:text-primary"><Home aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><span className="break-words">{[notice.lease.unit.property.name, notice.lease.unit.building?.name].filter(Boolean).join(" · ")}</span></DeferredLink>
+                    <div className="grid grid-cols-2 gap-3 rounded-2xl bg-muted/30 p-3">
+                      <Detail icon={<CalendarDays aria-hidden="true" className="size-3.5" />} label="Notice received" value={formatDate(notice.noticeDate)} />
+                      <Detail icon={<LogOut aria-hidden="true" className="size-3.5" />} label="Moving out" value={formatDate(notice.moveOutDate)} />
                     </div>
-                    {notice.inspection?.inspector.fullName ? <p className="mt-3 text-xs text-muted-foreground">Inspector: <span className="font-medium text-foreground">{notice.inspection.inspector.fullName}</span></p> : null}
-                    <div className="mt-4 border-t border-border pt-4"><MoveOutProgress status={notice.status} closeout={notice.closeout} /></div>
+                    <dl className="grid gap-4 text-sm sm:grid-cols-2">
+                      <div className="min-w-0"><dt className="text-xs text-muted-foreground">Inspection</dt><dd className="mt-1 break-words font-medium">{notice.inspection ? formatDateTime(notice.inspection.scheduledAt) : "Not scheduled"}</dd>{notice.inspection?.inspector.fullName ? <dd className="mt-1 break-words text-xs text-muted-foreground">{notice.inspection.inspector.fullName}</dd> : null}</div>
+                      <div><dt className="text-xs text-muted-foreground">Current amount owed</dt><dd className={`mt-1 font-semibold ${notice.currentAmountOwed > 0 ? "text-amber-800 dark:text-amber-200" : "text-foreground"}`}>{new Intl.NumberFormat("en-KE", { style: "currency", currency: props.currencyCode }).format(notice.currentAmountOwed)}</dd><dd className="mt-1 text-xs text-muted-foreground">{notice.financialStatus === "PRELIMINARY" ? "Subject to final settlement" : notice.financialStatus.replaceAll("_", " ").toLowerCase()}</dd></div>
+                    </dl>
+                    <div className="rounded-xl border border-border bg-background/60 p-3"><p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Next step</p><p className="mt-1 text-sm leading-6">{nextStep}</p>{notice.currentAmountOwed > 0 && !["CLOSED", "CANCELLED"].includes(notice.status) ? <p className="mt-1 text-xs leading-5 text-muted-foreground">Arrears require an admin or authorised approver before handover.</p> : null}</div>
                   </div>
-                  <div className="min-w-0 border-t border-border bg-muted/10 p-4 sm:p-5 xl:border-l xl:border-t-0">
-                    <div className="flex items-center justify-between gap-3"><h4 className="text-sm font-semibold">Next steps & settlement</h4><a className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary hover:underline" href={`/api/move-outs/${encodePublicId(notice.id, "move-out-notice")}/report`}><FileText aria-hidden="true" className="size-3.5" />{notice.status === "CLOSED" ? "Final statement" : "Move-out report"}</a></div>
-                    <p className="mt-2 text-xs text-muted-foreground">{notice.financialStatus.replaceAll("_", " ")} <span aria-hidden="true">·</span> Current amount owed <span className="font-semibold text-foreground">{notice.currentAmountOwed.toFixed(2)}</span></p>
-                    <div className="mt-3"><SettlementSummary closeout={notice.closeout} /></div>
-                    {notice.status === "CLOSED" && notice.lease.unit.status === "UNDER_MAINTENANCE" ? <ReleaseUnitForm noticeId={notice.id} /> : null}
-                    {notice.status === "CLOSED" && notice.lease.unit.status === "VACANT" ? <p role="status" className="mt-2 text-xs">Unit is vacant and ready to let.</p> : null}
-                    {notice.status === "CLOSED" && notice.closeout && typeof notice.closeout === "object" && !Array.isArray(notice.closeout) && notice.closeout.refundStatus === "PENDING" ? <RefundForm noticeId={notice.id} /> : null}
-                    {["SUBMITTED", "INSPECTION_SCHEDULED"].includes(notice.status) ? (
-                      inspectors.some(inspector => canInspectUnit([inspector], notice.lease.unit)) ? <ScheduleForm noticeId={notice.id} reschedule={Boolean(notice.inspection)} inspectors={Array.from(new Map(inspectors.filter(inspector => canInspectUnit([inspector], notice.lease.unit)).map(inspector => [inspector.userId, { id: inspector.userId, label: `${inspector.user.fullName} (${inspector.role})` }])).values())} /> : <p className="mt-3 rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">Add active staff in this unit’s scope before scheduling.</p>
-                    ) : notice.inspection ? (
-                      <div className="mt-3 flex flex-wrap items-center gap-3"><Link href={`/dashboard/org/inspections/${encodePublicId(notice.inspection.id, "inspection")}`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-border bg-background px-3 text-xs font-semibold text-primary hover:bg-muted"><ClipboardList aria-hidden="true" className="size-4" />Open inspection report</Link>{notice.status === "INSPECTION_COMPLETED" ? <Link href={`/dashboard/org/move-outs/${encodePublicId(notice.id, "move-out-notice")}`} className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground">Open handover workspace</Link> : null}</div>
-                    ) : <p className="mt-3 text-xs text-muted-foreground">No action is needed right now.</p>}
-                  </div>
-                </div>
-              </article>
-            ))}
+                  <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-muted/15 px-5 py-4 sm:px-6">
+                    <a href={`/api/move-outs/${encodePublicId(notice.id, "move-out-notice")}/report`} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary"><FileText aria-hidden="true" className="size-4" />{notice.status === "CLOSED" ? "Final statement" : "Move-out report"}</a>
+                    <Link href={noticeHref} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">Open notice<ArrowUpRight aria-hidden="true" className="size-4" /></Link>
+                  </footer>
+                </article>
+              );
+            })}
           </div>
         )}
       </section>
