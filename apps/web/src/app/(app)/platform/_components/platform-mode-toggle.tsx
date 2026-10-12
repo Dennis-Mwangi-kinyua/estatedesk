@@ -1,6 +1,6 @@
 "use client";
 
-import { Code2, Shield } from "lucide-react";
+import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { modeMeta, type PlatformMode } from "../_lib/nav";
 import { usePlatformMode } from "./platform-mode-context";
 
@@ -23,7 +23,7 @@ export function PlatformModeToggle({
       aria-label="Platform mode. Shortcut: Alt+Shift+A admin, Alt+Shift+D developer"
       title="Alt+Shift+A admin · Alt+Shift+D developer"
       className={[
-        "grid grid-cols-2 gap-1 rounded-xl border border-border bg-muted/60 p-1",
+        "platform-mode-switch grid grid-cols-2 gap-1 rounded-xl border border-border bg-muted/60 p-1",
         compact ? "min-w-[148px]" : "",
         mobile ? "w-full" : "",
         className,
@@ -31,7 +31,6 @@ export function PlatformModeToggle({
     >
       {(["admin", "developer"] as const).map((target) => {
         const active = mode === target;
-        const Icon = target === "admin" ? Shield : Code2;
         const meta = modeMeta[target as PlatformMode];
 
         return (
@@ -46,12 +45,12 @@ export function PlatformModeToggle({
               mobile ? "min-h-11 text-[13px]" : "",
               active
                 ? target === "developer"
-                  ? "bg-violet-600 text-white shadow-sm dark:bg-violet-500"
-                  : "bg-primary text-primary-foreground shadow-sm"
+                  ? "bg-violet-100 text-violet-900 shadow-sm dark:bg-violet-950 dark:text-violet-100"
+                  : "bg-sky-100 text-sky-900 shadow-sm dark:bg-sky-950 dark:text-sky-100"
                 : "text-muted-foreground hover:bg-card hover:text-foreground",
             ].join(" ")}
           >
-            <Icon className="h-3.5 w-3.5 shrink-0" />
+            <WorkspaceIcon label={target === "admin" ? "security" : "developer"} className="h-4 w-4" />
             <span className="truncate">{mobile ? meta.label : meta.shortLabel}</span>
           </button>
         );

@@ -220,3 +220,44 @@
   outline-offset: 2px;
 }
 .platform-color-icon { filter: drop-shadow(0 1px 1px rgb(15 23 42 / 12%)); }
+
+/* One surface and navigation treatment across sidebar, header, and drawer. */
+:is(.platform-shell-admin, .platform-shell-developer) {
+  --platform-chrome: var(--card);
+  --platform-active: #e0f2fe;
+  --platform-active-ink: #075985;
+}
+.platform-shell-developer { --platform-active: #ede9fe; --platform-active-ink: #5b21b6; }
+.dark .platform-shell-admin { --platform-active: #0c4a6e; --platform-active-ink: #e0f2fe; }
+.dark .platform-shell-developer { --platform-active: #4c1d95; --platform-active-ink: #ede9fe; }
+.estate-workspace :is(.platform-shell-admin, .platform-shell-developer) :is(.platform-sidebar, .platform-desktop-header, .platform-mobile-header, .platform-navigation-drawer) {
+  background: var(--platform-chrome) !important;
+  border-color: var(--border);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.estate-workspace :is(.platform-shell-admin, .platform-shell-developer) .platform-sidebar-link {
+  min-height: 2.875rem;
+  color: var(--muted-foreground);
+  background: transparent;
+  box-shadow: none;
+}
+.estate-workspace :is(.platform-shell-admin, .platform-shell-developer) .platform-sidebar-link[aria-current="page"] {
+  background: var(--platform-active);
+  color: var(--platform-active-ink);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--platform-active-ink);
+}
+.estate-workspace :is(.platform-shell-admin, .platform-shell-developer) .platform-sidebar-link:hover {
+  color: var(--foreground);
+  background: var(--muted);
+}
+.platform-desktop-header .workspace-identity { max-width: 17rem; }
+.platform-desktop-header .workspace-identity .ed-full-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+.estate-workspace :is(.platform-shell-admin, .platform-shell-developer) .platform-mode-switch button {
+  min-width: 0;
+  padding-inline: .5rem;
+  gap: .375rem;
+  font-size: .75rem;
+}

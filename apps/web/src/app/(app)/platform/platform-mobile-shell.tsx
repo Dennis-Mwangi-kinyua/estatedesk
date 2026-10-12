@@ -12,10 +12,10 @@ import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import {
   isNavItemActive,
-  modeMeta,
   type PlatformMode,
   type PlatformNavItem,
 } from "./_lib/nav";
+import { PlatformBrand } from "./_components/platform-brand";
 import { PlatformNavIcon } from "./_components/platform-nav-icon";
 import { PlatformModeToggle } from "./_components/platform-mode-toggle";
 
@@ -40,7 +40,6 @@ export default function PlatformMobileShell({
     ? ["/platform", "/platform/organizations", "/platform/payments"]
     : ["/platform/developer", "/platform/system-health", "/platform/jobs"]).includes(item.href));
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const meta = modeMeta[mode];
   const isDeveloper = mode === "developer";
 
   const closeMenu = useCallback(() => {
@@ -88,29 +87,9 @@ export default function PlatformMobileShell({
   return (
     <>
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="ed-shell-panel flex shrink-0 flex-col border-b pt-safe lg:hidden">
+        <header className="platform-mobile-header ed-shell-panel flex shrink-0 flex-col border-b pt-safe lg:hidden">
           <div className="flex h-14 items-center justify-between gap-2 px-3 sm:h-16 sm:px-4">
-            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-              <span
-                className={[
-                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-                  isDeveloper
-                    ? "bg-violet-100 dark:bg-violet-950"
-                    : "bg-sky-100 dark:bg-sky-950",
-                ].join(" ")}
-              >
-                <PlatformNavIcon label={isDeveloper ? "/platform/developer" : "/platform/organizations"} className="h-6 w-6" />
-              </span>
-
-              <div className="min-w-0">
-                <h1 className="truncate text-sm font-semibold tracking-tight text-foreground sm:text-base">
-                  EstateDesk
-                </h1>
-                <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
-                  {meta.brandSubtitle}
-                </p>
-              </div>
-            </div>
+            <PlatformBrand mode={mode} />
 
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <HeaderThemeToggle />
@@ -162,18 +141,13 @@ export default function PlatformMobileShell({
         aria-label="Platform navigation"
         aria-hidden={!open}
         inert={!open}
-        className={`ed-shell-panel fixed right-0 top-0 z-50 h-full w-[84%] max-w-[360px] border-l shadow-2xl transition-transform duration-300 lg:hidden ${
+        className={`platform-navigation-drawer ed-shell-panel fixed right-0 top-0 z-50 h-full w-[84%] max-w-[360px] border-l shadow-2xl transition-transform duration-300 lg:hidden ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex h-full flex-col bg-card/95 backdrop-blur-xl">
           <div className="flex items-center justify-between border-b border-border px-4 py-4">
-            <div className="min-w-0">
-              <h2 className="truncate text-base font-semibold tracking-tight text-foreground">
-                {meta.headerTitle}
-              </h2>
-              <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-xs text-muted-foreground">{fullName}</p>
-            </div>
+            <PlatformBrand mode={mode} />
 
             <button data-workspace-action="true"
               type="button"
@@ -200,7 +174,7 @@ export default function PlatformMobileShell({
                   href={item.href}
                   onClick={closeMenu}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                  className={`platform-sidebar-link flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                     active
                       ? isDeveloper
                         ? "bg-violet-600 text-white"
@@ -208,15 +182,7 @@ export default function PlatformMobileShell({
                       : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
                   }`}
                 >
-                  <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-md ${
-                      active
-                        ? "bg-white/12 text-white"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    <SidebarSticker href={item.href} />
-                  </span>
+                  <SidebarSticker href={item.href} />
                   <span className="min-w-0 flex-1 truncate">{item.label}</span>
                   {item.superAdminOnly ? (
                     <span
@@ -235,6 +201,7 @@ export default function PlatformMobileShell({
           </nav>
 
           <div className="space-y-3 border-t border-border p-4">
+            <p className="break-words text-sm font-semibold text-foreground">{fullName}</p>
             <InAppHelpNav workspace="platform" compact />
             <form action={logoutAction}>
               <button data-action-kind="destructive" data-workspace-action="true"

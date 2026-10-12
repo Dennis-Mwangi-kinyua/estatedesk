@@ -1,4 +1,5 @@
 "use client";
+import { PlatformBrand } from "./platform-brand";
 import { WorkspaceIdentity } from "@/components/shared/workspace-identity";
 
 import { SidebarSticker } from "@/components/shared/sidebar-sticker";
@@ -11,8 +12,7 @@ import { WorkspaceActions } from "@/components/shared/workspace-actions";
 import Link from "@/components/navigation/workspace-link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useMemo, useState } from "react";
-import { Code2 } from "lucide-react";
-import { Building2, LogOut, MessageSquareText } from "@/components/shared/colored-icons";
+import { LogOut } from "@/components/shared/colored-icons";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 import { logoutAction } from "@/features/auth/actions/logout-action";
@@ -45,7 +45,6 @@ function PlatformShellInner({
   );
   const meta = modeMeta[mode];
   const isDeveloper = mode === "developer";
-  const BrandIcon = isDeveloper ? Code2 : Building2;
 
   return (
     <div
@@ -55,26 +54,9 @@ function PlatformShellInner({
       ].join(" ")}
     >
       <div className="flex h-dvh overflow-hidden">
-        <aside className="ed-shell-panel fixed bottom-0 left-0 top-0 z-40 hidden w-[280px] border-r lg:flex lg:flex-col">
+        <aside aria-label="Platform sidebar" className="platform-sidebar ed-shell-panel fixed bottom-0 left-0 top-0 z-40 hidden w-[280px] border-r lg:flex lg:flex-col">
           <div className="shrink-0 border-b border-border px-5 py-5">
-            <div className="flex items-center gap-3">
-              <div
-                className={[
-                  "flex h-10 w-10 items-center justify-center rounded-lg shadow-sm",
-                  isDeveloper
-                    ? "bg-violet-600 text-white"
-                    : "ed-brand-mark bg-primary text-primary-foreground",
-                ].join(" ")}
-              >
-                <BrandIcon className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="truncate text-base font-semibold tracking-tight text-foreground">
-                  EstateDesk
-                </h1>
-                <p className="text-xs text-muted-foreground">{meta.brandSubtitle}</p>
-              </div>
-            </div>
+            <PlatformBrand mode={mode} />
 
             <div className="mt-4">
               <PlatformModeToggle variant="sidebar" />
@@ -92,7 +74,7 @@ function PlatformShellInner({
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={[
-                    "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    "platform-sidebar-link group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                     active
                       ? isDeveloper
                         ? "bg-violet-600 text-white dark:bg-violet-500"
@@ -100,16 +82,7 @@ function PlatformShellInner({
                       : "ed-nav-item text-muted-foreground hover:bg-muted/70 hover:text-foreground",
                   ].join(" ")}
                 >
-                  <span
-                    className={[
-                      "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
-                      active
-                        ? "bg-white/15 text-white"
-                        : "ed-nav-icon bg-muted text-muted-foreground group-hover:bg-card group-hover:text-primary",
-                    ].join(" ")}
-                  >
-                    <SidebarSticker href={item.href} />
-                  </span>
+                  <SidebarSticker href={item.href} />
                   <span className="min-w-0 flex-1 truncate">{item.label}</span>
                   {item.superAdminOnly ? (
                     <span
@@ -151,7 +124,7 @@ function PlatformShellInner({
           mode={mode}
         >
           <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden lg:pl-[280px]">
-            <header className="ed-shell-panel hidden h-[76px] shrink-0 border-b px-6 lg:block">
+            <header className="platform-desktop-header ed-shell-panel hidden h-[76px] shrink-0 border-b px-6 lg:block">
               <div className="flex h-full items-center justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -176,13 +149,8 @@ function PlatformShellInner({
 
                 <div className="flex shrink-0 items-center gap-3">
                   <HeaderThemeToggle />
-                  <WorkspaceIdentity name={fullName} role="Platform" />
-                  <div className="ed-soft-button flex items-center gap-3 rounded-lg border px-4 py-2 shadow-sm">
-                    <MessageSquareText className="h-4 w-4 text-muted-foreground" />
-                    <span className="max-w-[220px] ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-medium text-foreground">
-                      {fullName}
-                    </span>
-                  </div>
+                  <WorkspaceIdentity name={fullName} role={isDeveloper ? "Developer" : isSuperAdmin ? "Super admin" : "Platform admin"} />
+
                 </div>
               </div>
             </header>
