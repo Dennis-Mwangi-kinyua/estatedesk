@@ -83,12 +83,20 @@ export function getDefaultNotificationActionUrl(
 
 export function resolveNotificationActionUrl(input: {
   type: NotificationType;
+  title?: string;
   userId?: string | null;
   tenantId?: string | null;
   actionUrl?: string | null;
   audience?: NotificationAudience;
 }) {
   const audience = input.audience ?? resolveNotificationAudience(input);
+
+  // Older manual submissions stored the generic notifications-hub fallback.
+  if (audience === "org_staff" && input.type === "GENERAL" &&
+      /^Manual (?:bill payment|payment|water payment|advance rent) needs verification$/.test(input.title ?? "") &&
+      (!input.actionUrl || input.actionUrl === "/dashboard/org/notifications")) {
+    return "/dashboard/org/payments#pending-payments";
+  }
 
   if (input.actionUrl && isNotificationUrlAllowed(input.actionUrl, audience)) {
     return input.actionUrl;

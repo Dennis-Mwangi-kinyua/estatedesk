@@ -4,7 +4,7 @@ import { build } from "esbuild";
 import vm from "node:vm";
 import path from "node:path";
 
-async function harness(role = "ADMIN", authorized = true) {
+async function harness(role = "ADMIN", authorized = true, grantedPermissions: string[] = []) {
   const updates: unknown[] = [], audits: unknown[] = [], reads: unknown[] = [], paths: unknown[] = [];
   const h = {
     prisma: { organization: {
@@ -12,14 +12,14 @@ async function harness(role = "ADMIN", authorized = true) {
       update: async (args: unknown) => { updates.push(args); },
     } },
     requirePlatformRole: async () => { if (!authorized) throw new Error("Forbidden"); return { userId: "admin-1" }; },
-    requireUserSession: async () => ({ userId: "member-1" }),
+    requireUserSession: async () => ({ userId: "member-1", activeOrgRole: role, grantedPermissions }),
     requireCurrentOrgId: async () => "org-1",
     requireOrgAccess: async () => ({ role }),
     writeAuditLog: async (args: unknown) => { audits.push(args); },
     revalidatePath: (...args: unknown[]) => { paths.push(args); },
   };
   const bundle = await build({entryPoints:[path.resolve("apps/web/src/features/organizations/actions/rename-organization.ts")],bundle:true,write:false,format:"cjs",platform:"node",tsconfig:"apps/web/tsconfig.json",plugins:[{name:"dependencies",setup(builder){
-    builder.onResolve({filter:/^(next\/cache|@\/lib\/)/},args=>({path:args.path,namespace:"mock"}));
+    builder.onResolve({filter:/^(next\/cache|@\/lib\/)/},args=>args.path.endsWith("role-matrix") ? undefined : ({path:args.path,namespace:"mock"}));
     builder.onLoad({filter:/.*/,namespace:"mock"},args=>({contents:args.path.endsWith("prisma")?'export const prisma=globalThis.h.prisma;':args.path.endsWith("guards")?'export const requirePlatformRole=globalThis.h.requirePlatformRole;':args.path.endsWith("session")?'export const requireUserSession=globalThis.h.requireUserSession;':args.path.endsWith("auth/org")?'export const requireOrgAccess=globalThis.h.requireOrgAccess; export const requireCurrentOrgId=globalThis.h.requireCurrentOrgId;':args.path==="next/cache"?'export const revalidatePath=globalThis.h.revalidatePath;':'export const writeAuditLog=globalThis.h.writeAuditLog;',loader:"js"}));
   }}]});
   const module={exports:{}};
@@ -47,4 +47,11 @@ test("organisation members can rename only the active organisation",async()=>{
  const h=await harness("MANAGER");const data=form("New Name");data.set("orgId","forged-other-org");
  assert.equal((await h.renameCurrentOrganizationAction({},data)).status,"success");
  assert.equal(JSON.stringify(h.reads),JSON.stringify([{where:{id:"org-1"},select:{id:true,name:true,slug:true,deletedAt:true}}]));
+});
+
+
+test("an accountant can rename the active organisation when granted settings authority", async () => {
+ const h = await harness("ACCOUNTANT", true, ["org.settings.manage"]);
+ assert.equal((await h.renameCurrentOrganizationAction({}, form("New Name"))).status, "success");
+ assert.equal(h.updates.length, 1);
 });

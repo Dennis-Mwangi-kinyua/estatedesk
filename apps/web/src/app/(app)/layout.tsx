@@ -99,7 +99,7 @@ export default async function AppLayout({
 
   const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { profileImageUrl: true } });
   return (
-    <WorkspaceAccessProvider access={{ platformRole: session.platformRole, activeOrgRole: session.activeOrgRole, activeOrgId: session.activeOrgId }}>
+    <WorkspaceAccessProvider access={{ grantedPermissions: session.grantedPermissions, platformRole: session.platformRole, activeOrgRole: session.activeOrgRole, activeOrgId: session.activeOrgId }}>
     <ProfilePictureProvider url={user?.profileImageUrl ?? null}>
     <div className="estate-workspace app-mobile-canvas app-sensitive-surface ed-mobile-surface relative min-h-dvh w-full min-w-0 overflow-x-hidden">
       <WorkspaceThemeScope />

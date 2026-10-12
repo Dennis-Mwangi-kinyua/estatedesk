@@ -7,6 +7,8 @@ import { canDiscoverWorkspaceHref, type canAccessWorkspacePath } from "@/lib/per
 type Access = Parameters<typeof canAccessWorkspacePath>[0];
 const WorkspaceAccessContext = createContext<Access | null>(null);
 
+export function useWorkspaceAccess() { return useContext(WorkspaceAccessContext); }
+
 export function WorkspaceAccessProvider({ access, children }: { access: Access; children: ReactNode }) {
   return <WorkspaceAccessContext.Provider value={access}>{children}</WorkspaceAccessContext.Provider>;
 }

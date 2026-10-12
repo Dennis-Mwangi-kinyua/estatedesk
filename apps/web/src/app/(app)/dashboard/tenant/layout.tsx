@@ -65,7 +65,7 @@ export default async function TenantLayout({
             status: "ACTIVE",
             deletedAt: null,
           },
-          select: { id: true },
+          select: { id: true, unit: { select: { property: { select: { name: true } } } } },
         }),
       { label: "tenant-layout-active-lease" },
     ),
@@ -100,6 +100,7 @@ export default async function TenantLayout({
   return (
     <TenantDashboardShell
       organizationName={tenant.org.name}
+      propertyName={activeLease?.unit.property.name}
       userName={tenant.fullName}
       hasActiveLease={Boolean(activeLease)}
       unreadNotificationCount={portalContext.unreadNotificationCount}

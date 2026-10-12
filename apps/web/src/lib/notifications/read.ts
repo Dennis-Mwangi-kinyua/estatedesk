@@ -28,6 +28,7 @@ export async function readPersonalNotification(session: AppSession, id: string) 
   });
   return resolveNotificationActionUrl({
     type: notification.type,
+    title: notification.title,
     audience: session.activeOrgRole === "TENANT" ? "tenant" : session.activeOrgRole === "CARETAKER" ? "caretaker" : "org_staff",
     actionUrl: readNotificationActionUrl(notification.providerResponse),
   });

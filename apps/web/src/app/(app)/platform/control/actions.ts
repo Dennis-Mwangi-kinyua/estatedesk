@@ -1,5 +1,7 @@
 "use server";
 
+import { buildAccountStatusDraft } from "@/lib/notifications/recipient-message";
+import { accountLoginUrl } from "@/lib/notifications/account-login-url";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { BillingPlan, OrganizationStatus, SubscriptionStatus } from "@prisma/client";
@@ -338,7 +340,7 @@ export async function overrideSubscriptionAction(formData: FormData) {
   redirect(`${PAGE}?ok=subscription`);
 }
 
-export async function forceUserStatusAction(formData: FormData) {
+async function changeUserStatusAndPrepareDraft(formData: FormData) {
   const session = await requireSuperAdmin();
   const identifier = readString(formData, "identifier").toLowerCase();
   const status = readString(formData, "status").toUpperCase();
@@ -355,6 +357,7 @@ export async function forceUserStatusAction(formData: FormData) {
     select: {
       id: true,
       email: true,
+      phone: true,
       username: true,
       fullName: true,
       status: true,
@@ -383,11 +386,20 @@ export async function forceUserStatusAction(formData: FormData) {
     entityId: user.id,
     beforeState: { status: user.status },
     afterState: { status },
-    metadata: { email: user.email, username: user.username },
+    metadata: { email: user.email, username: user.username, reason: readString(formData, "reason") || null },
   });
 
   refreshControl();
+  return buildAccountStatusDraft({ fullName: user.fullName, email: user.email, phone: user.phone, status, reason: readString(formData, "reason"), loginUrl: accountLoginUrl() });
+}
+
+export async function forceUserStatusAction(formData: FormData) {
+  await changeUserStatusAndPrepareDraft(formData);
   redirect(`${PAGE}?ok=user-status`);
+}
+
+export async function forceUserStatusDraftAction(formData: FormData) {
+  return { draft: await changeUserStatusAndPrepareDraft(formData) };
 }
 
 export async function forcePasswordChangeAction(formData: FormData) {

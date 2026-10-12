@@ -15,10 +15,9 @@ import {
   notifyRequestSubmitter,
 } from "@/lib/accounting/request-workflow";
 import { prisma } from "@/lib/prisma";
-import { requireOrgRole } from "@/lib/permissions/guards";
+import { requireOrgRole, requireOrgPermission } from "@/lib/permissions/guards";
 import {
   DEFAULT_EXPENSE_SYSTEM_KEY,
-  FINANCE_REVIEW_ROLES,
   PAYABLES_ELIGIBLE_TYPES,
   WORKER_SUBMIT_ROLES,
 } from "./_lib/constants";
@@ -235,7 +234,7 @@ export async function cancelAccountingRequestAction(formData: FormData) {
 }
 
 export async function startAccountingRequestReviewAction(formData: FormData) {
-  const session = await requireOrgRole([...FINANCE_REVIEW_ROLES]);
+  const session = await requireOrgPermission("finance.requests.review");
   const orgId = session.activeOrgId!;
   const requestId = text(formData, "requestId");
 
@@ -267,7 +266,7 @@ export async function startAccountingRequestReviewAction(formData: FormData) {
 }
 
 export async function approveAccountingRequestAction(formData: FormData) {
-  const session = await requireOrgRole([...FINANCE_REVIEW_ROLES]);
+  const session = await requireOrgPermission("finance.requests.review");
   const orgId = session.activeOrgId!;
   const requestId = text(formData, "requestId");
   const feedback = text(formData, "feedback") || null;
@@ -365,7 +364,7 @@ export async function approveAccountingRequestAction(formData: FormData) {
 }
 
 export async function rejectAccountingRequestAction(formData: FormData) {
-  const session = await requireOrgRole([...FINANCE_REVIEW_ROLES]);
+  const session = await requireOrgPermission("finance.requests.review");
   const orgId = session.activeOrgId!;
   const requestId = text(formData, "requestId");
   const feedback = text(formData, "feedback");
@@ -428,7 +427,7 @@ export async function rejectAccountingRequestAction(formData: FormData) {
 }
 
 export async function markAccountingRequestPaidAction(formData: FormData) {
-  const session = await requireOrgRole([...FINANCE_REVIEW_ROLES]);
+  const session = await requireOrgPermission("finance.requests.review");
   const orgId = session.activeOrgId!;
   const requestId = text(formData, "requestId");
   const feedback = text(formData, "feedback") || null;

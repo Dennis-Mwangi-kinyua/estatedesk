@@ -158,6 +158,7 @@ export async function processRentChargePayment(
       channels: ["IN_APP"],
       type: "GENERAL",
       title: "Manual payment needs verification",
+      actionUrl: "/dashboard/org/payments#pending-payments",
       message: `${tenant.fullName} submitted ${charge.period} ${methodLabel} payment for ${charge.lease.unit.property.name} / Unit ${charge.lease.unit.houseNo}.`,
     });
   }

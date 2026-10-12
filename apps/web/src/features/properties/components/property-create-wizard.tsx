@@ -1,9 +1,10 @@
 "use client";
 import { useStepFocus } from "./_lib/use-step-focus";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { PortfolioHierarchy } from "@/components/portfolio/portfolio-hierarchy";
-import { createPropertyAction } from "@/features/properties/actions/create-property-action";
+import { AccountCreatedShare } from "@/components/shared/account-created-share";
+import { createPropertyAction, type PropertyCreateHandover } from "@/features/properties/actions/create-property-action";
 import { StepBilling } from "./_components/step-billing";
 import { StepLandlord } from "./_components/step-landlord";
 import { StepPropertyProfile } from "./_components/step-property-profile";
@@ -31,6 +32,7 @@ export function PropertyCreateWizard({
   landlordProfiles,
   helpOrgRole,
 }: PropertyCreateWizardProps) {
+  const [handover, createAction] = useActionState<PropertyCreateHandover, FormData>(async (_previous, data) => createPropertyAction(data), {});
   const formRef = useRef<HTMLFormElement>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [stepError, setStepError] = useState<string | null>(null);
@@ -51,11 +53,7 @@ export function PropertyCreateWizard({
     return new Map(
       landlordProfiles.map((profile) => [
         profile.id,
-        [
-          profile.displayName,
-          profile.phone,
-          profile.email,
-        ]
+        [profile.displayName, profile.phone, profile.email]
           .filter(Boolean)
           .join(" - "),
       ]),
@@ -124,6 +122,8 @@ export function PropertyCreateWizard({
     setStepError(null);
   }
 
+  if (handover.credentials) return <AccountCreatedShare credentials={handover.credentials} continueHref="/dashboard/org/properties" continueLabel="Go to properties" />;
+
   return (
     <div className="org-theme-content mx-auto w-full max-w-6xl space-y-5 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
       <PortfolioHierarchy />
@@ -144,7 +144,7 @@ export function PropertyCreateWizard({
 
             <form
               ref={formRef}
-              action={createPropertyAction}
+              action={createAction}
               noValidate
               className="space-y-8"
               onSubmit={(event) => {

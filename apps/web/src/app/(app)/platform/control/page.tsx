@@ -1,3 +1,4 @@
+import { UserStatusForm } from "./user-status-form";
 import Link from "@/components/navigation/workspace-link";
 import { AlertTriangle, Power, ShieldAlert, Zap } from "lucide-react";
 import { Building2, KeyRound, UsersRound as Users } from "@/components/shared/colored-icons";
@@ -24,7 +25,6 @@ import {
   forceAllOrgsFeatureAction,
   forceOrgStatusAction,
   forcePasswordChangeAction,
-  forceUserStatusAction,
   overrideSubscriptionAction,
   purgeFailedNotificationsAction,
   restoreOrgAction,
@@ -831,27 +831,7 @@ export default async function WebsiteControlCenterPage({
         description="Suspend, disable, or force password change by email, username, or user id."
       >
         <div className="grid gap-4 p-4 lg:grid-cols-2">
-          <form action={forceUserStatusAction} className="space-y-3 rounded-xl border border-slate-200 p-4 dark:border-white/10">
-            <p className="text-sm font-semibold text-slate-950 dark:text-white">Set user status</p>
-            <input
-              name="identifier"
-              required
-              placeholder="email / username / id"
-              className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-white/10 dark:bg-slate-950"
-            />
-            <select
-              name="status"
-              className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-white/10 dark:bg-slate-950"
-              defaultValue="SUSPENDED"
-            >
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="SUSPENDED">SUSPENDED</option>
-              <option value="DISABLED">DISABLED</option>
-            </select>
-            <button data-workspace-action="true" className="h-11 w-full rounded-xl bg-slate-950 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">
-              Apply status
-            </button>
-          </form>
+          <UserStatusForm />
 
           <form action={forcePasswordChangeAction} className="space-y-3 rounded-xl border border-slate-200 p-4 dark:border-white/10">
             <p className="text-sm font-semibold text-slate-950 dark:text-white">

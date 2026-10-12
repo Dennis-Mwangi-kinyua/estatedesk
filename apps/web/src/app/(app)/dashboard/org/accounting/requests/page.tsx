@@ -1,4 +1,4 @@
-import { requireOrgRole } from "@/lib/permissions/guards";
+import { requireOrgPermission } from "@/lib/permissions/guards";
 import { AccountingRequestsReviewWorkspace } from "@/features/accounting-requests/components/accounting-requests-review-workspace";
 import { getAccountingRequestsReviewPageData } from "@/features/accounting-requests/_lib/queries";
 import { decodePublicId } from "@/lib/public-id";
@@ -10,7 +10,7 @@ type PageProps = {
 };
 
 export default async function AccountingRequestsPage({ searchParams }: PageProps) {
-  const session = await requireOrgRole(["ADMIN", "MANAGER", "ACCOUNTANT"]);
+  const session = await requireOrgPermission("finance.requests.review");
   const resolved = (await searchParams) ?? {};
 
   const data = await getAccountingRequestsReviewPageData(session.activeOrgId!);

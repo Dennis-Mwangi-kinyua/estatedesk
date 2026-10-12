@@ -58,6 +58,16 @@ describe("notification deep links", () => {
     assert.equal(readNotificationActionUrl({ actionUrl: "https://evil.example" }), null);
   });
 
+  it("opens payment review for old manual-payment notifications without a useful link", () => {
+    for (const title of ["Manual bill payment needs verification", "Manual payment needs verification", "Manual water payment needs verification", "Manual advance rent needs verification"]) {
+      for (const actionUrl of [undefined, "/dashboard/org/notifications"]) {
+        assert.equal(resolveNotificationActionUrl({ type: "GENERAL", audience: "org_staff", title, actionUrl }), "/dashboard/org/payments#pending-payments");
+      }
+      assert.equal(resolveNotificationActionUrl({ type: "GENERAL", audience: "tenant", title }), "/dashboard/tenant/notifications");
+      assert.equal(resolveNotificationActionUrl({ type: "GENERAL", audience: "org_staff", title, actionUrl: "/dashboard/org/payments?tab=history" }), "/dashboard/org/payments?tab=history");
+    }
+    assert.equal(resolveNotificationActionUrl({ type: "GENERAL", audience: "org_staff", title: "Office update" }), "/dashboard/org/notifications");
+  });
   it("resolves audience from recipient shape", () => {
     assert.equal(resolveNotificationAudience({ tenantId: "tenant-1" }), "tenant");
     assert.equal(

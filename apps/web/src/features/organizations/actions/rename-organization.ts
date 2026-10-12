@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { writeAuditLog } from "@/lib/audit/security";
+import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { requireCurrentOrgId, requireOrgAccess } from "@/lib/auth/org";
 import { requireUserSession } from "@/lib/auth/session";
@@ -41,6 +42,6 @@ export async function renameCurrentOrganizationAction(_state: OrganizationNameSt
   const session = await requireUserSession();
   const orgId = await requireCurrentOrgId();
   const membership = await requireOrgAccess(orgId);
-  if (!["ADMIN", "MANAGER"].includes(membership.role)) throw new Error("Forbidden");
+  if (!["ADMIN", "MANAGER"].includes(membership.role) && !memberHasOrgPermission(session, "org.settings.manage")) throw new Error("Forbidden");
   return saveName(orgId, session.userId, formData);
 }

@@ -149,6 +149,7 @@ export async function executeCreateTenantTransaction(
       kraPin: input.kraPin,
     });
 
+    let allocation: { property: string; unit: string; currency: string; monthlyRent: string; deposit: string | null; startDate: string; dueDay: number } | null = null;
     if (input.unitId) {
       const unit = await tx.unit.findFirst({
         where: {
@@ -163,6 +164,8 @@ export async function executeCreateTenantTransaction(
         },
         select: {
           id: true,
+          houseNo: true,
+          property: { select: { name: true, org: { select: { currencyCode: true } } } },
           rentAmount: true,
           depositAmount: true,
         },
@@ -190,6 +193,7 @@ export async function executeCreateTenantTransaction(
         },
       });
 
+      allocation = { property: unit.property.name, unit: unit.houseNo, currency: unit.property.org.currencyCode, monthlyRent: lease.monthlyRent.toString(), deposit: lease.deposit?.toString() ?? null, startDate: lease.startDate.toISOString(), dueDay: lease.dueDay ?? 5 };
       await createInitialLeaseCharges(tx, lease);
 
       await tx.unit.update({
@@ -204,6 +208,7 @@ export async function executeCreateTenantTransaction(
     }
 
     return {
+      allocation,
       tenantName: tenant.fullName,
       username: user.username ?? username,
     };

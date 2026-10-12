@@ -78,7 +78,7 @@ export function CaretakerMobileSidebar({
         onClick={handleClose}
         aria-label="Close menu overlay"
         className={clsx(
-          "absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-200",
+          "workspace-navigation-backdrop absolute inset-0 bg-slate-950/25 backdrop-blur-md transition-opacity duration-200",
           open ? "opacity-100" : "opacity-0",
         )}
       />

@@ -187,6 +187,7 @@ export async function processWaterBillPayment(
       channels: ["IN_APP"],
       type: "GENERAL",
       title: "Manual water payment needs verification",
+      actionUrl: "/dashboard/org/payments#pending-payments",
       message: `${tenant.fullName} submitted ${methodLabel} water bill ${bill.period} for ${bill.unit.property.name} / Unit ${bill.unit.houseNo}.`,
     });
   }

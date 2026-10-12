@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { createCaretakerAction } from "@/features/staff/actions/create-caretaker-action";
+import { AccountCreatedShare } from "@/components/shared/account-created-share";
+import { createCaretakerAction, type CreateCaretakerState } from "@/features/staff/actions/create-caretaker-action";
 
 type PropertyOption = {
   id: string;
@@ -23,7 +24,7 @@ type CreateCaretakerFormProps = {
   buildings: BuildingOption[];
 };
 
-const initialCreateCaretakerState = {
+const initialCreateCaretakerState: CreateCaretakerState = {
   error: null as string | null,
 };
 
@@ -51,6 +52,8 @@ export function CreateCaretakerForm({
     setSelectedPropertyId(value);
     setSelectedBuildingId("");
   }
+
+  if (state.credentials) return <AccountCreatedShare credentials={state.credentials} continueHref="/staff/caretaker" continueLabel="Go to caretakers" />;
 
   return (
     <form action={formAction} className="space-y-6">

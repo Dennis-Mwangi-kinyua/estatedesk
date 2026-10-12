@@ -39,7 +39,8 @@ export async function getFinanceReviewerUserIds(db: WorkflowDb, orgId: string) {
     where: {
       orgId,
       deactivatedAt: null,
-      role: { in: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
+      employmentEndedAt: null,
+      OR: [{ role: { in: ["ADMIN", "MANAGER", "ACCOUNTANT"] } }, { role: "OFFICE", grantedPermissions: { has: "finance.requests.review" } }],
     },
     select: { userId: true },
   });

@@ -170,7 +170,7 @@ export function TenantDashboardSidebar({
           aria-label="Close navigation overlay"
           onClick={closeMobile}
           className={[
-            "absolute inset-0 bg-slate-950/42 backdrop-blur-md transition-opacity duration-300 ease-out",
+            "workspace-navigation-backdrop absolute inset-0 bg-slate-950/25 backdrop-blur-md transition-opacity duration-300 ease-out",
             mobileOpen ? "opacity-100" : "opacity-0",
           ].join(" ")}
         />
@@ -182,7 +182,7 @@ export function TenantDashboardSidebar({
           aria-label="Workspace navigation"
           tabIndex={-1}
           className={[
-            "system-glass-sidebar absolute inset-y-0 left-0 flex w-[90%] max-w-[390px] flex-col border-r border-slate-200 bg-white/86 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out dark:border-white/10 dark:bg-slate-950/86",
+            "workspace-navigation-panel workspace-navigation-panel--left system-glass-sidebar absolute inset-y-0 left-0 flex w-[90%] max-w-[390px] flex-col border-r border-slate-200 bg-white/86 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out dark:border-white/10 dark:bg-slate-950/86",
             mobileOpen ? "translate-x-0" : "-translate-x-full",
           ].join(" ")}
         >

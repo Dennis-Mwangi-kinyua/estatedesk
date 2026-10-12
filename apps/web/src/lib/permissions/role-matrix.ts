@@ -1,6 +1,8 @@
 import type { OrgRole } from "@prisma/client";
 
 export const ORG_PERMISSIONS = [
+  "move-outs.arrears.approve",
+  "finance.requests.review",
   "org.settings.manage",
   "org.users.manage",
   "org.users.delete",
@@ -22,6 +24,7 @@ export type OrgPermission = (typeof ORG_PERMISSIONS)[number];
 export const ORG_ROLE_PERMISSIONS: Record<OrgRole, readonly OrgPermission[]> = {
   ADMIN: ORG_PERMISSIONS,
   MANAGER: [
+    "finance.requests.review",
     "payments.record",
     "payments.verify",
     "properties.manage",
@@ -40,6 +43,7 @@ export const ORG_ROLE_PERMISSIONS: Record<OrgRole, readonly OrgPermission[]> = {
     "inspections.manage",
   ],
   ACCOUNTANT: [
+    "finance.requests.review",
     "payments.record",
     "payments.manage",
     "payments.verify",
@@ -57,4 +61,16 @@ export function roleHasOrgPermission(
 ) {
   if (!role) return false;
   return ORG_ROLE_PERMISSIONS[role]?.includes(permission) ?? false;
+}
+
+export const DELEGATABLE_ORG_ROLES = ["MANAGER", "OFFICE", "ACCOUNTANT"] as const;
+export function canReceiveOrgMandates(role: OrgRole | null | undefined) {
+  return !!role && (DELEGATABLE_ORG_ROLES as readonly OrgRole[]).includes(role);
+}
+export function memberHasOrgPermission(member: { activeOrgRole?: OrgRole | null; grantedPermissions?: readonly string[] }, permission: OrgPermission) {
+  return roleHasOrgPermission(member.activeOrgRole, permission) || (canReceiveOrgMandates(member.activeOrgRole) && !!member.grantedPermissions?.includes(permission));
+}
+export function validateOrgMandates(values: unknown[]): OrgPermission[] {
+  if (values.some(value => typeof value !== "string" || (!(ORG_PERMISSIONS as readonly string[]).includes(value) || value === "caretaker.fieldwork"))) throw new Error("Choose valid staff permissions.");
+  return [...new Set(values)] as OrgPermission[];
 }

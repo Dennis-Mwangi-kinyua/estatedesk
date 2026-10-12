@@ -173,6 +173,7 @@ export async function processPeriodBillPayment(
       channels: ["IN_APP"],
       type: "GENERAL",
       title: "Manual bill payment needs verification",
+      actionUrl: "/dashboard/org/payments#pending-payments",
       message: `${tenant.fullName} submitted ${period} ${methodLabel} payment (${amount.toFixed(0)}) for ${periodBill.propertyName} / Unit ${periodBill.unitHouseNo}${isPartial ? " (partial)" : ""}.`,
     });
   }

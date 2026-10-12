@@ -11,7 +11,8 @@ import {
   assertCanCreateUnit,
 } from "@/lib/billing/access";
 import { requireOrgPermission } from "@/lib/permissions/guards";
-import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
+import { accountLoginUrl } from "@/lib/notifications/account-login-url";
+import type { CreatedAccountLogin } from "@/lib/notifications/recipient-message";
 import { getAuthorizedOrgId } from "./_lib/authorization";
 import { executeCreatePropertyTransaction } from "./_lib/create-property-transaction";
 import {
@@ -28,7 +29,9 @@ import {
   parseUnitPlans,
 } from "./_lib/parse-unit-plans";
 
-export async function createPropertyAction(formData: FormData) {
+export type PropertyCreateHandover = { credentials?: CreatedAccountLogin };
+
+export async function createPropertyAction(formData: FormData): Promise<PropertyCreateHandover> {
   const session = await requireOrgPermission("properties.manage");
   const orgId = await getAuthorizedOrgId(session.userId, session.activeOrgId);
 
@@ -181,15 +184,7 @@ export async function createPropertyAction(formData: FormData) {
   revalidatePath("/dashboard/org/units");
 
   if (landlordMode === "new") {
-    await sendAccountCredentials({
-      fullName: landlordFullName!,
-      username: landlordUsername!,
-      password: landlordPassword!,
-      email: landlordEmail,
-      phone: landlordPhone,
-      role: "LANDLORD",
-      loginUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`,
-    });
+    return { credentials: { fullName: landlordFullName!, username: landlordUsername!, password: landlordPassword!, email: landlordEmail, phone: landlordPhone, role: "LANDLORD", loginUrl: accountLoginUrl() } };
   }
 
   redirect("/dashboard/org/properties?created=1");

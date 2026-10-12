@@ -1,5 +1,7 @@
 "use client";
 
+import { useWorkspaceAccess } from "@/components/navigation/workspace-link";
+import { canDiscoverWorkspaceHref } from "@/lib/permissions/workspace-access";
 import { useCallback, useMemo, useRef } from "react";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 import { usePathname } from "next/navigation";
@@ -31,11 +33,12 @@ export function OrgDashboardSidebar({
   role = "ADMIN",
 }: OrgDashboardSidebarProps) {
   const pathname = usePathname();
+  const access = useWorkspaceAccess();
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const visibleLinks = useMemo(() => {
-    return SIDEBAR_LINKS.filter((item) => item.roles.includes(role));
-  }, [role]);
+    return SIDEBAR_LINKS.filter((item) => access ? canDiscoverWorkspaceHref(access, item.href) : item.roles.includes(role));
+  }, [role, access]);
 
   const closeMobile = useCallback(() => {
     setMobileOpen(false);
@@ -79,7 +82,7 @@ export function OrgDashboardSidebar({
           aria-label="Close navigation overlay"
           onClick={closeMobile}
           className={[
-            "absolute inset-0 bg-slate-950/42 backdrop-blur-md transition-opacity duration-300 ease-out",
+            "workspace-navigation-backdrop absolute inset-0 bg-slate-950/25 backdrop-blur-md transition-opacity duration-300 ease-out",
             mobileOpen ? "opacity-100" : "opacity-0",
           ].join(" ")}
         />

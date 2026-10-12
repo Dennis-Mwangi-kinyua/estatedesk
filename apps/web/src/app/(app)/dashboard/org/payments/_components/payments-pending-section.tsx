@@ -24,7 +24,7 @@ export function PaymentsPendingSection({
 }) {
   if (pendingPayments.length > 0) {
     return (
-      <section className="overflow-hidden rounded-3xl border border-amber-200 bg-card text-card-foreground shadow-sm dark:border-amber-800">
+      <section id="pending-payments" className="scroll-mt-24 overflow-hidden rounded-3xl border border-amber-200 bg-card text-card-foreground shadow-sm dark:border-amber-800">
         <div className="border-b border-amber-100 bg-amber-50/80 px-5 py-4 dark:border-amber-900 dark:bg-amber-950/30 sm:px-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
@@ -99,7 +99,7 @@ export function PaymentsPendingSection({
   }
 
   return (
-    <section className={`${panelShellClassName} p-5 sm:p-6`}>
+    <section id="pending-payments" className={`${panelShellClassName} scroll-mt-24 p-5 sm:p-6`}>
       <form action="/dashboard/org/payments" className="flex max-w-md flex-col gap-2 min-[400px]:flex-row">
         <input
           type="search"

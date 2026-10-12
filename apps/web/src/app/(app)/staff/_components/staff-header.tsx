@@ -31,6 +31,7 @@ export function StaffHeader({ data, orgRole }: StaffHeaderProps) {
             <InAppGuideHint topic="portfolio" workspace="org" orgRole={orgRole} />
           </div>
           <div className="grid w-full gap-2 sm:grid-cols-2 lg:w-auto lg:min-w-56">
+            {orgRole === "ADMIN" && <Link href="/dashboard/org/staff/permissions" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-border px-4 py-3 text-sm font-semibold sm:col-span-2">Staff permissions & mandates</Link>}
             <Link data-workspace-action="true" href="/staff/new" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:col-span-2">
               <UserRoundPlus aria-hidden="true" className="h-5 w-5 shrink-0" />Add new staff
             </Link>

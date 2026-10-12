@@ -1,4 +1,5 @@
 import type { OrgRole, PlatformRole } from "@prisma/client";
+import { canReceiveOrgMandates, type OrgPermission } from "./role-matrix";
 import { tenantCanAccessWorkspacePath } from "./access";
 
 const MANAGEMENT: readonly OrgRole[] = ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"];
@@ -11,11 +12,11 @@ export const ORG_WORKSPACE_ROLES: Record<string, readonly OrgRole[]> = {
   security: MANAGEMENT, support: MANAGEMENT,
   properties: OPERATIONS, buildings: OPERATIONS, units: OPERATIONS,
   tenants: OPERATIONS, leases: OPERATIONS, "vacancy-inquiries": OPERATIONS,
-  "finance-requests": OPERATIONS, "move-outs": OPERATIONS,
-  inspections: OPERATIONS, issues: OPERATIONS, notifications: OPERATIONS,
+  "finance-requests": OPERATIONS, "move-outs": MANAGEMENT,
+  inspections: OPERATIONS, issues: OPERATIONS, notifications: MANAGEMENT,
   imports: OPERATIONS,
   payments: MANAGEMENT, "water-bills": MANAGEMENT, charges: MANAGEMENT,
-  accounting: FINANCE, expenditures: FINANCE, reports: FINANCE,
+  accounting: FINANCE, expenditures: FINANCE, reports: MANAGEMENT,
   staff: ["ADMIN", "MANAGER"], taxes: ["ADMIN", "ACCOUNTANT"],
   airbnb: ["ADMIN", "MANAGER"],
   settings: ["ADMIN"], "verify-tenant": ["ADMIN"],
@@ -26,7 +27,7 @@ function under(path: string, prefix: string) {
 }
 
 export function canAccessWorkspacePath(
-  session: { platformRole: PlatformRole; activeOrgRole: OrgRole | null; activeOrgId: string | null },
+  session: { platformRole: PlatformRole; activeOrgRole: OrgRole | null; activeOrgId: string | null; grantedPermissions?: readonly string[] },
   pathname: string,
 ) {
   let path: string;
@@ -49,8 +50,19 @@ export function canAccessWorkspacePath(
   if (under(path, "/dashboard/landlord")) return role === "LANDLORD";
   if (!MANAGEMENT.includes(role)) return false;
   if (path === "/dashboard/org" || path === "/dashboard/billing-required") return true;
+  if (under(path, "/dashboard/org/staff/permissions")) return role === "ADMIN";
   const section = under(path, "/dashboard/org") ? path.split("/")[3] : path.split("/")[1];
-  return Boolean(section && ORG_WORKSPACE_ROLES[section]?.includes(role));
+  if (section && ORG_WORKSPACE_ROLES[section]?.includes(role)) return true;
+  if (!canReceiveOrgMandates(role)) return false;
+  const grants = session.grantedPermissions ?? [];
+  if (under(path, "/dashboard/org/accounting/requests")) return grants.includes("finance.requests.review");
+  const sectionPermissions: Record<string, readonly OrgPermission[]> = {
+    settings: ["org.settings.manage"], staff: ["org.users.manage", "org.users.delete"],
+    properties: ["properties.manage"], buildings: ["properties.manage"], units: ["properties.manage"],
+    tenants: ["tenants.manage"], leases: ["leases.manage"], reports: ["reports.view", "reports.export"],
+    issues: ["maintenance.manage"], inspections: ["inspections.manage"],
+  };
+  return !!sectionPermissions[section]?.some(permission => grants.includes(permission));
 }
 
 /** Hide protected destinations using the same policy as page authorization. */

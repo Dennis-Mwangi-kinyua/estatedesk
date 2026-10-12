@@ -13,7 +13,7 @@ export type ReceiptAllocationSnapshot = {
 };
 
 export type ReceiptSnapshot = {
-  pdfTemplateVersion?: 1 | 2;
+  pdfTemplateVersion?: 1 | 2 | 3;
   organizationName: string;
   organizationAddress: string | null;
   organizationPhone: string | null;
@@ -137,7 +137,7 @@ export async function createReceiptSnapshot(
   });
 
   return {
-    pdfTemplateVersion: 2,
+    pdfTemplateVersion: 3,
     organizationName: payment.org.name,
     organizationAddress: payment.org.address,
     organizationPhone: payment.org.phone,
@@ -148,7 +148,7 @@ export async function createReceiptSnapshot(
     etimsFooter: formatEtimsFooterSummary(etims),
     etimsReadyForSubmission: etims.readyForSubmission,
     payerName: payment.payerTenant?.fullName ?? payment.payerUser?.fullName ?? payment.payerName ?? "Payer",
-    tenantIdentifier: payment.payerTenant?.id ?? null,
+    tenantIdentifier: null,
     amount: Number(payment.amount),
     currencyCode: payment.org.currencyCode,
     paymentMethod: payment.method,
@@ -157,7 +157,7 @@ export async function createReceiptSnapshot(
     paidAt: (payment.paidAt ?? payment.createdAt).toISOString(),
     propertyName: property?.name ?? null,
     unitName: unit?.houseNo ?? null,
-    leaseIdentifier: lease?.id ?? null,
+    leaseIdentifier: null,
     periods: [...new Set(allocations.map((allocation) => allocation.period))],
     allocations,
     previousBalance: remainingBalance === null ? null : remainingBalance + allocatedAmount,

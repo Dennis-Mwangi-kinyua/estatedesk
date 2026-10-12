@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { RecordCashPaymentForm } from "./record-cash-payment-form";
-import { roleHasOrgPermission } from "@/lib/permissions/role-matrix";
+import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
 import { nairobiDate } from "@/lib/move-outs/validation";
 import type { OrgRole } from "@prisma/client";
 import type { PaymentsPageData } from "../_lib/types";
@@ -16,10 +16,12 @@ export function PaymentsWorkspace({
   data,
   orgRole,
   recordPayment,
+  grantedPermissions,
 }: {
   data: PaymentsPageData;
   recordPayment?: ReactNode;
   orgRole?: OrgRole | null;
+  grantedPermissions?: string[];
 }) {
   const {
     ledger,
@@ -125,7 +127,7 @@ export function PaymentsWorkspace({
         reconciliationQueue={reconciliationQueue}
       />
 
-      {roleHasOrgPermission(orgRole, "payments.record") ? <RecordCashPaymentForm leases={data.cashLeases} period={ledger.period} dateLimit={nairobiDate()} /> : null}
+      {memberHasOrgPermission({ activeOrgRole: orgRole, grantedPermissions }, "payments.record") ? <RecordCashPaymentForm leases={data.cashLeases} period={ledger.period} dateLimit={nairobiDate()} /> : null}
 
       <PaymentsPendingSection pendingPayments={pendingPayments} q={q} />
 

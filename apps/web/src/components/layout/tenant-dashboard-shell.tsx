@@ -11,6 +11,7 @@ import { TenantDashboardSidebar } from "./tenant-dashboard-sidebar";
 type TenantDashboardShellProps = {
   children: ReactNode;
   organizationName: string;
+  propertyName?: string;
   userName: string;
   hasActiveLease: boolean;
   unreadNotificationCount?: number;
@@ -19,6 +20,7 @@ type TenantDashboardShellProps = {
 export function TenantDashboardShell({
   children,
   organizationName,
+  propertyName,
   userName,
   hasActiveLease,
   unreadNotificationCount = 0,
@@ -35,7 +37,7 @@ export function TenantDashboardShell({
       />
 
       <TenantDashboardHeader
-        organizationName={organizationName}
+        organizationName={propertyName || organizationName}
         userName={userName}
         unreadNotificationCount={unreadNotificationCount}
         onMenuClick={() => setMobileOpen(true)}

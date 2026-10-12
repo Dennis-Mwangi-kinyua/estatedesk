@@ -1,5 +1,5 @@
 import { RecordOrgPayment } from "@/features/charges/components/record-org-payment";
-import { roleHasOrgPermission } from "@/lib/permissions/role-matrix";
+import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { loadPaymentsPageData } from "./_lib/queries";
 import type { PaymentsPageProps } from "./_lib/types";
@@ -19,8 +19,8 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   const data = await loadPaymentsPageData(session.activeOrgId, q);
 
   return (
-    <PaymentsWorkspace data={data} orgRole={session.activeOrgRole}
-      recordPayment={roleHasOrgPermission(session.activeOrgRole, "payments.verify") ? <RecordOrgPayment orgId={session.activeOrgId} /> : null}
+    <PaymentsWorkspace grantedPermissions={session.grantedPermissions} data={data} orgRole={session.activeOrgRole}
+      recordPayment={memberHasOrgPermission(session, "payments.verify") ? <RecordOrgPayment orgId={session.activeOrgId} /> : null}
     />
   );
 }

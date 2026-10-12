@@ -128,7 +128,7 @@ export default function PlatformMobileShell({
         type="button"
         aria-label="Close menu overlay"
         onClick={closeMenu}
-        className={`fixed inset-0 z-40 bg-background/50 backdrop-blur-[2px] transition-opacity duration-300 lg:hidden ${
+        className={`workspace-navigation-backdrop fixed inset-0 z-40 bg-slate-950/25 backdrop-blur-md transition-opacity duration-300 lg:hidden ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
@@ -141,7 +141,7 @@ export default function PlatformMobileShell({
         aria-label="Platform navigation"
         aria-hidden={!open}
         inert={!open}
-        className={`platform-navigation-drawer ed-shell-panel fixed right-0 top-0 z-50 h-full w-[84%] max-w-[360px] border-l shadow-2xl transition-transform duration-300 lg:hidden ${
+        className={`platform-navigation-drawer workspace-navigation-panel ed-shell-panel fixed right-0 top-0 z-50 h-full w-[84%] max-w-[360px] border-l shadow-2xl transition-transform duration-300 lg:hidden ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >

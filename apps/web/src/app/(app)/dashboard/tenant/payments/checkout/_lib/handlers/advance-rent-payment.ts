@@ -138,6 +138,7 @@ export async function processAdvanceRentPayment(
       channels: ["IN_APP"],
       type: "GENERAL",
       title: "Manual advance rent needs verification",
+      actionUrl: "/dashboard/org/payments#pending-payments",
       message: `${tenant.fullName} submitted ${methodLabel} advance rent for ${lease.unit.property.name} / Unit ${lease.unit.houseNo}.`,
     });
   }

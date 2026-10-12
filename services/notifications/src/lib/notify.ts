@@ -92,6 +92,7 @@ export async function notifyRecipients({
 
       const resolvedActionUrl = resolveNotificationActionUrl({
         type,
+        title,
         userId: recipient.userId,
         tenantId: recipient.tenantId,
         actionUrl,

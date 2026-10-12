@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import Link from "@/components/navigation/workspace-link";
 import { ArrowLeft } from "lucide-react";
 import { VisualSticker } from "@/components/shared/visual-sticker";
-import { createPlatformUserAction } from "../../actions";
+import { PlatformUserCreationForm } from "./platform-user-creation-form";
 import { CREATE_ERROR_MESSAGES, PLATFORM_PERMISSION_VALUES, PLATFORM_ROLE_META, ROLE_VALUES } from "../../_lib/constants";
 import { formatPermission } from "../../_lib/helpers";
 import { PageHeader } from "../../../_components/control-plane";
@@ -21,7 +21,7 @@ export function NewPlatformUserWorkspace({ isSuperAdmin, createError }: { isSupe
     <Link href="/platform/users" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"><ArrowLeft aria-hidden="true" className="h-4 w-4" />Back to users</Link>
     <PageHeader eyebrow="People & access" title="Add platform user" description="Set up their account, sign-in details, and platform access." />
     {createError && <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">{CREATE_ERROR_MESSAGES[createError] ?? "Could not create this user. Please try again."}</div>}
-    <form action={createPlatformUserAction} className="space-y-5">
+    <PlatformUserCreationForm>
       <FormSection title="Account details" label="profile" description="Enter the person's name and contact details.">
         <div className="grid gap-5 md:grid-cols-2">
           <Field label="Full name"><input className={fieldClass} name="fullName" autoComplete="name" placeholder="Jane Mwangi" required /></Field>
@@ -55,7 +55,7 @@ export function NewPlatformUserWorkspace({ isSuperAdmin, createError }: { isSupe
         <p className="mb-4 text-xs leading-5 text-muted-foreground">The user will reset their password and accept the terms on first sign-in.</p>
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end"><Link href="/platform/users" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border px-5 py-3 text-sm font-medium text-foreground">Cancel</Link><CreateUserSubmit /></div>
       </div>
-    </form>
+    </PlatformUserCreationForm>
   </div>;
 }
 

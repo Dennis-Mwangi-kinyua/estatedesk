@@ -4,7 +4,7 @@ import { build } from "esbuild";
 import vm from "node:vm";
 import path from "node:path";
 
-async function harness(role = "ADMIN", authorized = true, updateError?: { code: string }) {
+async function harness(role = "ADMIN", authorized = true, updateError?: { code: string }, grantedPermissions: string[] = []) {
   const updates: unknown[] = [], audits: unknown[] = [], reads: unknown[] = [], paths: unknown[] = [];
   const h = {
     prisma: { organization: {
@@ -12,7 +12,7 @@ async function harness(role = "ADMIN", authorized = true, updateError?: { code: 
       update: async (args: unknown) => { if (updateError) throw updateError; updates.push(args); },
     } },
     requirePlatformRole: async () => { if (!authorized) throw new Error("Forbidden"); return { userId: "admin-1" }; },
-    requireUserSession: async () => ({ userId: "member-1" }),
+    requireUserSession: async () => ({ userId: "member-1", activeOrgRole: role, grantedPermissions }),
     requireCurrentOrgId: async () => "org-1",
     requireOrgAccess: async () => ({ role }),
     writeAuditLog: async (args: unknown) => { audits.push(args); },
@@ -21,7 +21,7 @@ async function harness(role = "ADMIN", authorized = true, updateError?: { code: 
     revalidatePath: (...args: unknown[]) => { paths.push(args); },
   };
   const bundle = await build({entryPoints:[path.resolve("apps/web/src/features/organizations/actions/update-organization-slug.ts")],bundle:true,write:false,format:"cjs",platform:"node",tsconfig:"apps/web/tsconfig.json",plugins:[{name:"dependencies",setup(builder){
-    builder.onResolve({filter:/^(next\/(cache|navigation)|@\/lib\/)/},args=>({path:args.path,namespace:"mock"}));
+    builder.onResolve({filter:/^(next\/(cache|navigation)|@\/lib\/)/},args=>args.path.endsWith("role-matrix") ? undefined : ({path:args.path,namespace:"mock"}));
     builder.onLoad({filter:/.*/,namespace:"mock"},args=>({contents:args.path.endsWith("prisma")?'export const prisma=globalThis.h.prisma;':args.path === "next/navigation"?'export const redirect=globalThis.h.redirect;':args.path.endsWith("role-matrix")?'export const roleHasOrgPermission=globalThis.h.roleHasOrgPermission;':args.path.endsWith("guards")?'export const requirePlatformRole=globalThis.h.requirePlatformRole;':args.path.endsWith("session")?'export const requireUserSession=globalThis.h.requireUserSession;':args.path.endsWith("auth/org")?'export const requireOrgAccess=globalThis.h.requireOrgAccess; export const requireCurrentOrgId=globalThis.h.requireCurrentOrgId;':args.path==="next/cache"?'export const revalidatePath=globalThis.h.revalidatePath;':'export const writeAuditLog=globalThis.h.writeAuditLog;',loader:"js"}));
   }}]});
   const module={exports:{}};
@@ -55,4 +55,11 @@ test("duplicate slugs return a recoverable error without audit or redirect", asy
  const h=await harness("ADMIN",true,{code:"P2002"});
  assert.equal((await h.updatePlatformOrganizationSlugAction({},form("taken-slug"))).status,"error");
  assert.equal(h.audits.length,0);assert.equal(h.paths.length,0);
+});
+
+
+test("an office worker with an explicit settings mandate can edit the active organisation slug", async () => {
+ const h = await harness("OFFICE", true, undefined, ["org.settings.manage"]);
+ assert.equal((await h.updateCurrentOrganizationSlugAction({}, form("delegated-address"))).status, "success");
+ assert.equal(h.updates.length, 1);
 });

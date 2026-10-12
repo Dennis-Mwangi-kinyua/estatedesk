@@ -3,16 +3,17 @@
 import { Prisma, OrgRole, ScopeType, UserStatus } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { safeServerActionError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { requireCurrentOrgId } from "@/lib/auth/org";
-import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
+import { accountLoginUrl } from "@/lib/notifications/account-login-url";
+import type { CreatedAccountLogin } from "@/lib/notifications/recipient-message";
 
-type CreateCaretakerState = {
+export type CreateCaretakerState = {
   error: string | null;
+  credentials?: CreatedAccountLogin;
 };
 
 export async function createCaretakerAction(
@@ -201,15 +202,5 @@ export async function createCaretakerAction(
   revalidatePath("/staff");
   revalidatePath("/staff/caretaker");
 
-  await sendAccountCredentials({
-    fullName,
-    username,
-    password,
-    email,
-    phone,
-    role: "CARETAKER",
-    loginUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`,
-  });
-
-  redirect("/staff/caretaker");
+  return { error: null, credentials: { fullName, username, password, email, phone, role: "CARETAKER", loginUrl: accountLoginUrl() } };
 }

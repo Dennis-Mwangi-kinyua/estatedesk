@@ -1,10 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { CalendarDays, ClipboardCheck, Mail, Phone } from "@/components/shared/colored-icons";
 import { EmojiSticker } from "@/components/shared/emoji-sticker";
-import { nairobiDate } from "@/lib/move-outs/validation";
-import { CloseoutForm } from "@/features/move-outs/components/closeout-form";
 import Link from "@/components/navigation/workspace-link";
-import { confirmMoveOutAction } from "@/app/(app)/dashboard/org/notifications/actions";
 import {
   formatDateTime,
   formatEnumLabel,
@@ -91,7 +88,7 @@ export function MoveOutQueuePanel({
                       <Link data-workspace-action="true" href={`/dashboard/org/tenants/${encodeURIComponent(notice.tenant.slug ?? notice.tenant.id)}`} className={primaryButtonClassName}>Review tenant<ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0" /></Link>
                       <Link data-workspace-action="true" href={notice.inspection ? `/dashboard/org/inspections/${encodePublicId(notice.inspection.id, "inspection")}` : "/dashboard/org/move-outs"} className={secondaryButtonClassName}>{notice.inspection ? "View inspection" : "Schedule inspection"}</Link>
                     </div>
-                    {ready ? <details className="notice-closeout min-w-0 rounded-xl border border-border bg-muted/20"><summary className="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-ring">Confirm handover and settlement</summary><div className="min-w-0 p-3 pt-0"><CloseoutForm dateLimit={nairobiDate()} noticeId={notice.id} action={confirmMoveOutAction} /></div></details> : <p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><ClipboardCheck aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-primary" />Handover confirmation becomes available after inspection is completed.</p>}
+                    {ready ? <Link href={`/dashboard/org/move-outs/${encodePublicId(notice.id, "move-out-notice")}`} className={secondaryButtonClassName}>Open handover workspace</Link> : <p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><ClipboardCheck aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-primary" />Handover confirmation becomes available after inspection is completed.</p>}
                   </footer>
                 </article>
               );

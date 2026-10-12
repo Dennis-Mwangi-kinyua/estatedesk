@@ -2,10 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireOrgPermission } from "@/lib/permissions/guards";
+import { isStaffRole } from "@/features/staff/constants/role-meta";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { isSupportedCurrency } from "@/lib/currencies";
 
 export async function updateMembership(memberId: string, formData: FormData) {
+  const session = await requireOrgPermission("org.users.manage");
   const orgId = await requireCurrentOrgId();
 
   const fullName = String(formData.get("fullName") ?? "").trim();
@@ -54,6 +57,8 @@ export async function updateMembership(memberId: string, formData: FormData) {
     throw new Error("Member not found");
   }
 
+  if (!isStaffRole(role)) throw new Error("Choose a valid staff role.");
+  if (session.activeOrgRole !== "ADMIN" && (membership.role === "ADMIN" || role !== membership.role)) throw new Error("Only an organisation admin can change staff roles or edit admin accounts.");
   await prisma.$transaction(async (tx) => {
     await tx.user.update({
       where: { id: membership.userId },
@@ -67,6 +72,7 @@ export async function updateMembership(memberId: string, formData: FormData) {
     await tx.membership.update({
       where: { id: membership.id },
       data: {
+        grantedPermissions: role === membership.role ? undefined : [],
         role: role as
           | "ADMIN"
           | "MANAGER"

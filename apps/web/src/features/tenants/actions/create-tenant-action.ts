@@ -5,7 +5,8 @@ import { revalidatePath } from "next/cache";
 import { requireUserSession } from "@/lib/auth/session";
 import { safeServerActionError } from "@/lib/errors/server-error-log";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
-import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
+import { accountLoginUrl } from "@/lib/notifications/account-login-url";
+import { buildAllocationDraft } from "@/lib/notifications/recipient-message";
 import { getAuthorizedOrgContext } from "./_lib/authorization";
 import {
   isValidUsername,
@@ -158,20 +159,14 @@ export async function createTenantAction(
       revalidatePublicVacancies();
     }
 
-    await sendAccountCredentials({
-      fullName,
-      username: result.username,
-      password,
-      email,
-      phone,
-      role: "TENANT",
-      loginUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`,
-    });
-
-    const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`;
+    const loginUrl = accountLoginUrl();
+    const allocation = result.allocation;
+    const money = (amount: string) => new Intl.NumberFormat("en-KE", { style: "currency", currency: allocation?.currency ?? "KES" }).format(Number(amount));
+    const allocationDraft = allocation ? buildAllocationDraft({ fullName: result.tenantName, email, phone, property: allocation.property, unit: allocation.unit, startDate: new Intl.DateTimeFormat("en-KE", { dateStyle: "long", timeZone: "Africa/Nairobi" }).format(new Date(allocation.startDate)), monthlyRent: money(allocation.monthlyRent), deposit: allocation.deposit ? money(allocation.deposit) : undefined, dueDay: allocation.dueDay, loginUrl }) : undefined;
 
     return {
       status: "success",
+      allocationDraft,
       message: "Tenant account created successfully.",
       credentials: {
         tenantName: result.tenantName,

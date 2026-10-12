@@ -17,7 +17,7 @@ import {
   tenantPathRequiresActiveLease,
 } from "@/lib/permissions/access";
 import {
-  roleHasOrgPermission,
+  memberHasOrgPermission,
   type OrgPermission,
 } from "@/lib/permissions/role-matrix";
 
@@ -150,7 +150,7 @@ export async function requireOrgPermission(
 ): Promise<AppSession> {
   const session = await requireOrgMembership(options);
 
-  if (!roleHasOrgPermission(session.activeOrgRole, permission)) {
+  if (!memberHasOrgPermission(session, permission)) {
     await auditDeniedAccess({
       session,
       reason: "Missing organization permission",
@@ -207,5 +207,14 @@ export async function requireTenantAccess(options?: GuardOptions) {
     }
   }
 
+  return session;
+}
+
+export async function requireOrgRoleOrPermission(roles: OrgRole[], permissions: OrgPermission[]) {
+  const session = await requireOrgMembership();
+  if (!hasOrgRole(session.activeOrgRole, roles) && !permissions.some(permission => memberHasOrgPermission(session, permission))) {
+    await auditDeniedAccess({ session, reason: "Missing organisation role or delegated permission", required: [...roles, ...permissions], entityType: "Organization", entityId: session.activeOrgId ?? "unknown" });
+    deny();
+  }
   return session;
 }

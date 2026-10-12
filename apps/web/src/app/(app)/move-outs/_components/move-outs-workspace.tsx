@@ -3,8 +3,6 @@ import { ScheduleForm } from "@/features/move-outs/components/schedule-form";
 import { SettlementSummary } from "@/features/move-outs/components/settlement-summary";
 import { RefundForm } from "@/features/move-outs/components/refund-form";
 import { canInspectUnit } from "@/lib/move-outs/inspection-scope";
-import { nairobiDate } from "@/lib/move-outs/validation";
-import { CloseoutForm } from "@/features/move-outs/components/closeout-form";
 import { MoveOutProgress } from "@/features/move-outs/components/progress";
 import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
@@ -14,7 +12,6 @@ import { DeferredLink } from "@/components/navigation/app-links";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { encodePublicId } from "@/lib/public-id";
-import { closeMoveOutAction } from "../_lib/actions";
 import { formatDate, formatDateTime } from "../_lib/helpers";
 import type { MoveOutsPageData } from "../_lib/types";
 import { MoveOutsPagination } from "./move-outs-pagination";
@@ -190,7 +187,7 @@ export function MoveOutsWorkspace({
                     {["SUBMITTED", "INSPECTION_SCHEDULED"].includes(notice.status) ? (
                       inspectors.some(inspector => canInspectUnit([inspector], notice.lease.unit)) ? <ScheduleForm noticeId={notice.id} reschedule={Boolean(notice.inspection)} inspectors={Array.from(new Map(inspectors.filter(inspector => canInspectUnit([inspector], notice.lease.unit)).map(inspector => [inspector.userId, { id: inspector.userId, label: `${inspector.user.fullName} (${inspector.role})` }])).values())} /> : <p className="mt-3 rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">Add active staff in this unit’s scope before scheduling.</p>
                     ) : notice.inspection ? (
-                      <div className="mt-3 flex flex-wrap items-center gap-3"><Link href={`/dashboard/org/inspections/${encodePublicId(notice.inspection.id, "inspection")}`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-border bg-background px-3 text-xs font-semibold text-primary hover:bg-muted"><ClipboardList aria-hidden="true" className="size-4" />Open inspection report</Link>{notice.status === "INSPECTION_COMPLETED" ? <CloseoutForm dateLimit={nairobiDate()} noticeId={notice.id} deposit={notice.lease.deposit?.toString() ?? "0"} action={closeMoveOutAction} /> : null}</div>
+                      <div className="mt-3 flex flex-wrap items-center gap-3"><Link href={`/dashboard/org/inspections/${encodePublicId(notice.inspection.id, "inspection")}`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-border bg-background px-3 text-xs font-semibold text-primary hover:bg-muted"><ClipboardList aria-hidden="true" className="size-4" />Open inspection report</Link>{notice.status === "INSPECTION_COMPLETED" ? <Link href={`/dashboard/org/move-outs/${encodePublicId(notice.id, "move-out-notice")}`} className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground">Open handover workspace</Link> : null}</div>
                     ) : <p className="mt-3 text-xs text-muted-foreground">No action is needed right now.</p>}
                   </div>
                 </div>

@@ -552,6 +552,7 @@ model DocumentEvent {
 
 /// Organization role assignment with optional scoped access.
 model Membership {
+  grantedPermissions   String[]      @default([])
   id                   String        @id @default(cuid())
   orgId                String
   userId               String

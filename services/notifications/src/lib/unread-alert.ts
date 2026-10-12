@@ -80,6 +80,7 @@ export async function getUnreadNotificationAlert(input: {
 
   const actionUrl = resolveNotificationActionUrl({
     type: latest.type,
+    title: latest.title,
     userId: latest.userId,
     tenantId: latest.tenantId,
     actionUrl: readActionUrl(latest.providerResponse),

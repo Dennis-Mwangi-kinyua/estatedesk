@@ -11,6 +11,7 @@ import {
 export async function resolvePushActionUrl(notification: {
   orgId: string;
   type: NotificationType;
+  title?: string;
   userId: string | null;
   tenantId: string | null;
   providerResponse: unknown;
@@ -39,6 +40,7 @@ export async function resolvePushActionUrl(notification: {
 
   return resolveNotificationActionUrl({
     type: notification.type,
+    title: notification.title,
     userId: notification.userId,
     tenantId: notification.tenantId,
     audience,

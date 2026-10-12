@@ -1,3 +1,4 @@
+import type { CreatedAccountLogin } from "@/lib/notifications/recipient-message";
 import type { StaffRole } from "@/features/staff/constants/role-meta";
 
 export type AssignmentTargetType = "PROPERTY" | "BUILDING";
@@ -11,6 +12,7 @@ export type AssignmentTarget = {
 
 export type CreateMembershipState = {
   ok: boolean;
+  credentials?: CreatedAccountLogin;
   message?: string;
   step?: number;
   field?: string;

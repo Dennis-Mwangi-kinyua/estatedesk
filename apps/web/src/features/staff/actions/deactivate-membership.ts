@@ -62,6 +62,8 @@ export async function deactivateMembershipAction(formData: FormData) {
     throw new Error("Active staff membership not found.");
   }
 
+  if (membership.role === "ADMIN" && session.activeOrgRole !== "ADMIN") throw new Error("Only an organisation admin can deactivate an admin account.");
+
   const expectedConfirmation = membership.user.fullName.trim() || "DEACTIVATE";
 
   if (confirmation !== expectedConfirmation) {
@@ -162,7 +164,7 @@ export async function deactivateMembershipAction(formData: FormData) {
 }
 
 export async function reactivateMembershipAction(formData: FormData) {
-  const session = await requireUserSession();
+  const session = await requireOrgPermission("org.users.manage");
 
   if (!session.activeOrgId) {
     throw new Error("No active organisation found.");
@@ -204,6 +206,7 @@ export async function reactivateMembershipAction(formData: FormData) {
   if (!membership) {
     throw new Error("Previous employee record not found.");
   }
+  if (membership.role === "ADMIN" && session.activeOrgRole !== "ADMIN") throw new Error("Only an organisation admin can reactivate an admin account.");
 
   await prisma.$transaction(async (tx) => {
     await tx.membership.update({

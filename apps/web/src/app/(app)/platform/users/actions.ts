@@ -8,6 +8,8 @@ import {
 } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { accountLoginUrl } from "@/lib/notifications/account-login-url";
+import type { CreatedAccountLogin } from "@/lib/notifications/recipient-message";
 import { prisma } from "@/lib/prisma";
 import { writePlatformAuditLog } from "@/lib/audit/security";
 import { requirePlatformRole } from "@/lib/permissions/guards";
@@ -30,7 +32,9 @@ function parsePlatformRole(value: FormDataEntryValue | null) {
     : PlatformRole.USER;
 }
 
-export async function createPlatformUserAction(formData: FormData) {
+export type CreatePlatformUserResult = { credentials?: CreatedAccountLogin };
+
+export async function createPlatformUserAction(formData: FormData): Promise<CreatePlatformUserResult> {
   const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/login",
   });
@@ -147,5 +151,5 @@ export async function createPlatformUserAction(formData: FormData) {
   }
 
   revalidatePath("/platform/users");
-  redirect("/platform/users?created=1");
+  return { credentials: { fullName, username, password, email, phone, role: platformRole, loginUrl: accountLoginUrl() } };
 }

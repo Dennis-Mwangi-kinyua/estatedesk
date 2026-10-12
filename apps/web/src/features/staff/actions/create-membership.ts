@@ -8,7 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { assertCanCreateStaffUser } from "@/lib/billing/access";
 import { requireOrgPermission } from "@/lib/permissions/guards";
-import { sendAccountCredentials } from "@/lib/notifications/account-credentials";
+import { accountLoginUrl } from "@/lib/notifications/account-login-url";
+import type { CreatedAccountLogin } from "@/lib/notifications/recipient-message";
 import { isSupportedCurrency } from "@/lib/currencies";
 import {
   STAFF_ROLES,
@@ -19,6 +20,7 @@ type AssignmentTargetType = "PROPERTY" | "BUILDING";
 
 export type CreateMembershipState = {
   ok: boolean;
+  credentials?: CreatedAccountLogin;
   message?: string;
   step?: number;
   field?: string;
@@ -83,7 +85,7 @@ export async function createMembership(
   _previousState: CreateMembershipState,
   formData: FormData,
 ): Promise<CreateMembershipState> {
-  await requireOrgPermission("org.users.manage");
+  const session = await requireOrgPermission("org.users.manage");
   const orgId = await requireCurrentOrgId();
 
   try {
@@ -133,6 +135,7 @@ export async function createMembership(
   }
 
   const role = roleRaw;
+  if (role === "ADMIN" && session.activeOrgRole !== "ADMIN") return fail("Only an organisation admin can create another admin.", 0, "role");
 
   if (role === "CARETAKER" && !assignmentTargetType) {
     return fail(
@@ -349,17 +352,7 @@ export async function createMembership(
   revalidatePath("/staff");
   revalidatePath(`/staff/${role.toLowerCase()}`);
 
-  await sendAccountCredentials({
-    fullName,
-    username,
-    password,
-    email,
-    phone,
-    role,
-    loginUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`,
-  });
-
-  redirect(`/staff/${role.toLowerCase()}`);
+  return { ok: true, credentials: { fullName, username, password, email, phone, role: role, loginUrl: accountLoginUrl() } };
 }
 
 async function resolveCaretakerAssignmentTarget({

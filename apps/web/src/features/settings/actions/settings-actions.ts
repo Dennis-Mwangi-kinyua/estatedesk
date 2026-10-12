@@ -7,6 +7,8 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isSupportedCurrency } from "@/lib/currencies";
 import { requireCurrentOrgId, requireOrgAccess } from "@/lib/auth/org";
+import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
+import { requireOrgPermission } from "@/lib/permissions/guards";
 import { requireUserSession } from "@/lib/auth/session";
 import { createInvitation } from "@/lib/invitations/create-invitation";
 import { writeAuditLog } from "@/lib/audit/security";
@@ -58,7 +60,8 @@ async function ensureSettingsWriteAccess() {
   const orgId = await requireCurrentOrgId();
   const membership = await requireOrgAccess(orgId);
 
-  if (!["ADMIN", "MANAGER"].includes(membership.role)) {
+  const session = await requireUserSession();
+  if (!["ADMIN", "MANAGER"].includes(membership.role) && !memberHasOrgPermission(session, "org.settings.manage")) {
     throw new Error("Forbidden");
   }
 
@@ -415,6 +418,7 @@ export async function requestPlanUpgradeAction(formData: FormData) {
 }
 
 export async function inviteMemberAction(formData: FormData) {
+  await requireOrgPermission("org.users.manage");
   const { orgId } = await ensureSettingsWriteAccess();
   const session = await requireUserSession();
 
@@ -448,6 +452,8 @@ export async function inviteMemberAction(formData: FormData) {
   ) {
     throw new Error("Invalid role.");
   }
+
+  if (role === "ADMIN" && session.activeOrgRole !== "ADMIN") throw new Error("Only an organisation admin can invite another admin.");
 
   const existingInvite = await prisma.invitation.findFirst({
     where: {

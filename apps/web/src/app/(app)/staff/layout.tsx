@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { OrgDashboardShell } from "@/components/layout/org-dashboard-shell";
-import { requireOrgRole } from "@/lib/permissions/guards";
+import { requireOrgRoleOrPermission } from "@/lib/permissions/guards";
 import { requireActiveSubscription } from "@/lib/billing/subscription-access";
 import { SubscriptionWarning } from "@/components/billing/subscription-warning";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
@@ -41,7 +41,7 @@ export default async function StaffLayout({
 }: {
   children: ReactNode;
 }) {
-  const session = await requireOrgRole(["ADMIN", "MANAGER"]);
+  const session = await requireOrgRoleOrPermission(["ADMIN", "MANAGER"], ["org.users.manage", "org.users.delete"]);
   const access = await requireActiveSubscription(session.activeOrgId!);
 
   let organizationName = "Organisation";

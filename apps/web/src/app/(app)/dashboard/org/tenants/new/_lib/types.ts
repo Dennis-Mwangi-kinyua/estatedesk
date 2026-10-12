@@ -1,3 +1,4 @@
+import type { RecipientMessageDraft } from "@/lib/notifications/recipient-message";
 import type { ReactNode } from "react";
 
 export type AvailableUnit = {
@@ -12,6 +13,7 @@ export type Step = 1 | 2 | 3 | 4 | 5;
 export type ActionState = {
   status: "idle" | "error" | "success";
   message?: string;
+  allocationDraft?: RecipientMessageDraft;
   credentials?: {
     tenantName: string;
     username: string;

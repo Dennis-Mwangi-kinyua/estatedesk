@@ -1,3 +1,4 @@
+import { requireArrearsApproval } from "./arrears-approval";
 import { depositHeldCents, finalBillingIssues } from "./readiness";
 import { loadMoveOutBalances } from "./balances";
 import { moneyCents, parseCostItems } from "./settlement";
@@ -28,6 +29,7 @@ export async function closeMoveOut(tx: Prisma.TransactionClient, input: { notice
   const reviewed = report.metadata && typeof report.metadata === "object" && !Array.isArray(report.metadata) ? report.metadata : {};
   if (Number(reviewed.outstandingBills) !== settlement.outstandingBills || Number(reviewed.depositHeld) !== settlement.depositHeld || JSON.stringify(parseCostItems(JSON.stringify(reviewed.itemisedCosts ?? []))) !== JSON.stringify(settlement.itemisedCosts)) throw new Error("Settlement has changed. Generate the report with the current itemised costs and review it again.");
   if (notice.lease.status !== "ACTIVE" || actualMoveOutDate < notice.lease.startDate) throw new Error("The handover date must belong to the active lease.");
+  await requireArrearsApproval(tx, input.orgId, notice.id, settlement, nairobiDate(actualMoveOutDate));
   const otherOccupant = await tx.lease.findFirst({ where: { unitId: notice.lease.unitId, id: { not: notice.leaseId }, status: "ACTIVE", deletedAt: null }, select: { id: true } });
   if (otherOccupant) throw new Error("This unit has another active lease. Resolve its occupancy before closing.");
   const claimed = await tx.moveOutNotice.updateMany({ where: { id: notice.id, status: "INSPECTION_COMPLETED" }, data: { status: "CLOSED", actualMoveOutDate, closedAt: new Date(), closeout: { ...settlement, notes, actorUserId: input.actorUserId } } });

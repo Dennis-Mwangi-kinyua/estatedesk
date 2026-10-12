@@ -1,4 +1,5 @@
 "use server";
+import { latestArrearsApproval } from "@/lib/move-outs/arrears-approval";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { parseMoveOutDate } from "@/lib/move-outs/validation";
@@ -12,5 +13,5 @@ export async function getSettlementPreview(noticeId: string, handoverDate?: stri
   const issues = handoverDate ? await finalBillingIssues(prisma, notice.lease, parseMoveOutDate(handoverDate)) : [];
   const credit = await prisma.payment.findFirst({ where: { orgId: session.activeOrgId!, payerTenantId: notice.tenantId, verificationStatus: "VERIFIED", unappliedAmount: { gt: 0 } }, select: { id: true } });
   if (credit) issues.push("This tenant has unapplied payment credit. Allocate or refund that credit before closing the account.");
-  return { issues, depositHeld: (await depositHeldCents(prisma, notice.lease)) / 100, outstandingBills: balances.totalCents / 100, lines: [...balances.charges.map(charge => ({ label: `${charge.period} ${charge.description ?? charge.chargeType}`, amount: Number(charge.balance) })), ...balances.water.map(bill => ({ label: `${bill.period} water`, amount: bill.remainingCents / 100 }))] };
+  return { approval: await latestArrearsApproval(prisma, session.activeOrgId!, noticeId), issues, depositHeld: (await depositHeldCents(prisma, notice.lease)) / 100, outstandingBills: balances.totalCents / 100, lines: [...balances.charges.map(charge => ({ label: `${charge.period} ${charge.description ?? charge.chargeType}`, amount: Number(charge.balance) })), ...balances.water.map(bill => ({ label: `${bill.period} water`, amount: bill.remainingCents / 100 }))] };
 }

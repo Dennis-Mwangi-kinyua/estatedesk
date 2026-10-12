@@ -63,7 +63,9 @@ test("move-out handover, private refund proof, report permissions and retained r
   try {
     console.log("Opening move-out workspace");
     await page.goto("/dashboard/org/move-outs");
-    const form = page.getByRole("heading", { name: "Confirm handover and settlement" }).locator("..");
+    await page.getByRole("link", { name: "Open handover workspace" }).click();
+    await expect(page).toHaveURL(/\/dashboard\/org\/move-outs\/[^/]+$/);
+    const form = page.getByRole("heading", { name: "Review settlement and complete handover" }).locator("..");
     await expect(form.getByLabel("Deposit actually held")).toHaveValue("12000.00", { timeout: 30_000 });
     console.log("Filling handover form");
     await form.getByLabel("Actual handover date").fill(fixture.day);

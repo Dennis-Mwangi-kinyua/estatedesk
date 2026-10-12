@@ -26,6 +26,7 @@ import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 export type { OrgRole, PlatformRole, ScopeType };
 
 export type AppSession = {
+  grantedPermissions?: string[];
   userId: string;
   email: string | null;
   fullName: string;
@@ -531,10 +532,12 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
               where: {
                 id: activeMembershipId,
                 userId: user.id,
+                deactivatedAt: null,
                 employmentEndedAt: null,
               },
               select: {
                 orgId: true,
+                grantedPermissions: true,
                 role: true,
                 scopeType: true,
                 scopeId: true,
@@ -553,6 +556,7 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       requiresTermsAcceptance: !user.termsAcceptedAt,
       activeOrgId: activeMembership?.orgId ?? null,
       activeOrgRole: activeMembership?.role ?? null,
+      grantedPermissions: activeMembership?.grantedPermissions ?? [],
       membershipScope: activeMembership
         ? {
             scopeType: activeMembership.scopeType,

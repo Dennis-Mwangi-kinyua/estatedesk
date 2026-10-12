@@ -33,6 +33,22 @@ describe("professional financial exports", () => {
     const bytes = await generateReceiptPdf({ pdfTemplateVersion: 1, serialNumber: "RECEIPT-2026-FROZEN", verificationUrl: "https://example.test/verify/receipt", status: "ISSUED", issuedAt, organizationName: "Greenview Organisation", payerName: "Demo Tenant", amount: 25000, currencyCode: "KES", paymentMethod: "MPESA", paymentFor: "RENT", paidAt: issuedAt, periods: ["2026-10"] });
     assert.equal(createHash("sha256").update(bytes).digest("hex"), "622bc7936aa914c15b7e9dd3f101a05c686f8ced16af28167a1180e36424dc21");
   });
+  it("preserves registered version-two receipt bytes", async () => {
+    const bytes = await generateReceiptPdf({ pdfTemplateVersion: 2, serialNumber: "RECEIPT-2026-FROZEN", verificationUrl: "https://example.test/verify/receipt", status: "ISSUED", issuedAt, organizationName: "Greenview Organisation", payerName: "Demo Tenant", amount: 25000, currencyCode: "KES", paymentMethod: "MPESA", paymentFor: "RENT", paidAt: issuedAt, periods: ["2026-10"] });
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), "f79e17fcb44ffd2bae5d5f2e38bd9a2890b980ddd8711f7dd84b2bdbd898b2af");
+  });
+  it("shows readable receipt and premises details without internal tenant or lease keys", async () => {
+    const data = { serialNumber: "ED-RCT-2026-ABC123", verificationUrl: "https://example.test/verify/receipt", status: "ISSUED", issuedAt, organizationName: "Greenview Organisation", payerName: "Demo Tenant", amount: 25000, currencyCode: "KES", paymentMethod: "MPESA", paymentFor: "RENT", paidAt: issuedAt, tenantIdentifier: "internal-tenant-database-key", leaseIdentifier: "internal-lease-database-key", propertyName: "Greenview Gardens", unitName: "A12", periods: ["2026-10"] };
+    const bytes = await generateReceiptPdf(data);
+    const result = await inspect(bytes);
+    assert.ok(result.contains("ED-RCT-2026-ABC123"));
+    assert.ok(result.contains("Greenview Gardens"));
+    assert.ok(result.contains("A12"));
+    assert.ok(result.contains("Oct 2026"));
+    assert.ok(!result.contains(data.tenantIdentifier));
+    assert.ok(!result.contains(data.leaseIdentifier));
+    assert.deepEqual(await generateReceiptPdf(data), bytes);
+  });
   it("keeps custom lease clauses and signature fields on paginated agreement pages", async () => {
     const result = await inspect(await generateLeaseAgreementPdf({ title: "Residential tenancy agreement", landlordName: "Demo Landlord", organizationName: "Demo Organisation", tenantName: "Demo Tenant", premises: "Greenview Gardens A12", leaseId: "lease-reference", startDate: "01 October 2026", endDate: "30 September 2027", monthlyRent: "KES 25,000.00", deposit: "KES 25,000.00", dueDay: 5, terms: Array.from({ length: 80 }, (_, i) => `Clause-${i + 1}: Agreed condition for this tenancy.`).join("\n") }));
     assert.ok(result.pdf.getPageCount() > 1);
@@ -59,7 +75,7 @@ describe("professional financial exports", () => {
     const result = await inspect(await generateReceiptPdf({ serialNumber: "RECEIPT-2026-TEST", verificationUrl: "https://example.test/verify/receipt", status: "ISSUED", issuedAt, organizationName: "Greenview International Property Management Organisation ".repeat(3), payerName: "Tenant Full Name ".repeat(8), amount: 40000, currencyCode: "KES", paymentMethod: "MPESA", paymentFor: "RENT", paymentReference: "LONGREFERENCE".repeat(20), paidAt: issuedAt, periods: ["2026-10"], allocations: Array.from({ length: 40 }, (_, index) => ({ period: "2026-10", description: `Allocation-${index + 1}`, amount: 1000 })) }));
     assert.ok(result.pdf.getPageCount() > 1);
     for (let index = 1; index <= 40; index++) assert.ok(result.contains(`Allocation-${index}`), `missing allocation ${index}`);
-    assert.ok(result.contains("Remaining balance"));
+    assert.ok(result.contains("REMAINING BALANCE"));
   });
   it("retains the final invoice charge and water details across continuation pages", async () => {
     const result = await inspect(await generateInvoicePdf({ serialNumber: "INVOICE-2026-TEST", verificationCode: "verify-code", verificationUrl: "https://example.test/verify/invoice", status: "UNPAID", issuedAt, dueDate: issuedAt, period: "2026-10", organizationName: "Greenview Organisation", tenantName: "Test Tenant", propertyName: "Property Name ".repeat(10), unitName: "A1", currencyCode: "KES", amountDue: 50000, amountPaid: 0, balance: 50000, lines: Array.from({ length: 50 }, (_, index) => ({ label: `Charge-${index + 1}`, amountDue: 1000, amountPaid: 0, balance: 1000, ...(index === 49 ? { waterReading: { prevReading: 10, currentReading: 20, unitsUsed: 10, ratePerUnit: 100, fixedCharge: 0, billStatus: "UNPAID", readingStatus: "APPROVED" } } : {}) })) }));

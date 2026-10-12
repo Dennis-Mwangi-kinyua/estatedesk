@@ -25,11 +25,18 @@ export async function fixture(deposit = 12000) {
   const form = new FormData();
   for (const [key, value] of Object.entries({ actualMoveOutDate: day, depositHeld: String(deposit), expectedOutstandingBills: "11000", costItems: JSON.stringify(items), refundStatus: deposit > 11500 ? "PENDING" : "NOT_DUE", notes: "Final bills reviewed, door repair agreed and keys returned.", keysReturned: "on", balancesReviewed: "on", finalBillingConfirmed: "on", reportReviewed: "on" })) form.set(key, value);
   const input = { noticeId: notice.id, orgId: org.id, actorUserId: actor.id, form };
+  const approveArrears = async () => {
+    const { approvalSettlement } = await import("../../apps/web/src/lib/move-outs/arrears-approval");
+    await prisma.$transaction(async tx => {
+      const snapshot = await approvalSettlement(tx, org.id, notice.id, form);
+      await tx.auditLog.create({ data: { orgId: org.id, actorUserId: actor.id, action: "MOVE_OUT_ARREARS_APPROVED", entityType: "MoveOutNotice", entityId: notice.id, metadata: { key: snapshot.key, ...snapshot.settlement, date: snapshot.date } } });
+    }, { isolationLevel: "Serializable" });
+  };
   const close = () => prisma.$transaction(tx => closeMoveOut(tx, input), { isolationLevel: "Serializable", timeout: 15000 });
   const proof = await prisma.asset.create({ data: { orgId: org.id, unitId: unit.id, uploadedByUserId: actor.id, fileName: "refund.png", fileType: "image", mimeType: "image/png", key: "private/refund.png", size: 100, metadata: { purpose: "refund_proof" } } });
   const refund = (reference = `REFUND-${notice.id}`) => prisma.$transaction(tx => recordMoveOutRefund(tx, { ...input, reference, method: "BANK", proofAssetId: proof.id }), { isolationLevel: "Serializable", timeout: 15000 });
   const cleanup = async () => { await prisma.accountingJournalLine.deleteMany({ where: { orgId: org.id } }); await prisma.organization.delete({ where: { id: org.id } }); await prisma.user.delete({ where: { id: actor.id } }); await prisma.$disconnect(); };
-  return { prisma, org, actor, unit, tenant, lease, notice, rent, water, form, close, refund, cleanup, verifyPayment, period };
+  return { prisma, org, actor, unit, tenant, lease, notice, rent, water, form, close, approveArrears, refund, cleanup, verifyPayment, period };
 }
 
 export async function assertBalanced(db: Awaited<ReturnType<typeof fixture>>["prisma"], orgId: string) {

@@ -22,6 +22,7 @@ export async function loadLeaseDetailsData(orgId: string, leaseId: string) {
       },
       tenant: {
         select: {
+          user: { select: { email: true, phone: true } },
           id: true,
           slug: true,
           fullName: true,

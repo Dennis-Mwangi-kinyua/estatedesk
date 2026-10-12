@@ -1,7 +1,9 @@
 export type AccountCredentialsMessageInput = {
   fullName: string;
   username: string;
-  password: string;
+  password?: string;
+  organizationName?: string;
+  email?: string | null;
   role?: string;
   loginUrl?: string | null;
 };
@@ -9,19 +11,25 @@ export type AccountCredentialsMessageInput = {
 export function buildAccountCredentialsMessage(
   input: AccountCredentialsMessageInput,
 ) {
-  const role = input.role ?? "TENANT";
-
+  const role = (input.role ?? "TENANT").toLowerCase().replaceAll("_", " ");
   return [
-    `Hello ${input.fullName}, your EstateDesk ${role} account has been created.`,
+    `Hello ${input.fullName},`,
     "",
-    `Username: ${input.username}`,
-    `Temporary password: ${input.password}`,
+    `Welcome to EstateDesk. Your ${role} account is ready.`,
+    "",
+    input.organizationName ? `Workspace: ${input.organizationName}` : null,
     input.loginUrl ? `Login: ${input.loginUrl}` : null,
+    `Username: ${input.username}`,
+    input.email ? `Email: ${input.email}` : null,
+    input.password ? `Temporary password: ${input.password}` : "Your temporary password will be shared separately.",
     "",
-    "For your security, you will be asked to change this password the first time you sign in.",
-  ]
-    .filter(Boolean)
-    .join("\n");
+    "To get started, open the login link and sign in with your username and temporary password.",
+    "You will be asked to choose a new password on your first sign-in.",
+    "Keep your login details private. If you need help, contact the administrator who created your account.",
+    "",
+    "Kind regards,",
+    "The EstateDesk Team",
+  ].filter(line => line !== null).join("\n");
 }
 
 function normalizeKenyaPhone(value: string) {
@@ -42,8 +50,7 @@ export function buildAccountCredentialsEmailHref(
   input: AccountCredentialsMessageInput,
   recipientEmail?: string | null,
 ) {
-  const role = input.role ?? "TENANT";
-  const subject = encodeURIComponent(`Your EstateDesk ${role} account`);
+  const subject = encodeURIComponent("Your EstateDesk account — sign-in details");
   const body = encodeURIComponent(buildAccountCredentialsMessage(input));
   const recipient = recipientEmail?.trim();
 

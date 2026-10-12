@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { AccountCreatedShare } from "@/components/shared/account-created-share";
 import { STAFF_ROLES, type StaffRole } from "@/features/staff/constants/role-meta";
 import { BasicDetailsFields } from "./_components/basic-details-fields";
 import { CaretakerDetailsStep } from "./_components/caretaker-details-step";
@@ -161,6 +162,8 @@ export function MemberForm({
     setLocalError(undefined);
     setCurrentStep((step) => Math.max(step - 1, 0));
   }, []);
+
+  if (!isEditing && actionState.credentials) return <AccountCreatedShare credentials={actionState.credentials} continueHref={`/staff/${selectedRole.toLowerCase()}`} continueLabel="Go to staff" />;
 
   if (isEditing) {
     return (

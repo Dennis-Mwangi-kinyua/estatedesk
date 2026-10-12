@@ -33,6 +33,7 @@ test("handover applies deposit, preserves history and receipts, and refund settl
 test("post-handover debt payment clears ledger without new recurring billing", { skip }, async () => {
   const f = await fixture(8000);
   try {
+    await f.approveArrears();
     await f.close();
     const before = await f.prisma.rentCharge.count({ where: { leaseId: f.lease.id } });
     const payment = await f.prisma.payment.create({ data: { orgId: f.org.id, payerTenantId: f.tenant.id, method: "CASH", amount: 3500, targetType: "COMBINED", gatewayStatus: "PENDING", verificationStatus: "PENDING", callbackRaw: { combined: true, leaseId: f.lease.id, period: f.period } } });
@@ -88,6 +89,7 @@ test("move-out preserves tenant activity when another lease remains active", { s
 test("payment racing handover cannot double-apply deposit or lose a payment", { skip }, async () => {
   const f = await fixture(8000);
   try {
+    await f.approveArrears();
     const payment = await f.prisma.payment.create({ data: { orgId: f.org.id, payerTenantId: f.tenant.id, method: "CASH", amount: 1000, targetType: "COMBINED", gatewayStatus: "SUCCESS", verificationStatus: "NOT_REQUIRED", callbackRaw: { combined: true, leaseId: f.lease.id, period: f.period } } });
     const session = { userId: f.actor.id, activeOrgId: f.org.id, activeOrgRole: "MANAGER" as const, email: null, fullName: "Manager", platformRole: "USER" as const, mustChangePassword: false, requiresTermsAcceptance: false, membershipScope: null };
     const pay = () => f.prisma.$transaction(tx => f.verifyPayment(tx, session, payment.id, "Receipt verified"), { isolationLevel: "Serializable", timeout: 15000 });
@@ -98,6 +100,24 @@ test("payment racing handover cannot double-apply deposit or lose a payment", { 
     assert.equal((await loadMoveOutBalances(f.prisma, f.lease)).totalCents, closed ? 250000 : 1000000);
     assert.equal(await f.prisma.payment.count({ where: { orgId: f.org.id, method: "DEPOSIT_OFFSET" } }), closed ? 1 : 0);
     assert.equal((await f.prisma.payment.findUniqueOrThrow({ where: { id: payment.id } })).verificationStatus, "VERIFIED");
+    await assertBalanced(f.prisma, f.org.id);
+  } finally { await f.cleanup(); }
+});
+
+
+test("arrears handover requires approval and preserves debt after admin approval", { skip }, async () => {
+  const f = await fixture(8000);
+  try {
+    await assert.rejects(f.close(), /must approve/);
+    assert.equal((await f.prisma.lease.findUniqueOrThrow({ where: { id: f.lease.id } })).status, "ACTIVE");
+    assert.equal((await f.prisma.unit.findUniqueOrThrow({ where: { id: f.unit.id } })).status, "OCCUPIED");
+    await f.approveArrears();
+    await f.close();
+    const notice = await f.prisma.moveOutNotice.findUniqueOrThrow({ where: { id: f.notice.id } });
+    assert.equal(notice.status, "CLOSED");
+    assert.equal((notice.closeout as Record<string, unknown>).amountOwed, 3500);
+    const { loadMoveOutBalances } = await import("../../apps/web/src/lib/move-outs/balances");
+    assert.equal((await loadMoveOutBalances(f.prisma, f.lease)).totalCents, 350000);
     await assertBalanced(f.prisma, f.org.id);
   } finally { await f.cleanup(); }
 });

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { writeAuditLog } from "@/lib/audit/security";
 import { requirePlatformRole } from "@/lib/permissions/guards";
-import { roleHasOrgPermission } from "@/lib/permissions/role-matrix";
+import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
 import { requireCurrentOrgId, requireOrgAccess } from "@/lib/auth/org";
 import { requireUserSession } from "@/lib/auth/session";
 
@@ -50,7 +50,7 @@ export async function updatePlatformOrganizationSlugAction(_state: OrganizationS
 export async function updateCurrentOrganizationSlugAction(_state: OrganizationSlugState, formData: FormData): Promise<OrganizationSlugState> {
   const session = await requireUserSession();
   const orgId = await requireCurrentOrgId();
-  const membership = await requireOrgAccess(orgId);
-  if (!roleHasOrgPermission(membership.role, "org.settings.manage")) throw new Error("Forbidden");
+  await requireOrgAccess(orgId);
+  if (!memberHasOrgPermission(session, "org.settings.manage")) throw new Error("Forbidden");
   return saveSlug(orgId, session.userId, formData);
 }

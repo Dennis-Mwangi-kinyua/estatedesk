@@ -20,7 +20,7 @@ export function TenantDashboardHeader({
   onMenuClick,
 }: TenantDashboardHeaderProps) {
   return (
-    <header className="ed-shell-panel sticky top-0 z-[110] border-b bg-card/95 shadow-sm backdrop-blur-xl lg:ml-72">
+    <header className="tenant-shell-header ed-shell-panel sticky top-0 z-[110] border-b bg-card/95 shadow-sm backdrop-blur-xl lg:ml-72">
       <div className="flex min-h-[76px] items-center justify-between gap-3 px-3 pt-safe sm:px-6 lg:min-h-16 lg:px-8 lg:pt-0">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <button data-workspace-action="true"
@@ -32,7 +32,7 @@ export function TenantDashboardHeader({
             <Menu className="h-5 w-5" />
           </button>
 
-          <div className="min-w-0 flex-1 py-2">
+          <div className="min-w-0 flex-1 py-2 text-center">
             <h1 className="hidden ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-base lg:block font-semibold tracking-tight text-slate-950 dark:text-white sm:text-lg">
               {organizationName}
             </h1>
@@ -67,7 +67,7 @@ export function TenantDashboardHeader({
         </div>
       </div>
       <div className="border-t border-slate-200/70 bg-slate-50/90 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950/90 lg:hidden">
-        <h1 className="ed-full-name whitespace-normal break-words text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100 [overflow-wrap:anywhere]">{organizationName}</h1>
+        <h1 className="ed-full-name text-center whitespace-normal break-words text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100 [overflow-wrap:anywhere]">{organizationName}</h1>
       </div>
     </header>
   );

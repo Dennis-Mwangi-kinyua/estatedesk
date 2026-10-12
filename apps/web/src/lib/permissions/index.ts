@@ -7,6 +7,7 @@
  * Legacy AppPermission names are mapped for any remaining call sites.
  */
 export {
+  memberHasOrgPermission,
   ORG_PERMISSIONS,
   ORG_ROLE_PERMISSIONS,
   roleHasOrgPermission,
