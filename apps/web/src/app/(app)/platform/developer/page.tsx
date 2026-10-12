@@ -1,5 +1,5 @@
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 import { prisma } from "@/lib/prisma";

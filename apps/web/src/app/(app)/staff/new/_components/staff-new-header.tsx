@@ -1,5 +1,5 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowLeft, UserRoundPlus as UserPlus } from "lucide-react";
 import { STAFF_SETUP_WORKFLOW } from "../_lib/constants";
 

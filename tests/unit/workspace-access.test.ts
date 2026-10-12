@@ -28,3 +28,9 @@ it("isolates role portals and rejects unknown or deceptive routes", () => {
   assert.equal(canAccessWorkspacePath({ ...session("TENANT"), platformRole: "SUPER_ADMIN" }, "/dashboard/org/settings"), false);
   assert.equal(canAccessWorkspacePath({ ...session("ADMIN"), platformRole: "SUPER_ADMIN" }, "/platform/users"), true);
 });
+it("hides super-admin controls from platform admins and ordinary users", () => {
+  for (const platformRole of ["USER", "PLATFORM_ADMIN", "SUPER_ADMIN"] as const) {
+    assert.equal(canAccessWorkspacePath({ ...session("ADMIN"), platformRole }, "/platform/control"), platformRole === "SUPER_ADMIN");
+    assert.equal(canAccessWorkspacePath({ ...session("ADMIN"), platformRole }, "/platform/control/settings"), platformRole === "SUPER_ADMIN");
+  }
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { memo } from "react";
 import { PencilLine } from "lucide-react";
 

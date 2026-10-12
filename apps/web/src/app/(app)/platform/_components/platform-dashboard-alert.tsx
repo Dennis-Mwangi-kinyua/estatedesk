@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { BellRing as Bell, ExternalLink } from "lucide-react";
 import { formatNumber } from "../_lib/helpers";
 import type { PlatformDashboardData } from "../_lib/queries";

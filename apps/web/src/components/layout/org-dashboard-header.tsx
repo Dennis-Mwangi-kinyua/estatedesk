@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
 import { BellRing as Bell, Menu, Search } from "lucide-react";
 import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { KeyRound, Webhook } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getIntegrationReadinessReport } from "@/lib/integrations";

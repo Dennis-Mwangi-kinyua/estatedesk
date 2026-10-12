@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import { ArrowLeft, Archive, ChevronDown, UserRoundPlus, UsersRound } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Download, FileText, House as Home, Wallet } from "lucide-react";
 import {
   formatLedgerCurrency,

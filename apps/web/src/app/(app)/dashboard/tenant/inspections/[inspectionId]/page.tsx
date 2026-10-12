@@ -1,6 +1,6 @@
 // src/app/(app)/dashboard/tenant/inspections/[inspectionId]/page.tsx
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { PageShell, SurfaceCard } from "@/components/theme/ed-dashboard-shell";

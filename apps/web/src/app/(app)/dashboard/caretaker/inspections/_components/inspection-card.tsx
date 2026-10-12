@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
 import { CalendarDays, ClipboardCheck, Clock3, MapPin, Phone, UserRound } from "lucide-react";
 import { encodePublicId } from "@/lib/public-id";

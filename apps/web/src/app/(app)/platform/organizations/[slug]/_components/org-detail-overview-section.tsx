@@ -1,7 +1,7 @@
 import { OrgBillingActions } from "./org-billing-actions";
 import { OrganizationNameEditor } from "@/components/forms/organization-name-editor";
 import { renamePlatformOrganizationAction } from "@/features/organizations/actions/rename-organization";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import {
   ArrowLeft,
   Mail,

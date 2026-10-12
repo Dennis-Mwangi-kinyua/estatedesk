@@ -1,7 +1,7 @@
 "use client";
 
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { useState } from "react";
 import { Download, Share2, Copy } from "lucide-react";
 import { accountHandoverText, accountShareUrl } from "../_lib/account-handover";

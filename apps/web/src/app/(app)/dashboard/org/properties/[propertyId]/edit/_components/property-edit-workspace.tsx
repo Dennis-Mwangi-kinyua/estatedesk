@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { encodePublicId } from "@/lib/public-id";
 import { PropertyType, type OrgRole } from "@prisma/client";
 import { PropertiesGuidance } from "../../../_components/properties-guidance";

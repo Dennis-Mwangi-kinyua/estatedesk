@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { UnitDetailsViewData } from "../_lib/types";
 import { DetailItem, formatCurrency } from "./unit-details-ui";
 import { encodePublicId } from "@/lib/public-id";

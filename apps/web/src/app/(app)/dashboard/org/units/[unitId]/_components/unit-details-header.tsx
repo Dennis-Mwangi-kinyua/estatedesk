@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { deleteUnitAction } from "../../actions";
 import type { UnitDetailsViewData } from "../_lib/types";
 import { encodePublicId } from "@/lib/public-id";

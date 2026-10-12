@@ -1,5 +1,6 @@
+import { paymentReconciliationBlocker } from "@/lib/payments/reconciliation-policy";
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { formatLedgerCurrency, formatLedgerDate } from "@/lib/ledger";
 import {
   disputePaymentReconciliationAction,
@@ -169,6 +170,7 @@ export function PaymentsReconciliationSection({
                   >
                     {formatStatus(payment.reconciliationStatus)}
                   </span>
+                  <p className="mt-1 text-xs text-muted-foreground">{formatStatus(payment.verificationStatus)} · {formatStatus(payment.gatewayStatus)}</p>
                   {payment.reconciliationNotes ? (
                     <p className="mt-1 max-w-xs text-xs text-muted-foreground">
                       {payment.reconciliationNotes}
@@ -180,7 +182,9 @@ export function PaymentsReconciliationSection({
                 </td>
                 <td data-label="Actions" data-mobile-block="true" className="px-4 py-3">
                   <div className="grid min-w-72 gap-2">
-                    <form
+                    {paymentReconciliationBlocker(payment) ? (
+                      <p className="text-xs leading-5 text-muted-foreground">{paymentReconciliationBlocker(payment)}</p>
+                    ) : <form
                       action={reconcilePaymentAction}
                       className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]"
                     >
@@ -196,7 +200,7 @@ export function PaymentsReconciliationSection({
                       >
                         Mark reconciled
                       </button>
-                    </form>
+                    </form>}
                     <form
                       action={disputePaymentReconciliationAction}
                       className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]"
@@ -221,7 +225,7 @@ export function PaymentsReconciliationSection({
             {reconciliationQueue.length === 0 ? (
               <tr>
                 <td colSpan={6} className="payments-empty-cell px-4 py-8 text-center text-muted-foreground">
-                  No verified payments need reconciliation right now.
+                  No payments need reconciliation review right now.
                 </td>
               </tr>
             ) : null}

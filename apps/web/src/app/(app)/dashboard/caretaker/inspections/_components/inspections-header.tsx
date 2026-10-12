@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ClipboardList, House as Home } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";

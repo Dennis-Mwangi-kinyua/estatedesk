@@ -167,8 +167,8 @@ export async function getPlatformDashboardData() {
     platformQuery("platform-recent-organizations", () =>
       prisma.organization.findMany({
         where: { deletedAt: null },
-        orderBy: { createdAt: "desc" },
-        take: 6,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 10,
         include: {
           subscription: {
             select: {

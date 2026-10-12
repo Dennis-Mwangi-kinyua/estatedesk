@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { createTenantExpenditureAction } from "../actions";
 import {
   fieldClassName,

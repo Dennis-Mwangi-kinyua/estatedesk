@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { CaretakerDashboardStats } from "@/app/(app)/dashboard/caretaker/_lib/types";
 import {
   FocusTaskCard,

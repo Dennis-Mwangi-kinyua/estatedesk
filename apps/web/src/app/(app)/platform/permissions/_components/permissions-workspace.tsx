@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { encodePublicId } from "@/lib/public-id";
 import { ArrowUpRight, KeyRound, Shield, UserRoundCog as UserCog } from "lucide-react";
 import {

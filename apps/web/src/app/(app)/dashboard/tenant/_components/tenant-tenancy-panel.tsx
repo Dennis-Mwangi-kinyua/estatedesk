@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Building2, DoorOpen, FileText } from "lucide-react";
 import type { TenantDashboardUnitImage } from "../_lib/types";
 import { panelShellClassName, StatusPill, SummaryMetric } from "./tenant-dashboard-ui";

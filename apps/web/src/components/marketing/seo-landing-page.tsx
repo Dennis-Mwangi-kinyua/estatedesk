@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowRight, CircleCheck as CheckCircle2, CircleHelp as HelpCircle, Layers3, ListChecks } from "lucide-react";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";

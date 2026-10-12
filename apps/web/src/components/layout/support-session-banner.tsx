@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { useEffect, useState } from "react";
 import { LifeBuoy, Timer } from "lucide-react";
 import {

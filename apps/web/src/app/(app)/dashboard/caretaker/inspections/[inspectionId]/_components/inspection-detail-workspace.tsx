@@ -1,5 +1,5 @@
 import { InspectionReportForm } from "@/features/inspections/inspection-report-form";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowLeft } from "lucide-react";
 import { encodePublicId } from "@/lib/public-id";
 import {

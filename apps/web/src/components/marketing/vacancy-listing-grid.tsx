@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Bath, BedDouble, Building2, MapPin, Phone } from "lucide-react";
 import { VacancyPaginationNav } from "@/components/marketing/vacancy-pagination-nav";
 import { VacancyShareActions } from "@/components/marketing/vacancy-share-actions";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowRight, House as Home } from "lucide-react";
 import {
   panelShellClassName,

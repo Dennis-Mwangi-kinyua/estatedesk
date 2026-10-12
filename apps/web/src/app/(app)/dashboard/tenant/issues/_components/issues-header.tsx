@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { Plus } from "lucide-react";
 import type { TenantIssuesPageData } from "@/app/(app)/dashboard/tenant/issues/_lib/types";

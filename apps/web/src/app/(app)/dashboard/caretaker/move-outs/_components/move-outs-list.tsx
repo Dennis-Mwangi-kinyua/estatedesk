@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ErrorStateCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import {
   panelBodyClassName,

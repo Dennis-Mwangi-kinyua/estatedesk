@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { ShieldCheck } from "lucide-react";
 import { panelShellClassName } from "./profile-ui";

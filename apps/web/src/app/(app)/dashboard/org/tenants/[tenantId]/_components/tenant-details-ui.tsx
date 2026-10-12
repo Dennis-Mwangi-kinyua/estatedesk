@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { memo } from "react";
 import { TenantAdminActions } from "../TenantAdminActions";

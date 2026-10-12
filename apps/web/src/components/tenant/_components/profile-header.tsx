@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { memo } from "react";
 import { PencilLine, ShieldCheck, UserCircle2 } from "lucide-react";
 import { statusBadgeStyles } from "../_lib/helpers";

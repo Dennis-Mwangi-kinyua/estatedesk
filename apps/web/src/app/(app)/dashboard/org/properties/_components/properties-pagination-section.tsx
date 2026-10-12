@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { PropertiesPageData } from "../_lib/types";
 import { buildPageHref } from "../_lib/helpers";
 

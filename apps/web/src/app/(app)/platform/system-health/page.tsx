@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { prisma } from "@/lib/prisma";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { getProductionReadinessReport } from "@/lib/ops/production-readiness";

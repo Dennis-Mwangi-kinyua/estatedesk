@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { useActionState } from "react";
 import { ExternalLink, KeyRound, ShieldCheck } from "lucide-react";
 import { PasswordField } from "@/components/auth/password-field";

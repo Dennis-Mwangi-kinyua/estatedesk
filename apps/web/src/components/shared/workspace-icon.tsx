@@ -33,7 +33,7 @@ export function workspaceIconFor(label: string) {
 
 /** Decorative SVG; visible text on its parent supplies the accessible name. */
 export function WorkspaceIcon({ label, className = "h-5 w-5" }: { label: string; className?: string }) {
-  const { icon } = stickerFor(label);
+  const { icon, tone } = stickerFor(label);
   const Icon = WORKSPACE_ICONS[icon];
-  return <Icon aria-hidden="true" focusable="false" data-workspace-icon={icon} className={`shrink-0 ${className}`} strokeWidth={1.75} />;
+  return <Icon aria-hidden="true" focusable="false" data-workspace-icon={icon} data-workspace-icon-tone={tone} className={`shrink-0 ${className}`} strokeWidth={1.75} />;
 }

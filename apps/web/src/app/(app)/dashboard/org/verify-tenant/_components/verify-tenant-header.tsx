@@ -2,7 +2,7 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 
 import { VisualSticker } from "@/components/shared/visual-sticker";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import type { OrgRole } from "@prisma/client";
 

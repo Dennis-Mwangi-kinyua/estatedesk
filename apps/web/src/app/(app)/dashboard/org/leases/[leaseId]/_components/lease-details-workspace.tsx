@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { getOrgUnitHref } from "@/lib/units/url";
 import { encodePublicId } from "@/lib/public-id";

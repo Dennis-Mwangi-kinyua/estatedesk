@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { encodePublicId } from "@/lib/public-id";
 import { ArrowLeft, Pencil } from "lucide-react";
 import { PresencePill, RolePill } from "@/app/(app)/staff/_components/staff-ui";

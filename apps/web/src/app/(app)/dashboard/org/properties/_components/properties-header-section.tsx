@@ -1,5 +1,5 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import { ArrowLeft, Plus } from "lucide-react";
 import type { PropertiesPageData } from "../_lib/types";

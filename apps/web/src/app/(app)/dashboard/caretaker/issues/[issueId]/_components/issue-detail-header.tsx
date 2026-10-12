@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowLeft, Printer } from "lucide-react";
 import { encodePublicId } from "@/lib/public-id";
 import { IssueSlaBadge } from "@/app/(app)/dashboard/caretaker/_components/issue-sla-badge";

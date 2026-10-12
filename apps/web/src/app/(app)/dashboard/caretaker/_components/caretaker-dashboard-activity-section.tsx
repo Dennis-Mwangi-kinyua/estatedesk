@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { AlertCircle, CircleCheck as CheckCircle2 } from "lucide-react";
 import { TicketStatus } from "@prisma/client";
 import { DeferredLink } from "@/components/navigation/app-links";

@@ -1,5 +1,5 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowLeft } from "lucide-react";
 export function NewTenantHeader({ orgName, availableUnitsCount }: { orgName: string; availableUnitsCount: number }) {
   return <header className="relative overflow-hidden rounded-3xl border border-border bg-card p-5 sm:p-6">

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Building2 } from "lucide-react";
 import type { getBuildingsPageData } from "../_lib/queries";
 import { panelShellClassName } from "./buildings-ui";

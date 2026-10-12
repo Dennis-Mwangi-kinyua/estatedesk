@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import { CalendarDays, ClipboardCheck, Clock3, MapPin, UserRound } from "lucide-react";
 import { DeferredLink } from "@/components/navigation/app-links";

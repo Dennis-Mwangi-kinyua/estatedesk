@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Clock3 } from "lucide-react";
 import { DeferredLink } from "@/components/navigation/app-links";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";

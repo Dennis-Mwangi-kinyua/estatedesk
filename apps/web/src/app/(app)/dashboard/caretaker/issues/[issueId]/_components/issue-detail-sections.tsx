@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { TicketStatus } from "@prisma/client";
 import { encodePublicId } from "@/lib/public-id";
 import { ContactActions } from "@/app/(app)/dashboard/caretaker/_components/contact-actions";

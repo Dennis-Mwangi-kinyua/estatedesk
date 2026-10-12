@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { OnboardingRequestCard } from "./_components/onboarding-request-card";
 import { encodePublicId } from "@/lib/public-id";

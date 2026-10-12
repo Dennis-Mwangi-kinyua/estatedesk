@@ -1,6 +1,6 @@
 
 import { VisualSticker } from "@/components/shared/visual-sticker";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { TenantVerificationSearchForm } from "./tenant-verification-search-form";
 import type { VerifyTenantPageData } from "../_lib/types";
 

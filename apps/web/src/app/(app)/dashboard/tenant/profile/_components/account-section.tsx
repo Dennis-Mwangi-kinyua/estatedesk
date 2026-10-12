@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { PushNotificationSettingsPanel } from "@/components/pwa/push-notification-settings-panel";
 import type { TenantProfileRecord } from "../_lib/types";

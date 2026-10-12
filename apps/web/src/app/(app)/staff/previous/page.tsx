@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { prisma } from "@/lib/prisma";
 import { reactivateMembershipAction } from "@/features/staff/actions/deactivate-membership";

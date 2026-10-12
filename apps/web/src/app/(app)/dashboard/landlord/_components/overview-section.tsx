@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import { BarChart3 } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";

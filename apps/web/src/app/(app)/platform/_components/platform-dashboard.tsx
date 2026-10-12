@@ -1,6 +1,6 @@
 
 import { PlatformSticker as VisualSticker } from "./platform-sticker";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { PlatformDashboardData } from "../_lib/queries";
 import { PlatformDashboardAlert } from "./platform-dashboard-alert";
 import { PlatformDashboardAside } from "./platform-dashboard-aside";

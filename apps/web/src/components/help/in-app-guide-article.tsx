@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowRight, BookOpen, CalendarDays, Clock3, Lock } from "lucide-react";
 import type { HelpWorkspace } from "@/lib/help/help-workspace";
 import { getInAppHelpArticlePath, getInAppHelpHubPath } from "@/lib/help/help-workspace";

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 
 export function ErrorState({ title = "This page could not load", description = "Please try again. If the problem continues, contact support with the reference below.", reference, retry, homeHref = "/", homeLabel = "Go home" }: { title?: string; description?: string; reference?: string; retry: () => void; homeHref?: string; homeLabel?: string }) {

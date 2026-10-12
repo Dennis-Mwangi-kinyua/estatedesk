@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ExternalLink, ShieldCheck } from "lucide-react";
 import { documentVerificationPath } from "@/lib/documents/identity";
 import type { TenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";

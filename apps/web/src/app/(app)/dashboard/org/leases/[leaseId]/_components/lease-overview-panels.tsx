@@ -1,5 +1,5 @@
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { getOrgUnitHref } from "@/lib/units/url";
 import { formatDate } from "../_lib/helpers";
 import { encodePublicId } from "@/lib/public-id";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { SUPPORT_GUIDANCE } from "../_lib/constants";
 import { panelShellClassName } from "./support-ui";

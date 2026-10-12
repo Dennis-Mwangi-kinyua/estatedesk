@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { VisualSticker } from "@/components/shared/visual-sticker";
 import { ArrowRight, CircleCheck as CheckCircle2, CircleHelp as HelpCircle, Layers3, UsersRound as Users } from "lucide-react";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";

@@ -2,7 +2,7 @@ import { ArrowUpRight, CalendarDays, ClipboardCheck, Mail, Phone } from "lucide-
 import { EmojiSticker } from "@/components/shared/emoji-sticker";
 import { nairobiDate } from "@/lib/move-outs/validation";
 import { CloseoutForm } from "@/features/move-outs/components/closeout-form";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { confirmMoveOutAction } from "@/app/(app)/dashboard/org/notifications/actions";
 import {
   formatDateTime,

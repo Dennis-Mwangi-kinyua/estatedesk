@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, KeyRound } from "lucide-react";
 import { TenantWorkspace } from "@/components/theme/ed-dashboard-shell";

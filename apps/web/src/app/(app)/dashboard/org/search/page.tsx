@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { buildIssueDetailHref } from "@/app/(app)/dashboard/org/issues/_lib/helpers";

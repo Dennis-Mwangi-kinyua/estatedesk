@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowRight } from "lucide-react";
 import { VacancyPaginationNav } from "@/components/marketing/vacancy-pagination-nav";
 import type { VacancyPaginationState } from "@/lib/vacancy-pagination";

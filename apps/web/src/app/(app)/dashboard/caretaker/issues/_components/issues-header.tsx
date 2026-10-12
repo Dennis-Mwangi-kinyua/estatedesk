@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Plus, Wrench } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { CaretakerI18nFormat } from "@/app/(app)/dashboard/caretaker/_components/caretaker-i18n-format";

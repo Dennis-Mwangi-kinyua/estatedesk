@@ -7,7 +7,7 @@ import { formatDate, formatDateTime } from "@/lib/formatters";
 import type { TenantNoticesResult } from "@/app/(app)/dashboard/tenant/notices/_lib/queries";
 import { getMoveOutStatusClasses } from "@/app/(app)/dashboard/tenant/notices/_lib/helpers";
 import { EmptySection } from "@/app/(app)/dashboard/tenant/notices/_components/empty-section";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { encodePublicId } from "@/lib/public-id";
 
 type GivenNoticesCardProps = {

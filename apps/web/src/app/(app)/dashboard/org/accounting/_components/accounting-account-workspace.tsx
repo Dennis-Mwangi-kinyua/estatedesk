@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowLeft, Landmark } from "lucide-react";
 import {
   DataCard,

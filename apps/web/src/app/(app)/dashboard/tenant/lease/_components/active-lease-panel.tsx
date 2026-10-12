@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Download, FileText, MapPin } from "lucide-react";
 import { formatDate, formatMoney } from "../_lib/helpers";
 import { isPdfLeaseAsset, tenantLeaseDownloadPath } from "../_lib/download";

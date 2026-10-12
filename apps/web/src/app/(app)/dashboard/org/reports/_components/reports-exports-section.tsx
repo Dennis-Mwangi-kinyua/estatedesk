@@ -1,5 +1,5 @@
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Clock3, Download, FileSpreadsheet } from "lucide-react";
 import { ORG_REPORT_EXPORTS } from "@/lib/reports/org-report-exports";
 import type { ReportsPageData } from "../_lib/types";

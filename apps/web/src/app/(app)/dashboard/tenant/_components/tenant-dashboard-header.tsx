@@ -1,5 +1,5 @@
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import {
   BellRing as Bell,
   WalletCards as CreditCard,

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowUpRight, Search } from "lucide-react";
 import { PlatformSticker } from "../_components/platform-sticker";
 import {

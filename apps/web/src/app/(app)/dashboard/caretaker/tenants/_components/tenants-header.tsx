@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { FileText, Search, UsersRound as Users } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {

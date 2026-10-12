@@ -2,7 +2,7 @@
 
 import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Building2, Code2, LogOut, Menu, Search, X } from "lucide-react";
@@ -236,7 +236,7 @@ export default function PlatformMobileShell({
           <div className="space-y-3 border-t border-border p-4">
             <InAppHelpNav workspace="platform" compact />
             <form action={logoutAction}>
-              <button data-workspace-action="true"
+              <button data-action-kind="destructive" data-workspace-action="true"
                 type="submit"
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.99]"
               >

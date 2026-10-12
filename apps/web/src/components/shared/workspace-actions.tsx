@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { VisualSticker } from "./visual-sticker";

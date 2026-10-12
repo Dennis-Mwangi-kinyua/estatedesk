@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { ComponentType, ReactNode } from "react";
 import { ArrowRight, Wrench } from "lucide-react";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";

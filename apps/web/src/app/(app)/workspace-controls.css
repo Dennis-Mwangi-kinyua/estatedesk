@@ -240,3 +240,40 @@
 }
 .estate-workspace :is(input, select, textarea)[aria-invalid="true"] { border-color: var(--workspace-action-danger) !important; }
 }
+
+/* Legacy buttons follow the same geometry without changing tabs or icon controls. */
+@layer base {
+:is(.estate-workspace, body[data-workspace-theme="true"]) button:not([role="tab"]):not([role="switch"]):not([data-size^="icon"]):not([aria-label]):not([data-workspace-action]) {
+  min-height: var(--workspace-action-height);
+  border-radius: var(--workspace-action-radius) !important;
+  font-size: .875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: .625rem 1rem;
+  border: 1px solid var(--border);
+}
+:is(.estate-workspace, body[data-workspace-theme="true"]) button[type="submit"]:not([data-workspace-action]) {
+  background: var(--workspace-action-primary) !important;
+  color: var(--workspace-action-primary-ink) !important;
+  border-color: var(--workspace-action-primary) !important;
+}
+:is(.estate-workspace, body[data-workspace-theme="true"]) [data-action-kind="destructive"] {
+  background: var(--workspace-action-danger) !important;
+  color: var(--workspace-action-danger-ink) !important;
+  border-color: var(--workspace-action-danger) !important;
+}
+:is(.estate-workspace, body[data-workspace-theme="true"]) [data-action-kind="destructive"] :is(span, svg) {
+  color: inherit !important;
+  background: transparent !important;
+}
+}
+
+.estate-workspace [data-workspace-icon-tone="sky"] { color: #1d5d9b; }
+.estate-workspace [data-workspace-icon-tone="mint"] { color: #206b50; }
+.estate-workspace [data-workspace-icon-tone="peach"] { color: #975321; }
+.estate-workspace [data-workspace-icon-tone="violet"] { color: #6950a7; }
+.dark .estate-workspace [data-workspace-icon-tone="sky"] { color: #91c5ff; }
+.dark .estate-workspace [data-workspace-icon-tone="mint"] { color: #79edb6; }
+.dark .estate-workspace [data-workspace-icon-tone="peach"] { color: #ffc48a; }
+.dark .estate-workspace [data-workspace-icon-tone="violet"] { color: #c7a5ff; }
+.estate-workspace :is([data-workspace-action], [aria-current="page"]) [data-workspace-icon-tone] { color: inherit; }

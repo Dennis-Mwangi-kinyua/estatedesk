@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ProfilePicturePanel } from "@/components/uploads/profile-picture-panel";
 export const dynamic = "force-dynamic";
 export default function ProfilePage() {

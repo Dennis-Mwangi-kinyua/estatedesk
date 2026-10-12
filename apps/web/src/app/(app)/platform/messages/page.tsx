@@ -1,7 +1,7 @@
 
 import { VisualSticker } from "@/components/shared/visual-sticker";
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Prisma } from "@prisma/client";
 import { ArrowRight, ArrowUpRight, Search, Mail } from "lucide-react";
 import { prisma } from "@/lib/prisma";

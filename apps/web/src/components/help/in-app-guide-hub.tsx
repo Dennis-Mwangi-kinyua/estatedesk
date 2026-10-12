@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { BookOpen, Lock, Shield } from "lucide-react";
 import type { HelpWorkspace } from "@/lib/help/help-workspace";
 import {

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { useState } from "react";
 import { createCaretakerIssueAction } from "@/features/issues/actions/create-caretaker-issue-action";
 import {

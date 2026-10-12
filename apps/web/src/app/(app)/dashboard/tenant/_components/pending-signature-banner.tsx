@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { FileSignature } from "lucide-react";
 import type { TenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";
 import { encodePublicId } from "@/lib/public-id";

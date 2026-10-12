@@ -3,9 +3,6 @@
 import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import {
-  asObject,
-  getNumber,
-  getString,
   paymentsMessageUrl,
   readString,
   requirePaymentManager,
@@ -13,6 +10,7 @@ import {
 } from "./payment-action-shared";
 import { writeAuditLog } from "@/lib/audit/security";
 import { prisma } from "@/lib/prisma";
+import { paymentReconciliationBlocker } from "@/lib/payments/reconciliation-policy";
 import { parseBankStatement } from "@/lib/payments/bank-statement";
 
 export async function importBankStatementAction(formData: FormData) {
@@ -38,6 +36,8 @@ export async function importBankStatementAction(formData: FormData) {
           externalReference: { equals: row.transactionId, mode: "insensitive" },
           amount: new Prisma.Decimal(row.amount),
           verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
+          gatewayStatus: "SUCCESS",
+          reversedAt: null,
         },
         select: { id: true, reconciliationStatus: true },
       });
@@ -91,7 +91,7 @@ export async function reconcilePaymentAction(formData: FormData) {
   const notes = readString(formData, "notes");
 
   if (!paymentId) {
-    throw new Error("Payment id is required.");
+    redirect(paymentsMessageUrl("Payment id is required.", "error"));
   }
 
   const payment = await prisma.payment.findFirst({
@@ -102,6 +102,8 @@ export async function reconcilePaymentAction(formData: FormData) {
     select: {
       id: true,
       verificationStatus: true,
+      gatewayStatus: true,
+      reversedAt: true,
       reconciliationStatus: true,
       amount: true,
       reference: true,
@@ -111,18 +113,22 @@ export async function reconcilePaymentAction(formData: FormData) {
   });
 
   if (!payment) {
-    throw new Error("Payment not found.");
+    redirect(paymentsMessageUrl("Payment not found in this organisation.", "error"));
   }
 
-  if (
-    payment.verificationStatus !== "VERIFIED" &&
-    payment.verificationStatus !== "NOT_REQUIRED"
-  ) {
-    throw new Error("Only verified payments can be reconciled.");
-  }
+  const blocker = paymentReconciliationBlocker(payment);
+  if (blocker) redirect(paymentsMessageUrl(blocker, "error"));
 
-  await prisma.payment.update({
-    where: { id: payment.id },
+  // Recheck eligibility in the write so a stale page cannot reconcile a payment
+  // that has been rejected or reversed since it was loaded.
+  const updated = await prisma.payment.updateMany({
+    where: {
+      id: payment.id,
+      orgId: session.activeOrgId!,
+      verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
+      gatewayStatus: "SUCCESS",
+      reversedAt: null,
+    },
     data: {
       reconciliationStatus: "RECONCILED",
       reconciledAt: new Date(),
@@ -130,6 +136,11 @@ export async function reconcilePaymentAction(formData: FormData) {
       reconciliationNotes: notes || "Matched against source statement.",
     },
   });
+
+  if (updated.count !== 1) {
+    revalidatePaymentSurfaces();
+    redirect(paymentsMessageUrl("Payment status changed. Refresh and review it before reconciliation.", "error"));
+  }
 
   await writeAuditLog({
     orgId: session.activeOrgId!,

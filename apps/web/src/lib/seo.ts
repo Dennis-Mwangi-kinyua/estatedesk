@@ -4,7 +4,7 @@ export const SITE_NAME = "EstateDesk";
 export const SITE_TAGLINE =
   "Kenya-built property management software for rent, water, M-Pesa, KRA eTIMS-ready receipts, caretakers, and vacant houses.";
 export const SITE_DESCRIPTION =
-  "EstateDesk is the property management software built for Kenya and East Africa: tenants, leases, M-Pesa rent collection, water billing, double-entry accounting, KRA eTIMS/eRITS-ready tax receipts, offline caretaker metering, WhatsApp ops, public vacancy listings, and role-based staff access—in one secure workspace that replaces spreadsheets, notebooks, and chat-only property management.";
+  "Manage properties, tenants, leases, M-Pesa rent collection, water bills and accounting with EstateDesk, built for landlords and property managers in Kenya.";
 export const DEFAULT_SITE_URL = "https://estatedesk.co.ke";
 
 /** Product differentiators for SEO landings and structured data. */
@@ -133,7 +133,7 @@ export function publicPageMetadata({
       alternateLocale: ["en_US", "en_GB", "en_AE", "en_ZA"],
       images: [
         {
-          url: "/images/og-vacancy.svg",
+          url: "/opengraph-image",
           width: 1200,
           height: 630,
           alt: resolvedTitle,
@@ -144,7 +144,7 @@ export function publicPageMetadata({
       card: "summary_large_image",
       title: resolvedTitle,
       description,
-      images: ["/images/og-vacancy.svg"],
+      images: ["/opengraph-image"],
     },
     robots: {
       index: true,
@@ -192,7 +192,7 @@ export function noIndexPageMetadata({
       locale: "en_KE",
       images: [
         {
-          url: "/images/og-vacancy.svg",
+          url: "/opengraph-image",
           width: 1200,
           height: 630,
           alt: resolvedTitle,
@@ -203,7 +203,7 @@ export function noIndexPageMetadata({
       card: "summary_large_image",
       title: resolvedTitle,
       description,
-      images: ["/images/og-vacancy.svg"],
+      images: ["/opengraph-image"],
     },
     robots: {
       index: false,

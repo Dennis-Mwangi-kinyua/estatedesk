@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Building2, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 

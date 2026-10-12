@@ -6,7 +6,7 @@ import { canInspectUnit } from "@/lib/move-outs/inspection-scope";
 import { nairobiDate } from "@/lib/move-outs/validation";
 import { CloseoutForm } from "@/features/move-outs/components/closeout-form";
 import { MoveOutProgress } from "@/features/move-outs/components/progress";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
 import {
   ArrowUpRight,

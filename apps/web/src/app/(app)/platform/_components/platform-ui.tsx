@@ -1,6 +1,6 @@
 
 import { PlatformSticker as VisualSticker } from "./platform-sticker";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { ComponentType, ReactNode } from "react";
 import type { BarPoint } from "../_lib/types";
 import { formatNumber } from "../_lib/helpers";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import type { OrgRole } from "@prisma/client";
 import { House as Home } from "lucide-react";

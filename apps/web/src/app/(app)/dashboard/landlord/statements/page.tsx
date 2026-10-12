@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { redirect } from "next/navigation";
 import { requireUserSession } from "@/lib/auth/session";
 import { getOwnerStatement } from "@/lib/accounting/owner-statements";

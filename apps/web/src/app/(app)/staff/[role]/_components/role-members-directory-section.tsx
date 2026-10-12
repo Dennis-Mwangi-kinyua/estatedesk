@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { UserRoundPlus as UserPlus } from "lucide-react";
 import { encodePublicId } from "@/lib/public-id";
 import { DeferredLink } from "@/components/navigation/app-links";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { BellRing as Bell, X } from "lucide-react";
 
 type OnboardingRequestPopupProps = {

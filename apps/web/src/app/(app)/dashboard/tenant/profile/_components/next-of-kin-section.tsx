@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { PencilLine } from "lucide-react";
 import { maskEmail, maskPhone } from "../_lib/helpers";
 import type { TenantProfileRecord } from "../_lib/types";

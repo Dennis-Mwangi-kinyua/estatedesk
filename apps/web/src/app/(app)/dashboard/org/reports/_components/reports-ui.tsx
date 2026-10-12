@@ -1,6 +1,6 @@
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { type LucideIcon } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { formatLedgerCurrency } from "@/lib/ledger";
 import { formatStatusLabel, ratingTone } from "../_lib/helpers";

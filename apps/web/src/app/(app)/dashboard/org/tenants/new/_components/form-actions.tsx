@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { MouseEvent } from "react";
 import { buttonPrimaryClassName, buttonSecondaryClassName } from "../_lib/constants";
 import type { Step } from "../_lib/types";

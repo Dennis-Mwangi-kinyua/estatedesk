@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { formatCurrency } from "../_lib/helpers";
 import type { LeaseDetailsData } from "../_lib/types";

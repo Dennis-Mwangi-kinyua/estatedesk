@@ -65,6 +65,8 @@ export async function loadPaymentsPageData(orgId: string, q = "") {
       where: {
         orgId,
         verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
+        gatewayStatus: "SUCCESS",
+        reversedAt: null,
         reconciliationStatus: "UNRECONCILED",
       },
     }),
@@ -90,6 +92,8 @@ export async function loadPaymentsPageData(orgId: string, q = "") {
         OR: [
           {
             verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
+            gatewayStatus: "SUCCESS",
+            reversedAt: null,
             reconciliationStatus: "UNRECONCILED",
           },
           { reconciliationStatus: "DISPUTED" },
@@ -106,6 +110,7 @@ export async function loadPaymentsPageData(orgId: string, q = "") {
         targetType: true,
         gatewayStatus: true,
         verificationStatus: true,
+        reversedAt: true,
         reconciliationStatus: true,
         reconciliationNotes: true,
         reference: true,

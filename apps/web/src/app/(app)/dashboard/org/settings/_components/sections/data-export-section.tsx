@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { encodePublicId } from "@/lib/public-id";
 import { Download, FileArchive } from "lucide-react";
 import { requestDataExportAction } from "@/features/settings/actions/settings-actions";

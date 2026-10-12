@@ -1,6 +1,7 @@
 "use client";
 
-import Link, { type LinkProps } from "next/link";
+import Link from "@/components/navigation/workspace-link";
+import type { LinkProps } from "next/link";
 import {
   useState,
   type AnchorHTMLAttributes,

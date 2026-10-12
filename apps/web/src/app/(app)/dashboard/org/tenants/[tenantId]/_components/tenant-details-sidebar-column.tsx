@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { encodePublicId } from "@/lib/public-id";
 import { computeRentRewards } from "@/lib/rewards/rent-rewards";
 import type { TenantDetailsData } from "../_lib/types";

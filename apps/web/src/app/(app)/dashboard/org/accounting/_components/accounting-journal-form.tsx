@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { FilePenLine } from "lucide-react";
 import { buttonSecondaryClassName } from "../_lib/helpers";
 

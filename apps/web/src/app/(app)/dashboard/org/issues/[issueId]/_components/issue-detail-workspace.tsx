@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import { ArrowLeft } from "lucide-react";
 import type { IssueDetailPageData } from "../../_lib/types";

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { VisualSticker } from "@/components/shared/visual-sticker";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";

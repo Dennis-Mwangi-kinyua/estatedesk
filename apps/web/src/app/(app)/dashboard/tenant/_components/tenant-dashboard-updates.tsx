@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowUpRight, BellRing as Bell, Wrench } from "lucide-react";
 import { formatDate, getStatusTone } from "@/lib/tenant/tenant-format";
 import type {

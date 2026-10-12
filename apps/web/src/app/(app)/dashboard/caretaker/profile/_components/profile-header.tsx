@@ -1,5 +1,5 @@
 import { ProfileAvatar } from "@/components/uploads/profile-avatar";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ShieldCheck, UserRound } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {

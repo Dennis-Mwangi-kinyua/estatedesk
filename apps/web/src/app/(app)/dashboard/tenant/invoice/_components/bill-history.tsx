@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Fragment } from "react";
 import { Droplets, Eye, FileDown, Receipt, Wallet } from "lucide-react";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";

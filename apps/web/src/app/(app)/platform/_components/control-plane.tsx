@@ -1,5 +1,5 @@
 import { PlatformSticker as VisualSticker } from "./platform-sticker";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
 
 export const dateTimeFormatter = new Intl.DateTimeFormat("en-KE", {

@@ -8,7 +8,7 @@ import "../platform-glass.css";
 import { WorkspaceActions } from "@/components/shared/workspace-actions";
 
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useMemo, useState } from "react";
 import {
@@ -138,7 +138,7 @@ function PlatformShellInner({
             </div>
 
             <form action={logoutAction}>
-              <button data-workspace-action="true"
+              <button data-action-kind="destructive" data-workspace-action="true"
                 type="submit"
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
               >

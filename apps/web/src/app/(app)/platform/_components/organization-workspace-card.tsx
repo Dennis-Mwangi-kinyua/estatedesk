@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
 import { Building2, ChevronRight, Globe2, UsersRound, ArrowUpRight } from "lucide-react";
 import {

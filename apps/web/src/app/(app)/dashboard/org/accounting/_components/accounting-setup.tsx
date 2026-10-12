@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { BookOpen } from "lucide-react";
 import { initializeAccountingAction } from "../actions";
 import { ACCOUNTING_WORKFLOW_STEPS } from "../_lib/constants";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { PlatformSticker } from "./platform-sticker";
 import { ArrowUpRight } from "lucide-react";
 import {
@@ -57,10 +57,10 @@ export function PlatformDashboardRecent({
         />
       </section>
 
-      <section className="platform-activity-grid grid min-w-0 items-start gap-5 xl:grid-cols-2">
-        <Panel title="Recent organizations" subtitle="Newest workspaces on the platform">
+      <section className="platform-activity-grid grid min-w-0 items-start gap-5">
+        <Panel title="Recent organizations" subtitle="The 10 newest workspaces · select an organization to open it">
           <div className="mb-4 flex justify-end"><Link href="/platform/organizations" className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-primary">View all organizations<ArrowUpRight aria-hidden="true" className="h-4 w-4" /></Link></div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="platform-recent-organizations grid gap-3 sm:grid-cols-2">
             {recentOrganizations.length === 0 ? (
               <OrganizationWorkspaceCardEmpty />
             ) : (

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { VacancyPaginationState } from "@/lib/vacancy-pagination";
 import { buildVacancyPageHref } from "@/lib/vacancy-pagination";

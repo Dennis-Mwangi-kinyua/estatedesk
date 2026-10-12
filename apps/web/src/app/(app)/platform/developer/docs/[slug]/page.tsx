@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, BookOpen, Clock3, Lock } from "lucide-react";
 import { requirePlatformRole } from "@/lib/permissions/guards";

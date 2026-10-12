@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { useActionState } from "react";
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import {

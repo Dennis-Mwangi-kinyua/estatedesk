@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { ResponsiveDataList, DataCardRow } from "@/components/ui/responsive-data-list";

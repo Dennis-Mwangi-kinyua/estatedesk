@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";

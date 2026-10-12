@@ -2,7 +2,7 @@
 
 import { VisualSticker } from "@/components/shared/visual-sticker";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { memo, type ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 

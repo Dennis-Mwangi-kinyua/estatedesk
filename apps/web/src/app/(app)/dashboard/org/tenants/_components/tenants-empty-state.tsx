@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { UsersRound as Users } from "lucide-react";
 
 export function TenantsEmptyState({ hasSearch }: { hasSearch: boolean }) {

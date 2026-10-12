@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Building2, House as Home, MessageCircleQuestion, Search, ShieldCheck } from "lucide-react";
 
 const footerLinks = [

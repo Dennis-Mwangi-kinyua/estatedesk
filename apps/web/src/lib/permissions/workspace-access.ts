@@ -37,6 +37,7 @@ export function canAccessWorkspacePath(
   }
   if (["/dashboard", "/profile", "/access-denied"].includes(path) || under(path, "/change-password")) return true;
   const platform = ["SUPER_ADMIN", "PLATFORM_ADMIN"].includes(session.platformRole);
+  if (under(path, "/platform/control")) return session.platformRole === "SUPER_ADMIN";
   if (under(path, "/platform")) return platform;
   if (path === "/api-keys") return platform || (Boolean(session.activeOrgId) && session.activeOrgRole === "ADMIN");
   if (!session.activeOrgId || !session.activeOrgRole) return false;
@@ -50,4 +51,13 @@ export function canAccessWorkspacePath(
   if (path === "/dashboard/org" || path === "/dashboard/billing-required") return true;
   const section = under(path, "/dashboard/org") ? path.split("/")[3] : path.split("/")[1];
   return Boolean(section && ORG_WORKSPACE_ROLES[section]?.includes(role));
+}
+
+/** Hide protected destinations using the same policy as page authorization. */
+export function canDiscoverWorkspaceHref(session: Parameters<typeof canAccessWorkspacePath>[0], href: string) {
+  if (!href.startsWith("/") || href.startsWith("//")) return true;
+  const path = new URL(href, "https://estatedesk.invalid").pathname;
+  const section = path.split("/")[1];
+  const protectedDestination = ["dashboard", "platform", "api-keys", "profile", "inspections"].includes(section) || section in ORG_WORKSPACE_ROLES;
+  return !protectedDestination || canAccessWorkspacePath(session, href);
 }

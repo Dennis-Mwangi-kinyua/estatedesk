@@ -1,6 +1,6 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import {
   AlertCircle,
   Building2,

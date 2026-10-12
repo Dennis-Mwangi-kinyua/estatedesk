@@ -1,5 +1,5 @@
 import { NotificationViewButton } from "@/components/notifications/notification-view-button";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { BellRing as Bell, CircleCheck as CheckCircle2, Inbox, Send } from "lucide-react";
 import { PageShell, SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import {

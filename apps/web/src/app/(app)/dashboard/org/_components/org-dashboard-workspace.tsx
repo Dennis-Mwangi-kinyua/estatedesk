@@ -2,7 +2,7 @@
 
 import { WorkspaceActions } from "@/components/shared/workspace-actions";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { useEffect, useRef, useState } from "react";
 import { reportClientError } from "@/lib/errors/report-client-error";
 import type { OrgRole } from "@prisma/client";

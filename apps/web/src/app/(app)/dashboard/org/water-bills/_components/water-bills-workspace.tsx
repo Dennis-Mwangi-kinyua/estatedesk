@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import {
   CircleCheck as CheckCircle2,

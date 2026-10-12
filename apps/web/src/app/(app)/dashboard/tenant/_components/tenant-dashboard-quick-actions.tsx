@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ChevronRight } from "lucide-react";
 import { VisualSticker } from "@/components/shared/visual-sticker";
 import { panelShellClassName } from "./tenant-dashboard-ui";

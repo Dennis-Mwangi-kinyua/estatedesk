@@ -1,5 +1,5 @@
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import { ArrowLeft, Download, Landmark } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";

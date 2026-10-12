@@ -1,6 +1,6 @@
 // src/app/(app)/dashboard/org/inspections/[inspectionId]/print/page.tsx
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { notFound } from "next/navigation";
 import { Prisma } from "@prisma/client";
 

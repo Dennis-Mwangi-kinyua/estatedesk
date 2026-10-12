@@ -1,6 +1,6 @@
 import { EmojiSticker } from "@/components/shared/emoji-sticker";
 import { InspectionReportForm } from "@/features/inspections/inspection-report-form";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { encodePublicId } from "@/lib/public-id";
 import {
   buttonPrimaryClassName,

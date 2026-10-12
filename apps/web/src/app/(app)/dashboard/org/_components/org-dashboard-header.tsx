@@ -1,5 +1,5 @@
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import { Lightbulb, UserRoundPlus as UserPlus } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { CalendarClock, HandCoins, UsersRound as Users } from "lucide-react";
 import type { AgingSummary } from "@/lib/accounting/aging";
 import {

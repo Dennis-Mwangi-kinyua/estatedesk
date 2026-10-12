@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import { CircleCheck as CheckCircle2, ClipboardList, XCircle } from "lucide-react";
 import { DeferredLink } from "@/components/navigation/app-links";

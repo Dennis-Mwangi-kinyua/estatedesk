@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Mail, MessageCircle } from "lucide-react";
 import {
   buildAccountCredentialsEmailHref,

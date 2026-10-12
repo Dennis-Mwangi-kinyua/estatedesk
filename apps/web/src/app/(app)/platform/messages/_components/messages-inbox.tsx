@@ -2,7 +2,7 @@
 
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowUpRight, Archive, Ban, CheckCheck, Mail, Phone, RotateCcw, Trash2 } from "lucide-react";
 import { closePlatformMessageAction, deletePlatformMessageAction, markPlatformMessageReadAction, markPlatformMessageSpamAction, reopenPlatformMessageAction } from "../actions";

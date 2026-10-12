@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
 import { ArrowLeft, CalendarDays, ClipboardCheck, MapPin, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";

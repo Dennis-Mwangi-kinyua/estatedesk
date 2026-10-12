@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { getCurrentPeriod } from "@/lib/ledger-utils";
 import type { TenantPaymentsPageData } from "@/app/(app)/dashboard/tenant/payments/_lib/types";

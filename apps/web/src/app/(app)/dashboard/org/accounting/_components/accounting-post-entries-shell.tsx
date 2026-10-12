@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { FilePenLine, NotebookPen, Receipt } from "lucide-react";
 import type { ReactNode } from "react";
 import { buildAccountingPageHref } from "../_lib/helpers";

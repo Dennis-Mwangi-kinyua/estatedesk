@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowUpRight, ReceiptText } from "lucide-react";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { formatCurrency, formatDate, getStatusTone } from "@/lib/tenant/tenant-format";

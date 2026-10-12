@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { Plus } from "lucide-react";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowLeft, WalletCards as CreditCard, Download, FileText } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { isPdfLeaseAsset, tenantLeaseDownloadPath } from "../_lib/download";

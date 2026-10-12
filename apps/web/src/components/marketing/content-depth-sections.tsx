@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowRight, BookOpen, CircleHelp, Layers3, Workflow } from "lucide-react";
 import type { ContentDepthSections } from "@/lib/content-depth/types";
 

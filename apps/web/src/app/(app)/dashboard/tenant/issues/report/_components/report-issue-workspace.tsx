@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { AlertCircle, ChevronLeft, Send, Wrench } from "lucide-react";
 import { reportIssueAction } from "../_lib/actions";
 import { unitLabel } from "../_lib/helpers";

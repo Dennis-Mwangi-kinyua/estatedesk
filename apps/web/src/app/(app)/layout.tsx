@@ -1,10 +1,12 @@
+import { WorkspaceAccessProvider } from "@/components/navigation/workspace-link";
+import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 import { WorkspaceThemeScope } from "@/components/shared/workspace-theme-scope";
 import { ProfilePictureProvider } from "@/components/uploads/profile-picture-context";
 import "./workspace.css";
 import "./workspace-controls.css";
 import { ReactNode } from "react";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { auditSensitivePageView } from "@/lib/audit/sensitive-pages";
 import { isSecurityGatePathname } from "@/lib/auth/security-gate";
 import { requireAuthenticated } from "@/lib/permissions/guards";
@@ -32,6 +34,10 @@ export default async function AppLayout({
 
   if (pathname && session.activeOrgRole === "TENANT" && !tenantCanAccessWorkspacePath(pathname)) {
     redirect("/dashboard/tenant");
+  }
+
+  if (pathname && (pathname.startsWith("/platform") || pathname.startsWith("/dashboard/")) && !canAccessWorkspacePath(session, pathname)) {
+    notFound();
   }
 
   // Only force password change / terms acceptance for non-platform users.
@@ -93,6 +99,7 @@ export default async function AppLayout({
 
   const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { profileImageUrl: true } });
   return (
+    <WorkspaceAccessProvider access={{ platformRole: session.platformRole, activeOrgRole: session.activeOrgRole, activeOrgId: session.activeOrgId }}>
     <ProfilePictureProvider url={user?.profileImageUrl ?? null}>
     <div className="estate-workspace app-mobile-canvas app-sensitive-surface ed-mobile-surface relative min-h-dvh w-full min-w-0 overflow-x-hidden">
       <WorkspaceThemeScope />
@@ -103,5 +110,6 @@ export default async function AppLayout({
       {isSecurityGateRoute ? null : <DestructiveActionGuard />}
     </div>
     </ProfilePictureProvider>
+    </WorkspaceAccessProvider>
   );
 }

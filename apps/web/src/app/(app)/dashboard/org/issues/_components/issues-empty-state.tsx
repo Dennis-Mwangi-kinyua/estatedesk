@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import { Wrench } from "lucide-react";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";

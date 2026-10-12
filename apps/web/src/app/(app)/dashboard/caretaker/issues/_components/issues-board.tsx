@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { TicketPriority, TicketStatus } from "@prisma/client";
 import { ListPagination } from "@/app/(app)/dashboard/caretaker/_components/list-pagination";
 import { IssueCard } from "@/app/(app)/dashboard/caretaker/issues/_components/issue-card";

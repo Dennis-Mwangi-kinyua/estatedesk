@@ -4,7 +4,7 @@ import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 
 import { Children, cloneElement, isValidElement, useRef, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { createUnitAction } from "../actions";
 
 const steps = ["Identity", "Layout", "Pricing", "Review"];

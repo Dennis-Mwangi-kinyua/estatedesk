@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     locale: "en_KE",
     images: [
       {
-        url: "/images/og-vacancy.svg",
+        url: "/opengraph-image",
         width: 1200,
         height: 630,
         alt: "EstateDesk property management software",
@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     title:
       "EstateDesk | Best Property Management Software in Kenya (M-Pesa, KRA eTIMS)",
     description: SITE_DESCRIPTION,
-    images: ["/images/og-vacancy.svg"],
+    images: ["/opengraph-image"],
   },
   appleWebApp: {
     capable: true,

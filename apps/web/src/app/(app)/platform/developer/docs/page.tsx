@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowRight, BookOpen, Lock, Shield } from "lucide-react";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { privatePageMetadata } from "@/lib/seo";

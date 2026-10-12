@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Search, UsersRound as Users } from "lucide-react";
 import { ListPagination } from "@/app/(app)/dashboard/caretaker/_components/list-pagination";
 import {

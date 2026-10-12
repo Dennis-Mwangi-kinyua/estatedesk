@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowLeft, Download, Droplets, FileText, Wallet } from "lucide-react";
 import type { InvoicePdfData, InvoicePdfLine } from "@/lib/documents/invoice-pdf";
 import {

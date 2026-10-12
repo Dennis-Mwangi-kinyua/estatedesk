@@ -1,5 +1,5 @@
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import type { ComponentType } from "react";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import type { InAppGuideTopic } from "@/lib/help/in-app-guides";

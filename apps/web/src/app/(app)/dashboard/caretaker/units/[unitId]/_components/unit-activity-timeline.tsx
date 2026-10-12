@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Droplets, Wrench } from "lucide-react";
 import { CaretakerI18nLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-i18n-label";
 import { getCaretakerIssueHref } from "@/app/(app)/dashboard/caretaker/_lib/paths";
