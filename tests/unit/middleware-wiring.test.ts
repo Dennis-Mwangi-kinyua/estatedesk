@@ -9,6 +9,15 @@ import { getSessionCookieName } from "../../apps/web/src/lib/auth/cookie-policy"
 const ROOT = join(import.meta.dirname, "..", "..");
 
 describe("middleware wiring", () => {
+  it("allows subscription invoice viewing and downloading while requiring authentication", () => {
+    const cookie = `${getSessionCookieName()}=v1.${"a".repeat(64)}.${"b".repeat(32)}`;
+    for (const suffix of ["", "?download=1"]) {
+      const url = `https://example.test/api/org/subscription-invoices/invoice-id${suffix}`;
+      const headers = { accept: "text/html", "sec-fetch-dest": "document", cookie };
+      assert.equal(proxy(new NextRequest(url, { headers })).status, 200);
+      assert.equal(proxy(new NextRequest(url, { headers: { accept: "text/html" } })).status, 401);
+    }
+  });
   it("allows authenticated move-out downloads while guarding other browser API navigation", () => {
     const cookie = `${getSessionCookieName()}=v1.${"a".repeat(64)}.${"b".repeat(32)}`;
     for (const suffix of ["report", "refund-proof"]) {

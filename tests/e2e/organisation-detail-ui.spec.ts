@@ -7,10 +7,11 @@ test("organisation detail provides scoped operations and section navigation", as
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   const bundle = await build({entryPoints:[path.resolve("tests/e2e/fixtures/organisation-detail.tsx")], bundle:true, write:false, platform:"browser", format:"iife", jsx:"automatic", tsconfig:"apps/web/tsconfig.json", define:{"process.env":"{}","process.env.NODE_ENV": '\"production\"'}, plugins:[{name:"payments-fixture", setup(builder) {
+    builder.onResolve({filter:/^\.\.\/billing-actions$/},()=>({path:"billing",namespace:"fixture"}));
     builder.onResolve({filter:/rename-organization$/},()=>({path:"rename",namespace:"fixture"}));
     builder.onResolve({filter:/^next\/link$/}, () => ({path:"link",namespace:"fixture"}));
     builder.onResolve({filter:/^\.\.\/actions$/}, () => ({path:"actions",namespace:"fixture"}));
-    builder.onLoad({filter:/.*/,namespace:"fixture"}, args => ({contents: args.path === "rename" ? 'export const renamePlatformOrganizationAction=async(_state,data)=>{const name=String(data.get("organizationName")).trim();return name.length<2?{status:"error",message:"Enter an organisation name between 2 and 200 characters."}:{status:"success",message:"Organisation name updated.",name};};' : args.path === "link" ? 'import React from "react"; export default function Link(props){return React.createElement("a",props);}' : 'export const archiveOrganizationAction = async () => {}; export const permanentlyDeleteOrganizationAction = async () => {};', loader:"js", resolveDir:process.cwd()}));
+    builder.onLoad({filter:/.*/,namespace:"fixture"}, args => ({contents: args.path === "billing" ? 'export const organizationBillingAction=async(_state,data)=>({invoice:data.get("operation")==="invoice"?{filename:"invoice.pdf",content:"JVBERi10ZXN0"}:undefined,success:data.get("operation")==="invoice"?"Invoice ready to download.":data.get("operation")==="renew"?"Subscription renewed for 30 days.":"Subscription cancelled."});' : args.path === "rename" ? 'export const renamePlatformOrganizationAction=async(_state,data)=>{const name=String(data.get("organizationName")).trim();return name.length<2?{status:"error",message:"Enter an organisation name between 2 and 200 characters."}:{status:"success",message:"Organisation name updated.",name};};' : args.path === "link" ? 'import React from "react"; export default function Link(props){return React.createElement("a",props);}' : 'export const archiveOrganizationAction = async () => {}; export const permanentlyDeleteOrganizationAction = async () => {};', loader:"js", resolveDir:process.cwd()}));
   }}]});
   await page.goto("/register");
   await page.waitForLoadState("networkidle");
@@ -33,6 +34,24 @@ test("organisation detail provides scoped operations and section navigation", as
     await expectReadableWords(page, ".organisation-detail-page");
     await page.screenshot({path:testInfo.outputPath(`organisation-${theme}.png`),fullPage:true});
   }
+  const billing = page.locator("#organisation-billing");
+  await billing.getByRole("button", { name: "Renew subscription", exact: true }).click();
+  const renewal = billing.getByRole("checkbox");
+  await expect(renewal).not.toBeChecked();
+  await expect(renewal).toHaveAttribute("required", "");
+  await renewal.check();
+  await billing.getByRole("button", { name: "Confirm renewal", exact: true }).click();
+  await expect(billing.getByRole("status")).toContainText("renewed for 30 days");
+  await billing.getByRole("button", { name: "Send an invoice", exact: true }).click();
+  await expect(billing.getByRole("checkbox", { name: /Also send by email/ })).not.toBeChecked();
+  await billing.getByRole("button", { name: "Generate invoice", exact: true }).click();
+  await expect(billing.getByRole("status")).toContainText("Invoice ready to download");
+  await expect(billing.getByRole("link", { name: "Download invoice PDF" })).toHaveAttribute("download", "invoice.pdf");
+  await billing.getByRole("button", { name: "Cancel subscription", exact: true }).click();
+  await billing.getByRole("checkbox").check();
+  await billing.getByRole("button", { name: "Confirm cancellation", exact: true }).click();
+  await expect(billing.getByRole("status")).toContainText("Subscription cancelled");
+  await billing.getByRole("button", { name: "Close", exact: true }).click();
   await page.getByText("Advanced organisation actions",{exact:true}).click();
   await expect(page.getByRole("button",{name:"Permanently delete organization",exact:true})).toBeVisible();
   await page.getByText("Advanced organisation actions",{exact:true}).click();
@@ -54,7 +73,7 @@ test("organisation detail provides scoped operations and section navigation", as
   await expect(page.getByRole("alert")).toContainText("between 2 and 200");
   await page.getByLabel("New organisation name").fill("Updated Properties");
   await page.getByRole("button",{name:"Save name",exact:true}).click();
-  await expect(page.getByRole("status")).toContainText("Organisation name updated");
+  await expect(page.locator("#organisation-profile").getByRole("status")).toContainText("Organisation name updated");
   await expect(page.getByText("Updated Properties",{exact:true})).toBeVisible();
   await page.getByRole("button",{name:"Done",exact:true}).click();
   await expect(page.getByLabel("New organisation name")).toBeHidden();

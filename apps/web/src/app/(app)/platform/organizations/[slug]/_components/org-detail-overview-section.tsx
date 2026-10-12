@@ -1,3 +1,4 @@
+import { OrgBillingActions } from "./org-billing-actions";
 import { OrganizationNameEditor } from "@/components/forms/organization-name-editor";
 import { renamePlatformOrganizationAction } from "@/features/organizations/actions/rename-organization";
 import Link from "next/link";
@@ -86,6 +87,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
                   <InfoTile label="Trial end" value={formatDate(org.subscription.trialEndsAt)} />
                   <InfoTile label="Billing email" value={org.subscription.billingEmail ?? "-"} />
                 </div>
+                <OrgBillingActions orgId={org.id} cancelled={org.subscription.status === "CANCELLED"} />
               </div>
             ) : (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100">

@@ -145,7 +145,12 @@ export function CommunicationFeedPanel({
                       </p>
                     )}
 
-                    {notification.user?.id === membership.userId ? <div className="mt-3"><NotificationViewButton notificationId={notification.id} /></div> : null}
+                    {notification.title === "Subscription invoice sent" ? (
+                      <div className="mt-3 flex gap-3 text-sm font-medium text-primary">
+                        <a href={`/api/org/subscription-invoices/${notification.id}`} target="_blank" rel="noopener noreferrer">View invoice</a>
+                        <a href={`/api/org/subscription-invoices/${notification.id}?download=1`}>Download invoice</a>
+                      </div>
+                    ) : notification.user?.id === membership.userId ? <div className="mt-3"><NotificationViewButton notificationId={notification.id} /></div> : null}
                     {!notification.readAt && notification.user?.id === membership.userId ? (
                       <form action={markNotificationReadAction} className="mt-3">
                         <input type="hidden" name="notificationId" value={notification.id} />
