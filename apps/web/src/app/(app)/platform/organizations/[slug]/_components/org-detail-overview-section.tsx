@@ -4,6 +4,10 @@ import { renamePlatformOrganizationAction } from "@/features/organizations/actio
 import Link from "next/link";
 import {
   ArrowLeft,
+  Mail,
+  Phone,
+  Globe2,
+  CalendarDays,
   Building2,
   WalletCards as CreditCard,
   FileText,
@@ -14,7 +18,6 @@ import {
 } from "lucide-react";
 import {
   Badge,
-  Surface,
   formatCurrency,
   formatDateTime,
   formatNumber,
@@ -23,7 +26,7 @@ import {
 import { formatSubscriptionSummary } from "../../../_lib/helpers";
 import { formatDate } from "../_lib/helpers";
 import type { OrgDetailWorkspaceProps } from "./org-detail-workspace";
-import { InfoTile, SmallCount, OrgSummaryCard } from "./org-detail-ui";
+import { InfoTile, SmallCount, OrgSummaryCard, OrgSurface } from "./org-detail-ui";
 
 export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
   const { org, featureKeys, paidTotal, unitCount, recentMessages } = props;
@@ -40,15 +43,29 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
           Organizations
         </Link>
 
-        <header className="rounded-2xl border border-border bg-card p-4 sm:p-6">
-          <div className="flex items-start gap-3"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Building2 aria-hidden="true" className="h-6 w-6"/></span><div className="min-w-0"><p className="text-xs font-medium text-muted-foreground">Organisation workspace</p><h1 data-heading-icon="custom" className="mt-1 break-words text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">{org.name}</h1></div></div>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">Manage the organisation’s profile, billing, people, and operational activity.</p>
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs"><Badge tone={toneForStatus(org.status)}>{org.status}</Badge><span className="break-all rounded-full border border-border bg-muted/20 px-3 py-1.5 text-muted-foreground">/{org.slug}</span><span className="rounded-full border border-border bg-muted/20 px-3 py-1.5 text-muted-foreground">{org.currencyCode} · {org.timezone}</span></div>
-          <div className="mt-5 grid gap-2 sm:grid-cols-2"><Link data-workspace-action="true" href={`/platform/payment-ops?orgId=${encodeURIComponent(org.slug)}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><Receipt aria-hidden="true" className="h-4 w-4"/>Payment operations</Link><Link data-workspace-action="true" href="#organisation-audit" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground"><ShieldCheck aria-hidden="true" className="h-4 w-4"/>Audit activity</Link></div>
+        <header className="org-detail-hero overflow-hidden rounded-3xl border border-border bg-card">
+          <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div className="min-w-0">
+              <div className="flex items-start gap-4">
+                <span className="org-hero-icon flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm"><Building2 aria-hidden="true" className="h-7 w-7" /></span>
+                <div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Organisation overview</p><h1 data-heading-icon="custom" className="mt-2 break-words text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">{org.name}</h1><p className="mt-2 break-all text-sm text-muted-foreground">/{org.slug}</p></div>
+              </div>
+              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-2"><Globe2 aria-hidden="true" className="h-4 w-4" />{org.timezone}</span>
+                <span className="inline-flex items-center gap-2"><CreditCard aria-hidden="true" className="h-4 w-4" />{org.currencyCode}</span>
+                <span className="inline-flex items-center gap-2"><CalendarDays aria-hidden="true" className="h-4 w-4" />Created {formatDate(org.createdAt)}</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3 lg:min-w-56">
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card/80 px-4 py-3"><span className="text-xs font-medium text-muted-foreground">Workspace status</span><Badge tone={toneForStatus(org.status)}>{org.status}</Badge></div>
+              <Link data-workspace-action="true" href={`/platform/payment-ops?orgId=${encodeURIComponent(org.slug)}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Receipt aria-hidden="true" className="h-4 w-4" />Payment operations</Link>
+              <Link data-workspace-action="true" href="#organisation-audit" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><ShieldCheck aria-hidden="true" className="h-4 w-4" />Audit activity</Link>
+            </div>
+          </div>
         </header>
       </div>
 
-      <nav aria-label="Organisation sections" className="grid grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-2 sm:grid-cols-6 sm:p-3">{[{id:"profile",label:"Profile",Icon:Building2},{id:"billing",label:"Billing",Icon:CreditCard},{id:"operations",label:"Operations",Icon:Settings},{id:"payments",label:"Payments",Icon:Receipt},{id:"members",label:"Members",Icon:Users},{id:"audit",label:"Audit activity",Icon:ShieldCheck}].map(({id,label,Icon})=><Link key={id} href={`#organisation-${id}`} className="flex min-h-16 flex-col items-center justify-center gap-1.5 rounded-xl px-1 py-2 text-center text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"><Icon aria-hidden="true" className="h-5 w-5 text-primary"/>{label}</Link>)}</nav>
+      <nav aria-label="Organisation sections" className="grid grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-2 sm:grid-cols-6 sm:p-3">{[{id:"profile",label:"Profile",Icon:Building2},{id:"billing",label:"Billing",Icon:CreditCard},{id:"operations",label:"Operations",Icon:Settings},{id:"payments",label:"Payments",Icon:Receipt},{id:"members",label:"Members",Icon:Users},{id:"audit",label:"Audit activity",Icon:ShieldCheck}].map(({id,label,Icon})=><Link key={id} href={`#organisation-${id}`} className="flex min-h-14 flex-col items-center justify-center gap-1.5 rounded-xl px-1 py-2 text-center text-xs font-medium text-muted-foreground transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Icon aria-hidden="true" className="h-5 w-5 text-primary"/>{label}</Link>)}</nav>
       <section className="organisation-summary grid grid-cols-2 gap-3 xl:grid-cols-4">
         <OrgSummaryCard label="Status" value={org.status} note={`Created ${formatDate(org.createdAt)}`} />
         <OrgSummaryCard label="Tenants" value={formatNumber(org._count.tenants)} note={`${formatNumber(org._count.leases)} leases`} />
@@ -56,20 +73,20 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
         <OrgSummaryCard label="Recognized paid" value={formatCurrency(paidTotal)} note={`${formatNumber(org._count.payments)} payments`} />
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
-        <Surface id="organisation-profile" title="Workspace profile" className="organisation-profile-card">
+      <section className="grid items-start gap-5 xl:grid-cols-2">
+        <OrgSurface id="organisation-profile" title="Workspace profile" description="Identity, contact details and workspace preferences." className="organisation-profile-card">
           <div className="p-4 sm:px-5"><OrganizationNameEditor name={org.name} orgId={org.id} action={renamePlatformOrganizationAction} /></div>
           <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
             <InfoTile icon={<Building2 className="h-4 w-4" />} label="Slug" value={`/${org.slug}`} />
             <InfoTile icon={<Settings className="h-4 w-4" />} label="Timezone" value={org.timezone} />
             <InfoTile icon={<CreditCard className="h-4 w-4" />} label="Currency" value={org.currencyCode} />
             <InfoTile icon={<FileText className="h-4 w-4" />} label="Retention" value={`${org.dataRetentionDays} days`} />
-            <InfoTile icon={<Users className="h-4 w-4" />} label="Email" value={org.email ?? "-"} />
-            <InfoTile icon={<Users className="h-4 w-4" />} label="Phone" value={org.phone ?? "-"} />
+            <InfoTile icon={<Mail className="h-4 w-4" />} label="Email" value={org.email ?? "-"} />
+            <InfoTile icon={<Phone className="h-4 w-4" />} label="Phone" value={org.phone ?? "-"} />
           </div>
-        </Surface>
+        </OrgSurface>
 
-        <Surface id="organisation-billing" title="Billing and subscription">
+        <OrgSurface id="organisation-billing" title="Billing and subscription" description="Subscription dates, invoices and renewal actions.">
           <div className="p-4">
             {org.subscription ? (
               <div className="space-y-4">
@@ -95,11 +112,11 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
               </div>
             )}
           </div>
-        </Surface>
+        </OrgSurface>
       </section>
 
       <section className="grid items-start gap-4 lg:grid-cols-2">
-        <Surface title="Feature flags">
+        <OrgSurface title="Feature flags" description="Features enabled for this organisation.">
           <div className="p-4">
             {featureKeys.length ? (
               <div className="flex flex-wrap gap-2">
@@ -111,9 +128,9 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
               <p className="text-sm text-slate-500 dark:text-slate-400">No feature flags configured.</p>
             )}
           </div>
-        </Surface>
+        </OrgSurface>
 
-        <Surface id="organisation-kra" title="KRA integration">
+        <OrgSurface id="organisation-kra" title="KRA integration" description="Tax integration status and synchronization.">
           <div className="space-y-3 p-4">
             {org.kraIntegration ? (
               <>
@@ -137,13 +154,13 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
               <p className="text-sm text-slate-500 dark:text-slate-400">No KRA integration configured.</p>
             )}
           </div>
-        </Surface>
+        </OrgSurface>
 
       </section>
 
       <section aria-label="Organisation operational counts">
-        <Surface id="organisation-operations" title="Operational counts">
-          <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-5">
+        <OrgSurface id="organisation-operations" title="Operational counts" description="A snapshot of people, records and activity across the workspace.">
+          <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 sm:p-5 xl:grid-cols-5">
             <SmallCount label="Members" value={org._count.memberships} />
             <SmallCount label="API keys" value={org._count.apiKeys} />
             <SmallCount label="Issues" value={org._count.issues} />
@@ -155,7 +172,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
             <SmallCount label="Invitations" value={org._count.invitations} />
             <SmallCount label="Audit records" value={org._count.auditLogs} />
           </div>
-        </Surface>
+        </OrgSurface>
       </section>
     </>
   );

@@ -7,13 +7,13 @@ import { organizationBillingAction } from "../billing-actions";
 export function OrgBillingActions({ orgId, cancelled }: { orgId: string; cancelled: boolean }) {
   const [operation, setOperation] = useState<"renew" | "invoice" | "cancel" | null>(null);
   const [state, action, pending] = useActionState(organizationBillingAction, {});
-  const buttonClass = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium disabled:opacity-50";
+  const buttonClass = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
   return (
     <div className="space-y-3 border-t border-border pt-4">
-      <div className="flex flex-wrap gap-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         <button type="button" disabled={pending} onClick={() => setOperation("renew")} className={`${buttonClass} bg-primary text-primary-foreground`}><RefreshCw aria-hidden="true" className="h-4 w-4" />Renew subscription</button>
         <button type="button" disabled={pending} onClick={() => setOperation("invoice")} className={buttonClass}><Send aria-hidden="true" className="h-4 w-4" />Send an invoice</button>
-        <button type="button" disabled={pending || cancelled} onClick={() => setOperation("cancel")} className={`${buttonClass} text-red-600 dark:text-red-400`}><XCircle aria-hidden="true" className="h-4 w-4" />Cancel subscription</button>
+        <button type="button" disabled={pending || cancelled} onClick={() => setOperation("cancel")} className={`${buttonClass} text-red-600 dark:text-red-400 sm:col-span-2`}><XCircle aria-hidden="true" className="h-4 w-4" />Cancel subscription</button>
       </div>
       {operation ? <form key={operation} action={action} className="space-y-3 rounded-xl border border-border bg-muted/20 p-3">
         <input type="hidden" name="orgId" value={orgId} />

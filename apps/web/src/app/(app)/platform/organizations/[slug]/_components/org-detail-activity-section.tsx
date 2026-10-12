@@ -1,10 +1,11 @@
+import { OrgSurface } from "./org-detail-ui";
+import { Receipt, UsersRound, Archive, Trash2, ChevronDown } from "lucide-react";
 import {
   archiveOrganizationAction,
   permanentlyDeleteOrganizationAction,
 } from "../actions";
 import {
   Badge,
-  Surface,
   formatCurrency,
   formatDateTime,
   labelize,
@@ -18,11 +19,11 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
   return (
     <>
       <section className="grid gap-4 xl:grid-cols-2">
-        <Surface id="organisation-payments" title="Recent payments">
+        <OrgSurface id="organisation-payments" title="Recent payments" description="Latest transactions and their payment status.">
           <div className="divide-y divide-slate-100 dark:divide-white/10">
             {recentPayments.map((payment) => (
-              <div key={payment.id} className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto]">
-                <div className="min-w-0">
+              <div key={payment.id} className="org-activity-row grid gap-3 p-4 transition hover:bg-muted/30 sm:grid-cols-[minmax(0,1fr)_auto] sm:p-5">
+                <div className="flex min-w-0 items-start gap-3"><span className="org-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Receipt aria-hidden="true" className="h-4 w-4" /></span><div className="min-w-0">
                   <p className="break-words font-medium leading-5 text-slate-950 dark:text-white">
                     {payment.payerTenant?.fullName ??
                       payment.payerUser?.fullName ??
@@ -32,7 +33,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     {payment.targetType} • {payment.reference ?? payment.externalReference ?? "-"}
                   </p>
-                </div>
+                </div></div>
                 <div className="min-w-0 text-left sm:text-right">
                   <p className="font-semibold text-slate-950 dark:text-white">
                     {formatCurrency(Number(payment.amount))}
@@ -47,20 +48,20 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
               <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">No payments found.</div>
             ) : null}
           </div>
-        </Surface>
+        </OrgSurface>
 
-        <Surface id="organisation-members" title="Recent members">
+        <OrgSurface id="organisation-members" title="Recent members" description="Workspace roles and recent sign-in activity.">
           <div className="divide-y divide-slate-100 dark:divide-white/10">
             {recentMembers.map((member) => (
-              <div key={member.id} className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto]">
-                <div className="min-w-0">
+              <div key={member.id} className="org-activity-row grid gap-3 p-4 transition hover:bg-muted/30 sm:grid-cols-[minmax(0,1fr)_auto] sm:p-5">
+                <div className="flex min-w-0 items-start gap-3"><span className="org-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><UsersRound aria-hidden="true" className="h-4 w-4" /></span><div className="min-w-0">
                   <p className="break-words font-medium leading-5 text-slate-950 dark:text-white">
                     {member.user.fullName}
                   </p>
                   <p className="mt-1 break-words text-sm text-slate-500 dark:text-slate-400">
                     {member.user.email ?? "-"}
                   </p>
-                </div>
+                </div></div>
                 <div className="min-w-0 text-left sm:text-right">
                   <Badge>{member.role}</Badge>
                   <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -73,10 +74,10 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
               <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">No members found.</div>
             ) : null}
           </div>
-        </Surface>
+        </OrgSurface>
       </section>
 
-      <Surface id="organisation-audit" title="Recent audit activity">
+      <OrgSurface id="organisation-audit" title="Recent audit activity" description="A record of changes, actions and the people behind them.">
         <div className="divide-y divide-border md:hidden">
           {recentAuditLogs.map((log) => (
             <article key={log.id} className="space-y-2.5 px-3 py-3.5 sm:px-4">
@@ -142,11 +143,11 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
             </tbody>
           </table>
         </div>
-      </Surface>
+      </OrgSurface>
 
       <details className="rounded-2xl border border-border bg-card">
-        <summary className="flex min-h-12 cursor-pointer items-center px-4 py-3 text-sm font-semibold text-muted-foreground">Advanced organisation actions</summary>
-      <Surface
+        <summary className="flex min-h-14 cursor-pointer items-center gap-3 px-5 py-4 text-sm font-semibold text-muted-foreground"><Archive aria-hidden="true" className="h-5 w-5" />Advanced organisation actions<ChevronDown aria-hidden="true" className="ml-auto h-4 w-4" /></summary>
+      <OrgSurface
         title="Danger zone"
         description="Archive access or permanently remove this organization."
       >
@@ -176,7 +177,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
             type="submit"
             className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/20 dark:focus-visible:ring-offset-slate-900 sm:w-auto"
           >
-            Archive and terminate access
+            <Archive aria-hidden="true" className="mr-2 h-4 w-4" />Archive and terminate access
           </button>
         </form>
 
@@ -207,10 +208,10 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
             type="submit"
             className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-red-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:bg-red-500 dark:text-white dark:hover:bg-red-400 dark:focus-visible:ring-offset-slate-900 sm:w-auto"
           >
-            Permanently delete organization
+            <Trash2 aria-hidden="true" className="mr-2 h-4 w-4" />Permanently delete organization
           </button>
         </form>
-      </Surface>
+      </OrgSurface>
       </details>
     </>
   );
