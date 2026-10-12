@@ -138,6 +138,7 @@ export async function scheduleInspectionAction(formData: FormData) {
 
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");
+  revalidatePath(`/dashboard/org/move-outs/${encodePublicId(noticeId, "move-out-notice")}`);
   revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/inspections");
   revalidatePath("/dashboard/org/notifications");
@@ -172,6 +173,7 @@ export async function closeMoveOutAction(formData: FormData) {
 
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");
+  revalidatePath(`/dashboard/org/move-outs/${encodePublicId(noticeId, "move-out-notice")}`);
   revalidatePath("/dashboard/org");
   revalidatePath("/dashboard/org/notifications");
   revalidatePath("/dashboard/org/verify-tenant");
@@ -200,11 +202,13 @@ export async function recordMoveOutRefundAction(form: FormData) {
   await prisma.$transaction(tx => recordMoveOutRefund(tx, { noticeId, orgId: session.activeOrgId!, actorUserId: session.userId, reference, method, proofAssetId }), { isolationLevel: "Serializable" });
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");
+  revalidatePath(`/dashboard/org/move-outs/${encodePublicId(noticeId, "move-out-notice")}`);
   revalidatePath("/dashboard/tenant/notices");
 }
 
 export async function releaseMoveOutUnitAction(form: FormData) {
   const session = await requireManagementAccess();
+  const noticeId = String(form.get("noticeId") ?? "").trim();
   if (form.get("readyConfirmed") !== "on") throw new Error("Confirm repairs and cleaning are complete.");
   await prisma.$transaction(async tx => {
     const notice = await tx.moveOutNotice.findFirst({ where: { id: String(form.get("noticeId") ?? ""), status: "CLOSED", lease: { orgId: session.activeOrgId! } }, include: { lease: true } });
@@ -216,6 +220,7 @@ export async function releaseMoveOutUnitAction(form: FormData) {
   }, { isolationLevel: "Serializable" });
   revalidatePath("/move-outs");
   revalidatePath("/dashboard/org/move-outs");
+  revalidatePath(`/dashboard/org/move-outs/${encodePublicId(noticeId, "move-out-notice")}`);
   revalidatePath("/dashboard/org/units");
   revalidatePublicVacancies();
 }

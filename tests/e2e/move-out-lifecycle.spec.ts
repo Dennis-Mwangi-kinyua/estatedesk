@@ -63,7 +63,7 @@ test("move-out handover, private refund proof, report permissions and retained r
   try {
     console.log("Opening move-out workspace");
     await page.goto("/dashboard/org/move-outs");
-    await page.getByRole("link", { name: "Open handover workspace" }).click();
+    await page.getByRole("link", { name: "Open notice" }).click();
     await expect(page).toHaveURL(/\/dashboard\/org\/move-outs\/[^/]+$/);
     const form = page.getByRole("heading", { name: "Review settlement and complete handover" }).locator("..");
     await expect(form.getByLabel("Deposit actually held")).toHaveValue("12000.00", { timeout: 30_000 });
@@ -84,8 +84,9 @@ test("move-out handover, private refund proof, report permissions and retained r
     expect(bytes.subarray(0, 4).toString()).toBe("%PDF");
     await form.getByLabel("I generated and reviewed", { exact: false }).check();
     console.log("Closing handover");
-    await Promise.all([page.waitForNavigation({ waitUntil: "domcontentloaded" }), form.getByRole("button", { name: "Confirm handover and close", exact: true }).click()]);
-    await expect(page.getByText(/^REFUND PENDING · Current amount owed/)).toBeVisible();
+    await form.getByRole("button", { name: "Confirm handover and close", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Handover completed", exact: true })).toBeVisible();
+    await expect(page.getByLabel("Paid refund reference")).toBeVisible();
     await page.waitForLoadState("networkidle");
     expect((await db.unit.findUniqueOrThrow({ where: { id: fixture.unitId } })).status).toBe("UNDER_MAINTENANCE");
     const notice = await db.moveOutNotice.findUniqueOrThrow({ where: { id: fixture.noticeId } });
@@ -96,8 +97,8 @@ test("move-out handover, private refund proof, report permissions and retained r
     await page.getByLabel("Paid refund reference").fill(`BROWSER-${fixture.noticeId}`);
     await page.getByLabel("Refund payment proof").setInputFiles({ name: "proof.png", mimeType: "image/png", buffer: image });
     await page.getByLabel("I confirm this refund has already been paid.").check();
-    await Promise.all([page.waitForNavigation({ waitUntil: "domcontentloaded" }), page.getByRole("button", { name: "Record paid refund", exact: true }).click()]);
-    await expect(page.getByText(/^SETTLED · Current amount owed/)).toBeVisible();
+    await page.getByRole("button", { name: "Record paid refund", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Record paid refund", exact: true })).toHaveCount(0);
     await page.waitForLoadState("networkidle");
     await page.getByLabel("Repairs and cleaning completed", { exact: false }).check();
     await page.getByRole("button", { name: "Mark unit vacant and ready" }).click();

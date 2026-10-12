@@ -48,7 +48,7 @@ export function CloseoutForm({ noticeId, deposit = "0", dateLimit, action, appro
         else { setNotice("Request sent to admins and authorised approvers. Handover is blocked until approval."); setRefreshKey(key => key + 1); router.refresh(); }
         return;
       }
-      const result = await action(form); if (result && !result.ok) { setError(result.error || "Could not close this move-out. Please try again."); return; } window.location.assign("/dashboard/org/move-outs"); } catch { setError("Could not close this move-out. Refresh the settlement and try again. If it continues, contact support."); } });
+      const result = await action(form); if (result && !result.ok) { setError(result.error || "Could not close this move-out. Please try again."); return; } router.refresh(); } catch { setError("Could not close this move-out. Refresh the settlement and try again. If it continues, contact support."); } });
   }}>
     <input type="hidden" name="noticeId" value={noticeId} />
     <input type="hidden" name="costItems" value={JSON.stringify(costs)} />
