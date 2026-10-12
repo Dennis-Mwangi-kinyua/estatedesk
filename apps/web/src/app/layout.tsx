@@ -31,6 +31,7 @@ import "./globals.css";
 import "./system-glass.css";
 import "./modern-ui.css";
 import "./site-experience.css";
+import "./soft-ui.css";
 
 const siteUrl = getSiteUrl();
 const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;

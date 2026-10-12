@@ -1,5 +1,6 @@
 import { PlatformRole } from "@prisma/client";
-import { Crown, Plus, Shield, User2 } from "lucide-react";
+import { Plus } from "lucide-react";
+import { VisualSticker } from "@/components/shared/visual-sticker";
 import { KeyRound } from "@/components/shared/colored-icons";
 import { createPlatformUserAction } from "../actions";
 import {
@@ -10,15 +11,7 @@ import {
 import { formatPermission } from "../_lib/helpers";
 
 function roleIcon(role: PlatformRole) {
-  if (role === "SUPER_ADMIN") {
-    return <Crown className="h-4 w-4 text-neutral-700" />;
-  }
-
-  if (role === "PLATFORM_ADMIN") {
-    return <Shield className="h-4 w-4 text-neutral-700" />;
-  }
-
-  return <User2 className="h-4 w-4 text-neutral-700" />;
+  return <VisualSticker label={role === "USER" ? "user" : "security"} size="xs" />;
 }
 
 export function RoleGuidePanel() {
@@ -34,7 +27,7 @@ export function RoleGuidePanel() {
       <div className="divide-y divide-neutral-200">
         {ROLE_VALUES.map((roleValue) => (
           <div key={roleValue} className="flex gap-3 px-4 py-3">
-            <div className="mt-0.5 rounded-lg border border-neutral-200 bg-neutral-50 p-2">
+            <div className="mt-0.5 shrink-0">
               {roleIcon(roleValue)}
             </div>
             <div className="min-w-0">
