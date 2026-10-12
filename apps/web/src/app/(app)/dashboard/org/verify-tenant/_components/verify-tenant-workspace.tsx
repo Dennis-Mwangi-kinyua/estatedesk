@@ -11,7 +11,7 @@ export function VerifyTenantWorkspace({ data, activeOrgId, orgRole }: { data: Ve
   return (
     <div className="org-theme-content mx-auto max-w-6xl space-y-5 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
       <VerifyTenantHeader orgRole={orgRole} />
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="grid gap-5 min-[1600px]:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-4">
           <VerifyTenantTransferRequestsPanel incomingTransferRequests={incomingTransferRequests} />
           <VerifyTenantSearchPanel

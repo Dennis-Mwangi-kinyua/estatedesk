@@ -1,3 +1,4 @@
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { formatLedgerCurrency, formatLedgerDate } from "@/lib/ledger";
 import { reverseVerifiedPaymentAction } from "../actions";
 import type { PaymentsPageData } from "../_lib/types";
@@ -17,6 +18,7 @@ export function PaymentsRecentSection({
     <section className={panelShellClassName}>
       <div className="border-b border-border px-5 py-4 sm:px-6">
         <h2 className="text-lg font-semibold tracking-tight text-foreground">
+          <VisualSticker label="Recent payments" size="xs" className="mr-2 align-middle" />
           Recorded payments this month
         </h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -82,7 +84,7 @@ export function PaymentsRecentSection({
                 </td>
                 <td data-label="Reconciliation" className="px-4 py-3">
                   <span
-                    className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${reconciliationClasses(
+                    className={`inline-flex shrink-0 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${reconciliationClasses(
                       payment.reconciliationStatus,
                     )}`}
                   >

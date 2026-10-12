@@ -31,9 +31,9 @@ export function PlatformDashboardAside({
   } = data;
 
   return (
-    <aside className="flex flex-col gap-5">
+    <section aria-label="Platform operations" className="grid min-w-0 items-stretch gap-5 xl:grid-cols-3">
       <Panel title="Quick actions" subtitle="High-priority shortcuts">
-        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-1">
+        <div className="grid grid-cols-1 gap-2.5 min-[480px]:grid-cols-2 xl:grid-cols-1">
           <ActionLink href="/platform/organizations/new" label="New organization" icon={Plus} />
           <ActionLink href="/platform/onboarding?status=NEW" label="New onboarding" icon={SlidersHorizontal} />
           <ActionLink href="/platform/users" label="Platform users" icon={Users} />
@@ -75,6 +75,6 @@ export function PlatformDashboardAside({
           />
         </div>
       </Panel>
-    </aside>
+    </section>
   );
 }

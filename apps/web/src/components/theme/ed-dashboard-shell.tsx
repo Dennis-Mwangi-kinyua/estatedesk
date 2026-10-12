@@ -60,7 +60,7 @@ export function StatCard({
   return (
     <div
       className={[
-        "rounded-[24px] border p-4",
+        "workspace-metric min-w-0 rounded-[24px] border p-4",
         tone === "accent"
           ? "border-primary/20 bg-primary text-primary-foreground"
           : "ed-theme-card border-border bg-muted/35",
@@ -68,26 +68,26 @@ export function StatCard({
     >
       <div
         className={[
-          "flex items-center gap-2",
+          "flex items-center gap-3",
           tone === "accent" ? "text-primary-foreground/85" : "text-foreground/70",
         ].join(" ")}
       >
         <div
           className={[
-            "flex h-8 w-8 items-center justify-center rounded-full sm:h-9 sm:w-9",
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full sm:h-9 sm:w-9",
             tone === "accent" ? "bg-primary-foreground/15" : "bg-card text-foreground shadow-sm",
           ].join(" ")}
         >
           {icon}
         </div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.14em]">
+        <p className="min-w-0 text-xs font-medium leading-5">
           {label}
         </p>
       </div>
 
       <p
         className={[
-          "mt-3 text-[15px] font-semibold tabular-nums sm:text-[16px]",
+          "mt-3 break-words text-xl font-semibold tabular-nums sm:text-2xl",
           tone === "accent" ? "text-primary-foreground" : "text-foreground",
         ].join(" ")}
       >

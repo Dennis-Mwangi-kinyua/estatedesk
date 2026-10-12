@@ -15,7 +15,7 @@ export function NoticesStats({
   totalMoveOutNotices,
 }: NoticesStatsProps) {
   return (
-    <section className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:gap-4">
+    <section className="workspace-card-grid grid grid-cols-2 gap-3 lg:grid-cols-4 xl:gap-4">
       <StatCard icon={<Bell className="h-4 w-4" />} label="All Notices" value={totalNotifications} />
       <StatCard icon={<Clock3 className="h-4 w-4" />} label="Queued" value={queuedNotifications} />
       <StatCard icon={<CheckCircle2 className="h-4 w-4" />} label="Sent" value={sentNotifications} />

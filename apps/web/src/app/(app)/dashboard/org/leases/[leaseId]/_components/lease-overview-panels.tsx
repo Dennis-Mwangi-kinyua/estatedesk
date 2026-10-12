@@ -1,3 +1,4 @@
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "next/link";
 import { getOrgUnitHref } from "@/lib/units/url";
 import { formatDate } from "../_lib/helpers";
@@ -6,57 +7,57 @@ import type { LeaseDetailsData } from "../_lib/types";
 
 export function LeaseOverviewPanels({ lease }: { lease: LeaseDetailsData["lease"] }) {
   return (
-    <section className="grid gap-6 xl:grid-cols-3">
-      <div className="rounded-xl border bg-background p-5 shadow-sm xl:col-span-1">
-        <h2 className="text-base font-semibold">Lease Overview</h2>
+    <section className="grid min-w-0 items-start gap-4 xl:grid-cols-3">
+      <div className="workspace-panel min-w-0 rounded-2xl border border-border bg-card p-5 shadow-sm xl:col-span-1">
+        <h2 className="flex items-center gap-3 text-base font-semibold"><VisualSticker label="Lease Overview" size="xs" />Lease Overview</h2>
 
         <dl className="mt-4 space-y-3 text-sm">
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Lease reference</dt>
-            <dd className="font-medium">{lease.tenant.fullName} · Unit {lease.unit.houseNo}</dd>
+            <dt className="shrink-0 text-muted-foreground">Lease reference</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{lease.tenant.fullName} · Unit {lease.unit.houseNo}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Organization</dt>
-            <dd className="text-right font-medium">{lease.org.name}</dd>
+            <dt className="shrink-0 text-muted-foreground">Organization</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{lease.org.name}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Start Date</dt>
-            <dd className="font-medium">{formatDate(lease.startDate)}</dd>
+            <dt className="shrink-0 text-muted-foreground">Start Date</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{formatDate(lease.startDate)}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">End Date</dt>
-            <dd className="font-medium">{formatDate(lease.endDate)}</dd>
+            <dt className="shrink-0 text-muted-foreground">End Date</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{formatDate(lease.endDate)}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Created</dt>
-            <dd className="font-medium">{formatDate(lease.createdAt)}</dd>
+            <dt className="shrink-0 text-muted-foreground">Created</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{formatDate(lease.createdAt)}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Updated</dt>
-            <dd className="font-medium">{formatDate(lease.updatedAt)}</dd>
+            <dt className="shrink-0 text-muted-foreground">Updated</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{formatDate(lease.updatedAt)}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Notes</dt>
-            <dd className="max-w-[60%] text-right font-medium">
+            <dt className="shrink-0 text-muted-foreground">Notes</dt>
+            <dd className="min-w-0 max-w-[60%] break-words text-right font-medium">
               {lease.notes ?? "—"}
             </dd>
           </div>
         </dl>
       </div>
 
-      <div className="rounded-xl border bg-background p-5 shadow-sm xl:col-span-1">
-        <h2 className="text-base font-semibold">Tenant</h2>
+      <div className="workspace-panel min-w-0 rounded-2xl border border-border bg-card p-5 shadow-sm xl:col-span-1">
+        <h2 className="flex items-center gap-3 text-base font-semibold"><VisualSticker label="Tenant" size="xs" />Tenant</h2>
 
         <dl className="mt-4 space-y-3 text-sm">
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Name</dt>
-            <dd className="text-right font-medium">
+            <dt className="shrink-0 text-muted-foreground">Name</dt>
+            <dd className="min-w-0 break-words text-right font-medium">
               <Link
                 href={`/dashboard/org/tenants/${encodeURIComponent(lease.tenant.slug ?? lease.tenant.id)}`}
                 className="underline underline-offset-4"
@@ -67,41 +68,41 @@ export function LeaseOverviewPanels({ lease }: { lease: LeaseDetailsData["lease"
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Phone</dt>
-            <dd className="font-medium">{lease.tenant.phone}</dd>
+            <dt className="shrink-0 text-muted-foreground">Phone</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{lease.tenant.phone}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Email</dt>
-            <dd className="max-w-[60%] text-right font-medium">
+            <dt className="shrink-0 text-muted-foreground">Email</dt>
+            <dd className="min-w-0 max-w-[60%] break-words text-right font-medium">
               {lease.tenant.email ?? "—"}
             </dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">National ID</dt>
-            <dd className="font-medium">{lease.tenant.nationalId ?? "—"}</dd>
+            <dt className="shrink-0 text-muted-foreground">National ID</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{lease.tenant.nationalId ?? "—"}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Company</dt>
-            <dd className="font-medium">{lease.tenant.companyName ?? "—"}</dd>
+            <dt className="shrink-0 text-muted-foreground">Company</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{lease.tenant.companyName ?? "—"}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Status</dt>
-            <dd className="font-medium">{lease.tenant.status}</dd>
+            <dt className="shrink-0 text-muted-foreground">Status</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{lease.tenant.status}</dd>
           </div>
         </dl>
       </div>
 
-      <div className="rounded-xl border bg-background p-5 shadow-sm xl:col-span-1">
-        <h2 className="text-base font-semibold">Unit & Property</h2>
+      <div className="workspace-panel min-w-0 rounded-2xl border border-border bg-card p-5 shadow-sm xl:col-span-1">
+        <h2 className="flex items-center gap-3 text-base font-semibold"><VisualSticker label="Unit & Property" size="xs" />Unit & Property</h2>
 
         <dl className="mt-4 space-y-3 text-sm">
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Unit</dt>
-            <dd className="text-right font-medium">
+            <dt className="shrink-0 text-muted-foreground">Unit</dt>
+            <dd className="min-w-0 break-words text-right font-medium">
               <Link
                 href={getOrgUnitHref({
                   id: lease.unit.id,
@@ -117,13 +118,13 @@ export function LeaseOverviewPanels({ lease }: { lease: LeaseDetailsData["lease"
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Unit Type</dt>
-            <dd className="font-medium">{lease.unit.type}</dd>
+            <dt className="shrink-0 text-muted-foreground">Unit Type</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{lease.unit.type}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Property</dt>
-            <dd className="max-w-[60%] text-right font-medium">
+            <dt className="shrink-0 text-muted-foreground">Property</dt>
+            <dd className="min-w-0 max-w-[60%] break-words text-right font-medium">
               <Link
                 href={`/dashboard/org/properties/${encodePublicId(lease.unit.property.id, "property")}`}
                 className="underline underline-offset-4"
@@ -134,23 +135,23 @@ export function LeaseOverviewPanels({ lease }: { lease: LeaseDetailsData["lease"
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Building</dt>
-            <dd className="font-medium">{lease.unit.building?.name ?? "—"}</dd>
+            <dt className="shrink-0 text-muted-foreground">Building</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{lease.unit.building?.name ?? "—"}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Bedrooms</dt>
-            <dd className="font-medium">{lease.unit.bedrooms ?? "—"}</dd>
+            <dt className="shrink-0 text-muted-foreground">Bedrooms</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{lease.unit.bedrooms ?? "—"}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Bathrooms</dt>
-            <dd className="font-medium">{lease.unit.bathrooms ?? "—"}</dd>
+            <dt className="shrink-0 text-muted-foreground">Bathrooms</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{lease.unit.bathrooms ?? "—"}</dd>
           </div>
 
           <div className="flex items-start justify-between gap-4">
-            <dt className="text-muted-foreground">Unit Status</dt>
-            <dd className="font-medium">{lease.unit.status}</dd>
+            <dt className="shrink-0 text-muted-foreground">Unit Status</dt>
+            <dd className="min-w-0 break-words text-right font-medium">{lease.unit.status}</dd>
           </div>
         </dl>
       </div>

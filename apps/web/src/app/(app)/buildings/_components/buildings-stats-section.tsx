@@ -7,7 +7,7 @@ export function BuildingsStatsSection({ data }: { data: BuildingsPageData }) {
   const { totalBuildings, activeBuildings, totalUnits, occupiedUnits, vacantUnits } = data;
 
   return (
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="workspace-card-grid grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <StatCard
         label="Buildings"
         value={totalBuildings}

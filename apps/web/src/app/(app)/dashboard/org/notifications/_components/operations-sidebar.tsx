@@ -37,7 +37,7 @@ export function OperationsSidebar({
   unreadCount,
 }: OperationsSidebarProps) {
   return (
-    <aside className="space-y-5 xl:col-span-4">
+    <aside className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
       <section className={panelShellClassName}>
         <div className={`border-b border-border ${panelBodyClassName}`}>
           <PanelHeader
@@ -99,7 +99,7 @@ export function OperationsSidebar({
                       {(payment.reference || payment.externalReference) && (
                         <>
                           <span>•</span>
-                          <span className="truncate">
+                          <span className="break-all">
                             Ref: {payment.reference ?? payment.externalReference}
                           </span>
                         </>

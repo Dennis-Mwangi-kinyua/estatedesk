@@ -16,14 +16,14 @@ import {
 export function TenantDetailsMainColumn({ data }: { data: TenantDetailsData }) {
   const { tenant, tenantHistory } = data;
   return (
-      <div className="space-y-5">
-        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+      <div className="min-w-0 space-y-5">
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="Tenant information"
             description="Core tenant identity, contact details, and compliance fields."
           />
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3 min-[1600px]:grid-cols-2">
             <DetailItem label="Full name" value={tenant.fullName} />
             <DetailItem label="Tenant type" value={formatStatus(tenant.type)} />
             <DetailItem label="Phone number" value={tenant.phone || "—"} />
@@ -38,7 +38,7 @@ export function TenantDetailsMainColumn({ data }: { data: TenantDetailsData }) {
           </div>
         </section>
 
-        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="Lease portfolio"
             description="Current occupancy, rent terms, and complete lease history for this tenant."
@@ -77,7 +77,7 @@ export function TenantDetailsMainColumn({ data }: { data: TenantDetailsData }) {
                       </span>
                     </div>
 
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2 min-[1800px]:grid-cols-3">
                       <DetailItem label="Rent" value={formatCurrency(lease.monthlyRent)} />
                       <DetailItem label="Deposit" value={formatCurrency(lease.deposit)} />
                       <DetailItem label="Due day" value={lease.dueDay ? `${lease.dueDay}th day` : "—"} />
@@ -132,7 +132,7 @@ export function TenantDetailsMainColumn({ data }: { data: TenantDetailsData }) {
           </div>
         </section>
 
-        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="Tenant history"
             description="Chronological history built from onboarding, leases, payments, notices, and tenant action logs."

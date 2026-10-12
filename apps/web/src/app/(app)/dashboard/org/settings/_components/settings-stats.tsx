@@ -15,7 +15,7 @@ export function SettingsStats({
     data.organization.status === "ACTIVE" ? "success" : "warning";
 
   return (
-    <section className="grid grid-cols-[repeat(auto-fit,minmax(11.75rem,1fr))] gap-3">
+    <section className="workspace-card-grid grid min-w-0 grid-cols-1 gap-3 min-[420px]:grid-cols-2 xl:grid-cols-4">
       <StatCard
         label="Organization"
         value={data.organization.name}

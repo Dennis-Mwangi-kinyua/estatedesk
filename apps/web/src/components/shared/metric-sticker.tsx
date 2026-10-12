@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { VisualSticker } from "./visual-sticker";
+import { EmojiSticker as VisualSticker } from "./emoji-sticker";
 
 export function labelSticker(label: string) {
   return <VisualSticker label={label} size="xs" />;

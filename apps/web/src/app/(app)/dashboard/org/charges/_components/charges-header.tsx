@@ -1,10 +1,9 @@
-import { WorkspaceIcon } from "@/components/shared/workspace-icon";
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "next/link";
 import type { OrgRole } from "@prisma/client";
-import { ArrowLeft, FileText, Receipt } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { CHARGES_WORKFLOW_STEPS } from "../_lib/constants";
-import { formatCurrency } from "../_lib/helpers";
 import type { ChargesPageData } from "../_lib/types";
 import { panelShellClassName } from "./charges-ui";
 
@@ -15,7 +14,7 @@ export function ChargesHeader({
   data: ChargesPageData;
   orgRole?: OrgRole | null;
 }) {
-  const { stats, organizationName } = data;
+  const { organizationName } = data;
 
   return (
     <section data-workspace-header className={panelShellClassName}>
@@ -23,7 +22,7 @@ export function ChargesHeader({
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              <Receipt className="h-3.5 w-3.5" />
+              <VisualSticker label="Rent billing" size="xs" />
               Rent billing
             </div>
 
@@ -58,35 +57,8 @@ export function ChargesHeader({
         </div>
       </div>
 
-      <div className="grid gap-3 border-b border-border px-5 py-5 sm:grid-cols-3 sm:px-6">
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Total charges
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {stats.totalCharges}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Outstanding balance
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {formatCurrency(stats.totalBalance)}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Total amount due
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {formatCurrency(stats.totalAmountDue)}
-          </p>
-        </div>
-      </div>
-
       <details className="border-t border-border">
-        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6"><WorkspaceIcon label="help" className="inline-block h-5 w-5 shrink-0 align-middle" /> How this works</summary>
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6"><VisualSticker label="Help" size="xs" /> How this works</summary>
 <div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
         {CHARGES_WORKFLOW_STEPS.map((item) => (
           <div

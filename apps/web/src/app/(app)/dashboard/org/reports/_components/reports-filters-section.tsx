@@ -5,7 +5,7 @@ import { ReportFilterLink } from "./reports-ui";
 
 export function ReportsFiltersSection({ data }: { data: ReportsPageData }) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm">
+    <section className="workspace-panel min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
       <div className="flex items-center gap-3 border-b border-border px-5 py-4 sm:px-6">
         <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-muted/20 text-muted-foreground">
           <Filter className="h-4 w-4" />

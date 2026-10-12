@@ -1,3 +1,4 @@
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "next/link";
 import { formatLedgerCurrency, formatLedgerDate } from "@/lib/ledger";
 import {
@@ -40,6 +41,7 @@ export function PaymentsReconciliationSection({
             Reconciliation channel
           </p>
           <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+          <VisualSticker label="Payment verification" size="xs" className="mr-2 align-middle" />
             Statement matching and exceptions
           </h2>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -63,7 +65,7 @@ export function PaymentsReconciliationSection({
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid min-w-0 grid-cols-1 gap-3 min-[380px]:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Unreconciled"
           value={unreconciledCount}
@@ -161,7 +163,7 @@ export function PaymentsReconciliationSection({
                 </td>
                 <td data-label="Status" className="px-4 py-3">
                   <span
-                    className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${reconciliationClasses(
+                    className={`inline-flex shrink-0 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${reconciliationClasses(
                       payment.reconciliationStatus,
                     )}`}
                   >

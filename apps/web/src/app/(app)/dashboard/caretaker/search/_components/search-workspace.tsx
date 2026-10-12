@@ -37,7 +37,7 @@ export function SearchWorkspace({
           </div>
         </section>
       ) : (
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="grid gap-5 min-[1600px]:grid-cols-[minmax(0,1fr)_280px]">
           <div className="space-y-5">
             <section className={panelShellClassName}>
               <div className={panelBodyClassName}>

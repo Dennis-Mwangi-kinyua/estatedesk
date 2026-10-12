@@ -5,7 +5,7 @@ export function UnitsStatsSection({ data }: { data: UnitsPageData }) {
   const { totalUnits, activeUnits, occupiedUnits, vacantUnits } = data;
 
   return (
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="workspace-card-grid grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <StatCard label="Total units" value={totalUnits} note="Across all properties" />
       <StatCard
         label="Active units"

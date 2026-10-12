@@ -11,7 +11,7 @@ export function AccountingStats({ data }: { data: AccountingPageData }) {
   }
 
   return (
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="workspace-card-grid grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <StatCard
         label="Income"
         value={formatMoney(summary.income, org.currencyCode)}

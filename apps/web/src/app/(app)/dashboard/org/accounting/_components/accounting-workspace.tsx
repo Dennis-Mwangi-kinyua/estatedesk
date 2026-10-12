@@ -59,7 +59,7 @@ export function AccountingWorkspace({
       <AccountingKpiStrip data={data} />
       <AccountingQuickActions />
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-5">
+      <div className="grid gap-4 min-[1600px]:grid-cols-[minmax(0,1fr)_280px] lg:gap-5">
         <div className="min-w-0 space-y-4 sm:space-y-5">
           <AccountingBooksHealth data={data} />
           <AccountingComparative data={data} />

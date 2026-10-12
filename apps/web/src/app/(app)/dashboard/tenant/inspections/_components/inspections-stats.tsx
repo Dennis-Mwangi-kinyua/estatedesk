@@ -9,7 +9,7 @@ import type { InspectionTotals } from "@/app/(app)/dashboard/tenant/inspections/
 
 export function InspectionsStats({ totals }: { totals: InspectionTotals }) {
   return (
-    <section className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:gap-4">
+    <section className="workspace-card-grid grid grid-cols-2 gap-3 lg:grid-cols-4 xl:gap-4">
       <StatCard
         icon={<ClipboardCheck className="h-4 w-4" />}
         label="Move-Out Notices"

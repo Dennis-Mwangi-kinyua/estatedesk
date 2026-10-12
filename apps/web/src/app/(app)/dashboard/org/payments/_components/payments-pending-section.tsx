@@ -1,3 +1,4 @@
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { PaymentReviewSubmit } from "./payment-review-submit";
 import {
   rejectTenantPaymentAction,
@@ -28,6 +29,7 @@ export function PaymentsPendingSection({
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h2 className="text-base font-semibold text-amber-950 dark:text-amber-100">
+          <VisualSticker label="Pending payments" size="xs" className="mr-2 align-middle" />
                 Payments awaiting verification
               </h2>
               <p className="mt-1 text-sm leading-6 text-amber-700 dark:text-amber-300">

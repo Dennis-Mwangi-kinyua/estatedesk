@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { RecordCashPaymentForm } from "./record-cash-payment-form";
 import { roleHasOrgPermission } from "@/lib/permissions/role-matrix";
 import { nairobiDate } from "@/lib/move-outs/validation";
@@ -14,8 +15,10 @@ import { PaymentsStatsSection } from "./payments-stats-section";
 export function PaymentsWorkspace({
   data,
   orgRole,
+  recordPayment,
 }: {
   data: PaymentsPageData;
+  recordPayment?: ReactNode;
   orgRole?: OrgRole | null;
 }) {
   const {
@@ -30,13 +33,18 @@ export function PaymentsWorkspace({
   } = data;
 
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-5 px-3 pb-24 pt-3 sm:space-y-6 sm:px-6 sm:pt-4 lg:px-8">
+    <div className="org-theme-content mx-auto w-full min-w-0 max-w-7xl space-y-5 px-0 pb-24 pt-2 sm:space-y-6 sm:px-2">
       <style>{`
-        @media (max-width: 639px) {
+        @media (max-width: 1279px) {
           .payments-responsive-table,
           .payments-responsive-table tbody {
             display: block;
             width: 100%;
+          }
+          .payments-responsive-table tbody {
+            display: grid;
+            gap: 1rem;
+            padding: 1rem;
           }
 
           .payments-responsive-table thead {
@@ -45,11 +53,11 @@ export function PaymentsWorkspace({
 
           .payments-responsive-table tr {
             display: block;
-            margin: 0.75rem;
+            margin: 0;
             overflow: hidden;
             border: 1px solid var(--border);
             border-radius: 1rem;
-            background: var(--background);
+            background: var(--card);
           }
 
           .payments-responsive-table td {
@@ -99,9 +107,13 @@ export function PaymentsWorkspace({
             display: none;
           }
         }
+        @media (min-width: 768px) and (max-width: 1279px) {
+          .payments-responsive-table tbody { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
       `}</style>
       <PaymentsHeader data={data} orgRole={orgRole} />
       <PaymentsStatsSection ledger={ledger} pendingPayments={pendingPayments} />
+      {recordPayment}
 
       <PaymentsReconciliationSection
         ledger={ledger}
@@ -117,13 +129,9 @@ export function PaymentsWorkspace({
 
       <PaymentsPendingSection pendingPayments={pendingPayments} q={q} />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="space-y-5">
-          <PaymentsLedgerSection ledger={ledger} />
-          <PaymentsRecentSection ledger={ledger} />
-        </div>
-        <PaymentsGuidance orgRole={orgRole} />
-      </div>
+      <PaymentsLedgerSection ledger={ledger} />
+      <PaymentsRecentSection ledger={ledger} />
+      <PaymentsGuidance orgRole={orgRole} />
     </div>
   );
 }

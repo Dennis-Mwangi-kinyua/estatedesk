@@ -33,14 +33,14 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
     })),
   );
   return (
-      <div className="space-y-5">
-        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+      <div className="min-w-0 space-y-5">
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="Account summary"
             description="Lifecycle, status, and high-level account overview."
           />
 
-          <div className="mt-4 grid gap-3">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <DetailItem label="Tenant since" value={formatDate(tenant.createdAt)} />
             <DetailItem label="Current unit" value={currentUnit} />
             <DetailItem label="Monthly rent" value={currentRent} />
@@ -65,12 +65,12 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
           </div>
         </section>
 
-        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="RentRewards"
             description="Loyalty points for early and on-time rent payments. Redeem digital vouchers."
           />
-          <div className="mt-4 grid gap-3">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <DetailItem label="Earned points" value={String(rewards.points)} />
             <DetailItem label="Tier" value={rewards.tier} />
             <DetailItem label="Early payments" value={String(rewards.earlyPayments)} />
@@ -111,14 +111,14 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
           />
         </section>
 
-        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="Next of kin"
             description="Emergency and contact fallback details linked to this tenant."
           />
 
           {tenant.nextOfKin ? (
-            <div className="mt-4 grid gap-3">
+            <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
               <DetailItem label="Name" value={tenant.nextOfKin.name} />
               <DetailItem label="Relationship" value={tenant.nextOfKin.relationship} />
               <DetailItem label="Phone" value={tenant.nextOfKin.phone} />
@@ -131,7 +131,7 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
           )}
         </section>
 
-        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="Recent payments"
             description="Latest payment records linked to the tenant account."
@@ -182,7 +182,7 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
           </div>
         </section>
 
-        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="Water bills"
             description="Recent utility billing history for units occupied by this tenant."
@@ -224,7 +224,7 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
           </div>
         </section>
 
-        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="Move-out notices"
             description="Notice and inspection records associated with the tenant."
@@ -303,7 +303,7 @@ export function TenantDetailsSidebarColumn({ data }: { data: TenantDetailsData }
           </div>
         </section>
 
-        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+        <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="Internal notes"
             description="Private notes visible to authorised staff only."

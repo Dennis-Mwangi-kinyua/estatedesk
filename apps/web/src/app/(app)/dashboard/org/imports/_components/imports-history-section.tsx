@@ -1,3 +1,4 @@
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { Clock3, FileSpreadsheet } from "lucide-react";
 import {
   DataCard,
@@ -23,7 +24,7 @@ export function ImportsHistorySection({
     <section className="overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm">
       <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
         <div>
-          <p className="text-sm font-semibold text-foreground">Import history</p>
+          <h2 className="flex items-center gap-3 text-base font-semibold text-foreground"><VisualSticker label="Import history" />Import history</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Recent validation and commit attempts for this organization.
           </p>
@@ -52,12 +53,13 @@ export function ImportsHistorySection({
         </div>
       ) : (
         <ResponsiveDataList
+          desktopBreakpoint="2xl"
           mobile={
-            <ul className="divide-y divide-border">
+            <ul className="grid min-w-0 gap-3 bg-muted/15 p-3 sm:grid-cols-2 sm:p-4">
               {history.map((run) => (
                 <li key={run.id}>
-                  <DataCard>
-                    <div className="flex items-start justify-between gap-2">
+                  <DataCard className="h-full rounded-2xl border border-border bg-card shadow-sm">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-foreground">
                           {kindLabels[run.kind] ?? run.kind}

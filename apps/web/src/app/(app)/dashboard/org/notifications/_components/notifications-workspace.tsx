@@ -29,7 +29,7 @@ export function NotificationsWorkspace({
   } = data;
 
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content notifications-page uniform-page-actions mx-auto w-full min-w-0 max-w-7xl space-y-5 px-0 pb-24 pt-2 sm:px-2">
       <NotificationsHero
         membership={membership}
         approvalQueueCount={approvalQueueCount}
@@ -39,39 +39,16 @@ export function NotificationsWorkspace({
         sentCount={sentCount}
       />
 
-      <OperationsAlertsSection />
-
-      <section className="grid gap-5 xl:grid-cols-2">
+      <CommunicationFeedPanel membership={membership} notifications={notifications}
+        activeFilter={activeFilter} totalNotifications={totalNotifications}
+        unreadCount={unreadCount} queuedCount={queuedCount} failedCount={failedCount} />
+      <section aria-label="Approvals and move-outs" className="grid min-w-0 items-start gap-5 xl:grid-cols-2">
         <MoveOutQueuePanel membership={membership} moveOutQueue={moveOutQueue} />
-        <WaterApprovalQueuePanel
-          membership={membership}
-          approvalQueue={approvalQueue}
-          approvalQueueCount={approvalQueueCount}
-        />
+        <WaterApprovalQueuePanel membership={membership} approvalQueue={approvalQueue} approvalQueueCount={approvalQueueCount} />
       </section>
-
-      <section className="grid gap-5 xl:grid-cols-12">
-        <div className="xl:col-span-8">
-          <CommunicationFeedPanel
-            membership={membership}
-            notifications={notifications}
-            activeFilter={activeFilter}
-            totalNotifications={totalNotifications}
-            unreadCount={unreadCount}
-            queuedCount={queuedCount}
-            failedCount={failedCount}
-          />
-        </div>
-
-        <OperationsSidebar
-          membership={membership}
-          approvalQueueCount={approvalQueueCount}
-          recentPayments={recentPayments}
-          sentCount={sentCount}
-          failedCount={failedCount}
-          unreadCount={unreadCount}
-        />
-      </section>
+      <OperationsSidebar membership={membership} approvalQueueCount={approvalQueueCount}
+        recentPayments={recentPayments} sentCount={sentCount} failedCount={failedCount} unreadCount={unreadCount} />
+      <OperationsAlertsSection />
     </div>
   );
 }

@@ -13,7 +13,7 @@ export function ReportsMatrixSection({ data }: { data: ReportsPageData }) {
   const empty = data.filteredRows.length === 0;
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm">
+    <section className="workspace-panel min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
       <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
         <div>
           <p className="text-sm font-semibold text-foreground">
@@ -46,22 +46,23 @@ export function ReportsMatrixSection({ data }: { data: ReportsPageData }) {
         </div>
       ) : (
         <ResponsiveDataList
+          desktopBreakpoint="2xl"
           mobile={
-            <ul className="divide-y divide-border">
+            <ul className="grid min-w-0 gap-3 bg-muted/15 p-3 md:grid-cols-2 sm:p-4">
               {data.filteredRows.map((row) => (
                 <li key={row.tenantId}>
-                  <DataCard>
-                    <div className="flex items-start justify-between gap-2">
+                  <DataCard className="h-full min-w-0 rounded-2xl border border-border bg-card shadow-sm">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground">
                           {row.tenantName}
                         </p>
-                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        <p className="mt-0.5 break-words text-xs text-muted-foreground">
                           {row.unitLabel} · {row.phone ?? row.email ?? "No contact"}
                         </p>
                       </div>
                       <span
-                        className={`inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusTone(row.paymentStatus)}`}
+                        className={`inline-flex shrink-0 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusTone(row.paymentStatus)}`}
                       >
                         {formatStatusLabel(row.paymentStatus)}
                       </span>
@@ -120,7 +121,7 @@ export function ReportsMatrixSection({ data }: { data: ReportsPageData }) {
                     </td>
                     <td className="px-4 py-4">
                       <span
-                        className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusTone(row.paymentStatus)}`}
+                        className={`inline-flex shrink-0 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${statusTone(row.paymentStatus)}`}
                       >
                         {formatStatusLabel(row.paymentStatus)}
                       </span>

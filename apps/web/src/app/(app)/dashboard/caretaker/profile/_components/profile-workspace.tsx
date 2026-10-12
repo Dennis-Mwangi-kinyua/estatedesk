@@ -27,7 +27,7 @@ export function ProfileWorkspace({ data }: { data: CaretakerProfilePageData }) {
         <>
           <ProfileStats member={member} />
 
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="grid gap-5 min-[1600px]:grid-cols-[minmax(0,1fr)_280px]">
             <ProfileDetailsSection member={member} />
 
             <div className="space-y-4">

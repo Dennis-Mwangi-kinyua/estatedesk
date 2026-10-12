@@ -8,7 +8,7 @@ export function NotificationsStats({
   data: Pick<CaretakerNotificationsPageData, "unreadCount" | "totalNotifications">;
 }) {
   return (
-    <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <section className="workspace-card-grid grid grid-cols-1 gap-3 sm:grid-cols-2">
       <StatCard
         label="Unread"
         value={data.unreadCount}

@@ -1,5 +1,6 @@
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "next/link";
-import { ArrowLeft, BarChart3, Download } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import type { OrgRole } from "@prisma/client";
 import { formatPercent } from "../_lib/helpers";
@@ -23,12 +24,12 @@ export function ReportsHeader({
   orgRole?: OrgRole | null;
 }) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm">
+    <section className="workspace-panel min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
       <div className="border-b border-border px-5 py-5 sm:px-6 sm:py-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div className="max-w-3xl">
+          <div className="min-w-0 max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              <BarChart3 className="h-3.5 w-3.5" />
+              <VisualSticker label="Reports" size="xs" />
               Reports
             </div>
 
@@ -55,7 +56,7 @@ export function ReportsHeader({
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row xl:flex-col">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap xl:flex-col">
             <Link data-workspace-action="true"
               href="/dashboard/org/payments"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
@@ -74,8 +75,8 @@ export function ReportsHeader({
         </div>
       </div>
 
-      <div className="grid gap-4 px-5 py-5 sm:grid-cols-[minmax(0,1fr)_16rem] sm:items-end sm:px-6">
-        <form action="/dashboard/org/reports" className="flex flex-col gap-3 sm:flex-row sm:items-end">
+      <div className="grid gap-4 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:items-end sm:px-6">
+        <form action="/dashboard/org/reports" className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end">
           {data.selectedApartment !== "all" ? (
             <input type="hidden" name="apartment" value={data.selectedApartment} />
           ) : null}
@@ -91,7 +92,7 @@ export function ReportsHeader({
               type="month"
               name="period"
               defaultValue={data.period}
-              className="mt-2 h-11 w-full rounded-2xl border border-border bg-background px-3 text-sm font-medium text-foreground outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/15"
+              className="mt-2 h-11 min-w-0 max-w-full w-full rounded-2xl border border-border bg-background px-3 text-sm font-medium text-foreground outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/15"
             />
           </div>
           <button data-workspace-action="true"

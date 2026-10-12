@@ -1,11 +1,11 @@
 "use client";
 
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { useActionState, useMemo, useState } from "react";
 import {
   AlertCircle,
   CircleCheck as CheckCircle2,
   Download,
-  FileUp,
   Loader2,
   Upload,
   XCircle,
@@ -101,14 +101,14 @@ export function CsvImportForm() {
         : "error";
 
   return (
-    <div className="space-y-5">
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
+    <div className="min-w-0 space-y-5">
+      <div className="grid min-w-0 items-start gap-5 min-[1440px]:grid-cols-[minmax(0,1fr)_minmax(280px,0.45fr)]">
         <form
           action={action}
-          className="overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm"
+          className="workspace-panel min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm"
         >
           <div className="border-b border-border px-5 py-5 sm:px-6">
-            <p className="text-sm font-semibold text-foreground">Upload workspace</p>
+            <h2 className="flex items-center gap-3 text-base font-semibold text-foreground"><VisualSticker label="Upload files" />Upload workspace</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Select a dataset, load your CSV, then validate before committing.
             </p>
@@ -116,7 +116,7 @@ export function CsvImportForm() {
 
           <div className="space-y-6 px-5 py-5 sm:px-6">
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm font-semibold text-foreground">Import dataset</p>
                 <button data-workspace-action="true"
                   type="button"
@@ -130,12 +130,12 @@ export function CsvImportForm() {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 {IMPORT_KIND_OPTIONS.map((option) => {
-                  const Icon = option.icon;
                   const selected = kind === option.value;
 
                   return (
                     <button data-workspace-action="true"
                       key={option.value}
+                      aria-pressed={selected}
                       type="button"
                       onClick={() => {
                         setKind(option.value);
@@ -149,15 +149,7 @@ export function CsvImportForm() {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span
-                          className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${
-                            selected
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted text-muted-foreground"
-                          }`}
-                        >
-                          <Icon className="h-5 w-5" />
-                        </span>
+                        <VisualSticker label={option.label} className="shrink-0" />
                         <div>
                           <p className="text-sm font-semibold text-foreground">
                             {option.label}
@@ -207,9 +199,9 @@ export function CsvImportForm() {
                 htmlFor="csvFile"
                 className="flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/10 px-4 py-6 text-center transition hover:border-primary/40 hover:bg-muted/20"
               >
-                <FileUp className="h-8 w-8 text-muted-foreground" />
-                <p className="mt-3 text-sm font-medium text-foreground">
-                  {fileName ? fileName : "Choose a CSV file or drag it here"}
+                <VisualSticker label="Import files" size="lg" />
+                <p className="mt-3 max-w-full break-words text-sm font-medium text-foreground">
+                  {fileName ? fileName : "Choose a CSV file"}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   UTF-8 CSV up to 500 rows
@@ -230,7 +222,7 @@ export function CsvImportForm() {
             </div>
 
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <label htmlFor="csv" className="text-sm font-semibold text-foreground">
                   CSV content
                 </label>
@@ -293,7 +285,7 @@ export function CsvImportForm() {
         </form>
 
         <aside
-          className={`overflow-hidden rounded-3xl border bg-card text-card-foreground shadow-sm ${
+          className={`workspace-panel min-w-0 overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-sm ${
             statusTone === "success"
               ? "border-emerald-500/30"
               : statusTone === "error"
@@ -321,12 +313,12 @@ export function CsvImportForm() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 px-5 py-5">
+          <dl className="grid grid-cols-1 gap-3 px-4 py-4 min-[380px]:grid-cols-2 sm:px-5">
             <ResultStat label="Rows parsed" value={state.totalRows} />
             <ResultStat label="Created" value={state.created} />
             <ResultStat label="Errors" value={state.errors.length} highlight={state.errors.length > 0} />
             <ResultStat label="Mode" value={state.dryRun ? "Validation" : "Commit"} />
-          </div>
+          </dl>
 
           {state.rollbackSummary ? (
             <div className="mx-5 mb-5 rounded-2xl border border-border bg-muted/15 p-3 text-sm text-muted-foreground">
@@ -344,7 +336,7 @@ export function CsvImportForm() {
                 {state.preview.map((item) => (
                   <li
                     key={item}
-                    className="truncate rounded-xl border border-border bg-muted/10 px-3 py-2"
+                    className="break-words rounded-xl border border-border bg-muted/10 px-3 py-2"
                   >
                     {item}
                   </li>
@@ -382,7 +374,7 @@ export function CsvImportForm() {
       </div>
 
       {state.rowResults.length > 0 ? (
-        <section className="overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm">
+        <section className="workspace-panel min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
           <div className="flex flex-col gap-3 border-b border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div>
               <p className="text-sm font-semibold text-foreground">Row validation</p>
@@ -490,9 +482,9 @@ function ResultStat({
 }) {
   return (
     <div className="rounded-2xl border border-border bg-muted/10 p-3">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dt className="flex items-center gap-2 text-xs text-muted-foreground"><VisualSticker label={label} size="xs" />{label}</dt>
       <dd
-        className={`mt-1 text-lg font-semibold ${
+        className={`mt-2 break-words text-lg font-semibold tabular-nums ${
           highlight ? "text-red-600 dark:text-red-300" : "text-foreground"
         }`}
       >

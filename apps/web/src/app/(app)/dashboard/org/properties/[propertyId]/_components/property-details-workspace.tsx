@@ -15,7 +15,7 @@ export function PropertyDetailsWorkspace({
 
   return (
     <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="grid gap-5 min-[1600px]:grid-cols-[minmax(0,1fr)_280px]">
         <PropertyDetailsView property={property} canRenameUnits={!!orgRole && ["ADMIN", "MANAGER"].includes(orgRole)} />
         <div className="space-y-5">
           <InstallQrPanel

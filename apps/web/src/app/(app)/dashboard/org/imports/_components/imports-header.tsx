@@ -1,7 +1,7 @@
-import { WorkspaceIcon } from "@/components/shared/workspace-icon";
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "next/link";
 import type { OrgRole } from "@prisma/client";
-import { ArrowLeft, FileSpreadsheet, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { IMPORT_WORKFLOW_STEPS } from "../_lib/constants";
 import type { ImportHistoryItem } from "../_lib/types";
@@ -26,7 +26,7 @@ export function ImportsHeader({
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              <FileSpreadsheet className="h-3.5 w-3.5" />
+              <VisualSticker label="Import files" size="xs" />
               Data onboarding
             </div>
 
@@ -54,9 +54,7 @@ export function ImportsHeader({
         </div>
       </div>
 
-      <details className="border-t border-border">
-        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6"><WorkspaceIcon label="help" className="inline-block h-5 w-5 shrink-0 align-middle" /> How this works</summary>
-<div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
+<div className="grid min-w-0 gap-3 px-4 py-4 min-[420px]:grid-cols-2 lg:grid-cols-3 sm:px-6">
         <HeaderStat
           label="Completed runs"
           value={historyUnavailable ? "—" : String(completedRuns)}
@@ -71,11 +69,13 @@ export function ImportsHeader({
         />
       </div>
 
+      <details className="border-t border-border">
+        <summary className="flex min-h-12 cursor-pointer items-center gap-3 px-4 text-sm font-semibold text-foreground sm:px-6"><VisualSticker label="Help" size="xs" />How importing works</summary>
       <div className="grid gap-3 border-t border-border px-5 py-5 sm:grid-cols-3 sm:px-6">
         {IMPORT_WORKFLOW_STEPS.map((item) => (
           <div
             key={item.step}
-            className="rounded-2xl border border-border bg-muted/20 p-4"
+            className="workspace-metric min-w-0 rounded-2xl border border-border bg-muted/20 p-4"
           >
             <div className="flex items-center gap-3">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
@@ -99,17 +99,18 @@ export function ImportsHeader({
         </p>
       </div>
       </details>
+      <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground sm:px-6">Overview reflects the latest 12 import runs.</p>
     </section>
   );
 }
 
 function HeaderStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-muted/20 p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-        {label}
+    <div className="workspace-metric min-w-0 rounded-2xl border border-border bg-muted/20 p-4">
+      <p className="flex items-center gap-2 text-xs font-medium leading-5 text-muted-foreground">
+        <VisualSticker label={label} size="xs" />{label}
       </p>
-      <p className="mt-2 text-2xl font-semibold text-foreground">{value}</p>
+      <p className="mt-3 text-2xl font-semibold tabular-nums text-foreground">{value}</p>
     </div>
   );
 }

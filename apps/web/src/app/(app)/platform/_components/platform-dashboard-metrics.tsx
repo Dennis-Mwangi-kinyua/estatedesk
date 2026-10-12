@@ -32,8 +32,8 @@ export function PlatformDashboardMetrics({
 
   return (
     <section className="platform-glass-metrics overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
-      <div className="grid gap-3 xl:grid-cols-[1.55fr_0.9fr]">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid gap-4">
+        <div className="grid grid-cols-1 gap-4 min-[380px]:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             label="Organizations"
             href="/platform/organizations"
@@ -64,7 +64,7 @@ export function PlatformDashboardMetrics({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-4 min-[380px]:grid-cols-2 xl:grid-cols-4">
           <CompactInfoCard
             label="Payments"
             href="/platform/payments"

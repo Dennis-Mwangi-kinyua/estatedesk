@@ -5,7 +5,7 @@ import { StatCard } from "./taxes-ui";
 export function TaxesStats({ stats }: Pick<TaxesPageData, "stats">) {
   return (
     <div className="space-y-3">
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+      <section className="workspace-card-grid grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         <StatCard label="Total MRI returns" value={stats.totalReturns} />
         <StatCard label="Draft returns" value={stats.draftReturns} />
         <StatCard label="Submitted" value={stats.submittedReturns} />
@@ -14,7 +14,7 @@ export function TaxesStats({ stats }: Pick<TaxesPageData, "stats">) {
         <StatCard label="Paid returns" value={stats.paidReturns} />
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="workspace-card-grid grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Gross rent filed"
           value={formatCurrency(stats.totalGrossRent)}

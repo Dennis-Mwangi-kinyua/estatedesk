@@ -19,9 +19,8 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   const data = await loadPaymentsPageData(session.activeOrgId, q);
 
   return (
-    <div className="space-y-4">
-      {roleHasOrgPermission(session.activeOrgRole, "payments.verify") ? <RecordOrgPayment orgId={session.activeOrgId} /> : null}
-      <PaymentsWorkspace data={data} orgRole={session.activeOrgRole} />
-    </div>
+    <PaymentsWorkspace data={data} orgRole={session.activeOrgRole}
+      recordPayment={roleHasOrgPermission(session.activeOrgRole, "payments.verify") ? <RecordOrgPayment orgId={session.activeOrgId} /> : null}
+    />
   );
 }

@@ -14,7 +14,7 @@ export function BillDetailStats({
 
   return (
     <>
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="workspace-card-grid grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Period" value={bill.period} />
         <StatCard label="Units used" value={bill.unitsUsed} />
         <StatCard
@@ -27,7 +27,7 @@ export function BillDetailStats({
         />
       </section>
 
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <section className="workspace-card-grid grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatCard label="Total bill" value={formatCurrency(bill.total)} />
         <StatCard label="Total paid" value={data.totalPaid} />
         <StatCard

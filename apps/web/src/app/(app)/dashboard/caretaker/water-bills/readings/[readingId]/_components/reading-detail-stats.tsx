@@ -11,7 +11,7 @@ export function ReadingDetailStats({
 
   return (
     <>
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <section className="workspace-card-grid grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatCard label="Previous reading" value={reading.prevReading} />
         <StatCard label="Current reading" value={reading.currentReading} />
         <StatCard label="Units used" value={reading.unitsUsed} />

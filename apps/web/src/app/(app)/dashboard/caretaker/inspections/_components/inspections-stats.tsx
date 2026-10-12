@@ -13,7 +13,7 @@ type InspectionsStatsProps = {
 
 export function InspectionsStats({ stats }: InspectionsStatsProps) {
   return (
-    <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="workspace-card-grid grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <StatCard
         label="Total inspections"
         value={stats.total}

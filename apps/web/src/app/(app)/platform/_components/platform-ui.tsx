@@ -1,5 +1,5 @@
 
-import { VisualSticker } from "@/components/shared/visual-sticker";
+import { PlatformSticker as VisualSticker } from "./platform-sticker";
 import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
 import type { BarPoint } from "../_lib/types";
@@ -15,14 +15,17 @@ export function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className="platform-glass-panel rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
-      <div className="mb-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-          {title}
-        </p>
-        <h2 className="mt-1 text-base font-semibold tracking-tight text-slate-950 dark:text-white">
-          {subtitle}
-        </h2>
+    <section className="platform-glass-panel min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
+      <div className="mb-5 flex items-start gap-3">
+        <VisualSticker label={title} size="sm" className="shrink-0" />
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+            {title}
+          </p>
+          <h2 className="mt-1 text-base font-semibold tracking-tight text-slate-950 dark:text-white">
+            {subtitle}
+          </h2>
+        </div>
       </div>
       {children}
     </section>
@@ -44,18 +47,18 @@ export function MetricCard({
 }) {
   const content = (
     <div className="platform-glass-metric group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        <VisualSticker label={href ?? label} size="xs" className="mr-2" />{label}
+      <p className="flex items-center gap-3 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">
+        <VisualSticker label={href ?? label} size="sm" className="shrink-0" />{label}
       </p>
-      <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-3">
-        <p className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white lg:text-[22px]">
+      <div className="mt-4 flex flex-col items-start gap-2">
+        <p className="break-words text-2xl font-semibold tracking-tight text-slate-950 tabular-nums dark:text-white lg:text-3xl">
           {value}
         </p>
-        <p className={`text-[11px] font-medium ${metaTone}`}>{meta}</p>
+        <p className={`text-xs leading-5 font-medium ${metaTone}`}>{meta}</p>
       </div>
     </div>
   );
-  return href ? <Link href={href} className="block min-w-0 rounded-xl focus-visible:outline-2 focus-visible:outline-primary">{content}</Link> : content;
+  return href ? <Link href={href} className="block h-full min-w-0 rounded-xl focus-visible:outline-2 focus-visible:outline-primary">{content}</Link> : content;
 }
 
 export function CompactInfoCard({
@@ -71,18 +74,18 @@ export function CompactInfoCard({
 }) {
   const content = (
     <div className="platform-glass-metric group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        <VisualSticker label={href ?? label} size="xs" className="mr-2" />{label}
+      <p className="flex items-center gap-3 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">
+        <VisualSticker label={href ?? label} size="sm" className="shrink-0" />{label}
       </p>
-      <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-3">
-        <p className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white lg:text-[22px]">
+      <div className="mt-4 flex flex-col items-start gap-2">
+        <p className="break-words text-2xl font-semibold tracking-tight text-slate-950 tabular-nums dark:text-white lg:text-3xl">
           {value}
         </p>
-        <p className="text-[11px] text-slate-500 dark:text-slate-400">{helper}</p>
+        <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">{helper}</p>
       </div>
     </div>
   );
-  return href ? <Link href={href} className="block min-w-0 rounded-xl focus-visible:outline-2 focus-visible:outline-primary">{content}</Link> : content;
+  return href ? <Link href={href} className="block h-full min-w-0 rounded-xl focus-visible:outline-2 focus-visible:outline-primary">{content}</Link> : content;
 }
 
 export function ActionLink({
@@ -99,12 +102,11 @@ export function ActionLink({
       href={href}
       className="platform-glass-action group flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3.5 py-3.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 dark:border-white/25 dark:bg-slate-700 dark:shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] dark:hover:border-white/40 dark:hover:bg-slate-600"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-700 ring-1 ring-slate-200/80 transition-colors group-hover:bg-white group-hover:text-slate-950 dark:bg-white/15 dark:text-white dark:ring-white/20 dark:group-hover:bg-white/25 dark:group-hover:text-white">
-        <Icon className="h-4 w-4 stroke-[2.25]" />
-      </div>
+      <VisualSticker label={label} size="sm" className="shrink-0" />
       <p className="min-w-0 text-sm font-semibold text-slate-900 transition-colors group-hover:text-slate-950 dark:text-slate-50 dark:group-hover:text-white">
         {label}
       </p>
+      <Icon aria-hidden="true" className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
     </Link>
   );
 }
@@ -132,8 +134,10 @@ export function ChartPanel({
   children: ReactNode;
 }) {
   return (
-    <section className="platform-glass-panel rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
-      <div>
+    <section className="platform-glass-panel min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
+      <div className="flex items-start gap-3">
+        <VisualSticker label={title} size="sm" className="shrink-0" />
+        <div className="min-w-0">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
           {eyebrow}
         </p>
@@ -141,6 +145,7 @@ export function ChartPanel({
           {title}
         </h2>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>
+      </div>
       </div>
       <div className="mt-4 h-[240px]">{children}</div>
     </section>

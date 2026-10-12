@@ -11,7 +11,7 @@ export function SettingsDirectorySection() {
         </p>
       </div>
 
-      <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-3">
+      <div className="grid min-w-0 gap-4 p-4 md:grid-cols-2 sm:p-5 xl:grid-cols-3">
         {SETTINGS_NAV_ITEMS.map((item) => (
           <SettingsNavCard
             key={item.id}

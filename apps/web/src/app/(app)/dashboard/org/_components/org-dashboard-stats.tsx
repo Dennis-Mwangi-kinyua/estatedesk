@@ -22,7 +22,7 @@ export function OrgDashboardStats({ data }: { data: OrgDashboardSummary }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+      <div className="workspace-card-grid grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
         <StatCard
           label="Total Units"
           value={data.totalUnits}

@@ -1,5 +1,5 @@
 
-import { VisualSticker } from "@/components/shared/visual-sticker";
+import { PlatformSticker as VisualSticker } from "./platform-sticker";
 import Link from "next/link";
 import { OnboardingRequestPopup } from "./onboarding-request-popup";
 import type { PlatformDashboardData } from "../_lib/queries";
@@ -43,10 +43,8 @@ export function PlatformDashboard({ data }: { data: PlatformDashboardData }) {
 
         <PlatformDashboardMetrics data={data} />
 
-        <div className="grid gap-5 xl:grid-cols-[290px_minmax(0,1fr)]">
-          <PlatformDashboardAside data={data} />
-          <PlatformDashboardRecent data={data} />
-        </div>
+        <PlatformDashboardAside data={data} />
+        <PlatformDashboardRecent data={data} />
       </div>
     </div>
   );

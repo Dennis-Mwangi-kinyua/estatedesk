@@ -14,7 +14,7 @@ export function ExpendituresStats({ data }: { data: OrgExpendituresPageData }) {
   } = data;
 
   return (
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+    <section className="workspace-card-grid grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
       <StatCard
         label="Recorded total"
         value={formatMoney(recordedTotal, org.currencyCode)}

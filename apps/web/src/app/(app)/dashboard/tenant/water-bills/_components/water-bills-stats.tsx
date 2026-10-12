@@ -5,7 +5,7 @@ import type { WaterBillsTotals } from "@/app/(app)/dashboard/tenant/water-bills/
 
 export function WaterBillsStats({ totals }: { totals: WaterBillsTotals }) {
   return (
-    <section className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:gap-4">
+    <section className="workspace-card-grid grid grid-cols-2 gap-3 lg:grid-cols-4 xl:gap-4">
       <StatCard
         icon={<Droplets className="h-4 w-4" />}
         label="Total Billed"

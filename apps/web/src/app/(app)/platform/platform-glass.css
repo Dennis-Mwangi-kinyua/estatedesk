@@ -104,3 +104,52 @@
   border-color: var(--glass-line);
   border-radius: 1.25rem;
 }
+
+/* Shared page cards keep a clear edge and readable content in both modes. */
+:is(.platform-shell-admin, .platform-shell-developer) .platform-theme-content {
+  scrollbar-gutter: stable;
+}
+:is(.platform-shell-admin, .platform-shell-developer) :is(.platform-stat-card, .workspace-panel, .page-header) {
+  border-color: color-mix(in srgb, var(--border) 85%, var(--foreground) 15%);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 20px rgb(15 23 42 / 5%);
+}
+:is(.platform-shell-admin, .platform-shell-developer) .platform-stat-card {
+  height: 100%;
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  background: var(--card);
+}
+:is(.platform-shell-admin, .platform-shell-developer) .platform-stat-card > p {
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.estate-workspace .platform-shell-admin .platform-glass-metric {
+  border-color: color-mix(in srgb, var(--border) 85%, var(--foreground) 15%);
+  border-radius: 1.25rem;
+  background: var(--card) !important;
+}
+.platform-shell-admin .platform-glass-metric p:first-child {
+  letter-spacing: normal;
+}
+:is(.platform-shell-admin, .platform-shell-developer) :is(.platform-glass-action, .platform-glass-shortcut):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+@media (max-width: 639px) {
+  :is(.platform-shell-admin, .platform-shell-developer) .platform-theme-content {
+    padding-inline: 1rem;
+  }
+}
+
+/* Keep the dashboard in aligned rows instead of a narrow nested sidebar. */
+.platform-glass-dashboard .platform-glass-panel {
+  height: 100%;
+}
+@media (min-width: 768px) and (max-width: 1599px) {
+  .platform-analytics-grid > :last-child { grid-column: 1 / -1; }
+  .platform-analytics-grid > :last-child > .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1280px) {
+  .platform-activity-grid > :last-child { grid-column: 1 / -1; }
+}

@@ -314,3 +314,85 @@ body.estate-glass-system .organisation-detail-page :is(.workspace-panel, .org-su
 @media (max-width: 1023px) {
   .estate-glass-system .tenant-dashboard-main { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
 }
+
+/* Shared card surfaces and decorative stickers across public and workspace pages. */
+.visual-sticker.emoji-sticker { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 1.35rem; line-height: 1; letter-spacing: normal; }
+.visual-sticker--xs.emoji-sticker { font-size: 1.05rem; }
+.visual-sticker--lg.emoji-sticker { font-size: 2rem; }
+:where(.estate-workspace, .estate-glass-system) :is(.ed-theme-card, .workspace-panel, [data-slot="card"]) {
+  min-width: 0;
+  border-radius: 1.25rem;
+  border-color: var(--border);
+  box-shadow: 0 4px 20px rgb(15 23 42 / 5%);
+}
+:where(.estate-workspace, .estate-glass-system) .workspace-metric {
+  height: 100%;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+:where(.estate-workspace, .estate-glass-system) .workspace-metric > p { overflow-wrap: anywhere; }
+
+/* Consistent actions on the reorganised management pages. */
+@layer base {
+.estate-workspace .uniform-page-actions :is(button, a[data-workspace-action="true"], a[data-page-button="true"]):not([role="tab"]) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 2.75rem;
+  border: 1px solid var(--workspace-action-primary, var(--primary)) !important;
+  border-radius: .85rem !important;
+  padding: .65rem 1rem;
+  background: var(--workspace-action-primary, var(--primary)) !important;
+  color: var(--workspace-action-primary-ink, var(--primary-foreground)) !important;
+  font-size: .875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  transition: opacity 150ms ease;
+}
+.estate-workspace .uniform-page-actions :is(button, a[data-page-button="true"], a[data-workspace-action="true"]):hover { opacity: .88; }
+.estate-workspace .uniform-page-actions :is(button, a[data-page-button="true"], a[data-workspace-action="true"]):focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+.estate-workspace .uniform-page-actions :is(button, a)[aria-current="page"] { outline: 2px solid var(--ring); outline-offset: 3px; }
+.estate-workspace .uniform-page-actions button:disabled { opacity: .5; cursor: not-allowed; }
+
+}
+
+.lease-details-page :is(dd, p, h1, h2, h3) { overflow-wrap: anywhere; }
+.lease-details-page dl > div { min-width: 0; }
+.lease-details-page dl dt { max-width: 45%; }
+@media (max-width: 639px) {
+  .uniform-page-actions [data-workspace-action="true"] { width: 100%; }
+}
+
+/* Report content wraps inside its own grid track, including long filenames. */
+.reports-page :is(section, article, form, [data-slot="card"], .grid > *) { min-width: 0; }
+.reports-page :is(p, h1, h2, h3, dd, a) { overflow-wrap: anywhere; }
+.reports-page :is(input, select, textarea) { min-width: 0; max-width: 100%; }
+.reports-page table { font-variant-numeric: tabular-nums; }
+.reports-page table :is(td, th) { overflow-wrap: anywhere; }
+.reports-page table td:first-child { max-width: 20rem; }
+
+/* Management page content stays within its cards at phone widths. */
+:is(.notifications-page, .staff-page, .settings-page) :is(section, article, form, .grid > *) { min-width: 0; }
+:is(.notifications-page, .staff-page, .settings-page) :is(p, h1, h2, h3, a, dd) { overflow-wrap: anywhere; }
+:is(.notifications-page, .staff-page, .settings-page) :is(input, select, textarea) { min-width: 0; max-width: 100%; }
+.notifications-page .grid > :only-child { grid-column: 1 / -1; }
+.notifications-page [aria-current="page"] { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--ring); }
+
+/* Overview cards respond to their actual content width beside workspace navigation. */
+.estate-workspace .workspace-card-grid.grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  align-items: stretch;
+  gap: 1rem;
+}
+.estate-workspace .workspace-card-grid > * {
+  min-width: 0;
+  height: 100%;
+}
+.estate-workspace .workspace-card-grid :is(p, dd, h3) {
+  overflow-wrap: anywhere;
+  white-space: normal;
+  font-variant-numeric: tabular-nums;
+}
+.estate-workspace :is(.org-theme-content, .platform-theme-content) :is(.grid, .flex) > :where(section, article, form, .workspace-panel) { min-width: 0; }

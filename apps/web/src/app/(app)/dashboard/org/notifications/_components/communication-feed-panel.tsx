@@ -57,7 +57,7 @@ export function CommunicationFeedPanel({
           </form>
         </div>
 
-        <div className="no-scrollbar -mx-1 mt-5 flex gap-2 overflow-x-auto px-1 pb-1">
+        <div className="mt-5 flex min-w-0 flex-wrap gap-2">
           <NotificationFilterLink filter="all" activeFilter={activeFilter} label="All" />
           <NotificationFilterLink filter="unread" activeFilter={activeFilter} label="Unread" />
           <NotificationFilterLink filter="payments" activeFilter={activeFilter} label="Payments" />
@@ -67,7 +67,7 @@ export function CommunicationFeedPanel({
         </div>
       </div>
 
-      <div className={`space-y-3 ${panelBodyClassName}`}>
+      <div className={`grid min-w-0 gap-4 md:grid-cols-2 ${panelBodyClassName}`}>
         {notifications.length === 0 ? (
           <EmptyState
             title="No notifications yet"
@@ -81,7 +81,7 @@ export function CommunicationFeedPanel({
             const StatusIcon = meta.icon;
 
             return (
-              <article key={notification.id} className={panelItemClassName}>
+              <article key={notification.id} className={`${panelItemClassName} h-full`}>
                 <div className="flex items-start gap-3">
                   <div
                     className={cn(
@@ -94,7 +94,7 @@ export function CommunicationFeedPanel({
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="min-w-0 text-sm font-semibold text-foreground">
+                      <p className="min-w-0 break-words text-sm font-semibold text-foreground">
                         {notification.title}
                       </p>
                       {!notification.readAt && notification.user?.id === membership.userId && (
@@ -112,7 +112,7 @@ export function CommunicationFeedPanel({
                       </span>
                     </div>
 
-                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">
+                    <p className="mt-2 break-words text-sm leading-6 text-muted-foreground">
                       {notification.message}
                     </p>
 

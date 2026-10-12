@@ -14,7 +14,7 @@ export function LeasesStats({ data }: { data: OrgLeasesPageData }) {
   } = data;
 
   return (
-    <section className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+    <section className="workspace-card-grid grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
       <StatCard label="Total leases" value={totalLeases} />
       <StatCard
         label="Active"

@@ -2,7 +2,7 @@ import { PushNotificationSettingsPanel } from "@/components/pwa/push-notificatio
 
 export function OperationsAlertsSection() {
   return (
-    <section className="overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm">
+    <section className="workspace-panel min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
       <div className="border-b border-border px-5 py-4 sm:px-6">
         <p className="text-sm font-semibold text-foreground">Device alerts</p>
         <p className="mt-1 text-sm text-muted-foreground">

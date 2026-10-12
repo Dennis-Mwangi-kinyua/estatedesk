@@ -23,7 +23,7 @@ export function StatCard({
 
   return (
     <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-      <p className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-xs">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-xs">
         {label}
       </p>
       <p className={`mt-2 text-2xl font-semibold ${valueClassName}`}>{value}</p>

@@ -1,3 +1,4 @@
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { formatLedgerCurrency, formatLedgerDate } from "@/lib/ledger";
 import type { PaymentsPageData } from "../_lib/types";
@@ -12,6 +13,7 @@ export function PaymentsLedgerSection({
     <section className={panelShellClassName}>
       <div className="border-b border-border px-5 py-4 sm:px-6">
         <h2 className="text-lg font-semibold tracking-tight text-foreground">
+          <VisualSticker label="Tenant payments" size="xs" className="mr-2 align-middle" />
           Tenant payment ledger
         </h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -84,7 +86,7 @@ export function PaymentsLedgerSection({
                   </td>
                   <td data-label="Status" className="px-4 py-3">
                     <span
-                      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClasses(
+                      className={`inline-flex shrink-0 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClasses(
                         row.tone,
                       )}`}
                     >

@@ -11,7 +11,7 @@ import { ReportStat } from "./reports-ui";
 
 export function ReportsStatsSection({ data }: { data: ReportsPageData }) {
   return (
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <section className="grid min-w-0 grid-cols-1 gap-3 min-[420px]:grid-cols-2 xl:grid-cols-6 [&>*]:h-full xl:[&>*:nth-child(-n+3)]:col-span-2 xl:[&>*:nth-child(n+4)]:col-span-3">
       <ReportStat
         icon={Receipt}
         label="Expected"

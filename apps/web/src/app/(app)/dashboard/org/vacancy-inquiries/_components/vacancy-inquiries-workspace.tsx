@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { OrgRole } from "@prisma/client";
-import { BellRing } from "lucide-react";
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
+import { ResponsiveDataList, DataCardRow } from "@/components/ui/responsive-data-list";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { updateVacancyInquiryStatusAction } from "../actions";
@@ -14,7 +15,7 @@ import type { getVacancyInquiriesPageData } from "../_lib/queries";
 import { INQUIRY_STATUSES } from "../_lib/types";
 
 const panelShellClassName =
-  "overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm";
+  "workspace-panel min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm";
 
 type VacancyInquiriesPageData = Awaited<
   ReturnType<typeof getVacancyInquiriesPageData>
@@ -28,13 +29,13 @@ export function VacancyInquiriesWorkspace({
   orgRole?: OrgRole | null;
 }) {
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content uniform-page-actions mx-auto w-full min-w-0 max-w-7xl space-y-5 px-0 pb-24 pt-2 sm:px-2">
       <section className={panelShellClassName}>
         <div className="border-b border-border px-5 py-5 sm:px-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                <BellRing className="h-3.5 w-3.5" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-medium leading-5 text-muted-foreground">
+                <VisualSticker label="Vacancy inquiries" size="xs" />
                 Vacancy leads
               </div>
               <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
@@ -48,7 +49,7 @@ export function VacancyInquiriesWorkspace({
             </div>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-5 grid min-w-0 grid-cols-1 gap-3 min-[380px]:grid-cols-2 lg:grid-cols-3 min-[1600px]:grid-cols-5">
             <Stat label="New" value={data.newCount} highlight={data.newCount > 0} />
             <Stat label="Contacted" value={data.contactedCount} />
             <Stat label="Viewings" value={data.viewingCount} />
@@ -76,7 +77,7 @@ export function VacancyInquiriesWorkspace({
 
       <section className={panelShellClassName}>
         <div className="border-b border-border px-5 py-4 sm:px-6">
-          <h2 className="text-lg font-semibold text-foreground">Inquiry register</h2>
+          <h2 className="flex items-center gap-3 text-lg font-semibold text-foreground"><VisualSticker label="Inquiries" />Inquiry register</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Showing {data.showingFrom}–{data.showingTo} of {data.totalInquiries}
           </p>
@@ -87,6 +88,36 @@ export function VacancyInquiriesWorkspace({
             No vacancy inquiries match this filter.
           </div>
         ) : (
+          <ResponsiveDataList desktopBreakpoint="2xl" mobile={
+            <ul className="grid min-w-0 gap-4 bg-muted/15 p-3 md:grid-cols-2 sm:p-4">
+              {data.inquiries.map((inquiry) => (
+                <li key={inquiry.id} className="flex min-w-0 flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <VisualSticker label="Prospect profile" className="shrink-0" />
+                    <div className="min-w-0 flex-1"><h3 className="break-words font-semibold">{inquiry.fullName}</h3><p className="mt-1 text-xs text-muted-foreground">{formatInquiryDate(inquiry.createdAt)}</p></div>
+                    <span className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${inquiryStatusClasses(inquiry.status)}`}>{formatInquiryStatus(inquiry.status)}</span>
+                  </div>
+                  <dl className="space-y-3 rounded-xl bg-muted/25 p-3">
+                    <DataCardRow label="Phone" value={<a href={`tel:${inquiry.phone}`} className="text-primary underline underline-offset-4">{inquiry.phone}</a>} />
+                    {inquiry.email && <DataCardRow label="Email" value={<a href={`mailto:${inquiry.email}`} className="break-all text-primary underline underline-offset-4">{inquiry.email}</a>} />}
+                    <DataCardRow label="Unit" value={<DeferredLink href={`/dashboard/org/units/${inquiry.unitId}`} className="text-primary underline underline-offset-4">Unit {inquiry.unit.houseNo}</DeferredLink>} />
+                    <DataCardRow label="Property" value={inquiry.unit.property.name} />
+                    {inquiry.unit.property.location && <DataCardRow label="Location" value={inquiry.unit.property.location} />}
+                  </dl>
+                  <p className="break-words text-sm leading-6 text-muted-foreground">{inquiry.message || "No message provided."}</p>
+                  <form action={updateVacancyInquiryStatusAction} className="mt-auto grid gap-3 border-t border-border pt-4 min-[480px]:grid-cols-[1fr_auto]">
+                    <input type="hidden" name="inquiryId" value={inquiry.id} />
+                    <label className="min-w-0 text-xs font-medium text-muted-foreground">Inquiry status
+                      <select name="status" defaultValue={inquiry.status} className="mt-1 min-h-11 w-full rounded-xl border border-border bg-background px-3 text-base text-foreground sm:text-sm">
+                        {INQUIRY_STATUSES.map((status) => <option key={status} value={status}>{formatInquiryStatus(status)}</option>)}
+                      </select>
+                    </label>
+                    <button type="submit" data-workspace-action="true" className="self-end">Save status</button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          } desktop={
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead className="border-b border-border bg-muted/20">
@@ -183,10 +214,11 @@ export function VacancyInquiriesWorkspace({
               </tbody>
             </table>
           </div>
+          } />
         )}
 
         {data.totalPages > 1 ? (
-          <div className="flex items-center justify-between border-t border-border px-5 py-4 sm:px-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-4 sm:px-6">
             <p className="text-sm text-muted-foreground">
               Page {data.currentPage} of {data.totalPages}
             </p>
@@ -197,7 +229,7 @@ export function VacancyInquiriesWorkspace({
                     data.currentPage - 1,
                     data.statusFilter === "ALL" ? undefined : data.statusFilter,
                   )}
-                  className="rounded-xl border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted/20"
+                  data-page-button="true" className="rounded-xl border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted/20"
                 >
                   Previous
                 </Link>
@@ -208,7 +240,7 @@ export function VacancyInquiriesWorkspace({
                     data.currentPage + 1,
                     data.statusFilter === "ALL" ? undefined : data.statusFilter,
                   )}
-                  className="rounded-xl border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted/20"
+                  data-page-button="true" className="rounded-xl border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted/20"
                 >
                   Next
                 </Link>
@@ -231,9 +263,9 @@ function Stat({
   highlight?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        {label}
+    <div className="workspace-metric min-w-0 rounded-2xl border border-border bg-card px-4 py-4">
+      <p className="text-xs font-medium leading-5 text-muted-foreground">
+        <span className="inline-flex items-center gap-2"><VisualSticker label={label} size="xs" />{label}</span>
       </p>
       <p
         className={`mt-2 text-2xl font-semibold ${
@@ -258,6 +290,8 @@ function FilterLink({
   return (
     <Link
       href={href}
+      data-page-button="true"
+      aria-current={active ? "page" : undefined}
       className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
         active
           ? "border-primary bg-primary text-primary-foreground"

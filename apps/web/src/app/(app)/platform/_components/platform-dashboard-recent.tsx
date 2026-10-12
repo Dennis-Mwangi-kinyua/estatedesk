@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PlatformSticker } from "./platform-sticker";
 import { Clock3, Mail, Phone } from "lucide-react";
 import {
   formatCompactCurrency,
@@ -42,8 +43,8 @@ export function PlatformDashboardRecent({
   } = data;
 
   return (
-    <main className="grid gap-5">
-      <section className="grid gap-5 lg:grid-cols-[1.15fr_1.15fr_0.9fr]">
+    <div className="grid min-w-0 gap-5">
+      <section className="platform-analytics-grid grid min-w-0 items-stretch gap-5 md:grid-cols-2 min-[1600px]:grid-cols-[1fr_1fr_0.9fr]">
         <ChartSection
           organizationSeries={organizationSeries}
           revenueSeries={revenueSeries}
@@ -58,7 +59,7 @@ export function PlatformDashboardRecent({
         />
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[1.2fr_0.95fr]">
+      <section className="platform-activity-grid grid min-w-0 items-start gap-5 xl:grid-cols-2">
         <Panel title="Onboarding queue" subtitle="New requests needing first response">
           {recentOnboardingRequests.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-slate-900 dark:text-slate-400">
@@ -73,7 +74,8 @@ export function PlatformDashboardRecent({
                   className="platform-glass-inset group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
+                    <PlatformSticker label="Onboarding" className="shrink-0" />
+                    <div className="min-w-0 flex-1">
                       <p className="break-words text-sm font-semibold leading-5 text-slate-950 dark:text-white">
                         {request.companyName}
                       </p>
@@ -142,13 +144,17 @@ export function PlatformDashboardRecent({
         </Panel>
 
         <Panel title="Recent payments" subtitle="Latest platform transactions">
-          <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {recentPayments.length === 0 && (
+              <p className="col-span-full rounded-xl border border-dashed border-border bg-muted/40 p-6 text-center text-sm text-muted-foreground">No recent payments.</p>
+            )}
             {recentPayments.map((payment) => (
               <div
                 key={payment.id}
                 className="platform-glass-inset group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20"
               >
-                <div className="min-w-0">
+                <PlatformSticker label="Payment" className="shrink-0" />
+                <div className="min-w-0 flex-1">
                   <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-slate-950 dark:text-white">
                     {payment.payerTenant?.fullName ?? "Tenant payment"}
                   </p>
@@ -171,7 +177,7 @@ export function PlatformDashboardRecent({
           </div>
         </Panel>
       </section>
-    </main>
+    </div>
   );
 }
 

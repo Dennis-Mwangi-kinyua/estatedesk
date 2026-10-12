@@ -13,5 +13,6 @@ export default async function LeaseDetailPage({ params }: LeasePageProps) {
   const leaseId = decodePublicId(publicLeaseId, "lease");
   const data = await loadLeaseDetailsData(session.activeOrgId!, leaseId);
 
-  return <><LeaseDetailsWorkspace data={data} orgRole={session.activeOrgRole} /><div className="mx-auto max-w-7xl p-4"><LeaseAgreementPanel leaseId={leaseId} /></div></>;
+  return <LeaseDetailsWorkspace data={data} orgRole={session.activeOrgRole}
+    agreement={<LeaseAgreementPanel leaseId={leaseId} />} />;
 }

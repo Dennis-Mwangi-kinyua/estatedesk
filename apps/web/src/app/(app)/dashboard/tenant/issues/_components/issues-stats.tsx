@@ -9,7 +9,7 @@ import type { TenantIssuesPageData } from "@/app/(app)/dashboard/tenant/issues/_
 
 export function IssuesStats({ data }: { data: TenantIssuesPageData }) {
   return (
-    <section className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:gap-4">
+    <section className="workspace-card-grid grid grid-cols-2 gap-3 lg:grid-cols-4 xl:gap-4">
       <StatCard
         icon={<MessageSquareWarning className="h-4 w-4" />}
         label="Total Issues"

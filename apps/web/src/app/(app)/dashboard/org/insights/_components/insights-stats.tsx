@@ -7,7 +7,7 @@ export function InsightsStats({ data }: { data: InsightsPageData }) {
   const { snapshot } = data;
 
   return (
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="workspace-card-grid grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <StatCard
         label="Portfolio score"
         value={

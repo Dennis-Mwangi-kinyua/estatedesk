@@ -1,3 +1,4 @@
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
@@ -6,7 +7,7 @@ import { formatStatusLabel, ratingTone } from "../_lib/helpers";
 import type { TenantReportCardProps } from "../_lib/types";
 
 export const panelShellClassName =
-  "overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm";
+  "workspace-panel min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm";
 
 export function RatingScore({ score }: { score: number }) {
   return <span aria-label={`Rating ${score} out of 5`} className="inline-flex rounded-lg border border-border bg-muted/20 px-2 py-1 text-xs font-semibold text-foreground">{score} / 5</span>;
@@ -24,7 +25,9 @@ export function ReportFilterLink({
   return (
     <Link
       href={href}
-      className={`inline-flex min-h-9 items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+      aria-current={active ? "page" : undefined}
+      data-page-button="true"
+      className={`inline-flex min-h-11 max-w-full items-center break-words rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
         active
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:bg-muted/20 hover:text-foreground"
@@ -47,20 +50,20 @@ export function ReportStat({
   highlight?: boolean;
 }) {
   return (
-    <div className="rounded-3xl border border-border bg-card p-4 shadow-sm">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+    <div className="report-stat h-full min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-2 text-xs font-medium leading-5 text-muted-foreground"><VisualSticker label={label} size="xs" />{label}</p>
           <p
-            className={`mt-1 text-xl font-bold ${
+            className={`mt-3 break-words text-2xl font-semibold tabular-nums ${
               highlight ? "text-red-600 dark:text-red-300" : "text-foreground"
             }`}
           >
             {value}
           </p>
         </div>
-        <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-          <Icon className="h-[18px] w-[18px]" />
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+          <Icon aria-hidden="true" className="h-4 w-4" />
         </span>
       </div>
     </div>
@@ -76,13 +79,13 @@ export function TenantReportCard({
   orgRole,
 }: TenantReportCardProps) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm">
+    <section className="workspace-panel min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
       <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-5 sm:px-6">
-        <div>
-          <h2 className="text-base font-semibold text-foreground">{title}</h2>
+        <div className="min-w-0 flex-1">
+          <h2 className="flex items-start gap-2 text-base font-semibold text-foreground"><VisualSticker label={title} size="xs" className="shrink-0" />{title}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         </div>
-        <span className="rounded-full border border-border bg-muted/20 px-3 py-1 text-xs font-semibold text-muted-foreground">
+        <span className="shrink-0 rounded-full border border-border bg-muted/20 px-3 py-1 text-xs font-semibold text-muted-foreground">
           {rows.length}
         </span>
       </div>
@@ -101,7 +104,7 @@ export function TenantReportCard({
           rows.map((row) => (
             <article
               key={row.tenantId}
-              className="rounded-2xl border border-border bg-background p-4 transition hover:bg-muted/10"
+              className="min-w-0 rounded-2xl border border-border bg-muted/15 p-4 transition hover:bg-muted/10"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
@@ -111,18 +114,18 @@ export function TenantReportCard({
                   <p className="mt-1 text-xs text-muted-foreground">{row.unitLabel}</p>
                 </div>
                 <span
-                  className={`inline-flex w-fit rounded-full border px-2.5 py-1 text-xs font-semibold ${ratingTone(row.rating.score)}`}
+                  className={`inline-flex w-fit max-w-full rounded-full border px-2.5 py-1 text-xs font-semibold ${ratingTone(row.rating.score)}`}
                 >
                   {row.rating.label}
                 </span>
               </div>
 
-              <div className="mt-3 flex items-center justify-between gap-3">
-                <div>
+              <div className="mt-3 flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0">
                   <RatingScore score={row.rating.score} />
                   <p className="mt-1 text-xs text-muted-foreground">{row.rating.detail}</p>
                 </div>
-                <div className="text-right">
+                <div className="min-w-0 rounded-xl bg-card p-3 min-[480px]:text-right">
                   <p className="text-xs text-muted-foreground">
                     {row.daysPastDue > 0 ? `${row.daysPastDue} days past due` : "Within period"}
                   </p>

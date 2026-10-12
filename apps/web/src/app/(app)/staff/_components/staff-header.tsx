@@ -42,7 +42,7 @@ export function StaffHeader({ data, orgRole }: StaffHeaderProps) {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-2 p-4 sm:gap-3 sm:p-6">
+      <div className="grid grid-cols-1 gap-3 p-4 min-[380px]:grid-cols-2 md:grid-cols-3 sm:p-6">
         <StatCard label="Total staff" value={totalStaff} />
         <StatCard label="Online now" value={onlineStaffUsers} highlight="success" />
         <StatCard label="Offline" value={Math.max(totalStaff - onlineStaffUsers, 0)} />

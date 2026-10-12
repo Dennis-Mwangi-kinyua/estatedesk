@@ -1,3 +1,4 @@
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "next/link";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
@@ -7,7 +8,6 @@ import {
   Droplets,
   Megaphone,
   Send,
-  ShieldCheck,
 } from "lucide-react";
 import { sendPaymentRemindersAction } from "@/app/(app)/dashboard/org/notifications/actions";
 import { OPERATIONS_WORKFLOW_STEPS } from "@/app/(app)/dashboard/org/notifications/_lib/constants";
@@ -32,17 +32,17 @@ export function NotificationsHero({
   sentCount,
 }: NotificationsHeroProps) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm">
+    <section className="workspace-panel min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
       <div className="border-b border-border px-5 py-5 sm:px-6 sm:py-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              <ShieldCheck className="h-3.5 w-3.5" />
+              <VisualSticker label="Notifications" size="xs" />
               {membership.org.name} operations desk
             </div>
 
             <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Operations overview
+              Notifications and activity
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
@@ -82,7 +82,7 @@ export function NotificationsHero({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 border-b border-border px-5 py-5 sm:grid-cols-3 sm:px-6 xl:grid-cols-5">
+      <div className="grid min-w-0 grid-cols-1 gap-3 border-b border-border p-4 min-[380px]:grid-cols-2 lg:grid-cols-3 min-[1600px]:grid-cols-5 sm:p-5">
         <KpiTile label="Water review" value={approvalQueueCount} icon={Droplets} />
         <KpiTile label="Move-outs" value={moveOutCount} icon={Megaphone} />
         <KpiTile label="Unread" value={unreadCount} icon={Bell} />
@@ -90,6 +90,8 @@ export function NotificationsHero({
         <KpiTile label="Sent" value={sentCount} icon={Send} />
       </div>
 
+      <details className="border-t border-border">
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-4 text-sm font-semibold sm:px-6"><VisualSticker label="Help" size="xs" />How this workspace works</summary>
       <div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
         {OPERATIONS_WORKFLOW_STEPS.map((item) => (
           <div
@@ -108,6 +110,7 @@ export function NotificationsHero({
           </div>
         ))}
       </div>
+      </details>
     </section>
   );
 }

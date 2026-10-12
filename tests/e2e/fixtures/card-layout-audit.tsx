@@ -1,0 +1,27 @@
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { ReportsHeader } from "@/app/(app)/dashboard/org/reports/_components/reports-header";
+import { ReportsStatsSection } from "@/app/(app)/dashboard/org/reports/_components/reports-stats-section";
+import { ReportsFiltersSection } from "@/app/(app)/dashboard/org/reports/_components/reports-filters-section";
+import { ReportsTenantPanels } from "@/app/(app)/dashboard/org/reports/_components/reports-tenant-panels";
+import { ReportsExportsSection } from "@/app/(app)/dashboard/org/reports/_components/reports-exports-section";
+import { SettingsDirectorySection } from "@/app/(app)/dashboard/org/settings/_components/settings-directory-section";
+import { SettingsStats } from "@/app/(app)/dashboard/org/settings/_components/settings-stats";
+import { CommunicationFeedPanel } from "@/app/(app)/dashboard/org/notifications/_components/communication-feed-panel";
+import { NotificationsHero } from "@/app/(app)/dashboard/org/notifications/_components/notifications-hero";
+import { StatCard } from "@/app/(app)/dashboard/org/units/_components/units-ui";
+
+const longName = "Greenview Gardens and Residences International Management Organisation";
+const row = { tenantId: "tenant-1", tenantName: "Brian Wanjiku Mwangi Kinyua Long Family Name", unitLabel: longName + " · Apartment A100", amountDue: 123456789.89, amountPaid: 1234567.89, balance: 122222222, daysPastDue: 25, rating: { score: 2, label: "Needs attention", detail: "Several outstanding balances require a follow-up with the account holder." } };
+const report = { period: "2026-10", selectedApartment: "all", selectedPayment: "all", apartmentOptions: [longName, "ApartmentNameWithoutSpaces".repeat(4)], activePaymentFilter: { label: "All occupants" }, collectionRate: 85, scopedTotals: { expected: 123456789.89, paid: 1234567.89, deficit: 122222222 }, filteredRows: [row], paidRows: [], notPaidRows: [row], recentExports: [{ id: "export-1", reportType: "Rent collection summary", fileName: "organisation_export_".repeat(10) + ".csv", period: "2026-10", createdAt: new Date("2026-10-12T09:00:00Z") }] } as unknown as React.ComponentProps<typeof ReportsHeader>["data"];
+const settings = { organization: { name: longName, status: "ACTIVE" }, subscription: { plan: "PROFESSIONAL", status: "ACTIVE" }, members: [1,2], apiKeys: [1] } as unknown as React.ComponentProps<typeof SettingsStats>["data"];
+const membership = { userId: "viewer", orgId: "org-1", role: "ADMIN", org: { id: "org-1", name: longName, slug: "greenview", currencyCode: "KES", timezone: "Africa/Nairobi" } } as const;
+const notifications = ["SENT", "FAILED"].map((status, i) => ({ id: `notification-${i}`, title: "Payment update for " + longName, message: "Please review this account. " + "TransactionReferenceWithoutSpaces".repeat(6), type: "PAYMENT", channel: "IN_APP", channels: ["IN_APP", "EMAIL"], status, readAt: null, createdAt: new Date("2026-10-12T09:00:00Z"), user: { id: "viewer", fullName: longName, email: null, phone: null, status: "ACTIVE" }, tenant: null }));
+createRoot(document.getElementById("fixture")!).render(<div className="estate-workspace min-h-screen lg:pl-72">
+  <main className="min-w-0 space-y-8 p-4">
+    <section data-audit="metrics" className="org-theme-content"><div className="workspace-card-grid grid gap-3 xl:grid-cols-6">{["Expected rent", "Paid", "Outstanding", "Properties", "Units", "Active tenants"].map(label => <StatCard key={label} label={label} value="KES 123,456,789.89" note={longName} />)}</div></section>
+    <section data-audit="reports" className="reports-page org-theme-content uniform-page-actions space-y-5"><ReportsHeader data={report} /><ReportsFiltersSection data={report} /><ReportsStatsSection data={report} /><ReportsTenantPanels data={report} /><ReportsExportsSection data={report} /></section>
+    <section data-audit="settings" className="settings-page org-theme-content space-y-5"><SettingsStats data={settings} activeMembers={2} activeApiKeys={1} /><SettingsDirectorySection /></section>
+    <section data-audit="notifications" className="notifications-page org-theme-content uniform-page-actions space-y-5"><NotificationsHero membership={membership} approvalQueueCount={3} moveOutCount={2} unreadCount={2} queuedCount={0} sentCount={20} /><CommunicationFeedPanel membership={membership} notifications={notifications} activeFilter="all" totalNotifications={2} unreadCount={2} queuedCount={0} failedCount={1} /></section>
+  </main>
+</div>);

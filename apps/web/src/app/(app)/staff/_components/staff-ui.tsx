@@ -1,5 +1,6 @@
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "next/link";
-import { Activity, BriefcaseBusiness, ChevronLeft, ChevronRight, Clock3, ContactRound, Landmark, Mail, Moon, Phone, ShieldCheck, UserRoundCog, UsersRound, Wrench } from "lucide-react";
+import { BriefcaseBusiness, ChevronLeft, ChevronRight, Clock3, ContactRound, Landmark, Mail, Phone, ShieldCheck, UserRoundCog, Wrench } from "lucide-react";
 import { ROLE_META, type StaffRole } from "@/features/staff/constants/role-meta";
 import { DeferredLink } from "@/components/navigation/app-links";
 
@@ -24,7 +25,7 @@ export function RolePill({ role }: { role: StaffRole }) {
 
   return (
     <span
-      className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${meta.badgeClass} dark:border-border dark:bg-muted/20 dark:text-foreground`}
+      className={`inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${meta.badgeClass} dark:border-border dark:bg-muted/20 dark:text-foreground`}
     >
       <StaffRoleIcon role={role} />
       {meta.label}
@@ -35,7 +36,7 @@ export function RolePill({ role }: { role: StaffRole }) {
 export function PresencePill({ online }: { online: boolean }) {
   return (
     <span
-      className={`inline-flex w-fit items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-semibold ${
+      className={`inline-flex w-fit shrink-0 items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-semibold ${
         online
           ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
           : "border-border bg-muted/20 text-muted-foreground"
@@ -60,10 +61,9 @@ export function StatCard({
   value: number;
   highlight?: "success";
 }) {
-  const Icon = label === "Online now" ? Activity : label === "Offline" ? Moon : UsersRound;
   return (
     <div className="min-w-0 rounded-2xl border border-border bg-muted/10 p-3 sm:p-4">
-      <Icon aria-hidden="true" className={`mb-2 h-5 w-5 ${highlight === "success" ? "text-emerald-600 dark:text-emerald-300" : "text-primary"}`} strokeWidth={1.75} />
+      <VisualSticker label={label} className="mb-3" />
       <p className="text-[11px] leading-4 text-muted-foreground sm:text-sm">{label}</p>
       <p
         className={`mt-1 break-words text-xl font-semibold tabular-nums sm:text-2xl ${
@@ -162,14 +162,14 @@ export function StaffCard({
 }) {
   const initials = name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "?";
   return (
-    <DeferredLink href={href} className="group block min-w-0 rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    <DeferredLink href={href} className="group block h-full min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:border-primary/30 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       <div className="flex items-start gap-3">
         <span aria-hidden="true" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-semibold text-primary">{initials}</span>
         <div className="min-w-0 flex-1">
           <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground">{name}</p>
           <div className="mt-2"><RolePill role={role} /></div>
         </div>
-        <ChevronRight aria-hidden="true" className="mt-3 h-4 w-4 shrink-0 text-muted-foreground transition group-hover:text-primary" />
+        <VisualSticker label={`${role.toLowerCase()} staff`} size="xs" className="shrink-0" />
       </div>
       <div className="mt-4 space-y-2 text-xs text-muted-foreground">
         {email ? <p className="flex items-start gap-2"><Mail aria-hidden="true" className="h-4 w-4 shrink-0" /><span className="min-w-0" style={{ overflowWrap: "anywhere" }}>{email}</span></p> : null}

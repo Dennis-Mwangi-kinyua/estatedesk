@@ -50,7 +50,7 @@ export function LeaseWorkspace({
       <LeaseHeader data={data} />
       <LeaseStats data={data} />
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="grid items-start gap-5 min-[1600px]:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-5">
           {latestLease && activeLeases.length > 0 ? (
             <ActiveLeasePanel lease={latestLease} />

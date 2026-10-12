@@ -28,7 +28,7 @@ export function TodayStats({
   data: Extract<CaretakerTodayWorkPageData, { ok: true }>;
 }) {
   return (
-    <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="workspace-card-grid grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <StatCard
         label={<CaretakerI18nLabel labelKey="dueToday" />}
         value={data.dueToday}

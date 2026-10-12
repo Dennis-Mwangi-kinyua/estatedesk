@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Search } from "lucide-react";
-import { WorkspaceHero } from "@/components/shared/workspace-hero";
+import { PlatformSticker } from "../_components/platform-sticker";
 import {
-  DataCard,
   DataCardRow,
   ResponsiveDataList,
 } from "@/components/ui/responsive-data-list";
@@ -13,7 +12,7 @@ import {
   formatLedgerDate,
   getPlatformPaymentLedger,
 } from "@/lib/ledger";
-import { PaginationControls, StatCard } from "../_components/control-plane";
+import { PageHeader, PaginationControls, StatCard } from "../_components/control-plane";
 
 export const dynamic = "force-dynamic";
 
@@ -61,34 +60,35 @@ export default async function PlatformPaymentsPage({
 
   return (
     <div className="ed-mobile-first min-w-0 max-w-full space-y-4 overflow-x-clip sm:space-y-6">
-      <div className="workspace-panel overflow-hidden rounded-3xl border border-border bg-card">
-        <WorkspaceHero kind="payments" eyebrow="Platform ledger" title="Organisation payments" description={`Collection visibility for ${ledger.period}. Review billing, payments, and outstanding balances across your organisations.`} actions={<Link data-workspace-action="true" href="/platform/payment-ops" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">Review payment operations<ArrowUpRight className="h-4 w-4" /></Link>}>
-          <p className="text-xs text-muted-foreground">Select an organisation below to explore its profile, billing, members, and operational activity.</p>
-        </WorkspaceHero>
-      </div>
+      <PageHeader
+        eyebrow="Platform ledger"
+        title="Organisation payments"
+        description={`Collection overview for ${ledger.period}. Review recorded payments and outstanding balances, then open an organisation for its full account.`}
+        action={<Link data-workspace-action="true" href="/platform/payment-ops" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground">Payment operations<ArrowUpRight aria-hidden="true" className="h-4 w-4" /></Link>}
+      />
 
-      <section className="grid min-w-0 grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
-        <StatCard label="Organizations" value={ledger.totals.organizations} />
+      <section aria-label="Payment overview" className="grid min-w-0 grid-cols-1 gap-3 min-[380px]:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Organisations" value={ledger.totals.organizations} note="All matching organisations" />
         <StatCard
-          label="Organisations with payments"
+          label="With payments"
           value={ledger.totals.paidOrganizations}
-          note="Current page"
+          note="On this page"
         />
         <StatCard
           label="Recorded payments"
           value={formatLedgerCurrency(ledger.totals.paid)}
-          note="Current page"
+          note="On this page"
         />
         <StatCard
           label="Outstanding balance"
           value={formatLedgerCurrency(ledger.totals.deficit)}
-          note="Current page"
+          note="On this page"
         />
       </section>
 
       <section className="min-w-0 max-w-full overflow-hidden workspace-panel rounded-3xl border border-border bg-card shadow-sm">
         <div className="border-b border-border px-4 py-3">
-          <h2 className="text-base font-semibold text-foreground">Organisations</h2>
+          <h2 className="flex items-center gap-3 text-base font-semibold text-foreground"><PlatformSticker label="Organisations" />Organisation accounts</h2>
           <p className="mt-1 text-xs text-muted-foreground">{ledger.totals.listedOrganizations} on this page · Open an organisation to view its operations.</p>
         </div>
 
@@ -105,32 +105,38 @@ export default async function PlatformPaymentsPage({
           </p>
         ) : (
           <ResponsiveDataList
+            desktopBreakpoint="2xl"
             className="min-w-0 max-w-full"
             mobile={
-              <ul className="min-w-0 divide-y divide-border overflow-hidden">
+              <ul className="grid min-w-0 gap-4 bg-muted/20 p-3 sm:grid-cols-2 sm:p-4">
                 {ledger.rows.map((row) => (
-                  <li key={row.orgId}>
-                    <DataCard>
-                      <Link
-                        href={`/platform/organizations/${encodeURIComponent(row.slug)}`}
-                        className="group inline-flex min-h-11 max-w-full items-center gap-2 break-words text-sm font-semibold text-primary underline underline-offset-4 hover:decoration-2"
-                      >
-                        {row.name}<ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0 transition group-hover:translate-x-0.5" />
-                      </Link>
-                      <p className="mt-0.5 break-all text-xs text-muted-foreground">/{row.slug}</p>
-                      <dl className="mt-2.5 space-y-1.5 rounded-xl border border-border bg-muted/30 p-2.5">
+                  <li key={row.orgId} className="min-w-0">
+                    <article className="flex h-full min-w-0 flex-col rounded-2xl border border-border bg-card p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <PlatformSticker label="Organisation" className="shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <Link href={`/platform/organizations/${encodeURIComponent(row.slug)}`}
+                            className="group inline-flex min-h-11 max-w-full items-center gap-2 break-words text-sm font-semibold text-foreground hover:text-primary focus-visible:rounded-md focus-visible:outline-2 focus-visible:outline-primary">
+                            <span className="min-w-0 break-words">{row.name}</span><ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0" />
+                          </Link>
+                          <p className="break-all text-xs text-muted-foreground">/{row.slug}</p>
+                        </div>
+                      </div>
+                      <dl className="my-4 grid min-w-0 grid-cols-1 gap-2 min-[420px]:grid-cols-2">
+                        <div className="min-w-0 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+                          <dt className="flex items-center gap-2 text-xs font-medium text-muted-foreground"><PlatformSticker label="Payments" size="xs" />Recorded payments</dt>
+                          <dd className="mt-2 break-words text-lg font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">{formatLedgerCurrency(row.paid)}</dd>
+                        </div>
+                        <div className="min-w-0 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
+                          <dt className="flex items-center gap-2 text-xs font-medium text-muted-foreground"><PlatformSticker label="Balance" size="xs" />Outstanding</dt>
+                          <dd className="mt-2 break-words text-lg font-semibold tabular-nums text-amber-700 dark:text-amber-300">{formatLedgerCurrency(row.deficit)}</dd>
+                        </div>
+                      </dl>
+                      <dl className="mt-auto space-y-3 border-t border-border pt-4">
                         <DataCardRow label="Tenants" value={row.tenantCount} />
                         <DataCardRow
                           label="Expected"
                           value={formatLedgerCurrency(row.expected)}
-                        />
-                        <DataCardRow
-                          label="Paid"
-                          value={formatLedgerCurrency(row.paid)}
-                        />
-                        <DataCardRow
-                          label="Deficit"
-                          value={formatLedgerCurrency(row.deficit)}
                         />
                         <DataCardRow label="Payments" value={row.paymentCount} />
                         <DataCardRow
@@ -138,13 +144,13 @@ export default async function PlatformPaymentsPage({
                           value={formatLedgerDate(row.lastPaymentAt)}
                         />
                       </dl>
-                    </DataCard>
+                    </article>
                   </li>
                 ))}
               </ul>
             }
             desktop={
-              <table className="min-w-full text-sm">
+              <table className="min-w-full text-sm [&_td]:tabular-nums">
                 <thead className="bg-muted/30 text-left text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 font-medium">Organization</th>

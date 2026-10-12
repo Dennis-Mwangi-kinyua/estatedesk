@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { VisualSticker } from "./visual-sticker";
+import { EmojiSticker as VisualSticker } from "./emoji-sticker";
 
 export type WorkspaceKind = "tenant" | "org" | "caretaker" | "landlord" | "platform" | "payments";
 

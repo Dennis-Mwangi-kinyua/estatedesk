@@ -48,7 +48,7 @@ export function StaffDirectorySection({ data }: StaffDirectorySectionProps) {
         </div>
       ) : (
         <>
-          <div className="grid min-w-0 gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:hidden">
+          <div className="grid min-w-0 gap-3 p-3 sm:grid-cols-2 sm:p-4 xl:grid-cols-3 2xl:hidden">
             {rows.map((member) => (
               <StaffCard
                 key={member.id}
@@ -64,7 +64,7 @@ export function StaffDirectorySection({ data }: StaffDirectorySectionProps) {
             ))}
           </div>
 
-          <div className="hidden overflow-x-auto lg:block">
+          <div className="hidden min-w-0 overflow-x-auto 2xl:block">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/15 text-left text-xs uppercase tracking-[0.12em] text-muted-foreground">

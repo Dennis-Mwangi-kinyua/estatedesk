@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { memo } from "react";
 import { TenantAdminActions } from "../TenantAdminActions";
 import {
@@ -37,9 +38,9 @@ export const DetailItem = memo(function DetailItem({
   mono?: boolean;
 }) {
   return (
-    <div className="rounded-2xl ed-theme-card border border-border bg-card p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
-        {label}
+    <div className="min-w-0 rounded-2xl border border-border bg-muted/25 p-4">
+      <p className="text-xs font-medium leading-5 text-muted-foreground">
+        <span className="inline-flex items-center gap-2"><VisualSticker label={label} size="xs" />{label}</span>
       </p>
       <p className={`mt-2 break-words text-sm text-foreground ${mono ? "font-mono" : ""}`}>
         {value || "—"}
@@ -57,7 +58,7 @@ export const SectionHeader = memo(function SectionHeader({
 }) {
   return (
     <div>
-      <h2 className="text-base font-semibold text-foreground">{title}</h2>
+      <h2 className="flex items-center gap-3 text-base font-semibold text-foreground"><VisualSticker label={title} className="shrink-0" />{title}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{description}</p>
     </div>
   );
@@ -71,11 +72,11 @@ export const SummaryStat = memo(function SummaryStat({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl bg-neutral-50 p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
-        {label}
+    <div className="workspace-metric min-w-0 rounded-2xl border border-border bg-muted/30 p-4">
+      <p className="text-xs font-medium leading-5 text-muted-foreground">
+        <span className="inline-flex items-center gap-2"><VisualSticker label={label} size="xs" />{label}</span>
       </p>
-      <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
+      <p className="mt-3 break-words text-lg font-semibold tabular-nums text-foreground">{value}</p>
     </div>
   );
 });
@@ -88,6 +89,8 @@ export const TenantHeroCard = memo(function TenantHeroCard({
   phone,
   currentUnit,
   currentRent,
+  currentDeposit,
+  recordedPayments,
   canManage,
   initials,
   tenantId,
@@ -103,6 +106,8 @@ export const TenantHeroCard = memo(function TenantHeroCard({
   phone: string | null;
   currentUnit: string;
   currentRent: string;
+  currentDeposit: string;
+  recordedPayments: string;
   canManage: boolean;
   initials: string;
   tenantId: string;
@@ -144,15 +149,17 @@ export const TenantHeroCard = memo(function TenantHeroCard({
             </span>
           </div>
 
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 break-words text-sm text-muted-foreground">
             {email || "No email"} • {phone || "No phone"}
           </p>
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 xl:grid-cols-4">
         <SummaryStat label="Current unit" value={currentUnit} />
         <SummaryStat label="Monthly rent" value={currentRent} />
+        <SummaryStat label="Deposit held" value={currentDeposit} />
+        <SummaryStat label="Recorded payments" value={recordedPayments} />
       </div>
 
       {canManage ? (

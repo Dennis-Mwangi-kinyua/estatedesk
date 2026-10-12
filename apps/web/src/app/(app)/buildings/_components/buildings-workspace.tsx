@@ -20,7 +20,7 @@ export function BuildingsWorkspace({ data, orgRole }: BuildingsWorkspaceProps) {
       <BuildingsStatsSection data={data} />
       <BuildingsFiltersSection data={data} />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="grid gap-5 min-[1600px]:grid-cols-[minmax(0,1fr)_280px]">
         <BuildingsDirectorySection data={data} />
         <BuildingsGuidance orgRole={orgRole} />
       </div>

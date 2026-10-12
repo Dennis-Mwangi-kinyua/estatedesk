@@ -16,19 +16,15 @@ export function ReportsWorkspace({
   orgRole?: OrgRole | null;
 }) {
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content reports-page uniform-page-actions mx-auto w-full min-w-0 max-w-7xl space-y-5 px-0 pb-24 pt-2 sm:px-2">
       <ReportsHeader data={data} orgRole={orgRole} />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="space-y-5">
-          <ReportsExportsSection data={data} />
-          <ReportsFiltersSection data={data} />
-          <ReportsStatsSection data={data} />
-          <ReportsTenantPanels data={data} orgRole={orgRole} />
-          <ReportsMatrixSection data={data} />
-        </div>
-        <ReportsGuidance orgRole={orgRole} />
-      </div>
+      <ReportsFiltersSection data={data} />
+      <ReportsStatsSection data={data} />
+      <ReportsTenantPanels data={data} orgRole={orgRole} />
+      <ReportsMatrixSection data={data} />
+      <ReportsExportsSection data={data} />
+      <ReportsGuidance orgRole={orgRole} />
     </div>
   );
 }

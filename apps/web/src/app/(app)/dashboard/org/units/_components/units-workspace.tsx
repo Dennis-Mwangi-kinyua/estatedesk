@@ -39,7 +39,7 @@ export function UnitsWorkspace({
       <UnitsFiltersSection data={data} />
       <UnitsBreadcrumb data={data} />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="grid gap-5 min-[1600px]:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-5">
           {!hasPageContent(data) ? (
             <UnitsEmptyState data={data} orgRole={orgRole} />

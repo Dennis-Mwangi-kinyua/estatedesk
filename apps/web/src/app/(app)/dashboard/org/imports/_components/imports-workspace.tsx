@@ -15,23 +15,16 @@ export function ImportsWorkspace({
   orgRole?: OrgRole | null;
 }) {
   return (
-    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content mx-auto w-full min-w-0 max-w-7xl space-y-5 px-0 pb-24 pt-2 sm:px-2">
       <ImportsHeader
         history={history}
         historyUnavailable={historyUnavailable}
         orgRole={orgRole}
       />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="space-y-5">
-          <CsvImportForm />
-          <ImportsHistorySection
-            history={history}
-            historyUnavailable={historyUnavailable}
-          />
-        </div>
-        <ImportsGuidance orgRole={orgRole} />
-      </div>
+      <CsvImportForm />
+      <ImportsHistorySection history={history} historyUnavailable={historyUnavailable} />
+      <ImportsGuidance orgRole={orgRole} />
     </div>
   );
 }

@@ -10,7 +10,7 @@ export function PaymentsStatsSection({
   pendingPayments: PaymentsPageData["pendingPayments"];
 }) {
   return (
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="workspace-card-grid grid min-w-0 grid-cols-1 gap-3 min-[380px]:grid-cols-2 xl:grid-cols-4">
       <StatCard
         label="Expected this month"
         value={formatLedgerCurrency(ledger.totals.expected)}

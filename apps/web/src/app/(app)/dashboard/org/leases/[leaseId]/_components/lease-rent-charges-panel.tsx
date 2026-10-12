@@ -1,3 +1,5 @@
+import { ResponsiveDataList, DataCardRow } from "@/components/ui/responsive-data-list";
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { formatCurrency, formatDate, getChargeStatusClass } from "../_lib/helpers";
 import type { LeaseDetailsData } from "../_lib/types";
 
@@ -9,9 +11,9 @@ export function LeaseRentChargesPanel({
   currencyCode: string;
 }) {
   return (
-    <section className="overflow-hidden rounded-xl border bg-background shadow-sm">
+    <section className="overflow-hidden workspace-panel min-w-0 rounded-2xl border border-border bg-card shadow-sm">
       <div className="border-b px-4 py-3">
-        <h2 className="text-base font-semibold">Rent Charges</h2>
+        <h2 className="flex items-center gap-3 text-base font-semibold"><VisualSticker label="Rent Charges" size="xs" />Rent Charges</h2>
       </div>
 
       {lease.rentCharges.length === 0 ? (
@@ -19,6 +21,31 @@ export function LeaseRentChargesPanel({
           No rent charges found.
         </div>
       ) : (
+        <ResponsiveDataList desktopBreakpoint="2xl" mobile={
+          <ul className="grid min-w-0 gap-3 bg-muted/15 p-3 md:grid-cols-2 sm:p-4">
+            {lease.rentCharges.map((charge) => (
+              <li key={charge.id} className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm">
+                <div className="mb-4 flex items-center gap-3"><VisualSticker label="Rent charges" /><h3 className="text-sm font-semibold">Rent charge</h3></div>
+                <dl className="space-y-3">
+
+                    <DataCardRow label="Period" value={<>{charge.period}</>} />
+                    <DataCardRow label="Type" value={<>{charge.chargeType}</>} />
+                    <DataCardRow label="Amount Due" value={<>{formatCurrency(charge.amountDue, currencyCode)}</>} />
+                    <DataCardRow label="Amount Paid" value={<>{formatCurrency(charge.amountPaid, currencyCode)}</>} />
+                    <DataCardRow label="Balance" value={<>{formatCurrency(charge.balance, currencyCode)}</>} />
+                    <DataCardRow label="Due Date" value={<>{formatDate(charge.dueDate)}</>} />
+                    <DataCardRow label="Status" value={<><span
+                      className={`inline-flex shrink-0 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs ${getChargeStatusClass(
+                        charge.status
+                      )}`}
+                    >
+                      {charge.status}
+                    </span></>} />
+                </dl>
+              </li>
+            ))}
+          </ul>
+        } desktop={
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-muted/40">
@@ -51,7 +78,7 @@ export function LeaseRentChargesPanel({
                   <td className="px-4 py-3">{formatDate(charge.dueDate)}</td>
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-flex rounded-full border px-2.5 py-1 text-xs ${getChargeStatusClass(
+                      className={`inline-flex shrink-0 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs ${getChargeStatusClass(
                         charge.status
                       )}`}
                     >
@@ -63,6 +90,7 @@ export function LeaseRentChargesPanel({
             </tbody>
           </table>
         </div>
+        } />
       )}
     </section>
   );

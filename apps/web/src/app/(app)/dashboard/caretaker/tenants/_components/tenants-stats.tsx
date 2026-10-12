@@ -11,7 +11,7 @@ export function TenantsStats({
   >;
 }) {
   return (
-    <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+    <section className="workspace-card-grid grid grid-cols-2 gap-3 xl:grid-cols-4">
       <StatCard
         label="Total"
         value={data.totalTenants}

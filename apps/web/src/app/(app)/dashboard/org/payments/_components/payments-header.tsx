@@ -1,11 +1,10 @@
-import { WorkspaceIcon } from "@/components/shared/workspace-icon";
+import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "next/link";
 import type { OrgRole } from "@prisma/client";
-import { ArrowLeft, Download, Landmark, Wallet } from "lucide-react";
+import { ArrowLeft, Download, Landmark } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { PAYMENTS_WORKFLOW_STEPS } from "../_lib/constants";
 import { formatPeriodLabel } from "../_lib/helpers";
-import { formatLedgerCurrency } from "@/lib/ledger";
 import type { PaymentsPageData } from "../_lib/types";
 import { panelShellClassName } from "./payments-ui";
 
@@ -24,7 +23,7 @@ export function PaymentsHeader({
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              <Wallet className="h-3.5 w-3.5" />
+              <VisualSticker label="Payments" size="xs" />
               Tenant ledger
             </div>
 
@@ -67,35 +66,8 @@ export function PaymentsHeader({
         </div>
       </div>
 
-      <div className="grid gap-3 border-b border-border px-5 py-5 sm:grid-cols-3 sm:px-6">
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Expected this month
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {formatLedgerCurrency(ledger.totals.expected)}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Paid this month
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {formatLedgerCurrency(ledger.totals.paid)}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Deficit
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {formatLedgerCurrency(ledger.totals.deficit)}
-          </p>
-        </div>
-      </div>
-
       <details className="border-t border-border">
-        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6"><WorkspaceIcon label="help" className="inline-block h-5 w-5 shrink-0 align-middle" /> How this works</summary>
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-medium text-muted-foreground sm:px-6"><VisualSticker label="Help" size="xs" /> How this works</summary>
 <div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
         {PAYMENTS_WORKFLOW_STEPS.map((item) => (
           <div
