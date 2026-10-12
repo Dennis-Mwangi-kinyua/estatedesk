@@ -1,6 +1,6 @@
 "use client";
 
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "@/components/shared/colored-icons";
 import { formatSource } from "../_lib/helpers";
 import type { CheckoutFormState } from "./use-checkout-form";
 

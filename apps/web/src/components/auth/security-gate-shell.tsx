@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { Building2, ShieldCheck } from "lucide-react";
+import { Building2, ShieldCheck } from "@/components/shared/colored-icons";
 import type { ReactNode } from "react";
 
 type SecurityGateShellProps = {

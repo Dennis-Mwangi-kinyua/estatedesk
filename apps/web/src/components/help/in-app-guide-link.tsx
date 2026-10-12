@@ -1,6 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import { BookOpen } from "lucide-react";
+import { BookOpen } from "@/components/shared/colored-icons";
 import {
   canAccessGuideTopic,
   getInAppGuideTopic,

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Ban, Mail } from "lucide-react";
+import { Ban } from "lucide-react";
+import { Mail } from "@/components/shared/colored-icons";
 import { privatePageMetadata } from "@/lib/seo";
 
 export const metadata = privatePageMetadata;

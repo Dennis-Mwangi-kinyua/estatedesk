@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowLeft, Wrench } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Wrench } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
   CaretakerWorkspaceFooter,

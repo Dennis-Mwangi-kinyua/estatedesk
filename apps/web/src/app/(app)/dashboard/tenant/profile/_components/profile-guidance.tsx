@@ -1,6 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "@/components/shared/colored-icons";
 import { panelShellClassName } from "./profile-ui";
 
 const LINKS = [

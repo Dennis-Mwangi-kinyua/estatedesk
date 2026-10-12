@@ -16,6 +16,7 @@ export type WorkspaceIconName =
 export type Sticker = { icon: WorkspaceIconName; tone: StickerTone };
 
 const vocabulary: Array<[RegExp, WorkspaceIconName, StickerTone]> = [
+  [/^(more|menu)$/, "LayoutDashboard", "violet"],
   [/^(home|overview|dashboard)$|workspace overview/, "House", "sky"],
   [/reports|analytics|insights|statement|distribution|financial report/, "ChartNoAxesCombined", "violet"],
   [/property profile/, "Building2", "sky"],

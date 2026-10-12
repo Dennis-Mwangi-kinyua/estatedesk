@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowRight, BookOpen, CircleHelp, Layers3, Workflow } from "lucide-react";
+import { ArrowRight, Layers3, Workflow } from "lucide-react";
+import { BookOpen, CircleHelp } from "@/components/shared/colored-icons";
 import type { ContentDepthSections } from "@/lib/content-depth/types";
 
 type ContentDepthStackProps = ContentDepthSections & {

@@ -1,4 +1,5 @@
-import { Globe2, Mail, MapPin, Phone } from "lucide-react";
+import { Globe2, MapPin } from "lucide-react";
+import { Mail, Phone } from "@/components/shared/colored-icons";
 import type { SettingsPageData } from "../../settings-data";
 import { SectionCard, SmallInfoCard } from "../../settings-ui";
 

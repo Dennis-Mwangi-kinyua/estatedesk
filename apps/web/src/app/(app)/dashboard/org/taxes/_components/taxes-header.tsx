@@ -1,7 +1,8 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import { ArrowLeft, Landmark, Receipt } from "lucide-react";
+import { ArrowLeft, Receipt } from "lucide-react";
+import { Landmark } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { TAXES_WORKFLOW_STEPS } from "../_lib/constants";
 import { panelShellClassName } from "./taxes-ui";

@@ -1,11 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import {
-  ArrowRightLeft,
-  BookOpenCheck,
-  FilePenLine,
-  Receipt,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRightLeft, FilePenLine, Receipt, type LucideIcon } from "lucide-react";
+import { BookOpenCheck } from "@/components/shared/colored-icons";
 import type { ReactNode } from "react";
 import { buildAccountingPageHref } from "../_lib/helpers";
 import type { AccountingTab } from "../_lib/types";

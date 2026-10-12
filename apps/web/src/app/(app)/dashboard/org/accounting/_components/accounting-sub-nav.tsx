@@ -2,19 +2,8 @@
 
 import Link from "@/components/navigation/workspace-link";
 import { usePathname } from "next/navigation";
-import {
-  BookOpen,
-  Building2,
-  CalendarRange,
-  ChartPie,
-  FileSpreadsheet,
-  Inbox,
-  Landmark,
-  LayoutDashboard,
-  Scale,
-  Settings2,
-  Wallet,
-} from "lucide-react";
+import { CalendarRange, ChartPie, FileSpreadsheet, Scale, Settings2 } from "lucide-react";
+import { BookOpen, Building2, Inbox, Landmark, LayoutDashboard, Wallet } from "@/components/shared/colored-icons";
 
 const LINKS = [
   {

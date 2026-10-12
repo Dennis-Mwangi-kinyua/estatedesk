@@ -1,6 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
-import { Building2, ChevronRight, Globe2, UsersRound, ArrowUpRight } from "lucide-react";
+import { ChevronRight, Globe2, ArrowUpRight } from "lucide-react";
+import { Building2, UsersRound } from "@/components/shared/colored-icons";
 import {
   formatDate,
   formatNumber,

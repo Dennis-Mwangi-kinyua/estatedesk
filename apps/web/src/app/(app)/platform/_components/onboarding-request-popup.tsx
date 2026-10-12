@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "@/components/navigation/workspace-link";
-import { BellRing as Bell, X } from "lucide-react";
+import { X } from "lucide-react";
+import { BellRing as Bell } from "@/components/shared/colored-icons";
 
 type OnboardingRequestPopupProps = {
   count: number;

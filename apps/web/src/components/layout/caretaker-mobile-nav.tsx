@@ -3,7 +3,8 @@
 import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 
 import { DeferredLink } from "@/components/navigation/app-links";
-import { X, LogOut } from "lucide-react";
+import { X } from "lucide-react";
+import { LogOut } from "@/components/shared/colored-icons";
 import { useCallback, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";

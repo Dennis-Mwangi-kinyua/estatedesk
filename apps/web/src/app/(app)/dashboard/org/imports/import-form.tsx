@@ -2,14 +2,8 @@
 
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import { useActionState, useMemo, useState } from "react";
-import {
-  AlertCircle,
-  CircleCheck as CheckCircle2,
-  Download,
-  Loader2,
-  Upload,
-  XCircle,
-} from "lucide-react";
+import { AlertCircle, Loader2, XCircle } from "lucide-react";
+import { CircleCheck as CheckCircle2, Download, Upload } from "@/components/shared/colored-icons";
 import {
   DataCard,
   ResponsiveDataList,

@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { AlertCircle, ChevronLeft, Send, Wrench } from "lucide-react";
+import { AlertCircle, ChevronLeft, Send } from "lucide-react";
+import { Wrench } from "@/components/shared/colored-icons";
 import { reportIssueAction } from "../_lib/actions";
 import { unitLabel } from "../_lib/helpers";
 import type { ReportIssuePageData } from "../_lib/types";

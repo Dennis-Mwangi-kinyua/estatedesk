@@ -1,5 +1,5 @@
 import { DeferredLink } from "@/components/navigation/app-links";
-import { Search } from "lucide-react";
+import { Search } from "@/components/shared/colored-icons";
 import { buildPageHref } from "../_lib/helpers";
 import type { UnitsPageData } from "../_lib/types";
 import {

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { BellRing as Bell, X } from "lucide-react";
+import { X } from "lucide-react";
+import { BellRing as Bell } from "@/components/shared/colored-icons";
 import type { UnreadNotificationAlert } from "@/lib/notifications/unread-alert";
 import { NotificationViewButton } from "./notification-view-button";
 

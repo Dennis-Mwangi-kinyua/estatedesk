@@ -1,14 +1,8 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import Link from "@/components/navigation/workspace-link";
-import {
-  AlertCircle,
-  Building2,
-  CircleCheck as CheckCircle2,
-  ClipboardList,
-  Droplets,
-  Wrench,
-} from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { Building2, CircleCheck as CheckCircle2, ClipboardList, Droplets, Wrench } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { CARETAKER_DASHBOARD_WORKFLOW } from "../_lib/constants";
 import type { CaretakerDashboardData } from "../_lib/types";

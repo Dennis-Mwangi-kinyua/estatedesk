@@ -1,4 +1,5 @@
-import { Save, Shield, Trash2 } from "lucide-react";
+import { Shield } from "lucide-react";
+import { Save, Trash2 } from "@/components/shared/colored-icons";
 import { archiveOrphanPlatformUser, updatePlatformUserStatus } from "../actions";
 import type { UserDetailWorkspaceProps } from "./user-detail-sidebar";
 

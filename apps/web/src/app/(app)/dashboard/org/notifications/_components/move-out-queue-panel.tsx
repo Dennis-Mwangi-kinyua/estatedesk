@@ -1,4 +1,5 @@
-import { ArrowUpRight, CalendarDays, ClipboardCheck, Mail, Phone } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { CalendarDays, ClipboardCheck, Mail, Phone } from "@/components/shared/colored-icons";
 import { EmojiSticker } from "@/components/shared/emoji-sticker";
 import { nairobiDate } from "@/lib/move-outs/validation";
 import { CloseoutForm } from "@/features/move-outs/components/closeout-form";

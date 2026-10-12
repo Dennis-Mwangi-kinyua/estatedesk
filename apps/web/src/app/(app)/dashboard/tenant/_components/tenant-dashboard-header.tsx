@@ -1,14 +1,7 @@
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import Link from "@/components/navigation/workspace-link";
-import {
-  BellRing as Bell,
-  WalletCards as CreditCard,
-  FileText,
-  MapPin,
-  MessageSquareText,
-  WalletCards,
-  Wrench,
-} from "lucide-react";
+import { FileText, MapPin } from "lucide-react";
+import { BellRing as Bell, WalletCards as CreditCard, MessageSquareText, WalletCards, Wrench } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { formatCurrency } from "@/lib/tenant/tenant-format";
 import type { TenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";

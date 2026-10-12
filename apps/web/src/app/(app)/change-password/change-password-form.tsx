@@ -2,7 +2,8 @@
 
 import Link from "@/components/navigation/workspace-link";
 import { useActionState } from "react";
-import { ExternalLink, KeyRound, ShieldCheck } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import { KeyRound, ShieldCheck } from "@/components/shared/colored-icons";
 import { PasswordField } from "@/components/auth/password-field";
 import {
   changeInitialPasswordAction,

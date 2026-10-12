@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarClock, UserRound } from "lucide-react";
+import { CalendarClock } from "lucide-react";
+import { UserRound } from "@/components/shared/colored-icons";
 import { scheduleInspectionAction } from "@/app/(app)/move-outs/_lib/actions";
 
 export function ScheduleForm({

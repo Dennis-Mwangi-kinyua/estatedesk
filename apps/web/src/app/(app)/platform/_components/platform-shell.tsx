@@ -11,12 +11,8 @@ import { WorkspaceActions } from "@/components/shared/workspace-actions";
 import Link from "@/components/navigation/workspace-link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useMemo, useState } from "react";
-import {
-  Building2,
-  Code2,
-  LogOut,
-  MessageSquareText,
-} from "lucide-react";
+import { Code2 } from "lucide-react";
+import { Building2, LogOut, MessageSquareText } from "@/components/shared/colored-icons";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 import { logoutAction } from "@/features/auth/actions/logout-action";

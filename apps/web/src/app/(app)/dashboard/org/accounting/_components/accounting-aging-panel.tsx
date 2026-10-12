@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { CalendarClock, HandCoins, UsersRound as Users } from "lucide-react";
+import { CalendarClock, HandCoins } from "lucide-react";
+import { UsersRound as Users } from "@/components/shared/colored-icons";
 import type { AgingSummary } from "@/lib/accounting/aging";
 import {
   DataCard,

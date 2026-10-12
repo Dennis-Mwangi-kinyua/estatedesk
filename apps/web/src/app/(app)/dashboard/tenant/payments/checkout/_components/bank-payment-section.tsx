@@ -1,6 +1,6 @@
 "use client";
 
-import { Landmark } from "lucide-react";
+import { Landmark } from "@/components/shared/colored-icons";
 import { getBankAccountForMethod } from "@/lib/payments/instructions";
 import { getPaymentMethodDefinition } from "@/lib/payments/methods-catalog";
 import type { CheckoutFormState } from "./use-checkout-form";

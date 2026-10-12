@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowRight, CircleCheck as CheckCircle2, CircleHelp as HelpCircle, Layers3, ListChecks } from "lucide-react";
+import { ArrowRight, Layers3, ListChecks } from "lucide-react";
+import { CircleCheck as CheckCircle2, CircleHelp as HelpCircle } from "@/components/shared/colored-icons";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";

@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { Clock3 } from "lucide-react";
+import { Clock3 } from "@/components/shared/colored-icons";
 import { DeferredLink } from "@/components/navigation/app-links";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { getAuditActivityHref } from "../_lib/activity-links";

@@ -9,14 +9,8 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LockKeyhole } from "lucide-react";
+import { Mail, ShieldCheck } from "@/components/shared/colored-icons";
 import type { LoginActionState } from "./actions";
 
 type LoginActionHandler = (

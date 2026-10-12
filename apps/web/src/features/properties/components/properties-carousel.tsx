@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { memo, useCallback, useMemo, useRef } from "react";
-import { ChevronLeft, ChevronRight, MapPin, UsersRound as Users, Building2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { UsersRound as Users, Building2 } from "@/components/shared/colored-icons";
 
 type PropertyCardItem = {
   id: string;

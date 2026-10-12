@@ -1,23 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import { PlatformPermissionType, PlatformRole } from "@prisma/client";
-import {
-  ArrowLeft,
-  BadgeCheck,
-  Building2,
-  CalendarDays,
-  CircleCheck as CheckCircle2,
-  Crown,
-  KeyRound,
-  LogIn,
-  Mail,
-  Phone,
-  Save,
-  Shield,
-  Trash2,
-  User2,
-  UsersRound as Users,
-  XCircle,
-} from "lucide-react";
+import { ArrowLeft, BadgeCheck, Crown, Shield, User2, XCircle } from "lucide-react";
+import { Building2, CalendarDays, CircleCheck as CheckCircle2, KeyRound, LogIn, Mail, Phone, Save, Trash2, UsersRound as Users } from "@/components/shared/colored-icons";
 import {
   archiveOrphanPlatformUser,
   resetPlatformUserPassword,

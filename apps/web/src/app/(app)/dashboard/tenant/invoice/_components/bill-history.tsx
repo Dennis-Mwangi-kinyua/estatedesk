@@ -1,6 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import { Fragment } from "react";
-import { Droplets, Eye, FileDown, Receipt, Wallet } from "lucide-react";
+import { Eye, FileDown, Receipt } from "lucide-react";
+import { Droplets, Wallet } from "@/components/shared/colored-icons";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import {
   formatDate,

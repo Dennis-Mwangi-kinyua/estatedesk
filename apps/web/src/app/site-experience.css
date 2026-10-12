@@ -428,3 +428,18 @@ body.estate-glass-system .organisation-detail-page :is(.workspace-panel, .org-su
   .organisation-detail-page .organisation-summary { grid-template-columns: minmax(0, 1fr); }
   .organisation-detail-page .org-count-card { flex-direction: column; align-items: flex-start; gap: .5rem; }
 }
+
+/* Shared multicolor artwork also serves CSS headings and metric accents. */
+.estate-glass-system h1[data-page-icon]::before,
+.estate-workspace h1[data-workspace-heading-icon]::before {
+  background: var(--workspace-heading-image) center / contain no-repeat;
+  mask: none;
+  -webkit-mask: none;
+}
+.workspace-metric[data-metric-icon]::after {
+  background: var(--workspace-metric-image) center / contain no-repeat;
+  mask: none;
+  -webkit-mask: none;
+  opacity: 1;
+}
+.workspace-color-icon { filter: drop-shadow(0 1px 1px rgb(15 23 42 / 10%)); }

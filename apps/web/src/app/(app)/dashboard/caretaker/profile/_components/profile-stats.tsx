@@ -1,4 +1,5 @@
-import { CalendarDays, CircleUserRound, LogIn, Wallet } from "lucide-react";
+import { CircleUserRound } from "lucide-react";
+import { CalendarDays, LogIn, Wallet } from "@/components/shared/colored-icons";
 import { StatCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import { formatDate, formatMoney } from "../_lib/helpers";
 import type { CaretakerProfileMember } from "../_lib/types";

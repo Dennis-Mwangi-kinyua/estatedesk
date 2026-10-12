@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "@/components/navigation/workspace-link";
-import { BedDouble, MapPin, Plus, UsersRound as Users } from "lucide-react";
+import { MapPin, Plus } from "lucide-react";
+import { BedDouble, UsersRound as Users } from "@/components/shared/colored-icons";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { WorkspaceHero } from "@/components/shared/workspace-hero";

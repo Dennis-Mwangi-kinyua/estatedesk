@@ -1,9 +1,5 @@
-import {
-  CalendarClock,
-  CircleCheck as CheckCircle2,
-  ClipboardList,
-  XCircle,
-} from "lucide-react";
+import { CalendarClock, XCircle } from "lucide-react";
+import { CircleCheck as CheckCircle2, ClipboardList } from "@/components/shared/colored-icons";
 import { StatCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerInspectionsPageData } from "../_lib/queries";
 

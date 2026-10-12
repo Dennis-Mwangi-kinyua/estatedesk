@@ -1,5 +1,6 @@
 import { PlatformRole } from "@prisma/client";
-import { Crown, KeyRound, Plus, Shield, User2 } from "lucide-react";
+import { Crown, Plus, Shield, User2 } from "lucide-react";
+import { KeyRound } from "@/components/shared/colored-icons";
 import { createPlatformUserAction } from "../actions";
 import {
   PLATFORM_PERMISSION_VALUES,

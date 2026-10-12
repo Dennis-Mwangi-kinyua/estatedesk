@@ -1,7 +1,8 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import { ArrowLeft, Wrench } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Wrench } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { canCreateOrgIssue } from "@/lib/issues/share-routing";
 import { ISSUE_TRACKING_WORKFLOW } from "../_lib/constants";

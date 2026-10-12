@@ -1,4 +1,5 @@
-import { BadgeCheck, CalendarDays, ShieldCheck } from "lucide-react";
+import { BadgeCheck } from "lucide-react";
+import { CalendarDays, ShieldCheck } from "@/components/shared/colored-icons";
 import type { SettingsPageData } from "../../settings-data";
 import { SectionCard, SmallInfoCard } from "../../settings-ui";
 

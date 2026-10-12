@@ -1,20 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
-import {
-  ArrowRight,
-  Bath,
-  BedDouble,
-  Building2,
-  CircleCheck as CheckCircle2,
-  ChevronRight,
-  Coins,
-  ExternalLink,
-  MapPin,
-  MessageCircle,
-  Phone,
-  Send,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowRight, Bath, ChevronRight, Coins, ExternalLink, MapPin, MessageCircle, Send } from "lucide-react";
+import { BedDouble, Building2, CircleCheck as CheckCircle2, Phone, ShieldCheck } from "@/components/shared/colored-icons";
 import {
   VacancyDetailRelatedGrid,
   type RelatedVacancyListingCard,

@@ -1,11 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import {
-  ArrowRight,
-  Camera,
-  Droplets,
-  House as Home,
-  UserRound,
-} from "lucide-react";
+import { ArrowRight, Camera } from "lucide-react";
+import { Droplets, House as Home, UserRound } from "@/components/shared/colored-icons";
 import {
   formatDateTime,
   formatMoney,

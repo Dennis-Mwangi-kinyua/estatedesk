@@ -1,26 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import { type ElementType, type ReactNode } from "react";
-import {
-  ArrowRight,
-  Building2,
-  CalendarCheck2,
-  Check,
-  ClipboardList,
-  WalletCards as CreditCard,
-  Droplets,
-  FileCheck2,
-  House as Home,
-  KeyRound,
-  Layers3,
-  LockKeyhole,
-  MapPin,
-  PhoneCall,
-  Search,
-  ShieldCheck,
-  SlidersHorizontal,
-  UsersRound,
-  WalletCards,
-} from "lucide-react";
+import { ArrowRight, CalendarCheck2, Check, Layers3, LockKeyhole, MapPin, PhoneCall } from "lucide-react";
+import { Building2, ClipboardList, WalletCards as CreditCard, Droplets, FileCheck2, House as Home, KeyRound, Search, ShieldCheck, SlidersHorizontal, UsersRound, WalletCards } from "@/components/shared/colored-icons";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { APP_PLAN_ORDER, APP_PLANS } from "@/lib/billing/plans";

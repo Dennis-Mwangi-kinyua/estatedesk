@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowLeft, WalletCards as CreditCard, Download, FileText } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
+import { WalletCards as CreditCard, Download } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { isPdfLeaseAsset, tenantLeaseDownloadPath } from "../_lib/download";
 import type { TenantLeasePageData } from "../_lib/types";

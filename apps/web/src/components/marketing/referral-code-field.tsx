@@ -1,6 +1,7 @@
 "use client";
 
-import { CircleCheck as CheckCircle2, Loader2, Ticket, XCircle } from "lucide-react";
+import { Loader2, Ticket, XCircle } from "lucide-react";
+import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
 import { useEffect, useMemo, useState } from "react";
 
 type LookupStatus = "idle" | "loading" | "found" | "not_found" | "error";

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Building2, Mail, ShieldAlert } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
+import { Building2, Mail } from "@/components/shared/colored-icons";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { privatePageMetadata } from "@/lib/seo";
 

@@ -1,6 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import type { ComponentType, ReactNode } from "react";
-import { ArrowRight, Wrench } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Wrench } from "@/components/shared/colored-icons";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import {
   panelBodyClassName,

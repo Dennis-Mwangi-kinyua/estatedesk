@@ -3,7 +3,8 @@
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Camera, Check, ClipboardCheck, FileText, Send } from "lucide-react";
+import { Camera, Check, FileText, Send } from "lucide-react";
+import { ClipboardCheck } from "@/components/shared/colored-icons";
 import { completeInspectionAction } from "./actions/complete-inspection-action";
 import { inspectionChecklistFields } from "@/app/(app)/dashboard/caretaker/inspections/[inspectionId]/_lib/constants";
 

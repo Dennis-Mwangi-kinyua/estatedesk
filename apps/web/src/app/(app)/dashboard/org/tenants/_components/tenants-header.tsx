@@ -1,7 +1,8 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import { ArrowLeft, UserRoundPlus as UserPlus, UsersRound as Users } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { UserRoundPlus as UserPlus, UsersRound as Users } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { TENANTS_WORKFLOW_STEPS } from "../_lib/constants";
 import type { TenantsPageData } from "../_lib/types";

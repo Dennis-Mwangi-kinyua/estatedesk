@@ -1,6 +1,7 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "@/components/navigation/workspace-link";
-import { ArrowLeft, UserRoundPlus as UserPlus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { UserRoundPlus as UserPlus } from "@/components/shared/colored-icons";
 import { STAFF_SETUP_WORKFLOW } from "../_lib/constants";
 
 type StaffNewHeaderProps = {

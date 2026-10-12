@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { ClipboardList, House as Home } from "lucide-react";
+import { ClipboardList, House as Home } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import {

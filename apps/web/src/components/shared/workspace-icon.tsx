@@ -1,3 +1,4 @@
+import { workspaceIconArtwork } from "./workspace-icon-artwork";
 import {
   Activity, Archive, ArchiveRestore, BadgeDollarSign, BadgePercent, BedDouble,
   BellRing, BookOpen, BookOpenCheck, Braces, Building, Building2,
@@ -34,6 +35,5 @@ export function workspaceIconFor(label: string) {
 /** Decorative SVG; visible text on its parent supplies the accessible name. */
 export function WorkspaceIcon({ label, className = "h-5 w-5" }: { label: string; className?: string }) {
   const { icon, tone } = stickerFor(label);
-  const Icon = WORKSPACE_ICONS[icon];
-  return <Icon aria-hidden="true" focusable="false" data-workspace-icon={icon} data-workspace-icon-tone={tone} className={`shrink-0 ${className}`} strokeWidth={1.75} />;
+  return <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" data-workspace-icon={icon} data-workspace-icon-tone={tone} className={`workspace-color-icon shrink-0 ${className}`} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: workspaceIconArtwork[icon] }} />;
 }

@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { UserRoundPlus as UserPlus } from "lucide-react";
+import { UserRoundPlus as UserPlus } from "@/components/shared/colored-icons";
 import { encodePublicId } from "@/lib/public-id";
 import { DeferredLink } from "@/components/navigation/app-links";
 import {

@@ -1,6 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
-import { CalendarDays, ClipboardCheck, Clock3, MapPin, Phone, UserRound } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { CalendarDays, ClipboardCheck, Clock3, Phone, UserRound } from "@/components/shared/colored-icons";
 import { encodePublicId } from "@/lib/public-id";
 import { badgeClass, formatDate, formatDateTime } from "../_lib/helpers";
 import type { CaretakerInspectionsPageData } from "../_lib/queries";

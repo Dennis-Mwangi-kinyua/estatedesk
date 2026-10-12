@@ -1,17 +1,7 @@
 import Link from "next/link";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
-import {
-  Building2,
-  Check,
-  WalletCards as CreditCard,
-  ShieldCheck,
-  Layers3,
-  ClipboardList,
-  Droplets,
-  FileBarChart2,
-  WalletCards,
-  X,
-} from "lucide-react";
+import { Check, Layers3, FileBarChart2, X } from "lucide-react";
+import { Building2, WalletCards as CreditCard, ShieldCheck, ClipboardList, Droplets, WalletCards } from "@/components/shared/colored-icons";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { siteContentDepth } from "@/lib/content-depth/site-topics";

@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowUpRight, Search } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { Search } from "@/components/shared/colored-icons";
 import { PlatformSticker } from "../_components/platform-sticker";
 import {
   DataCardRow,

@@ -1,6 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import { encodePublicId } from "@/lib/public-id";
-import { ArrowUpRight, KeyRound, Shield, UserRoundCog as UserCog } from "lucide-react";
+import { ArrowUpRight, Shield } from "lucide-react";
+import { KeyRound, UserRoundCog as UserCog } from "@/components/shared/colored-icons";
 import {
   Badge,
   PageHeader,

@@ -1,4 +1,5 @@
-import { Clock3, Laptop, LogOut, ShieldCheck, Smartphone } from "lucide-react";
+import { Laptop, Smartphone } from "lucide-react";
+import { Clock3, LogOut, ShieldCheck } from "@/components/shared/colored-icons";
 import {
   getManagedUserSessions,
   requireUserSession,

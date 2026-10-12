@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { CircleCheck as CheckCircle2, Loader2, X, XCircle } from "lucide-react";
+import { Loader2, X, XCircle } from "lucide-react";
+import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
 import {
   completedLabel,
   formatQueryFeedback,

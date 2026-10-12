@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, House as Home, LifeBuoy, Search, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { House as Home, LifeBuoy, Search, ShieldCheck } from "@/components/shared/colored-icons";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { privatePageMetadata } from "@/lib/seo";
 

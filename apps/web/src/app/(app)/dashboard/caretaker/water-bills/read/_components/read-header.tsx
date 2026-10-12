@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowLeft, Droplets } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Droplets } from "@/components/shared/colored-icons";
 import {
   panelBodyClassName,
   panelShellClassName,

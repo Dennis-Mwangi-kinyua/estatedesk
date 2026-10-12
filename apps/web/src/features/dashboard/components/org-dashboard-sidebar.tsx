@@ -1,13 +1,5 @@
-import {
-  ArrowRight,
-  BellRing as Bell,
-  CircleAlert,
-  WalletCards as CreditCard,
-  CircleCheck as CheckCircle2,
-  Banknote,
-  House as Home,
-  UsersRound as Users,
-} from "lucide-react";
+import { ArrowRight, CircleAlert, Banknote } from "lucide-react";
+import { BellRing as Bell, WalletCards as CreditCard, CircleCheck as CheckCircle2, House as Home, UsersRound as Users } from "@/components/shared/colored-icons";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import {
   HeroAction,

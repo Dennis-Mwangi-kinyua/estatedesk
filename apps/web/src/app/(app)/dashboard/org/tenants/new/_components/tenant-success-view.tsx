@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "@/components/navigation/workspace-link";
-import { Mail, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
+import { Mail } from "@/components/shared/colored-icons";
 import {
   buildAccountCredentialsEmailHref,
   buildAccountCredentialsWhatsAppHref,

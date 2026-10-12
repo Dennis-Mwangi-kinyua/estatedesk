@@ -1,6 +1,6 @@
 import { ProfileAvatar } from "@/components/uploads/profile-avatar";
 import Link from "@/components/navigation/workspace-link";
-import { KeyRound, LogOut, PencilLine, UserRound } from "lucide-react";
+import { KeyRound, LogOut, PencilLine, UserRound } from "@/components/shared/colored-icons";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import { paymentHealthTone, statusTone } from "../_lib/helpers";
 import type { TenantProfilePageData } from "../_lib/types";

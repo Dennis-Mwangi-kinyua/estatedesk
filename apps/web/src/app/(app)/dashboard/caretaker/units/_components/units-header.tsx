@@ -1,4 +1,4 @@
-import { Building2 } from "lucide-react";
+import { Building2 } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
   panelBodyClassName,

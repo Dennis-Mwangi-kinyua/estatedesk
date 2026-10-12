@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
-import { Camera, CircleCheck as CheckCircle2, ImagePlus, LoaderCircle, Trash2, X } from "lucide-react";
+import { Camera, ImagePlus, LoaderCircle, X } from "lucide-react";
+import { CircleCheck as CheckCircle2, Trash2 } from "@/components/shared/colored-icons";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfilePicture } from "@/app/(app)/profile/actions";

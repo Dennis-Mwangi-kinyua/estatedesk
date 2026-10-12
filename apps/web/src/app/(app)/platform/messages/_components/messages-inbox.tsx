@@ -4,7 +4,8 @@ import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 
 import Link from "@/components/navigation/workspace-link";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowUpRight, Archive, Ban, CheckCheck, Mail, Phone, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Ban, CheckCheck, RotateCcw } from "lucide-react";
+import { Archive, Mail, Phone, Trash2 } from "@/components/shared/colored-icons";
 import { closePlatformMessageAction, deletePlatformMessageAction, markPlatformMessageReadAction, markPlatformMessageSpamAction, reopenPlatformMessageAction } from "../actions";
 import { MessageActionButton } from "./message-action-button";
 

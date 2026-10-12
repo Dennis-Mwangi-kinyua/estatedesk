@@ -1,6 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, PencilLine } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { PencilLine } from "@/components/shared/colored-icons";
 import { TenantWorkspace } from "@/components/theme/ed-dashboard-shell";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { panelShellClassName } from "../_components/profile-ui";

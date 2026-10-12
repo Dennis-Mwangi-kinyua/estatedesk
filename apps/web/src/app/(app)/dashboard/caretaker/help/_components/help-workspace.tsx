@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { BookOpen } from "lucide-react";
+import { BookOpen } from "@/components/shared/colored-icons";
 import {
   CaretakerWorkspaceFooter,
   panelBodyClassName,

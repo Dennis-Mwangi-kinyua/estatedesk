@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRight, Building2, Globe2, SearchCheck, ShieldCheck } from "lucide-react";
+import { ArrowRight, Globe2, SearchCheck } from "lucide-react";
+import { Building2, ShieldCheck } from "@/components/shared/colored-icons";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";

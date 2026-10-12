@@ -2,7 +2,8 @@
 
 import Link from "@/components/navigation/workspace-link";
 import { useEffect, useState } from "react";
-import { LifeBuoy, Timer } from "lucide-react";
+import { Timer } from "lucide-react";
+import { LifeBuoy } from "@/components/shared/colored-icons";
 import {
   leaveOrgSupportAccessAction,
   extendOrgSupportAccessAction,

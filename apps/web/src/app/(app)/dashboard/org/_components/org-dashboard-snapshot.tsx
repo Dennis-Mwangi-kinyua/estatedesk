@@ -1,20 +1,7 @@
 import type { ComponentType } from "react";
 import { DeferredLink } from "@/components/navigation/app-links";
-import {
-  ArrowRight,
-  BellRing,
-  CircleAlert,
-  ClipboardCheck,
-  ClipboardList,
-  Droplets,
-  FileText,
-  Inbox,
-  Landmark,
-  Lightbulb,
-  LogOut,
-  Receipt,
-  Wallet,
-} from "lucide-react";
+import { ArrowRight, CircleAlert, FileText, Lightbulb, Receipt } from "lucide-react";
+import { BellRing, ClipboardCheck, ClipboardList, Droplets, Inbox, Landmark, LogOut, Wallet } from "@/components/shared/colored-icons";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { panelShellClassName } from "./org-dashboard-ui";
 

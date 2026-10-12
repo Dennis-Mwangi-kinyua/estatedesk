@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { FileText, Search, UsersRound as Users } from "lucide-react";
+import { FileText } from "lucide-react";
+import { Search, UsersRound as Users } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
   panelBodyClassName,

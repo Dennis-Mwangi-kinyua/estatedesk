@@ -1,12 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import {
-  ArrowRight,
-  Banknote,
-  CalendarDays,
-  House as Home,
-  Phone,
-  UsersRound as Users,
-} from "lucide-react";
+import { ArrowRight, Banknote } from "lucide-react";
+import { CalendarDays, House as Home, Phone, UsersRound as Users } from "@/components/shared/colored-icons";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { ListPagination } from "@/app/(app)/dashboard/caretaker/_components/list-pagination";
 import {

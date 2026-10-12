@@ -1,6 +1,6 @@
 import { DeferredLink } from "@/components/navigation/app-links";
 import { IssueSlaBadge } from "@/components/issues/issue-sla-badge";
-import { Wrench } from "lucide-react";
+import { Wrench } from "@/components/shared/colored-icons";
 import type { OrgIssue } from "../_lib/types";
 import {
   buildIssuesHref,

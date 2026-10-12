@@ -1,4 +1,4 @@
-import { Activity, ShieldCheck } from "lucide-react";
+import { Activity, ShieldCheck } from "@/components/shared/colored-icons";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import {
   Badge,

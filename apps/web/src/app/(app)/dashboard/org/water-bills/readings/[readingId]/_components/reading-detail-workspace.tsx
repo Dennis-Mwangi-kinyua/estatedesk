@@ -1,12 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import {
-  ArrowLeft,
-  Camera,
-  CircleCheck as CheckCircle2,
-  House as Home,
-  UserRound,
-  XCircle,
-} from "lucide-react";
+import { ArrowLeft, Camera, XCircle } from "lucide-react";
+import { CircleCheck as CheckCircle2, House as Home, UserRound } from "@/components/shared/colored-icons";
 import {
   approveMeterReading,
   rejectMeterReading,

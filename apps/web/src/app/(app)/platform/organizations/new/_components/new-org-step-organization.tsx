@@ -1,6 +1,7 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { APP_PLANS, type AppPlan, planSupportsTrial } from "@/lib/billing/plans";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { Mail, Phone } from "@/components/shared/colored-icons";
 import { CurrencySelect } from "@/components/forms/currency-select";
 import {
   fieldClass,

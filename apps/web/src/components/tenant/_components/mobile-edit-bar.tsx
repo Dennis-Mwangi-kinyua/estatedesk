@@ -2,7 +2,7 @@
 
 import Link from "@/components/navigation/workspace-link";
 import { memo } from "react";
-import { PencilLine } from "lucide-react";
+import { PencilLine } from "@/components/shared/colored-icons";
 
 export const MobileEditBar = memo(function MobileEditBar() {
   return (

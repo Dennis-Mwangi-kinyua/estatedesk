@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "@/components/navigation/workspace-link";
-import { ArrowUpRight, Building2, WalletCards as CreditCard, Phone, UserRound } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { Building2, WalletCards as CreditCard, Phone, UserRound } from "@/components/shared/colored-icons";
 import { WorkspaceDetailPanel } from "@/components/help/workspace-detail-panel";
 import {
   getBankAccountForMethod,

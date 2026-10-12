@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { BellRing as Bell, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import { BellRing as Bell } from "@/components/shared/colored-icons";
 import { formatNumber } from "../_lib/helpers";
 import type { PlatformDashboardData } from "../_lib/queries";
 

@@ -3,7 +3,8 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "@/components/navigation/workspace-link";
 import { useState } from "react";
-import { Download, Share2, Copy } from "lucide-react";
+import { Share2, Copy } from "lucide-react";
+import { Download } from "@/components/shared/colored-icons";
 import { accountHandoverText, accountShareUrl } from "../_lib/account-handover";
 import { createCredentialsPdf } from "../_lib/credentials-pdf";
 import type { CreateOrganizationState } from "../actions";

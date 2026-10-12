@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Download, RefreshCw, Send, XCircle } from "lucide-react";
+import { RefreshCw, Send, XCircle } from "lucide-react";
+import { Download } from "@/components/shared/colored-icons";
 import { organizationBillingAction } from "../billing-actions";
 
 export function OrgBillingActions({ orgId, cancelled }: { orgId: string; cancelled: boolean }) {

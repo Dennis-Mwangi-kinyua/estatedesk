@@ -1,4 +1,5 @@
-import { Building2, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { Building2 } from "@/components/shared/colored-icons";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { buildPageHref } from "../_lib/helpers";
 import type { UnitsPageData } from "../_lib/types";

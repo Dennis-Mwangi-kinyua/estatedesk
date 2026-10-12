@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { Droplets } from "lucide-react";
+import { Droplets } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
   panelBodyClassName,

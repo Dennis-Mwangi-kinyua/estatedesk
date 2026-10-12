@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { PencilLine } from "lucide-react";
+import { PencilLine } from "@/components/shared/colored-icons";
 import { maskEmail, maskPhone } from "../_lib/helpers";
 import type { TenantProfileRecord } from "../_lib/types";
 import { InfoRow } from "./info-row";

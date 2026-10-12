@@ -1,13 +1,5 @@
-import {
-  BarChart3,
-  Building2,
-  ClipboardList,
-  House as Home,
-  Receipt,
-  TrendingUp,
-  UserRoundCheck,
-  UsersRound as Users,
-} from "lucide-react";
+import { BarChart3, Receipt, TrendingUp, UserRoundCheck } from "lucide-react";
+import { Building2, ClipboardList, House as Home, UsersRound as Users } from "@/components/shared/colored-icons";
 import {
   formatCurrency,
   formatPercent,

@@ -2,7 +2,8 @@
 
 import Link from "@/components/navigation/workspace-link";
 import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
-import { BellRing as Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
+import { BellRing as Bell } from "@/components/shared/colored-icons";
 import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 
 type TenantDashboardHeaderProps = {

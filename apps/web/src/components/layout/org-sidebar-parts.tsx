@@ -3,7 +3,8 @@
 import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 
 import { memo } from "react";
-import { Building2, LogOut, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { Building2, LogOut } from "@/components/shared/colored-icons";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import { isActivePath, type SidebarLink } from "./org-sidebar-links";

@@ -22,7 +22,8 @@ import {
   QuickLinkCard,
   SectionIntro,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
-import { AlertTriangle, ClipboardList, Droplets, FileText, Wrench } from "lucide-react";
+import { AlertTriangle, FileText } from "lucide-react";
+import { ClipboardList, Droplets, Wrench } from "@/components/shared/colored-icons";
 import type { CaretakerUnitDetailPageData } from "../_lib/types";
 
 export function UnitDetailSections({

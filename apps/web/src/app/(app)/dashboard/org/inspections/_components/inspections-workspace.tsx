@@ -1,6 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import { CalendarDays, ClipboardCheck, Clock3, MapPin, UserRound } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { CalendarDays, ClipboardCheck, Clock3, UserRound } from "@/components/shared/colored-icons";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { encodePublicId } from "@/lib/public-id";

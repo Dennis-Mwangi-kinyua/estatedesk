@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { KeyRound, ShieldCheck } from "lucide-react";
+import { KeyRound, ShieldCheck } from "@/components/shared/colored-icons";
 import { PushNotificationSettingsPanel } from "@/components/pwa/push-notification-settings-panel";
 import type { TenantProfileRecord } from "../_lib/types";
 import { panelShellClassName } from "./profile-ui";

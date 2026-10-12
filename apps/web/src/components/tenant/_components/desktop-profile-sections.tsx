@@ -2,7 +2,7 @@
 
 import Link from "@/components/navigation/workspace-link";
 import { memo } from "react";
-import { PencilLine } from "lucide-react";
+import { PencilLine } from "@/components/shared/colored-icons";
 import { displayValue } from "../_lib/helpers";
 import type { RevealState, SensitiveFieldKey, TenantProfileViewModel } from "../_lib/types";
 import { DesktopField } from "./desktop-field";

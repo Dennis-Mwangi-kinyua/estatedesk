@@ -1,10 +1,6 @@
 import { StatCard } from "@/components/theme/ed-dashboard-shell";
-import {
-  AlertCircle,
-  CircleCheck as CheckCircle2,
-  Clock3,
-  MessageSquareWarning,
-} from "lucide-react";
+import { AlertCircle, MessageSquareWarning } from "lucide-react";
+import { CircleCheck as CheckCircle2, Clock3 } from "@/components/shared/colored-icons";
 import type { TenantIssuesPageData } from "@/app/(app)/dashboard/tenant/issues/_lib/types";
 
 export function IssuesStats({ data }: { data: TenantIssuesPageData }) {

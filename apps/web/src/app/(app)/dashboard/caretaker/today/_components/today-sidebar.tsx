@@ -1,6 +1,6 @@
 import { QuickLinkCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
-import { Building2, Droplets, Wrench } from "lucide-react";
+import { Building2, Droplets, Wrench } from "@/components/shared/colored-icons";
 
 export function TodaySidebar() {
   return (

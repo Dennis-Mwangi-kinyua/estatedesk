@@ -1,5 +1,6 @@
 import { StatCard } from "@/components/theme/ed-dashboard-shell";
-import { CalendarDays, Droplets, ReceiptText, Waves } from "lucide-react";
+import { Waves } from "lucide-react";
+import { CalendarDays, Droplets, ReceiptText } from "@/components/shared/colored-icons";
 import { formatMoney } from "@/app/(app)/dashboard/tenant/water-bills/_lib/helpers";
 import type { WaterBillsTotals } from "@/app/(app)/dashboard/tenant/water-bills/_lib/types";
 

@@ -1,13 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import { redirect } from "next/navigation";
-import {
-  CalendarDays,
-  Check,
-  ClipboardCheck,
-  DoorOpen,
-  KeyRound,
-  WalletCards,
-} from "lucide-react";
+import { Check } from "lucide-react";
+import { CalendarDays, ClipboardCheck, DoorOpen, KeyRound, WalletCards } from "@/components/shared/colored-icons";
 import { PageShell, SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { getTenantNoticesData } from "@/app/(app)/dashboard/tenant/notices/_lib/queries";

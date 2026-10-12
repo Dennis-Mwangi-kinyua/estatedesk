@@ -1,16 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  ArrowRight,
-  Building2,
-  CircleCheck as CheckCircle2,
-  ClipboardList,
-  Landmark,
-  Mail,
-  MessageSquare,
-  ShieldCheck,
-  UsersRound,
-} from "lucide-react";
+import { ArrowRight, MessageSquare } from "lucide-react";
+import { Building2, CircleCheck as CheckCircle2, ClipboardList, Landmark, Mail, ShieldCheck, UsersRound } from "@/components/shared/colored-icons";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { sharedTopicGuides } from "@/lib/content-depth/site-topics";

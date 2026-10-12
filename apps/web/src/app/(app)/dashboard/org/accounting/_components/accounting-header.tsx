@@ -1,12 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import {
-  ArrowLeft,
-  BookOpen,
-  FileSpreadsheet,
-  Inbox,
-  Receipt,
-} from "lucide-react";
+import { ArrowLeft, FileSpreadsheet, Receipt } from "lucide-react";
+import { BookOpen, Inbox } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { ACCOUNTING_WORKFLOW_STEPS } from "../_lib/constants";
 import { buildAccountingPageHref } from "../_lib/helpers";

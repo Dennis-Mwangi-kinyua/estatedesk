@@ -1,21 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
-import {
-  Building2,
-  Calendar,
-  ClipboardList,
-  DoorOpen,
-  Droplets,
-  FileText,
-  FolderOpen,
-  ListTodo,
-  Megaphone,
-  NotebookPen,
-  Search,
-  Truck,
-  UsersRound as Users,
-  Wrench,
-} from "lucide-react";
+import { Calendar, FileText, FolderOpen, ListTodo, NotebookPen, Truck } from "lucide-react";
+import { Building2, ClipboardList, DoorOpen, Droplets, Megaphone, Search, UsersRound as Users, Wrench } from "@/components/shared/colored-icons";
 import { encodePublicId } from "@/lib/public-id";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import {

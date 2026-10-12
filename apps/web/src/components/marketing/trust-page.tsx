@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowRight, Download, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Download, ShieldCheck } from "@/components/shared/colored-icons";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";

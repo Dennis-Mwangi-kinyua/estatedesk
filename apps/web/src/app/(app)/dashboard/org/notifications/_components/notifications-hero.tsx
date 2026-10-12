@@ -1,14 +1,8 @@
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "@/components/navigation/workspace-link";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
-import {
-  ArrowLeft,
-  BellRing as Bell,
-  Clock3,
-  Droplets,
-  Megaphone,
-  Send,
-} from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
+import { BellRing as Bell, Clock3, Droplets, Megaphone } from "@/components/shared/colored-icons";
 import { sendPaymentRemindersAction } from "@/app/(app)/dashboard/org/notifications/actions";
 import { OPERATIONS_WORKFLOW_STEPS } from "@/app/(app)/dashboard/org/notifications/_lib/constants";
 import type { OrgContext } from "@/app/(app)/dashboard/org/notifications/_lib/types";

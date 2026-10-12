@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { FileText, Plus, Search } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
+import { Search } from "@/components/shared/colored-icons";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { OrganizationWorkspaceCard } from "../_components/organization-workspace-card";
 import {

@@ -1,5 +1,6 @@
 import { OrgSurface } from "./org-detail-ui";
-import { Receipt, UsersRound, Archive, Trash2, ChevronDown } from "lucide-react";
+import { Receipt, ChevronDown } from "lucide-react";
+import { UsersRound, Archive, Trash2 } from "@/components/shared/colored-icons";
 import {
   archiveOrganizationAction,
   permanentlyDeleteOrganizationAction,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search } from "@/components/shared/colored-icons";
 import { FormEvent, useState } from "react";
 import { getCaretakerSearchHref } from "../_lib/paths.client";
 

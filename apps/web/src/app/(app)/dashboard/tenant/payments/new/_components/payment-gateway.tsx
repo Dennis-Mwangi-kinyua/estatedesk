@@ -2,15 +2,8 @@
 
 import { createElement, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Search,
-  Smartphone,
-  Landmark,
-  WalletCards as CreditCard,
-  ChevronRight,
-  Zap,
-  ClipboardPaste,
-} from "lucide-react";
+import { Smartphone, ChevronRight, Zap, ClipboardPaste } from "lucide-react";
+import { Search, Landmark, WalletCards as CreditCard } from "@/components/shared/colored-icons";
 import type { PaymentMethodDefinition } from "@/lib/payments/methods-catalog";
 
 type PaymentGatewayProps = {

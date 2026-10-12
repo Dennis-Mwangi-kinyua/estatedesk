@@ -1,7 +1,8 @@
 "use client";
 
 import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
-import { BellRing as Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
+import { BellRing as Bell } from "@/components/shared/colored-icons";
 import { useCallback, useRef, useState } from "react";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { CaretakerMobileSidebar } from "@/components/layout/caretaker-mobile-nav";

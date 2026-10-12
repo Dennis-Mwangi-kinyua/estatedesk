@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { BellRing, ExternalLink, Phone, X } from "lucide-react";
+import { ExternalLink, X } from "lucide-react";
+import { BellRing, Phone } from "@/components/shared/colored-icons";
 import { DeferredLink } from "@/components/navigation/app-links";
 import type { VacancyInquiryAlert } from "@/features/dashboard/server/get-vacancy-inquiry-alerts";
 

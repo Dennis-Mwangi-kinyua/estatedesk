@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CircleCheck as CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
 import { STEPS } from "../_lib/constants";
 import {
   buttonPrimaryClassName,

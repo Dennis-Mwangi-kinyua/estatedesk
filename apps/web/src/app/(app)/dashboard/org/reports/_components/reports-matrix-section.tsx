@@ -1,4 +1,4 @@
-import { UsersRound as Users } from "lucide-react";
+import { UsersRound as Users } from "@/components/shared/colored-icons";
 import {
   DataCard,
   DataCardRow,

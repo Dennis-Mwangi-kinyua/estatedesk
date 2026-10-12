@@ -1,6 +1,7 @@
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "@/components/navigation/workspace-link";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Download } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import type { OrgRole } from "@prisma/client";
 import { formatPercent } from "../_lib/helpers";

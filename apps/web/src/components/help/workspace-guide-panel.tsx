@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { BookOpen } from "lucide-react";
+import { BookOpen } from "@/components/shared/colored-icons";
 import { WorkspaceDetailPanel } from "@/components/help/workspace-detail-panel";
 
 export type WorkspaceGuidePanelProps = {

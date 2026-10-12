@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowUpRight, BellRing as Bell, Wrench } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { BellRing as Bell, Wrench } from "@/components/shared/colored-icons";
 import { formatDate, getStatusTone } from "@/lib/tenant/tenant-format";
 import type {
   TenantDashboardIssueItem,

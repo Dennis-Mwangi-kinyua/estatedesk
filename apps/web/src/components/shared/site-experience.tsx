@@ -22,6 +22,7 @@ export function SiteExperience() {
           heading.dataset.workspaceHeadingIcon = icon.name;
           delete heading.dataset.stickerEmoji;
           heading.style.setProperty("--workspace-heading-icon", icon.mask);
+          heading.style.setProperty("--workspace-heading-image", icon.image);
         }
       }
       if (heading?.dataset.headingIcon === "custom") delete heading.dataset.pageIcon;
@@ -29,11 +30,13 @@ export function SiteExperience() {
         const icon = workspaceHeadingIcon(pathname ?? "dashboard");
         heading.dataset.pageIcon = icon.name;
         heading.style.setProperty("--workspace-heading-icon", icon.mask);
+          heading.style.setProperty("--workspace-heading-image", icon.image);
       }
       root.querySelectorAll<HTMLElement>(".workspace-metric").forEach(metric => {
         if (metric.querySelector(".workspace-metric-sticker, .visual-sticker, svg")) {
           delete metric.dataset.metricIcon;
           metric.style.removeProperty("--workspace-metric-icon");
+          metric.style.removeProperty("--workspace-metric-image");
           return;
         }
         const label = metric.querySelector("h2, h3, [data-metric-label], p")?.textContent;
@@ -41,6 +44,7 @@ export function SiteExperience() {
           delete metric.dataset.metricEmoji;
           metric.dataset.metricIcon = workspaceHeadingIcon(label).name;
           metric.style.setProperty("--workspace-metric-icon", workspaceHeadingIcon(label).mask);
+          metric.style.setProperty("--workspace-metric-image", workspaceHeadingIcon(label).image);
         }
       });
       root.querySelectorAll<HTMLTableElement>("table").forEach(table => {

@@ -1,6 +1,7 @@
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "@/components/navigation/workspace-link";
-import { BriefcaseBusiness, ChevronLeft, ChevronRight, Clock3, ContactRound, Landmark, Mail, Phone, ShieldCheck, UserRoundCog, Wrench } from "lucide-react";
+import { BriefcaseBusiness, ChevronLeft, ChevronRight } from "lucide-react";
+import { Clock3, ContactRound, Landmark, Mail, Phone, ShieldCheck, UserRoundCog, Wrench } from "@/components/shared/colored-icons";
 import { ROLE_META, type StaffRole } from "@/features/staff/constants/role-meta";
 import { DeferredLink } from "@/components/navigation/app-links";
 

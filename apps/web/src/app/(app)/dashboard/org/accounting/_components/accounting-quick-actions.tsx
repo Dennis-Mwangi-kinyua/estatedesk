@@ -1,16 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import {
-  ArrowLeftRight,
-  Banknote,
-  BookMarked,
-  FilePlus2,
-  Landmark,
-  PieChart,
-  Receipt,
-  Scale,
-  Settings2,
-  Wallet,
-} from "lucide-react";
+import { ArrowLeftRight, Banknote, BookMarked, FilePlus2, PieChart, Receipt, Scale, Settings2 } from "lucide-react";
+import { Landmark, Wallet } from "@/components/shared/colored-icons";
 import { buildAccountingPageHref } from "../_lib/helpers";
 import { panelShellClassName, SectionHeader } from "./accounting-ui";
 

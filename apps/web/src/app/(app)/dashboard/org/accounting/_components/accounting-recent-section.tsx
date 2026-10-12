@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { WalletCards } from "lucide-react";
+import { WalletCards } from "@/components/shared/colored-icons";
 import {
   DataCard,
   DataCardRow,

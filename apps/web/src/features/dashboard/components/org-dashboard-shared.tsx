@@ -1,13 +1,6 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  BellRing as Bell,
-  Building2,
-  CircleAlert,
-  House as Home,
-  UsersRound as Users,
-  Wallet,
-} from "lucide-react";
+import { ArrowRight, CircleAlert } from "lucide-react";
+import { BellRing as Bell, Building2, House as Home, UsersRound as Users, Wallet } from "@/components/shared/colored-icons";
 import type { ComponentType, ReactNode } from "react";
 
 export type IconType = ComponentType<{ className?: string }>;

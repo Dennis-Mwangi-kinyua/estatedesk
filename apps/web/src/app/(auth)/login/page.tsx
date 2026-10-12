@@ -2,16 +2,8 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "next/link";
 import { VisualSticker } from "@/components/shared/visual-sticker";
-import {
-  ArrowLeft,
-  ChevronRight,
-  ShieldCheck,
-  Building2,
-  WalletCards as CreditCard,
-  Droplets,
-  ClipboardList,
-  Users2,
-} from "lucide-react";
+import { ArrowLeft, ChevronRight, Users2 } from "lucide-react";
+import { ShieldCheck, Building2, WalletCards as CreditCard, Droplets, ClipboardList } from "@/components/shared/colored-icons";
 import OperationsShowcase from "@/components/marketing/operations-showcase";
 import { publicPageMetadata } from "@/lib/seo";
 import { loginAction } from "./actions";

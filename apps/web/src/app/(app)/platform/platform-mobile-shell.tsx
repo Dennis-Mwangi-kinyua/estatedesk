@@ -5,7 +5,8 @@ import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 import Link from "@/components/navigation/workspace-link";
 import { ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Building2, Code2, LogOut, Menu, Search, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { LogOut, Search } from "@/components/shared/colored-icons";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 import { logoutAction } from "@/features/auth/actions/logout-action";
@@ -15,7 +16,7 @@ import {
   type PlatformMode,
   type PlatformNavItem,
 } from "./_lib/nav";
-import { WorkspaceIcon } from "@/components/shared/workspace-icon";
+import { PlatformNavIcon } from "./_components/platform-nav-icon";
 import { PlatformModeToggle } from "./_components/platform-mode-toggle";
 
 export default function PlatformMobileShell({
@@ -41,7 +42,6 @@ export default function PlatformMobileShell({
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const meta = modeMeta[mode];
   const isDeveloper = mode === "developer";
-  const BrandIcon = isDeveloper ? Code2 : Building2;
 
   const closeMenu = useCallback(() => {
     menuButtonRef.current?.focus();
@@ -95,11 +95,11 @@ export default function PlatformMobileShell({
                 className={[
                   "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
                   isDeveloper
-                    ? "bg-violet-600 text-white"
-                    : "ed-brand-mark bg-primary text-primary-foreground",
+                    ? "bg-violet-100 dark:bg-violet-950"
+                    : "bg-sky-100 dark:bg-sky-950",
                 ].join(" ")}
               >
-                <BrandIcon className="h-4 w-4" />
+                <PlatformNavIcon label={isDeveloper ? "/platform/developer" : "/platform/organizations"} className="h-6 w-6" />
               </span>
 
               <div className="min-w-0">
@@ -135,12 +135,13 @@ export default function PlatformMobileShell({
         </header>
 
         <div inert={open} className="min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
-        <nav aria-label="Quick navigation" inert={open} className="ed-shell-panel grid shrink-0 grid-cols-4 border-t border-border px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:hidden">
+        <nav aria-label="Quick navigation" inert={open} className="platform-mobile-dock ed-shell-panel grid shrink-0 grid-cols-4 gap-1 border-t border-border px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:hidden">
           {tabs.map((item) => {
             const active = isNavItemActive(pathname, item.href);
-            return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary ${active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"}`}><WorkspaceIcon label={item.href} className="h-5 w-5" /><span>{item.href === "/platform/organizations" ? "Orgs" : item.href === "/platform/developer" ? "Home" : item.label}</span></Link>;
+            const tone = item.href.includes("payments") || item.href.includes("system-health") ? "emerald" : item.href.includes("organizations") || item.href.includes("jobs") ? "violet" : "sky";
+            return <Link data-dock-tone={tone} key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`platform-dock-item flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary ${active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"}`}><span className="platform-dock-icon"><PlatformNavIcon label={item.href} className="h-6 w-6" /></span><span>{item.href === "/platform/organizations" ? "Orgs" : item.href === "/platform/developer" ? "Home" : item.label}</span></Link>;
           })}
-          <button data-workspace-action="true" type="button" onClick={() => setOpen(true)} aria-label="More navigation" aria-expanded={open} aria-controls={panelId} className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold text-muted-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-primary"><Menu className="h-5 w-5" />More</button>
+          <button data-workspace-action="true" type="button" onClick={() => setOpen(true)} data-dock-tone="slate" aria-label="More navigation" aria-expanded={open} aria-controls={panelId} className="platform-dock-item flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold text-muted-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-primary"><span className="platform-dock-icon"><PlatformNavIcon label="more" className="h-6 w-6" /></span><span>More</span></button>
         </nav>
       </div>
 

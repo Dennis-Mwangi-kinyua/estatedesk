@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowRight, House as Home } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { House as Home } from "@/components/shared/colored-icons";
 import {
   panelShellClassName,
   SectionIntro,

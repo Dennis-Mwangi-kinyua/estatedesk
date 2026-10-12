@@ -2,16 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import {
-  CloudOff,
-  Download,
-  Info,
-  LockKeyhole,
-  RefreshCw,
-  ShieldCheck,
-  Wifi,
-  X,
-} from "lucide-react";
+import { CloudOff, Info, LockKeyhole, RefreshCw, Wifi, X } from "lucide-react";
+import { Download, ShieldCheck } from "@/components/shared/colored-icons";
 import { activateWaitingServiceWorker, isStandaloneDisplayMode } from "@/lib/pwa/client";
 
 const LOCK_ENABLED_KEY = "estatedesk:pwa-lock-enabled";

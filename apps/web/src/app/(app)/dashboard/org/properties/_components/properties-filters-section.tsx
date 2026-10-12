@@ -1,5 +1,5 @@
 import { DeferredLink } from "@/components/navigation/app-links";
-import { Search } from "lucide-react";
+import { Search } from "@/components/shared/colored-icons";
 import type { PropertiesPageData } from "../_lib/types";
 import { PROPERTY_TYPES, STATUS_OPTIONS } from "../_lib/types";
 import { buildPageHref } from "../_lib/helpers";

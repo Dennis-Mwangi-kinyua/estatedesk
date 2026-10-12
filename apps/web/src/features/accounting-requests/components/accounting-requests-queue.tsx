@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Inbox } from "lucide-react";
+import { Inbox } from "@/components/shared/colored-icons";
 import type { AccountingRequestsQueueData } from "../_lib/types";
 import { AccountingRequestReviewCard } from "./accounting-request-review-card";
 

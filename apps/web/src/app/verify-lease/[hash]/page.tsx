@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { BadgeCheck, FileCheck2 } from "lucide-react";
+import { BadgeCheck } from "lucide-react";
+import { FileCheck2 } from "@/components/shared/colored-icons";
 import { prisma } from "@/lib/prisma";
 import { publicPageMetadata } from "@/lib/seo";
 

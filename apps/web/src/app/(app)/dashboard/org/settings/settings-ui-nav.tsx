@@ -1,15 +1,5 @@
-import {
-  BadgeCheck,
-  Building2,
-  WalletCards as CreditCard,
-  FileArchive,
-  Globe2,
-  KeyRound,
-  Settings2,
-  ShieldCheck,
-  UsersRound as Users,
-  Wallet,
-} from "lucide-react";
+import { BadgeCheck, FileArchive, Globe2, Settings2 } from "lucide-react";
+import { Building2, WalletCards as CreditCard, KeyRound, ShieldCheck, UsersRound as Users, Wallet } from "@/components/shared/colored-icons";
 
 export const SETTINGS_NAV_ITEMS = [
   {

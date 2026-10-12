@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowLeft, Clock3, Landmark, Receipt, XCircle } from "lucide-react";
+import { ArrowLeft, Receipt, XCircle } from "lucide-react";
+import { Clock3, Landmark } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
   CaretakerWorkspaceFooter,

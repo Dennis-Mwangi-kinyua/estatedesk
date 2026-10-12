@@ -1,5 +1,5 @@
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
-import { ReceiptText } from "lucide-react";
+import { ReceiptText } from "@/components/shared/colored-icons";
 import { getBillStatusClasses } from "@/app/(app)/dashboard/tenant/water-bills/_lib/helpers";
 import { PaginationLink } from "@/app/(app)/dashboard/tenant/water-bills/_components/pagination-link";
 import {

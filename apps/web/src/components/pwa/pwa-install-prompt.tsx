@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, Share, X } from "lucide-react";
+import { Share, X } from "lucide-react";
+import { Download } from "@/components/shared/colored-icons";
 import { isIosDevice, isStandaloneDisplayMode } from "@/lib/pwa/client";
 
 const DISMISS_KEY = "estatedesk-pwa-install-dismissed";

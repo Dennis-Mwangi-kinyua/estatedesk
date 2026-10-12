@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { Search, UsersRound as Users } from "lucide-react";
+import { Search, UsersRound as Users } from "@/components/shared/colored-icons";
 import { ListPagination } from "@/app/(app)/dashboard/caretaker/_components/list-pagination";
 import {
   ErrorStateCard,

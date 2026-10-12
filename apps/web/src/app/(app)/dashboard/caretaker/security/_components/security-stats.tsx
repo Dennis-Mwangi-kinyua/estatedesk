@@ -1,4 +1,5 @@
-import { Clock3, Laptop, UserRound } from "lucide-react";
+import { Laptop } from "lucide-react";
+import { Clock3, UserRound } from "@/components/shared/colored-icons";
 import { StatCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import { SESSION_TIMEOUT_LABEL } from "@/features/security/_lib/helpers";
 import type { CaretakerSecurityPageData } from "../_lib/types";

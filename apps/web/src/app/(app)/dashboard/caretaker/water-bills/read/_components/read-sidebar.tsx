@@ -1,4 +1,4 @@
-import { Droplets, House as Home, UsersRound as Users, Wrench } from "lucide-react";
+import { Droplets, House as Home, UsersRound as Users, Wrench } from "@/components/shared/colored-icons";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import {

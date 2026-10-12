@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, CircleCheck as CheckCircle2, X } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
+import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
 
 type RegisterStatusToastProps = {
   message: {

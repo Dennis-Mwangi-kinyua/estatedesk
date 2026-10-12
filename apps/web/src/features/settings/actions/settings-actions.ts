@@ -69,15 +69,14 @@ export async function updateOrganizationAction(formData: FormData) {
   const { orgId } = await ensureSettingsWriteAccess();
 
   const name = readString(formData, "organizationName");
-  const slug = readString(formData, "slug");
   const email = readOptionalString(formData, "email");
   const phone = readOptionalString(formData, "phone");
   const address = readOptionalString(formData, "address");
   const timezone = readString(formData, "timezone");
   const currency = readString(formData, "currency").toUpperCase();
 
-  if (!name || !slug || !timezone || !currency) {
-    throw new Error("Name, slug, timezone, and currency are required.");
+  if (!name || !timezone || !currency) {
+    throw new Error("Name, timezone, and currency are required.");
   }
   if (!isSupportedCurrency(currency)) {
     throw new Error("Select a supported East African or UAE currency.");
@@ -87,7 +86,6 @@ export async function updateOrganizationAction(formData: FormData) {
     where: { id: orgId },
     data: {
       name,
-      slug,
       email,
       phone,
       address,

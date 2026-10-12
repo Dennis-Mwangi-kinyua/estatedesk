@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowRight, BookOpen, CalendarDays, Clock3, Layers3 } from "lucide-react";
+import { ArrowRight, Layers3 } from "lucide-react";
+import { BookOpen, CalendarDays, Clock3 } from "@/components/shared/colored-icons";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { faqJsonLd } from "@/components/marketing/seo-faq";

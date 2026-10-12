@@ -1,4 +1,4 @@
-import { Clock3, ShieldCheck } from "lucide-react";
+import { Clock3, ShieldCheck } from "@/components/shared/colored-icons";
 import type { ManagedUserSession } from "@/lib/auth/session";
 import { revokeOtherSessionsAction } from "@/app/(app)/dashboard/security/actions";
 import { SESSION_TIMEOUT_LABEL } from "../_lib/helpers";

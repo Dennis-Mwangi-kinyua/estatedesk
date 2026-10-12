@@ -1,5 +1,5 @@
 import type { OrgRole } from "@prisma/client";
-import { BookOpen } from "lucide-react";
+import { BookOpen } from "@/components/shared/colored-icons";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import { getInAppHelpHubPath, type HelpWorkspace } from "@/lib/help/help-workspace";
 

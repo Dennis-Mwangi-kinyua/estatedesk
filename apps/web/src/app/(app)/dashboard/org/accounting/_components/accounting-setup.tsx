@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { BookOpen } from "lucide-react";
+import { BookOpen } from "@/components/shared/colored-icons";
 import { initializeAccountingAction } from "../actions";
 import { ACCOUNTING_WORKFLOW_STEPS } from "../_lib/constants";
 import { buttonPrimaryClassName, buttonSecondaryClassName } from "../_lib/helpers";

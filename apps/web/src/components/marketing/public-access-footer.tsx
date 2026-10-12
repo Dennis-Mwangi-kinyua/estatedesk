@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { Building2, House as Home, MessageCircleQuestion, Search, ShieldCheck } from "lucide-react";
+import { MessageCircleQuestion } from "lucide-react";
+import { Building2, House as Home, Search, ShieldCheck } from "@/components/shared/colored-icons";
 
 const footerLinks = [
   { href: "/vacancies", label: "Vacancies" },

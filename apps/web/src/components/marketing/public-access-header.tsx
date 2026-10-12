@@ -4,21 +4,8 @@ import Link from "@/components/navigation/workspace-link";
 import { VisualSticker } from "@/components/shared/visual-sticker";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import {
-  ArrowRight,
-  BookOpen,
-  Building2,
-  BedDouble,
-  House as Home,
-  LogIn,
-  Mail,
-  Menu,
-  MessageCircleQuestion,
-  Search,
-  UserRoundPlus as UserPlus,
-  WalletCards,
-  X,
-} from "lucide-react";
+import { ArrowRight, Menu, MessageCircleQuestion, X } from "lucide-react";
+import { BookOpen, Building2, BedDouble, House as Home, LogIn, Mail, Search, UserRoundPlus as UserPlus, WalletCards } from "@/components/shared/colored-icons";
 import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 
 const subscribeHydration = () => () => {};

@@ -1,6 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import { ArrowLeft, Wrench } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Wrench } from "@/components/shared/colored-icons";
 import { IssueNewForm, type IssueNewPropertyOption } from "./issue-new-form";
 import { IssuesGuidance } from "./issues-guidance";
 import { panelShellClassName } from "./issues-ui";

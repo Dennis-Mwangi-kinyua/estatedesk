@@ -1,13 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import {
-  AlertTriangle,
-  Building2,
-  KeyRound,
-  Power,
-  ShieldAlert,
-  UsersRound as Users,
-  Zap,
-} from "lucide-react";
+import { AlertTriangle, Power, ShieldAlert, Zap } from "lucide-react";
+import { Building2, KeyRound, UsersRound as Users } from "@/components/shared/colored-icons";
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import {

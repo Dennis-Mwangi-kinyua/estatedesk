@@ -1,11 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import {
-  AlertTriangle,
-  CircleCheck as CheckCircle2,
-  ClipboardList,
-  FileClock,
-  Scale,
-} from "lucide-react";
+import { AlertTriangle, FileClock, Scale } from "lucide-react";
+import { CircleCheck as CheckCircle2, ClipboardList } from "@/components/shared/colored-icons";
 import { buildAccountingPageHref, formatMoney } from "../_lib/helpers";
 import type { AccountingPageData } from "../_lib/types";
 import { MetricPill, panelShellClassName, SectionHeader } from "./accounting-ui";

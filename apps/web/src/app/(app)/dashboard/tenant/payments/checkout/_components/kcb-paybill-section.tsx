@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2 } from "lucide-react";
+import { Building2 } from "@/components/shared/colored-icons";
 import type { CheckoutFormState } from "./use-checkout-form";
 
 type KcbPaybillSectionProps = {

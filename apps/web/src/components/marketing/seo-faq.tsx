@@ -1,4 +1,4 @@
-import { CircleHelp as HelpCircle } from "lucide-react";
+import { CircleHelp as HelpCircle } from "@/components/shared/colored-icons";
 
 export type FaqItem = {
   question: string;

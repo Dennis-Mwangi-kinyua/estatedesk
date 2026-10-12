@@ -1,20 +1,6 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  BellRing as Bell,
-  Building2,
-  CircleCheck as CheckCircle2,
-  ClipboardCheck,
-  Droplets,
-  FileText,
-  House as Home,
-  KeyRound,
-  Landmark,
-  LockKeyhole,
-  MessageSquare,
-  ShieldCheck,
-  Wrench,
-} from "lucide-react";
+import { ArrowRight, FileText, LockKeyhole, MessageSquare } from "lucide-react";
+import { BellRing as Bell, Building2, CircleCheck as CheckCircle2, ClipboardCheck, Droplets, House as Home, KeyRound, Landmark, ShieldCheck, Wrench } from "@/components/shared/colored-icons";
 import { RegisterRequestForm } from "./register-request-form";
 import { RegisterStatusToast } from "./register-status-toast";
 import { publicPageMetadata } from "@/lib/seo";

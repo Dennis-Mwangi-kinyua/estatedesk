@@ -1,4 +1,5 @@
-import { Building2, Download, FileText, MapPin } from "lucide-react";
+import { FileText, MapPin } from "lucide-react";
+import { Building2, Download } from "@/components/shared/colored-icons";
 import { formatDate, formatMoney } from "../_lib/helpers";
 import { isPdfLeaseAsset, tenantLeaseDownloadPath } from "../_lib/download";
 import type { TenantLeaseResult } from "../_lib/types";

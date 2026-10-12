@@ -14,7 +14,8 @@ import {
   QuickLinkCard,
   SectionIntro,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
-import { Building2, FileText, Wrench } from "lucide-react";
+import { FileText } from "lucide-react";
+import { Building2, Wrench } from "@/components/shared/colored-icons";
 import {
   formatCurrency,
   formatDate,

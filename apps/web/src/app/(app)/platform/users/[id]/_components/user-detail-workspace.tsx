@@ -1,10 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import {
-  ArrowLeft,
-  Building2,
-  CircleCheck as CheckCircle2,
-  Shield,
-} from "lucide-react";
+import { ArrowLeft, Shield } from "lucide-react";
+import { Building2, CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
 import type { getPlatformUserDetails } from "../_lib/queries";
 import { MetricCard } from "./user-detail-ui";
 import { UserDetailProfile } from "./user-detail-profile";

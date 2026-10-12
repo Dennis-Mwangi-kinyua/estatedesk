@@ -1,4 +1,5 @@
-import { CircleCheck as CheckCircle2, Clock3, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
+import { CircleCheck as CheckCircle2, Clock3 } from "@/components/shared/colored-icons";
 import { StatCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerLeasesPageData } from "../_lib/types";
 

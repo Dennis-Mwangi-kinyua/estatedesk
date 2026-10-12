@@ -1,6 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
-import { ArrowLeft, CalendarDays, ClipboardCheck, MapPin, UserRound } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
+import { CalendarDays, ClipboardCheck, UserRound } from "@/components/shared/colored-icons";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";

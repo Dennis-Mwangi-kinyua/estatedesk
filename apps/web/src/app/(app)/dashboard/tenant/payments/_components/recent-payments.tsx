@@ -1,7 +1,8 @@
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { StkStatusCheck } from "./stk-status-check";
 import { mpesaFailureMessage } from "@/lib/mpesa/result-message";
-import { ArrowUpRight, ReceiptText } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { ReceiptText } from "@/components/shared/colored-icons";
 import {
   formatDate,
   formatMoney,

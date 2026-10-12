@@ -1,6 +1,7 @@
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "@/components/navigation/workspace-link";
-import { Clock3, Download, FileSpreadsheet } from "lucide-react";
+import { FileSpreadsheet } from "lucide-react";
+import { Clock3, Download } from "@/components/shared/colored-icons";
 import { ORG_REPORT_EXPORTS } from "@/lib/reports/org-report-exports";
 import type { ReportsPageData } from "../_lib/types";
 

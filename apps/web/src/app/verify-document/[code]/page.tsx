@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  BadgeCheck,
-  Ban,
-  Building2,
-  CalendarDays,
-  FileCheck2,
-  Hash,
-} from "lucide-react";
+import { BadgeCheck, Ban, Hash } from "lucide-react";
+import { Building2, CalendarDays, FileCheck2 } from "@/components/shared/colored-icons";
 import { InvoiceDocumentDisplay } from "@/components/documents/invoice-document-display";
 import { verifiedDocumentDownloadPath } from "@/lib/documents/identity";
 import { readLeaseSnapshot } from "@/lib/documents/lease-snapshot";

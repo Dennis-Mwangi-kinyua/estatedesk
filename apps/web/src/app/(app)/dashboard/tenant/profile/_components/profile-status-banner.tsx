@@ -1,4 +1,4 @@
-import { CircleCheck as CheckCircle2 } from "lucide-react";
+import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
 import { panelShellClassName } from "./profile-ui";
 
 export function ProfileStatusBanner({ message }: { message: string }) {

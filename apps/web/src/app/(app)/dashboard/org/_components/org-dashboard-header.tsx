@@ -1,7 +1,8 @@
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import { Lightbulb, UserRoundPlus as UserPlus } from "lucide-react";
+import { Lightbulb } from "lucide-react";
+import { UserRoundPlus as UserPlus } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { panelShellClassName } from "./org-dashboard-ui";

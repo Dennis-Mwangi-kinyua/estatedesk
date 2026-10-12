@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { House as Home } from "lucide-react";
+import { House as Home } from "@/components/shared/colored-icons";
 import type { PropertiesPageData } from "../_lib/types";
 import { buildPageHref } from "../_lib/helpers";
 

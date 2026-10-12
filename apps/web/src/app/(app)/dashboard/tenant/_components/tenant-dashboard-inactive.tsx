@@ -1,4 +1,4 @@
-import { Building2, CalendarDays, House as Home, ShieldCheck } from "lucide-react";
+import { Building2, CalendarDays, House as Home, ShieldCheck } from "@/components/shared/colored-icons";
 import { StatCard, SurfaceCard, TenantWorkspace } from "@/components/theme/ed-dashboard-shell";
 import type { TenantDashboardHistoryRecord } from "../_lib/types";
 import { panelShellClassName, SummaryMetric } from "./tenant-dashboard-ui";

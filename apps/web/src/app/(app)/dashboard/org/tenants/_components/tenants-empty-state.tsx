@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { UsersRound as Users } from "lucide-react";
+import { UsersRound as Users } from "@/components/shared/colored-icons";
 
 export function TenantsEmptyState({ hasSearch }: { hasSearch: boolean }) {
   return (

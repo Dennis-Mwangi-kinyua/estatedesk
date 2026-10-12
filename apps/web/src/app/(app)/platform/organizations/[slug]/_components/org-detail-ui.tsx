@@ -1,4 +1,5 @@
-import { Activity, BellRing, Building2, Droplets, Files, History, KeyRound, Mail, MessagesSquare, TriangleAlert, UsersRound, Wallet, FileText, CalendarDays, Clock3, Globe2, Phone, Settings2, ShieldCheck, SlidersHorizontal, Receipt, type LucideIcon } from "lucide-react";
+import { History, MessagesSquare, TriangleAlert, FileText, Globe2, Settings2, Receipt, type LucideIcon } from "lucide-react";
+import { Activity, BellRing, Building2, Droplets, Files, KeyRound, Mail, UsersRound, Wallet, CalendarDays, Clock3, Phone, ShieldCheck, SlidersHorizontal } from "@/components/shared/colored-icons";
 import type { ReactNode } from "react";
 import { formatNumber } from "../../../_components/control-plane";
 

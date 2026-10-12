@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { ChevronRight, House as Home } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { House as Home } from "@/components/shared/colored-icons";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { ContactActions } from "@/app/(app)/dashboard/caretaker/_components/contact-actions";
 import { getCaretakerTenantHref } from "@/app/(app)/dashboard/caretaker/_lib/paths";

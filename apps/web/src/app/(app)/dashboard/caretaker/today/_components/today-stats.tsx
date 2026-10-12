@@ -1,4 +1,5 @@
-import { AlertCircle, ClipboardList, Droplets, ListTodo } from "lucide-react";
+import { AlertCircle, ListTodo } from "lucide-react";
+import { ClipboardList, Droplets } from "@/components/shared/colored-icons";
 import { CaretakerI18nFormat } from "@/app/(app)/dashboard/caretaker/_components/caretaker-i18n-format";
 import { CaretakerI18nLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-i18n-label";
 import { StatCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";

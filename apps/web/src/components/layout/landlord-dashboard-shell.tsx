@@ -8,17 +8,8 @@ import { usePathname } from "next/navigation";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  BarChart3,
-  Building2,
-  House as Home,
-  LogOut,
-  Menu,
-  Receipt,
-  ShieldCheck,
-  UsersRound as Users,
-  X,
-} from "lucide-react";
+import { BarChart3, Menu, Receipt, X } from "lucide-react";
+import { Building2, House as Home, LogOut, ShieldCheck, UsersRound as Users } from "@/components/shared/colored-icons";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { WorkspaceIdentity } from "@/components/shared/metric-sticker";

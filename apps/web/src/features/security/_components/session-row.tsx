@@ -1,4 +1,5 @@
-import { Laptop, LogOut, Smartphone } from "lucide-react";
+import { Laptop, Smartphone } from "lucide-react";
+import { LogOut } from "@/components/shared/colored-icons";
 import type { ManagedUserSession } from "@/lib/auth/session";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import {

@@ -1,13 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import { encodePublicId } from "@/lib/public-id";
-import {
-  ArrowUpRight,
-  Crown,
-  Search,
-  Shield,
-  Trash2,
-  User2,
-} from "lucide-react";
+import { ArrowUpRight, Crown, Shield, User2 } from "lucide-react";
+import { Search, Trash2 } from "@/components/shared/colored-icons";
 import {
   Badge,
   PageHeader,

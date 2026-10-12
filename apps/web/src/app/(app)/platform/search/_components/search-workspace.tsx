@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search } from "@/components/shared/colored-icons";
 import { encodePublicId } from "@/lib/public-id";
 import {
   PageHeader,

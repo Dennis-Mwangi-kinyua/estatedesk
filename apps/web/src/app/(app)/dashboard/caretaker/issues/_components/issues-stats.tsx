@@ -1,9 +1,5 @@
-import {
-  AlertCircle,
-  CircleCheck as CheckCircle2,
-  Hammer,
-  Zap,
-} from "lucide-react";
+import { AlertCircle, Hammer, Zap } from "lucide-react";
+import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
 import { TicketPriority, TicketStatus } from "@prisma/client";
 import { CaretakerI18nLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-i18n-label";
 import type { IssueDataResult } from "@/app/(app)/dashboard/caretaker/issues/_lib/types";

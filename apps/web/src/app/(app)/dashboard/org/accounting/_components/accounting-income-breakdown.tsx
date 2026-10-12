@@ -1,12 +1,5 @@
-import {
-  Droplets,
-  House as Home,
-  Percent,
-  ReceiptText,
-  Scale,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
+import { Percent, Scale, TrendingDown, TrendingUp } from "lucide-react";
+import { Droplets, House as Home, ReceiptText } from "@/components/shared/colored-icons";
 import { expenseRatio, netMarginPct } from "@/lib/accounting/aging";
 import { formatMoney } from "../_lib/helpers";
 import type { AccountingPageData } from "../_lib/types";

@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { Download, FileText, House as Home, Wallet } from "lucide-react";
+import { FileText } from "lucide-react";
+import { Download, House as Home, Wallet } from "@/components/shared/colored-icons";
 import {
   formatLedgerCurrency,
   formatLedgerDate,

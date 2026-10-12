@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, Inbox } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Inbox } from "@/components/shared/colored-icons";
 import type { getAccountingRequestsReviewPageData } from "../_lib/queries";
 import { AccountingRequestReviewCard } from "./accounting-request-review-card";
 

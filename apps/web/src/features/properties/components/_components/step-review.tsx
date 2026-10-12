@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck as CheckCircle2 } from "lucide-react";
+import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
 import type { ReviewSummary } from "../_lib/types";
 import {
   infoPanelClassName,

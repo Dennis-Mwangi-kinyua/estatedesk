@@ -1,6 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BookOpen, Clock3, Lock } from "lucide-react";
+import { ArrowLeft, Lock } from "lucide-react";
+import { BookOpen, Clock3 } from "@/components/shared/colored-icons";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { privatePageMetadata } from "@/lib/seo";
 import {

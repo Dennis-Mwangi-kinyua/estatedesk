@@ -1,5 +1,5 @@
 import type { OrgRole } from "@prisma/client";
-import { KeyRound } from "lucide-react";
+import { KeyRound } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 
 type OrgApiKeysOnboardingProps = {

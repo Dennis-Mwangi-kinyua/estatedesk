@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
-import { CircleCheck as CheckCircle2, Droplets, X } from "lucide-react";
+import { X } from "lucide-react";
+import { CircleCheck as CheckCircle2, Droplets } from "@/components/shared/colored-icons";
 import { quickSubmitMeterReading } from "../[unitId]/_lib/quick-submit-meter-reading";
 import type { QuickMeterReadingState } from "../[unitId]/_lib/types";
 import type { QuickEntryUnit } from "../_lib/types";

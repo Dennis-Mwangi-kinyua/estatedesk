@@ -1,5 +1,5 @@
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
-import { House as Home } from "lucide-react";
+import { House as Home } from "@/components/shared/colored-icons";
 import {
   formatDate,
   getPriorityClasses,

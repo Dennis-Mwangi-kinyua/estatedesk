@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowUpRight, ReceiptText } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { ReceiptText } from "@/components/shared/colored-icons";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { formatCurrency, formatDate, getStatusTone } from "@/lib/tenant/tenant-format";
 import type { TenantDashboardPaymentItem } from "../_lib/types";

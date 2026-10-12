@@ -1,4 +1,5 @@
-import { AlertTriangle, CircleCheck as CheckCircle2 } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
+import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
 import {
   formatCurrency,
   formatPercent,

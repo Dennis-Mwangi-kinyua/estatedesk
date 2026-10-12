@@ -2,7 +2,8 @@
 
 import Link from "@/components/navigation/workspace-link";
 import { useActionState, type ReactNode } from "react";
-import { ArrowRight, Building2, CircleCheck as CheckCircle2, Mail, Phone, Trash2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Building2, CircleCheck as CheckCircle2, Mail, Phone, Trash2 } from "@/components/shared/colored-icons";
 import { deleteOnboardingRequestAction, quickUpdateOnboardingStatusAction, updateOnboardingRequestAction } from "../actions";
 
 export type OnboardingRequestCardData = {

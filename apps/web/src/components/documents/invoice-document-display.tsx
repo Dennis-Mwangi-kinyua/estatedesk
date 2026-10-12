@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowLeft, Download, Droplets, FileText, Wallet } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
+import { Download, Droplets, Wallet } from "@/components/shared/colored-icons";
 import type { InvoicePdfData, InvoicePdfLine } from "@/lib/documents/invoice-pdf";
 import {
   formatDate,

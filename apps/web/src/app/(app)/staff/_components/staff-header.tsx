@@ -1,6 +1,7 @@
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import { ArrowLeft, Archive, ChevronDown, UserRoundPlus, UsersRound } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
+import { Archive, UserRoundPlus, UsersRound } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { ROLE_META, STAFF_ROLES } from "@/features/staff/constants/role-meta";
 import { STAFF_DIRECTORY_WORKFLOW } from "../_lib/constants";

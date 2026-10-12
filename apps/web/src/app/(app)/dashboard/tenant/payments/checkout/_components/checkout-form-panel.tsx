@@ -1,6 +1,6 @@
 "use client";
 
-import { WalletCards as CreditCard } from "lucide-react";
+import { WalletCards as CreditCard } from "@/components/shared/colored-icons";
 import { formatSource } from "../_lib/helpers";
 import { BankPaymentSection } from "./bank-payment-section";
 import { KcbPaybillSection } from "./kcb-paybill-section";

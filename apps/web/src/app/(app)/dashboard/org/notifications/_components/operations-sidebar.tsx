@@ -1,4 +1,4 @@
-import { WalletCards as CreditCard } from "lucide-react";
+import { WalletCards as CreditCard } from "@/components/shared/colored-icons";
 import {
   formatDateTime,
   formatEnumLabel,

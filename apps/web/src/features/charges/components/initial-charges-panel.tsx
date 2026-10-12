@@ -3,7 +3,7 @@ import { BackfillChargesButton } from "./backfill-charges-button";
 import { prisma } from "@/lib/prisma";
 import { nairobiDate } from "@/lib/move-outs/validation";
 import { ConfirmChargePaymentForm } from "./confirm-charge-payment-form";
-import { ReceiptText, WalletCards } from "lucide-react";
+import { ReceiptText, WalletCards } from "@/components/shared/colored-icons";
 
 export async function InitialChargesPanel({ orgId, tenantId, canConfirm = false, canPay = false }: { orgId: string; tenantId: string; canConfirm?: boolean; canPay?: boolean }) {
   const leases = await prisma.lease.findMany({ where: { orgId, tenantId, deletedAt: null, status: { in: ["ACTIVE", "TERMINATED"] } }, orderBy: { startDate: "desc" }, select: { id: true, startDate: true, monthlyRent: true, deposit: true, org: { select: { currencyCode: true } } } });

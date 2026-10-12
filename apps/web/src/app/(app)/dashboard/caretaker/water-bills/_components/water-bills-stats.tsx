@@ -1,9 +1,5 @@
-import {
-  AlertCircle,
-  CircleCheck as CheckCircle2,
-  Clock3,
-  Send,
-} from "lucide-react";
+import { AlertCircle, Send } from "lucide-react";
+import { CircleCheck as CheckCircle2, Clock3 } from "@/components/shared/colored-icons";
 import { StatCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import { formatCurrency } from "../_lib/helpers";
 import type { CaretakerWaterBillsData } from "../_lib/types";

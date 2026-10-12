@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowRight, BookOpen, Lock, Shield } from "lucide-react";
+import { ArrowRight, Lock, Shield } from "lucide-react";
+import { BookOpen } from "@/components/shared/colored-icons";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { privatePageMetadata } from "@/lib/seo";
 import {

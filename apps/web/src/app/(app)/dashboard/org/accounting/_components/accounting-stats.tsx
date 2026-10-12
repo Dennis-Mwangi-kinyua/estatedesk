@@ -1,4 +1,5 @@
-import { Landmark, ReceiptText, Scale, TrendingUp } from "lucide-react";
+import { Scale, TrendingUp } from "lucide-react";
+import { Landmark, ReceiptText } from "@/components/shared/colored-icons";
 import { formatMoney } from "../_lib/helpers";
 import type { AccountingPageData } from "../_lib/types";
 import { StatCard } from "./accounting-ui";

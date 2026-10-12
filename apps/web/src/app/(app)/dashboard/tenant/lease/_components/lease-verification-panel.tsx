@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ExternalLink, ShieldCheck } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import { ShieldCheck } from "@/components/shared/colored-icons";
 import { documentVerificationPath } from "@/lib/documents/identity";
 import type { TenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";
 import { panelShellClassName } from "./leases-ui";

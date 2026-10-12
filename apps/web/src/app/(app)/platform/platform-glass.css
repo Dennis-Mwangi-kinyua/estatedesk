@@ -153,3 +153,70 @@
 @media (min-width: 1280px) {
   .platform-activity-grid > :last-child { grid-column: 1 / -1; }
 }
+
+/* Balanced dashboard cards at phone and tablet widths. */
+.platform-primary-metrics,
+.platform-secondary-metrics { align-items: stretch; grid-auto-rows: 1fr; }
+.platform-glass-dashboard .platform-glass-metric { padding: 1rem; }
+.platform-glass-dashboard .platform-glass-metric > div { margin-top: .75rem; }
+.platform-glass-dashboard .platform-glass-metric > div > p { overflow-wrap: anywhere; }
+@media (max-width: 639px) {
+  .platform-secondary-metrics > :last-child { grid-column: 1 / -1; }
+  .platform-glass-dashboard .platform-glass-metric { min-height: 9rem; padding: .875rem; }
+  .platform-glass-dashboard .platform-glass-metric p:first-child { gap: .5rem; }
+  .platform-glass-dashboard .platform-glass-shortcut { font-size: .75rem; gap: .5rem; padding: .75rem; }
+  .platform-glass-dashboard .platform-glass-hero h1 { font-size: clamp(1.5rem, 6vw, 2rem); }
+}
+@media (min-width: 768px) and (max-width: 1279px) {
+  .platform-operations-grid > :last-child { grid-column: 1 / -1; }
+}
+
+/* Colored, labeled shortcuts keep navigation recognizable in either theme. */
+:is(.platform-shell-admin, .platform-shell-developer) .platform-mobile-dock {
+  margin: 0 .5rem .375rem;
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  box-shadow: 0 -4px 24px rgb(15 23 42 / 7%);
+}
+.platform-mobile-dock [data-dock-tone="sky"] { --dock-color: #0369a1; --dock-tint: #e0f2fe; }
+.platform-mobile-dock [data-dock-tone="violet"] { --dock-color: #6d28d9; --dock-tint: #ede9fe; }
+.platform-mobile-dock [data-dock-tone="emerald"] { --dock-color: #047857; --dock-tint: #d1fae5; }
+.platform-mobile-dock [data-dock-tone="slate"] { --dock-color: #475569; --dock-tint: #f1f5f9; }
+.platform-mobile-dock .platform-dock-item { color: var(--muted-foreground); font-size: .6875rem; gap: .25rem; }
+.platform-mobile-dock .platform-dock-icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: .875rem;
+  color: var(--dock-color);
+  background: var(--dock-tint);
+  transition: background 160ms ease, color 160ms ease;
+}
+:is(.platform-shell-admin, .platform-shell-developer) .platform-mobile-dock .platform-dock-item[aria-current="page"] {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--dock-color) 8%, transparent);
+  box-shadow: none;
+}
+.platform-mobile-dock .platform-dock-item[aria-current="page"] .platform-dock-icon {
+  color: var(--dock-color);
+  background: var(--dock-tint);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--dock-color) 25%, transparent);
+}
+.dark .platform-mobile-dock [data-dock-tone="sky"] { --dock-color: #7dd3fc; --dock-tint: #0c4a6e; }
+.dark .platform-mobile-dock [data-dock-tone="violet"] { --dock-color: #c4b5fd; --dock-tint: #4c1d95; }
+.dark .platform-mobile-dock [data-dock-tone="emerald"] { --dock-color: #6ee7b7; --dock-tint: #064e3b; }
+.dark .platform-mobile-dock [data-dock-tone="slate"] { --dock-color: #cbd5e1; --dock-tint: #334155; }
+.dark .platform-mobile-dock .platform-dock-item[aria-current="page"] .platform-dock-icon { color: #0f172a; }
+@media (hover: hover) {
+  .platform-mobile-dock .platform-dock-item:hover { background: color-mix(in srgb, var(--dock-color) 10%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .platform-mobile-dock .platform-dock-icon { transition: none; }
+}
+
+.platform-mobile-dock .platform-dock-item[aria-current="page"] .platform-dock-icon {
+  outline: 2px solid var(--dock-color);
+  outline-offset: 2px;
+}
+.platform-color-icon { filter: drop-shadow(0 1px 1px rgb(15 23 42 / 12%)); }

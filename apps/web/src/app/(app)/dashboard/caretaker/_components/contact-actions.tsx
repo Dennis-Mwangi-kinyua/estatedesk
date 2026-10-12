@@ -1,7 +1,8 @@
 "use client";
 
 import { useId, useState } from "react";
-import { ChevronDown, Phone } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { Phone } from "@/components/shared/colored-icons";
 import { contactHref } from "@/app/(app)/dashboard/caretaker/_lib/contact";
 
 type ContactOption = {

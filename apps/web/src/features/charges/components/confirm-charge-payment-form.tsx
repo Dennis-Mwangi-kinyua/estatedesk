@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { CircleCheck, ReceiptText } from "lucide-react";
+import { CircleCheck, ReceiptText } from "@/components/shared/colored-icons";
 import { confirmChargePaymentAction } from "../confirm-charge-payment-action";
 
 export function ConfirmChargePaymentForm({ chargeId, amount, dateLimit, initiallyOpen = false }: { chargeId: string; amount: string; dateLimit: string; initiallyOpen?: boolean }) {

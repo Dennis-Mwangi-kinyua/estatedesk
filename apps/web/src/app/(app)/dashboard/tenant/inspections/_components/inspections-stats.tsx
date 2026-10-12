@@ -1,10 +1,6 @@
 import { StatCard } from "@/components/theme/ed-dashboard-shell";
-import {
-  CircleCheck as CheckCircle2,
-  ClipboardCheck,
-  Clock3,
-  XCircle,
-} from "lucide-react";
+import { XCircle } from "lucide-react";
+import { CircleCheck as CheckCircle2, ClipboardCheck, Clock3 } from "@/components/shared/colored-icons";
 import type { InspectionTotals } from "@/app/(app)/dashboard/tenant/inspections/_lib/types";
 
 export function InspectionsStats({ totals }: { totals: InspectionTotals }) {

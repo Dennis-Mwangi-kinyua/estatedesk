@@ -1,6 +1,7 @@
 "use client";
 
-import { Plus, Save } from "lucide-react";
+import { Plus } from "lucide-react";
+import { Save } from "@/components/shared/colored-icons";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import {

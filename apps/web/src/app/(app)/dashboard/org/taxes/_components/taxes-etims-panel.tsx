@@ -1,4 +1,5 @@
-import { CircleCheck as CheckCircle2, AlertTriangle, Shield } from "lucide-react";
+import { AlertTriangle, Shield } from "lucide-react";
+import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
 
 type Readiness = {
   configured: boolean;

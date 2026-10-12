@@ -1,4 +1,4 @@
-import { Building2, KeyRound, UsersRound as Users, Wallet } from "lucide-react";
+import { Building2, KeyRound, UsersRound as Users, Wallet } from "@/components/shared/colored-icons";
 import { SectionCard } from "../../settings-ui";
 
 export function DeveloperNotesSection() {

@@ -1,13 +1,5 @@
-import {
-  Landmark,
-  Percent,
-  ReceiptText,
-  Scale,
-  TrendingDown,
-  TrendingUp,
-  UsersRound as Users,
-  Wallet,
-} from "lucide-react";
+import { Percent, Scale, TrendingDown, TrendingUp } from "lucide-react";
+import { Landmark, ReceiptText, UsersRound as Users, Wallet } from "@/components/shared/colored-icons";
 import { formatMoney } from "../_lib/helpers";
 import type { AccountingPageData } from "../_lib/types";
 import { StatCard } from "./accounting-ui";

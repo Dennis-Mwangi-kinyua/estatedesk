@@ -1,4 +1,5 @@
-import { AlertTriangle, Gauge } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
+import { Gauge } from "@/components/shared/colored-icons";
 import { formatLedgerCurrency } from "@/lib/ledger";
 import type { InsightsPageData } from "../_lib/types";
 import { StatCard } from "./insights-ui";

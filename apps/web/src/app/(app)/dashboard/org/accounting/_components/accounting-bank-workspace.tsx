@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { Building2, Landmark } from "lucide-react";
+import { Building2, Landmark } from "@/components/shared/colored-icons";
 import { encodePublicId } from "@/lib/public-id";
 import {
   completeBankReconciliationAction,

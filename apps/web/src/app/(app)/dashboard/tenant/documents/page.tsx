@@ -3,13 +3,8 @@ import { PageShell, SurfaceCard, StatCard, MutedBand, MutedPanel } from "@/compo
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
-import {
-  FileText,
-  FileImage,
-  Download,
-  CalendarDays,
-  FolderOpen,
-} from "lucide-react";
+import { FileText, FileImage, FolderOpen } from "lucide-react";
+import { Download, CalendarDays } from "@/components/shared/colored-icons";
 import {
   isPdfLeaseAsset,
   tenantLeaseDownloadPath,

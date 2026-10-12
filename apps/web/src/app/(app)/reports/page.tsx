@@ -1,14 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import {
-  ArrowLeft,
-  BarChart3,
-  Building2,
-  ClipboardList,
-  Download,
-  House as Home,
-  Receipt,
-  TrendingUp,
-} from "lucide-react";
+import { ArrowLeft, BarChart3, Receipt, TrendingUp } from "lucide-react";
+import { Building2, ClipboardList, Download, House as Home } from "@/components/shared/colored-icons";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { ReportsGuidanceAside } from "./_components/reports-guidance-aside";
 

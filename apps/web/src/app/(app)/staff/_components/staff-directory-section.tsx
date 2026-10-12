@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ChevronRight, ContactRound, UserRoundPlus as UserPlus } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { ContactRound, UserRoundPlus as UserPlus } from "@/components/shared/colored-icons";
 import { encodePublicId } from "@/lib/public-id";
 import { formatDateTime, formatRelative } from "../_lib/helpers";
 import type { getStaffDirectoryData } from "../_lib/queries";

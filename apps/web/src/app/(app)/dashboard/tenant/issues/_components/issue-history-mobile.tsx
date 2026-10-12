@@ -1,4 +1,4 @@
-import { Wrench } from "lucide-react";
+import { Wrench } from "@/components/shared/colored-icons";
 import { ResolutionForm } from "@/app/(app)/dashboard/tenant/issues/_components/resolution-form";
 import {
   formatDate,

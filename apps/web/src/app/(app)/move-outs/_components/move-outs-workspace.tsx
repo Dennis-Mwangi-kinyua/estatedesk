@@ -8,17 +8,8 @@ import { CloseoutForm } from "@/features/move-outs/components/closeout-form";
 import { MoveOutProgress } from "@/features/move-outs/components/progress";
 import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
-import {
-  ArrowUpRight,
-  CalendarDays,
-  CircleCheck as CheckCircle2,
-  ClipboardList,
-  FileText,
-  House as Home,
-  LogOut,
-  MapPin,
-  UsersRound as Users,
-} from "lucide-react";
+import { ArrowUpRight, FileText, MapPin } from "lucide-react";
+import { CalendarDays, CircleCheck as CheckCircle2, ClipboardList, House as Home, LogOut, UsersRound as Users } from "@/components/shared/colored-icons";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";

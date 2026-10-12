@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { CaretakerI18nLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-i18n-label";
 import { QrScanLauncher } from "@/app/(app)/dashboard/caretaker/_components/qr-scan-launcher";

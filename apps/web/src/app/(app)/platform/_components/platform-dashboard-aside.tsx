@@ -1,10 +1,5 @@
-import {
-  Code2,
-  WalletCards as CreditCard,
-  Plus,
-  Building2,
-  UsersRound as Users,
-} from "lucide-react";
+import { Code2, Plus } from "lucide-react";
+import { WalletCards as CreditCard, Building2, UsersRound as Users } from "@/components/shared/colored-icons";
 import { formatNumber } from "../_lib/helpers";
 import type { PlatformDashboardData } from "../_lib/queries";
 import {
@@ -31,9 +26,9 @@ export function PlatformDashboardAside({
   } = data;
 
   return (
-    <section aria-label="Platform operations" className="grid min-w-0 items-stretch gap-5 xl:grid-cols-3">
+    <section aria-label="Platform operations" className="platform-operations-grid grid min-w-0 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3">
       <Panel title="Quick actions" subtitle="High-priority shortcuts">
-        <div className="grid grid-cols-1 gap-2.5 min-[480px]:grid-cols-2 xl:grid-cols-1">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-1">
           <ActionLink href="/platform/organizations/new" label="New organization" icon={Plus} />
           <ActionLink href="/platform/organizations" label="Organization directory" icon={Building2} />
           <ActionLink href="/platform/users" label="Platform users" icon={Users} />

@@ -2,7 +2,8 @@
 
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { useState } from "react";
-import { Lock, Mail, Phone, User2 } from "lucide-react";
+import { Lock, User2 } from "lucide-react";
+import { Mail, Phone } from "@/components/shared/colored-icons";
 import {
   iconBubbleClass,
   iconClass,

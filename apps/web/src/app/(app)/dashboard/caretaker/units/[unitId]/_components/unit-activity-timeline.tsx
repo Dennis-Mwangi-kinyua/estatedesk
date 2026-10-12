@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { Droplets, Wrench } from "lucide-react";
+import { Droplets, Wrench } from "@/components/shared/colored-icons";
 import { CaretakerI18nLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-i18n-label";
 import { getCaretakerIssueHref } from "@/app/(app)/dashboard/caretaker/_lib/paths";
 import {

@@ -1,6 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import { Wrench } from "lucide-react";
+import { Wrench } from "@/components/shared/colored-icons";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import { canCreateOrgIssue } from "@/lib/issues/share-routing";
 import { SurfaceCard } from "./issues-page-shell";

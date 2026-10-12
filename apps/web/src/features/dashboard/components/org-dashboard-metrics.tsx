@@ -1,12 +1,5 @@
-import {
-  House as Home,
-  Building,
-  Briefcase,
-  UserRoundCog as UserCog,
-  UsersRound as Users,
-  Wifi,
-  FileText,
-} from "lucide-react";
+import { Briefcase, Wifi, FileText } from "lucide-react";
+import { House as Home, Building, UserRoundCog as UserCog, UsersRound as Users } from "@/components/shared/colored-icons";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { MetricCard } from "./org-dashboard-shared";
 

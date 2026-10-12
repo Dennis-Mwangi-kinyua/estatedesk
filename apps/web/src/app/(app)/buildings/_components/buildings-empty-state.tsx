@@ -1,5 +1,5 @@
 import Link from "@/components/navigation/workspace-link";
-import { Building2 } from "lucide-react";
+import { Building2 } from "@/components/shared/colored-icons";
 import type { getBuildingsPageData } from "../_lib/queries";
 import { panelShellClassName } from "./buildings-ui";
 

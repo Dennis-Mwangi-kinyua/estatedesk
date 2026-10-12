@@ -1,9 +1,4 @@
-import {
-  BellRing as Bell,
-  House as Home,
-  KeyRound,
-  ShieldCheck,
-} from "lucide-react";
+import { BellRing as Bell, House as Home, KeyRound, ShieldCheck } from "@/components/shared/colored-icons";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
 import {

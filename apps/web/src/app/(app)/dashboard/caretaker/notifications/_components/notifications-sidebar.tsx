@@ -1,9 +1,4 @@
-import {
-  ClipboardList,
-  Droplets,
-  House as Home,
-  Wrench,
-} from "lucide-react";
+import { ClipboardList, Droplets, House as Home, Wrench } from "@/components/shared/colored-icons";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import {
   panelShellClassName,

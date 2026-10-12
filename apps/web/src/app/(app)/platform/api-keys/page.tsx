@@ -1,4 +1,5 @@
-import { KeyRound, Lock, ReceiptText } from "lucide-react";
+import { Lock } from "lucide-react";
+import { KeyRound, ReceiptText } from "@/components/shared/colored-icons";
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import {

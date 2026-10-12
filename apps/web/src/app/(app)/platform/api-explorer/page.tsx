@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { KeyRound, Webhook } from "lucide-react";
+import { Webhook } from "lucide-react";
+import { KeyRound } from "@/components/shared/colored-icons";
 import { prisma } from "@/lib/prisma";
 import { getIntegrationReadinessReport } from "@/lib/integrations";
 import { requirePlatformRole } from "@/lib/permissions/guards";

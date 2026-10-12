@@ -5,7 +5,7 @@ import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 import { usePathname } from "next/navigation";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import clsx from "clsx";
-import { LogOut } from "lucide-react";
+import { LogOut } from "@/components/shared/colored-icons";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { CARETAKER_NAV_ITEMS } from "@/app/(app)/dashboard/caretaker/_lib/i18n";

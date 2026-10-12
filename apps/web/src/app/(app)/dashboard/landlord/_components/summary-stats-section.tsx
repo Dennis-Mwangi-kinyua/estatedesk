@@ -1,5 +1,6 @@
 import { MetricSticker } from "@/components/shared/metric-sticker";
-import { Building2, House as Home, Receipt, UsersRound as Users } from "lucide-react";
+import { Receipt } from "lucide-react";
+import { Building2, House as Home, UsersRound as Users } from "@/components/shared/colored-icons";
 import { formatCurrency } from "@/app/(app)/dashboard/landlord/_lib/helpers";
 import type { LandlordDashboardData } from "@/app/(app)/dashboard/landlord/_lib/types";
 

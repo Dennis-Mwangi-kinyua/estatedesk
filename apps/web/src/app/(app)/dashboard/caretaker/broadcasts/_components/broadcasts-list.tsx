@@ -1,4 +1,4 @@
-import { Megaphone } from "lucide-react";
+import { Megaphone } from "@/components/shared/colored-icons";
 import { ErrorStateCard } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import {
   panelBodyClassName,

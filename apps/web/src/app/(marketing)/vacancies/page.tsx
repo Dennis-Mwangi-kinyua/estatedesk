@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  House as Home,
-  MapPin,
-  Search,
-  Building2,
-} from "lucide-react";
+import { MapPin } from "lucide-react";
+import { House as Home, Search, Building2 } from "@/components/shared/colored-icons";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";

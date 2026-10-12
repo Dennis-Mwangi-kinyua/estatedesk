@@ -1,5 +1,6 @@
 import { NotificationViewButton } from "@/components/notifications/notification-view-button";
-import { Clock3, Send } from "lucide-react";
+import { Send } from "lucide-react";
+import { Clock3 } from "@/components/shared/colored-icons";
 import { markCaretakerNotificationReadAction } from "../actions";
 import {
   formatDateTime,

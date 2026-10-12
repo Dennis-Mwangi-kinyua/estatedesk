@@ -1,12 +1,8 @@
 import type { ComponentType } from "react";
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import {
-  CircleCheck as CheckCircle2,
-  Droplets,
-  Inbox,
-  XCircle,
-} from "lucide-react";
+import { XCircle } from "lucide-react";
+import { CircleCheck as CheckCircle2, Droplets, Inbox } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import type { getOrgWaterBillsPageData } from "../_lib/queries";
 import { WaterApprovalQueue } from "./water-approval-queue";

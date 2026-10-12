@@ -1,5 +1,6 @@
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
-import { Clock3, FileSpreadsheet } from "lucide-react";
+import { FileSpreadsheet } from "lucide-react";
+import { Clock3 } from "@/components/shared/colored-icons";
 import {
   DataCard,
   DataCardRow,

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "@/components/navigation/workspace-link";
-import { Bath, BedDouble, Building2, MapPin, Phone } from "lucide-react";
+import { Bath, MapPin } from "lucide-react";
+import { BedDouble, Building2, Phone } from "@/components/shared/colored-icons";
 import { VacancyPaginationNav } from "@/components/marketing/vacancy-pagination-nav";
 import { VacancyShareActions } from "@/components/marketing/vacancy-share-actions";
 import type { VacancyPaginationState } from "@/lib/vacancy-pagination";

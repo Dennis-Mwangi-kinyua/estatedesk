@@ -1,4 +1,5 @@
-import { Banknote, Landmark, Smartphone, Wallet } from "lucide-react";
+import { Banknote, Smartphone } from "lucide-react";
+import { Landmark, Wallet } from "@/components/shared/colored-icons";
 import { formatMoney } from "../_lib/helpers";
 import type { AccountingPageData } from "../_lib/types";
 import { StatCard, panelShellClassName } from "./accounting-ui";

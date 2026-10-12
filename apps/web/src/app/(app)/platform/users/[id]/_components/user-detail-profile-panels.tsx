@@ -1,5 +1,6 @@
 import { PlatformRole } from "@prisma/client";
-import { KeyRound, Save, User2 } from "lucide-react";
+import { User2 } from "lucide-react";
+import { KeyRound, Save } from "@/components/shared/colored-icons";
 import {
   resetPlatformUserPassword,
   updatePlatformUserProfile,

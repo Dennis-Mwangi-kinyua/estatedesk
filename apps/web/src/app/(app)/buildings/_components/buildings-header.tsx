@@ -1,7 +1,8 @@
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import { ArrowLeft, Building2, House as Home } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Building2, House as Home } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { BUILDINGS_WORKFLOW_STEPS } from "../_lib/constants";
 import type { getBuildingsPageData } from "../_lib/queries";

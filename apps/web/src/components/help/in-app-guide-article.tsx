@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowRight, BookOpen, CalendarDays, Clock3, Lock } from "lucide-react";
+import { ArrowRight, Lock } from "lucide-react";
+import { BookOpen, CalendarDays, Clock3 } from "@/components/shared/colored-icons";
 import type { HelpWorkspace } from "@/lib/help/help-workspace";
 import { getInAppHelpArticlePath, getInAppHelpHubPath } from "@/lib/help/help-workspace";
 import type { GuideArticle } from "@/lib/guides/types";

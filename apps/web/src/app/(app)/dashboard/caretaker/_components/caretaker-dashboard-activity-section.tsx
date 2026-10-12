@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { AlertCircle, CircleCheck as CheckCircle2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
 import { TicketStatus } from "@prisma/client";
 import { DeferredLink } from "@/components/navigation/app-links";
 import {

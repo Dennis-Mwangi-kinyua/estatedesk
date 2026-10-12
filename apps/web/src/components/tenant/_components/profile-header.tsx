@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "@/components/navigation/workspace-link";
 import { memo } from "react";
-import { PencilLine, ShieldCheck, UserCircle2 } from "lucide-react";
+import { UserCircle2 } from "lucide-react";
+import { PencilLine, ShieldCheck } from "@/components/shared/colored-icons";
 import { statusBadgeStyles } from "../_lib/helpers";
 import type { TenantProfileViewModel } from "../_lib/types";
 import { TopSummaryCard } from "./top-summary-card";

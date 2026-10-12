@@ -1,4 +1,5 @@
-import { ArrowRight, ClipboardList, Droplets, Wrench } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { ClipboardList, Droplets, Wrench } from "@/components/shared/colored-icons";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { CaretakerI18nLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-i18n-label";
 import { IssueSlaBadge } from "@/app/(app)/dashboard/caretaker/_components/issue-sla-badge";

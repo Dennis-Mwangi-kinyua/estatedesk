@@ -1,4 +1,5 @@
-import { Landmark, Receipt } from "lucide-react";
+import { Receipt } from "lucide-react";
+import { Landmark } from "@/components/shared/colored-icons";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import {
   MiniStat,

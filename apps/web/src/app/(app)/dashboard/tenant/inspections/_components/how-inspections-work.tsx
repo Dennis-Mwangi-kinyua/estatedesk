@@ -1,5 +1,5 @@
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays } from "@/components/shared/colored-icons";
 
 export function HowInspectionsWork() {
   return (

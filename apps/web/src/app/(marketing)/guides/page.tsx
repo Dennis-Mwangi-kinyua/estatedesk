@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Layers3 } from "lucide-react";
+import { ArrowRight, Layers3 } from "lucide-react";
+import { BookOpen } from "@/components/shared/colored-icons";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import {

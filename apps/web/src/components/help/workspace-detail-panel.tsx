@@ -10,7 +10,8 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { BookOpen, ChevronRight, X } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
+import { BookOpen } from "@/components/shared/colored-icons";
 import { cn } from "@/lib/utils";
 
 export type WorkspaceDetailPanelProps = {

@@ -46,12 +46,12 @@ export function MetricCard({
   metaTone: string;
 }) {
   const content = (
-    <div className="platform-glass-metric group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
-      <p className="flex items-center gap-3 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">
+    <div className="platform-glass-metric group h-full min-w-0 relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
+      <p className="flex min-w-0 flex-wrap items-center gap-2 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">
         <VisualSticker label={href ?? label} size="sm" className="shrink-0" />{label}
       </p>
       <div className="mt-4 flex flex-col items-start gap-2">
-        <p className="break-words text-2xl font-semibold tracking-tight text-slate-950 tabular-nums dark:text-white lg:text-3xl">
+        <p className="break-words text-xl sm:text-2xl font-semibold tracking-tight text-slate-950 tabular-nums dark:text-white lg:text-3xl">
           {value}
         </p>
         <p className={`text-xs leading-5 font-medium ${metaTone}`}>{meta}</p>
@@ -73,12 +73,12 @@ export function CompactInfoCard({
   helper: string;
 }) {
   const content = (
-    <div className="platform-glass-metric group relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
-      <p className="flex items-center gap-3 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">
+    <div className="platform-glass-metric group h-full min-w-0 relative overflow-hidden rounded-xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20">
+      <p className="flex min-w-0 flex-wrap items-center gap-2 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">
         <VisualSticker label={href ?? label} size="sm" className="shrink-0" />{label}
       </p>
       <div className="mt-4 flex flex-col items-start gap-2">
-        <p className="break-words text-2xl font-semibold tracking-tight text-slate-950 tabular-nums dark:text-white lg:text-3xl">
+        <p className="break-words text-xl sm:text-2xl font-semibold tracking-tight text-slate-950 tabular-nums dark:text-white lg:text-3xl">
           {value}
         </p>
         <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">{helper}</p>

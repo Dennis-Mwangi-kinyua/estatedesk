@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, Landmark } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Landmark } from "@/components/shared/colored-icons";
 import type { FinanceRequestsPageData } from "../_lib/types";
 import { FinanceRequestForm } from "./finance-request-form";
 import { FinanceRequestsList } from "./finance-requests-list";

@@ -1,5 +1,6 @@
 import Link from "@/components/navigation/workspace-link";
-import { ArrowLeft, Landmark } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Landmark } from "@/components/shared/colored-icons";
 import {
   DataCard,
   DataCardRow,

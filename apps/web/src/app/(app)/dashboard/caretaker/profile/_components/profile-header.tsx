@@ -1,6 +1,6 @@
 import { ProfileAvatar } from "@/components/uploads/profile-avatar";
 import Link from "@/components/navigation/workspace-link";
-import { ShieldCheck, UserRound } from "lucide-react";
+import { ShieldCheck, UserRound } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
   panelBodyClassName,

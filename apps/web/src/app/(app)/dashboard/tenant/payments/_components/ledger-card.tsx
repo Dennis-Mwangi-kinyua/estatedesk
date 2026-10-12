@@ -3,7 +3,7 @@ import {
   formatLedgerCurrency,
   formatLedgerDate,
 } from "@/lib/ledger";
-import { Clock3, ReceiptText, Wallet } from "lucide-react";
+import { Clock3, ReceiptText, Wallet } from "@/components/shared/colored-icons";
 import type { TenantPaymentsPageData } from "@/app/(app)/dashboard/tenant/payments/_lib/types";
 
 export function LedgerCard({ data }: { data: TenantPaymentsPageData }) {

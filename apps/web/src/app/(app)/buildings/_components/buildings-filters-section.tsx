@@ -1,5 +1,5 @@
 import { DeferredLink } from "@/components/navigation/app-links";
-import { Search } from "lucide-react";
+import { Search } from "@/components/shared/colored-icons";
 import type { getBuildingsPageData } from "../_lib/queries";
 import {
   buttonPrimaryClassName,

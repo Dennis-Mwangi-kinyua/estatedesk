@@ -1,10 +1,5 @@
-import {
-  AlertTriangle,
-  BadgeCheck,
-  Receipt,
-  UsersRound as Users,
-  TrendingUp,
-} from "lucide-react";
+import { AlertTriangle, BadgeCheck, Receipt, TrendingUp } from "lucide-react";
+import { UsersRound as Users } from "@/components/shared/colored-icons";
 import { formatLedgerCurrency } from "@/lib/ledger";
 import type { ReportsPageData } from "../_lib/types";
 import { ReportStat } from "./reports-ui";

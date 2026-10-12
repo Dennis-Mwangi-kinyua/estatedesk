@@ -80,10 +80,9 @@
   height: 1em;
   margin-inline-end: .5em;
   vertical-align: -.12em;
-  background: var(--workspace-action-primary);
-  mask-image: var(--workspace-heading-icon);
-  mask-size: contain;
-  mask-repeat: no-repeat;
+  background: var(--workspace-heading-image) center / contain no-repeat;
+  mask: none;
+  -webkit-mask: none;
 }
 .estate-workspace .workspace-hero__eyebrow svg { width: 1rem; height: 1rem; }
 @media (max-width: 1023px) {

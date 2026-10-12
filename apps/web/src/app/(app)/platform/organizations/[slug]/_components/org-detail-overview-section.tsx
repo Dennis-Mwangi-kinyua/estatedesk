@@ -1,21 +1,11 @@
+import { OrganizationSlugEditor } from "@/components/forms/organization-slug-editor";
+import { updatePlatformOrganizationSlugAction } from "@/features/organizations/actions/update-organization-slug";
 import { OrgBillingActions } from "./org-billing-actions";
 import { OrganizationNameEditor } from "@/components/forms/organization-name-editor";
 import { renamePlatformOrganizationAction } from "@/features/organizations/actions/rename-organization";
 import Link from "@/components/navigation/workspace-link";
-import {
-  ArrowLeft,
-  Mail,
-  Phone,
-  Globe2,
-  CalendarDays,
-  Building2,
-  WalletCards as CreditCard,
-  FileText,
-  Receipt,
-  Settings,
-  ShieldCheck,
-  UsersRound as Users,
-} from "lucide-react";
+import { ArrowLeft, Globe2, FileText, Receipt, Settings } from "lucide-react";
+import { Mail, Phone, CalendarDays, Building2, WalletCards as CreditCard, ShieldCheck, UsersRound as Users } from "@/components/shared/colored-icons";
 import {
   Badge,
   formatCurrency,
@@ -76,6 +66,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
       <section className="grid items-start gap-5 xl:grid-cols-2">
         <OrgSurface id="organisation-profile" title="Workspace profile" description="Identity, contact details and workspace preferences." className="organisation-profile-card">
           <div className="p-4 sm:px-5"><OrganizationNameEditor name={org.name} orgId={org.id} action={renamePlatformOrganizationAction} /></div>
+          <div className="p-4 sm:px-5"><OrganizationSlugEditor slug={org.slug} orgId={org.id} action={updatePlatformOrganizationSlugAction} /></div>
           <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
             <InfoTile icon={<Building2 className="h-4 w-4" />} label="Slug" value={`/${org.slug}`} />
             <InfoTile icon={<Settings className="h-4 w-4" />} label="Timezone" value={org.timezone} />

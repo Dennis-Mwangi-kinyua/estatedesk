@@ -1,13 +1,6 @@
 import { StatCard } from "@/components/theme/ed-dashboard-shell";
-import {
-  BadgeCheck,
-  Clock3,
-  Droplets,
-  ReceiptText,
-  Trash2,
-  Wallet,
-  Wrench,
-} from "lucide-react";
+import { BadgeCheck } from "lucide-react";
+import { Clock3, Droplets, ReceiptText, Trash2, Wallet, Wrench } from "@/components/shared/colored-icons";
 import { formatMoney } from "@/app/(app)/dashboard/tenant/payments/_lib/helpers";
 import type { TenantPaymentsPageData } from "@/app/(app)/dashboard/tenant/payments/_lib/types";
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { LoaderCircle, Search } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
+import { Search } from "@/components/shared/colored-icons";
 
 export function TenantVerificationSearchForm({ search }: { search: string }) {
   const [searching, setSearching] = useState(false);
