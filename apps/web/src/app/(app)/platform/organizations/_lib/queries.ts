@@ -94,7 +94,7 @@ export async function getPlatformOrganizationsPageData({
       Promise.all([
         prisma.organization.findMany({
           where,
-          orderBy: { createdAt: "desc" },
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
           skip,
           take,
           include: {

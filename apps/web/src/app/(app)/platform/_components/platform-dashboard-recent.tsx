@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { PlatformSticker } from "./platform-sticker";
-import { Clock3, Mail, Phone } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import {
   formatCompactCurrency,
   formatCurrency,
-  formatDate,
   formatNumber,
   statusTone,
 } from "../_lib/helpers";
@@ -27,7 +26,6 @@ export function PlatformDashboardRecent({
   data: PlatformDashboardData;
 }) {
   const {
-    recentOnboardingRequests,
     recentOrganizations,
     recentPayments,
     totalSubscriptions,
@@ -60,67 +58,15 @@ export function PlatformDashboardRecent({
       </section>
 
       <section className="platform-activity-grid grid min-w-0 items-start gap-5 xl:grid-cols-2">
-        <Panel title="Onboarding queue" subtitle="New requests needing first response">
-          {recentOnboardingRequests.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-slate-900 dark:text-slate-400">
-              No new onboarding requests.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentOnboardingRequests.map((request) => (
-                <Link
-                  key={request.id}
-                  href="/platform/onboarding?status=NEW"
-                  className="platform-glass-inset group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-white/20"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <PlatformSticker label="Onboarding" className="shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="break-words text-sm font-semibold leading-5 text-slate-950 dark:text-white">
-                        {request.companyName}
-                      </p>
-                      <p className="mt-1 break-words text-xs text-slate-500 dark:text-slate-400">
-                        {request.fullName} / {request.managedPropertyType}
-                      </p>
-                    </div>
-                    <StatusBadge tone={statusTone("pending")}>NEW</StatusBadge>
-                  </div>
-                  <div className="mt-3 grid gap-2 text-[11px] text-slate-500 dark:text-slate-400 sm:grid-cols-2">
-                    <span className="inline-flex min-w-0 items-center gap-1.5">
-                      <Mail className="h-3.5 w-3.5 shrink-0" />
-                      <span className="truncate">{request.workEmail}</span>
-                    </span>
-                    {request.phone ? (
-                      <span className="inline-flex min-w-0 items-center gap-1.5">
-                        <Phone className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate">{request.phone}</span>
-                      </span>
-                    ) : null}
-                    <span className="inline-flex min-w-0 items-center gap-1.5">
-                      <Clock3 className="h-3.5 w-3.5 shrink-0" />
-                      <span>{formatDate(request.createdAt)}</span>
-                    </span>
-                    <span className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere]">
-                      {request.marketer
-                        ? `${request.marketer.fullName} (${request.marketer.referralCode})`
-                        : request.referralCode
-                          ? `Referral ${request.referralCode}`
-                          : "No referral"}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </Panel>
-
         <Panel title="Recent organizations" subtitle="Newest workspaces on the platform">
-          <div className="space-y-3">
+          <div className="mb-4 flex justify-end"><Link href="/platform/organizations" className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-primary">View all organizations<ArrowUpRight aria-hidden="true" className="h-4 w-4" /></Link></div>
+          <div className="grid gap-3 sm:grid-cols-2">
             {recentOrganizations.length === 0 ? (
               <OrganizationWorkspaceCardEmpty />
             ) : (
               recentOrganizations.map((org) => (
                 <OrganizationWorkspaceCard
+                  layout="directory"
                   key={org.id}
                   href={`/platform/organizations/${org.slug}`}
                   name={org.name}

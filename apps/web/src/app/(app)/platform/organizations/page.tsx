@@ -39,8 +39,9 @@ export default async function PlatformOrganizationsPage({
   const status = parseOrganizationStatus(params.status);
   const deletedSlug = (params.deleted ?? "").trim();
   const archivedSlug = (params.archived ?? "").trim();
-  const page = Number(params.page ?? 1);
-  const pageSize = Number(params.pageSize ?? 24);
+  const requestedPage = Number(params.page ?? 1);
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const pageSize = 16;
 
   const {
     organizations,
@@ -87,7 +88,7 @@ export default async function PlatformOrganizationsPage({
       <PageHeader
         eyebrow="Platform directory"
         title="Organizations"
-        description="Search, review, and open organization workspaces without loading the whole platform into one request."
+        description="Find an organization and open its workspace. Newest organizations appear first."
         action={
           <div className="platform-action-group">
             <Link
@@ -129,11 +130,12 @@ export default async function PlatformOrganizationsPage({
       </section>
 
       <section className="min-w-0 max-w-full overflow-hidden rounded-[26px] border border-neutral-200 bg-white/95 shadow-sm backdrop-blur">
-        <form className="grid gap-3 border-b border-neutral-200 p-4 md:grid-cols-[1fr_180px_auto]">
+        <form action="/platform/organizations" method="get" aria-label="Search organizations" className="grid gap-3 border-b border-neutral-200 p-4 md:grid-cols-[1fr_180px_auto]">
           <div className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
             <Search className="h-4 w-4 text-neutral-400" />
             <input
               name="q"
+              aria-label="Search organizations"
               defaultValue={q}
               placeholder="Search name, slug, email, or phone"
               className="min-w-0 flex-1 bg-transparent text-sm text-neutral-800 outline-none placeholder:text-neutral-400"
@@ -142,6 +144,7 @@ export default async function PlatformOrganizationsPage({
 
           <select
             name="status"
+            aria-label="Organization status"
             defaultValue={status ?? ""}
             className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-medium text-neutral-700 outline-none"
           >
@@ -154,20 +157,22 @@ export default async function PlatformOrganizationsPage({
           </select>
 
           <button data-workspace-action="true" className="rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800">
-            Apply
+            Search
           </button>
         </form>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4 text-sm"><p className="font-semibold text-foreground">{formatNumber(totalFiltered)} organizations{q ? ` matching “${q}”` : ""}</p><div className="flex items-center gap-3 text-xs text-muted-foreground"><span>Newest first · 16 per page</span>{q || status ? <Link href="/platform/organizations" className="font-medium text-primary underline underline-offset-4">Clear filters</Link> : null}</div></div>
 
         {organizations.length === 0 ? (
           <div className="p-10 text-center text-sm text-neutral-500">
             No organizations match the current filters.
           </div>
         ) : (
-          <div className="min-w-0 space-y-3 p-3 sm:p-4">
+          <div className="organization-directory-grid grid min-w-0 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {organizations.map((org, index) => (
               <OrganizationWorkspaceCard
                 key={org.id}
-                layout="wide"
+                layout="directory"
                 colorVariant={(page - 1) * pageSize + index}
                 href={`/platform/organizations/${org.slug}`}
                 name={org.name}

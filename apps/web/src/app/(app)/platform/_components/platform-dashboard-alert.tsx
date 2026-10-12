@@ -7,13 +7,10 @@ export function PlatformDashboardAlert({
   newOnboardingCount,
   recentOnboardingRequests,
 }: Pick<PlatformDashboardData, "newOnboardingCount" | "recentOnboardingRequests">) {
-  if (newOnboardingCount <= 0) {
-    return null;
-  }
 
   return (
     <Link
-      href="/platform/onboarding?status=NEW"
+      href="/platform/onboarding"
       className="flex flex-col gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950 shadow-sm transition hover:border-amber-400 hover:bg-amber-100 dark:border-amber-400/50 dark:bg-amber-950 dark:text-amber-50 dark:shadow-[0_0_0_1px_rgba(251,191,36,0.15)] dark:hover:border-amber-300/70 dark:hover:bg-amber-900 sm:flex-row sm:items-center sm:justify-between"
     >
       <span className="flex items-start gap-3">
@@ -22,12 +19,10 @@ export function PlatformDashboardAlert({
         </span>
         <span>
           <span className="block text-sm font-semibold text-amber-950 dark:text-amber-50">
-            {formatNumber(newOnboardingCount)} new onboarding request
-            {newOnboardingCount === 1 ? "" : "s"} need attention
+            Onboarding requests · {formatNumber(newOnboardingCount)} new
           </span>
           <span className="mt-1 block text-sm text-amber-900/80 dark:text-amber-100/90">
-            Latest: {recentOnboardingRequests[0]?.companyName ?? "New company"} from{" "}
-            {recentOnboardingRequests[0]?.fullName ?? "a new contact"}.
+            {newOnboardingCount > 0 ? `Latest: ${recentOnboardingRequests[0]?.companyName ?? "New company"}. Review requests and manage onboarding.` : "No new requests. Open onboarding to review all requests and their progress."}
           </span>
         </span>
       </span>

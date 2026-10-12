@@ -27,13 +27,12 @@ export function PlatformDashboardMetrics({
     previousRevenue,
     verifiedPayments,
     activeSubscriptions,
-    newOnboardingCount,
   } = data;
 
   return (
     <section className="platform-glass-metrics overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-950 lg:p-5">
       <div className="grid gap-4">
-        <div className="grid grid-cols-1 gap-4 min-[380px]:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 min-[380px]:grid-cols-2 xl:grid-cols-3">
           <MetricCard
             label="Organizations"
             href="/platform/organizations"
@@ -64,7 +63,7 @@ export function PlatformDashboardMetrics({
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 min-[380px]:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 min-[380px]:grid-cols-2 xl:grid-cols-3">
           <CompactInfoCard
             label="Payments"
             href="/platform/payments"
@@ -82,12 +81,6 @@ export function PlatformDashboardMetrics({
             href="/platform/organizations"
             value={formatNumber(totalProperties)}
             helper={`${formatNumber(totalUnits)} units`}
-          />
-          <CompactInfoCard
-            label="Onboarding"
-            href="/platform/onboarding"
-            value={formatNumber(newOnboardingCount)}
-            helper="new requests"
           />
         </div>
       </div>

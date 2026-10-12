@@ -2,7 +2,7 @@ import {
   Code2,
   WalletCards as CreditCard,
   Plus,
-  SlidersHorizontal,
+  Building2,
   UsersRound as Users,
 } from "lucide-react";
 import { formatNumber } from "../_lib/helpers";
@@ -35,7 +35,7 @@ export function PlatformDashboardAside({
       <Panel title="Quick actions" subtitle="High-priority shortcuts">
         <div className="grid grid-cols-1 gap-2.5 min-[480px]:grid-cols-2 xl:grid-cols-1">
           <ActionLink href="/platform/organizations/new" label="New organization" icon={Plus} />
-          <ActionLink href="/platform/onboarding?status=NEW" label="New onboarding" icon={SlidersHorizontal} />
+          <ActionLink href="/platform/organizations" label="Organization directory" icon={Building2} />
           <ActionLink href="/platform/users" label="Platform users" icon={Users} />
           <ActionLink href="/platform/billing" label="Billing center" icon={CreditCard} />
           <ActionLink href="/platform/developer" label="Developer portal" icon={Code2} />

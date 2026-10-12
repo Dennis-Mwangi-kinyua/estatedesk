@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Building2, ChevronRight, Globe2 } from "lucide-react";
+import { Building2, ChevronRight, Globe2, UsersRound, ArrowUpRight } from "lucide-react";
 import {
   formatDate,
   formatNumber,
@@ -19,7 +19,7 @@ type OrganizationWorkspaceCardProps = {
   status: string;
   timezone?: string | null;
   createdAt: Date;
-  layout?: "stacked" | "wide";
+  layout?: "stacked" | "wide" | "directory";
   colorVariant?: number;
   metrics: {
     properties: number;
@@ -77,6 +77,7 @@ function getOrganizationColorVariant(colorVariant?: number) {
 }
 
 export function OrganizationWorkspaceCard(props: OrganizationWorkspaceCardProps) {
+  if (props.layout === "directory") return <DirectoryOrganizationCard {...props} />;
   if (props.layout === "wide") {
     return <WideOrganizationWorkspaceCard {...props} />;
   }
@@ -294,4 +295,17 @@ export function OrganizationWorkspaceCardEmpty() {
       No organizations to show yet.
     </div>
   );
+}
+
+function DirectoryOrganizationCard(props: OrganizationWorkspaceCardProps) {
+  const billing = formatSubscriptionSummary(props.subscription);
+  return <Link href={props.href} className="organization-directory-card group flex h-full min-w-0 flex-col rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    <div className="flex items-center justify-between gap-2"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Building2 aria-hidden="true" className="h-5 w-5" /></span><StatusBadge tone={statusTone(props.status)}>{props.status}</StatusBadge></div>
+    <h3 className="mt-4 break-words text-base font-semibold leading-6 text-foreground">{props.name}</h3>
+    <p className="mt-1 truncate text-xs text-muted-foreground">/{props.slug}</p>
+    <p className="mt-2 truncate text-xs text-muted-foreground">{props.email || props.phone || "No contact set"}</p>
+    <dl className="my-4 grid grid-cols-2 gap-2 rounded-xl bg-muted/30 p-3"><div><dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><Building2 aria-hidden="true" className="h-3.5 w-3.5" />Properties</dt><dd className="mt-1 text-lg font-semibold tabular-nums">{formatNumber(props.metrics.properties)}</dd></div><div><dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><UsersRound aria-hidden="true" className="h-3.5 w-3.5" />Tenants</dt><dd className="mt-1 text-lg font-semibold tabular-nums">{formatNumber(props.metrics.tenants)}</dd></div></dl>
+    <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3"><span className="text-xs font-medium text-muted-foreground">{billing.label}</span><span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">Open workspace<ArrowUpRight aria-hidden="true" className="h-4 w-4" /></span></div>
+    <p className="mt-2 text-[11px] text-muted-foreground">Created {formatDate(props.createdAt)}</p>
+  </Link>;
 }
