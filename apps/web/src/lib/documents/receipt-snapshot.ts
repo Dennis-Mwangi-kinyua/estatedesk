@@ -13,6 +13,7 @@ export type ReceiptAllocationSnapshot = {
 };
 
 export type ReceiptSnapshot = {
+  pdfTemplateVersion?: 1 | 2;
   organizationName: string;
   organizationAddress: string | null;
   organizationPhone: string | null;
@@ -136,6 +137,7 @@ export async function createReceiptSnapshot(
   });
 
   return {
+    pdfTemplateVersion: 2,
     organizationName: payment.org.name,
     organizationAddress: payment.org.address,
     organizationPhone: payment.org.phone,

@@ -33,18 +33,18 @@
 }
 .dark .estate-workspace {
   --background: #111827;
-  --foreground: #edf3fc;
+  --foreground: #f1f5ff;
   --card: #192332;
-  --card-foreground: #edf3fc;
+  --card-foreground: #f1f5ff;
   --primary: #9cc5ff;
   --primary-foreground: #132640;
   --secondary: #243248;
   --secondary-foreground: #d0e1fa;
   --muted: #243044;
-  --muted-foreground: #afbed2;
+  --muted-foreground: #c2cfe2;
   --accent: #203e36;
   --accent-foreground: #a4e3c7;
-  --border: #334257;
+  --border: #475a75;
   --input: #40516b;
   --ring: #9cc5ff;
   --workspace-sky: #203654;
@@ -167,3 +167,13 @@
 .estate-workspace .estate-stickers--compact .estate-sticker { width: 3.75rem; min-height: 3.75rem; border-radius: 1rem; }
 .estate-workspace .estate-stickers--compact .estate-stickers__collection { gap: .5rem; }
 .estate-workspace .estate-stickers--compact:not([data-expanded="true"]) .estate-stickers__detail { display: none; }
+
+/* Legacy light-only labels remain readable on themed surfaces. Keep printed papers independent. */
+@layer base {
+  .dark .estate-workspace :is(.text-black, .text-slate-950, .text-slate-900, .text-slate-800, .text-neutral-950, .text-neutral-900, .text-neutral-800, .text-gray-950, .text-gray-900, .text-gray-800, .text-zinc-900, .text-stone-900):not(.ed-invoice-paper *):not([data-workspace-action]) { color: var(--foreground) !important; }
+  .dark .estate-workspace :is(.text-slate-700, .text-slate-600, .text-slate-500, .text-slate-400, .text-neutral-700, .text-neutral-600, .text-neutral-500, .text-gray-700, .text-gray-600, .text-gray-500, .text-zinc-500, .text-stone-500, .text-foreground\/50, .text-foreground\/60, .text-foreground\/70):not(.ed-invoice-paper *):not([data-workspace-action]) { color: var(--muted-foreground) !important; }
+}
+
+@layer base {
+  .estate-workspace :is(.text-foreground\/50, .text-foreground\/60, .text-foreground\/70):not(.ed-invoice-paper *):not([data-workspace-action]) { color: var(--muted-foreground) !important; }
+}

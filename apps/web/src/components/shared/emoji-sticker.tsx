@@ -1,6 +1,13 @@
 import { stickerFor } from "@/lib/presentation/stickers";
 
 const accents: Array<[RegExp, string]> = [
+  [/notice|move-out|handover|inspection/, "📋"],
+  [/cleanliness|cleaning/, "🧹"],
+  [/walls?/, "🧱"],
+  [/doors?|windows?/, "🚪"],
+  [/plumbing/, "🚰"],
+  [/electrical/, "💡"],
+  [/keys? returned/, "🔑"],
   [/notification|unread|alerts?/, "🔔"],
   [/communication|message|feed/, "💬"],
   [/sent|delivery|send/, "📨"],

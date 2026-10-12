@@ -98,7 +98,14 @@ export async function GET(
       },
     });
   }
+  // A registered hash must keep its original renderer. Unhashed artifacts can use the new layout.
+  if (snapshot && !document.contentHash && snapshot.pdfTemplateVersion !== 2) {
+    snapshot = { ...snapshot, pdfTemplateVersion: 2 };
+    const metadata = document.metadata && typeof document.metadata === "object" && !Array.isArray(document.metadata) ? document.metadata : {};
+    document = await prisma.documentRecord.update({ where: { id: document.id }, data: { metadata: { ...metadata, receiptSnapshot: snapshot } } });
+  }
   const pdfBytes = await generateReceiptPdf({
+    pdfTemplateVersion: document.contentHash ? snapshot?.pdfTemplateVersion ?? 1 : 2,
     serialNumber: document.serialNumber,
     verificationUrl,
     status: document.status,

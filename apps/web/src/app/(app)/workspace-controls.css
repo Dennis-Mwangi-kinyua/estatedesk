@@ -59,9 +59,9 @@
 .estate-workspace .sidebar-sticker,
 .estate-workspace .workspace-page-marker,
 .estate-workspace .workspace-metric-sticker {
-  color: var(--workspace-action-primary);
-  background: var(--workspace-sky);
-  border-color: var(--border);
+  color: var(--sticker-ink, var(--workspace-action-primary));
+  background: var(--sticker-wash, var(--workspace-sky));
+  border-color: var(--sticker-edge, var(--border));
   flex-shrink: 0;
 }
 .estate-workspace :is(.sidebar-sticker, .workspace-page-marker, .workspace-metric-sticker) svg { width: 1.125rem; height: 1.125rem; stroke-width: 1.75; }

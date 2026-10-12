@@ -1,3 +1,5 @@
+import { ArrowUpRight, CalendarDays, ClipboardCheck, Mail, Phone } from "lucide-react";
+import { EmojiSticker } from "@/components/shared/emoji-sticker";
 import { nairobiDate } from "@/lib/move-outs/validation";
 import { CloseoutForm } from "@/features/move-outs/components/closeout-form";
 import Link from "next/link";
@@ -17,7 +19,6 @@ import {
   PanelHeader,
   panelBodyClassName,
   panelChipClassName,
-  panelItemClassName,
   panelShellClassName,
   primaryButtonClassName,
   secondaryButtonClassName,
@@ -33,136 +34,68 @@ export function MoveOutQueuePanel({
   membership,
   moveOutQueue,
 }: MoveOutQueuePanelProps) {
+  const readyCount = moveOutQueue.filter(notice => notice.status === "INSPECTION_COMPLETED").length;
   return (
-    <section className={panelShellClassName}>
-      <div className={panelBodyClassName}>
-        <PanelHeader
-          eyebrow="Move-out desk"
-          title="Notice review queue"
-          description="Tenant move-out notices submitted from the tenant portal."
-        />
+    <section aria-label="Notice review queue" className={panelShellClassName}>
+      <div className={`${panelBodyClassName} flex flex-col gap-4 border-b border-border sm:flex-row sm:items-start sm:justify-between`}>
+        <PanelHeader eyebrow="Move-out desk" title="Notice review queue"
+          description="Review each notice, check outstanding balances, and complete handover after inspection." />
+        <div className="flex shrink-0 flex-wrap gap-2 text-xs font-semibold">
+          <span className={panelChipClassName}>{moveOutQueue.length} notices</span>
+          <span className={panelChipClassName}>{readyCount} inspections complete</span>
+        </div>
       </div>
-
-      <div className={`space-y-4 ${panelBodyClassName} pt-0`}>
+      <div className={panelBodyClassName}>
         {moveOutQueue.length === 0 ? (
-          <EmptyState
-            title="No move-outs waiting"
-            message="New tenant notices will appear here immediately after submission."
-          />
+          <EmptyState title="No move-outs waiting" message="New tenant notices will appear here immediately after submission." />
         ) : (
-          moveOutQueue.map((notice) => {
-            const rentBalance = notice.lease.rentCharges.reduce(
-              (sum, charge) => sum + toNumber(charge.balance),
-              0,
-            );
-            const waterBalance = notice.tenant.waterBills.reduce(
-              (sum, bill) => sum + toNumber(bill.total),
-              0,
-            );
-            const clearanceBalance = rentBalance + waterBalance;
-
-            return (
-              <article key={notice.id} className={panelItemClassName}>
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={panelChipClassName}>
-                        {notice.lease.unit.property.name}
-                      </span>
-                      <span className={panelChipClassName}>
-                        Unit {notice.lease.unit.houseNo}
-                      </span>
-                      <span className={panelChipClassName}>
-                        {formatEnumLabel(notice.status)}
-                      </span>
-                      <span className={panelChipClassName}>
-                        {clearanceBalance <= 0 ? "Clearance ready" : "Balance pending"}
-                      </span>
-                    </div>
-
-                    <h3 className="mt-4 text-base font-semibold text-foreground sm:text-lg">
-                      {notice.tenant.fullName}
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Move-out date {formatDateTime(notice.moveOutDate, membership.org.timezone)}
-                    </p>
-                    <p className="mt-1 break-words text-sm text-muted-foreground">
-                      {notice.tenant.phone}
-                      {notice.tenant.email ? ` / ${notice.tenant.email}` : ""}
-                    </p>
-
-                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-2xl border border-border bg-muted/10 p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Rent Balance
-                        </p>
-                        <p className="mt-2 text-sm font-semibold text-foreground">
-                          {formatMoney(rentBalance, membership.org.currencyCode)}
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-border bg-muted/10 p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Water Balance
-                        </p>
-                        <p className="mt-2 text-sm font-semibold text-foreground">
-                          {formatMoney(waterBalance, membership.org.currencyCode)}
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-border bg-muted/10 p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Clearance
-                        </p>
-                        <p className="mt-2 text-sm font-semibold text-foreground">
-                          {formatMoney(clearanceBalance, membership.org.currencyCode)}
-                        </p>
+          <div className="notice-review-grid">
+            {moveOutQueue.map(notice => {
+              const rentBalance = notice.lease.rentCharges.reduce((sum, charge) => sum + toNumber(charge.balance), 0);
+              const waterBalance = notice.tenant.waterBills.reduce((sum, bill) => sum + toNumber(bill.total), 0);
+              const clearanceBalance = rentBalance + waterBalance;
+              const ready = notice.status === "INSPECTION_COMPLETED";
+              return (
+                <article key={notice.id} className="notice-review-card flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card">
+                  <header className="space-y-4 border-b border-border p-4 sm:p-5">
+                    <div className="flex items-start gap-3">
+                      <EmojiSticker label="tenant" />
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base font-semibold leading-6 text-foreground">{notice.tenant.fullName}</h3>
+                        <p className="mt-1 text-sm leading-5 text-muted-foreground">{notice.lease.unit.property.name}</p>
+                        <p className="mt-1 text-xs font-medium text-muted-foreground">Unit {notice.lease.unit.houseNo}{notice.lease.unit.building?.name ? ` · ${notice.lease.unit.building.name}` : ""}</p>
                       </div>
                     </div>
-
-                    {notice.notes ? (
-                      <div className="mt-4 rounded-2xl border border-border bg-muted/10 p-3 text-sm text-muted-foreground">
-                        {notice.notes}
-                      </div>
-                    ) : null}
+                    <div className="flex flex-wrap gap-2">
+                      <span className={`notice-status ${ready ? "notice-status--ready" : "notice-status--pending"}`}><ClipboardCheck aria-hidden="true" className="h-4 w-4 shrink-0" />{formatEnumLabel(notice.status)}</span>
+                      <span className={`notice-status ${clearanceBalance <= 0 ? "notice-status--ready" : "notice-status--pending"}`}>{clearanceBalance <= 0 ? "Clearance ready" : "Balance pending"}</span>
+                    </div>
+                  </header>
+                  <div className="flex-1 space-y-5 p-4 sm:p-5">
+                    <dl className="grid gap-4 sm:grid-cols-2">
+                      {[{ label: "Move-out date", value: notice.moveOutDate }, { label: "Notice submitted", value: notice.noticeDate }].map(item => <div key={item.label} className="min-w-0"><dt className="flex items-center gap-2 text-xs font-medium text-muted-foreground"><CalendarDays aria-hidden="true" className="h-4 w-4 text-primary" />{item.label}</dt><dd className="mt-1 text-sm font-semibold leading-6 text-foreground">{formatDateTime(item.value, membership.org.timezone)}</dd></div>)}
+                    </dl>
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <p className="flex items-start gap-2"><Phone aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-primary" /><span>{notice.tenant.phone || "No phone provided"}</span></p>
+                      {notice.tenant.email ? <p className="flex items-start gap-2"><Mail aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-primary" /><span className="min-w-0">{notice.tenant.email}</span></p> : null}
+                    </div>
+                    <dl className="notice-balance-grid">
+                      {[{ label: "Rent balance", value: rentBalance, icon: "rent" }, { label: "Water balance", value: waterBalance, icon: "water" }, { label: "Total clearance", value: clearanceBalance, icon: "balance" }].map(item => <div key={item.label} className="min-w-0 rounded-xl border border-border bg-muted/30 p-3"><dt className="flex items-center gap-2 text-xs font-medium leading-5 text-muted-foreground"><EmojiSticker label={item.icon} size="xs" />{item.label}</dt><dd className="mt-3 break-words text-base font-semibold tabular-nums text-foreground">{formatMoney(item.value, membership.org.currencyCode)}</dd></div>)}
+                    </dl>
+                    {notice.notes ? <div className="rounded-xl border border-border bg-muted/20 p-3"><h4 className="text-xs font-semibold text-foreground">Tenant notes</h4><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{notice.notes}</p></div> : null}
+                    <div className="rounded-xl border border-border bg-muted/20 p-3 text-sm leading-6 text-muted-foreground"><p className="font-semibold text-foreground">Next step</p>{ready ? "Inspection is complete. Review the final settlement before confirming handover." : notice.inspection ? `Review the ${formatEnumLabel(notice.inspection.status).toLowerCase()} inspection scheduled for ${formatDateTime(notice.inspection.scheduledAt, membership.org.timezone)}.` : "Schedule an inspection to review the unit before handover."}</div>
                   </div>
-
-                  <div className="grid w-full gap-2 sm:grid-cols-2 lg:max-w-xs lg:grid-cols-1">
-                    <Link href={`/dashboard/org/tenants/${encodeURIComponent(notice.tenant.slug ?? notice.tenant.id)}`} className={primaryButtonClassName}>
-                      Review tenant
-                    </Link>
-                    {notice.inspection ? (
-                      <Link
-                        href={`/dashboard/org/inspections/${encodePublicId(
-                          notice.inspection.id,
-                          "inspection",
-                        )}`}
-                        className={secondaryButtonClassName}
-                      >
-                        View inspection
-                      </Link>
-                    ) : (
-                      <Link
-                        href="/dashboard/org/move-outs"
-                        className={secondaryButtonClassName}
-                      >
-                        Schedule inspection
-                      </Link>
-                    )}
-                    {notice.status === "INSPECTION_COMPLETED" ? (
-                      <CloseoutForm dateLimit={nairobiDate()} noticeId={notice.id} action={confirmMoveOutAction} />
-                    ) : (
-                      <button data-workspace-action="true"
-                        type="button"
-                        disabled
-                        className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-border bg-muted/10 px-4 py-3 text-sm font-medium text-muted-foreground sm:col-span-2 lg:col-span-1"
-                      >
-                        Confirm after inspection
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </article>
-            );
-          })
+                  <footer className="space-y-4 border-t border-border p-4 sm:p-5">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Link data-workspace-action="true" href={`/dashboard/org/tenants/${encodeURIComponent(notice.tenant.slug ?? notice.tenant.id)}`} className={primaryButtonClassName}>Review tenant<ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0" /></Link>
+                      <Link data-workspace-action="true" href={notice.inspection ? `/dashboard/org/inspections/${encodePublicId(notice.inspection.id, "inspection")}` : "/dashboard/org/move-outs"} className={secondaryButtonClassName}>{notice.inspection ? "View inspection" : "Schedule inspection"}</Link>
+                    </div>
+                    {ready ? <details className="notice-closeout min-w-0 rounded-xl border border-border bg-muted/20"><summary className="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-ring">Confirm handover and settlement</summary><div className="min-w-0 p-3 pt-0"><CloseoutForm dateLimit={nairobiDate()} noticeId={notice.id} action={confirmMoveOutAction} /></div></details> : <p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><ClipboardCheck aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-primary" />Handover confirmation becomes available after inspection is completed.</p>}
+                  </footer>
+                </article>
+              );
+            })}
+          </div>
         )}
       </div>
     </section>

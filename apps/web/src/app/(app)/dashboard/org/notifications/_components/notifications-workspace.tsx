@@ -42,7 +42,7 @@ export function NotificationsWorkspace({
       <CommunicationFeedPanel membership={membership} notifications={notifications}
         activeFilter={activeFilter} totalNotifications={totalNotifications}
         unreadCount={unreadCount} queuedCount={queuedCount} failedCount={failedCount} />
-      <section aria-label="Approvals and move-outs" className="grid min-w-0 items-start gap-5 xl:grid-cols-2">
+      <section aria-label="Approvals and move-outs" className="grid min-w-0 items-start gap-5">
         <MoveOutQueuePanel membership={membership} moveOutQueue={moveOutQueue} />
         <WaterApprovalQueuePanel membership={membership} approvalQueue={approvalQueue} approvalQueueCount={approvalQueueCount} />
       </section>

@@ -162,6 +162,7 @@ export async function GET(
     notes: [
       `RentRewards snapshot: ${rewards.points} pts · tier ${rewards.tier} · streak ${rewards.streakMonths} mo`,
       "Export generated for Rent Restriction Tribunal filing support.",
+      "Scope: latest lease, up to 60 recent lease charges, 80 tenant payments and 100 notifications. This export is not a full historical archive.",
     ],
   });
 

@@ -1,3 +1,4 @@
+import { EmojiSticker } from "@/components/shared/emoji-sticker";
 import { InspectionReportForm } from "@/features/inspections/inspection-report-form";
 import Link from "next/link";
 import { encodePublicId } from "@/lib/public-id";
@@ -63,6 +64,7 @@ function formatDate(value: Date | string | null | undefined) {
     year: "numeric",
     month: "short",
     day: "2-digit",
+    timeZone: "Africa/Nairobi",
   }).format(date);
 }
 
@@ -76,6 +78,7 @@ function formatDateTime(value: Date | string | null | undefined) {
     year: "numeric",
     month: "short",
     day: "2-digit",
+    timeZone: "Africa/Nairobi",
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
@@ -106,8 +109,8 @@ function ReportField({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
-      <p className="text-sm text-muted-foreground">{label}</p>
+    <div className="min-w-0 rounded-2xl border border-border bg-muted/20 px-4 py-4">
+      <p className="flex items-center gap-2 text-sm text-muted-foreground"><EmojiSticker label={label} size="xs" />{label}</p>
       <p className="mt-1 text-sm font-semibold text-foreground">{value}</p>
     </div>
   );
@@ -131,18 +134,18 @@ export function InspectionDetailsWorkspace({
     .join(" — ");
 
   return (
-    <div className="org-theme-content mx-auto w-full max-w-none space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content inspection-details-page uniform-page-actions mx-auto w-full min-w-0 max-w-7xl space-y-5 px-0 pb-24 pt-2 sm:px-2">
       <section className={`${panelShellClassName} p-5 sm:p-6`}>
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
-              href="/dashboard/org/tenants"
+              href="/dashboard/org/notifications"
               className="inline-flex w-fit items-center text-sm font-medium text-muted-foreground transition hover:text-foreground"
             >
               <span aria-hidden="true" className="mr-2">
                 ←
               </span>
-              Back
+              Back to notifications
             </Link>
 
             <Link
@@ -150,6 +153,7 @@ export function InspectionDetailsWorkspace({
                 inspection.id,
                 "inspection",
               )}`}
+              data-workspace-action="true"
               className={buttonPrimaryClassName}
             >
               Print report
@@ -159,7 +163,7 @@ export function InspectionDetailsWorkspace({
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
-                Office inspection view
+                <span className="inline-flex items-center gap-2"><EmojiSticker label="inspection" size="xs" />Inspection workspace</span>
               </p>
               <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                 {inspection.notice.tenant.fullName}
@@ -180,7 +184,7 @@ export function InspectionDetailsWorkspace({
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Inspection overview" className="workspace-card-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Scheduled" value={formatDateTime(inspection.scheduledAt)} />
         <StatCard label="Move-out date" value={formatDate(inspection.notice.moveOutDate)} />
         <StatCard label="Inspector" value={inspection.inspector.fullName} />
@@ -191,12 +195,12 @@ export function InspectionDetailsWorkspace({
           <section className={panelShellClassName}>
             <div className="border-b border-border px-5 py-4 sm:px-6">
               <h2 className="text-base font-semibold text-foreground sm:text-lg">
-                Notice details
+                <span className="inline-flex items-center gap-2"><EmojiSticker label="notice" size="xs" />Notice details</span>
               </h2>
             </div>
 
-            <div className="space-y-4 p-5 sm:p-6">
-              <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
+            <div className="grid min-w-0 gap-4 p-4 sm:p-5">
+              <div className="min-w-0 rounded-2xl border border-border bg-muted/20 px-4 py-4">
                 <p className="text-sm text-muted-foreground">Tenant</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">
                   {inspection.notice.tenant.fullName}
@@ -209,7 +213,7 @@ export function InspectionDetailsWorkspace({
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
+              <div className="min-w-0 rounded-2xl border border-border bg-muted/20 px-4 py-4">
                 <p className="text-sm text-muted-foreground">Notice notes</p>
                 <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">
                   {inspection.notice.notes ?? "—"}
@@ -221,14 +225,14 @@ export function InspectionDetailsWorkspace({
           <section className={panelShellClassName}>
             <div className="border-b border-border px-5 py-4 sm:px-6">
               <h2 className="text-base font-semibold text-foreground sm:text-lg">
-                Inspection report
+                <span className="inline-flex items-center gap-2"><EmojiSticker label="inspection" size="xs" />Inspection report</span>
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Record and review the inspection before confirming handover.
               </p>
             </div>
 
-            <div className="space-y-4 p-5 sm:p-6">
+            <div className="grid min-w-0 gap-4 p-4 sm:p-5">
               {isCompleted ? (
                 <>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -266,14 +270,14 @@ export function InspectionDetailsWorkspace({
                     />
                   </div>
 
-                  <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
+                  <div className="min-w-0 rounded-2xl border border-border bg-muted/20 px-4 py-4">
                     <p className="text-sm text-muted-foreground">Summary</p>
                     <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">
                       {String(report.summary ?? inspection.notes ?? "—")}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-border bg-muted/10 px-4 py-4">
+                  <div className="min-w-0 rounded-2xl border border-border bg-muted/20 px-4 py-4">
                     <p className="text-sm text-muted-foreground">Recommendations</p>
                     <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">
                       {String(report.recommendations ?? "—")}
@@ -288,7 +292,7 @@ export function InspectionDetailsWorkspace({
                       <li>After close-out, record any refund with proof and mark the unit ready after repairs and cleaning.</li>
                     </ol>
                     <p className="mt-2 text-sm text-muted-foreground">The lease stays active until management records the close-out.</p>
-                    <Link href="/dashboard/org/move-outs" className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90 sm:w-auto">Open move-out desk</Link>
+                    <Link data-workspace-action="true" href="/dashboard/org/move-outs" className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90 sm:w-auto">Open move-out desk</Link>
                   </div>
                 </>
               ) : canReport && inspection.status === "SCHEDULED" ? <InspectionReportForm inspectionId={inspection.id} /> : (

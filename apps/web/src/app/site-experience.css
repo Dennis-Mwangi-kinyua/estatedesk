@@ -167,10 +167,10 @@ body.estate-glass-system .organisation-detail-page :is(.workspace-panel, .org-su
 .visual-sticker[data-sticker-tone="mint"] { --sticker-wash: #eaf7f1; --sticker-edge: #cce9dd; --sticker-ink: #206b50; }
 .visual-sticker[data-sticker-tone="peach"] { --sticker-wash: #fff3e9; --sticker-edge: #f3ddc7; --sticker-ink: #975321; }
 .visual-sticker[data-sticker-tone="violet"] { --sticker-wash: #f2efff; --sticker-edge: #e1dafa; --sticker-ink: #6950a7; }
-.dark .visual-sticker { --sticker-wash: #20334b; --sticker-edge: #354e70; --sticker-ink: #accfff; box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%); }
-.dark .visual-sticker[data-sticker-tone="mint"] { --sticker-wash: #203d33; --sticker-edge: #345b49; --sticker-ink: #9fe2c3; }
-.dark .visual-sticker[data-sticker-tone="peach"] { --sticker-wash: #423224; --sticker-edge: #66503a; --sticker-ink: #f5c496; }
-.dark .visual-sticker[data-sticker-tone="violet"] { --sticker-wash: #322b4b; --sticker-edge: #4e4270; --sticker-ink: #ccbaff; }
+.dark .visual-sticker { --sticker-wash: #20334b; --sticker-edge: #354e70; --sticker-ink: #8fc5ff; box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%); }
+.dark .visual-sticker[data-sticker-tone="mint"] { --sticker-wash: #203d33; --sticker-edge: #345b49; --sticker-ink: #79edb6; }
+.dark .visual-sticker[data-sticker-tone="peach"] { --sticker-wash: #423224; --sticker-edge: #66503a; --sticker-ink: #ffc48a; }
+.dark .visual-sticker[data-sticker-tone="violet"] { --sticker-wash: #322b4b; --sticker-edge: #4e4270; --sticker-ink: #c7a5ff; }
 @media (min-width: 1024px) {
   .estate-workspace .workspace-hero__art { display: block; width: 7rem; height: 4.75rem; }
   .workspace-hero__art > .visual-sticker { width: 3.5rem; height: 3.5rem; border-width: 2px; border-radius: 1rem; transform: rotate(-6deg); }
@@ -396,3 +396,14 @@ body.estate-glass-system .organisation-detail-page :is(.workspace-panel, .org-su
   font-variant-numeric: tabular-nums;
 }
 .estate-workspace :is(.org-theme-content, .platform-theme-content) :is(.grid, .flex) > :where(section, article, form, .workspace-panel) { min-width: 0; }
+
+/* Review queues size each notice from available space, including sidebar width. */
+.notice-review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); gap: 1.25rem; align-items: start; }
+.notice-balance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: .75rem; }
+.notice-review-card :is(p, h3, dd, span) { overflow-wrap: anywhere; }
+.notice-status { display: inline-flex; align-items: center; gap: .4rem; max-width: 100%; border: 1px solid var(--border); border-radius: 999px; padding: .4rem .65rem; font-size: .75rem; font-weight: 600; line-height: 1.4; }
+.notice-status--ready { background: var(--workspace-mint); color: var(--workspace-mint-ink); }
+.notice-status--pending { background: var(--workspace-peach); color: var(--workspace-peach-ink); }
+.notice-closeout[open] { grid-column: 1 / -1; }
+.inspection-details-page :is(section, article, .grid > *) { min-width: 0; }
+.inspection-details-page :is(p, h1, h2, h3, dd) { overflow-wrap: anywhere; }
