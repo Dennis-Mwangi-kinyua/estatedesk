@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, CircleAlert } from "lucide-react";
 import { BellRing as Bell, Building2, House as Home, UsersRound as Users, Wallet } from "@/components/shared/colored-icons";
 import type { ComponentType, ReactNode } from "react";
+import { PaymentMethodBrandMark } from "@/components/payments/payment-method-brand-mark";
 
 export type IconType = ComponentType<{ className?: string }>;
 
@@ -10,16 +11,7 @@ export function cn(...classes: Array<string | false | null | undefined>) {
 }
 
 export function MpesaLogo({ className = "" }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "flex items-center justify-center rounded-2xl bg-emerald-600 text-white",
-        className,
-      )}
-    >
-      <span className="text-[11px] font-black tracking-[0.16em]">M-PESA</span>
-    </div>
-  );
+  return <PaymentMethodBrandMark methodId="mpesa" className={cn("rounded-2xl p-1.5", className)} />;
 }
 
 export function SectionCard({

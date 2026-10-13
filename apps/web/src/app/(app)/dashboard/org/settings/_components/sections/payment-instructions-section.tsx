@@ -7,6 +7,7 @@ import {
   resolveEnabledMethods,
 } from "@/lib/payments/instructions";
 import { PAYMENT_METHOD_CATALOG } from "@/lib/payments/methods-catalog";
+import { PaymentMethodBrandMark } from "@/components/payments/payment-method-brand-mark";
 import { buttonPrimaryClassName } from "../../_lib/helpers";
 import type { SettingsPageData } from "../../settings-data";
 import {
@@ -63,12 +64,15 @@ export function PaymentInstructionsSection({ data }: { data: SettingsPageData })
                       defaultChecked={isOn}
                       className="mt-1 h-4 w-4 rounded border-border"
                     />
-                    <span>
-                      <span className="block text-sm font-medium text-foreground">
-                        {method.name}
-                      </span>
-                      <span className="mt-0.5 block text-xs text-muted-foreground">
-                        {method.description}
+                    <span className="flex min-w-0 items-start gap-3">
+                      <PaymentMethodBrandMark methodId={method.id} className="h-10 w-10 rounded-xl p-1" />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium text-foreground">
+                          {method.name}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-muted-foreground">
+                          {method.description}
+                        </span>
                       </span>
                     </span>
                   </label>
@@ -156,12 +160,15 @@ export function PaymentInstructionsSection({ data }: { data: SettingsPageData })
                 defaultChecked={enabled.has("kcb")}
                 className="mt-1 h-4 w-4 rounded border-border"
               />
-              <span>
-                <span className="block text-sm font-medium text-foreground">
-                  KCB Paybill
-                </span>
-                <span className="mt-0.5 block text-xs text-muted-foreground">
-                  Tenants pay via M-Pesa to your KCB paybill, then submit the code.
+              <span className="flex min-w-0 items-start gap-3">
+                <PaymentMethodBrandMark methodId="kcb" className="h-10 w-10 rounded-xl p-1" />
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-foreground">
+                    KCB Paybill
+                  </span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">
+                    Tenants pay via M-Pesa to your KCB paybill, then submit the code.
+                  </span>
                 </span>
               </span>
             </label>
@@ -231,12 +238,15 @@ export function PaymentInstructionsSection({ data }: { data: SettingsPageData })
                         defaultChecked={isOn}
                         className="mt-1 h-4 w-4 rounded border-border"
                       />
-                      <span>
-                        <span className="block text-sm font-medium text-foreground">
-                          {method.name}
-                        </span>
-                        <span className="mt-0.5 block text-xs text-muted-foreground">
-                          {method.description}
+                      <span className="flex min-w-0 items-start gap-3">
+                        <PaymentMethodBrandMark methodId={method.id} className="h-10 w-10 rounded-xl p-1" />
+                        <span className="min-w-0">
+                          <span className="block text-sm font-medium text-foreground">
+                            {method.name}
+                          </span>
+                          <span className="mt-0.5 block text-xs text-muted-foreground">
+                            {method.description}
+                          </span>
                         </span>
                       </span>
                     </label>

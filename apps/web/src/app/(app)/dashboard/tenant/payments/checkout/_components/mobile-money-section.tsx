@@ -1,6 +1,6 @@
 "use client";
 
-import { Smartphone } from "lucide-react";
+import { PaymentMethodBrandMark } from "@/components/payments/payment-method-brand-mark";
 import type { CheckoutFormState } from "./use-checkout-form";
 
 type MobileMoneySectionProps = {
@@ -26,8 +26,11 @@ export function MobileMoneySection({ form }: MobileMoneySectionProps) {
 
   return (
     <div className="rounded-2xl border border-border p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <Smartphone className="h-4 w-4 text-foreground/80" />
+      <div className="mb-3 flex min-w-0 items-center gap-3">
+        <PaymentMethodBrandMark
+          methodId={method ?? "manual-mpesa"}
+          className="h-10 w-10 rounded-xl p-1"
+        />
         <h2 className="text-sm font-semibold text-foreground">
           {isStk
             ? "M-Pesa STK Push"

@@ -1,6 +1,7 @@
 "use client";
 
 import { ShieldCheck } from "@/components/shared/colored-icons";
+import { PaymentMethodBrandMark } from "@/components/payments/payment-method-brand-mark";
 import { formatSource } from "../_lib/helpers";
 import type { CheckoutFormState } from "./use-checkout-form";
 
@@ -21,7 +22,13 @@ export function CheckoutSidebar({ form }: CheckoutSidebarProps) {
       <div className="mt-4 space-y-4 text-sm text-foreground/75">
         <div className="rounded-2xl bg-background p-4">
           <p className="font-medium text-foreground">Selected Method</p>
-          <p className="mt-1">{methodLabel}</p>
+          <div className="mt-2 flex min-w-0 items-center gap-3">
+            <PaymentMethodBrandMark
+              methodId={method ?? "manual-bank"}
+              className="h-9 w-9 rounded-lg p-1"
+            />
+            <p className="min-w-0 break-words">{methodLabel}</p>
+          </div>
         </div>
 
         <div className="rounded-2xl bg-background p-4">

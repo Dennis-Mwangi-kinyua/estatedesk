@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Smartphone, ChevronRight, Zap, ClipboardPaste } from "lucide-react";
 import { Search, Landmark, WalletCards as CreditCard } from "@/components/shared/colored-icons";
 import type { PaymentMethodDefinition } from "@/lib/payments/methods-catalog";
+import { PaymentMethodBrandMark } from "@/components/payments/payment-method-brand-mark";
 
 type PaymentGatewayProps = {
   availableMethods: PaymentMethodDefinition[];
@@ -208,11 +209,10 @@ function MethodCard({
       className="group flex h-full min-w-0 flex-col rounded-3xl border border-border bg-card p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg sm:p-6"
     >
       <div className="mb-4 flex items-start justify-between gap-4">
-        <div
-          className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${option.accent} text-lg font-bold text-white shadow-md`}
-        >
-          {option.logoText}
-        </div>
+        <PaymentMethodBrandMark
+          methodId={option.id}
+          className="h-16 w-16 rounded-2xl p-1"
+        />
         <div className="rounded-full bg-muted p-2 text-foreground/70 transition group-hover:bg-primary/10 group-hover:text-primary">
           {createElement(getOptionIcon(option), { className: "h-5 w-5" })}
         </div>

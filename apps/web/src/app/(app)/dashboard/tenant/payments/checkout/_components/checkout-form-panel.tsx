@@ -1,6 +1,7 @@
 "use client";
 
 import { WalletCards as CreditCard } from "@/components/shared/colored-icons";
+import { PaymentMethodBrandMark } from "@/components/payments/payment-method-brand-mark";
 import { formatSource } from "../_lib/helpers";
 import { BankPaymentSection } from "./bank-payment-section";
 import { KcbPaybillSection } from "./kcb-paybill-section";
@@ -14,6 +15,7 @@ type CheckoutFormPanelProps = {
 export function CheckoutFormPanel({ form }: CheckoutFormPanelProps) {
   const {
     source,
+    method,
     methodLabel,
     isMobileMoney,
     isKcbPaybill,
@@ -56,9 +58,15 @@ export function CheckoutFormPanel({ form }: CheckoutFormPanelProps) {
           <p className="text-xs font-semibold uppercase tracking-wide text-foreground/65">
             Payment Method
           </p>
-          <p className="mt-1 text-base font-semibold text-foreground">
-            {methodLabel}
-          </p>
+          <div className="mt-2 flex min-w-0 items-center gap-3">
+            <PaymentMethodBrandMark
+              methodId={method ?? "manual-bank"}
+              className="h-10 w-10 rounded-xl p-1"
+            />
+            <p className="min-w-0 break-words text-base font-semibold text-foreground">
+              {methodLabel}
+            </p>
+          </div>
         </div>
 
         {form.source === "advance_rent" && (

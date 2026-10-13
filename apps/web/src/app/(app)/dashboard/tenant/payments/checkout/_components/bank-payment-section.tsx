@@ -1,8 +1,8 @@
 "use client";
 
-import { Landmark } from "@/components/shared/colored-icons";
 import { getBankAccountForMethod } from "@/lib/payments/instructions";
 import { getPaymentMethodDefinition } from "@/lib/payments/methods-catalog";
+import { PaymentMethodBrandMark } from "@/components/payments/payment-method-brand-mark";
 import type { CheckoutFormState } from "./use-checkout-form";
 
 type BankPaymentSectionProps = {
@@ -34,8 +34,11 @@ export function BankPaymentSection({ form }: BankPaymentSectionProps) {
 
   return (
     <div className="rounded-2xl border border-border p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <Landmark className="h-4 w-4 text-foreground/80" />
+      <div className="mb-3 flex min-w-0 items-center gap-3">
+        <PaymentMethodBrandMark
+          methodId={method ?? "manual-bank"}
+          className="h-10 w-10 rounded-xl p-1"
+        />
         <h2 className="text-sm font-semibold text-foreground">
           {bankLabel} payment details
         </h2>
