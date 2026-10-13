@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getMpesaConfigForOrg, getMpesaConfigForCallback } from "../../apps/web/src/lib/mpesa/config";
+import { getMpesaConfigForOrg } from "../../apps/web/src/lib/mpesa/config";
+import { getMpesaConfigForCallback } from "../../apps/web/src/lib/mpesa/callback-config";
 
 test("separate M-Pesa connections isolate organisation credentials and callbacks", () => {
   const keys = ["ORG_ID", "ENVIRONMENT", "CONSUMER_KEY", "CONSUMER_SECRET", "SHORTCODE", "PASSKEY", "CALLBACK_SECRET", "CALLBACK_URL"];

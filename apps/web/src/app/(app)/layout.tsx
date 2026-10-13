@@ -61,43 +61,41 @@ export default async function AppLayout({
     redirect("/change-password");
   }
 
-  let orgLabel: string | null = null;
-
-  if (session.activeOrgId) {
-    try {
-      const organization = await prisma.organization.findUnique({
-        where: { id: session.activeOrgId },
-        select: { name: true },
-      });
-      orgLabel = organization?.name ?? null;
-    } catch (error) {
-      // Watermark label is non-critical — never block the app shell on a DB blip.
-      if (isDevDebugLoggingEnabled()) {
-        // eslint-disable-next-line no-console
-        console.warn("[AppLayout] organization lookup failed", error);
-      }
-      orgLabel = null;
-    }
-  } else if (
+  const orgLabelFallback = !session.activeOrgId && (
     session.platformRole === "PLATFORM_ADMIN" ||
     session.platformRole === "SUPER_ADMIN"
-  ) {
-    orgLabel = "Platform";
-  }
+  ) ? "Platform" : null;
 
-  if (pathname) {
-    try {
-      await auditSensitivePageView(session, pathname);
-    } catch (error) {
-      // Audit is best-effort — never block authenticated pages on logging failures.
-      if (isDevDebugLoggingEnabled()) {
-        // eslint-disable-next-line no-console
-        console.warn("[AppLayout] auditSensitivePageView failed", error);
-      }
-    }
-  }
-
-  const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { profileImageUrl: true } });
+  // These independent lookups used to run one after another on every page
+  // navigation. Run them together so shell latency follows the slowest query.
+  const [organization, user] = await Promise.all([
+    session.activeOrgId
+      ? prisma.organization.findUnique({
+          where: { id: session.activeOrgId },
+          select: { name: true },
+        }).catch((error) => {
+          if (isDevDebugLoggingEnabled()) {
+            // eslint-disable-next-line no-console
+            console.warn("[AppLayout] organization lookup failed", error);
+          }
+          return null;
+        })
+      : Promise.resolve(null),
+    prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { profileImageUrl: true },
+    }),
+    pathname
+      ? auditSensitivePageView(session, pathname).catch((error) => {
+          // Audit is best-effort — never block authenticated pages on logging failures.
+          if (isDevDebugLoggingEnabled()) {
+            // eslint-disable-next-line no-console
+            console.warn("[AppLayout] auditSensitivePageView failed", error);
+          }
+        })
+      : Promise.resolve(),
+  ]);
+  const orgLabel = organization?.name ?? orgLabelFallback;
   return (
     <WorkspaceAccessProvider access={{ grantedPermissions: session.grantedPermissions, platformRole: session.platformRole, activeOrgRole: session.activeOrgRole, activeOrgId: session.activeOrgId }}>
     <ProfilePictureProvider url={user?.profileImageUrl ?? null}>

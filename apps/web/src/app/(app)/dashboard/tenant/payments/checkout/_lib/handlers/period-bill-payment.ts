@@ -137,7 +137,7 @@ export async function processPeriodBillPayment(
         submittedAt: paidAt.toISOString(),
       },
     },
-    select: { id: true },
+    select: { id: true, amount: true, reference: true },
   });
 
   const lineSummary = periodBill.lines

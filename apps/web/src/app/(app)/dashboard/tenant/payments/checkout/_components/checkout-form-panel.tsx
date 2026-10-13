@@ -193,7 +193,9 @@ export function CheckoutFormPanel({ form }: CheckoutFormPanelProps) {
           className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending
-            ? "Processing..."
+            ? form.isGateway
+              ? "Sending M-Pesa prompt…"
+              : "Submitting payment…"
             : form.isGateway
               ? "Pay with STK Push"
               : "Submit for verification"}

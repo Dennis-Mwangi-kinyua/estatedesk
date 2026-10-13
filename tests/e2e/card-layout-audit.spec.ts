@@ -74,13 +74,9 @@ test("management cards contain long content and remain comfortable beside naviga
       expect(lowContrast, `${width} ${theme}: unreadable action labels`).toEqual([]);
       if (width === 390) {
         const queue = page.getByRole("region", { name: "Notice review queue" });
-        await queue.locator("summary").click();
-        await expect(queue.getByLabel("Actual handover date")).toBeVisible();
-        await expect(queue.getByRole("button", { name: "Confirm handover and close", exact: true })).toBeDisabled();
-        await queue.getByRole("button", { name: "Add cost", exact: true }).click();
-        await expect(queue.getByLabel("Cost description")).toBeVisible();
-        await queue.getByRole("button", { name: "Remove cost 1", exact: true }).click();
-        await queue.locator("summary").click();
+        await expect(queue.getByRole("link", { name: /Review tenant/ }).first()).toHaveAttribute("href", "/dashboard/org/tenants/brian");
+        await expect(queue.getByRole("link", { name: "Schedule inspection", exact: true }).first()).toHaveAttribute("href", "/dashboard/org/move-outs");
+        await expect(queue.getByRole("link", { name: "Open handover workspace", exact: true })).toHaveAttribute("href", "/dashboard/org/move-outs/move-out-notice-notice-1");
       }
       if ([390, 1280].includes(width)) {
         await page.screenshot({ path: testInfo.outputPath(`cards-${width}-${theme}.png`), fullPage: true });

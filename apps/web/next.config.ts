@@ -1,4 +1,5 @@
 import path from "node:path";
+import { availableParallelism } from "node:os";
 import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
 import type { NextConfig } from "next";
@@ -158,7 +159,9 @@ const nextConfig: NextConfig = {
     remotePatterns: vacancyImageRemotePatterns(),
   },
   experimental: {
-    cpus: 1,
+    // Keep production builds parallel while avoiding excessive workers on
+    // small CI/deployment builders.
+    cpus: Math.min(4, availableParallelism()),
     serverActions: { bodySizeLimit: "8mb" },
     optimizePackageImports: ["lucide-react", "react-icons"],
   },

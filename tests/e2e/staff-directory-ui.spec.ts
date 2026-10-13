@@ -43,8 +43,7 @@ test("staff directory wraps contacts and keeps actions usable from phones to des
       if ([390, 1440].includes(width)) await page.screenshot({ path: testInfo.outputPath(`staff-${width}-${theme}.png`), fullPage: true });
     }
   }
-  const workflow = page.getByText("How staff management works", { exact: true });
-  await workflow.click();
+  await page.locator("details").filter({ has: page.getByText("Workflow overview", { exact: true }) }).locator("summary").click();
   await expect(page.getByText("Review roster", { exact: false })).toBeVisible();
   expect(errors).toEqual([]);
 });

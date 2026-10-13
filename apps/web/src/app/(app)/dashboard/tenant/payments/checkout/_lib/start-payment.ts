@@ -18,15 +18,15 @@ import {
   getCheckoutSettlementMode,
   isBankCheckoutMethod,
   isGatewayCheckoutMethod,
-  isMpesaStkConfigured,
   mapCheckoutMethodToPaymentMethod,
   requiresAccountNameForCheckout,
   requiresPhoneForCheckout,
   requiresTransactionIdForCheckout,
   validateCheckoutTransactionId,
 } from "@/lib/payments/method-flow";
+import { isMpesaStkConfigured } from "@/lib/mpesa/config";
 import { isUniqueConstraintError } from "@/lib/payments/transaction-reference";
-import { requestMpesaStkPush, normalizeMpesaPhone, MpesaRequestError } from "@/lib/mpesa/client";
+import { getMpesaAccessTokenForOrg, requestMpesaStkPush, normalizeMpesaPhone, MpesaRequestError } from "@/lib/mpesa/client";
 import { processAdvanceRentPayment } from "./handlers/advance-rent-payment";
 import { processPeriodBillPayment } from "./handlers/period-bill-payment";
 import { processRentChargePayment } from "./handlers/rent-charge-payment";
@@ -61,27 +61,29 @@ export async function startTenantPayment(input: StartPaymentInput) {
     throw new Error("Missing tenant session context.");
   }
 
-  const tenant = await prisma.tenant.findFirst({
-    where: {
-      userId: session.userId,
-      orgId: session.activeOrgId,
-      deletedAt: null,
-    },
-    select: {
-      id: true,
-      fullName: true,
-      userId: true,
-    },
-  });
+  const [tenant, settings] = await Promise.all([
+    prisma.tenant.findFirst({
+      where: {
+        userId: session.userId,
+        orgId: session.activeOrgId,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        fullName: true,
+        userId: true,
+      },
+    }),
+    prisma.organizationSettings.findUnique({
+      where: { orgId: session.activeOrgId },
+      select: { customFields: true },
+    }),
+  ]);
 
   if (!tenant) {
     throw new Error("Tenant profile not found.");
   }
 
-  const settings = await prisma.organizationSettings.findUnique({
-    where: { orgId: session.activeOrgId },
-    select: { customFields: true },
-  });
   const instructions = { ...parsePaymentInstructions(settings?.customFields), mpesaStkEnabled: isMpesaStkConfigured(session.activeOrgId) };
 
   if (!isPaymentMethodAvailable(instructions, method)) {
@@ -153,6 +155,17 @@ export async function startTenantPayment(input: StartPaymentInput) {
   let uploadedProofUrl: string | null = null;
   let paymentId: string | null = null;
   let paymentAmount = Number(input.amount ?? 0);
+  let paymentReference: string | null = null;
+
+  // Start Daraja OAuth while the payment transaction runs. Warm server
+  // instances reuse this organization-scoped token, avoiding an extra network
+  // round trip before every customer prompt.
+  const stkAccessToken = isGateway && method === "mpesa-stk"
+    ? getMpesaAccessTokenForOrg(session.activeOrgId!).then(
+        (token) => ({ ok: true as const, token }),
+        (error: unknown) => ({ ok: false as const, error }),
+      )
+    : null;
 
   try {
     paymentId = await prisma.$transaction(async (tx) => {
@@ -207,7 +220,8 @@ export async function startTenantPayment(input: StartPaymentInput) {
               ? Number(input.amount)
               : undefined,
         });
-        paymentAmount = Number(input.amount ?? paymentAmount);
+        paymentAmount = Number(result.amount);
+        paymentReference = result.reference;
         return attachProof(result.id);
       }
 
@@ -216,7 +230,8 @@ export async function startTenantPayment(input: StartPaymentInput) {
           amount: Number(input.amount ?? 0),
           months: Number(input.months ?? 1),
         });
-        paymentAmount = Number(input.amount ?? 0);
+        paymentAmount = Number(result.amount);
+        paymentReference = result.reference;
         return attachProof(result.id);
       }
 
@@ -227,6 +242,8 @@ export async function startTenantPayment(input: StartPaymentInput) {
               ? Number(input.amount)
               : undefined,
         });
+        paymentAmount = Number(result.amount);
+        paymentReference = result.reference;
         return attachProof(result.id);
       }
 
@@ -237,6 +254,8 @@ export async function startTenantPayment(input: StartPaymentInput) {
               ? Number(input.amount)
               : undefined,
         });
+        paymentAmount = Number(result.amount);
+        paymentReference = result.reference;
         return attachProof(result.id);
       }
 
@@ -245,17 +264,15 @@ export async function startTenantPayment(input: StartPaymentInput) {
 
     // Gateway STK: prompt phone after payment row exists.
     if (isGateway && method === "mpesa-stk" && paymentId) {
-      const payment = await prisma.payment.findUnique({
-        where: { id: paymentId },
-        select: { amount: true, reference: true },
-      });
-      const amount = Number(payment?.amount ?? paymentAmount);
+      const accessToken = await stkAccessToken;
+      if (!accessToken?.ok) throw accessToken?.error ?? new Error("Could not authenticate with M-Pesa.");
       const stk = await requestMpesaStkPush({
         orgId: session.activeOrgId!,
-        amount,
+        amount: paymentAmount,
         phone: phoneNumber!.trim(),
-        accountReference: payment?.reference ?? id.slice(0, 12),
+        accountReference: paymentReference ?? id.slice(0, 12),
         transactionDesc: "EstateDesk bill",
+        accessToken: accessToken.token,
       }).catch(async (error: unknown) => {
         const rejected = error instanceof MpesaRequestError && error.rejected;
         await prisma.payment.updateMany({

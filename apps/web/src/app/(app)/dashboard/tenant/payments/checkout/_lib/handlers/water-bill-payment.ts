@@ -149,7 +149,7 @@ export async function processWaterBillPayment(
         submittedAt: paidAt.toISOString(),
       },
     },
-    select: { id: true },
+    select: { id: true, amount: true, reference: true },
   });
 
   if (!isGateway) {

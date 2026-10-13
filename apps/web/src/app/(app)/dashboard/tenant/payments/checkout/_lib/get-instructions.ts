@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireTenantAccess } from "@/lib/permissions/guards";
-import { isMpesaStkConfigured } from "@/lib/payments/method-flow";
+import { isMpesaStkConfigured } from "@/lib/mpesa/config";
 import { parsePaymentInstructions } from "@/lib/payments/instructions";
 
 export async function getTenantPaymentInstructions() {

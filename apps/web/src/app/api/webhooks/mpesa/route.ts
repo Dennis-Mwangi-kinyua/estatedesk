@@ -1,4 +1,5 @@
-import { getMpesaConfigs, getMpesaConfigForCallback } from "@/lib/mpesa/config";
+import { getMpesaConfigs } from "@/lib/mpesa/config";
+import { getMpesaConfigForCallback } from "@/lib/mpesa/callback-config";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { getPlatformControl } from "@/lib/platform/control";

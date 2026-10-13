@@ -1,5 +1,3 @@
-import { timingSafeEqual } from "node:crypto";
-
 export type MpesaConfig = {
   orgId: string;
   environment: "sandbox" | "production";
@@ -54,12 +52,6 @@ export function getMpesaConfigForOrg(orgId?: string | null) {
   return matches.length === 1 ? matches[0] : undefined;
 }
 
-export function getMpesaConfigForCallback(secret: string | null) {
-  if (!secret) return undefined;
-  const secretBytes = Buffer.from(secret);
-  const matches = getMpesaConfigs().filter(config => {
-    const expectedBytes = Buffer.from(config.callbackSecret);
-    return expectedBytes.length === secretBytes.length && timingSafeEqual(expectedBytes, secretBytes);
-  });
-  return matches.length === 1 ? getMpesaConfigForOrg(matches[0].orgId) : undefined;
+export function isMpesaStkConfigured(orgId?: string | null) {
+  return Boolean(getMpesaConfigForOrg(orgId));
 }

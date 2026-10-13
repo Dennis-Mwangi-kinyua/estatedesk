@@ -6,7 +6,7 @@ import { WebVitalsReporter } from "@/components/monitoring/web-vitals-reporter";
 import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
 import { PwaInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { PwaLaunchScreen } from "@/components/pwa/pwa-launch-screen";
-import { PwaExperience } from "@/components/pwa/pwa-experience";
+import { PwaExperienceLoader } from "@/components/pwa/pwa-experience-loader";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { ServiceWorkerUpdatePrompt } from "@/components/pwa/service-worker-update-prompt";
 import { InlineScript } from "@/components/layout/inline-script";
@@ -271,7 +271,7 @@ export default async function RootLayout({
           <SiteExperience />
           <ServiceWorkerRegistration />
           <ServiceWorkerUpdatePrompt />
-          <PwaExperience />
+          <PwaExperienceLoader />
           <PwaInstallPrompt />
           <div id="main-content" className="ed-mobile-first-root min-h-dvh w-full min-w-0">
             <IncidentBanner />

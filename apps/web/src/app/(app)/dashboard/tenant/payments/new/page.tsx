@@ -1,7 +1,7 @@
 import {
   listAvailablePaymentMethods,
 } from "@/lib/payments/instructions";
-import { isMpesaStkConfigured } from "@/lib/payments/method-flow";
+import { isMpesaStkConfigured } from "@/lib/mpesa/config";
 import { getTenantPaymentInstructions } from "../checkout/_lib/get-instructions";
 import { PaymentGateway } from "./_components/payment-gateway";
 import { requireTenantAccess } from "@/lib/permissions/guards";

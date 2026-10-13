@@ -11,7 +11,8 @@ export function SiteExperience() {
     if (pathname?.startsWith("/print")) return;
     const root = document.getElementById("main-content");
     if (!root) return;
-    let frame = 0;
+    let scheduleTimer = 0;
+    let idleCallback = 0;
     const enhance = () => {
       const heading = root.querySelector<HTMLElement>("h1");
       const isWorkspace = Boolean(heading?.closest(".estate-workspace"));
@@ -75,13 +76,37 @@ export function SiteExperience() {
       });
     };
     const schedule = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(() => { frame = 0; enhance(); });
+      if (scheduleTimer) return;
+      scheduleTimer = window.setTimeout(() => {
+        scheduleTimer = 0;
+        const idleWindow = window as Window & {
+          requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+        };
+        if (idleWindow.requestIdleCallback) {
+          idleCallback = idleWindow.requestIdleCallback(() => {
+            idleCallback = 0;
+            enhance();
+          }, { timeout: 1200 });
+        } else {
+          enhance();
+        }
+      }, 120);
     };
-    enhance();
+    // This adds decorative and mobile table metadata. Let the first content
+    // paint finish before scanning potentially large workspace pages.
+    schedule();
     const observer = new MutationObserver(schedule);
     observer.observe(root, { childList: true, subtree: true, characterData: true });
-    return () => { observer.disconnect(); if (frame) cancelAnimationFrame(frame); };
+    return () => {
+      observer.disconnect();
+      if (scheduleTimer) window.clearTimeout(scheduleTimer);
+      if (idleCallback) {
+        const idleWindow = window as Window & {
+          cancelIdleCallback?: (handle: number) => void;
+        };
+        idleWindow.cancelIdleCallback?.(idleCallback);
+      }
+    };
   }, [pathname]);
   return null;
 }

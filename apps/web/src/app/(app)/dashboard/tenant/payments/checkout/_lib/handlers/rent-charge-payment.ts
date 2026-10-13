@@ -129,7 +129,7 @@ export async function processRentChargePayment(
         submittedAt: paidAt.toISOString(),
       },
     },
-    select: { id: true },
+    select: { id: true, amount: true, reference: true },
   });
 
   if (isGateway) {

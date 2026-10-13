@@ -38,6 +38,16 @@ function darajaTimestamp(date = new Date()) {
   return `${part("year")}${part("month")}${part("day")}${part("hour")}${part("minute")}${part("second")}`;
 }
 
+type CachedAccessToken = {
+  consumerKey: string;
+  consumerSecret: string;
+  token?: string;
+  expiresAt?: number;
+  pending?: Promise<string>;
+};
+
+const accessTokensByOrg = new Map<string, CachedAccessToken>();
+
 async function darajaFetch(url: string, init: RequestInit) {
   const response = await fetch(url, {
     ...init,
@@ -56,21 +66,60 @@ async function darajaFetch(url: string, init: RequestInit) {
 }
 
 async function getAccessToken(config: MpesaConfig) {
+  const current = accessTokensByOrg.get(config.orgId);
+  const matchesConfig = current?.consumerKey === config.consumerKey &&
+    current.consumerSecret === config.consumerSecret;
+  if (matchesConfig && current.token && (current.expiresAt ?? 0) > Date.now() + 60_000) {
+    return current.token;
+  }
+  if (matchesConfig && current.pending) return current.pending;
+
   const credentials = Buffer.from(
     `${config.consumerKey}:${config.consumerSecret}`,
   ).toString("base64");
-  const payload = await darajaFetch(
-    `${darajaBaseUrl(config)}/oauth/v1/generate?grant_type=client_credentials`,
-    { headers: { Authorization: `Basic ${credentials}` } },
-  );
-  if (typeof payload.access_token !== "string") {
-    throw new Error("Daraja did not return an access token.");
+  const entry: CachedAccessToken = {
+    consumerKey: config.consumerKey,
+    consumerSecret: config.consumerSecret,
+  };
+  const pending = (async () => {
+    const payload = await darajaFetch(
+      `${darajaBaseUrl(config)}/oauth/v1/generate?grant_type=client_credentials`,
+      { headers: { Authorization: `Basic ${credentials}` } },
+    );
+    if (typeof payload.access_token !== "string") {
+      throw new Error("Daraja did not return an access token.");
+    }
+    const lifetimeSeconds = Number(payload.expires_in);
+    const safeLifetimeMs = Number.isFinite(lifetimeSeconds) && lifetimeSeconds > 0
+      ? Math.max(0, lifetimeSeconds * 1000 - 60_000)
+      : 4 * 60_000;
+    entry.token = payload.access_token;
+    entry.expiresAt = Date.now() + safeLifetimeMs;
+    return payload.access_token;
+  })();
+  entry.pending = pending;
+  accessTokensByOrg.set(config.orgId, entry);
+
+  try {
+    return await pending;
+  } catch (error) {
+    if (accessTokensByOrg.get(config.orgId) === entry) {
+      accessTokensByOrg.delete(config.orgId);
+    }
+    throw error;
+  } finally {
+    if (entry.pending === pending) entry.pending = undefined;
   }
-  return payload.access_token;
+}
+
+export async function getMpesaAccessTokenForOrg(orgId: string) {
+  const config = getMpesaConfigForOrg(orgId);
+  if (!config) throw new Error("M-Pesa is not configured for this organisation.");
+  return getAccessToken(config);
 }
 
 export async function requestMpesaStkPush(
-  input: MpesaStkPushInput & { orgId: string },
+  input: MpesaStkPushInput & { orgId: string; accessToken?: string },
 ): Promise<MpesaStkPushResult> {
   const config = getMpesaConfigForOrg(input.orgId);
   if (!config) {
@@ -86,7 +135,7 @@ export async function requestMpesaStkPush(
     `${shortcode}${config.passkey}${timestamp}`,
   ).toString("base64");
   const phone = normalizeMpesaPhone(input.phone);
-  const token = await getAccessToken(config);
+  const token = input.accessToken ?? await getAccessToken(config);
   const payload = await darajaFetch(
     `${darajaBaseUrl(config)}/mpesa/stkpush/v1/processrequest`,
     {

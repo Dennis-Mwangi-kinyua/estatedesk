@@ -4,11 +4,11 @@ import { emptyPaymentInstructions } from "../../apps/web/src/lib/payments/instru
 import {
   buildCheckoutTransactionKey,
   classifyCheckoutMethod,
-  isMpesaStkConfigured,
   mapCheckoutMethodToPaymentMethod,
   requiresTransactionIdForCheckout,
   validateCheckoutTransactionId,
 } from "../../apps/web/src/lib/payments/method-flow";
+import { isMpesaStkConfigured } from "../../apps/web/src/lib/mpesa/config";
 
 test("STK credentials are available only to their bound organisation and require a callback", () => {
   const keys = ["MPESA_ORG_ID", "MPESA_CONSUMER_KEY", "MPESA_CONSUMER_SECRET", "MPESA_SHORTCODE", "MPESA_PASSKEY", "MPESA_CALLBACK_SECRET", "MPESA_CALLBACK_URL"];
