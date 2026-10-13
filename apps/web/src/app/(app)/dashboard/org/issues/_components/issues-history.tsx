@@ -2,7 +2,7 @@ import { DeferredLink } from "@/components/navigation/app-links";
 import type { IssueStatusFilter, OrgIssue } from "../_lib/types";
 import { IssueSlaBadge } from "@/components/issues/issue-sla-badge";
 import {
-  buildIssuesHref,
+  buildIssueDetailHref,
   formatDate,
   getIssueUnitLabel,
   getPriorityClasses,
@@ -12,8 +12,6 @@ import {
 export function IssuesHistory({
   issues,
   selectedIssueId,
-  currentPage,
-  activeFilter,
 }: {
   issues: OrgIssue[];
   selectedIssueId?: string;
@@ -29,7 +27,7 @@ export function IssuesHistory({
           return (
             <DeferredLink
               key={issue.id}
-              href={buildIssuesHref(currentPage, issue.id, activeFilter, issue.title)}
+              href={buildIssueDetailHref(issue.id, issue.title)}
               className={[
                 "block rounded-[24px] border p-4 transition",
                 selected
@@ -115,7 +113,7 @@ export function IssuesHistory({
                 >
                   <td className="px-5 py-4">
                     <DeferredLink
-                      href={buildIssuesHref(currentPage, issue.id, activeFilter, issue.title)}
+                      href={buildIssueDetailHref(issue.id, issue.title)}
                       className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
                     >
                       {issue.title}

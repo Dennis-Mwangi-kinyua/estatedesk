@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { CaretakerDashboardSidebar } from "@/components/layout/caretaker-dashboard-sidebar";
 import { CaretakerDashboardHeader } from "@/components/layout/caretaker-dashboard-header";
-import { CaretakerDashboardFooter } from "@/components/layout/caretaker-dashboard-footer";
 
 type CaretakerDashboardShellProps = {
   fullName: string;
@@ -27,7 +26,6 @@ export function CaretakerDashboardShell({
             </div>
           </main>
 
-          <CaretakerDashboardFooter />
         </div>
       </div>
     </div>

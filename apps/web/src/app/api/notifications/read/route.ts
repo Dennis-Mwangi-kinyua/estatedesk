@@ -12,7 +12,8 @@ export async function POST(request: NextRequest) {
   if (!body || (body.all !== true && typeof body.id !== "string")) return NextResponse.json({ error: "Missing notification." }, { status: 400 });
   try {
     const actionUrl = body.all === true ? (await readAllPersonalNotifications(session), null) : await readPersonalNotification(session, body.id);
-    revalidatePath("/", "layout");
+    const portal = session.activeOrgRole === "TENANT" ? "tenant" : session.activeOrgRole === "CARETAKER" ? "caretaker" : "org";
+    revalidatePath(`/dashboard/${portal}/notifications`);
     return NextResponse.json({ actionUrl });
   } catch {
     return NextResponse.json({ error: "Unable to clear this notification." }, { status: 403 });

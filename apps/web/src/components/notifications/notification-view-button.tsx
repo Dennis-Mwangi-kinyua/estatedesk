@@ -11,8 +11,12 @@ export function NotificationViewButton({ notificationId, href, all = false, chil
   async function view() {
     if (pending) return;
     setPending(true); setError("");
+    // A server-resolved link can open even while the read acknowledgement is slow.
+    const opened = !all && Boolean(href);
+    if (opened) router.push(href!);
     try {
       const response = await fetch("/api/notifications/read", {
+        signal: AbortSignal.timeout(12_000), keepalive: true,
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(all ? { all: true } : { id: notificationId }),
       });
       const result = await response.json();
@@ -20,9 +24,9 @@ export function NotificationViewButton({ notificationId, href, all = false, chil
       onViewed?.();
       window.dispatchEvent(new Event("estatedesk:notifications-read"));
       const destination = all ? href : result.actionUrl;
-      if (destination) router.push(destination);
+      if (destination && !opened) router.push(destination);
       router.refresh();
-    } catch { setError("Could not clear the notification. Please try again."); }
+    } catch { setError(opened ? "The page opened, but the notification could not be marked as read. Please retry when your connection is stable." : "The notification could not be opened. Please try again."); }
     finally { setPending(false); }
   }
   return <span className="inline-flex flex-col gap-1"><button data-workspace-action="true" type="button" onClick={view} disabled={pending} className={className ?? "rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium"}>{pending ? "Opening…" : children}</button>{error ? <span role="alert" className="text-xs text-destructive">{error}</span> : null}</span>;

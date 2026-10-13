@@ -3,7 +3,7 @@ import { IssueSlaBadge } from "@/components/issues/issue-sla-badge";
 import { Wrench } from "@/components/shared/colored-icons";
 import type { OrgIssue } from "../_lib/types";
 import {
-  buildIssuesHref,
+  buildIssueDetailHref,
   formatDate,
   getIssueUnitLabel,
   getPriorityClasses,
@@ -19,7 +19,6 @@ type IssuesMobileListProps = {
 export function IssuesMobileList({
   issues,
   selectedIssueId,
-  currentPage,
 }: IssuesMobileListProps) {
   return (
     <div className="mt-5 space-y-3 lg:hidden">
@@ -38,7 +37,7 @@ export function IssuesMobileList({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <DeferredLink
-                  href={buildIssuesHref(currentPage, issue.id, "all", issue.title)}
+                  href={buildIssueDetailHref(issue.id, issue.title)}
                   className="text-sm font-semibold text-neutral-950 underline-offset-4 hover:underline"
                 >
                   {issue.title}
@@ -131,7 +130,7 @@ export function IssuesMobileList({
 
             <div className="mt-3 flex flex-wrap gap-2">
               <DeferredLink
-                href={buildIssuesHref(currentPage, issue.id, "all", issue.title)}
+                href={buildIssueDetailHref(issue.id, issue.title)}
                 className="inline-flex items-center rounded-[16px] border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-50"
               >
                 <Wrench className="mr-2 h-4 w-4" />

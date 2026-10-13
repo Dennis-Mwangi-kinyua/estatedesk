@@ -23,35 +23,15 @@ export function IssueDetailsCard({
   const latestReport = issue.resolutionReports[0] ?? null;
 
   return (
-    <SurfaceCard className="overflow-hidden p-4 sm:p-6 lg:p-7">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 flex-1">
-          <IssueDetailsSummary issue={issue} />
-
-          <IssueDetailsStatusActions
-            issue={issue}
-            currentPage={currentPage}
-            activeFilter={activeFilter}
-            latestReportStatus={latestReport?.status}
-          />
-
-          <IssueResolutionReportSection
-            issue={issue}
-            currentPage={currentPage}
-            activeFilter={activeFilter}
-          />
-        </div>
-
-        {canAssignCaretaker ? (
-          <IssueAssignmentCard
-            issueId={issue.id}
-            currentPage={currentPage}
-            activeFilter={activeFilter}
-            selectedCaretakerId={issue.assignedTo?.id}
-            caretakers={caretakers}
-          />
-        ) : null}
+    <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)]">
+      <div className="min-w-0 space-y-5">
+        <SurfaceCard className="min-w-0 p-5 sm:p-6"><IssueDetailsSummary issue={issue} /></SurfaceCard>
+        <SurfaceCard className="min-w-0 p-5 sm:p-6"><h2 className="text-lg font-semibold text-foreground">Actions and resolution</h2><IssueDetailsStatusActions issue={issue} currentPage={currentPage} activeFilter={activeFilter} latestReportStatus={latestReport?.status} /><IssueResolutionReportSection issue={issue} currentPage={currentPage} activeFilter={activeFilter} /></SurfaceCard>
       </div>
-    </SurfaceCard>
+      <div className="min-w-0 space-y-5">
+        <SurfaceCard className="min-w-0 space-y-4 p-5 sm:p-6"><h2 className="text-lg font-semibold text-foreground">Assignment and responsibility</h2><dl className="space-y-4 text-sm"><div><dt className="text-muted-foreground">Allocated to</dt><dd className="mt-1 break-words font-semibold text-foreground">{issue.assignedTo?.fullName || issue.assignedTo?.email || "Not assigned yet"}</dd></div><div><dt className="text-muted-foreground">Allocated by</dt><dd className="mt-1 break-words font-medium text-foreground">{issue.assignedBy?.fullName || issue.assignedBy?.email || "Not recorded"}</dd></div>{issue.assignedTo?.phone ? <div><dt className="text-muted-foreground">Contact number</dt><dd className="mt-1 font-medium text-foreground">{issue.assignedTo.phone}</dd></div> : null}</dl></SurfaceCard>
+        {canAssignCaretaker && !["CLOSED", "CANCELLED", "RESOLVED"].includes(issue.status) ? <IssueAssignmentCard issueId={issue.id} currentPage={currentPage} activeFilter={activeFilter} selectedCaretakerId={issue.assignedTo?.id} caretakers={caretakers} /> : null}
+      </div>
+    </div>
   );
 }

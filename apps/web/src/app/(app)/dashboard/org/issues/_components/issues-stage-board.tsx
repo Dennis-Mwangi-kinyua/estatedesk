@@ -1,7 +1,7 @@
 import { DeferredLink } from "@/components/navigation/app-links";
 import type { IssueStatusFilter, OrgIssue } from "../_lib/types";
 import {
-  buildIssuesHref,
+  buildIssueDetailHref,
   formatDate,
   getIssueUnitLabel,
   getPriorityClasses,
@@ -11,7 +11,6 @@ import {
 export function IssuesStageBoard({
   issues,
   selectedIssueId,
-  currentPage,
   activeFilter,
 }: {
   issues: OrgIssue[];
@@ -91,7 +90,7 @@ export function IssuesStageBoard({
                 return (
                   <DeferredLink
                     key={issue.id}
-                    href={buildIssuesHref(currentPage, issue.id, activeFilter, issue.title)}
+                    href={buildIssueDetailHref(issue.id, issue.title)}
                     className={[
                       "block rounded-[22px] border p-4 transition",
                       selected

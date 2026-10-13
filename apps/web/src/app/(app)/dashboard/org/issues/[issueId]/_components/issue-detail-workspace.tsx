@@ -9,7 +9,7 @@ import {
   getStatusClasses,
 } from "../../_lib/helpers";
 import { IssueDetailsCard } from "../../_components/issue-details-card";
-import { IssuesGuidance } from "../../_components/issues-guidance";
+import { IssueProgressTracker } from "../../_components/issue-progress-tracker";
 import { panelShellClassName } from "../../_components/issues-ui";
 
 type IssueDetailWorkspaceProps = {
@@ -17,7 +17,7 @@ type IssueDetailWorkspaceProps = {
   orgRole?: OrgRole | null;
 };
 
-export function IssueDetailWorkspace({ data, orgRole }: IssueDetailWorkspaceProps) {
+export function IssueDetailWorkspace({ data }: IssueDetailWorkspaceProps) {
   const { issue } = data;
 
   return (
@@ -25,7 +25,7 @@ export function IssueDetailWorkspace({ data, orgRole }: IssueDetailWorkspaceProp
       <section className={panelShellClassName}>
         <div className="border-b border-border px-5 py-5 sm:px-6 sm:py-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-3xl">
+            <div className="min-w-0 max-w-3xl">
               <Link
                 href="/dashboard/org/issues"
                 className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-foreground"
@@ -51,7 +51,7 @@ export function IssueDetailWorkspace({ data, orgRole }: IssueDetailWorkspaceProp
                 </span>
               </div>
 
-              <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="mt-4 break-words text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                 {issue.title}
               </h1>
 
@@ -63,7 +63,8 @@ export function IssueDetailWorkspace({ data, orgRole }: IssueDetailWorkspaceProp
         </div>
       </section>
 
-      <div className="grid gap-5 min-[1600px]:grid-cols-[minmax(0,1fr)_280px]">
+      <IssueProgressTracker issue={issue} />
+      <div className="space-y-5">
         <IssueDetailsCard
           issue={issue}
           caretakers={data.caretakers}
@@ -72,7 +73,6 @@ export function IssueDetailWorkspace({ data, orgRole }: IssueDetailWorkspaceProp
           canAssignCaretaker={data.canAssignCaretaker}
         />
 
-        <IssuesGuidance orgRole={orgRole} />
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-import { WorkspaceActions } from "@/components/shared/workspace-actions";
 import type { CaretakerDashboardResult } from "@/app/(app)/dashboard/caretaker/_lib/types";
 import {
   CaretakerWorkspaceFooter,
@@ -34,21 +33,12 @@ export function CaretakerDashboardWorkspace({
       ) : (
         <>
           <CaretakerDashboardHeader data={result.data} fullName={fullName} />
-          <WorkspaceActions />
 
-          <div className="grid gap-5 min-[1600px]:grid-cols-[minmax(0,1fr)_280px]">
-            <div className="space-y-5">
-              <CaretakerDashboardActivitySection
-                recentIssues={result.data.recentIssues}
-              />
-              <CaretakerDashboardFocusSection data={result.data} />
-            </div>
-
-            <CaretakerDashboardSidebar
-              data={result.data}
-              upcomingInspections={result.data.upcomingInspections}
-            />
+          <div className="grid min-w-0 items-stretch gap-5 xl:grid-cols-2">
+            <CaretakerDashboardFocusSection data={result.data} />
+            <CaretakerDashboardActivitySection recentIssues={result.data.recentIssues} />
           </div>
+          <CaretakerDashboardSidebar data={result.data} upcomingInspections={result.data.upcomingInspections} />
         </>
       )}
 

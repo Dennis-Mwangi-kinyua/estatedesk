@@ -31,11 +31,11 @@ export function IssueDetailSections({
     issue.assignedTo?.id === currentUserId &&
     (!latestReport || latestReport.status === "REJECTED");
   return (
-    <div className="space-y-5">
+    <div className="grid min-w-0 items-start gap-5 xl:grid-cols-2">
       <section className={panelShellClassName}>
         <SectionIntro eyebrow="Details" title="Issue description" />
         <div className={`space-y-4 ${panelBodyClassName} pt-0`}>
-          <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
+          <p className="whitespace-pre-wrap break-words text-sm leading-6 text-foreground">
             {issue.description}
           </p>
 
@@ -54,7 +54,7 @@ export function IssueDetailSections({
         </div>
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="min-w-0 space-y-5">
         <section className={panelShellClassName}>
           <SectionIntro eyebrow="Reporter" title="Reported by" />
           <div className={`space-y-4 ${panelBodyClassName} pt-0`}>
@@ -137,7 +137,7 @@ export function IssueDetailSections({
         </section>
       </div>
 
-      <section className={panelShellClassName}>
+      <section className={`${panelShellClassName} min-w-0 xl:col-span-2`}>
         <SectionIntro eyebrow="Field work" title="Issue actions" />
         <div className={`space-y-4 ${panelBodyClassName} pt-0`}>
           <Link
@@ -150,13 +150,14 @@ export function IssueDetailSections({
             Request vendor dispatch
           </Link>
 
+          <div className="grid gap-3 rounded-2xl border border-border bg-muted/10 p-4 sm:grid-cols-2"><div><p className="text-xs text-muted-foreground">Assigned caretaker</p><p className="mt-1 break-words text-sm font-semibold">{issue.assignedTo?.fullName || issue.assignedTo?.email || "Unassigned"}</p></div><div><p className="text-xs text-muted-foreground">Assigned by</p><p className="mt-1 break-words text-sm font-semibold">{issue.assignedBy?.fullName || issue.assignedBy?.email || "Not recorded"}</p></div></div>
           <IssueCardActions issue={issue} currentUserId={currentUserId} />
 
           {issue.resolutionNotes &&
           issue.status === TicketStatus.IN_PROGRESS ? (
             <div className="rounded-2xl border border-border bg-muted/10 p-4">
               <p className="text-sm font-semibold text-foreground">Progress notes</p>
-              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+              <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-muted-foreground">
                 {issue.resolutionNotes}
               </p>
             </div>

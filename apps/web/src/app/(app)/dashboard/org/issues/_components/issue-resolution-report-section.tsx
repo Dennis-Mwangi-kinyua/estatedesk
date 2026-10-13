@@ -19,40 +19,40 @@ export function IssueResolutionReportSection({
   if (!latestReport) return null;
 
   return (
-    <div className="mt-4 rounded-[22px] border border-neutral-200 bg-white p-4">
+    <div className="mt-4 rounded-[22px] border border-border bg-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="text-[11px] uppercase tracking-wide text-neutral-500">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
             Caretaker Report
           </p>
-          <p className="mt-1 text-sm font-semibold text-neutral-950">
+          <p className="mt-1 text-sm font-semibold text-foreground">
             {latestReport.caretaker.fullName ??
               latestReport.caretaker.email ??
               "Caretaker"}{" "}
             submitted on {formatDate(latestReport.submittedAt)}
           </p>
         </div>
-        <span className="rounded-full bg-neutral-100 px-3 py-1 text-[11px] font-semibold text-neutral-600">
+        <span className="rounded-full bg-muted px-3 py-1 text-[11px] font-semibold text-muted-foreground">
           {latestReport.status.replaceAll("_", " ")}
         </span>
       </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <div className="rounded-[18px] bg-muted/70 p-4 sm:col-span-2">
-          <p className="text-[11px] uppercase tracking-wide text-neutral-500">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
             Work Done
           </p>
-          <p className="mt-2 text-sm leading-6 text-neutral-700">
+          <p className="mt-2 text-sm leading-6 text-foreground">
             {latestReport.workSummary}
           </p>
         </div>
 
         {latestReport.materialsUsed ? (
           <div className="rounded-[18px] bg-muted/70 p-4">
-            <p className="text-[11px] uppercase tracking-wide text-neutral-500">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
               Materials
             </p>
-            <p className="mt-2 text-sm leading-6 text-neutral-700">
+            <p className="mt-2 text-sm leading-6 text-foreground">
               {latestReport.materialsUsed}
             </p>
           </div>
@@ -60,10 +60,10 @@ export function IssueResolutionReportSection({
 
         {latestReport.tenantInstructions ? (
           <div className="rounded-[18px] bg-muted/70 p-4">
-            <p className="text-[11px] uppercase tracking-wide text-neutral-500">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
               Tenant Notes
             </p>
-            <p className="mt-2 text-sm leading-6 text-neutral-700">
+            <p className="mt-2 text-sm leading-6 text-foreground">
               {latestReport.tenantInstructions}
             </p>
           </div>
@@ -84,11 +84,11 @@ export function IssueResolutionReportSection({
               name="officeNotes"
               rows={2}
               placeholder="Office note for tenant (optional)"
-              className="w-full rounded-[14px] border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
+              className="w-full rounded-[14px] border border-border bg-card px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
             />
             <button data-workspace-action="true"
               type="submit"
-              className="mt-2 inline-flex items-center justify-center rounded-[14px] bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white"
+              className="mt-2 inline-flex items-center justify-center rounded-[14px] bg-emerald-600 px-4 py-2.5 text-sm font-medium text-primary-foreground"
             >
               Approve and send to tenant
             </button>
@@ -106,11 +106,11 @@ export function IssueResolutionReportSection({
               name="officeNotes"
               rows={2}
               placeholder="What should the caretaker fix?"
-              className="w-full rounded-[14px] border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
+              className="w-full rounded-[14px] border border-border bg-card px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
             />
             <button data-workspace-action="true"
               type="submit"
-              className="mt-2 inline-flex items-center justify-center rounded-[14px] bg-orange-600 px-4 py-2.5 text-sm font-medium text-white"
+              className="mt-2 inline-flex items-center justify-center rounded-[14px] bg-orange-600 px-4 py-2.5 text-sm font-medium text-primary-foreground"
             >
               Return for more work
             </button>

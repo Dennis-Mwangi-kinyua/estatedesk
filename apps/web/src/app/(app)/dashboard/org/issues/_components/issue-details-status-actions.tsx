@@ -22,7 +22,7 @@ export function IssueDetailsStatusActions({
             activeFilter={activeFilter}
             status="IN_PROGRESS"
             label="Move to progress"
-            className="inline-flex items-center justify-center rounded-[18px] bg-neutral-900 px-4 py-3 text-sm font-medium text-white"
+            className="inline-flex items-center justify-center rounded-[18px] bg-primary px-4 py-3 text-sm font-medium text-primary-foreground"
           />
         ) : null}
 
@@ -47,7 +47,7 @@ export function IssueDetailsStatusActions({
             activeFilter={activeFilter}
             status="CANCELLED"
             label="Cancel"
-            className="inline-flex items-center justify-center rounded-[18px] border border-neutral-300 bg-white px-4 py-3 text-sm font-medium text-neutral-700"
+            className="inline-flex items-center justify-center rounded-[18px] border border-border bg-background px-4 py-3 text-sm font-medium text-foreground"
           />
         ) : null}
 
@@ -60,17 +60,17 @@ export function IssueDetailsStatusActions({
             activeFilter={activeFilter}
             status="OPEN"
             label="Reopen"
-            className="inline-flex items-center justify-center rounded-[18px] border border-neutral-300 bg-white px-4 py-3 text-sm font-medium text-neutral-700"
+            className="inline-flex items-center justify-center rounded-[18px] border border-border bg-background px-4 py-3 text-sm font-medium text-foreground"
           />
         ) : null}
       </div>
 
       {issue.resolutionNotes ? (
         <div className="mt-4 rounded-[22px] bg-muted/70 p-4">
-          <p className="text-[11px] uppercase tracking-wide text-neutral-500">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
             Resolution Notes
           </p>
-          <p className="mt-2 text-sm leading-6 text-neutral-700">
+          <p className="mt-2 text-sm leading-6 text-foreground">
             {issue.resolutionNotes}
           </p>
         </div>

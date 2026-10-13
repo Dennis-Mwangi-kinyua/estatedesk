@@ -2,7 +2,6 @@ import type { OrgRole } from "@prisma/client";
 import { DeferredLink } from "@/components/navigation/app-links";
 import type { OrgIssuesPageData } from "../_lib/types";
 import { getIssueFilterLabel } from "../_lib/helpers";
-import { IssueDetailsCard } from "./issue-details-card";
 import { IssuesHeader } from "./issues-header";
 import { IssuesHistory } from "./issues-history";
 import { IssuesPagination } from "./issues-pagination";
@@ -18,7 +17,7 @@ export function IssuesWorkspace({
   orgRole?: OrgRole | null;
 }) {
   return (
-    <div className="org-theme-content mx-auto w-full max-w-none space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
       <IssuesHeader membership={data.membership} stats={data.stats} orgRole={orgRole} />
       <IssuesStats stats={data.stats} activeFilter={data.activeFilter} />
 
@@ -52,20 +51,13 @@ export function IssuesWorkspace({
           ) : (
             <IssuesStageBoard
               issues={data.issues}
-              selectedIssueId={data.selectedIssue?.id}
               currentPage={data.currentPage}
               activeFilter={data.activeFilter}
             />
           )}
         </section>
 
-        <IssueDetailsCard
-          issue={data.selectedIssue}
-          caretakers={data.caretakers}
-          currentPage={data.currentPage}
-          activeFilter={data.activeFilter}
-          canAssignCaretaker={data.canAssignCaretaker}
-        />
+
 
         <section className={`${panelShellClassName} min-w-0 p-4 sm:p-6 xl:p-7`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -85,7 +77,6 @@ export function IssuesWorkspace({
 
           <IssuesHistory
             issues={data.paginatedIssues}
-            selectedIssueId={data.selectedIssue?.id}
             currentPage={data.currentPage}
             activeFilter={data.activeFilter}
           />
@@ -96,7 +87,6 @@ export function IssuesWorkspace({
             totalItems={data.totalFiltered}
             historyStart={data.historyStart}
             historyEnd={data.historyEnd}
-            selectedIssueId={data.selectedIssue?.id}
             activeFilter={data.activeFilter}
           />
         </section>

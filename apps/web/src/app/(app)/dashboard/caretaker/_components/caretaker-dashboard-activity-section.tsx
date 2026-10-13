@@ -1,3 +1,4 @@
+import { encodePublicId } from "@/lib/public-id";
 import Link from "@/components/navigation/workspace-link";
 import { AlertCircle } from "lucide-react";
 import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
@@ -84,7 +85,7 @@ export function CaretakerDashboardActivitySection({
             {recentIssues.map((issue) => (
               <li key={issue.id}>
                 <DeferredLink
-                  href="/dashboard/caretaker/issues"
+                  href={`/dashboard/caretaker/issues/${encodePublicId(issue.id, "issue")}`}
                   className="flex items-start gap-4 px-5 py-4 transition hover:bg-muted/15 sm:px-6"
                 >
                   <IssueActivityIcon status={issue.status} />
@@ -108,7 +109,7 @@ export function CaretakerDashboardActivitySection({
             {recentIssues.map((issue) => (
               <DeferredLink
                 key={issue.id}
-                href="/dashboard/caretaker/issues"
+                href={`/dashboard/caretaker/issues/${encodePublicId(issue.id, "issue")}`}
                 className="block rounded-2xl border border-border bg-muted/10 p-4 transition hover:border-primary/25 hover:bg-muted/20"
               >
                 <div className="flex items-start gap-3">

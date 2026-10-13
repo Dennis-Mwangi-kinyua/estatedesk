@@ -1,3 +1,4 @@
+import { IssueProgressTracker } from "@/components/issues/issue-progress-tracker";
 import {
   CaretakerWorkspaceFooter,
   ErrorStateCard,
@@ -29,6 +30,7 @@ export function IssueDetailWorkspace({
       ) : (
         <>
           <IssueDetailHeader issue={data.issue} />
+          <IssueProgressTracker issue={data.issue} />
           <IssueDetailSections issue={data.issue} currentUserId={currentUserId} />
         </>
       )}

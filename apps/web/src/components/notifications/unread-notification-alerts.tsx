@@ -26,7 +26,7 @@ export function UnreadNotificationAlerts({ scope, alert }: { scope: string; aler
           <h2 className="mt-2 break-words text-sm font-semibold leading-6 sm:text-base">{alert.latest.title}</h2>
           <p className="mt-1 break-words text-sm leading-6 text-muted-foreground">{alert.latest.message}</p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <NotificationViewButton notificationId={alert.latest.id} onViewed={() => setDismissed(key)} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60">
+            <NotificationViewButton notificationId={alert.latest.id} href={alert.latest.actionUrl} onViewed={() => setDismissed(key)} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60">
               {needsReview ? "Review payment" : "View update"}<ArrowUpRight className="h-4 w-4" aria-hidden="true" />
             </NotificationViewButton>
             <NotificationViewButton all href={alert.href} onViewed={() => setDismissed(key)} className="min-h-10 rounded-xl border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-60">View all ({alert.count})</NotificationViewButton>

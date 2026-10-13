@@ -16,16 +16,16 @@ export function IssueAssignmentCard({
   caretakers: CaretakerOption[];
 }) {
   return (
-    <div className="w-full max-w-md rounded-[28px] border border-border bg-muted p-4 sm:p-5">
+    <div className="w-full min-w-0 rounded-[28px] border border-border bg-muted p-4 sm:p-5">
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm">
-          <UserCheck className="h-5 w-5 text-neutral-700" />
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-background shadow-sm">
+          <UserCheck className="h-5 w-5 text-foreground" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-neutral-950">
+          <p className="text-sm font-semibold text-foreground">
             Assign caretaker
           </p>
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-muted-foreground">
             Once assigned, the issue moves to progress immediately.
           </p>
         </div>
@@ -38,13 +38,13 @@ export function IssueAssignmentCard({
           <input type="hidden" name="filter" value={activeFilter} />
 
           <label className="block">
-            <span className="mb-2 block text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <span className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Caretaker
             </span>
             <select
               name="caretakerUserId"
               defaultValue={selectedCaretakerId ?? ""}
-              className="w-full rounded-[20px] border border-neutral-200 bg-white px-4 py-3.5 text-sm text-neutral-900 outline-none transition focus:border-neutral-400"
+              className="w-full rounded-[20px] border border-border bg-background px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-primary"
               required
             >
               <option value="" disabled>
@@ -60,13 +60,13 @@ export function IssueAssignmentCard({
 
           <button data-workspace-action="true"
             type="submit"
-            className="inline-flex w-full items-center justify-center rounded-[20px] bg-neutral-900 px-4 py-3.5 text-sm font-medium text-white"
+            className="inline-flex w-full items-center justify-center rounded-[20px] bg-primary px-4 py-3.5 text-sm font-medium text-primary-foreground"
           >
             Assign and move to progress
           </button>
         </form>
       ) : (
-        <div className="mt-4 rounded-[18px] border border-dashed border-neutral-300 bg-white px-4 py-4 text-sm text-neutral-500">
+        <div className="mt-4 rounded-[18px] border border-dashed border-border bg-background px-4 py-4 text-sm text-muted-foreground">
           No caretaker users were found in this organization yet.
         </div>
       )}

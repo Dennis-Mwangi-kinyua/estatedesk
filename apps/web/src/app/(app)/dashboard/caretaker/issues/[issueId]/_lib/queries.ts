@@ -61,6 +61,7 @@ const issueDetailInclude = {
       phone: true,
     },
   },
+  assignedBy: { select: { fullName: true, email: true } },
   reportedBy: {
     select: {
       id: true,
@@ -89,6 +90,8 @@ const issueDetailInclude = {
       tenantInstructions: true,
       officeNotes: true,
       submittedAt: true,
+      officeReviewedAt: true,
+      tenantConfirmedAt: true,
     },
   },
 } as const satisfies Prisma.IssueTicketInclude;

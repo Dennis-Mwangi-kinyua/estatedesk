@@ -67,6 +67,7 @@ export const orgIssueArgs =
           phone: true,
         },
       },
+      assignedBy: { select: { fullName: true, email: true } },
       reportedBy: {
         select: {
           id: true,

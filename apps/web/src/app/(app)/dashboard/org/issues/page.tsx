@@ -4,7 +4,9 @@ import {
   canCreateOrgIssue,
   resolveIssueCreatePath,
 } from "@/lib/issues/share-routing";
-import { getOrgIssuesPageData } from "./_lib/queries";
+import { decodePublicSlug } from "@/lib/public-id";
+import { buildIssueDetailHref } from "./_lib/helpers";
+import { getIssueDetailPageData, getOrgIssuesPageData } from "./_lib/queries";
 import type { IssuesPageProps } from "./_lib/types";
 import { IssuesEmptyWorkspace } from "./_components/issues-empty-workspace";
 import { IssuesWorkspace } from "./_components/issues-workspace";
@@ -22,6 +24,11 @@ export default async function IssuesPage({ searchParams }: IssuesPageProps) {
     redirect(
       resolveIssueCreatePath({ role: session.activeOrgRole, search }),
     );
+  }
+
+  if (params.issueId) {
+    const detail = await getIssueDetailPageData(decodePublicSlug(params.issueId, "issue"), session.activeOrgId!);
+    redirect(buildIssueDetailHref(detail.issue.id, detail.issue.title));
   }
 
   const data = await getOrgIssuesPageData(Promise.resolve(params));

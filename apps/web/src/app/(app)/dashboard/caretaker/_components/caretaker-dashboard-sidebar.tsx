@@ -1,5 +1,4 @@
 import Link from "@/components/navigation/workspace-link";
-import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { Calendar, FileText, FolderOpen, ListTodo, NotebookPen, Truck } from "lucide-react";
 import { Building2, ClipboardList, DoorOpen, Droplets, Megaphone, Search, UsersRound as Users, Wrench } from "@/components/shared/colored-icons";
 import { encodePublicId } from "@/lib/public-id";
@@ -47,18 +46,14 @@ export function CaretakerDashboardSidebar({
   upcomingInspections: UpcomingInspection[];
 }) {
   return (
-    <WorkspaceGuidePanel
-      title="Quick actions"
-      description="Open a section to review field work in your assigned scope."
-      triggerClassName={panelShellClassName}
-    >
-      <section className={`${panelShellClassName} p-4`}>
+    <div className="min-w-0 space-y-5">
+      <section className={`${panelShellClassName} min-w-0 p-5 sm:p-6`}>
         <h2 className="text-sm font-semibold text-foreground">Quick actions</h2>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           Open a section to review field work in your assigned scope.
         </p>
 
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {CARETAKER_QUICK_ACTIONS.map((action) => {
             const Icon =
               QUICK_ACTION_ICONS[
@@ -84,7 +79,7 @@ export function CaretakerDashboardSidebar({
           Performance overview across leases, tenants, and inspections.
         </p>
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <MiniMetric
             label="Active leases"
             value={data.activeLeases.toLocaleString()}
@@ -115,13 +110,13 @@ export function CaretakerDashboardSidebar({
                   inspection.id,
                   "inspection",
                 )}`}
-                className="flex items-start justify-between gap-3 rounded-2xl border border-border bg-muted/10 p-3 text-sm transition hover:border-primary/25 hover:bg-muted/20"
+                className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-border bg-muted/10 p-3 text-sm transition hover:border-primary/25 hover:bg-muted/20"
               >
                 <div className="min-w-0">
                   <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] font-semibold text-foreground">
                     {inspection.notice.tenant.fullName}
                   </p>
-                  <p className="mt-1 truncate text-xs text-muted-foreground">
+                  <p className="mt-1 break-words text-xs text-muted-foreground">
                     {getUnitLabel({ unit: inspection.notice.lease.unit })}
                   </p>
                 </div>
@@ -134,8 +129,8 @@ export function CaretakerDashboardSidebar({
         ) : null}
       </section>
 
-      <section className={`${panelShellClassName} p-4`}>
-        <h2 className="text-sm font-semibold text-foreground">Field guidance</h2>
+      <details className={`${panelShellClassName} p-5 sm:p-6`}>
+        <summary className="cursor-pointer text-sm font-semibold text-foreground">Field guidance and help</summary>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           Common caretaker workflows for inspections, billing, and maintenance.
         </p>
@@ -168,7 +163,7 @@ export function CaretakerDashboardSidebar({
             className="w-full justify-center"
           />
         </div>
-      </section>
-    </WorkspaceGuidePanel>
+      </details>
+    </div>
   );
 }

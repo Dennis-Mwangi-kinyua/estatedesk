@@ -50,6 +50,7 @@ export async function getCaretakerNotificationsData(args: {
                 title: true,
                 message: true,
                 type: true,
+                providerResponse: true,
                 channel: true,
                 status: true,
                 readAt: true,

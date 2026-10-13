@@ -1,3 +1,4 @@
+import { resolveNotificationActionUrl, readNotificationActionUrl } from "@/lib/push/notification-links";
 import { NotificationViewButton } from "@/components/notifications/notification-view-button";
 import { Send } from "lucide-react";
 import { Clock3 } from "@/components/shared/colored-icons";
@@ -68,7 +69,7 @@ export function NotificationCard({
             </span>
           </div>
 
-          <div className="mt-3"><NotificationViewButton notificationId={notification.id} /></div>
+          <div className="mt-3"><NotificationViewButton notificationId={notification.id} href={resolveNotificationActionUrl({ type: notification.type, title: notification.title, audience: "caretaker", actionUrl: readNotificationActionUrl(notification.providerResponse) })} /></div>
           {isUnread ? (
             <form action={markCaretakerNotificationReadAction} className="mt-3">
               <input

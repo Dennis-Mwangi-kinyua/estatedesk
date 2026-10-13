@@ -10,13 +10,13 @@ export const dynamic = "force-dynamic";
  * spam the browser console with 401 noise.
  */
 export async function GET() {
-  const session = await getUserSession();
-
-  if (!session?.userId) {
-    return NextResponse.json({ count: 0 });
-  }
-
   try {
+    const session = await getUserSession();
+
+    if (!session?.userId) {
+      return NextResponse.json({ count: 0 });
+    }
+
     const count = await resolveUnreadBadgeCount(session);
     return NextResponse.json({ count });
   } catch (error) {
