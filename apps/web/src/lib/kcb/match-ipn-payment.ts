@@ -6,10 +6,7 @@ import {
   normalizeKcbAccountToken,
   type KcbIpnNotification,
 } from "@/lib/kcb/ipn";
-import {
-  parsePaymentInstructions,
-  resolveEnabledMethods,
-} from "@/lib/payments/instructions";
+import { parsePaymentInstructions } from "@/lib/payments/instructions";
 
 export type MatchedKcbPayment = {
   id: string;
@@ -53,17 +50,49 @@ export async function matchKcbIpnPayment(
     accountTokens[0],
   );
 
+  // Resolve the receiving account to one organization before looking at
+  // payments. Payment references and amounts can repeat across organizations.
+  const settings = accountTokens.length
+    ? await db.organizationSettings.findMany({
+        select: { orgId: true, customFields: true },
+      })
+    : [];
+  const orgsByAccount = new Map<string, Set<string>>();
+  for (const row of settings) {
+    const instructions = parsePaymentInstructions(row.customFields);
+    const tokens = [
+      instructions.kcbAccountNumber,
+      instructions.kcbPaybill,
+      instructions.bankAccountNumber,
+      ...Object.values(instructions.bankAccounts).map((account) => account.accountNumber),
+    ].map(normalizeKcbAccountToken).filter(Boolean);
+    for (const token of tokens) {
+      const orgIds = orgsByAccount.get(token) ?? new Set<string>();
+      orgIds.add(row.orgId);
+      orgsByAccount.set(token, orgIds);
+    }
+  }
+  // The credit account is the most specific identifier; generic paybill
+  // numbers may be shared by many organizations.
+  const matchedAccount = accountTokens
+    .map((token) => ({ token, orgIds: orgsByAccount.get(token) }))
+    .find((match) => match.orgIds?.size === 1);
+  const orgId = matchedAccount?.orgIds
+    ? [...matchedAccount.orgIds][0]
+    : null;
+
   const byKey = await db.payment.findFirst({
     where: { transactionReferenceKey: transactionKey },
     select: matchSelect,
   });
-  if (byKey) {
+  if (byKey && orgId && byKey.orgId === orgId) {
     return { payment: byKey, transactionKey, matchStrategy: "transaction_key" };
   }
 
-  if (candidates.length > 0) {
-    const byExternal = await db.payment.findFirst({
+  if (candidates.length > 0 && orgId) {
+    const byExternal = await db.payment.findMany({
       where: {
+        orgId,
         OR: [
           { externalReference: { in: candidates } },
           { reference: { in: candidates } },
@@ -71,12 +100,12 @@ export async function matchKcbIpnPayment(
         verificationStatus: { in: ["PENDING", "NOT_REQUIRED"] },
         gatewayStatus: { in: ["PENDING", "INITIATED", "SUCCESS"] },
       },
-      orderBy: { createdAt: "desc" },
       select: matchSelect,
+      take: 2,
     });
-    if (byExternal) {
+    if (byExternal.length === 1) {
       return {
-        payment: byExternal,
+        payment: byExternal[0],
         transactionKey,
         matchStrategy: "external_or_payment_reference",
       };
@@ -84,9 +113,10 @@ export async function matchKcbIpnPayment(
   }
 
   // Amount + org KCB account match for recent pending BANK payments
-  if (amount > 0 && accountTokens.length > 0) {
+  if (amount > 0 && orgId) {
     const recentPending = await db.payment.findMany({
       where: {
+        orgId,
         method: "BANK",
         verificationStatus: "PENDING",
         gatewayStatus: { in: ["PENDING", "INITIATED"] },
@@ -96,56 +126,19 @@ export async function matchKcbIpnPayment(
         },
       },
       orderBy: { createdAt: "desc" },
-      take: 40,
+      take: 2,
       select: {
         ...matchSelect,
         orgId: true,
       },
     });
 
-    if (recentPending.length > 0) {
-      const orgIds = [...new Set(recentPending.map((row) => row.orgId))];
-      const settings = await db.organizationSettings.findMany({
-        where: { orgId: { in: orgIds } },
-        select: { orgId: true, customFields: true },
-      });
-
-      const orgByAccount = new Map<string, string>();
-      for (const row of settings) {
-        const instructions = parsePaymentInstructions(row.customFields);
-        const enabled = resolveEnabledMethods(instructions);
-        if (!enabled.includes("kcb") && !enabled.some((id) => id.startsWith("kcb"))) {
-          // Still allow match if KCB account numbers are configured
-        }
-
-        const tokens = [
-          instructions.kcbAccountNumber,
-          instructions.kcbPaybill,
-          instructions.bankAccountNumber,
-          ...Object.values(instructions.bankAccounts).flatMap((account) => [
-            account.accountNumber,
-          ]),
-        ]
-          .map((value) => normalizeKcbAccountToken(value))
-          .filter(Boolean);
-
-        for (const token of tokens) {
-          orgByAccount.set(token, row.orgId);
-        }
-      }
-
-      for (const token of accountTokens) {
-        const orgId = orgByAccount.get(token);
-        if (!orgId) continue;
-        const payment = recentPending.find((row) => row.orgId === orgId);
-        if (payment) {
-          return {
-            payment,
-            transactionKey: buildKcbIpnTransactionKey(notification, token),
-            matchStrategy: "amount_and_org_kcb_account",
-          };
-        }
-      }
+    if (recentPending.length === 1) {
+      return {
+        payment: recentPending[0],
+        transactionKey: buildKcbIpnTransactionKey(notification, matchedAccount?.token),
+        matchStrategy: "amount_and_org_kcb_account",
+      };
     }
   }
 
