@@ -29,42 +29,50 @@ export function MarketingMarketersSection(props: MarketingWorkspaceProps) {
 
   return (
     <>
-      <div className="order-1">
+      <div>
         <PageHeader
           eyebrow="Growth"
           title="Marketing attribution"
-          description="Track which marketer brought each lead or customer, manage referral codes, and follow commission readiness from the platform side."
+          description="Manage referral partners, assign leads and organizations, and review commission estimates."
         />
       </div>
 
       {degraded ? (
-        <div className="order-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50">
           Marketing attribution data could not be loaded because the database
           timed out. The page is still available; refresh once the database
           connection recovers.
         </div>
       ) : null}
 
-      <section className="ed-keep-cols order-3 grid grid-cols-1 gap-2.5 min-[360px]:grid-cols-2 sm:gap-3 xl:grid-cols-5">
+      <section
+        aria-label="Marketing overview"
+        className="ed-keep-cols grid grid-cols-1 gap-2.5 min-[360px]:grid-cols-2 sm:gap-3 xl:grid-cols-5"
+      >
         <StatCard label="Active marketers" value={activeMarketers.length} />
         <StatCard label="Attributed leads" value={attributedLeads} />
-        <StatCard label="Attributed orgs" value={attributedOrgs} note={`${unassignedOrgs} unassigned`} />
+        <StatCard
+          label="Attributed orgs"
+          value={attributedOrgs}
+          note={`${unassignedOrgs} unassigned`}
+        />
         <StatCard label="Unassigned leads" value={unassignedLeads} />
         <StatCard
-          label="Est. monthly commission"
+          label="Recent est. monthly commission"
           value={formatCurrency(estimatedMonthlyCommission)}
+          note="Based on the latest 30 organizations"
         />
       </section>
 
       <Surface
+        id="create-marketer"
         title="Add marketer"
-        description="Create a marketer and give them a referral code. Public onboarding and sales forms accept ?ref=CODE, ?referral=CODE, and now let clients type the code manually before submitting."
-        className="order-6 lg:order-4"
+        description="Create a referral partner and assign a unique code they can share with prospective customers."
       >
         <CreateMarketerForm />
       </Surface>
 
-      <Surface title="Marketers" className="order-7 lg:order-5">
+      <Surface id="marketers" title="Marketers">
         <div className="grid min-w-0 gap-3 p-3 2xl:hidden">
           {marketers.map((marketer) => (
             <article

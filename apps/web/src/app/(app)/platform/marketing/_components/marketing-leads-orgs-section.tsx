@@ -17,7 +17,7 @@ export function MarketingLeadsOrgsSection(props: MarketingWorkspaceProps) {
 
   return (
     <>
-      <Surface title="Recent leads" className="order-4 lg:order-6">
+      <Surface id="leads" title="Recent leads">
         <div className="grid min-w-0 gap-3 p-3 2xl:hidden">
           {leads.map((lead) => (
             <article
@@ -149,7 +149,7 @@ export function MarketingLeadsOrgsSection(props: MarketingWorkspaceProps) {
         </div>
       </Surface>
 
-      <Surface title="Recent organizations" className="order-5 lg:order-7">
+      <Surface id="organizations" title="Recent organizations">
         <div className="grid min-w-0 gap-3 p-3 2xl:hidden">
           {organizations.map((org) => {
             const estimated = estimateMonthlyCommission({

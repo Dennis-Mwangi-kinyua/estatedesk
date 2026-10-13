@@ -15,6 +15,8 @@ export default async function PlatformMarketingPage() {
     marketers,
     leads,
     organizations,
+    attributedLeads,
+    attributedOrgs,
     unassignedLeads,
     unassignedOrgs,
   } = await loadPlatformMarketingData();
@@ -32,8 +34,6 @@ export default async function PlatformMarketingPage() {
           : `${marketer.fullName} (inactive)`,
       referralCode: marketer.referralCode,
     }));
-  const attributedLeads = leads.filter((lead) => lead.marketerId).length;
-  const attributedOrgs = organizations.filter((org) => org.marketerId).length;
   const estimatedMonthlyCommission = organizations.reduce((sum, org) => {
     return (
       sum +

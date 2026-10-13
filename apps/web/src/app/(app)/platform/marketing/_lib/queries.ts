@@ -3,7 +3,15 @@ import { prisma } from "@/lib/prisma";
 
 export async function loadPlatformMarketingData() {
   try {
-    const [marketers, leads, organizations, unassignedLeads, unassignedOrgs] =
+    const [
+      marketers,
+      leads,
+      organizations,
+      attributedLeads,
+      attributedOrgs,
+      unassignedLeads,
+      unassignedOrgs,
+    ] =
       await Promise.all([
         prisma.platformMarketer.findMany({
           orderBy: [{ status: "asc" }, { fullName: "asc" }],
@@ -49,6 +57,10 @@ export async function loadPlatformMarketingData() {
             },
           },
         }),
+        prisma.onboardingRequest.count({ where: { marketerId: { not: null } } }),
+        prisma.organization.count({
+          where: { marketerId: { not: null }, deletedAt: null },
+        }),
         prisma.onboardingRequest.count({ where: { marketerId: null } }),
         prisma.organization.count({ where: { marketerId: null, deletedAt: null } }),
       ]);
@@ -58,6 +70,8 @@ export async function loadPlatformMarketingData() {
       marketers,
       leads,
       organizations,
+      attributedLeads,
+      attributedOrgs,
       unassignedLeads,
       unassignedOrgs,
     };
@@ -73,6 +87,8 @@ export async function loadPlatformMarketingData() {
       marketers: [],
       leads: [],
       organizations: [],
+      attributedLeads: 0,
+      attributedOrgs: 0,
       unassignedLeads: 0,
       unassignedOrgs: 0,
     };
