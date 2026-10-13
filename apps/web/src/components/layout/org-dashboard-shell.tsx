@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { OrgDashboardHeader } from "@/components/layout/org-dashboard-header";
 import { OrgDashboardSidebar } from "@/components/layout/org-dashboard-sidebar";
+import { OrgMobileNav } from "@/components/layout/org-mobile-nav";
 import type { OrgRole } from "@/components/layout/org-dashboard-sidebar";
 import {
   SupportSessionBanner,
@@ -49,6 +50,8 @@ export function OrgDashboardShell({
         userName={userName}
         userRole={userRole}
       />
+
+      <OrgMobileNav role={role} menuOpen={mobileOpen} onMenuClick={() => setMobileOpen(true)} />
 
       <div className="lg:pl-72">
         <div className="flex min-h-[calc(100dvh-4rem)] flex-col">

@@ -264,7 +264,7 @@ body.estate-glass-system .organisation-detail-page :is(.workspace-panel, .org-su
 }
 
 /* A single reserved bottom surface for labelled mobile navigation. */
-.estate-glass-system .tenant-mobile-dock {
+.estate-glass-system :is(.tenant-mobile-dock, .org-mobile-dock) {
   display: flex;
   gap: .25rem;
   border-top: 1px solid var(--border);
@@ -308,11 +308,11 @@ body.estate-glass-system .organisation-detail-page :is(.workspace-panel, .org-su
   .tenant-mobile-dock__item:hover { background: var(--muted); color: var(--foreground); }
 }
 @media (min-width: 1024px) {
-  .estate-glass-system .tenant-mobile-dock { display: none; }
+  .estate-glass-system :is(.tenant-mobile-dock, .org-mobile-dock) { display: none; }
 }
 
 @media (max-width: 1023px) {
-  .estate-glass-system .tenant-dashboard-main { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
+  .estate-glass-system :is(.tenant-dashboard-main, .org-mobile-main-offset) { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
 }
 
 /* Shared card surfaces and decorative stickers across public and workspace pages. */

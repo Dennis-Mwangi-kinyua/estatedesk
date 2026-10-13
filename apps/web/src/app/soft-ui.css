@@ -109,7 +109,7 @@ body.estate-glass-system .workspace-identity__avatar { background: var(--muted);
   body.estate-glass-system .platform-brand { gap: .625rem; }
   body.estate-glass-system .platform-brand p:first-child { font-size: .875rem; }
   body.estate-glass-system .platform-brand p:last-child { font-size: .6875rem; }
-  body.estate-glass-system :is(.platform-mobile-dock, .tenant-mobile-dock) {
+  body.estate-glass-system :is(.platform-mobile-dock, .tenant-mobile-dock, .org-mobile-dock) {
     border-color: var(--border);
     border-radius: 1.125rem;
     box-shadow: 0 -2px 12px rgb(25 35 55 / 3%);

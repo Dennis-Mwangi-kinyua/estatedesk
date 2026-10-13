@@ -701,19 +701,15 @@ html.light,
     padding-bottom: max(6rem, env(safe-area-inset-bottom));
   }
 
-  /* Bottom tab bar removed — only need modest safe-area padding on phones */
+  /* Reserve space for the organisation's labelled mobile shortcut dock. */
   .org-mobile-main-offset {
-    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
+    padding-bottom: max(5.5rem, calc(5rem + env(safe-area-inset-bottom)));
   }
 
   @media (min-width: 1024px) {
     .org-mobile-main-offset {
       padding-bottom: 4rem;
     }
-  }
-
-  .org-mobile-tabbar {
-    display: none !important;
   }
 
   :where(main, section, article, aside, div, form, nav, header, footer, li, td, th, span)[class*="bg-slate-900"]:not([class*="/"]),
