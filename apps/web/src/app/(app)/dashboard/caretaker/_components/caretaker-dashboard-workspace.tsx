@@ -12,12 +12,10 @@ import { CaretakerDashboardSidebar } from "./caretaker-dashboard-sidebar";
 
 export type CaretakerDashboardWorkspaceProps = {
   result: CaretakerDashboardResult;
-  fullName: string;
 };
 
 export function CaretakerDashboardWorkspace({
   result,
-  fullName,
 }: CaretakerDashboardWorkspaceProps) {
   return (
     <div className="mx-auto w-full max-w-7xl space-y-5 pb-6 sm:space-y-6">
@@ -32,7 +30,7 @@ export function CaretakerDashboardWorkspace({
         </section>
       ) : (
         <>
-          <CaretakerDashboardHeader data={result.data} fullName={fullName} />
+          <CaretakerDashboardHeader data={result.data} />
           {result.data.assignedUnits === 0 ? <section className={`${panelShellClassName} p-5 sm:p-6`}><h2 className="text-base font-semibold text-foreground">Your current assignment</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">No apartments are currently allocated to you. Any issues or inspections assigned directly to you remain available. Contact the office if an apartment allocation is missing.</p></section> : null}
 
           <div className="grid min-w-0 items-stretch gap-5 xl:grid-cols-2">

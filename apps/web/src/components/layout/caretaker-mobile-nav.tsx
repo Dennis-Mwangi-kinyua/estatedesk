@@ -13,14 +13,12 @@ import { CARETAKER_NAV_ITEMS } from "@/app/(app)/dashboard/caretaker/_lib/i18n";
 import { CaretakerNavLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-nav-label";
 
 type Props = {
-  fullName: string;
   open: boolean;
   onClose: () => void;
   returnFocusRef?: React.RefObject<HTMLButtonElement | null>;
 };
 
 export function CaretakerMobileSidebar({
-  fullName,
   open,
   onClose,
   returnFocusRef,
@@ -112,9 +110,6 @@ export function CaretakerMobileSidebar({
                 Navigation
               </h2>
 
-              <p className="mt-1 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm text-muted-foreground">
-                {fullName}
-              </p>
             </div>
 
             <button data-workspace-action="true"
@@ -129,17 +124,6 @@ export function CaretakerMobileSidebar({
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-4">
-          <div className="mb-5 rounded-2xl border border-border bg-muted/10 p-4">
-            <p className="text-xs font-medium text-muted-foreground">Workspace</p>
-            <p className="mt-1 text-sm font-semibold text-foreground">
-              Caretaker dashboard
-            </p>
-            <p className="mt-2 text-xs leading-5 text-muted-foreground">
-              Access issues, inspections, tenants, leases, and billing in one
-              organized workspace.
-            </p>
-          </div>
-
           <nav className="space-y-1.5">
             {CARETAKER_NAV_ITEMS.map((item) => {
               const active =

@@ -11,11 +11,7 @@ import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { CARETAKER_NAV_ITEMS } from "@/app/(app)/dashboard/caretaker/_lib/i18n";
 import { CaretakerNavLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-nav-label";
 
-type Props = {
-  fullName: string;
-};
-
-export function CaretakerDashboardSidebar({ fullName }: Props) {
+export function CaretakerDashboardSidebar() {
   const pathname = usePathname();
 
   return (
@@ -29,10 +25,8 @@ export function CaretakerDashboardSidebar({ fullName }: Props) {
               </p>
 
               <h2 className="mt-2 text-lg font-semibold tracking-tight text-foreground 2xl:text-xl">
-                Caretaker Dashboard
+                Field operations
               </h2>
-
-              <p className="mt-1 text-sm text-muted-foreground">{fullName}</p>
             </HoverPrefetchLink>
           </div>
 

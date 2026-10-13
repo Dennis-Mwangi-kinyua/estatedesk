@@ -14,7 +14,7 @@ export function CaretakerDashboardShell({
   return (
     <div data-workspace="caretaker" className="app-mobile-canvas ed-mobile-surface h-dvh w-full min-w-0 overflow-hidden">
       <div className="flex h-full min-h-0 w-full">
-        <CaretakerDashboardSidebar fullName={fullName} />
+        <CaretakerDashboardSidebar />
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <CaretakerDashboardHeader fullName={fullName} />

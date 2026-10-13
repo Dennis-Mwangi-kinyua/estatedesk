@@ -4,7 +4,6 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { TenantMobileNav } from "./tenant-mobile-nav";
-import { TenantDashboardFooter } from "./tenant-dashboard-footer";
 import { TenantDashboardHeader } from "./tenant-dashboard-header";
 import { TenantDashboardSidebar } from "./tenant-dashboard-sidebar";
 
@@ -54,11 +53,6 @@ export function TenantDashboardShell({
             </div>
           </main>
 
-          <div className="hidden px-4 pb-4 sm:px-6 lg:block lg:px-8">
-            <div className="app-content-shell">
-              <TenantDashboardFooter organizationName={organizationName} />
-            </div>
-          </div>
         </div>
       </div>
     </div>

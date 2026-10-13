@@ -10,21 +10,17 @@ import { panelShellClassName, StatCard } from "./caretaker-ui";
 
 type CaretakerDashboardHeaderProps = {
   data: CaretakerDashboardData;
-  fullName: string;
 };
 
 export function CaretakerDashboardHeader({
   data,
-  fullName,
 }: CaretakerDashboardHeaderProps) {
   const attentionCount =
     data.openIssues + data.pendingWaterBills + data.scheduledInspections;
 
-  const firstName = fullName.trim().split(/\s+/)[0] || "Caretaker";
-
   return (
     <section data-workspace-header className={panelShellClassName}>
-      <WorkspaceHero kind="caretaker" eyebrow="Field operations" title={`Welcome back, ${firstName}`} description={attentionCount > 0 ? `${attentionCount} item${attentionCount === 1 ? "" : "s"} need attention across issues, inspections, and water billing in your assigned scope.` : "Your queues are clear. Review assigned units and stay ready for field updates."} actions={<>
+      <WorkspaceHero kind="caretaker" eyebrow="Overview" title="Your work at a glance" description={attentionCount > 0 ? `${attentionCount} item${attentionCount === 1 ? "" : "s"} need attention across issues, inspections, and water billing in your assigned scope.` : "Your queues are clear. Review assigned units and stay ready for field updates."} actions={<>
           <Link data-workspace-action="true" href="/dashboard/caretaker/today" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><ClipboardList className="h-4 w-4" />Today’s work</Link>
           <Link data-workspace-action="true" href="/dashboard/caretaker/inspections" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><ClipboardList className="h-4 w-4" />Inspections</Link>
           <Link data-workspace-action="true" href="/dashboard/caretaker/issues" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><Wrench className="h-4 w-4" />Open issues</Link>

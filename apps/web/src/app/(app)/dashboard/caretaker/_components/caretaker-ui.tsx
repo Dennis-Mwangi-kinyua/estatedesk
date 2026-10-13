@@ -171,15 +171,6 @@ export function ErrorStateCard({
   );
 }
 
-export function CaretakerWorkspaceFooter({ note }: { note?: string }) {
-  return (
-    <footer className="rounded-3xl border border-border bg-card px-4 py-4 text-xs text-muted-foreground sm:px-5">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p>
-          © {new Date().getFullYear()} EstateDesk · Caretaker Dashboard
-        </p>
-        {note ? <p>{note}</p> : null}
-      </div>
-    </footer>
-  );
+export function CaretakerWorkspaceFooter(_props: { note?: string }) {
+  return null;
 }

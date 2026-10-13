@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { OrgDashboardHeader } from "@/components/layout/org-dashboard-header";
 import { OrgDashboardSidebar } from "@/components/layout/org-dashboard-sidebar";
-import { OrgDashboardFooter } from "@/components/layout/org-dashboard-footer";
 import type { OrgRole } from "@/components/layout/org-dashboard-sidebar";
 import {
   SupportSessionBanner,
@@ -61,11 +60,6 @@ export function OrgDashboardShell({
             </div>
           </main>
 
-          <div className="hidden px-4 pb-4 sm:px-6 lg:block lg:px-8">
-            <div className="app-content-shell">
-              <OrgDashboardFooter organizationName={organizationName} />
-            </div>
-          </div>
         </div>
       </div>
     </div>

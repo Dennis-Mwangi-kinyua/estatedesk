@@ -24,7 +24,7 @@ export function CaretakerDashboardHeader({
 
   return (
     <>
-      <header className="ed-shell-panel sticky top-0 z-40 shrink-0 border-b">
+      <header className="ed-shell-panel sticky top-0 z-40 shrink-0 border-b shadow-sm">
         <div className="flex h-auto min-h-[72px] flex-col gap-3 px-3 py-3 sm:min-h-[68px] sm:flex-row sm:items-center sm:justify-between sm:px-6 xl:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button data-workspace-action="true"
@@ -46,12 +46,12 @@ export function CaretakerDashboardHeader({
                 </p>
                 <span className="hidden h-1 w-1 rounded-full bg-border sm:inline-block" />
                 <span className="hidden text-xs font-medium text-muted-foreground sm:inline">
-                  Caretaker
+                  Field operations
                 </span>
               </div>
 
               <h1 className="mt-0.5 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground sm:text-base lg:text-lg">
-                Welcome back, {fullName}
+                Workspace
               </h1>
             </div>
           </div>
@@ -77,7 +77,6 @@ export function CaretakerDashboardHeader({
       </header>
 
       <CaretakerMobileSidebar
-        fullName={fullName}
         open={open}
         onClose={closeMenu}
         returnFocusRef={menuButtonRef}

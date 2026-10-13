@@ -20,5 +20,5 @@ export default async function CaretakerDashboardPage() {
     membershipScope: session.membershipScope,
   });
 
-  return <CaretakerDashboard result={result} fullName={session.fullName} />;
+  return <CaretakerDashboard result={result} />;
 }
