@@ -64,35 +64,6 @@ export function StatCard({
   return <div className={className}>{content}</div>;
 }
 
-export function QuickLinkCard({
-  href,
-  title,
-  description,
-  icon: Icon,
-}: {
-  href: string;
-  title: string;
-  description: string;
-  icon: IconType;
-}) {
-  return (
-    <DeferredLink
-      href={href}
-      className="workspace-action group rounded-2xl border border-border bg-muted/10 px-4 py-4 transition hover:-translate-y-0.5 hover:border-border/80 hover:bg-muted/20 hover:shadow-sm"
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-semibold text-foreground">{title}</p>
-          <p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">
-            {description}
-          </p>
-        </div>
-        <Icon className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
-      </div>
-    </DeferredLink>
-  );
-}
-
 export function InfoPanel({
   title,
   children,

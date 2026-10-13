@@ -1,26 +1,3 @@
-export const NEW_ISSUE_QUICK_ACTIONS = [
-  {
-    href: "/dashboard/caretaker/issues",
-    title: "My issues",
-    description: "Return to your maintenance issue board.",
-  },
-  {
-    href: "/dashboard/caretaker/inspections",
-    title: "Inspections",
-    description: "Check scheduled move-out inspections.",
-  },
-  {
-    href: "/dashboard/caretaker/notifications",
-    title: "Notifications",
-    description: "Review operational alerts sent to you.",
-  },
-  {
-    href: "/dashboard/caretaker",
-    title: "Dashboard",
-    description: "Return to your caretaker overview.",
-  },
-] as const;
-
 export const EMERGENCY_ISSUE_TEMPLATE = {
   title: "Emergency maintenance",
   description:

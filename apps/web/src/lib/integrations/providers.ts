@@ -13,7 +13,7 @@ export const integrationProviders = [
       { key: "KRA_ETIMS_BASE_URL", label: "Base URL", requiredForLive: true },
       { key: "KRA_ETIMS_CLIENT_ID", label: "Client ID", requiredForLive: true },
       { key: "KRA_ETIMS_CLIENT_SECRET", label: "Client secret", requiredForLive: true },
-      { key: "KRA_ETIMS_WEBHOOK_SECRET", label: "Webhook secret", requiredForLive: false },
+      { key: "KRA_ETIMS_WEBHOOK_SECRET", label: "Webhook secret", requiredForLive: true },
     ],
     localFoundation:
       "Taxpayer profiles, rental returns, tax charges, eTIMS-ready receipts, sales payload builder, OAuth token client, webhook at /api/webhooks/kra-etims.",
@@ -152,6 +152,7 @@ export const integrationProviders = [
       { key: "WHATSAPP_PHONE_NUMBER_ID", label: "Phone number ID", requiredForLive: true },
       { key: "WHATSAPP_ACCESS_TOKEN", label: "Access token", requiredForLive: true },
       { key: "WHATSAPP_VERIFY_TOKEN", label: "Verify token", requiredForLive: false },
+      { key: "WHATSAPP_APP_SECRET", label: "Webhook signature secret", requiredForLive: true },
       { key: "AI_ASSISTANT_PROVIDER", label: "AI provider", requiredForLive: false },
       { key: "AI_ASSISTANT_API_KEY", label: "AI API key", requiredForLive: false },
     ],

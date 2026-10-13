@@ -1,4 +1,3 @@
-import { CaretakerWorkspaceFooter } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerVendorsPageData } from "../_lib/types";
 import { QuotePriceCheckPanel } from "./quote-price-check";
 import { VendorsHeader } from "./vendors-header";
@@ -18,7 +17,6 @@ export function VendorsWorkspace({
         <VendorsList data={data} issueId={issueId} />
         <QuotePriceCheckPanel />
       </div>
-      <CaretakerWorkspaceFooter note="Vendor directory, dispatch requests, and local price index checks" />
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import { CaretakerWorkspaceFooter } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerNotificationsPageData } from "../_lib/types";
 import { NotificationsHeader } from "./notifications-header";
 import { NotificationsList } from "./notifications-list";
@@ -20,7 +19,6 @@ export function NotificationsWorkspace({
         <NotificationsSidebar />
       </div>
 
-      <CaretakerWorkspaceFooter note="Operational updates for caretakers in the field" />
     </div>
   );
 }

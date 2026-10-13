@@ -46,10 +46,6 @@ export function TenantDashboardWorkspace({ data, initialCharges }: { data: Tenan
       <TenantDashboardHeader
         fullName={fullName}
         organizationName={portalContext.tenant?.org.name ?? "Organisation"}
-        propertyName={propertyName}
-        buildingName={buildingName}
-        houseNo={houseNo}
-        leaseStatus={leaseStatus}
         monthlyRent={monthlyRent}
         dueDay={dueDay}
         openIssuesCount={openIssuesCount}
@@ -65,8 +61,6 @@ export function TenantDashboardWorkspace({ data, initialCharges }: { data: Tenan
         buildingName={buildingName}
         houseNo={houseNo}
         leaseStatus={leaseStatus}
-        monthlyRent={monthlyRent}
-        dueDay={dueDay}
         images={images}
       />
 

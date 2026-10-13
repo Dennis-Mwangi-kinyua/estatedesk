@@ -40,11 +40,13 @@ export function TaxesWorkspace({
   orgRole,
   etimsReadiness,
   orgIntegration,
+  invalidEtimsUrl,
 }: {
   data: TaxesPageData;
   orgRole?: OrgRole | null;
   etimsReadiness: EtimsReadiness;
   orgIntegration: IntegrationSettings | null;
+  invalidEtimsUrl?: boolean;
 }) {
   const canEditEtims = orgRole === "ADMIN" || orgRole === "ACCOUNTANT";
 
@@ -64,6 +66,11 @@ export function TaxesWorkspace({
 
           <TaxesStats stats={data.stats} />
           <TaxesEtimsPanel readiness={etimsReadiness} />
+          {invalidEtimsUrl ? (
+            <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+              The API base URL was not saved. Use the official HTTPS KRA host for the selected environment.
+            </p>
+          ) : null}
           {canEditEtims ? (
             <TaxesEtimsSettingsForm integration={orgIntegration} />
           ) : null}

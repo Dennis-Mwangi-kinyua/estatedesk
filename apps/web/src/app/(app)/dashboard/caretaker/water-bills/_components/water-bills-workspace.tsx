@@ -1,4 +1,3 @@
-import { CaretakerWorkspaceFooter } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerWaterBillsData } from "../_lib/types";
 import {
   WaterBillsApprovalSection,
@@ -25,7 +24,6 @@ export function WaterBillsWorkspace({ data }: { data: CaretakerWaterBillsData })
         <WaterBillsSidebar />
       </div>
 
-      <CaretakerWorkspaceFooter note="Water billing workflow for assigned units" />
     </div>
   );
 }

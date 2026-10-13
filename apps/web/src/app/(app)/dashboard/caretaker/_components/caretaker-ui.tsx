@@ -170,7 +170,3 @@ export function ErrorStateCard({
     </div>
   );
 }
-
-export function CaretakerWorkspaceFooter(_props: { note?: string }) {
-  return null;
-}

@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/crypto/secrets";
 import {
   getEtimsClientConfig,
+  normalizeEtimsBaseUrl,
   type EtimsClientConfig,
   type EtimsEnvironment,
 } from "@/lib/tax/etims-client";
@@ -49,18 +50,21 @@ export async function getEtimsClientConfigForOrg(
   else if (row.environment === "SANDBOX") environment = "sandbox";
   else if (clientId && secret) environment = "sandbox";
 
-  const baseUrl =
+  const rawBaseUrl =
     row.apiBaseUrl?.trim() ||
-    platform.baseUrl ||
+    (platform.environment === environment ? platform.baseUrl : null) ||
     (environment === "production"
       ? "https://etims-api.kra.go.ke"
       : "https://etims-api-sbx.kra.go.ke");
+  const baseUrl = environment === "unconfigured"
+    ? null
+    : normalizeEtimsBaseUrl(rawBaseUrl, environment);
 
   const controlUnitSerial =
     row.controlUnitSerial?.trim() || platform.controlUnitSerial;
 
   const configured = Boolean(
-    clientId && secret && environment !== "unconfigured",
+    clientId && secret && baseUrl,
   );
 
   return {

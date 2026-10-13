@@ -3,7 +3,6 @@ import { ArrowLeft, Receipt, XCircle } from "lucide-react";
 import { Clock3, Landmark } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelBodyClassName,
   panelShellClassName,
@@ -45,7 +44,6 @@ export function CaretakerFinanceWorkspace({
         />
       )}
 
-      <CaretakerWorkspaceFooter note="Spend requests for caretakers in assigned properties" />
     </div>
   );
 }

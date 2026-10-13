@@ -86,7 +86,6 @@ export async function getTenantIssuesData(
     resolvedIssues: issues.filter(
       (issue) => issue.status === "RESOLVED" || issue.status === "CLOSED",
     ).length,
-    latestIssue: issues[0] ?? null,
     totalPages: Math.max(1, Math.ceil(issues.length / HISTORY_PAGE_SIZE)),
   };
 }

@@ -15,7 +15,7 @@ export function ReportButton({
     return (
       <span className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-200 px-4 py-2 text-sm font-medium text-slate-500">
         <FileText className="mr-2 h-4 w-4" />
-        View report
+        Report available after inspection
       </span>
     );
   }

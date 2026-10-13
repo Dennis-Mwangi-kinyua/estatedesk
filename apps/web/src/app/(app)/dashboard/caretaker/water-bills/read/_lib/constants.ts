@@ -1,26 +1,3 @@
-export const READ_QUICK_ACTIONS = [
-  {
-    href: "/dashboard/caretaker/water-bills",
-    title: "Water bills",
-    description: "Track submitted readings and issued bills.",
-  },
-  {
-    href: "/dashboard/caretaker/issues",
-    title: "Issues",
-    description: "Review maintenance tickets in your scope.",
-  },
-  {
-    href: "/dashboard/caretaker/tenants",
-    title: "Tenants",
-    description: "Open tenant records for assigned units.",
-  },
-  {
-    href: "/dashboard/caretaker",
-    title: "Dashboard",
-    description: "Return to your caretaker overview.",
-  },
-] as const;
-
 export const READ_GUIDANCE = [
   {
     title: "Capture both readings",

@@ -17,6 +17,14 @@ export function OrgDashboardStats({ data }: { data: OrgDashboardSummary }) {
 
       <div className="workspace-card-grid grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
         <StatCard
+          label="Occupancy"
+          value={`${data.occupancyRate}%`}
+          note={`${data.vacantUnits} vacant unit${data.vacantUnits === 1 ? "" : "s"}`}
+          icon={Home}
+          href="/dashboard/org/units"
+          highlight={data.occupancyRate >= 80 ? "success" : data.occupancyRate > 0 ? "warning" : "default"}
+        />
+        <StatCard
           label="Total Units"
           value={data.totalUnits}
           note="All active rentable units"

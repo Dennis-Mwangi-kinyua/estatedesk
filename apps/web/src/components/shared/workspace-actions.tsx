@@ -9,7 +9,6 @@ type WorkspaceAction = { label: string; description: string; href: string };
 
 function actionsForWorkspace(path: string, role?: string): WorkspaceAction[] {
   if (path === "/platform/organizations") return [
-    { label: "Create organisation", description: "Set up a workspace and owner login", href: "/platform/organizations/new" },
     { label: "Review onboarding", description: "Follow up on account requests", href: "/platform/onboarding" },
     { label: "Find an organisation", description: "Search platform records", href: "/platform/search" },
   ];

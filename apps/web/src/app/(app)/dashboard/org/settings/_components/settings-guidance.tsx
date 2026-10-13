@@ -2,7 +2,7 @@ import Link from "@/components/navigation/workspace-link";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import type { OrgRole } from "@prisma/client";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
-import { SETTINGS_GUIDANCE, SETTINGS_WORKFLOW_STEPS } from "../_lib/constants";
+import { SETTINGS_GUIDANCE } from "../_lib/constants";
 import { SETTINGS_NAV_ITEMS, type SettingsSectionId } from "../settings-ui-nav";
 import { panelShellClassName } from "./settings-ui";
 
@@ -68,24 +68,7 @@ export function SettingsGuidance({
             ))}
           </div>
         </section>
-      ) : (
-        <section className={`${panelShellClassName} p-4`}>
-          <h2 className="text-sm font-semibold text-foreground">Setup checklist</h2>
-          <ol className="mt-4 space-y-3">
-            {SETTINGS_WORKFLOW_STEPS.map((item) => (
-              <li
-                key={item.step}
-                className="rounded-2xl border border-border bg-muted/10 p-3"
-              >
-                <p className="text-sm font-semibold text-foreground">{item.title}</p>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                  {item.description}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
+      ) : null}
 
       <section className={`${panelShellClassName} p-4`}>
         <h2 className="text-sm font-semibold text-foreground">API integration guide</h2>

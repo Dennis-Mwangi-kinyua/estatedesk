@@ -14,6 +14,7 @@ export type TenantNotificationsPageData = {
   };
   notifications: Array<{
     id: string;
+    actionHref: string;
     title: string;
     message: string;
     type: string;

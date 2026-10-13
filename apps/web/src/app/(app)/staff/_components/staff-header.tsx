@@ -1,3 +1,4 @@
+import { WorkflowStepCards } from "@/components/help/workflow-step-list";
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import { ArrowLeft, ChevronDown } from "lucide-react";
@@ -55,9 +56,9 @@ export function StaffHeader({ data, orgRole }: StaffHeaderProps) {
         </Link>)}
       </div>
       <details className="group border-t border-border">
-        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-medium text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">How staff management works<ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 transition group-open:rotate-180" /></summary>
+        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-medium text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">Workflow overview<ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 transition group-open:rotate-180" /></summary>
         <div className="grid gap-3 px-4 pb-4 sm:grid-cols-3 sm:px-6 sm:pb-6">
-          {STAFF_DIRECTORY_WORKFLOW.map(item => <div key={item.step} className="rounded-2xl bg-muted/20 p-4"><p className="text-sm font-semibold"><span className="mr-2 text-primary">{item.step}</span>{item.title}</p><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p></div>)}
+          <WorkflowStepCards steps={STAFF_DIRECTORY_WORKFLOW} />
         </div>
       </details>
     </section>

@@ -1,3 +1,4 @@
+import { WorkflowStepCards } from "@/components/help/workflow-step-list";
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "@/components/navigation/workspace-link";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
@@ -85,24 +86,9 @@ export function NotificationsHero({
       </div>
 
       <details className="border-t border-border">
-        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-4 text-sm font-semibold sm:px-6"><VisualSticker label="Help" size="xs" />How this workspace works</summary>
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-4 text-sm font-semibold sm:px-6"><VisualSticker label="Help" size="xs" />Workflow overview</summary>
       <div className="grid gap-3 px-5 py-5 sm:grid-cols-3 sm:px-6">
-        {OPERATIONS_WORKFLOW_STEPS.map((item) => (
-          <div
-            key={item.step}
-            className="rounded-2xl border border-border bg-muted/15 p-4"
-          >
-            <div className="flex items-center gap-3">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                {item.step}
-              </span>
-              <p className="text-sm font-semibold text-foreground">{item.title}</p>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              {item.description}
-            </p>
-          </div>
-        ))}
+        <WorkflowStepCards steps={OPERATIONS_WORKFLOW_STEPS} />
       </div>
       </details>
     </section>

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { writePlatformAuditLog } from "@/lib/audit/security";
+import { safeReturnTo } from "@/lib/auth/safe-return-to";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { sendSecurityAlert } from "@/lib/security/alerts";
 import { setUserSession } from "@/lib/auth/session";
@@ -121,7 +122,7 @@ export async function leaveOrgSupportAccessAction(formData: FormData) {
   });
 
   const support = await getActiveSupportSession(session.userId);
-  const returnTo = readString(formData, "returnTo") || "/platform/support-access";
+  const requestedReturnTo = readString(formData, "returnTo");
 
   await clearSupportSessionCookie();
 
@@ -148,9 +149,12 @@ export async function leaveOrgSupportAccessAction(formData: FormData) {
   revalidatePath("/platform/support-access");
   revalidatePath("/platform/control");
   revalidatePath("/dashboard/org");
-  redirect(returnTo.startsWith("/platform") || returnTo.startsWith("/dashboard")
-    ? returnTo
-    : "/platform/support-access");
+  const candidate = safeReturnTo(requestedReturnTo);
+  const safePath = candidate &&
+    (candidate.startsWith("/platform/") || candidate.startsWith("/dashboard/"))
+    ? candidate
+    : "/platform/support-access";
+  redirect(safePath);
 }
 
 export async function extendOrgSupportAccessAction() {

@@ -1,76 +1,19 @@
-import { FileText } from "lucide-react";
-import { ClipboardList, CircleHelp as HelpCircle, House as Home, Wrench } from "@/components/shared/colored-icons";
+import { WorkflowStepCards } from "@/components/help/workflow-step-list";
 import { WorkspaceGuidePanel } from "@/components/help/workspace-guide-panel";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
-import {
-  panelShellClassName,
-  QuickLinkCard,
-} from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
-import { INSPECTIONS_QUICK_ACTIONS, INSPECTIONS_WORKFLOW } from "../_lib/constants";
-
-const QUICK_ACTION_ICONS = {
-  Dashboard: Home,
-  Issues: Wrench,
-  Leases: FileText,
-  "Help guides": HelpCircle,
-} as const;
+import { panelShellClassName } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
+import { INSPECTIONS_WORKFLOW } from "../_lib/constants";
 
 export function InspectionsSidebar() {
   return (
     <WorkspaceGuidePanel
-      title="Quick actions"
-      description="Jump to related caretaker workflows after reviewing inspections."
+      title="Inspection workflow"
+      description="Suggested process for move-out inspections in the field."
       triggerClassName={panelShellClassName}
     >
       <section className={`${panelShellClassName} p-4`}>
-        <h2 className="text-sm font-semibold text-foreground">Quick actions</h2>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Jump to related caretaker workflows after reviewing inspections.
-        </p>
-
         <div className="mt-4 space-y-3">
-          {INSPECTIONS_QUICK_ACTIONS.map((action) => {
-            const Icon =
-              QUICK_ACTION_ICONS[
-                action.title as keyof typeof QUICK_ACTION_ICONS
-              ] ?? ClipboardList;
-
-            return (
-              <QuickLinkCard
-                key={action.href}
-                href={action.href}
-                title={action.title}
-                description={action.description}
-                icon={Icon}
-              />
-            );
-          })}
-        </div>
-      </section>
-
-      <section className={`${panelShellClassName} p-4`}>
-        <h2 className="text-sm font-semibold text-foreground">Inspection workflow</h2>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Suggested process for move-out inspections in the field.
-        </p>
-
-        <div className="mt-4 space-y-3">
-          {INSPECTIONS_WORKFLOW.map((item) => (
-            <div
-              key={item.step}
-              className="rounded-2xl border border-border bg-muted/10 p-3"
-            >
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                  {item.step}
-                </span>
-                <p className="text-sm font-semibold text-foreground">{item.title}</p>
-              </div>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {item.description}
-              </p>
-            </div>
-          ))}
+          <WorkflowStepCards steps={INSPECTIONS_WORKFLOW} />
         </div>
 
         <div className="mt-4">

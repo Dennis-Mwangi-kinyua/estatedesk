@@ -1,5 +1,4 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import { DevicesPanel } from "@/features/security/_components/devices-panel";
@@ -34,7 +33,6 @@ export function SecurityWorkspace({
         </section>
       )}
 
-      <CaretakerWorkspaceFooter note="Session management and account security for caretakers" />
     </div>
   );
 }

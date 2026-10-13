@@ -27,6 +27,45 @@ export type EtimsClientConfig = {
   configured: boolean;
 };
 
+export function normalizeEtimsBaseUrl(
+  value: string,
+  environment: Exclude<EtimsEnvironment, "unconfigured">,
+) {
+  try {
+    const url = new URL(value);
+    const expectedHost = environment === "production"
+      ? "etims-api.kra.go.ke"
+      : "etims-api-sbx.kra.go.ke";
+    if (
+      url.protocol !== "https:" ||
+      url.hostname !== expectedHost ||
+      url.port ||
+      url.username ||
+      url.password ||
+      url.search ||
+      url.hash ||
+      (url.pathname !== "/" && url.pathname !== "")
+    ) return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
+function endpointOnBase(baseUrl: string, path: string) {
+  try {
+    if (/[\\\u0000-\u001f\u007f]/.test(path)) return null;
+    const base = new URL(baseUrl);
+    const endpoint = new URL(path, base);
+    return endpoint.origin === base.origin && endpoint.protocol === "https:" &&
+      !endpoint.username && !endpoint.password
+      ? endpoint.toString()
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export type EtimsSubmitResult = {
   ok: boolean;
   mode: "live" | "dry_run" | "skipped";
@@ -49,7 +88,7 @@ export function getEtimsClientConfig(): EtimsClientConfig {
   const rawEnv = (trimEnv("KRA_ETIMS_ENVIRONMENT") || "").toLowerCase();
   const clientId = trimEnv("KRA_ETIMS_CLIENT_ID");
   const clientSecret = trimEnv("KRA_ETIMS_CLIENT_SECRET");
-  const baseUrl =
+  const rawBaseUrl =
     trimEnv("KRA_ETIMS_BASE_URL") ||
     (rawEnv === "production" || rawEnv === "prod"
       ? "https://etims-api.kra.go.ke"
@@ -65,9 +104,10 @@ export function getEtimsClientConfig(): EtimsClientConfig {
     environment = "sandbox";
   }
 
-  const configured = Boolean(
-    clientId && clientSecret && environment !== "unconfigured",
-  );
+  const baseUrl = environment === "unconfigured"
+    ? null
+    : normalizeEtimsBaseUrl(rawBaseUrl, environment);
+  const configured = Boolean(clientId && clientSecret && baseUrl);
 
   return {
     environment: configured ? environment : "unconfigured",
@@ -179,9 +219,10 @@ export async function getEtimsAccessToken(
     return { ok: true, token: cachedToken.token };
   }
 
-  const tokenUrl =
-    process.env.KRA_ETIMS_TOKEN_URL?.trim() ||
-    `${config.baseUrl}/oauth2/v1/generate?grant_type=client_credentials`;
+  const tokenUrl = process.env.KRA_ETIMS_TOKEN_URL?.trim()
+    ? endpointOnBase(config.baseUrl, process.env.KRA_ETIMS_TOKEN_URL.trim())
+    : endpointOnBase(config.baseUrl, "/oauth2/v1/generate?grant_type=client_credentials");
+  if (!tokenUrl) return { ok: false, message: "eTIMS token endpoint must use the configured secure KRA host." };
 
   try {
     const basic = Buffer.from(
@@ -195,6 +236,7 @@ export async function getEtimsAccessToken(
         Accept: "application/json",
       },
       cache: "no-store",
+      signal: AbortSignal.timeout(20_000),
     });
 
     const body = (await response.json().catch(() => ({}))) as {
@@ -269,7 +311,17 @@ export async function submitEtimsSalesReceipt(
   const salesPath =
     process.env.KRA_ETIMS_SALES_PATH?.trim() ||
     "/etims-api/saveTrnsSalesOsdc";
-  const endpoint = `${config.baseUrl.replace(/\/$/, "")}${salesPath.startsWith("/") ? "" : "/"}${salesPath}`;
+  const endpoint = endpointOnBase(config.baseUrl, salesPath.startsWith("/") ? salesPath : `/${salesPath}`);
+  if (!endpoint) {
+    return {
+      ok: false,
+      mode: "live",
+      environment: config.environment,
+      message: "eTIMS sales endpoint must remain on the configured secure KRA host.",
+      payload,
+      receiptNumber: fields.invoiceNumber,
+    };
+  }
 
   try {
     const response = await fetch(endpoint, {
@@ -281,6 +333,7 @@ export async function submitEtimsSalesReceipt(
       },
       body: JSON.stringify(payload),
       cache: "no-store",
+      signal: AbortSignal.timeout(20_000),
     });
 
     const responseBody = await response.json().catch(() => null);

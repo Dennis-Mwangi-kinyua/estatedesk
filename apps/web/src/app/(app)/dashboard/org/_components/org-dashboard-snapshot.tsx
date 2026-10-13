@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import { DeferredLink } from "@/components/navigation/app-links";
-import { ArrowRight, CircleAlert, FileText, Lightbulb, Receipt } from "lucide-react";
+import { ArrowRight, CircleAlert, FileText, Receipt } from "lucide-react";
 import { BellRing, ClipboardCheck, ClipboardList, Droplets, Inbox, Landmark, LogOut, Wallet } from "@/components/shared/colored-icons";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { panelShellClassName } from "./org-dashboard-ui";
@@ -17,17 +17,6 @@ type Signal = {
 
 function buildSignals(data: OrgDashboardSummary): Signal[] {
   return [
-    {
-      title: "Smart insights",
-      description:
-        data.pendingPayments > 0 || data.openIssues > 0
-          ? "Exceptions detected — review ranked actions."
-          : "Operating within current rules.",
-      href: "/dashboard/org/insights",
-      actionLabel: "Insights",
-      icon: Lightbulb,
-      accent: data.pendingPayments > 0 || data.urgentIssues > 0,
-    },
     {
       title: "Payments",
       description:

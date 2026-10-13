@@ -1,5 +1,4 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelBodyClassName,
   panelShellClassName,
@@ -36,7 +35,6 @@ export function ReadingDetailWorkspace({
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Submitted meter reading detail" />
     </div>
   );
 }

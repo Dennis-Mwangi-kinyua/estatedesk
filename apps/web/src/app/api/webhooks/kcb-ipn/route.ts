@@ -50,6 +50,16 @@ export async function POST(request: Request) {
     );
   }
 
+  if (process.env.NODE_ENV === "production" && !process.env.KCB_BUNI_IPN_SIGNATURE_SECRET?.trim()) {
+    await recordWebhookSample({
+      statusCode: 503,
+      summary: "Rejected — KCB IPN authentication is not configured",
+    });
+    return Response.json(kcbIpnAck("UNKNOWN", 503, "Webhook authentication is not configured"), {
+      status: 503,
+    });
+  }
+
   const rawBody = await request.text();
   const url = new URL(request.url);
   const signatureHeader =

@@ -1,5 +1,4 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   MiniMetric,
   panelBodyClassName,
@@ -48,7 +47,6 @@ export function CalendarWorkspace({
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Weekly field operations calendar" />
     </div>
   );
 }

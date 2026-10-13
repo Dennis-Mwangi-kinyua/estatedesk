@@ -1,9 +1,6 @@
-import { Code2, Plus } from "lucide-react";
-import { WalletCards as CreditCard, Building2, UsersRound as Users } from "@/components/shared/colored-icons";
 import { formatNumber } from "../_lib/helpers";
 import type { PlatformDashboardData } from "../_lib/queries";
 import {
-  ActionLink,
   MiniStat,
   Panel,
   ProgressRow,
@@ -17,8 +14,6 @@ export function PlatformDashboardAside({
   const {
     totalRootAdmins,
     totalPlatformAdmins,
-    totalProperties,
-    totalUnits,
     totalSubscriptions,
     activeSubscriptions,
     trialSubscriptions,
@@ -26,23 +21,11 @@ export function PlatformDashboardAside({
   } = data;
 
   return (
-    <section aria-label="Platform operations" className="platform-operations-grid grid min-w-0 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3">
-      <Panel title="Quick actions" subtitle="High-priority shortcuts">
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-1">
-          <ActionLink href="/platform/organizations/new" label="New organization" icon={Plus} />
-          <ActionLink href="/platform/organizations" label="Organization directory" icon={Building2} />
-          <ActionLink href="/platform/users" label="Platform users" icon={Users} />
-          <ActionLink href="/platform/billing" label="Billing center" icon={CreditCard} />
-          <ActionLink href="/platform/developer" label="Developer portal" icon={Code2} />
-        </div>
-      </Panel>
-
+    <section aria-label="Platform operations" className="platform-operations-grid grid min-w-0 items-stretch gap-4 md:grid-cols-2">
       <Panel title="Platform health" subtitle="Core live totals">
         <div className="grid grid-cols-2 gap-2.5">
           <MiniStat label="Root admins" value={formatNumber(totalRootAdmins)} />
           <MiniStat label="Platform admins" value={formatNumber(totalPlatformAdmins)} />
-          <MiniStat label="Properties" value={formatNumber(totalProperties)} />
-          <MiniStat label="Units" value={formatNumber(totalUnits)} />
           <MiniStat label="Tenants" value={formatNumber(data.totalTenants)} />
           <MiniStat label="Leases" value={formatNumber(data.totalLeases)} />
         </div>

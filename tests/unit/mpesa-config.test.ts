@@ -11,6 +11,7 @@ test("separate M-Pesa connections isolate organisation credentials and callbacks
     for (const prefix of ["MPESA", "MPESA_TEST_SECOND"]) {
       for (const key of keys) process.env[`${prefix}_${key}`] = `${prefix}-${key}`;
       process.env[`${prefix}_ENVIRONMENT`] = prefix === "MPESA" ? "production" : "sandbox";
+      process.env[`${prefix}_CALLBACK_URL`] = `https://estatedesk.co.ke/api/webhooks/mpesa?secret=${prefix}-CALLBACK_SECRET`;
     }
     assert.equal(getMpesaConfigForOrg("MPESA-ORG_ID")?.environment, "production");
     assert.equal(getMpesaConfigForOrg("MPESA_TEST_SECOND-ORG_ID")?.consumerKey, "MPESA_TEST_SECOND-CONSUMER_KEY");
@@ -19,11 +20,13 @@ test("separate M-Pesa connections isolate organisation credentials and callbacks
     assert.equal(getMpesaConfigForCallback("unknown"), undefined);
     assert.equal(getMpesaConfigForOrg("unknown"), undefined);
     process.env.MPESA_TEST_SECOND_CALLBACK_SECRET = process.env.MPESA_CALLBACK_SECRET;
+    process.env.MPESA_TEST_SECOND_CALLBACK_URL = `https://estatedesk.co.ke/api/webhooks/mpesa?secret=${process.env.MPESA_CALLBACK_SECRET}`;
     assert.equal(getMpesaConfigForCallback(process.env.MPESA_CALLBACK_SECRET!), undefined);
     process.env.MPESA_TEST_SECOND_ORG_ID = process.env.MPESA_ORG_ID;
     assert.equal(getMpesaConfigForOrg(process.env.MPESA_ORG_ID), undefined);
     process.env.MPESA_TEST_SECOND_ORG_ID = "MPESA_TEST_SECOND-ORG_ID";
     process.env.MPESA_TEST_SECOND_CALLBACK_SECRET = "MPESA_TEST_SECOND-CALLBACK_SECRET";
+    process.env.MPESA_TEST_SECOND_CALLBACK_URL = "https://estatedesk.co.ke/api/webhooks/mpesa?secret=MPESA_TEST_SECOND-CALLBACK_SECRET";
     delete process.env.MPESA_TEST_SECOND_PASSKEY;
     assert.equal(getMpesaConfigForOrg("MPESA_TEST_SECOND-ORG_ID"), undefined);
   } finally {

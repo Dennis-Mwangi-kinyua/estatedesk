@@ -16,16 +16,26 @@ const ACCEPT_INVITE_ENDPOINT = "/api/auth/accept-invite";
 async function getBaseUrl() {
   const requestHeaders = await headers();
 
-  const forwardedHost = requestHeaders.get("x-forwarded-host");
-  const host = forwardedHost ?? requestHeaders.get("host");
-
-  const forwardedProto = requestHeaders.get("x-forwarded-proto");
-  const protocol = forwardedProto ?? "http";
-
-  if (!host) {
-    return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim() || process.env.APP_URL?.trim();
+  if (configured) {
+    try {
+      const url = new URL(configured);
+      if (
+        (url.protocol === "https:" || (process.env.NODE_ENV !== "production" && url.protocol === "http:")) &&
+        !url.username && !url.password
+      ) return url.origin;
+    } catch {
+      // Fall through to the fixed production origin or local development host.
+    }
   }
 
+  if (process.env.NODE_ENV === "production") return "https://estatedesk.co.ke";
+
+  const host = requestHeaders.get("host")?.toLowerCase() ?? "";
+  if (!/^(localhost|127\.0\.0\.1|\[::1\])(?::\d{1,5})?$/.test(host)) {
+    return "http://localhost:3000";
+  }
+  const protocol = requestHeaders.get("x-forwarded-proto") === "https" ? "https" : "http";
   return `${protocol}://${host}`;
 }
 

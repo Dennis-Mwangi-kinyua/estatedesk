@@ -19,6 +19,7 @@ import {
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendSecurityAlert } from "@/lib/security/alerts";
 import { isLoginTimingEnabled } from "@/lib/dev/background-refresh";
+import { safeReturnTo } from "@/lib/auth/safe-return-to";
 
 async function getPreferredPlatformMode() {
   const cookieStore = await cookies();
@@ -157,8 +158,7 @@ export async function loginAction(
   _prevState: LoginActionState,
   formData: FormData,
 ): Promise<LoginActionState> {
-  const requestedReturnTo = String(formData.get("returnTo") ?? "");
-  const returnTo = requestedReturnTo.startsWith("/") && !requestedReturnTo.startsWith("//") ? requestedReturnTo : null;
+  const returnTo = safeReturnTo(formData.get("returnTo"));
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),

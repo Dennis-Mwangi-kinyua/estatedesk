@@ -1,5 +1,4 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelBodyClassName,
   panelShellClassName,
@@ -29,7 +28,6 @@ export function UnitsWorkspace({ data }: { data: CaretakerUnitsPageData }) {
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Assigned apartment directory" />
     </div>
   );
 }

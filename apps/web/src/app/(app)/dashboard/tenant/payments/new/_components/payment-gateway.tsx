@@ -107,9 +107,9 @@ export function PaymentGateway({ availableMethods }: PaymentGatewayProps) {
             <p className="mt-2 text-sm text-muted-foreground">
               STK Push is awaiting setup for your organisation. Contact your property manager to enable it, or submit proof of a payment below.
             </p>
-            <button type="button" disabled className="mt-4 min-h-11 rounded-xl bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground">
-              Send STK push — unavailable
-            </button>
+            <p role="status" className="mt-4 text-sm font-medium text-muted-foreground">
+              M-Pesa STK Push is unavailable until your organisation completes setup.
+            </p>
           </section>
         ) : null}
 

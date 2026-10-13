@@ -70,7 +70,6 @@ export type TenantIssuesPageData = {
   openIssues: number;
   inProgressIssues: number;
   resolvedIssues: number;
-  latestIssue: TenantIssue | null;
   totalPages: number;
 };
 

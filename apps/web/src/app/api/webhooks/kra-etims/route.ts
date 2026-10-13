@@ -15,6 +15,10 @@ export async function POST(request: Request) {
       request.headers.get("x-signature");
 
     const secret = process.env.KRA_ETIMS_WEBHOOK_SECRET?.trim();
+    if (process.env.NODE_ENV === "production" && !secret) {
+      await recordEvent(503, "Rejected — eTIMS webhook authentication is not configured");
+      return Response.json({ ok: false, error: "Webhook authentication is not configured" }, { status: 503 });
+    }
     if (secret && !verifyEtimsWebhookSignature(raw, signature)) {
       await recordEvent(401, "Invalid eTIMS webhook signature");
       return Response.json({ ok: false, error: "Invalid signature" }, { status: 401 });

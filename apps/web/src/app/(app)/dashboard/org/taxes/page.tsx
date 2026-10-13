@@ -6,9 +6,14 @@ import { TaxesWorkspace } from "./_components/taxes-workspace";
 
 export const dynamic = "force-dynamic";
 
-export default async function TaxesPage() {
+export default async function TaxesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await requireManagementAccess();
   const orgId = session.activeOrgId!;
+  const params = await searchParams;
 
   const [data, orgConfig, orgIntegration] = await Promise.all([
     loadTaxesPageData(),
@@ -55,6 +60,7 @@ export default async function TaxesPage() {
       orgRole={session.activeOrgRole}
       etimsReadiness={etimsReadiness}
       orgIntegration={orgIntegration}
+      invalidEtimsUrl={params?.error === "invalid_etims_url"}
     />
   );
 }

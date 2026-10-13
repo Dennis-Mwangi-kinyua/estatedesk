@@ -155,7 +155,6 @@ export function NotificationsWorkspace({
                         <p className="text-sm font-semibold text-foreground">
                           {notification.title}
                         </p>
-                        <div className="mt-3"><NotificationViewButton notificationId={notification.id} /></div>
                       {!notification.readAt ? (
                           <span className="rounded-full bg-neutral-950 px-2 py-0.5 text-[10px] font-medium text-white">
                             New
@@ -175,7 +174,7 @@ export function NotificationsWorkspace({
                         <span>{formatDateTime(notification.createdAt)}</span>
                       </div>
 
-                      <div className="mt-3"><NotificationViewButton notificationId={notification.id} /></div>
+                      <div className="mt-3"><NotificationViewButton notificationId={notification.id} href={notification.actionHref} /></div>
                       {!notification.readAt ? (
                         <form
                           action={markTenantNotificationReadAction}

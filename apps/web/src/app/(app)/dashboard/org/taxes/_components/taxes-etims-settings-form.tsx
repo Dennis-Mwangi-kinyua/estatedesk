@@ -152,6 +152,9 @@ export function TaxesEtimsSettingsForm({
               defaultValue={integration?.apiBaseUrl ?? ""}
               placeholder="https://etims-api-sbx.kra.go.ke"
             />
+            <span className="mt-1 block font-normal text-muted-foreground">
+              Must use the official HTTPS KRA host for the selected environment.
+            </span>
           </label>
 
           <label className={`${label} sm:col-span-2`}>

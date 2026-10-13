@@ -1,3 +1,4 @@
+import { WorkflowStepCards } from "@/components/help/workflow-step-list";
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
@@ -71,24 +72,9 @@ export function ImportsHeader({
       </div>
 
       <details className="border-t border-border">
-        <summary className="flex min-h-12 cursor-pointer items-center gap-3 px-4 text-sm font-semibold text-foreground sm:px-6"><VisualSticker label="Help" size="xs" />How importing works</summary>
+        <summary className="flex min-h-12 cursor-pointer items-center gap-3 px-4 text-sm font-semibold text-foreground sm:px-6"><VisualSticker label="Help" size="xs" />Workflow overview</summary>
       <div className="grid gap-3 border-t border-border px-5 py-5 sm:grid-cols-3 sm:px-6">
-        {IMPORT_WORKFLOW_STEPS.map((item) => (
-          <div
-            key={item.step}
-            className="workspace-metric min-w-0 rounded-2xl border border-border bg-muted/20 p-4"
-          >
-            <div className="flex items-center gap-3">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                {item.step}
-              </span>
-              <p className="text-sm font-semibold text-foreground">{item.title}</p>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              {item.description}
-            </p>
-          </div>
-        ))}
+        <WorkflowStepCards steps={IMPORT_WORKFLOW_STEPS} />
       </div>
 
       <div className="flex items-start gap-3 border-t border-border bg-muted/15 px-5 py-4 sm:px-6">

@@ -34,6 +34,7 @@ export type RuntimeEnvKey =
   | "WHATSAPP_PHONE_NUMBER_ID"
   | "WHATSAPP_ACCESS_TOKEN"
   | "WHATSAPP_VERIFY_TOKEN"
+  | "WHATSAPP_APP_SECRET"
   | "WHATSAPP_DISPLAY_NAME"
   | "WHATSAPP_GRAPH_VERSION"
   | "WHATSAPP_TEMPLATE_LANGUAGE"
@@ -217,6 +218,12 @@ export const runtimeEnvChecks = [
     importance: "optional",
   },
   {
+    key: "WHATSAPP_APP_SECRET",
+    label: "Meta WhatsApp app secret",
+    group: "Messaging",
+    importance: "recommended",
+  },
+  {
     key: "WHATSAPP_BUSINESS_ACCOUNT_ID",
     label: "Meta business account",
     group: "Messaging",
@@ -263,6 +270,12 @@ export const runtimeEnvChecks = [
     label: "KRA/eTIMS client secret",
     group: "Integrations",
     importance: "optional",
+  },
+  {
+    key: "KRA_ETIMS_WEBHOOK_SECRET",
+    label: "KRA/eTIMS webhook signature secret",
+    group: "Integrations",
+    importance: "recommended",
   },
   {
     key: "MPESA_CONSUMER_KEY",

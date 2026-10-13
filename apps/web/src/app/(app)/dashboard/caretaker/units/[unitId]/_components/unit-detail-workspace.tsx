@@ -1,5 +1,4 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelBodyClassName,
   panelShellClassName,
@@ -42,7 +41,6 @@ export function UnitDetailWorkspace({
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Apartment operations profile" />
     </div>
   );
 }

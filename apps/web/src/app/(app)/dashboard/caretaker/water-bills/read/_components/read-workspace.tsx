@@ -1,5 +1,4 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerMeterReadPageData } from "../_lib/types";
@@ -33,7 +32,6 @@ export function ReadWorkspace({ data }: { data: CaretakerMeterReadPageData }) {
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Meter readings per assigned unit · building or single-unit scope" />
     </div>
   );
 }

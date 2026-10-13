@@ -1,5 +1,4 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelBodyClassName,
   panelShellClassName,
@@ -41,7 +40,6 @@ export function BillDetailWorkspace({
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Tenant water bill detail for assigned units" />
     </div>
   );
 }

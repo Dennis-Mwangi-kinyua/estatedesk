@@ -3,7 +3,6 @@ import { ArrowLeft } from "lucide-react";
 import { Wrench } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import {
-  CaretakerWorkspaceFooter,
   panelBodyClassName,
   panelShellClassName,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
@@ -83,7 +82,6 @@ export function NewIssueWorkspace({
         <NewIssueSidebar />
       </div>
 
-      <CaretakerWorkspaceFooter note="Maintenance reporting for caretakers in the field" />
     </div>
   );
 }

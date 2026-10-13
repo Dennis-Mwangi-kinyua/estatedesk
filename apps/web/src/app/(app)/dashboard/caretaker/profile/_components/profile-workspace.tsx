@@ -1,5 +1,4 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerProfilePageData } from "../_lib/types";
@@ -40,7 +39,6 @@ export function ProfileWorkspace({ data }: { data: CaretakerProfilePageData }) {
         </>
       ) : null}
 
-      <CaretakerWorkspaceFooter note="Employment profile and account settings for caretakers" />
     </div>
   );
 }

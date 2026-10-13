@@ -20,10 +20,12 @@ function extractUnitPath(value: string) {
   try {
     const url = new URL(value, window.location.origin);
     const match = url.pathname.match(UNIT_PATH_PATTERN);
-    return match ? `/dashboard/caretaker/units/${match[1]}` : null;
+    const segment = match?.[1];
+    return segment && /^[A-Za-z0-9_-]+$/.test(segment)
+      ? `/dashboard/caretaker/units/${segment}`
+      : null;
   } catch {
-    const match = value.match(UNIT_PATH_PATTERN);
-    return match ? `/dashboard/caretaker/units/${match[1]}` : null;
+    return null;
   }
 }
 

@@ -1,6 +1,5 @@
 import { IssueProgressTracker } from "@/components/issues/issue-progress-tracker";
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelBodyClassName,
   panelShellClassName,
@@ -35,7 +34,6 @@ export function IssueDetailWorkspace({
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Maintenance issue detail" />
     </div>
   );
 }

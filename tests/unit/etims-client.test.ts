@@ -4,10 +4,20 @@ import {
   buildEtimsSalesPayload,
   getEtimsClientConfig,
   getEtimsReadinessSummary,
+  normalizeEtimsBaseUrl,
 } from "../../apps/web/src/lib/tax/etims-client";
 import { buildEtimsReadyReceiptFields } from "../../apps/web/src/lib/tax/etims-receipt";
 
 describe("KRA eTIMS client", () => {
+  it("restricts eTIMS API bases to the official HTTPS host for the selected environment", () => {
+    assert.equal(normalizeEtimsBaseUrl("https://etims-api.kra.go.ke/", "production"), "https://etims-api.kra.go.ke");
+    assert.equal(normalizeEtimsBaseUrl("https://etims-api-sbx.kra.go.ke", "sandbox"), "https://etims-api-sbx.kra.go.ke");
+    assert.equal(normalizeEtimsBaseUrl("https://etims-api.kra.go.ke.attacker.example", "production"), null);
+    assert.equal(normalizeEtimsBaseUrl("http://etims-api.kra.go.ke", "production"), null);
+    assert.equal(normalizeEtimsBaseUrl("https://user:secret@etims-api.kra.go.ke", "production"), null);
+    assert.equal(normalizeEtimsBaseUrl("https://etims-api.kra.go.ke/proxy", "production"), null);
+  });
+
   it("builds OSCU-style sales payload from receipt fields", () => {
     const fields = buildEtimsReadyReceiptFields({
       serialNumber: "RCP-100",

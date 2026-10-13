@@ -28,12 +28,9 @@ export function PlatformDashboardRecent({
   const {
     recentOrganizations,
     recentPayments,
-    totalSubscriptions,
     totalAuditLogs,
-    verifiedPayments,
     pendingPayments,
     failedPayments,
-    currentRevenue,
     organizationSeries,
     revenueSeries,
     organizationBars,
@@ -48,12 +45,9 @@ export function PlatformDashboardRecent({
           revenueSeries={revenueSeries}
           organizationBars={organizationBars}
           revenueBars={revenueBars}
-          totalSubscriptions={totalSubscriptions}
           totalAuditLogs={totalAuditLogs}
-          verifiedPayments={verifiedPayments}
           pendingPayments={pendingPayments}
           failedPayments={failedPayments}
-          currentRevenue={currentRevenue}
         />
       </section>
 
@@ -132,23 +126,17 @@ function ChartSection({
   revenueSeries,
   organizationBars,
   revenueBars,
-  totalSubscriptions,
   totalAuditLogs,
-  verifiedPayments,
   pendingPayments,
   failedPayments,
-  currentRevenue,
 }: {
   organizationSeries: PlatformDashboardData["organizationSeries"];
   revenueSeries: PlatformDashboardData["revenueSeries"];
   organizationBars: PlatformDashboardData["organizationBars"];
   revenueBars: PlatformDashboardData["revenueBars"];
-  totalSubscriptions: number;
   totalAuditLogs: number;
-  verifiedPayments: number;
   pendingPayments: number;
   failedPayments: number;
-  currentRevenue: number;
 }) {
   return (
     <>
@@ -182,12 +170,9 @@ function ChartSection({
 
       <Panel title="Executive summary" subtitle="Operational snapshot">
         <div className="grid grid-cols-2 gap-2.5">
-          <MiniStat label="Subscriptions" value={formatNumber(totalSubscriptions)} />
           <MiniStat label="Audit logs" value={formatNumber(totalAuditLogs)} />
-          <MiniStat label="Verified" value={formatNumber(verifiedPayments)} />
           <MiniStat label="Pending" value={formatNumber(pendingPayments)} />
           <MiniStat label="Failed" value={formatNumber(failedPayments)} />
-          <MiniStat label="Revenue" value={formatCompactCurrency(currentRevenue)} />
         </div>
       </Panel>
     </>

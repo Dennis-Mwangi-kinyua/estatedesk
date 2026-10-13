@@ -24,7 +24,9 @@ function refreshJobsPage() {
 
 function readReturnTo(formData: FormData) {
   const value = readString(formData, "returnTo");
-  return value.startsWith(JOBS_PATH) ? value : JOBS_PATH;
+  if (!value.startsWith(`${JOBS_PATH}?`) && value !== JOBS_PATH) return JOBS_PATH;
+  if (/[\\\u0000-\u001f\u007f]|%2f|%5c/i.test(value)) return JOBS_PATH;
+  return value;
 }
 
 function redirectWithMessage(returnTo: string, message: string, type: "success" | "error" = "success") {

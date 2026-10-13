@@ -1,19 +1,15 @@
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import Link from "@/components/navigation/workspace-link";
-import { FileText, MapPin } from "lucide-react";
+import { FileText } from "lucide-react";
 import { BellRing as Bell, WalletCards as CreditCard, MessageSquareText, WalletCards, Wrench } from "@/components/shared/colored-icons";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { formatCurrency } from "@/lib/tenant/tenant-format";
 import type { TenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";
-import { panelShellClassName, StatusPill } from "./tenant-dashboard-ui";
+import { panelShellClassName } from "./tenant-dashboard-ui";
 
 type TenantDashboardHeaderProps = {
   fullName: string;
   organizationName: string;
-  propertyName?: string | null;
-  buildingName?: string | null;
-  houseNo?: string | null;
-  leaseStatus?: string | null;
   monthlyRent?: unknown;
   dueDay?: number | null;
   openIssuesCount: number;
@@ -21,84 +17,28 @@ type TenantDashboardHeaderProps = {
   portalContext: TenantPortalContext;
 };
 
-function buildSummary(input: {
-  openIssuesCount: number;
-  unreadNotificationCount: number;
-  paymentHealth: TenantPortalContext["paymentHealth"];
-  pendingSignatures: number;
-}) {
-  const parts: string[] = [];
-
-  if (input.paymentHealth && input.paymentHealth.tone !== "settled") {
-    parts.push(input.paymentHealth.paymentStatus.toLowerCase());
-  }
-
-  if (input.pendingSignatures > 0) {
-    parts.push(
-      `${input.pendingSignatures} lease signature${input.pendingSignatures === 1 ? "" : "s"} pending`,
-    );
-  }
-
-  if (input.openIssuesCount > 0) {
-    parts.push(
-      `${input.openIssuesCount} open maintenance request${input.openIssuesCount === 1 ? "" : "s"}`,
-    );
-  }
-
-  if (input.unreadNotificationCount > 0) {
-    parts.push(
-      `${input.unreadNotificationCount} unread notification${input.unreadNotificationCount === 1 ? "" : "s"}`,
-    );
-  }
-
-  if (parts.length === 0) {
-    return "Your tenancy, payments, and requests are up to date.";
-  }
-
-  return `${parts[0].charAt(0).toUpperCase()}${parts[0].slice(1)}${parts.length > 1 ? ` • ${parts.slice(1).join(" • ")}` : ""}.`;
-}
-
 export function TenantDashboardHeader({
   fullName,
   organizationName,
-  propertyName,
-  buildingName,
-  houseNo,
-  leaseStatus,
   monthlyRent,
   dueDay,
   openIssuesCount,
   unreadNotificationCount,
   portalContext,
 }: TenantDashboardHeaderProps) {
-  const location = [
-    propertyName,
-    buildingName,
-    houseNo ? `Unit ${houseNo}` : null,
-  ]
-    .filter(Boolean)
-    .join(" / ");
-
   const showPayNow =
     portalContext.paymentHealth &&
     portalContext.paymentHealth.tone !== "settled" &&
     Number(portalContext.paymentHealth.deficit ?? 0) > 0;
 
-  const summary = buildSummary({
-    openIssuesCount,
-    unreadNotificationCount,
-    paymentHealth: portalContext.paymentHealth,
-    pendingSignatures: portalContext.pendingLeaseSignatures.length,
-  });
-
   return (
     <section data-workspace-header className={panelShellClassName}>
-      <WorkspaceHero kind="tenant" eyebrow="Your tenant workspace" title={`Welcome back, ${fullName}`} description={summary} actions={<>
+      <WorkspaceHero kind="tenant" eyebrow="Your tenant workspace" title={`Welcome back, ${fullName}`} description="Your rent, lease, and service requests are in one place." actions={<>
           <Link data-workspace-action="true" href="/dashboard/tenant/payments" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><CreditCard className="h-4 w-4" />{showPayNow ? "Pay outstanding balance" : "View payments"}</Link>
           <Link data-workspace-action="true" href="/dashboard/tenant/lease" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><FileText className="h-4 w-4" />My lease</Link>
           <Link data-workspace-action="true" href="/dashboard/tenant/issues/report" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium"><Wrench className="h-4 w-4" />Report issue</Link>
         </>}>
-          <div className="flex flex-wrap items-center gap-2 text-xs"><span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1.5"><MapPin className="h-3.5 w-3.5 text-muted-foreground" />{location || "No unit assigned"}</span><StatusPill status={leaseStatus} /><span className="rounded-full border border-border bg-card/60 px-3 py-1.5 text-muted-foreground">{organizationName}</span></div>
+          <div className="flex flex-wrap items-center gap-2 text-xs"><span className="rounded-full border border-border bg-card/60 px-3 py-1.5 text-muted-foreground">{organizationName}</span></div>
           <InAppGuideHint topic="rent" workspace="tenant" />
         </WorkspaceHero>
 

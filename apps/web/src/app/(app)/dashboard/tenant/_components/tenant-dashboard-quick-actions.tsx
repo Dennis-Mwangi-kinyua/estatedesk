@@ -4,10 +4,7 @@ import { VisualSticker } from "@/components/shared/visual-sticker";
 import { panelShellClassName } from "./tenant-dashboard-ui";
 
 const ACTIONS = [
-  { href: "/dashboard/tenant/payments", label: "Payments" },
   { href: "/dashboard/tenant/water-bills", label: "Water bills" },
-  { href: "/dashboard/tenant/lease", label: "My lease" },
-  { href: "/dashboard/tenant/issues", label: "Maintenance" },
   { href: "/dashboard/tenant/invoice", label: "Invoices" },
   { href: "/dashboard/tenant/notifications", label: "Notifications" },
   { href: "/dashboard/tenant/documents", label: "Documents" },

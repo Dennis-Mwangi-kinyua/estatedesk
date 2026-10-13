@@ -6,6 +6,10 @@ import {
   normalizeNotificationFilter,
 } from "./helpers";
 import type { TenantNotificationsPageData } from "./types";
+import {
+  readNotificationActionUrl,
+  resolveNotificationActionUrl,
+} from "@/lib/push/notification-links";
 
 export async function getTenantNotificationsData(
   userId: string,
@@ -46,6 +50,7 @@ export async function getTenantNotificationsData(
         status: true,
         readAt: true,
         createdAt: true,
+        providerResponse: true,
       },
     }),
     getPersonalUnreadNotificationCount({ orgId, userId, orgRole: "TENANT", tenantId: tenant.id }),
@@ -53,7 +58,15 @@ export async function getTenantNotificationsData(
 
   return {
     tenant,
-    notifications: collapseNotificationCopies(notifications),
+    notifications: collapseNotificationCopies(notifications).map((notification) => ({
+      ...notification,
+      actionHref: resolveNotificationActionUrl({
+        type: notification.type,
+        title: notification.title,
+        audience: "tenant",
+        actionUrl: readNotificationActionUrl(notification.providerResponse),
+      }),
+    })),
     unreadCount,
     activeFilter,
   };

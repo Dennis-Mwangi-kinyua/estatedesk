@@ -1,3 +1,4 @@
+import { WorkflowStepCards } from "@/components/help/workflow-step-list";
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
 import { ArrowLeft, FileSpreadsheet, Receipt } from "lucide-react";
@@ -99,22 +100,7 @@ export function AccountingHeader({
 
         {/* Workflow: horizontal scroll on phone, grid on larger */}
         <div className="mt-4 flex gap-2 overflow-x-auto pb-1 sm:mt-5 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
-          {ACCOUNTING_WORKFLOW_STEPS.map((item) => (
-            <div
-              key={item.step}
-              className="min-w-[11.5rem] shrink-0 rounded-2xl border border-border bg-muted/10 px-3.5 py-3.5 sm:min-w-0 sm:px-4 sm:py-4"
-            >
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-primary sm:text-xs">
-                {item.step}
-              </p>
-              <p className="mt-1.5 text-sm font-semibold text-foreground">
-                {item.title}
-              </p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                {item.description}
-              </p>
-            </div>
-          ))}
+          <WorkflowStepCards steps={ACCOUNTING_WORKFLOW_STEPS} />
         </div>
       </div>
 

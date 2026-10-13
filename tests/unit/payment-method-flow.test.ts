@@ -16,7 +16,7 @@ test("STK credentials are available only to their bound organisation and require
   try {
     for (const key of keys) process.env[key] = "test-only";
     process.env.MPESA_ORG_ID = "benannabel-test";
-    process.env.MPESA_CALLBACK_URL = "https://sandbox.example.test/callback";
+    process.env.MPESA_CALLBACK_URL = "https://estatedesk.co.ke/api/webhooks/mpesa?secret=test-only";
     assert.equal(isMpesaStkConfigured("benannabel-test"), true);
     assert.equal(isMpesaStkConfigured("another-org"), false);
     assert.equal(isMpesaStkConfigured(), false);

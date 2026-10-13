@@ -1,3 +1,4 @@
+import { WorkflowStepCards } from "@/components/help/workflow-step-list";
 import Link from "@/components/navigation/workspace-link";
 import { BookOpen } from "@/components/shared/colored-icons";
 import { initializeAccountingAction } from "../actions";
@@ -27,22 +28,7 @@ export function AccountingSetup({ data }: { data: AccountingPageData }) {
         </div>
 
         <div className="grid gap-3 px-5 py-5 sm:grid-cols-2 lg:grid-cols-4 sm:px-6">
-          {ACCOUNTING_WORKFLOW_STEPS.map((item) => (
-            <div
-              key={item.step}
-              className="rounded-2xl border border-border bg-muted/15 p-4"
-            >
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                  {item.step}
-                </span>
-                <p className="text-sm font-semibold text-foreground">{item.title}</p>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                {item.description}
-              </p>
-            </div>
-          ))}
+          <WorkflowStepCards steps={ACCOUNTING_WORKFLOW_STEPS} />
         </div>
 
         <div className="border-t border-border px-5 py-6 sm:px-6">

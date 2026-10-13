@@ -7,6 +7,7 @@ import { ShieldCheck, Building2, WalletCards as CreditCard, Droplets, ClipboardL
 import OperationsShowcase from "@/components/marketing/operations-showcase";
 import { publicPageMetadata } from "@/lib/seo";
 import { loginAction } from "./actions";
+import { safeReturnTo } from "@/lib/auth/safe-return-to";
 import LoginForm from "./LoginForm";
 
 export const metadata = publicPageMetadata({
@@ -64,7 +65,7 @@ type LoginPageProps = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  const returnTo = params?.returnTo?.startsWith("/") && !params.returnTo.startsWith("//") ? params.returnTo : undefined;
+  const returnTo = safeReturnTo(params?.returnTo) ?? undefined;
 
   return (
     <div className="login-screen fixed inset-0 w-screen overflow-hidden bg-white text-slate-950">

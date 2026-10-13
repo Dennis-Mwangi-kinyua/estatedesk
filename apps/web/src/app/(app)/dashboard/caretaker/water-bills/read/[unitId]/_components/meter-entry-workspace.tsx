@@ -1,5 +1,4 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelShellClassName,
   SectionIntro,
@@ -65,7 +64,6 @@ export function MeterEntryWorkspace({ data }: MeterEntryWorkspaceProps) {
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Single-unit meter capture and submission" />
     </div>
   );
 }

@@ -17,6 +17,8 @@ test("STK transport rejects refused requests and preserves unknown provider resu
     process.env.MPESA_ORG_ID = input.orgId;
     process.env.MPESA_ENVIRONMENT = "sandbox";
     process.env.MPESA_SHORTCODE = "174379";
+    process.env.MPESA_CALLBACK_SECRET = "test";
+    process.env.MPESA_CALLBACK_URL = "https://estatedesk.co.ke/api/webhooks/mpesa?secret=test";
     globalThis.fetch = async (url, init) => {
       if (String(url).includes("/oauth/")) return Response.json({ access_token: "test-token" });
       assert.ok(String(url).startsWith("https://sandbox.safaricom.co.ke/"));

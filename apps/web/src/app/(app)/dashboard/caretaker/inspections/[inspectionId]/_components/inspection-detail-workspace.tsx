@@ -3,7 +3,6 @@ import Link from "@/components/navigation/workspace-link";
 import { ArrowLeft } from "lucide-react";
 import { encodePublicId } from "@/lib/public-id";
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelBodyClassName,
   panelShellClassName,
@@ -42,7 +41,6 @@ export function InspectionDetailWorkspace({
           </div>
         </section>
 
-        <CaretakerWorkspaceFooter note="Move-out inspection detail" />
       </div>
     );
   }
@@ -204,7 +202,6 @@ export function InspectionDetailWorkspace({
         </section>
       ) : <p className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">{inspection.status === "SCHEDULED" ? "This inspection is assigned to another staff member. You can review its details here." : "This inspection was cancelled."}</p>}
 
-      <CaretakerWorkspaceFooter note="Move-out inspection detail" />
     </div>
   );
 }

@@ -59,6 +59,9 @@ const checks = [
   { key: "MPESA_SHORTCODE", required: false, label: "M-Pesa shortcode" },
   { key: "MPESA_PASSKEY", required: false, label: "M-Pesa passkey" },
   { key: "MPESA_CALLBACK_URL", required: false, label: "M-Pesa callback URL" },
+  { key: "MPESA_CALLBACK_SECRET", required: false, label: "M-Pesa callback secret" },
+  { key: "WHATSAPP_APP_SECRET", required: false, label: "Meta WhatsApp webhook signature secret" },
+  { key: "KRA_ETIMS_WEBHOOK_SECRET", required: false, label: "KRA eTIMS webhook signature secret" },
   {
     key: "KCB_BUNI_IPN_SIGNATURE_SECRET",
     required: false,

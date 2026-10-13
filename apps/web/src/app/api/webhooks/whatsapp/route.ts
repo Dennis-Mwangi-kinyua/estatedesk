@@ -8,6 +8,10 @@ import {
 import { sendMetaWhatsappText, toWhatsappPhone } from "@/lib/whatsapp/meta";
 import { getCurrentPeriod } from "@/lib/ledger-utils";
 import { getPeriodBillForTenant } from "@/lib/billing/period-bill";
+import {
+  verifyMetaWhatsappSignature,
+  verifyMetaWhatsappToken,
+} from "@/lib/whatsapp/webhook-signature";
 
 /**
  * Meta WhatsApp Cloud API webhook.
@@ -22,7 +26,7 @@ export async function GET(request: Request) {
   const challenge = url.searchParams.get("hub.challenge");
   const expected = process.env.WHATSAPP_VERIFY_TOKEN?.trim();
 
-  if (mode === "subscribe" && expected && token === expected && challenge) {
+  if (mode === "subscribe" && expected && verifyMetaWhatsappToken(token, expected) && challenge) {
     return new Response(challenge, { status: 200 });
   }
 
@@ -112,7 +116,29 @@ async function resolveTenantContext(
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const appSecret = process.env.WHATSAPP_APP_SECRET?.trim();
+    if (process.env.NODE_ENV === "production" && !appSecret) {
+      return Response.json({ ok: false, error: "Webhook authentication is not configured" }, { status: 503 });
+    }
+
+    const contentLength = Number(request.headers.get("content-length") ?? "0");
+    if (Number.isFinite(contentLength) && contentLength > 1_000_000) {
+      return Response.json({ ok: false, error: "Webhook payload is too large" }, { status: 413 });
+    }
+    const rawBody = await request.text();
+    if (Buffer.byteLength(rawBody, "utf8") > 1_000_000) {
+      return Response.json({ ok: false, error: "Webhook payload is too large" }, { status: 413 });
+    }
+    if (appSecret && !verifyMetaWhatsappSignature(rawBody, request.headers.get("x-hub-signature-256"), appSecret)) {
+      return Response.json({ ok: false, error: "Invalid webhook signature" }, { status: 401 });
+    }
+
+    let body: unknown;
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      return Response.json({ ok: false, error: "Invalid webhook payload" }, { status: 400 });
+    }
     const messages = parseMetaWhatsappWebhook(body);
 
     if (messages.length === 0) {

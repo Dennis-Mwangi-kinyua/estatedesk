@@ -5,6 +5,8 @@ import { KraEnvironment, KraFilingMode, IntegrationStatus } from "@prisma/client
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { encryptSecret, isEncryptedSecret } from "@/lib/crypto/secrets";
+import { normalizeEtimsBaseUrl } from "@/lib/tax/etims-client";
+import { redirect } from "next/navigation";
 
 const TAXES_PATH = "/dashboard/org/taxes";
 
@@ -44,6 +46,10 @@ export async function saveOrgEtimsSettingsAction(formData: FormData) {
     String(formData.get("controlUnitSerial") ?? "").trim() || null;
   const branchOfficeId =
     String(formData.get("branchOfficeId") ?? "").trim() || null;
+
+  if (apiBaseUrl && !normalizeEtimsBaseUrl(apiBaseUrl, environment === "PRODUCTION" ? "production" : "sandbox")) {
+    redirect(`${TAXES_PATH}?error=invalid_etims_url`);
+  }
 
   const existing = await prisma.kraIntegration.findUnique({
     where: { orgId },

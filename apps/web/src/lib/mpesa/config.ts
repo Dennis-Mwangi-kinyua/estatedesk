@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "node:crypto";
+
 export type MpesaConfig = {
   orgId: string;
   environment: "sandbox" | "production";
@@ -8,6 +10,23 @@ export type MpesaConfig = {
   callbackSecret: string;
   callbackUrl: string;
 };
+
+function isSafeCallbackUrl(value: string, secret: string) {
+  try {
+    const url = new URL(value);
+    const appUrlValue = process.env.NEXT_PUBLIC_APP_URL?.trim() || process.env.APP_URL?.trim();
+    const appUrl = appUrlValue ? new URL(appUrlValue) : null;
+    return url.protocol === "https:" &&
+      !url.username && !url.password && !url.hash &&
+      url.pathname === "/api/webhooks/mpesa" &&
+      url.searchParams.get("secret") === secret &&
+      (appUrl
+        ? appUrl.protocol === "https:" && url.origin === appUrl.origin
+        : process.env.NODE_ENV !== "production");
+  } catch {
+    return false;
+  }
+}
 
 export function getMpesaConfigs(): MpesaConfig[] {
   const prefixes = ["MPESA", ...(process.env.MPESA_ADDITIONAL_PREFIXES ?? "").split(",").map(value => value.trim()).filter(value => /^[A-Z][A-Z0-9_]+$/.test(value) && value !== "MPESA")];
@@ -23,7 +42,9 @@ export function getMpesaConfigs(): MpesaConfig[] {
       callbackSecret: read("CALLBACK_SECRET"),
       callbackUrl: read("CALLBACK_URL"),
     };
-    return Object.values(config).every(Boolean) ? [config] : [];
+    return Object.values(config).every(Boolean) && isSafeCallbackUrl(config.callbackUrl, config.callbackSecret)
+      ? [config]
+      : [];
   });
 }
 
@@ -35,6 +56,10 @@ export function getMpesaConfigForOrg(orgId?: string | null) {
 
 export function getMpesaConfigForCallback(secret: string | null) {
   if (!secret) return undefined;
-  const matches = getMpesaConfigs().filter(config => config.callbackSecret === secret);
+  const secretBytes = Buffer.from(secret);
+  const matches = getMpesaConfigs().filter(config => {
+    const expectedBytes = Buffer.from(config.callbackSecret);
+    return expectedBytes.length === secretBytes.length && timingSafeEqual(expectedBytes, secretBytes);
+  });
   return matches.length === 1 ? getMpesaConfigForOrg(matches[0].orgId) : undefined;
 }

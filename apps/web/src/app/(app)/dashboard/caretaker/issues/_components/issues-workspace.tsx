@@ -1,9 +1,7 @@
 import { TicketPriority, TicketStatus } from "@prisma/client";
 import type { IssueDataResult } from "@/app/(app)/dashboard/caretaker/issues/_lib/types";
-import { CaretakerWorkspaceFooter } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import { IssuesBoard } from "./issues-board";
 import { IssuesHeader } from "./issues-header";
-import { IssuesSidebar } from "./issues-sidebar";
 import { IssuesStats } from "./issues-stats";
 
 export type IssuesWorkspaceProps = {
@@ -34,21 +32,16 @@ export function IssuesWorkspace({
         activeFilters={{ status, priority, range }}
       />
 
-      <div className="min-w-0 space-y-5">
-        <IssuesBoard
-          issueData={issueData}
-          currentUserId={currentUserId}
-          boardTitle={boardTitle}
-          boardDescription={boardDescription}
-          status={status}
-          priority={priority}
-          range={range}
-        />
+      <IssuesBoard
+        issueData={issueData}
+        currentUserId={currentUserId}
+        boardTitle={boardTitle}
+        boardDescription={boardDescription}
+        status={status}
+        priority={priority}
+        range={range}
+      />
 
-        <IssuesSidebar />
-      </div>
-
-      <CaretakerWorkspaceFooter note="Professional maintenance and operations tracking" />
     </div>
   );
 }

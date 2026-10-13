@@ -1,6 +1,5 @@
 "use client";
 
-import { WorkspaceActions } from "@/components/shared/workspace-actions";
 
 import Link from "@/components/navigation/workspace-link";
 import { useEffect, useRef, useState } from "react";
@@ -12,9 +11,7 @@ import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-da
 import { VacancyInquiryAlert } from "@/features/dashboard/components/vacancy-inquiry-alert";
 import type { VacancyInquiryAlert as VacancyInquiryAlertItem } from "@/features/dashboard/server/get-vacancy-inquiry-alerts";
 import { OrgDashboardActivity } from "./org-dashboard-activity";
-import { OrgDashboardGuidance } from "./org-dashboard-guidance";
 import { OrgDashboardHeader } from "./org-dashboard-header";
-import { OrgDashboardRolePanel } from "./org-dashboard-role-panel";
 import { OrgDashboardSnapshot } from "./org-dashboard-snapshot";
 import { OrgDashboardStats } from "./org-dashboard-stats";
 import {
@@ -120,7 +117,6 @@ export function OrgDashboardWorkspace({
     <div className="org-theme-content mx-auto w-full max-w-7xl space-y-5 pb-12 sm:space-y-6">
       <VacancyInquiryAlert inquiries={vacancyInquiries} orgId={orgId} />
       <OrgDashboardHeader
-        data={data}
         organizationName={organizationName}
         orgRole={orgRole}
       />
@@ -136,19 +132,10 @@ export function OrgDashboardWorkspace({
         ].map(item => <li key={item.href}><Link className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border px-3 text-sm" href={item.href}><span aria-hidden="true">{item.done ? "✓" : "○"}</span>{item.label}<span className="sr-only">{item.done ? ": completed" : ": needs setup"}</span></Link></li>)}</ol>
         {orgRole === "ADMIN" && <Link className="mt-3 inline-block text-sm text-primary underline" href="/dashboard/org/settings">Configure billing and payment collection</Link>}
       </section>}
-      <WorkspaceActions role={orgRole ?? undefined} />
       <OrgDashboardStats data={data} />
-      <OrgDashboardRolePanel data={data} orgRole={orgRole} />
-
-      {/* Operations full-width on mobile; side rail only on large screens */}
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start">
-        <div className="min-w-0 space-y-5">
-          <OrgDashboardSnapshot data={data} />
-          <OrgDashboardActivity data={data} />
-        </div>
-        <div className="min-w-0 xl:sticky xl:top-24">
-          <OrgDashboardGuidance data={data} orgRole={orgRole} />
-        </div>
+      <div className="min-w-0 space-y-5">
+        <OrgDashboardSnapshot data={data} />
+        <OrgDashboardActivity data={data} />
       </div>
     </div>
   );

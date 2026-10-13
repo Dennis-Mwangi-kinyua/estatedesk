@@ -1,5 +1,4 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerInspectionsPageData } from "../_lib/queries";
@@ -33,7 +32,6 @@ export function InspectionsWorkspace({ data }: InspectionsWorkspaceProps) {
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Inspection tasks assigned to you and within your caretaker scope" />
     </div>
   );
 }

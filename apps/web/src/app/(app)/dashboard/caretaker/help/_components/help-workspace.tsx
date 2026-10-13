@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { BookOpen } from "@/components/shared/colored-icons";
 import {
-  CaretakerWorkspaceFooter,
   panelBodyClassName,
   panelShellClassName,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
@@ -10,12 +9,10 @@ export function HelpWorkspace({
   children,
   title = "Workspace help",
   description = "Guides scoped to your caretaker role and assigned properties.",
-  note = "In-app guides for caretaker field operations",
 }: {
   children: ReactNode;
   title?: string;
   description?: string;
-  note?: string;
 }) {
   return (
     <div className="mx-auto w-full max-w-7xl space-y-5 pb-6 sm:space-y-6">
@@ -38,7 +35,6 @@ export function HelpWorkspace({
 
       {children}
 
-      <CaretakerWorkspaceFooter note={note} />
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import { Search } from "@/components/shared/colored-icons";
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelBodyClassName,
   panelShellClassName,
@@ -84,7 +83,6 @@ export function SearchWorkspace({
         </div>
       )}
 
-      <CaretakerWorkspaceFooter note="Search scoped to your assigned units" />
     </div>
   );
 }

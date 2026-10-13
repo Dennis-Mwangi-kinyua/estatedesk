@@ -1,6 +1,5 @@
 import type { CaretakerDashboardResult } from "@/app/(app)/dashboard/caretaker/_lib/types";
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelBodyClassName,
   panelShellClassName,
@@ -37,11 +36,10 @@ export function CaretakerDashboardWorkspace({
             <CaretakerDashboardFocusSection data={result.data} />
             <CaretakerDashboardActivitySection recentIssues={result.data.recentIssues} />
           </div>
-          <CaretakerDashboardSidebar data={result.data} upcomingInspections={result.data.upcomingInspections} />
+          <CaretakerDashboardSidebar upcomingInspections={result.data.upcomingInspections} />
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Field operations overview" />
     </div>
   );
 }

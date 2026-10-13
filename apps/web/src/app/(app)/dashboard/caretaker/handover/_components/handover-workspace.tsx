@@ -1,5 +1,4 @@
 import { CaretakerI18nLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-i18n-label";
-import { CaretakerWorkspaceFooter } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerHandoverPageData } from "../_lib/types";
 import { HandoverForm } from "./handover-form";
 import { HandoverLog } from "./handover-log";
@@ -38,7 +37,6 @@ export function HandoverWorkspace({
         <HandoverLog data={data} />
       </div>
 
-      <CaretakerWorkspaceFooter note="Caretaker shift handover records" />
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import { SurfaceCard } from "@/components/theme/ed-dashboard-shell";
-import { IssueHistoryMobile } from "@/app/(app)/dashboard/tenant/issues/_components/issue-history-mobile";
-import { IssueHistoryTable } from "@/app/(app)/dashboard/tenant/issues/_components/issue-history-table";
+import { IssueHistoryCards } from "@/app/(app)/dashboard/tenant/issues/_components/issue-history-cards";
 import { PaginationLink } from "@/app/(app)/dashboard/tenant/issues/_components/pagination-link";
 import {
   HISTORY_PAGE_SIZE,
@@ -24,10 +23,10 @@ export function IssuesHistorySection({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-[22px] font-semibold tracking-tight text-foreground">
-            Issue History
+            Your issue tickets
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            All issue tickets raised for your unit(s).
+            Track each request and check its latest status.
           </p>
         </div>
         <span className="text-xs font-medium text-muted-foreground">
@@ -35,8 +34,7 @@ export function IssuesHistorySection({
         </span>
       </div>
 
-      <IssueHistoryMobile issues={paginatedIssues} />
-      <IssueHistoryTable issues={paginatedIssues} />
+      <IssueHistoryCards issues={paginatedIssues} />
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4">
         <p className="text-sm text-muted-foreground">

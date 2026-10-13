@@ -107,7 +107,7 @@ const MODULAR_ROUTES: ModularRoute[] = [
   {
     name: "caretaker issues",
     page: "apps/web/src/app/(app)/dashboard/caretaker/issues/page.tsx",
-    lib: ["queries.ts", "helpers.ts", "types.ts", "constants.ts"],
+    lib: ["queries.ts", "helpers.ts", "types.ts"],
     components: [
       "issues-workspace.tsx",
       "issues-header.tsx",

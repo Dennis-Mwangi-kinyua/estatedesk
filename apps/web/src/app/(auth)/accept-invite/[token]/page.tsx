@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { safeClientMessage } from "@/lib/errors/client-safe-error";
+import { safeReturnTo } from "@/lib/auth/safe-return-to";
 
 type InviteStatus = "idle" | "loading" | "success" | "error";
 
@@ -85,7 +86,7 @@ export default function AcceptInvitePage() {
 
       setStatus("success");
       setMessage(data.message || "Invitation accepted successfully.");
-      setRedirectTo(data.redirectTo || "/dashboard/org");
+      setRedirectTo(safeReturnTo(data.redirectTo) || "/dashboard/org");
     } catch (error) {
       setStatus("error");
       setMessage(getErrorMessage(error));

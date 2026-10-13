@@ -27,7 +27,6 @@ export default async function CaretakerHelpArticlePage({ params }: PageProps) {
     <HelpWorkspace
       title={article.guide.title}
       description={article.guide.summary}
-      note="Caretaker workspace guide article"
     >
       <InAppGuideArticle
         guide={article.guide}

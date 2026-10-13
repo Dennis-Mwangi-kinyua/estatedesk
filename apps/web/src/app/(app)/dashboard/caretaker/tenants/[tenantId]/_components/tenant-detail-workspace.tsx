@@ -1,5 +1,4 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelBodyClassName,
   panelShellClassName,
@@ -31,7 +30,6 @@ export function TenantDetailWorkspace({
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Tenant profile scoped to assigned units" />
     </div>
   );
 }

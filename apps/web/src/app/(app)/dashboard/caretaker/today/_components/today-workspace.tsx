@@ -1,12 +1,10 @@
 import {
-  CaretakerWorkspaceFooter,
   ErrorStateCard,
   panelBodyClassName,
   panelShellClassName,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import type { CaretakerTodayWorkPageData } from "../_lib/types";
 import { TodayHeader } from "./today-header";
-import { TodaySidebar } from "./today-sidebar";
 import { TodayStats } from "./today-stats";
 import { TodayTaskList } from "./today-task-list";
 
@@ -27,14 +25,10 @@ export function TodayWorkspace({ data }: { data: CaretakerTodayWorkPageData }) {
           <TodayHeader data={data} />
           <TodayStats data={data} />
 
-          <div className="min-w-0 space-y-5">
-            <TodayTaskList tasks={data.tasks} />
-            <TodaySidebar />
-          </div>
+          <TodayTaskList tasks={data.tasks} />
         </>
       )}
 
-      <CaretakerWorkspaceFooter note="Daily field operations command center" />
     </div>
   );
 }
