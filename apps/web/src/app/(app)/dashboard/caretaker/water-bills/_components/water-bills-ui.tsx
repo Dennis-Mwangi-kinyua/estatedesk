@@ -10,7 +10,7 @@ export function StatusBadge({
   pulse = false,
 }: {
   label: string;
-  tone: "red" | "blue" | "green" | "neutral" | "violet";
+  tone: "red" | "blue" | "green" | "neutral" | "teal";
   pulse?: boolean;
 }) {
   const toneMap = {
@@ -19,8 +19,8 @@ export function StatusBadge({
     green:
       "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200",
     neutral: "border-border bg-muted/20 text-muted-foreground",
-    violet:
-      "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-200",
+    teal:
+      "border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-200",
   };
 
   return (
@@ -168,7 +168,7 @@ export function IssuedBillCard({
           </p>
         </div>
 
-        <StatusBadge label={`Unit ${houseNo}`} tone="violet" />
+        <StatusBadge label={`Unit ${houseNo}`} tone="teal" />
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3">

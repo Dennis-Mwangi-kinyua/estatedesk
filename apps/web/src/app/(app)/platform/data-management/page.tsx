@@ -22,11 +22,11 @@ export const dynamic = "force-dynamic";
 const ORG_COLOR_PALETTE = [
   { surface: "bg-sky-50/80 dark:bg-sky-500/10", bar: "bg-sky-500" },
   { surface: "bg-emerald-50/80 dark:bg-emerald-500/10", bar: "bg-emerald-500" },
-  { surface: "bg-violet-50/80 dark:bg-violet-500/10", bar: "bg-violet-500" },
+  { surface: "bg-teal-50/80 dark:bg-teal-500/10", bar: "bg-teal-500" },
   { surface: "bg-amber-50/80 dark:bg-amber-500/10", bar: "bg-amber-500" },
   { surface: "bg-rose-50/80 dark:bg-rose-500/10", bar: "bg-rose-500" },
   { surface: "bg-cyan-50/80 dark:bg-cyan-500/10", bar: "bg-cyan-500" },
-  { surface: "bg-indigo-50/80 dark:bg-indigo-500/10", bar: "bg-indigo-500" },
+  { surface: "bg-teal-50/80 dark:bg-teal-500/10", bar: "bg-teal-500" },
   { surface: "bg-orange-50/80 dark:bg-orange-500/10", bar: "bg-orange-500" },
 ] as const;
 

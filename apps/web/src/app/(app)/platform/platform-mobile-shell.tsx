@@ -117,7 +117,7 @@ export default function PlatformMobileShell({
         <nav aria-label="Quick navigation" inert={open} className="platform-mobile-dock ed-shell-panel grid shrink-0 grid-cols-4 gap-1 border-t border-border px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:hidden">
           {tabs.map((item) => {
             const active = isNavItemActive(pathname, item.href);
-            const tone = item.href.includes("payments") || item.href.includes("system-health") ? "emerald" : item.href.includes("organizations") || item.href.includes("jobs") ? "violet" : "sky";
+            const tone = item.href.includes("payments") || item.href.includes("system-health") ? "emerald" : item.href.includes("organizations") || item.href.includes("jobs") ? "teal" : "sky";
             return <Link data-dock-tone={tone} key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`platform-dock-item flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary ${active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"}`}><span className="platform-dock-icon"><PlatformNavIcon label={item.href} className="h-6 w-6" /></span><span>{item.href === "/platform/organizations" ? "Orgs" : item.href === "/platform/developer" ? "Home" : item.label}</span></Link>;
           })}
           <button data-workspace-action="true" type="button" onClick={() => setOpen(true)} data-dock-tone="slate" aria-label="More navigation" aria-expanded={open} aria-controls={panelId} className="platform-dock-item flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold text-muted-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-primary"><span className="platform-dock-icon"><PlatformNavIcon label="more" className="h-6 w-6" /></span><span>More</span></button>
@@ -177,7 +177,7 @@ export default function PlatformMobileShell({
                   className={`platform-sidebar-link flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                     active
                       ? isDeveloper
-                        ? "bg-violet-600 text-white"
+                        ? "bg-teal-600 text-white"
                         : "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
                   }`}

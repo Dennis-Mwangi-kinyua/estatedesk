@@ -46,8 +46,8 @@ const organizationColorVariants = [
     avatar: "border-teal-200 bg-teal-700 text-white dark:border-teal-400/30 dark:bg-teal-400 dark:text-teal-950",
   },
   {
-    shell: "border-violet-200 bg-violet-50/70 hover:border-violet-300 dark:border-violet-400/20 dark:bg-violet-950/20 dark:hover:border-violet-400/35",
-    avatar: "border-violet-200 bg-violet-700 text-white dark:border-violet-400/30 dark:bg-violet-400 dark:text-violet-950",
+    shell: "border-teal-200 bg-teal-50/70 hover:border-teal-300 dark:border-teal-400/20 dark:bg-teal-950/20 dark:hover:border-teal-400/35",
+    avatar: "border-teal-200 bg-teal-700 text-white dark:border-teal-400/30 dark:bg-teal-400 dark:text-teal-950",
   },
   {
     shell: "border-amber-200 bg-amber-50/70 hover:border-amber-300 dark:border-amber-400/20 dark:bg-amber-950/20 dark:hover:border-amber-400/35",
@@ -62,8 +62,8 @@ const organizationColorVariants = [
     avatar: "border-rose-200 bg-rose-700 text-white dark:border-rose-400/30 dark:bg-rose-400 dark:text-rose-950",
   },
   {
-    shell: "border-indigo-200 bg-indigo-50/70 hover:border-indigo-300 dark:border-indigo-400/20 dark:bg-indigo-950/20 dark:hover:border-indigo-400/35",
-    avatar: "border-indigo-200 bg-indigo-700 text-white dark:border-indigo-400/30 dark:bg-indigo-400 dark:text-indigo-950",
+    shell: "border-teal-200 bg-teal-50/70 hover:border-teal-300 dark:border-teal-400/20 dark:bg-teal-950/20 dark:hover:border-teal-400/35",
+    avatar: "border-teal-200 bg-teal-700 text-white dark:border-teal-400/30 dark:bg-teal-400 dark:text-teal-950",
   },
 ] as const;
 

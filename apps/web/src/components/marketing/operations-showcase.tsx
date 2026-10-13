@@ -103,8 +103,8 @@ const OPERATIONS: readonly OperationCard[] = [
     title: "Tenant records",
     label: "People",
     description: "Keep occupancy, contacts, and tenant history clean and searchable.",
-    accent: "border-l-indigo-500",
-    iconClassName: "border-indigo-100 bg-indigo-50 text-indigo-700",
+    accent: "border-l-teal-500",
+    iconClassName: "border-teal-100 bg-teal-50 text-teal-700",
   },
   {
     icon: ShieldCheck,
@@ -148,8 +148,8 @@ const RENTAL_STEPS: readonly OperationCard[] = [
     title: "Move in with records",
     label: "Lease",
     description: "Once approved, tenant details, lease records, and billing can be managed digitally.",
-    accent: "border-l-indigo-500",
-    iconClassName: "border-indigo-100 bg-indigo-50 text-indigo-700",
+    accent: "border-l-teal-500",
+    iconClassName: "border-teal-100 bg-teal-50 text-teal-700",
   },
 ] as const;
 
@@ -158,7 +158,7 @@ const SNAPSHOT_ITEMS: readonly SnapshotItem[] = [
     icon: Layers3,
     label: "Roles",
     value: "Access",
-    iconClassName: "border-indigo-100 bg-indigo-50 text-indigo-700",
+    iconClassName: "border-teal-100 bg-teal-50 text-teal-700",
   },
   {
     icon: CreditCard,
@@ -203,7 +203,7 @@ const RENTAL_SNAPSHOT_ITEMS: readonly SnapshotItem[] = [
     icon: PhoneCall,
     label: "Enquiry",
     value: "Contact manager",
-    iconClassName: "border-indigo-100 bg-indigo-50 text-indigo-700",
+    iconClassName: "border-teal-100 bg-teal-50 text-teal-700",
   },
 ] as const;
 
@@ -224,7 +224,7 @@ const CONTROLS: readonly ControlItem[] = [
     icon: ShieldCheck,
     title: "Records",
     detail: "Auditable",
-    iconClassName: "border-indigo-100 bg-indigo-50 text-indigo-700",
+    iconClassName: "border-teal-100 bg-teal-50 text-teal-700",
   },
 ] as const;
 
@@ -245,7 +245,7 @@ const RENTAL_CONTROLS: readonly ControlItem[] = [
     icon: FileCheck2,
     title: "Tenant records",
     detail: "Ready after approval",
-    iconClassName: "border-indigo-100 bg-indigo-50 text-indigo-700",
+    iconClassName: "border-teal-100 bg-teal-50 text-teal-700",
   },
 ] as const;
 

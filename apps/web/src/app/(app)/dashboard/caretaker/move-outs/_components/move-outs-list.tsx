@@ -34,7 +34,7 @@ export function MoveOutsList({
                   {notice.status.replaceAll("_", " ").toLowerCase()}
                 </span>
                 {notice.inspection ? (
-                  <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-800 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-200">
+                  <span className="rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-800 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-200">
                     Inspection {notice.inspection.status.toLowerCase()}
                   </span>
                 ) : null}

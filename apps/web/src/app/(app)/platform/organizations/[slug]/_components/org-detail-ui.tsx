@@ -47,7 +47,7 @@ export function SmallCount({ label, value }: { label: string; value: number }) {
 
 export function OrgSummaryCard({ label, value, note }: { label: string; value: string | number; note?: string }) {
   const Icon = icons[label] ?? Activity;
-  const tones: Record<string, string> = { Status: "emerald", Tenants: "blue", Properties: "violet", "Recognized paid": "amber" };
+  const tones: Record<string, string> = { Status: "emerald", Tenants: "blue", Properties: "teal", "Recognized paid": "amber" };
   return <div data-tone={tones[label]} className="org-summary-card relative overflow-hidden rounded-2xl border border-border bg-card p-4 sm:p-5">
     <div className="flex items-center justify-between gap-3"><p className="text-xs font-medium text-muted-foreground">{label}</p><span className="org-metric-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"><Icon aria-hidden="true" className="h-5 w-5" /></span></div>
     <p className="mt-3 break-words text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">{value}</p>

@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 type SearchParams = Promise<{ page?: string; pageSize?: string; q?: string; status?: string }>;
 const queues = [
   { status: "OPEN", label: "Unread", detail: "Ready for your attention", tone: "bg-sky-500/10 text-sky-700 dark:text-sky-200" },
-  { status: "READ", label: "Read", detail: "Reviewed conversations", tone: "bg-violet-500/10 text-violet-700 dark:text-violet-200" },
+  { status: "READ", label: "Read", detail: "Reviewed conversations", tone: "bg-teal-500/10 text-teal-700 dark:text-teal-200" },
   { status: "CLOSED", label: "Closed", detail: "Completed follow-ups", tone: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-200" },
   { status: "SPAM", label: "Spam", detail: "Set aside from your inbox", tone: "bg-amber-500/10 text-amber-800 dark:text-amber-200" },
 ];
@@ -59,10 +59,10 @@ export default async function PlatformMessagesPage({ searchParams }: { searchPar
   const viewLabel = queues.find(queue => queue.status === status)?.label ?? "All messages";
 
   return <div className="mx-auto w-full min-w-0 max-w-7xl space-y-5 sm:space-y-6">
-    <header className="relative isolate overflow-hidden rounded-[1.75rem] border border-sky-200/70 bg-linear-to-br from-sky-50 via-white to-violet-50 p-5 shadow-sm dark:border-sky-400/15 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/50 sm:p-7">
-      <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-violet-400/10 blur-3xl" />
+    <header className="relative isolate overflow-hidden rounded-[1.75rem] border border-sky-200/70 bg-linear-to-br from-sky-50 via-white to-teal-50 p-5 shadow-sm dark:border-sky-400/15 dark:from-slate-900 dark:via-slate-900 dark:to-teal-950/50 sm:p-7">
+      <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-teal-400/10 blur-3xl" />
       <div className="relative flex items-center justify-between gap-5"><div className="min-w-0"><p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-800 dark:text-sky-200"><Mail aria-hidden="true" className="h-3.5 w-3.5" />Platform communications</p><h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Your support inbox</h1><p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">Keep every conversation moving. Read requests, reach the right person, and follow up with confidence.</p><Link href={queueHref("OPEN")} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300">Review unread<span className="rounded-md bg-white/15 px-1.5 py-0.5 text-xs dark:bg-slate-950/10">{count("OPEN")}</span><ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></div>
-        <div aria-hidden="true" className="relative hidden h-36 w-40 shrink-0 sm:block"><div className="absolute left-0 top-5 grid h-24 w-24 -rotate-12 place-items-center rounded-[1.6rem] border-4 border-white bg-sky-100 text-5xl shadow-lg shadow-sky-900/10 dark:border-slate-800 dark:bg-sky-950"><WorkspaceIcon label="mail" className="h-10 w-10 text-sky-700 dark:text-sky-200" /></div><div className="absolute bottom-0 right-0 grid h-20 w-20 rotate-12 place-items-center rounded-3xl border-4 border-white bg-violet-100 text-4xl shadow-lg shadow-violet-900/10 dark:border-slate-800 dark:bg-violet-950"><WorkspaceIcon label="messages" className="h-8 w-8 text-violet-700 dark:text-violet-200" /></div></div>
+        <div aria-hidden="true" className="relative hidden h-36 w-40 shrink-0 sm:block"><div className="absolute left-0 top-5 grid h-24 w-24 -rotate-12 place-items-center rounded-[1.6rem] border-4 border-white bg-sky-100 text-5xl shadow-lg shadow-sky-900/10 dark:border-slate-800 dark:bg-sky-950"><WorkspaceIcon label="mail" className="h-10 w-10 text-sky-700 dark:text-sky-200" /></div><div className="absolute bottom-0 right-0 grid h-20 w-20 rotate-12 place-items-center rounded-3xl border-4 border-white bg-teal-100 text-4xl shadow-lg shadow-teal-900/10 dark:border-slate-800 dark:bg-teal-950"><WorkspaceIcon label="messages" className="h-8 w-8 text-teal-700 dark:text-teal-200" /></div></div>
       </div>
     </header>
 

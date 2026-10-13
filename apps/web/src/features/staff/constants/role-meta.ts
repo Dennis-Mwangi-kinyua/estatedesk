@@ -50,8 +50,8 @@ export const ROLE_META: Record<OrgRole, RoleMeta> = {
     label: "Office",
     shortLabel: "OF",
     description: "Administrative coordination, support, and records workflow.",
-    badgeClass: "border-violet-200 bg-violet-50 text-violet-700",
-    cardClass: "from-white to-violet-50",
+    badgeClass: "border-teal-200 bg-teal-50 text-teal-700",
+    cardClass: "from-white to-teal-50",
   },
 
   ACCOUNTANT: {

@@ -45,7 +45,7 @@ export function PlatformModeToggle({
               mobile ? "min-h-11 text-[13px]" : "",
               active
                 ? target === "developer"
-                  ? "bg-violet-100 text-violet-900 shadow-sm dark:bg-violet-950 dark:text-violet-100"
+                  ? "bg-teal-100 text-teal-900 shadow-sm dark:bg-teal-950 dark:text-teal-100"
                   : "bg-sky-100 text-sky-900 shadow-sm dark:bg-sky-950 dark:text-sky-100"
                 : "text-muted-foreground hover:bg-card hover:text-foreground",
             ].join(" ")}

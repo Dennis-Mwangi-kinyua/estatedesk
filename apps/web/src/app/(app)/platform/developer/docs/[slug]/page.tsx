@@ -138,7 +138,7 @@ export default async function DeveloperSystemDocArticlePage({
         {prev ? (
           <Link
             href={`/platform/developer/docs/${prev.slug}`}
-            className="inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-violet-700 dark:text-violet-300 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0"
+            className="inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-teal-700 dark:text-teal-300 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0"
           >
             ← {prev.title.split("—")[0]?.trim()}
           </Link>
@@ -148,7 +148,7 @@ export default async function DeveloperSystemDocArticlePage({
         {next ? (
           <Link
             href={`/platform/developer/docs/${next.slug}`}
-            className="inline-flex min-h-11 items-center justify-end rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-violet-700 dark:text-violet-300 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:text-right"
+            className="inline-flex min-h-11 items-center justify-end rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-teal-700 dark:text-teal-300 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:text-right"
           >
             {next.title.split("—")[0]?.trim()} →
           </Link>

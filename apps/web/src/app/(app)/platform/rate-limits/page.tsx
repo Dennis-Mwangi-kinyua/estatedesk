@@ -21,11 +21,11 @@ export const dynamic = "force-dynamic";
 const RATE_COLOR_PALETTE = [
   { card: "bg-sky-50/80 dark:bg-sky-500/10", row: "bg-sky-50/80 dark:bg-sky-500/10", bar: "bg-sky-500" },
   { card: "bg-emerald-50/80 dark:bg-emerald-500/10", row: "bg-emerald-50/80 dark:bg-emerald-500/10", bar: "bg-emerald-500" },
-  { card: "bg-violet-50/80 dark:bg-violet-500/10", row: "bg-violet-50/80 dark:bg-violet-500/10", bar: "bg-violet-500" },
+  { card: "bg-teal-50/80 dark:bg-teal-500/10", row: "bg-teal-50/80 dark:bg-teal-500/10", bar: "bg-teal-500" },
   { card: "bg-amber-50/80 dark:bg-amber-500/10", row: "bg-amber-50/80 dark:bg-amber-500/10", bar: "bg-amber-500" },
   { card: "bg-rose-50/80 dark:bg-rose-500/10", row: "bg-rose-50/80 dark:bg-rose-500/10", bar: "bg-rose-500" },
   { card: "bg-cyan-50/80 dark:bg-cyan-500/10", row: "bg-cyan-50/80 dark:bg-cyan-500/10", bar: "bg-cyan-500" },
-  { card: "bg-indigo-50/80 dark:bg-indigo-500/10", row: "bg-indigo-50/80 dark:bg-indigo-500/10", bar: "bg-indigo-500" },
+  { card: "bg-teal-50/80 dark:bg-teal-500/10", row: "bg-teal-50/80 dark:bg-teal-500/10", bar: "bg-teal-500" },
   { card: "bg-orange-50/80 dark:bg-orange-500/10", row: "bg-orange-50/80 dark:bg-orange-500/10", bar: "bg-orange-500" },
 ] as const;
 

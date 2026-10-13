@@ -7,7 +7,7 @@ export function billStatusTone(status: string) {
   if (status === "PAYMENT_PENDING" || status === "PAID_PENDING_VERIFICATION") {
     return "red" as const;
   }
-  if (status === "ISSUED") return "violet" as const;
+  if (status === "ISSUED") return "teal" as const;
   return "neutral" as const;
 }
 

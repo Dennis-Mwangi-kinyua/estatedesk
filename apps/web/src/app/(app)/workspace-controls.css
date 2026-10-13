@@ -57,8 +57,7 @@
 .estate-workspace :is(.page-header, .workspace-hero__actions) { min-width: 0; }
 .estate-workspace :is(.page-header, .workspace-hero__actions) :is(.flex, form) { flex-wrap: wrap; min-width: 0; }
 .estate-workspace .sidebar-sticker,
-.estate-workspace .workspace-page-marker,
-.estate-workspace .workspace-metric-sticker {
+.estate-workspace .workspace-page-marker,.estate-workspace .workspace-metric-sticker {
   color: var(--sticker-ink, var(--workspace-action-primary));
   background: var(--sticker-wash, var(--workspace-sky));
   border-color: var(--sticker-edge, var(--border));
@@ -128,24 +127,18 @@
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-blue-800"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-blue-900"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-blue-950"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-indigo-500"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-indigo-600"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-indigo-700"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-indigo-800"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-indigo-900"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-indigo-950"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-500"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-600"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-700"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-800"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-900"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-950"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-teal-500"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-teal-600"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-teal-700"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-teal-800"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-teal-900"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-teal-950"],
+:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-500"],
+:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-600"],
+:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-700"],
+:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-800"],
+:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-900"],
+:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-sky-950"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-emerald-500"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-emerald-600"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-emerald-700"],
@@ -158,12 +151,6 @@
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-green-800"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-green-900"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-green-950"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-violet-500"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-violet-600"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-violet-700"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-violet-800"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-violet-900"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-violet-950"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-neutral-500"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-neutral-600"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-neutral-700"],
@@ -181,8 +168,7 @@
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-zinc-700"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-zinc-800"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-zinc-900"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-zinc-950"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-black"] {
+:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-zinc-950"],:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="bg-black"] {
   border-color: var(--workspace-action-primary) !important;
   background: var(--workspace-action-primary) !important;
   color: var(--workspace-action-primary-ink) !important;
@@ -222,8 +208,7 @@
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="text-rose-500"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="text-rose-600"],
 :is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="text-rose-700"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="text-rose-800"],
-:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="text-rose-900"] {
+:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="text-rose-800"],:is(.estate-workspace, body[data-workspace-theme="true"]) [data-workspace-action="true"][class~="text-rose-900"] {
   border-color: var(--workspace-action-danger) !important;
   background: var(--workspace-action-danger) !important;
   color: var(--workspace-action-danger-ink) !important;
@@ -270,9 +255,9 @@
 .estate-workspace [data-workspace-icon-tone="sky"] { color: #1d5d9b; }
 .estate-workspace [data-workspace-icon-tone="mint"] { color: #206b50; }
 .estate-workspace [data-workspace-icon-tone="peach"] { color: #975321; }
-.estate-workspace [data-workspace-icon-tone="violet"] { color: #6950a7; }
+.estate-workspace [data-workspace-icon-tone="teal"] { color: #14b8a6; }
 .dark .estate-workspace [data-workspace-icon-tone="sky"] { color: #91c5ff; }
 .dark .estate-workspace [data-workspace-icon-tone="mint"] { color: #79edb6; }
 .dark .estate-workspace [data-workspace-icon-tone="peach"] { color: #ffc48a; }
-.dark .estate-workspace [data-workspace-icon-tone="violet"] { color: #c7a5ff; }
+.dark .estate-workspace [data-workspace-icon-tone="teal"] { color: #99f6e4; }
 .estate-workspace :is([data-workspace-action], [aria-current="page"]) [data-workspace-icon-tone] { color: inherit; }

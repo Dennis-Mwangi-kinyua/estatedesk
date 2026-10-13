@@ -120,7 +120,7 @@ export const PAYMENT_METHOD_CATALOG: PaymentMethodDefinition[] = [
     type: "bank",
     settlement: "manual",
     description: "Quick payments with NCBA Bank",
-    accent: "from-purple-700 to-indigo-900",
+    accent: "from-teal-700 to-teal-900",
     logoText: "NCBA",
   },
   {
@@ -147,7 +147,7 @@ export const PAYMENT_METHOD_CATALOG: PaymentMethodDefinition[] = [
     type: "bank",
     settlement: "manual",
     description: "Easy checkout with DTB",
-    accent: "from-indigo-600 to-blue-900",
+    accent: "from-teal-600 to-blue-900",
     logoText: "DTB",
   },
   {
@@ -174,7 +174,7 @@ export const PAYMENT_METHOD_CATALOG: PaymentMethodDefinition[] = [
     type: "bank",
     settlement: "manual",
     description: "Simple and secure Sidian Bank payment flow",
-    accent: "from-fuchsia-600 to-purple-800",
+    accent: "from-teal-600 to-teal-800",
     logoText: "SB",
   },
   {
@@ -201,7 +201,7 @@ export const PAYMENT_METHOD_CATALOG: PaymentMethodDefinition[] = [
     type: "bank",
     settlement: "manual",
     description: "Secure payment option via Ecobank",
-    accent: "from-blue-500 to-indigo-700",
+    accent: "from-blue-500 to-teal-700",
     logoText: "ECO",
   },
   {

@@ -44,7 +44,7 @@ function AdminMatrixCard({ admin }: { admin: AdminRow }) {
           <Badge
             tone={
               admin.isRootSuperAdmin
-                ? "border-violet-300 bg-violet-50 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100"
+                ? "border-teal-300 bg-teal-50 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-100"
                 : undefined
             }
           >

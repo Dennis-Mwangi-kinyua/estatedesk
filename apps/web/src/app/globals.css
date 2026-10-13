@@ -132,7 +132,7 @@ html[data-pwa-launch] .app-route-loading {
 }
 
 .pwa-loading-dot--teal { color: #14b8a6; background: currentColor; }
-.pwa-loading-dot--violet { color: #8b5cf6; background: currentColor; animation-delay: 180ms; }
+.pwa-loading-dot--teal { color: #5eead4; background: currentColor; animation-delay: 180ms; }
 .pwa-loading-dot--amber { color: #f59e0b; background: currentColor; animation-delay: 360ms; }
 
 @keyframes pwa-loading-dot-glow {
@@ -552,8 +552,7 @@ html.light,
     transition:
       transform 160ms ease,
       background-color 160ms ease,
-      box-shadow 160ms ease,
-      border-color 160ms ease;
+      box-shadow 160ms ease,      border-color 160ms ease;
   }
 
   .ios-button:active {
@@ -623,13 +622,13 @@ html.light,
 
   .dark .ios-panel {
     border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(24, 24, 27, 0.78);
+    background: rgba(4, 47, 46, 0.78);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
   }
 
   .dark .ios-card {
     border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(24, 24, 27, 0.86);
+    background: rgba(4, 47, 46, 0.86);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
   }
 
@@ -670,7 +669,7 @@ html.light,
 
   .dark .ed-soft-button {
     border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(24, 24, 27, 0.86);
+    background: rgba(4, 47, 46, 0.86);
     color: rgb(250 250 250);
   }
 
@@ -718,8 +717,7 @@ html.light,
   :where(main, section, article, aside, div, form, nav, header, footer, li, td, th, span)[class*="bg-neutral-950"]:not([class*="/"]),
   :where(main, section, article, aside, div, form, nav, header, footer, li, td, th, span)[class*="bg-zinc-900"]:not([class*="/"]),
   :where(main, section, article, aside, div, form, nav, header, footer, li, td, th, span)[class*="bg-zinc-950"]:not([class*="/"]),
-  :where(main, section, article, aside, div, form, nav, header, footer, li, td, th, span)[class*="bg-stone-900"]:not([class*="/"]),
-  :where(main, section, article, aside, div, form, nav, header, footer, li, td, th, span)[class*="bg-stone-950"]:not([class*="/"]) {
+  :where(main, section, article, aside, div, form, nav, header, footer, li, td, th, span)[class*="bg-stone-900"]:not([class*="/"]),  :where(main, section, article, aside, div, form, nav, header, footer, li, td, th, span)[class*="bg-stone-950"]:not([class*="/"]) {
     background-color: rgb(255 255 255 / 0.96) !important;
     color: var(--foreground) !important;
     border-color: var(--border) !important;
@@ -966,21 +964,15 @@ html.light,
   .dark .bg-blue-50,
   .dark .bg-blue-100,
   .dark .bg-blue-500\/10,
-  .dark .bg-indigo-50,
-  .dark .bg-indigo-100,
-  .dark .bg-violet-50,
-  .dark .bg-violet-100,
-  .dark .bg-purple-50,
-  .dark .bg-purple-100,
+  .dark .bg-teal-50,
+  .dark .bg-teal-100,
   .dark .bg-cyan-50,
   .dark .bg-cyan-100,
   .dark .hover\:bg-sky-50:hover,
   .dark .hover\:bg-sky-100:hover,
   .dark .hover\:bg-blue-50:hover,
   .dark .hover\:bg-blue-100:hover,
-  .dark .hover\:bg-indigo-50:hover,
-  .dark .hover\:bg-violet-50:hover,
-  .dark .hover\:bg-purple-50:hover,
+  .dark .hover\:bg-teal-50:hover,
   .dark .hover\:bg-cyan-50:hover,
   .dark .group:hover .group-hover\:bg-blue-50,
   .dark .group:hover .group-hover\:bg-sky-50 {
@@ -990,9 +982,7 @@ html.light,
   .dark .bg-sky-600,
   .dark .bg-blue-600,
   .dark .bg-blue-700,
-  .dark .bg-indigo-600,
-  .dark .bg-violet-600,
-  .dark .bg-purple-600,
+  .dark .bg-teal-600,
   .dark .bg-cyan-600 {
     background-color: rgb(62 66 73) !important;
   }
@@ -1020,10 +1010,8 @@ html.light,
   .dark .border-blue-200,
   .dark .border-blue-300,
   .dark .border-blue-500,
-  .dark .border-indigo-100,
-  .dark .border-indigo-200,
-  .dark .border-violet-200,
-  .dark .border-purple-200,
+  .dark .border-teal-100,
+  .dark .border-teal-200,
   .dark .border-cyan-200,
   .dark .ring-sky-200,
   .dark .ring-blue-200,
@@ -1040,7 +1028,7 @@ html.light,
 
   .dark .border-amber-200,
   .dark .border-red-200 {
-    border-color: rgb(113 113 122 / 0.58) !important;
+    border-color: rgb(20 184 166 / 0.58) !important;
   }
 
   .dark .text-emerald-700,
@@ -1055,12 +1043,8 @@ html.light,
   .dark .text-blue-700,
   .dark .text-blue-800,
   .dark .text-blue-900,
-  .dark .text-indigo-700,
-  .dark .text-indigo-800,
-  .dark .text-violet-700,
-  .dark .text-violet-800,
-  .dark .text-purple-700,
-  .dark .text-purple-800,
+  .dark .text-teal-700,
+  .dark .text-teal-800,
   .dark .text-cyan-700,
   .dark .text-cyan-800,
   .dark .group:hover .group-hover\:text-blue-700 {
@@ -1096,7 +1080,7 @@ html.light,
 
   .dark input::placeholder,
   .dark textarea::placeholder {
-    color: rgb(161 161 170);
+    color: rgb(94 234 212);
   }
 
   .dark :where(button, a)[class*="bg-slate-950"],
@@ -1107,9 +1091,7 @@ html.light,
   .dark :where(button, a)[class*="bg-emerald-700"],
   .dark :where(button, a)[class*="bg-blue-600"],
   .dark :where(button, a)[class*="bg-blue-700"],
-  .dark :where(button, a)[class*="bg-indigo-600"],
-  .dark :where(button, a)[class*="bg-violet-600"],
-  .dark :where(button, a)[class*="bg-purple-600"],
+  .dark :where(button, a)[class*="bg-teal-600"],
   .dark :where(button, a)[class*="bg-cyan-600"],
   .dark :where(button, a)[class*="bg-[#007AFF]"] {
     background-color: rgb(15 23 42) !important;
@@ -1126,9 +1108,7 @@ html.light,
   .dark :where(button, a)[class*="bg-emerald-700"]:hover,
   .dark :where(button, a)[class*="bg-blue-600"]:hover,
   .dark :where(button, a)[class*="bg-blue-700"]:hover,
-  .dark :where(button, a)[class*="bg-indigo-600"]:hover,
-  .dark :where(button, a)[class*="bg-violet-600"]:hover,
-  .dark :where(button, a)[class*="bg-purple-600"]:hover,
+  .dark :where(button, a)[class*="bg-teal-600"]:hover,
   .dark :where(button, a)[class*="bg-cyan-600"]:hover,
   .dark :where(button, a)[class*="bg-[#007AFF]"]:hover {
     background-color: rgb(30 41 59) !important;
@@ -1140,16 +1120,10 @@ html.light,
     color: rgb(250 250 250);
   }
 
-  .bg-indigo-50,
-  .bg-indigo-100,
-  .bg-violet-50,
-  .bg-violet-100,
-  .bg-purple-50,
-  .bg-purple-100,
+  .bg-teal-50,
+  .bg-teal-100,
   .bg-pink-50,
   .bg-pink-100,
-  .bg-fuchsia-50,
-  .bg-fuchsia-100,
   .bg-cyan-50,
   .bg-cyan-100,
   .bg-sky-50,
@@ -1159,31 +1133,21 @@ html.light,
     background-color: rgb(245 247 249) !important;
   }
 
-  .bg-indigo-600,
-  .bg-violet-600,
-  .bg-purple-600,
+  .bg-teal-600,
   .bg-pink-600,
-  .bg-fuchsia-600,
   .bg-cyan-600,
   .bg-sky-600,
   .bg-blue-600,
   .bg-blue-700,
-  .bg-indigo-700,
-  .bg-violet-700,
-  .bg-purple-700 {
+  .bg-teal-700,
+  .bg-teal-700 {
     background-color: rgb(31 41 55) !important;
   }
 
-  .text-indigo-700,
-  .text-indigo-800,
-  .text-violet-700,
-  .text-violet-800,
-  .text-purple-700,
-  .text-purple-800,
+  .text-teal-700,
+  .text-teal-800,
   .text-pink-700,
   .text-pink-800,
-  .text-fuchsia-700,
-  .text-fuchsia-800,
   .text-cyan-700,
   .text-cyan-800,
   .text-sky-700,
@@ -1194,12 +1158,9 @@ html.light,
     color: rgb(51 65 85) !important;
   }
 
-  .border-indigo-100,
-  .border-indigo-200,
-  .border-violet-200,
-  .border-purple-200,
+  .border-teal-100,
+  .border-teal-200,
   .border-pink-200,
-  .border-fuchsia-200,
   .border-cyan-200,
   .border-sky-100,
   .border-sky-200,
@@ -1208,19 +1169,13 @@ html.light,
     border-color: rgb(226 232 240) !important;
   }
 
-  .from-indigo-50,
-  .from-violet-50,
-  .from-purple-50,
+  .from-teal-50,
   .from-pink-50,
-  .from-fuchsia-50,
   .from-cyan-50,
   .from-sky-50,
   .from-blue-50,
-  .to-indigo-50,
-  .to-violet-50,
-  .to-purple-50,
+  .to-teal-50,
   .to-pink-50,
-  .to-fuchsia-50,
   .to-cyan-50,
   .to-sky-50,
   .to-blue-50 {
@@ -1228,26 +1183,18 @@ html.light,
     --tw-gradient-to: rgb(245 247 249) var(--tw-gradient-to-position) !important;
   }
 
-  .from-indigo-500,
-  .from-indigo-600,
-  .from-indigo-700,
-  .from-violet-500,
-  .from-violet-600,
-  .from-violet-700,
-  .from-purple-500,
-  .from-purple-600,
-  .from-purple-700,
+  .from-teal-500,
+  .from-teal-600,
+  .from-teal-700,
   .from-pink-500,
   .from-pink-600,
-  .from-fuchsia-600,
   .from-cyan-600,
   .from-sky-600,
   .from-blue-500,
   .from-blue-700,
-  .to-indigo-700,
-  .to-indigo-900,
-  .to-violet-700,
-  .to-purple-800,
+  .to-teal-700,
+  .to-teal-900,
+  .to-teal-800,
   .to-cyan-800,
   .to-sky-700,
   .to-sky-900,
@@ -1258,16 +1205,10 @@ html.light,
     --tw-gradient-to: rgb(75 85 99) var(--tw-gradient-to-position) !important;
   }
 
-  .dark .bg-indigo-50,
-  .dark .bg-indigo-100,
-  .dark .bg-violet-50,
-  .dark .bg-violet-100,
-  .dark .bg-purple-50,
-  .dark .bg-purple-100,
+  .dark .bg-teal-50,
+  .dark .bg-teal-100,
   .dark .bg-pink-50,
   .dark .bg-pink-100,
-  .dark .bg-fuchsia-50,
-  .dark .bg-fuchsia-100,
   .dark .bg-cyan-50,
   .dark .bg-cyan-100,
   .dark .bg-sky-50,
@@ -1277,16 +1218,10 @@ html.light,
     background-color: rgb(45 48 53 / 0.82) !important;
   }
 
-  .dark .text-indigo-700,
-  .dark .text-indigo-800,
-  .dark .text-violet-700,
-  .dark .text-violet-800,
-  .dark .text-purple-700,
-  .dark .text-purple-800,
+  .dark .text-teal-700,
+  .dark .text-teal-800,
   .dark .text-pink-700,
   .dark .text-pink-800,
-  .dark .text-fuchsia-700,
-  .dark .text-fuchsia-800,
   .dark .text-cyan-700,
   .dark .text-cyan-800,
   .dark .text-sky-700,
@@ -1405,8 +1340,7 @@ html.light,
 }
 
 .dark .ed-theme-band-inverse,
-.dark [class*="bg-[#10141a]"],
-.dark [class*="bg-[#0b1720]"] {
+.dark [class*="bg-[#10141a]"],.dark [class*="bg-[#0b1720]"] {
   background-color: oklch(0.14 0.008 248) !important;
   color: oklch(0.96 0.004 248) !important;
 }
@@ -1418,8 +1352,7 @@ html.light,
 
 .dark [class*="text-[#d1d5db]"],
 .dark [class*="text-[#e5e7eb]"],
-.dark [class*="text-[#f3f4f6]"],
-.dark [class*="text-[#f8fafc]"] {
+.dark [class*="text-[#f3f4f6]"],.dark [class*="text-[#f8fafc]"] {
   color: oklch(0.92 0.004 248) !important;
 }
 
@@ -1428,7 +1361,7 @@ html.light,
   color: oklch(0.74 0.006 248) !important;
 }
 
-.dark [class*="bg-[#f2f2f7]"],
+.dark [class*="bg-[#f0fdfa]"],
 .dark [class*="bg-[#f5f5f7]"],
 .dark [class*="bg-[#f5f7fb]"],
 .dark [class*="bg-[#f6f7f9]"],
@@ -1439,8 +1372,7 @@ html.light,
 .dark [class*="bg-[#fafafa]"],
 .dark [class*="bg-[#fbfbfd]"],
 .dark [class*="bg-[#fbfcfe]"],
-.dark [class*="bg-[#fcfcfd]"],
-.dark [class*="bg-[#F2F6FB]"] {
+.dark [class*="bg-[#fcfcfd]"],.dark [class*="bg-[#F2F6FB]"] {
   background-color: color-mix(in oklch, var(--background) 92%, var(--card)) !important;
   color: var(--foreground) !important;
 }
@@ -1451,8 +1383,7 @@ html.light,
 .dark [class*="bg-[#0f172a]"],
 .dark [class*="bg-[#111827]"],
 .dark [class*="bg-[#121821]"],
-.dark [class*="bg-[#151922]"],
-.dark [class*="bg-[#171b22]"] {
+.dark [class*="bg-[#151922]"],.dark [class*="bg-[#171b22]"] {
   background-color: color-mix(in oklch, var(--card) 88%, var(--background)) !important;
 }
 
@@ -1460,8 +1391,7 @@ html.light,
   background-color: var(--background) !important;
   background-image: linear-gradient(
     180deg,
-    color-mix(in oklch, var(--background) 90%, white 2%),
-    var(--background)
+    color-mix(in oklch, var(--background) 90%, white 2%),    var(--background)
   ) !important;
 }
 
@@ -1528,16 +1458,14 @@ html.light,
     button:not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]):not([class*="w-8"]):not([class*="w-9"]):not([class*="w-10"]),
     [role="button"]:not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]):not([class*="w-8"]):not([class*="w-9"]):not([class*="w-10"]),
     a.ios-button:not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]),
-    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
-    select
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),    select
   ) {
     min-height: 2.75rem;
   }
 
   .app-mobile-canvas :where(
     input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
-    select,
-    textarea
+    select,    textarea
   ) {
     width: 100%;
     max-width: 100%;
@@ -1626,9 +1554,8 @@ html.light,
 
   .platform-shell-developer {
     background:
-      radial-gradient(circle at 88% -10%, color-mix(in oklch, #7c3aed 12%, transparent), transparent 22rem),
-      radial-gradient(circle at 12% -8%, color-mix(in oklch, var(--primary) 8%, transparent), transparent 20rem),
-      var(--background) !important;
+      radial-gradient(circle at 88% -10%, color-mix(in oklch, #2dd4bf 12%, transparent), transparent 22rem),
+      radial-gradient(circle at 12% -8%, color-mix(in oklch, var(--primary) 8%, transparent), transparent 20rem),      var(--background) !important;
   }
 
   .dark :where(.platform-theme-content, .org-theme-content, .ed-theme-page) :where(.bg-white, .bg-white\/90, .bg-white\/95, .bg-background, .bg-background\/80, .bg-background\/90) {
@@ -1672,8 +1599,7 @@ html.light,
       linear-gradient(
         180deg,
         rgba(255, 255, 255, 0.42) 0%,
-        rgba(255, 255, 255, 0.72) 42%,
-        rgba(248, 250, 252, 0.88) 100%
+        rgba(255, 255, 255, 0.72) 42%,        rgba(248, 250, 252, 0.88) 100%
       );
     backdrop-filter: blur(10px) saturate(1.1);
     -webkit-backdrop-filter: blur(10px) saturate(1.1);
@@ -1684,8 +1610,7 @@ html.light,
       linear-gradient(
         180deg,
         rgba(2, 6, 23, 0.45) 0%,
-        rgba(2, 6, 23, 0.72) 42%,
-        rgba(2, 6, 23, 0.9) 100%
+        rgba(2, 6, 23, 0.72) 42%,        rgba(2, 6, 23, 0.9) 100%
       );
   }
 
@@ -1757,8 +1682,7 @@ html.light,
 
 /* Match the signed-in invoice body to its header when dark mode is active. */
 .dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper,
-.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper-body,
-.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper-header {
+.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper-body,.dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper-header {
   background-color: #0f172a !important;
   color: #f8fafc !important;
 }
@@ -1768,8 +1692,7 @@ html.light,
   border-color: #334155 !important;
   box-shadow:
     0 0 0 1px rgba(148, 163, 184, 0.18),
-    0 28px 56px -24px rgba(0, 0, 0, 0.62),
-    0 12px 24px -12px rgba(0, 0, 0, 0.42);
+    0 28px 56px -24px rgba(0, 0, 0, 0.62),    0 12px 24px -12px rgba(0, 0, 0, 0.42);
 }
 
 .dark .ed-invoice-viewer:not(.ed-verify-document-page) .ed-invoice-paper :where(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
@@ -1959,8 +1882,7 @@ html.light,
   html.dark [class*="bg-slate-50"],
   html.dark [class*="bg-neutral-50"],
   html.dark [class*="bg-gray-50"],
-  html.dark [class*="bg-[#f"],
-  html.dark [class*="bg-[#F"] {
+  html.dark [class*="bg-[#f"],  html.dark [class*="bg-[#F"] {
     background: #ffffff !important;
     color: #111111 !important;
   }
@@ -1968,8 +1890,7 @@ html.light,
   html.dark [class*="text-slate"],
   html.dark [class*="text-neutral"],
   html.dark [class*="text-gray"],
-  html.dark [class*="text-stone"],
-  html.dark [class*="text-zinc"] {
+  html.dark [class*="text-stone"],  html.dark [class*="text-zinc"] {
     color: #111111 !important;
   }
 
@@ -1978,8 +1899,7 @@ html.light,
   html.dark [class*="border-gray"],
   html.dark [class*="border-stone"],
   html.dark [class*="border-zinc"],
-  html.dark [class*="border-black"],
-  html.dark [class*="border-white"] {
+  html.dark [class*="border-black"],  html.dark [class*="border-white"] {
     border-color: #d4d4d8 !important;
   }
 
@@ -2010,8 +1930,7 @@ html.light,
    ============================================================================= */
 
 .ed-mobile-first,
-.ed-mobile-first-root,
-.ed-mobile-surface {
+.ed-mobile-first-root,.ed-mobile-surface {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -2077,8 +1996,7 @@ html.light,
 }
 
 .platform-action-group > form > button,
-.platform-action-group > a,
-.platform-action-group > button {
+.platform-action-group > a,.platform-action-group > button {
   width: 100%;
   justify-content: center;
   overflow-wrap: normal;
@@ -2124,8 +2042,7 @@ html.light,
     button:not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]):not([class*="w-8"]):not([class*="w-9"]):not([class*="w-10"]),
     [role="button"],
     a.button,
-    input[type="submit"],
-    input[type="button"]
+    input[type="submit"],    input[type="button"]
   ) {
     min-height: var(--ed-touch);
   }
@@ -2150,8 +2067,7 @@ html.light,
     .ed-mobile-content,
     .app-content-shell,
     main,
-    section,
-    article
+    section,    article
   )
     :has(> table):not(.hidden) {
     display: block;

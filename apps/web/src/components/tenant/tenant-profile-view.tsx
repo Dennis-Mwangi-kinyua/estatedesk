@@ -81,7 +81,7 @@ function TenantProfileView({ tenant }: { tenant: TenantProfileViewModel }) {
 
   return (
     <>
-      <div className="min-h-full bg-[#f2f2f7]">
+      <div className="min-h-full bg-[#f0fdfa]">
         <div className="mx-auto w-full max-w-6xl px-3 pb-28 pt-4 sm:px-4 sm:pt-6 lg:px-8 lg:pb-10">
           <div className="mx-auto max-w-3xl lg:max-w-6xl">
             <div className="space-y-4 lg:space-y-6">

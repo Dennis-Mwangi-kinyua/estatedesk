@@ -3,7 +3,7 @@ body.estate-glass-system {
   --system-glass-canvas: #f2f3f7;
   --system-glass-fill: #fff;
   --system-glass-control: #f8f9fb;
-  --system-glass-border: rgb(60 60 67 / 10%);
+  --system-glass-border: rgb(15 118 110 / 10%);
   --system-glass-shadow: 0 2px 8px rgb(30 40 60 / 3%);
   --system-glass-ink: #24262b;
   --system-glass-muted: #686c75;
@@ -14,16 +14,16 @@ body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surfa
   --foreground: #24262b;
   --card: #fff;
   --card-foreground: #24262b;
-  --primary: #3478f6;
+  --primary: #0f766e;
   --primary-foreground: #fff;
-  --secondary: #edf2fb;
-  --secondary-foreground: #365b93;
+  --secondary: #f0fdfa;
+  --secondary-foreground: #115e59;
   --muted: #f4f5f8;
   --muted-foreground: #686c75;
   --border: #e7e9ef;
   --input: #e0e3eb;
-  --ring: #3478f6;
-  --workspace-sky: #f0f4fc;
+  --ring: #0f766e;
+  --workspace-sky: #f0fdfa;
   --workspace-mint: #f1f7f5;
   --workspace-peach: #faf5ef;
 }
@@ -41,16 +41,16 @@ body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surfa
   --foreground: #f0f1f5;
   --card: #202227;
   --card-foreground: #f0f1f5;
-  --primary: #87b2fc;
-  --primary-foreground: #142746;
-  --secondary: #293244;
-  --secondary-foreground: #d7e4fc;
+  --primary: #5eead4;
+  --primary-foreground: #042f2e;
+  --secondary: #134e4a;
+  --secondary-foreground: #ccfbf1;
   --muted: #27292f;
   --muted-foreground: #a7abb5;
   --border: #33363e;
   --input: #3b3e47;
-  --ring: #87b2fc;
-  --workspace-sky: #252e3e;
+  --ring: #5eead4;
+  --workspace-sky: #102f35;
   --workspace-mint: #25342f;
   --workspace-peach: #363029;
 }

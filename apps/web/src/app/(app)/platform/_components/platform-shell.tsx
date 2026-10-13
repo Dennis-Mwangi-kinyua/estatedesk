@@ -77,7 +77,7 @@ function PlatformShellInner({
                     "platform-sidebar-link group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                     active
                       ? isDeveloper
-                        ? "bg-violet-600 text-white dark:bg-violet-500"
+                        ? "bg-teal-600 text-white dark:bg-teal-500"
                         : "ed-nav-item-active bg-primary text-primary-foreground"
                       : "ed-nav-item text-muted-foreground hover:bg-muted/70 hover:text-foreground",
                   ].join(" ")}
@@ -135,7 +135,7 @@ function PlatformShellInner({
                       className={[
                         "hidden rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide sm:inline-flex",
                         isDeveloper
-                          ? "bg-violet-500/15 text-violet-800 dark:text-violet-200"
+                          ? "bg-teal-500/15 text-teal-800 dark:text-teal-200"
                           : "bg-muted text-muted-foreground",
                       ].join(" ")}
                     >

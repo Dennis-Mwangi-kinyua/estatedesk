@@ -108,7 +108,7 @@ export function MoveOutsWorkspace({
           {[
             { label: "Total notices", count: totalNotices, Icon: Users, tone: "text-sky-700 dark:text-sky-300 bg-sky-500/10" },
             { label: "Submitted", count: submittedCount, Icon: FileText, tone: "text-amber-700 dark:text-amber-300 bg-amber-500/10" },
-            { label: "Inspection scheduled", count: scheduledCount, Icon: CalendarDays, tone: "text-violet-700 dark:text-violet-300 bg-violet-500/10" },
+            { label: "Inspection scheduled", count: scheduledCount, Icon: CalendarDays, tone: "text-teal-700 dark:text-teal-300 bg-teal-500/10" },
             { label: "Inspection complete", count: completedCount, Icon: ClipboardList, tone: "text-blue-700 dark:text-blue-300 bg-blue-500/10" },
             { label: "Closed", count: closedCount, Icon: CheckCircle2, tone: "text-emerald-700 dark:text-emerald-300 bg-emerald-500/10" },
           ].map(({ label, count, Icon, tone }) => (

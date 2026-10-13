@@ -83,7 +83,7 @@ export function PwaLoadingCard({ slow = false }: { slow?: boolean }) {
       </p>
       <div className="pwa-loading-dots" aria-hidden="true">
         <span className="pwa-loading-dot pwa-loading-dot--teal" />
-        <span className="pwa-loading-dot pwa-loading-dot--violet" />
+        <span className="pwa-loading-dot pwa-loading-dot--teal" />
         <span className="pwa-loading-dot pwa-loading-dot--amber" />
       </div>
     </div>

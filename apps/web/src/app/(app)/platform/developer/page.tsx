@@ -138,7 +138,7 @@ export default async function DeveloperPortalPage({
       ) : null}
 
       <section className="developer-glass-hero system-glass-card rounded-3xl border p-5 sm:p-8">
-      <p className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-violet-800 dark:text-violet-200"><SidebarSticker href="/platform/developer" /> Your engineering workspace</p>
+      <p className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-teal-800 dark:text-teal-200"><SidebarSticker href="/platform/developer" /> Your engineering workspace</p>
       <PageHeader
         eyebrow="Developer portal"
         title="Build. Connect. Keep things moving."
@@ -147,7 +147,7 @@ export default async function DeveloperPortalPage({
           <>
             <Link data-workspace-action="true"
               href="/platform/developer/docs"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-violet-300 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-900 transition hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-100 dark:hover:bg-violet-500/25"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-teal-300 bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-900 transition hover:bg-teal-100 dark:border-teal-500/40 dark:bg-teal-500/15 dark:text-teal-100 dark:hover:bg-teal-500/25"
             >
               <BookOpen className="h-4 w-4 shrink-0" />
               System docs
@@ -155,7 +155,7 @@ export default async function DeveloperPortalPage({
             {isSuperAdmin ? (
               <Link data-workspace-action="true"
                 href="/platform/control"
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500"
               >
                 Website control
                 <ArrowRight className="h-4 w-4 shrink-0" />
@@ -213,9 +213,9 @@ export default async function DeveloperPortalPage({
               <Link
                 key={tool.href}
                 href={tool.href}
-                className="developer-glass-tool group flex min-h-[4.5rem] items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition active:scale-[0.99] hover:border-violet-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-violet-500/40 sm:p-4 sm:hover:-translate-y-0.5"
+                className="developer-glass-tool group flex min-h-[4.5rem] items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition active:scale-[0.99] hover:border-teal-300 hover:shadow-md dark:border-white/10 dark:bg-slate-950 dark:hover:border-teal-500/40 sm:p-4 sm:hover:-translate-y-0.5"
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700 dark:bg-violet-500/15 dark:text-violet-200">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-200">
                   <SidebarSticker href={tool.href} />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -229,7 +229,7 @@ export default async function DeveloperPortalPage({
                           SA
                         </span>
                       ) : null}
-                      <ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-violet-600 dark:group-hover:text-violet-300" />
+                      <ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-teal-600 dark:group-hover:text-teal-300" />
                     </div>
                   </div>
                   <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
@@ -306,11 +306,11 @@ export default async function DeveloperPortalPage({
                 settings. Shortcut: Alt+Shift+A
               </p>
             </Link>
-            <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-500/30 dark:bg-violet-500/10">
-              <p className="text-sm font-semibold text-violet-900 dark:text-violet-100">
+            <div className="rounded-xl border border-teal-200 bg-teal-50 p-4 dark:border-teal-500/30 dark:bg-teal-500/10">
+              <p className="text-sm font-semibold text-teal-900 dark:text-teal-100">
                 Developer mode (current)
               </p>
-              <p className="mt-1 text-xs leading-5 text-violet-800/80 dark:text-violet-200/80">
+              <p className="mt-1 text-xs leading-5 text-teal-800/80 dark:text-teal-200/80">
                 Health, APIs, flags, rate limits, dual-mode help/security/audit, and
                 site ops, keys, jobs, data, and backups. Website Control is
                 super-admin only. Shortcut: Alt+Shift+D

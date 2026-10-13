@@ -157,7 +157,7 @@ export function WaterBillsIssuedSection({
       <SectionIntro
         eyebrow="Tenant billing"
         title="Bills already sent to tenants"
-        action={<StatusBadge label="Issued bills" tone="violet" />}
+        action={<StatusBadge label="Issued bills" tone="teal" />}
       />
 
       {data.issuedBills.length === 0 ? (

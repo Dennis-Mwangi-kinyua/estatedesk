@@ -273,7 +273,7 @@ export default async function ApiExplorerPage() {
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <Webhook className="h-3.5 w-3.5 text-violet-600 dark:text-violet-300" />
+                    <Webhook className="h-3.5 w-3.5 text-teal-600 dark:text-teal-300" />
                     <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-medium text-slate-900 dark:text-slate-100">
                       {item.name}
                     </p>

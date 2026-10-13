@@ -95,9 +95,9 @@ const ORG_COLOR_PALETTE = [
     chip: "border-emerald-200 bg-emerald-100 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-100",
   },
   {
-    row: "bg-violet-50/90 dark:bg-violet-500/10",
-    bar: "bg-violet-500",
-    chip: "border-violet-200 bg-violet-100 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/15 dark:text-violet-100",
+    row: "bg-teal-50/90 dark:bg-teal-500/10",
+    bar: "bg-teal-500",
+    chip: "border-teal-200 bg-teal-100 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/15 dark:text-teal-100",
   },
   {
     row: "bg-amber-50/90 dark:bg-amber-500/10",
@@ -115,14 +115,14 @@ const ORG_COLOR_PALETTE = [
     chip: "border-cyan-200 bg-cyan-100 text-cyan-900 dark:border-cyan-500/30 dark:bg-cyan-500/15 dark:text-cyan-100",
   },
   {
-    row: "bg-indigo-50/90 dark:bg-indigo-500/10",
-    bar: "bg-indigo-500",
-    chip: "border-indigo-200 bg-indigo-100 text-indigo-900 dark:border-indigo-500/30 dark:bg-indigo-500/15 dark:text-indigo-100",
+    row: "bg-teal-50/90 dark:bg-teal-500/10",
+    bar: "bg-teal-500",
+    chip: "border-teal-200 bg-teal-100 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/15 dark:text-teal-100",
   },
   {
-    row: "bg-fuchsia-50/90 dark:bg-fuchsia-500/10",
-    bar: "bg-fuchsia-500",
-    chip: "border-fuchsia-200 bg-fuchsia-100 text-fuchsia-900 dark:border-fuchsia-500/30 dark:bg-fuchsia-500/15 dark:text-fuchsia-100",
+    row: "bg-teal-50/90 dark:bg-teal-500/10",
+    bar: "bg-teal-500",
+    chip: "border-teal-200 bg-teal-100 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/15 dark:text-teal-100",
   },
   {
     row: "bg-teal-50/90 dark:bg-teal-500/10",
@@ -364,7 +364,7 @@ export default async function PlatformBillingPage({
                         /{subscription.org.slug} · current{" "}
                         <Badge>{subscription.plan}</Badge> → requested{" "}
                         <Badge
-                          tone="border-violet-300 bg-violet-50 text-violet-900"
+                          tone="border-teal-300 bg-teal-50 text-teal-900"
                         >
                           {request.plan}
                         </Badge>

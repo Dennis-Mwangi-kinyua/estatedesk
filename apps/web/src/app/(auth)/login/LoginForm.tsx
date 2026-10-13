@@ -9,8 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { ArrowRight, Eye, EyeOff, LockKeyhole } from "lucide-react";
-import { Mail, ShieldCheck } from "@/components/shared/colored-icons";
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 import type { LoginActionState } from "./actions";
 
 type LoginActionHandler = (
@@ -80,16 +79,16 @@ export default function LoginForm({
           <div className="login-auth-card w-full max-w-[340px] rounded-3xl border border-white/80 bg-white px-8 py-8 text-center shadow-[0_28px_90px_rgba(15,23,42,0.25)]">
             <div aria-hidden="true" className="relative mx-auto flex h-20 w-20 items-center justify-center">
               <div className="absolute inset-0 rounded-full border border-slate-100" />
-              <div className="login-loading-ring absolute inset-0 rounded-full border-[3px] border-transparent border-r-sky-200 border-t-sky-600" />
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-sky-50 text-sky-700">
+              <div className="login-loading-ring absolute inset-0 rounded-full border-[3px] border-transparent border-r-teal-200 border-t-teal-600" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-teal-700">
                 <ShieldCheck className="h-6 w-6" strokeWidth={1.7} />
               </div>
             </div>
-            <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-700">Secure sign-in</p>
+            <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-teal-700">Secure sign-in</p>
             <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">Verifying details</h3>
             <p className="mt-2 text-sm leading-6 text-slate-500">Please wait while we securely log you in.</p>
             <div aria-hidden="true" className="mt-6 h-1 overflow-hidden rounded-full bg-slate-100">
-              <div className="login-auth-progress h-full w-1/3 rounded-full bg-gradient-to-r from-sky-300 to-sky-600" />
+              <div className="login-auth-progress h-full w-1/3 rounded-full bg-gradient-to-r from-teal-300 to-teal-600" />
             </div>
           </div>
         </div>,

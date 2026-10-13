@@ -153,7 +153,7 @@ function SwitchRow({
         name={name}
         value="true"
         defaultChecked={defaultChecked}
-        className="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+        className="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
       />
       <span className="min-w-0">
         <span className="block text-sm font-semibold text-foreground">{label}</span>
@@ -246,7 +246,7 @@ export default async function WebsiteControlCenterPage({
             </Link>
             <Link data-workspace-action="true"
               href="/platform/system-health"
-              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-teal-600 px-4 text-sm font-semibold text-white"
             >
               System health
             </Link>
@@ -369,7 +369,7 @@ export default async function WebsiteControlCenterPage({
               defaultValue={control.incidentMessage ?? ""}
               rows={3}
               placeholder="We are investigating elevated payment webhook latency…"
-              className="min-h-[5.5rem] w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-violet-400"
+              className="min-h-[5.5rem] w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-teal-400"
             />
           </label>
 
@@ -480,7 +480,7 @@ export default async function WebsiteControlCenterPage({
                 defaultValue={control.maintenanceMessage ?? ""}
                 rows={3}
                 placeholder={defaultMaintenanceMessage(control)}
-                className="min-h-[5.5rem] w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-violet-400"
+                className="min-h-[5.5rem] w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-teal-400"
               />
             </label>
             <label className="block space-y-1.5">
@@ -492,14 +492,14 @@ export default async function WebsiteControlCenterPage({
                 defaultValue={control.notes ?? ""}
                 rows={3}
                 placeholder="Why these switches are set…"
-                className="min-h-[5.5rem] w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-violet-400"
+                className="min-h-[5.5rem] w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm outline-none focus:border-teal-400"
               />
             </label>
           </div>
 
           <button data-workspace-action="true"
             type="submit"
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 text-sm font-semibold text-white transition hover:bg-violet-500 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 text-sm font-semibold text-white transition hover:bg-teal-500 sm:w-auto"
           >
             <Power className="h-4 w-4" />
             Save kill switches
@@ -783,21 +783,21 @@ export default async function WebsiteControlCenterPage({
 
         <Surface title="Jobs & queue nuclear" description="Background processing control for the whole website.">
           <div className="space-y-4 p-4">
-            <form action={runAllCronJobsAction} className="rounded-xl border border-violet-200 bg-violet-50/60 p-4 dark:border-violet-500/30 dark:bg-violet-500/10">
-              <div className="flex items-center gap-2 text-sm font-semibold text-violet-950 dark:text-violet-100">
+            <form action={runAllCronJobsAction} className="rounded-xl border border-teal-200 bg-teal-50/60 p-4 dark:border-teal-500/30 dark:bg-teal-500/10">
+              <div className="flex items-center gap-2 text-sm font-semibold text-teal-950 dark:text-teal-100">
                 <Zap className="h-4 w-4" />
                 Run all cron jobs now
               </div>
-              <p className="mt-1 text-xs text-violet-900/80 dark:text-violet-100/80">
+              <p className="mt-1 text-xs text-teal-900/80 dark:text-teal-100/80">
                 Notifications, retention, owner statements. Confirm RUN-ALL-CRONS.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <input
                   name="confirmation"
                   placeholder="RUN-ALL-CRONS"
-                  className="h-10 flex-1 rounded-xl border border-violet-200 bg-white px-3 text-sm dark:border-violet-500/30 dark:bg-slate-950"
+                  className="h-10 flex-1 rounded-xl border border-teal-200 bg-white px-3 text-sm dark:border-teal-500/30 dark:bg-slate-950"
                 />
-                <button data-workspace-action="true" className="rounded-xl bg-violet-700 px-4 text-sm font-semibold text-white hover:bg-violet-600">
+                <button data-workspace-action="true" className="rounded-xl bg-teal-700 px-4 text-sm font-semibold text-white hover:bg-teal-600">
                   Run all
                 </button>
               </div>
@@ -958,8 +958,8 @@ export default async function WebsiteControlCenterPage({
                     </form>
                   </div>
 
-                  <div className="space-y-2 rounded-xl border border-violet-200/80 bg-violet-50/50 p-3 dark:border-violet-500/25 dark:bg-violet-500/5">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-violet-900 dark:text-violet-100">
+                  <div className="space-y-2 rounded-xl border border-teal-200/80 bg-teal-50/50 p-3 dark:border-teal-500/25 dark:bg-teal-500/5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-teal-900 dark:text-teal-100">
                       Support entry
                     </p>
                     <form action={enterOrgAsSupportAction} className="grid gap-2">
@@ -981,7 +981,7 @@ export default async function WebsiteControlCenterPage({
                         <option value="4">4 hours</option>
                         <option value="8">8 hours</option>
                       </select>
-                      <button data-workspace-action="true" className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 text-sm font-semibold text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100">
+                      <button data-workspace-action="true" className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 text-sm font-semibold text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-100">
                         <Building2 className="h-4 w-4" />
                         Enter as support
                       </button>
@@ -1110,7 +1110,7 @@ export default async function WebsiteControlCenterPage({
                             <option value="4">4h</option>
                             <option value="8">8h</option>
                           </select>
-                          <button data-workspace-action="true" className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border border-violet-200 bg-violet-50 text-[11px] font-semibold text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100">
+                          <button data-workspace-action="true" className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border border-teal-200 bg-teal-50 text-[11px] font-semibold text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-100">
                             <Building2 className="h-3 w-3" />
                             Enter as support
                           </button>

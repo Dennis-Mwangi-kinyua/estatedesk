@@ -33,7 +33,7 @@ export function statusTone(status: AccountingRequestStatus) {
     case "REJECTED":
       return "border-rose-200 bg-rose-50 text-rose-800";
     case "PAID":
-      return "border-indigo-200 bg-indigo-50 text-indigo-800";
+      return "border-teal-200 bg-teal-50 text-teal-800";
     case "CANCELLED":
     default:
       return "border-border bg-muted/20 text-muted-foreground";

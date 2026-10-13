@@ -80,10 +80,10 @@ body.estate-glass-system {
   overflow: hidden;
   border-bottom: 1px solid var(--border);
   padding: clamp(1.25rem, 3vw, 2rem);
-  background: radial-gradient(ellipse at top right, rgb(139 92 246 / 8%), transparent 55%), linear-gradient(120deg, var(--workspace-sky, #edf4ff), var(--card) 65%);
+  background: radial-gradient(ellipse at top right, rgb(94 234 212 / 8%), transparent 55%), linear-gradient(120deg, var(--workspace-sky, #edf4ff), var(--card) 65%);
 }
 .workspace-hero[data-kind="caretaker"] { background: radial-gradient(ellipse at top right, rgb(16 185 129 / 9%), transparent 55%), linear-gradient(120deg, var(--workspace-mint), var(--card) 65%); }
-.workspace-hero[data-kind="landlord"] { background: radial-gradient(ellipse at top right, rgb(139 92 246 / 10%), transparent 55%), linear-gradient(120deg, var(--workspace-sky), var(--card) 65%); }
+.workspace-hero[data-kind="landlord"] { background: radial-gradient(ellipse at top right, rgb(94 234 212 / 10%), transparent 55%), linear-gradient(120deg, var(--workspace-sky), var(--card) 65%); }
 .workspace-hero__layout { display: grid; gap: 1.25rem; align-items: center; }
 .workspace-hero__eyebrow { display: flex; align-items: center; gap: .6rem; color: var(--muted-foreground); font-size: .68rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
 .workspace-hero__eyebrow > span { display: inline-grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid var(--border); border-radius: .75rem; background: var(--card); font-size: 1.15rem; letter-spacing: 0; }
@@ -124,7 +124,7 @@ body.estate-glass-system {
   .workspace-hero__art, .workspace-hero__actions, .workspace-metric-sticker { display: none; }
 }
 .estate-glass-system .modern-auth {
-  background: radial-gradient(ellipse at 10% 10%, rgb(56 139 253 / 8%), transparent 45%), radial-gradient(ellipse at 90% 90%, rgb(139 92 246 / 7%), transparent 45%), var(--background);
+  background: radial-gradient(ellipse at 10% 10%, rgb(56 139 253 / 8%), transparent 45%), radial-gradient(ellipse at 90% 90%, rgb(94 234 212 / 7%), transparent 45%), var(--background);
 }
 .estate-glass-system .modern-auth :is(div, section, form)[class~="bg-white"][class*="rounded"] {
   background: var(--card);

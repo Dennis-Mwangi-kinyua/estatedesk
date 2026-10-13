@@ -180,7 +180,7 @@
   box-shadow: 0 -4px 24px rgb(15 23 42 / 7%);
 }
 .platform-mobile-dock [data-dock-tone="sky"] { --dock-color: #0369a1; --dock-tint: #e0f2fe; }
-.platform-mobile-dock [data-dock-tone="violet"] { --dock-color: #6d28d9; --dock-tint: #ede9fe; }
+.platform-mobile-dock [data-dock-tone="teal"] { --dock-color: #0f766e; --dock-tint: #f0fdfa; }
 .platform-mobile-dock [data-dock-tone="emerald"] { --dock-color: #047857; --dock-tint: #d1fae5; }
 .platform-mobile-dock [data-dock-tone="slate"] { --dock-color: #475569; --dock-tint: #f1f5f9; }
 .platform-mobile-dock .platform-dock-item { color: var(--muted-foreground); font-size: .6875rem; gap: .25rem; }
@@ -205,7 +205,7 @@
   box-shadow: 0 3px 8px color-mix(in srgb, var(--dock-color) 25%, transparent);
 }
 .dark .platform-mobile-dock [data-dock-tone="sky"] { --dock-color: #7dd3fc; --dock-tint: #0c4a6e; }
-.dark .platform-mobile-dock [data-dock-tone="violet"] { --dock-color: #c4b5fd; --dock-tint: #4c1d95; }
+.dark .platform-mobile-dock [data-dock-tone="teal"] { --dock-color: #ccfbf1; --dock-tint: #0d9488; }
 .dark .platform-mobile-dock [data-dock-tone="emerald"] { --dock-color: #6ee7b7; --dock-tint: #064e3b; }
 .dark .platform-mobile-dock [data-dock-tone="slate"] { --dock-color: #cbd5e1; --dock-tint: #334155; }
 .dark .platform-mobile-dock .platform-dock-item[aria-current="page"] .platform-dock-icon { color: #0f172a; }
@@ -228,9 +228,9 @@
   --platform-active: #e0f2fe;
   --platform-active-ink: #075985;
 }
-.platform-shell-developer { --platform-active: #ede9fe; --platform-active-ink: #5b21b6; }
+.platform-shell-developer { --platform-active: #f0fdfa; --platform-active-ink: #14b8a6; }
 .dark .platform-shell-admin { --platform-active: #0c4a6e; --platform-active-ink: #e0f2fe; }
-.dark .platform-shell-developer { --platform-active: #4c1d95; --platform-active-ink: #ede9fe; }
+.dark .platform-shell-developer { --platform-active: #0d9488; --platform-active-ink: #f0fdfa; }
 /* Developer tools include compact status callouts whose light-theme text
    shades otherwise disappear after their backgrounds are adapted for dark mode. */
 .dark .platform-shell-developer :is(
@@ -243,10 +243,6 @@
   .text-cyan-950, .text-cyan-900, [class*="text-cyan-950/"], [class*="text-cyan-900/"],
   .text-sky-950, .text-sky-900, [class*="text-sky-950/"], [class*="text-sky-900/"],
   .text-blue-950, .text-blue-900, [class*="text-blue-950/"], [class*="text-blue-900/"],
-  .text-indigo-950, .text-indigo-900, [class*="text-indigo-950/"], [class*="text-indigo-900/"],
-  .text-violet-950, .text-violet-900, [class*="text-violet-950/"], [class*="text-violet-900/"],
-  .text-purple-950, .text-purple-900, [class*="text-purple-950/"], [class*="text-purple-900/"],
-  .text-fuchsia-950, .text-fuchsia-900, [class*="text-fuchsia-950/"], [class*="text-fuchsia-900/"],
   .text-pink-950, .text-pink-900, [class*="text-pink-950/"], [class*="text-pink-900/"],
   .text-rose-950, .text-rose-900, [class*="text-rose-950/"], [class*="text-rose-900/"],
   .text-red-950, .text-red-900, [class*="text-red-950/"], [class*="text-red-900/"]

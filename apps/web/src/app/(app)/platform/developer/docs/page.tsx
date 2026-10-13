@@ -62,7 +62,7 @@ export default async function DeveloperSystemDocsHubPage() {
             <a
               key={article.slug}
               href={`#${article.slug}`}
-              className="inline-flex shrink-0 items-center rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground/80 shadow-sm transition hover:border-violet-400/50 hover:text-foreground"
+              className="inline-flex shrink-0 items-center rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground/80 shadow-sm transition hover:border-teal-400/50 hover:text-foreground"
             >
               {article.title.split("—")[0]?.trim() || article.title}
             </a>
@@ -101,20 +101,20 @@ export default async function DeveloperSystemDocsHubPage() {
                     key={article.slug}
                     id={article.slug}
                     href={`/platform/developer/docs/${article.slug}`}
-                    className="group scroll-mt-28 rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:border-violet-400/50 hover:shadow-md active:scale-[0.99] sm:p-5"
+                    className="group scroll-mt-28 rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:border-teal-400/50 hover:shadow-md active:scale-[0.99] sm:p-5"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/40 text-violet-700 dark:text-violet-300">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/40 text-teal-700 dark:text-teal-300">
                         <BookOpen className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-base font-semibold leading-6 text-foreground group-hover:text-violet-700 dark:group-hover:text-violet-300">
+                        <p className="text-base font-semibold leading-6 text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-300">
                           {article.title}
                         </p>
                         <p className="mt-1.5 text-sm leading-6 text-foreground/70">
                           {article.summary}
                         </p>
-                        <p className="mt-3 inline-flex flex-wrap items-center gap-1 text-xs font-semibold text-violet-700 dark:text-violet-300">
+                        <p className="mt-3 inline-flex flex-wrap items-center gap-1 text-xs font-semibold text-teal-700 dark:text-teal-300">
                           Read article
                           <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
                           <span className="ml-1 font-normal text-foreground/50">

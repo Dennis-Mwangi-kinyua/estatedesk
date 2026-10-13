@@ -15,7 +15,7 @@ const kindMeta = {
   inspection: {
     icon: ClipboardList,
     labelKey: "taskInspection" as const,
-    tone: "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-200",
+    tone: "border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-200",
   },
   meter_reading: {
     icon: Droplets,

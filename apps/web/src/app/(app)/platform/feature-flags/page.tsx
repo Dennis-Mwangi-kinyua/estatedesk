@@ -23,11 +23,11 @@ export const dynamic = "force-dynamic";
 const ORG_COLOR_PALETTE = [
   { surface: "bg-sky-50/80 dark:bg-sky-500/10", bar: "bg-sky-500" },
   { surface: "bg-emerald-50/80 dark:bg-emerald-500/10", bar: "bg-emerald-500" },
-  { surface: "bg-violet-50/80 dark:bg-violet-500/10", bar: "bg-violet-500" },
+  { surface: "bg-teal-50/80 dark:bg-teal-500/10", bar: "bg-teal-500" },
   { surface: "bg-amber-50/80 dark:bg-amber-500/10", bar: "bg-amber-500" },
   { surface: "bg-rose-50/80 dark:bg-rose-500/10", bar: "bg-rose-500" },
   { surface: "bg-cyan-50/80 dark:bg-cyan-500/10", bar: "bg-cyan-500" },
-  { surface: "bg-indigo-50/80 dark:bg-indigo-500/10", bar: "bg-indigo-500" },
+  { surface: "bg-teal-50/80 dark:bg-teal-500/10", bar: "bg-teal-500" },
   { surface: "bg-orange-50/80 dark:bg-orange-500/10", bar: "bg-orange-500" },
 ] as const;
 
@@ -68,12 +68,12 @@ function FlagToggle({
             ? `${featureKey} is globally forced; toggling still updates org storage`
             : `Turn ${featureKey} ${enabled ? "off" : "on"} for ${orgName}`
         }
-        className="min-h-8 rounded-full transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
+        className="min-h-8 rounded-full transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500"
       >
         <Badge
           tone={
             globallyForced
-              ? "border-violet-300 bg-violet-50 text-violet-900"
+              ? "border-teal-300 bg-teal-50 text-teal-900"
               : enabled
                 ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                 : "border-border bg-muted/50 text-muted-foreground"
@@ -131,7 +131,7 @@ export default async function FeatureFlagsPage() {
                 key={key}
                 tone={
                   value
-                    ? "border-violet-300 bg-violet-50 text-violet-900"
+                    ? "border-teal-300 bg-teal-50 text-teal-900"
                     : "border-red-200 bg-red-50 text-red-800"
                 }
               >
@@ -207,7 +207,7 @@ export default async function FeatureFlagsPage() {
                       <th key={key} className="px-4 py-3 font-medium">
                         {key}
                         {key in control.globalFeatures ? (
-                          <span className="ml-1 text-[10px] text-violet-700">G</span>
+                          <span className="ml-1 text-[10px] text-teal-700">G</span>
                         ) : null}
                       </th>
                     ))}

@@ -15,7 +15,7 @@ export function DeveloperSensitiveBanner({ isSuperAdmin }: { isSuperAdmin: boole
 
   if (!sensitive && !isSuperAdmin) {
     return (
-      <div className="mb-3 rounded-xl border border-violet-200 bg-violet-50 px-3 py-3 text-sm leading-6 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100 sm:mb-4 sm:px-4">
+      <div className="mb-3 rounded-xl border border-teal-200 bg-teal-50 px-3 py-3 text-sm leading-6 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-100 sm:mb-4 sm:px-4">
         <div className="flex items-start gap-2">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
@@ -30,13 +30,13 @@ export function DeveloperSensitiveBanner({ isSuperAdmin }: { isSuperAdmin: boole
 
   if (!sensitive) {
     return (
-      <div className="mb-3 rounded-xl border border-violet-200 bg-violet-50 px-3 py-3 text-sm leading-6 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100 sm:mb-4 sm:px-4">
+      <div className="mb-3 rounded-xl border border-teal-200 bg-teal-50 px-3 py-3 text-sm leading-6 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-100 sm:mb-4 sm:px-4">
         <div className="flex items-start gap-2">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
             <strong>Developer mode</strong> — engineering tools plus site administration
             (orgs, users, billing, support). Use the mode toggle or{" "}
-            <kbd className="rounded border border-violet-300 px-1 text-[11px]">
+            <kbd className="rounded border border-teal-300 px-1 text-[11px]">
               Alt+Shift+A
             </kbd>{" "}
             for Administration layout.
