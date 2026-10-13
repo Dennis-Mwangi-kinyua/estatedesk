@@ -1,3 +1,4 @@
+import { caretakerCanStartIssue, caretakerCanUpdateIssue } from "@/lib/caretaker/issue-actions";
 import { TicketStatus } from "@prisma/client";
 import {
   addCaretakerIssueProgressNoteAction,
@@ -18,13 +19,9 @@ export function IssueCardActions({
   issue: IssueActionTarget;
   currentUserId: string;
 }) {
-  const canStart =
-    issue.status === TicketStatus.OPEN &&
-    (!issue.assignedTo?.id || issue.assignedTo.id === currentUserId);
-
-  const canAddProgress =
-    issue.status === TicketStatus.IN_PROGRESS &&
-    issue.assignedTo?.id === currentUserId;
+  const target = { status: issue.status, assignedToUserId: issue.assignedTo?.id ?? null };
+  const canStart = caretakerCanStartIssue(target, currentUserId);
+  const canAddProgress = caretakerCanUpdateIssue(target, currentUserId);
 
   if (!canStart && !canAddProgress) {
     return null;

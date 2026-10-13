@@ -206,3 +206,16 @@ body.estate-glass-system .tenant-shell-header h1 {
   color: var(--foreground) !important;
   text-align: center;
 }
+
+/* A consistent, responsive card rhythm throughout the caretaker workspace. */
+[data-workspace="caretaker"] .caretaker-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 23rem), 1fr));
+  align-items: stretch;
+  gap: 1rem;
+}
+[data-workspace="caretaker"] .caretaker-card-grid > * { min-width: 0; }
+[data-workspace="caretaker"] .caretaker-card-grid > :only-child { grid-column: 1 / -1; }
+@media (max-width: 767px) {
+  [data-workspace="caretaker"] .caretaker-card-grid { grid-template-columns: minmax(0, 1fr); gap: .875rem; }
+}

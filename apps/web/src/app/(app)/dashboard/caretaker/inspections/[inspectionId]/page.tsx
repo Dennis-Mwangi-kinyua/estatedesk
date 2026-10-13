@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { requireUserSession } from "@/lib/auth/session";
+import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { InspectionDetailWorkspace } from "./_components/inspection-detail-workspace";
 import { getCaretakerInspectionDetail } from "./_lib/queries";
 
@@ -14,12 +14,13 @@ type PageProps = {
 export default async function CaretakerInspectionDetailPage({
   params,
 }: PageProps) {
-  const session = await requireUserSession();
+  const session = await requireCaretakerAccess();
   const { inspectionId: publicInspectionId } = await params;
 
   const result = await getCaretakerInspectionDetail({
     orgId: session.activeOrgId!,
     userId: session.userId,
+    membershipScope: session.membershipScope,
     publicInspectionId,
   });
 

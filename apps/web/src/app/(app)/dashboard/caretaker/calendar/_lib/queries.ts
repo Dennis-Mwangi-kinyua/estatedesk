@@ -59,46 +59,11 @@ export async function getCaretakerCalendarData({
       { label: "caretaker calendar allowed units" },
     );
 
-    if (allowedUnitIds.length === 0) {
-      return {
-        ok: true as const,
-        ...emptyCalendar,
-        weekStart,
-      };
-    }
-
-    const allocations = await retryTransientDatabaseOperation(
-      () =>
-        prisma.caretakerAssignment.findMany({
-          where: {
-            orgId,
-            caretakerUserId,
-            active: true,
-          },
-          select: {
-            propertyId: true,
-            buildingId: true,
-            unitId: true,
-          },
-        }),
-      { label: "caretaker calendar allocations" },
-    );
-
-    const propertyIds = allocations
-      .map((item) => item.propertyId)
-      .filter((value): value is string => Boolean(value));
-    const buildingIds = allocations
-      .map((item) => item.buildingId)
-      .filter((value): value is string => Boolean(value));
-    const unitIds = allocations
-      .map((item) => item.unitId)
-      .filter((value): value is string => Boolean(value));
-
     const allocationFilters = buildCaretakerAllocationFilters({
       userId: caretakerUserId,
-      propertyIds,
-      buildingIds,
-      unitIds,
+      propertyIds: [],
+      buildingIds: [],
+      unitIds: allowedUnitIds,
     });
 
     const issueScope = {
@@ -139,13 +104,10 @@ export async function getCaretakerCalendarData({
                     lease: {
                       orgId,
                       deletedAt: null,
-                      unitId: { in: allowedUnitIds },
                     },
                   },
                 },
-                ...(allocationFilters.length > 0
-                  ? [{ OR: allocationFilters }]
-                  : []),
+                { OR: [...allocationFilters, { inspectorUserId: caretakerUserId }] },
               ],
             },
             orderBy: { scheduledAt: "asc" },

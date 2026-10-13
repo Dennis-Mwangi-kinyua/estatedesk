@@ -23,7 +23,7 @@ export function VendorsList({
         eyebrow={<CaretakerI18nLabel labelKey="vendorDirectory" />}
         title={<CaretakerI18nLabel labelKey="approvedVendors" />}
       />
-      <div className={`space-y-3 ${panelBodyClassName} pt-0`}>
+      <div className={`caretaker-card-grid ${panelBodyClassName} pt-0`}>
         {!data.ok ? (
           <ErrorStateCard message={data.errorMessage} />
         ) : data.vendors.length === 0 ? (

@@ -2,7 +2,7 @@ import Link from "@/components/navigation/workspace-link";
 import type { ReactNode } from "react";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { CalendarDays, ClipboardCheck, UserRound } from "@/components/shared/colored-icons";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { decodePublicId } from "@/lib/public-id";
@@ -16,6 +16,7 @@ export const dynamic = "force-dynamic";
 export default async function InspectionPage({ params }: { params: Promise<{ inspectionId: string }> }) {
   const session = await requireUserSession();
   const { inspectionId } = await params;
+  if (session.activeOrgRole === "CARETAKER") redirect(`/dashboard/caretaker/inspections/${inspectionId}`);
   const inspection = await prisma.inspection.findFirst({
     where: { id: decodePublicId(inspectionId, "inspection"), notice: { lease: { orgId: session.activeOrgId!, deletedAt: null } } },
     include: {
@@ -30,7 +31,7 @@ export default async function InspectionPage({ params }: { params: Promise<{ ins
 
   const unit = inspection.notice.lease.unit;
   const scheduled = inspection.status === "SCHEDULED" && inspection.notice.status === "INSPECTION_SCHEDULED";
-  const backHref = session.activeOrgRole === "CARETAKER" ? "/dashboard/caretaker/inspections" : "/dashboard/org/inspections";
+  const backHref = "/dashboard/org/inspections";
   return (
     <main className="estate-workspace mx-auto w-full max-w-none space-y-5 px-4 pb-24 pt-4 sm:space-y-6 sm:px-6 lg:px-8">
       <header className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">

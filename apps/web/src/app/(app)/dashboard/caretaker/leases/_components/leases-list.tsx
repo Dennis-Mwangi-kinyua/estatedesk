@@ -53,7 +53,7 @@ export function LeasesList({ data }: { data: CaretakerLeasesPageData }) {
           </div>
         ) : (
           <>
-            <div className="space-y-3 md:hidden">
+            <div className="caretaker-card-grid">
               {leases.map((lease) => {
                 const rent =
                   lease.monthlyRent != null
@@ -156,69 +156,7 @@ export function LeasesList({ data }: { data: CaretakerLeasesPageData }) {
               })}
             </div>
 
-            <div className="hidden overflow-hidden rounded-2xl border border-border md:block">
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="border-b border-border bg-muted/20">
-                    <tr className="text-left text-muted-foreground">
-                      <th className="px-4 py-3 font-medium">Tenant</th>
-                      <th className="px-4 py-3 font-medium">Phone</th>
-                      <th className="px-4 py-3 font-medium">Property</th>
-                      <th className="px-4 py-3 font-medium">Building</th>
-                      <th className="px-4 py-3 font-medium">Unit</th>
-                      <th className="px-4 py-3 font-medium">Status</th>
-                      <th className="px-4 py-3 font-medium">Monthly rent</th>
-                      <th className="px-4 py-3 font-medium">Start</th>
-                      <th className="px-4 py-3 font-medium">End</th>
-                    </tr>
-                  </thead>
 
-                  <tbody className="divide-y divide-border">
-                    {leases.map((lease) => (
-                      <tr key={lease.id}>
-                        <td className="px-4 py-3 font-medium text-foreground">
-                          {lease.tenant?.fullName ?? "—"}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {lease.tenant?.phone ?? "—"}
-                        </td>
-                        <td className="px-4 py-3 text-foreground">
-                          {lease.unit?.property?.name ?? "—"}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {lease.unit?.building?.name ?? "—"}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {lease.unit?.houseNo ?? "—"}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex rounded-full border px-2.5 py-1 text-xs capitalize ${statusClasses(
-                              lease.status,
-                            )}`}
-                          >
-                            {lease.status.toLowerCase()}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-foreground">
-                          {lease.monthlyRent != null
-                            ? formatCurrency(lease.monthlyRent)
-                            : lease.unit?.rentAmount != null
-                              ? formatCurrency(lease.unit.rentAmount)
-                              : "—"}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {formatDate(lease.startDate)}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {formatDate(lease.endDate)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </>
         )}
       </div>

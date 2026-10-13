@@ -16,7 +16,7 @@ export function MoveOutsList({
   return (
     <section className={panelShellClassName}>
       <SectionIntro eyebrow="Queue" title="Move-out notices" />
-      <div className={`space-y-3 ${panelBodyClassName} pt-0`}>
+      <div className={`caretaker-card-grid ${panelBodyClassName} pt-0`}>
         {!data.ok ? (
           <ErrorStateCard message={data.errorMessage} />
         ) : data.notices.length === 0 ? (

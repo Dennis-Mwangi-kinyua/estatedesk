@@ -1,3 +1,4 @@
+import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
 import { Prisma } from "@prisma/client";
 import { getCaretakerManageableIssue } from "@/app/(app)/dashboard/caretaker/issues/_lib/access";
 import type { MembershipScope } from "@/lib/caretaker/access";
@@ -158,6 +159,7 @@ export async function getCaretakerIssueDetail({
     return {
       ok: true as const,
       issue,
+      canViewUnitProfile: Boolean(issue.unitId && (await getCaretakerAllowedUnitIds({ orgId, caretakerUserId, membershipScope })).includes(issue.unitId)),
       redirectTo,
     };
   } catch {

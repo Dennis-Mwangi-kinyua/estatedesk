@@ -13,6 +13,7 @@ import { requireCurrentOrgId } from "@/lib/auth/org";
 import { notifyRecipients } from "@/lib/notifications/notify";
 import { encodePublicId } from "@/lib/public-id";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
+import { caretakerCanCompleteInspection } from "@/lib/caretaker/issue-actions";
 import { canInspectUnit } from "@/lib/move-outs/inspection-scope";
 import { inspectionChecklistFields } from "@/app/(app)/dashboard/caretaker/inspections/[inspectionId]/_lib/constants";
 import { uploadInspectionPhoto } from "@/app/(app)/dashboard/caretaker/inspections/[inspectionId]/_lib/upload-inspection-photo";
@@ -68,7 +69,9 @@ export async function completeInspectionAction(formData: FormData) {
     throw new Error("Inspection not found or not allocated to you.");
   }
 
-  if (!canInspectUnit(memberships, inspection.notice.lease.unit)) throw new Error("This inspection is outside your organisation scope.");
+  if (session.activeOrgRole === "CARETAKER") {
+    if (!caretakerCanCompleteInspection(inspection, session.userId)) throw new Error("Only the assigned caretaker can complete this scheduled inspection.");
+  } else if (!canInspectUnit(memberships, inspection.notice.lease.unit)) throw new Error("This inspection is outside your organisation scope.");
   if (inspection.status !== "SCHEDULED" || inspection.notice.status !== "INSPECTION_SCHEDULED") throw new Error("Only scheduled inspections can be reported. Refresh this inspection.");
   for (const field of inspectionChecklistFields) {
     if (!["yes", "no"].includes(String(formData.get(field.name)))) {
@@ -179,7 +182,7 @@ export async function completeInspectionAction(formData: FormData) {
 
   await prisma.$transaction(async (tx) => {
     const reportSaved = await tx.inspection.updateMany({
-      where: { id: inspection.id, status: "SCHEDULED" },
+      where: { id: inspection.id, status: "SCHEDULED", ...(session.activeOrgRole === "CARETAKER" ? { inspectorUserId: session.userId } : {}) },
       data: {
         status: "COMPLETED",
         checklist,

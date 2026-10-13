@@ -1,11 +1,12 @@
 "use server";
+import { caretakerCanStartIssue, caretakerCanUpdateIssue } from "@/lib/caretaker/issue-actions";
 
 import { TicketStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCaretakerIssueHref } from "@/app/(app)/dashboard/caretaker/_lib/paths";
 import { prisma } from "@/lib/prisma";
-import { requireUserSession } from "@/lib/auth/session";
+import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 import { uploadCompletionPhoto } from "@/features/issues/actions/upload-completion-photo";
 import { getCaretakerManageableIssue } from "./_lib/access";
@@ -43,7 +44,7 @@ export async function startCaretakerIssueAction(formData: FormData) {
   const issueId = String(formData.get("issueId") ?? "");
   if (!issueId) redirect(CARETAKER_ISSUES_PATH);
 
-  const session = await requireUserSession();
+  const session = await requireCaretakerAccess();
   if (!session.activeOrgId) redirect(CARETAKER_ISSUES_PATH);
 
   const issue = await getCaretakerManageableIssue({
@@ -53,19 +54,16 @@ export async function startCaretakerIssueAction(formData: FormData) {
     issueId,
   });
 
-  if (!issue || issue.status !== TicketStatus.OPEN) {
+  if (!issue || !caretakerCanStartIssue(issue, session.userId)) {
     redirect(CARETAKER_ISSUES_PATH);
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.issueTicket.update({
-      where: { id: issue.id },
-      data: {
-        status: TicketStatus.IN_PROGRESS,
-        assignedToUserId: session.userId,
-        assignedByUserId: session.userId,
-      },
+    const claimed = await tx.issueTicket.updateMany({
+      where: { id: issue.id, orgId: session.activeOrgId!, status: "OPEN", OR: [{ assignedToUserId: null }, { assignedToUserId: session.userId }] },
+      data: { status: TicketStatus.IN_PROGRESS, assignedToUserId: session.userId, ...(issue.assignedToUserId ? {} : { assignedByUserId: session.userId }) },
     });
+    if (claimed.count !== 1) throw new Error("This issue has already been assigned or its status changed.");
 
     await notifyInAppAndPush({ actorUserId: session.userId,
       db: tx,
@@ -103,7 +101,7 @@ export async function addCaretakerIssueProgressNoteAction(formData: FormData) {
     redirect(CARETAKER_ISSUES_PATH);
   }
 
-  const session = await requireUserSession();
+  const session = await requireCaretakerAccess();
   if (!session.activeOrgId) redirect(CARETAKER_ISSUES_PATH);
 
   const issue = await getCaretakerManageableIssue({
@@ -113,7 +111,7 @@ export async function addCaretakerIssueProgressNoteAction(formData: FormData) {
     issueId,
   });
 
-  if (!issue || issue.status !== TicketStatus.IN_PROGRESS) {
+  if (!issue || !caretakerCanUpdateIssue(issue, session.userId)) {
     redirect(CARETAKER_ISSUES_PATH);
   }
 
@@ -123,13 +121,11 @@ export async function addCaretakerIssueProgressNoteAction(formData: FormData) {
     : entry;
 
   await prisma.$transaction(async (tx) => {
-    await tx.issueTicket.update({
-      where: { id: issue.id },
-      data: {
-        resolutionNotes,
-        assignedToUserId: session.userId,
-      },
+    const updated = await tx.issueTicket.updateMany({
+      where: { id: issue.id, orgId: session.activeOrgId!, status: "IN_PROGRESS", assignedToUserId: session.userId },
+      data: { resolutionNotes },
     });
+    if (updated.count !== 1) throw new Error("This issue is no longer assigned to you for work.");
 
     await tx.auditLog.create({
       data: {
@@ -161,7 +157,7 @@ export async function submitIssueResolutionReportAction(formData: FormData) {
     redirect(CARETAKER_ISSUES_PATH);
   }
 
-  const session = await requireUserSession();
+  const session = await requireCaretakerAccess();
 
   if (!session.activeOrgId) {
     redirect(CARETAKER_ISSUES_PATH);
@@ -217,6 +213,11 @@ export async function submitIssueResolutionReportAction(formData: FormData) {
   let reportId = "";
 
   await prisma.$transaction(async (tx) => {
+    const owned = await tx.issueTicket.updateMany({
+      where: { id: issue.id, orgId: session.activeOrgId!, assignedToUserId: session.userId, status: "IN_PROGRESS", resolutionReports: { none: { status: { in: ["SUBMITTED", "OFFICE_APPROVED"] } } } },
+      data: { status: "IN_PROGRESS" },
+    });
+    if (owned.count !== 1) throw new Error("This issue changed or already has a report awaiting review.");
     const report = await tx.issueResolutionReport.create({
       data: {
         issueId: issue.id,

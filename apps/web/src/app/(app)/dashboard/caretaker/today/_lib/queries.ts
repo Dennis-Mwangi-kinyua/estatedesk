@@ -53,38 +53,11 @@ export async function getCaretakerTodayWorkData({
       { label: "caretaker today work allowed units" },
     );
 
-    const allocations = await retryTransientDatabaseOperation(
-      () =>
-        prisma.caretakerAssignment.findMany({
-          where: {
-            orgId,
-            caretakerUserId,
-            active: true,
-          },
-          select: {
-            propertyId: true,
-            buildingId: true,
-            unitId: true,
-          },
-        }),
-      { label: "caretaker today work allocations" },
-    );
-
-    const propertyIds = allocations
-      .map((item) => item.propertyId)
-      .filter((value): value is string => Boolean(value));
-    const buildingIds = allocations
-      .map((item) => item.buildingId)
-      .filter((value): value is string => Boolean(value));
-    const unitIds = allocations
-      .map((item) => item.unitId)
-      .filter((value): value is string => Boolean(value));
-
     const allocationFilters = buildCaretakerAllocationFilters({
       userId: caretakerUserId,
-      propertyIds,
-      buildingIds,
-      unitIds,
+      propertyIds: [],
+      buildingIds: [],
+      unitIds: allowedUnitIds,
     });
 
     const issueScope = {
@@ -131,7 +104,7 @@ export async function getCaretakerTodayWorkData({
                         },
                       },
                     },
-                    { OR: allocationFilters },
+                    { OR: [...allocationFilters, { inspectorUserId: caretakerUserId }] },
                   ],
                 },
                 orderBy: { scheduledAt: "asc" },

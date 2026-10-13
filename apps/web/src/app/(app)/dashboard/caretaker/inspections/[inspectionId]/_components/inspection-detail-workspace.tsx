@@ -189,7 +189,7 @@ export function InspectionDetailWorkspace({
             />
           </div>
         </section>
-      ) : inspection.status === "SCHEDULED" ? (
+      ) : result.canComplete ? (
         <section className={panelShellClassName}>
           <SectionIntro
             eyebrow="Field work"
@@ -202,7 +202,7 @@ export function InspectionDetailWorkspace({
 
           <div className={panelBodyClassName}><InspectionReportForm inspectionId={inspection.id} /></div>
         </section>
-      ) : <p className="text-sm text-muted-foreground">This inspection was cancelled.</p>}
+      ) : <p className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">{inspection.status === "SCHEDULED" ? "This inspection is assigned to another staff member. You can review its details here." : "This inspection was cancelled."}</p>}
 
       <CaretakerWorkspaceFooter note="Move-out inspection detail" />
     </div>

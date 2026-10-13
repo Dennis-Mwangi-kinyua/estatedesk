@@ -1,3 +1,4 @@
+import { caretakerCanAccessPath } from "../caretaker/workspace-policy";
 import type { OrgRole, PlatformRole } from "@prisma/client";
 import { canReceiveOrgMandates, type OrgPermission } from "./role-matrix";
 import { tenantCanAccessWorkspacePath } from "./access";
@@ -27,7 +28,7 @@ function under(path: string, prefix: string) {
 }
 
 export function canAccessWorkspacePath(
-  session: { platformRole: PlatformRole; activeOrgRole: OrgRole | null; activeOrgId: string | null; grantedPermissions?: readonly string[] },
+  session: { platformRole: PlatformRole; activeOrgRole: OrgRole | null; activeOrgId: string | null; grantedPermissions?: readonly string[]; caretakerSections?: readonly string[]; caretakerUnitPaths?: readonly string[] },
   pathname: string,
 ) {
   let path: string;
@@ -46,7 +47,7 @@ export function canAccessWorkspacePath(
   if (/^\/inspections\/[^/]+$/.test(path)) return role !== "TENANT";
   if (role === "TENANT") return tenantCanAccessWorkspacePath(path);
   if (under(path, "/dashboard/tenant")) return false;
-  if (under(path, "/dashboard/caretaker")) return role === "CARETAKER";
+  if (under(path, "/dashboard/caretaker")) return role === "CARETAKER" && caretakerCanAccessPath(path, session.caretakerSections);
   if (under(path, "/dashboard/landlord")) return role === "LANDLORD";
   if (!MANAGEMENT.includes(role)) return false;
   if (path === "/dashboard/org" || path === "/dashboard/billing-required") return true;
@@ -69,6 +70,9 @@ export function canAccessWorkspacePath(
 export function canDiscoverWorkspaceHref(session: Parameters<typeof canAccessWorkspacePath>[0], href: string) {
   if (!href.startsWith("/") || href.startsWith("//")) return true;
   const path = new URL(href, "https://estatedesk.invalid").pathname;
+  if (session.activeOrgRole === "CARETAKER" && session.caretakerUnitPaths && path.startsWith("/dashboard/caretaker/units/")) {
+    if (!session.caretakerUnitPaths.includes(path)) return false;
+  }
   const section = path.split("/")[1];
   const protectedDestination = ["dashboard", "platform", "api-keys", "profile", "inspections"].includes(section) || section in ORG_WORKSPACE_ROLES;
   return !protectedDestination || canAccessWorkspacePath(session, href);

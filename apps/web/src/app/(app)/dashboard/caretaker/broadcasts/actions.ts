@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireUserSession } from "@/lib/auth/session";
+import { requireCaretakerAccess } from "@/lib/permissions/guards";
 
 const BROADCASTS_PATH = "/dashboard/caretaker/broadcasts";
 
 async function requireCaretakerBroadcastContext() {
-  const session = await requireUserSession();
+  const session = await requireCaretakerAccess();
 
   if (!session.activeOrgId || session.activeOrgRole !== "CARETAKER") {
     throw new Error("Caretaker access is required.");

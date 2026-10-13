@@ -20,9 +20,11 @@ import { getIssuePhotoUrl } from "../_lib/helpers";
 export function IssueDetailSections({
   issue,
   currentUserId,
+  canViewUnitProfile = false,
 }: {
   issue: CaretakerIssueDetail;
   currentUserId: string;
+  canViewUnitProfile?: boolean;
 }) {
   const activeTenant = issue.unit?.leases[0]?.tenant ?? null;
   const latestReport = issue.resolutionReports[0] ?? null;
@@ -94,12 +96,12 @@ export function IssueDetailSections({
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
-                  <Link
+                  {canViewUnitProfile ? <Link
                     href={getCaretakerUnitHref(issue.unit.id)}
                     className="mt-3 inline-flex text-sm font-semibold text-primary transition hover:text-primary/80"
                   >
                     Open unit profile
-                  </Link>
+                  </Link> : null}
                 </div>
 
                 {activeTenant ? (
@@ -109,12 +111,12 @@ export function IssueDetailSections({
                       {activeTenant.fullName}
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-3">
-                      <Link
+                      {canViewUnitProfile ? <Link
                         href={getCaretakerTenantHref(activeTenant)}
                         className="text-sm font-semibold text-primary transition hover:text-primary/80"
                       >
                         View tenant record
-                      </Link>
+                      </Link> : null}
                       <ContactActions
                         phone={activeTenant.phone}
                         email={activeTenant.email}
@@ -140,7 +142,7 @@ export function IssueDetailSections({
       <section className={`${panelShellClassName} min-w-0 xl:col-span-2`}>
         <SectionIntro eyebrow="Field work" title="Issue actions" />
         <div className={`space-y-4 ${panelBodyClassName} pt-0`}>
-          <Link
+          {issue.assignedTo?.id === currentUserId && issue.status === "IN_PROGRESS" ? <Link
             href={`/dashboard/caretaker/vendors?issueId=${encodePublicId(
               issue.id,
               "issue",
@@ -148,7 +150,7 @@ export function IssueDetailSections({
             className="inline-flex rounded-2xl border border-border bg-muted/10 px-4 py-3 text-sm font-semibold text-primary transition hover:bg-muted/20"
           >
             Request vendor dispatch
-          </Link>
+          </Link> : null}
 
           <div className="grid gap-3 rounded-2xl border border-border bg-muted/10 p-4 sm:grid-cols-2"><div><p className="text-xs text-muted-foreground">Assigned caretaker</p><p className="mt-1 break-words text-sm font-semibold">{issue.assignedTo?.fullName || issue.assignedTo?.email || "Unassigned"}</p></div><div><p className="text-xs text-muted-foreground">Assigned by</p><p className="mt-1 break-words text-sm font-semibold">{issue.assignedBy?.fullName || issue.assignedBy?.email || "Not recorded"}</p></div></div>
           <IssueCardActions issue={issue} currentUserId={currentUserId} />

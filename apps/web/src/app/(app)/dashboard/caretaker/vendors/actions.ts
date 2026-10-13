@@ -30,7 +30,7 @@ export async function dispatchCaretakerVendorAction(formData: FormData) {
     issueId,
   });
 
-  if (!issue) {
+  if (!issue || issue.assignedToUserId !== session.userId || issue.status !== "IN_PROGRESS") {
     redirect(VENDORS_PATH);
   }
 

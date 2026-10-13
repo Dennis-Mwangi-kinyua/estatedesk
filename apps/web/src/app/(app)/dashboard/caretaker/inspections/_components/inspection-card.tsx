@@ -38,7 +38,7 @@ export function InspectionCard({ inspection }: InspectionCardProps) {
 
           <div className="grid w-full gap-2 border-t border-border pt-4 sm:grid-cols-2 xl:w-52 xl:shrink-0 xl:grid-cols-1 xl:border-t-0 xl:pt-0">
             <Link data-workspace-action="true" href={detailHref} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">
-              {scheduled ? <><ClipboardIcon />Perform inspection</> : "View submitted report"}
+              {inspection.canComplete ? <><ClipboardIcon />Perform inspection</> : scheduled ? "View inspection" : "View submitted report"}
             </Link>
             {scheduled ? inspection.notice.tenant.phone ? <a href={`tel:${inspection.notice.tenant.phone}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-muted/40"><Phone aria-hidden="true" className="size-4" />Call tenant</a> : <span className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-muted/20 px-4 text-sm font-medium text-muted-foreground"><Phone aria-hidden="true" className="size-4" />No phone number</span> : null}
           </div>

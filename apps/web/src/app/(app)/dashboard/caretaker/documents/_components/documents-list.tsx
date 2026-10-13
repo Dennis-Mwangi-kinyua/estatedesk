@@ -27,7 +27,7 @@ export function DocumentsList({
   return (
     <section className={panelShellClassName}>
       <SectionIntro eyebrow="Locker" title="Scoped files" />
-      <div className={`space-y-3 ${panelBodyClassName} pt-0`}>
+      <div className={`caretaker-card-grid ${panelBodyClassName} pt-0`}>
         {!data.ok ? (
           <ErrorStateCard message={data.errorMessage} />
         ) : data.totalCount === 0 ? (

@@ -1,12 +1,9 @@
 import Link from "@/components/navigation/workspace-link";
-import { TicketStatus } from "@prisma/client";
 import {
   getCaretakerIssueHref,
   getCaretakerUnitHref,
 } from "@/app/(app)/dashboard/caretaker/_lib/paths";
 import { IssueSlaBadge } from "@/app/(app)/dashboard/caretaker/_components/issue-sla-badge";
-import { CompletionReportForm } from "./completion-report-form";
-import { IssueCardActions } from "./issue-card-actions";
 import {
   formatDateTime,
   getPriorityClass,
@@ -19,15 +16,10 @@ type IssueCardProps = {
   currentUserId: string;
 };
 
-export function IssueCard({ issue, currentUserId }: IssueCardProps) {
+export function IssueCard({ issue }: IssueCardProps) {
   const propertyName = issue.unit?.property.name ?? issue.property?.name ?? "—";
   const buildingName = issue.unit?.building?.name ?? "—";
   const unitName = issue.unit?.houseNo ?? "—";
-  const latestReport = issue.resolutionReports[0] ?? null;
-  const canSubmitReport =
-    issue.status === TicketStatus.IN_PROGRESS &&
-    issue.assignedTo?.id === currentUserId &&
-    (!latestReport || latestReport.status === "REJECTED");
 
   return (
     <article className="rounded-2xl border border-border bg-card p-4 transition hover:border-primary/25 hover:shadow-sm">
@@ -78,12 +70,12 @@ export function IssueCard({ issue, currentUserId }: IssueCardProps) {
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 border-t border-border pt-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-1 gap-3 border-t border-border pt-4 sm:grid-cols-2">
         <div>
           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
             Property
           </p>
-          <p className="mt-1 text-sm font-medium text-foreground">
+          <p className="mt-1 break-words text-sm font-medium text-foreground">
             {propertyName}
           </p>
         </div>
@@ -92,7 +84,7 @@ export function IssueCard({ issue, currentUserId }: IssueCardProps) {
           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
             Building
           </p>
-          <p className="mt-1 text-sm font-medium text-foreground">
+          <p className="mt-1 break-words text-sm font-medium text-foreground">
             {buildingName}
           </p>
         </div>
@@ -101,7 +93,7 @@ export function IssueCard({ issue, currentUserId }: IssueCardProps) {
           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
             Unit
           </p>
-          <p className="mt-1 text-sm font-medium text-foreground">
+          <p className="mt-1 break-words text-sm font-medium text-foreground">
             {unitName}
           </p>
         </div>
@@ -110,7 +102,7 @@ export function IssueCard({ issue, currentUserId }: IssueCardProps) {
           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
             Assigned to
           </p>
-          <p className="mt-1 text-sm font-medium text-foreground">
+          <p className="mt-1 break-words text-sm font-medium text-foreground">
             {issue.assignedTo?.fullName ?? "Unassigned"}
           </p>
         </div>
@@ -139,43 +131,7 @@ export function IssueCard({ issue, currentUserId }: IssueCardProps) {
         </span>
       </div>
 
-      <IssueCardActions issue={issue} currentUserId={currentUserId} />
-
-      {issue.resolutionNotes && issue.status === TicketStatus.IN_PROGRESS ? (
-        <div className="mt-4 rounded-2xl border border-border bg-muted/10 p-4">
-          <p className="text-sm font-semibold text-foreground">Progress notes</p>
-          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-            {issue.resolutionNotes}
-          </p>
-        </div>
-      ) : null}
-
-      {latestReport ? (
-        <div className="mt-4 rounded-2xl border border-border bg-muted/10 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-foreground">
-              Completion report
-            </p>
-            <span className="rounded-full border border-border bg-background px-3 py-1 text-[11px] font-semibold text-muted-foreground">
-              {latestReport.status.replaceAll("_", " ")}
-            </span>
-          </div>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            {latestReport.workSummary}
-          </p>
-          {latestReport.officeNotes ? (
-            <p className="mt-2 text-xs leading-5 text-muted-foreground">
-              Office notes: {latestReport.officeNotes}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {canSubmitReport ? (
-        <div className="mt-4">
-          <CompletionReportForm issueId={issue.id} />
-        </div>
-      ) : null}
+      <div className="mt-4 border-t border-border pt-4"><Link href={getCaretakerIssueHref(issue.id)} className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Open issue and workflow</Link></div>
     </article>
   );
 }

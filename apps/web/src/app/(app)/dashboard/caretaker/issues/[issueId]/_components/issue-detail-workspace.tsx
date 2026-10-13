@@ -31,7 +31,7 @@ export function IssueDetailWorkspace({
         <>
           <IssueDetailHeader issue={data.issue} />
           <IssueProgressTracker issue={data.issue} />
-          <IssueDetailSections issue={data.issue} currentUserId={currentUserId} />
+          <IssueDetailSections issue={data.issue} currentUserId={currentUserId} canViewUnitProfile={data.canViewUnitProfile} />
         </>
       )}
 

@@ -1,3 +1,5 @@
+import { caretakerCanCompleteInspection } from "@/lib/caretaker/issue-actions";
+import { getCaretakerAllowedUnitIds, type MembershipScope } from "@/lib/caretaker/access";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
@@ -14,42 +16,16 @@ const emptyInspectionStats = {
 export async function getCaretakerInspectionsData(args: {
   orgId: string;
   userId: string;
+  membershipScope?: MembershipScope;
 }) {
   try {
-    const allocations = await retryTransientDatabaseOperation(
-      () =>
-        prisma.caretakerAssignment.findMany({
-          where: {
-            orgId: args.orgId,
-            caretakerUserId: args.userId,
-            active: true,
-          },
-          select: {
-            propertyId: true,
-            buildingId: true,
-            unitId: true,
-          },
-        }),
-      { label: "caretaker inspections allocations" },
-    );
-
-    const propertyIds = allocations
-      .map((item) => item.propertyId)
-      .filter((value): value is string => Boolean(value));
-
-    const buildingIds = allocations
-      .map((item) => item.buildingId)
-      .filter((value): value is string => Boolean(value));
-
-    const unitIds = allocations
-      .map((item) => item.unitId)
-      .filter((value): value is string => Boolean(value));
+    const allowedUnitIds = await getCaretakerAllowedUnitIds({ orgId: args.orgId, caretakerUserId: args.userId, membershipScope: args.membershipScope });
 
     const allocationFilters = buildCaretakerAllocationFilters({
       userId: args.userId,
-      propertyIds,
-      buildingIds,
-      unitIds,
+      propertyIds: [],
+      buildingIds: [],
+      unitIds: allowedUnitIds,
     });
 
     const inspections = await retryTransientDatabaseOperation(
@@ -134,7 +110,7 @@ export async function getCaretakerInspectionsData(args: {
 
     return {
       ok: true as const,
-      inspections,
+      inspections: inspections.map(inspection => ({ ...inspection, canComplete: caretakerCanCompleteInspection(inspection, args.userId) })),
       stats: { total, scheduled, completed, cancelled },
     };
   } catch (error) {

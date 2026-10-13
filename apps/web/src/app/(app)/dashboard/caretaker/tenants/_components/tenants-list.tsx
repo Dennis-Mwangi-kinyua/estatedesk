@@ -9,7 +9,6 @@ import {
 import { buildTenantsPageHref } from "../_lib/helpers";
 import type { CaretakerTenantsPageData } from "../_lib/types";
 import { TenantMobileList } from "./tenant-mobile-list";
-import { TenantsTable } from "./tenants-table";
 
 export function TenantsList({ data }: { data: CaretakerTenantsPageData }) {
   const {
@@ -66,7 +65,6 @@ export function TenantsList({ data }: { data: CaretakerTenantsPageData }) {
         ) : (
           <>
             <TenantMobileList tenants={tenants} />
-            <TenantsTable tenants={tenants} />
           </>
         )}
       </div>

@@ -36,7 +36,7 @@ export function UnitsList({
         }
       />
 
-      <div className={`space-y-3 ${panelBodyClassName} pt-0`}>
+      <div className={`caretaker-card-grid ${panelBodyClassName} pt-0`}>
         {data.units.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-muted/10 p-6 text-sm text-muted-foreground">
             No units match your search in the current assignment scope.

@@ -1,3 +1,5 @@
+import { caretakerCanCompleteInspection } from "@/lib/caretaker/issue-actions";
+import { getCaretakerAllowedUnitIds, type MembershipScope } from "@/lib/caretaker/access";
 import { prisma } from "@/lib/prisma";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import {
@@ -13,43 +15,19 @@ export const INSPECTION_DETAIL_LOAD_ERROR_MESSAGE =
 export async function getCaretakerInspectionDetail(args: {
   orgId: string;
   userId: string;
+  membershipScope?: MembershipScope;
   publicInspectionId: string;
 }) {
   const inspectionId = decodePublicId(args.publicInspectionId, "inspection");
 
   try {
-    const allocations = await retryTransientDatabaseOperation(
-      () =>
-        prisma.caretakerAssignment.findMany({
-          where: {
-            orgId: args.orgId,
-            caretakerUserId: args.userId,
-            active: true,
-          },
-          select: {
-            propertyId: true,
-            buildingId: true,
-            unitId: true,
-          },
-        }),
-      { label: "caretaker inspection detail allocations" },
-    );
-
-    const propertyIds = allocations
-      .map((item) => item.propertyId)
-      .filter((value): value is string => Boolean(value));
-    const buildingIds = allocations
-      .map((item) => item.buildingId)
-      .filter((value): value is string => Boolean(value));
-    const unitIds = allocations
-      .map((item) => item.unitId)
-      .filter((value): value is string => Boolean(value));
+    const allowedUnitIds = await getCaretakerAllowedUnitIds({ orgId: args.orgId, caretakerUserId: args.userId, membershipScope: args.membershipScope });
 
     const allocationFilters = buildCaretakerAllocationFilters({
       userId: args.userId,
-      propertyIds,
-      buildingIds,
-      unitIds,
+      propertyIds: [],
+      buildingIds: [],
+      unitIds: allowedUnitIds,
     });
 
     const inspection = await retryTransientDatabaseOperation(
@@ -144,6 +122,7 @@ export async function getCaretakerInspectionDetail(args: {
     return {
       ok: true as const,
       inspection,
+      canComplete: caretakerCanCompleteInspection(inspection, args.userId),
       redirectTo,
     };
   } catch {

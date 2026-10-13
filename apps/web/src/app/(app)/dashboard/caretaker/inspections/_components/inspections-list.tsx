@@ -39,7 +39,7 @@ export function InspectionsList({ inspections }: InspectionsListProps) {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="caretaker-card-grid">
             {inspections.map((inspection) => (
               <InspectionCard key={inspection.id} inspection={inspection} />
             ))}

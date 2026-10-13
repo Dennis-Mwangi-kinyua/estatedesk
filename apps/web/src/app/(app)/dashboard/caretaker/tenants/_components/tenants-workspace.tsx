@@ -14,12 +14,11 @@ export function TenantsWorkspace({ data }: { data: CaretakerTenantsPageData }) {
       <TenantsHeader data={data} />
       <TenantsStats data={data} />
 
-      {/* Mobile: quick links first, then list. Desktop: list + sticky sidebar */}
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-5">
-        <div className="order-2 min-w-0 space-y-4 lg:order-1">
+      <div className="min-w-0 space-y-5">
+        <div className="min-w-0 space-y-4">
           <TenantsList data={data} />
         </div>
-        <div className="order-1 lg:order-2 lg:sticky lg:top-4">
+        <div className="min-w-0">
           <TenantsSidebar />
         </div>
       </div>

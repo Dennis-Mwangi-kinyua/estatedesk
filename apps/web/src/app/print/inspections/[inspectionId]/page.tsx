@@ -1,3 +1,5 @@
+import { getCaretakerAllowedUnitIds, type MembershipScope } from "@/lib/caretaker/access";
+import { buildCaretakerAllocationFilters } from "@/app/(app)/dashboard/caretaker/inspections/[inspectionId]/_lib/helpers";
 // src/app/print/inspections/[inspectionId]/page.tsx
 
 import Link from "next/link";
@@ -160,86 +162,9 @@ function SectionCard({
   );
 }
 
-async function getCaretakerInspectionFilters(args: {
-  orgId: string;
-  userId: string;
-}) {
-  const allocations = await prisma.caretakerAssignment.findMany({
-    where: {
-      orgId: args.orgId,
-      caretakerUserId: args.userId,
-      active: true,
-    },
-    select: {
-      propertyId: true,
-      buildingId: true,
-      unitId: true,
-    },
-  });
-
-  const propertyIds = allocations
-    .map((item) => item.propertyId)
-    .filter((value): value is string => Boolean(value));
-
-  const buildingIds = allocations
-    .map((item) => item.buildingId)
-    .filter((value): value is string => Boolean(value));
-
-  const unitIds = allocations
-    .map((item) => item.unitId)
-    .filter((value): value is string => Boolean(value));
-
-  const allocationFilters: Prisma.InspectionWhereInput[] = [
-    {
-      notice: {
-        lease: {
-          caretakerUserId: args.userId,
-        },
-      },
-    },
-  ];
-
-  if (unitIds.length > 0) {
-    allocationFilters.push({
-      notice: {
-        lease: {
-          unitId: {
-            in: unitIds,
-          },
-        },
-      },
-    });
-  }
-
-  if (buildingIds.length > 0) {
-    allocationFilters.push({
-      notice: {
-        lease: {
-          unit: {
-            buildingId: {
-              in: buildingIds,
-            },
-          },
-        },
-      },
-    });
-  }
-
-  if (propertyIds.length > 0) {
-    allocationFilters.push({
-      notice: {
-        lease: {
-          unit: {
-            propertyId: {
-              in: propertyIds,
-            },
-          },
-        },
-      },
-    });
-  }
-
-  return allocationFilters;
+async function getCaretakerInspectionFilters(args: { orgId: string; userId: string; membershipScope?: MembershipScope }) {
+  const unitIds = await getCaretakerAllowedUnitIds({ orgId: args.orgId, caretakerUserId: args.userId, membershipScope: args.membershipScope });
+  return [...buildCaretakerAllocationFilters({ userId: args.userId, propertyIds: [], buildingIds: [], unitIds }), { inspectorUserId: args.userId }];
 }
 
 export default async function InspectionPrintPage({ params }: PageProps) {
@@ -276,6 +201,7 @@ export default async function InspectionPrintPage({ params }: PageProps) {
     const allocationFilters = await getCaretakerInspectionFilters({
       orgId: session.activeOrgId,
       userId: session.userId,
+      membershipScope: session.membershipScope,
     });
 
     accessFilters.push({ OR: allocationFilters });

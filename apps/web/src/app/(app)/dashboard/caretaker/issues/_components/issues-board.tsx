@@ -58,7 +58,7 @@ export function IssuesBoard({
         {boardDescription}
       </p>
 
-      <div className="space-y-3 p-4 sm:p-5">
+      <div className="caretaker-card-grid p-4 sm:p-5">
         {!issueData.ok ? (
           <ErrorStateCard message={issueData.errorMessage} />
         ) : issueData.issues.length === 0 ? (

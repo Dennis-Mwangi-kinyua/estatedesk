@@ -1,5 +1,7 @@
 import "server-only";
 
+import { caretakerAssignmentTargets } from "./scope-targets";
+import { cache } from "react";
 import type { ScopeType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
@@ -43,11 +45,12 @@ function addScopedTarget(
   }
 }
 
-export async function getCaretakerAllowedUnitIds({
-  orgId,
-  caretakerUserId,
-  membershipScope,
-}: GetCaretakerAllowedUnitIdsInput) {
+export async function getCaretakerAllowedUnitIds(input: GetCaretakerAllowedUnitIdsInput) {
+  return resolveCaretakerAllowedUnitIds(input.orgId, input.caretakerUserId, input.membershipScope?.scopeType, input.membershipScope?.scopeId);
+}
+
+const resolveCaretakerAllowedUnitIds = cache(async (orgId: string, caretakerUserId: string, scopeType?: ScopeType, scopeId?: string) => {
+  const membershipScope = scopeType && scopeId ? { scopeType, scopeId } : null;
   const targets = {
     propertyIds: new Set<string>(),
     buildingIds: new Set<string>(),
@@ -74,19 +77,10 @@ export async function getCaretakerAllowedUnitIds({
     { label: "caretaker assignment scope" },
   );
 
-  for (const assignment of assignments) {
-    if (assignment.propertyId) {
-      targets.propertyIds.add(assignment.propertyId);
-    }
-
-    if (assignment.buildingId) {
-      targets.buildingIds.add(assignment.buildingId);
-    }
-
-    if (assignment.unitId) {
-      targets.unitIds.add(assignment.unitId);
-    }
-  }
+  const assignmentTargets = caretakerAssignmentTargets(assignments);
+  assignmentTargets.propertyIds.forEach(id => targets.propertyIds.add(id));
+  assignmentTargets.buildingIds.forEach(id => targets.buildingIds.add(id));
+  assignmentTargets.unitIds.forEach(id => targets.unitIds.add(id));
 
   const propertyIds = Array.from(targets.propertyIds);
   const buildingIds = Array.from(targets.buildingIds);
@@ -127,7 +121,7 @@ export async function getCaretakerAllowedUnitIds({
   );
 
   return units.map((unit) => unit.id);
-}
+});
 
 export async function getCaretakerManagedBuildingUnitIds({
   orgId,
@@ -150,6 +144,7 @@ export async function getCaretakerManagedBuildingUnitIds({
       caretakerUserId,
       active: true,
       endedAt: null,
+      unitId: null,
       buildingId: {
         not: null,
       },

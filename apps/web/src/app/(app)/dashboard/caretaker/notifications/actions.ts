@@ -3,11 +3,11 @@
 import { readPersonalNotification, readAllPersonalNotifications } from "@/lib/notifications/read";
 
 import { revalidatePath } from "next/cache";
-import { requireUserSession } from "@/lib/auth/session";
+import { requireCaretakerAccess } from "@/lib/permissions/guards";
 
 
 async function requireCaretakerNotificationContext() {
-  const session = await requireUserSession();
+  const session = await requireCaretakerAccess();
 
   if (!session.activeOrgId || session.activeOrgRole !== "CARETAKER") {
     throw new Error("Caretaker access is required.");
