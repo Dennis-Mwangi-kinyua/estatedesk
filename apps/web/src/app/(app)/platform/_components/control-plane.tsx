@@ -100,11 +100,11 @@ export function StatCard({
 }) {
   return (
     <div className="platform-stat-card workspace-metric ios-card rounded-xl border border-border bg-card/90 p-3 shadow-sm sm:p-4">
-      <div className="flex items-center justify-between gap-2"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:text-xs">{label}</p><VisualSticker label={label} size="sm" className="shrink-0" /></div>
-      <p className="mt-1.5 text-xl font-semibold tracking-tight text-foreground sm:mt-2 sm:text-2xl">
+      <div className="flex min-w-0 items-start justify-between gap-2"><p className="min-w-0 flex-1 whitespace-normal text-[10px] font-semibold uppercase leading-4 tracking-[0.12em] text-muted-foreground sm:text-xs">{label}</p><VisualSticker label={label} size="sm" className="shrink-0" /></div>
+      <p className="mt-1.5 whitespace-normal text-xl font-semibold leading-tight tracking-tight text-foreground sm:mt-2 sm:text-2xl">
         {value}
       </p>
-      {note ? <p className="mt-1 text-[11px] text-muted-foreground sm:text-xs">{note}</p> : null}
+      {note ? <p className="mt-1 whitespace-normal text-[11px] leading-4 text-muted-foreground sm:text-xs">{note}</p> : null}
     </div>
   );
 }

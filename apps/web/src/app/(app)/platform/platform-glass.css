@@ -121,7 +121,8 @@
   background: var(--card);
 }
 :is(.platform-shell-admin, .platform-shell-developer) .platform-stat-card > p {
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
   font-variant-numeric: tabular-nums;
 }
 .estate-workspace .platform-shell-admin .platform-glass-metric {
@@ -230,6 +231,28 @@
 .platform-shell-developer { --platform-active: #ede9fe; --platform-active-ink: #5b21b6; }
 .dark .platform-shell-admin { --platform-active: #0c4a6e; --platform-active-ink: #e0f2fe; }
 .dark .platform-shell-developer { --platform-active: #4c1d95; --platform-active-ink: #ede9fe; }
+/* Developer tools include compact status callouts whose light-theme text
+   shades otherwise disappear after their backgrounds are adapted for dark mode. */
+.dark .platform-shell-developer :is(
+  .text-amber-950, .text-amber-900, [class*="text-amber-950/"], [class*="text-amber-900/"],
+  .text-orange-950, .text-orange-900, [class*="text-orange-950/"], [class*="text-orange-900/"],
+  .text-yellow-950, .text-yellow-900, [class*="text-yellow-950/"], [class*="text-yellow-900/"],
+  .text-lime-950, .text-lime-900, [class*="text-lime-950/"], [class*="text-lime-900/"],
+  .text-emerald-950, .text-emerald-900, [class*="text-emerald-950/"], [class*="text-emerald-900/"],
+  .text-teal-950, .text-teal-900, [class*="text-teal-950/"], [class*="text-teal-900/"],
+  .text-cyan-950, .text-cyan-900, [class*="text-cyan-950/"], [class*="text-cyan-900/"],
+  .text-sky-950, .text-sky-900, [class*="text-sky-950/"], [class*="text-sky-900/"],
+  .text-blue-950, .text-blue-900, [class*="text-blue-950/"], [class*="text-blue-900/"],
+  .text-indigo-950, .text-indigo-900, [class*="text-indigo-950/"], [class*="text-indigo-900/"],
+  .text-violet-950, .text-violet-900, [class*="text-violet-950/"], [class*="text-violet-900/"],
+  .text-purple-950, .text-purple-900, [class*="text-purple-950/"], [class*="text-purple-900/"],
+  .text-fuchsia-950, .text-fuchsia-900, [class*="text-fuchsia-950/"], [class*="text-fuchsia-900/"],
+  .text-pink-950, .text-pink-900, [class*="text-pink-950/"], [class*="text-pink-900/"],
+  .text-rose-950, .text-rose-900, [class*="text-rose-950/"], [class*="text-rose-900/"],
+  .text-red-950, .text-red-900, [class*="text-red-950/"], [class*="text-red-900/"]
+) {
+  color: var(--foreground) !important;
+}
 .estate-workspace :is(.platform-shell-admin, .platform-shell-developer) :is(.platform-sidebar, .platform-desktop-header, .platform-mobile-header, .platform-navigation-drawer) {
   background: var(--platform-chrome) !important;
   border-color: var(--border);

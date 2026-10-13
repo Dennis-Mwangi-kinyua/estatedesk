@@ -9,6 +9,7 @@ const CONTENT_WIDTH = RIGHT - LEFT;
 const BOTTOM_LIMIT = 72;
 
 type ReportRow = { label: string; value: string; amount?: number };
+export type MoveOutReportPhoto = { label: string; fileName: string; mimeType: "image/jpeg" | "image/png"; bytes: Uint8Array };
 
 /** Paginated handover report with grouped details, readable tables, and a verified live link. */
 export async function createMoveOutReportPdf(input: {
@@ -18,6 +19,8 @@ export async function createMoveOutReportPdf(input: {
   lines: string[];
   reportUrl: string;
   closed: boolean;
+  currencyCode?: string;
+  photos?: MoveOutReportPhoto[];
 }) {
   const pdf = await PDFDocument.create();
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
@@ -32,7 +35,6 @@ export async function createMoveOutReportPdf(input: {
   const amberWash = rgb(1, 0.96, 0.87);
   let page!: PDFPage;
   let y = 0;
-  let pageNumber = 0;
 
   const clean = (value: string) => Array.from(value).map(char => {
     try { regular.encodeText(char); return char; } catch { return "-"; }
@@ -42,13 +44,28 @@ export async function createMoveOutReportPdf(input: {
     const lines: string[] = [];
     for (const paragraph of clean(value).split("\n")) {
       let line = "";
-      for (const char of paragraph) {
-        if (line && font.widthOfTextAtSize(line + char, size) > width) {
-          lines.push(line.trimEnd());
-          line = char.trim() ? char : "";
-        } else line += char;
+      for (const word of paragraph.split(/\s+/).filter(Boolean)) {
+        const candidate = line ? `${line} ${word}` : word;
+        if (font.widthOfTextAtSize(candidate, size) <= width) {
+          line = candidate;
+          continue;
+        }
+        if (line) lines.push(line);
+        line = "";
+        if (font.widthOfTextAtSize(word, size) <= width) {
+          line = word;
+          continue;
+        }
+        let fragment = "";
+        for (const char of word) {
+          if (fragment && font.widthOfTextAtSize(fragment + char, size) > width) {
+            lines.push(fragment);
+            fragment = char;
+          } else fragment += char;
+        }
+        line = fragment;
       }
-      lines.push(line.trimEnd());
+      lines.push(line);
     }
     return lines.length ? lines : [""];
   };
@@ -61,7 +78,6 @@ export async function createMoveOutReportPdf(input: {
 
   const startPage = () => {
     page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-    pageNumber += 1;
     page.drawRectangle({ x: 0, y: PAGE_HEIGHT - 14, width: PAGE_WIDTH, height: 14, color: accent });
     page.drawText("EstateDesk", { x: LEFT, y: 786, size: 23, font: bold, color: ink });
     drawWrapped(page, input.organisation, LEFT, 777, 320, 10, regular, muted, 13);
@@ -80,7 +96,6 @@ export async function createMoveOutReportPdf(input: {
   const ensure = (height: number) => {
     if (y - height < BOTTOM_LIMIT) {
       page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-      pageNumber += 1;
       page.drawRectangle({ x: 0, y: PAGE_HEIGHT - 8, width: PAGE_WIDTH, height: 8, color: accent });
       page.drawText("EstateDesk | Move-out report", { x: LEFT, y: 805, size: 9, font: bold, color: ink });
       page.drawText(clean(input.reference), { x: RIGHT - regular.widthOfTextAtSize(clean(input.reference), 8), y: 805, size: 8, font: regular, color: muted });
@@ -119,6 +134,13 @@ export async function createMoveOutReportPdf(input: {
     if (amountColumn) page.drawLine({ start: { x: RIGHT - 126, y: y + 2 }, end: { x: RIGHT - 126, y: y + 21 }, thickness: 0.5, color: border });
   };
 
+  const tableHeadings = (financial: boolean) => {
+    if (financial) return { first: "Description", second: `Amount (${input.currencyCode ?? "KES"})` };
+    if (sectionTitle === "Inspection checklist") return { first: "Inspection item", second: "Result" };
+    if (sectionTitle === "Meter readings") return { first: "Meter detail", second: "Reading" };
+    return { first: "Field", second: "Details" };
+  };
+
   const drawRow = (raw: string, index: number, financialTable: boolean) => {
     const row = splitRow(raw);
     const hasAmount = financialTable && row.amount !== undefined;
@@ -130,13 +152,14 @@ export async function createMoveOutReportPdf(input: {
     const rowHeight = Math.max(25, lineCount * 12 + 12);
     if (y - rowHeight < BOTTOM_LIMIT) {
       ensure(rowHeight + 25);
-      drawTableHeader(financialTable ? "Item / status" : "Information", financialTable ? "Amount / value" : "Record");
+      const headings = tableHeadings(financialTable);
+      drawTableHeader(headings.first, headings.second);
     }
     if (index % 2 === 1) page.drawRectangle({ x: LEFT, y: y - rowHeight + 5, width: CONTENT_WIDTH, height: rowHeight, color: rgb(0.985, 0.988, 0.99) });
     labelLines.forEach((line, lineIndex) => page.drawText(line, { x: LEFT + 8, y: y - 8 - lineIndex * 12, size: 9, font: regular, color: hasAmount ? ink : muted }));
     if (hasAmount) {
       page.drawLine({ start: { x: RIGHT - 126, y: y - rowHeight + 5 }, end: { x: RIGHT - 126, y }, thickness: 0.5, color: border });
-      const amount = Number(row.amount).toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const amount = `${input.currencyCode ?? "KES"} ${Number(row.amount).toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       page.drawText(amount, { x: RIGHT - 8 - regular.widthOfTextAtSize(amount, 9), y: y - 8, size: 9, font: bold, color: ink });
     } else if (financialTable) {
       valueLines.forEach((line, lineIndex) => page.drawText(line, { x: LEFT + 8, y: y - 8 - lineIndex * 12, size: 9, font: regular, color: ink }));
@@ -155,6 +178,9 @@ export async function createMoveOutReportPdf(input: {
   const sectionTitles = new Set([
     "Tenant and handover details",
     "Current outstanding bills",
+    "Meter readings",
+    "Inspection findings",
+    "Inspection checklist",
     "Settlement recorded at handover",
     "Deposit and readiness",
     "Agreed costs breakdown",
@@ -162,7 +188,8 @@ export async function createMoveOutReportPdf(input: {
   ]);
   const renderRows = () => {
     if (!rows.length) return;
-    drawTableHeader(financialTable ? "Item / status" : "Information", financialTable ? "Amount / value" : "Record");
+    const headings = tableHeadings(financialTable);
+    drawTableHeader(headings.first, headings.second);
     rows.forEach((row, index) => drawRow(row, index, financialTable));
     y -= 8;
     rows = [];
@@ -195,15 +222,47 @@ export async function createMoveOutReportPdf(input: {
   }
   renderRows();
 
+  if (input.photos?.length) {
+    page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+    page.drawRectangle({ x: 0, y: PAGE_HEIGHT - 8, width: PAGE_WIDTH, height: 8, color: accent });
+    page.drawText("EstateDesk | Move-out report", { x: LEFT, y: 805, size: 9, font: bold, color: ink });
+    page.drawText(clean(input.reference), { x: RIGHT - regular.widthOfTextAtSize(clean(input.reference), 8), y: 805, size: 8, font: regular, color: muted });
+    y = 780;
+    drawSection("Photo evidence appendix");
+    for (const photo of input.photos) {
+      const embedded = photo.mimeType === "image/png" ? await pdf.embedPng(photo.bytes) : await pdf.embedJpg(photo.bytes);
+      const scale = Math.min((CONTENT_WIDTH - 20) / embedded.width, 420 / embedded.height, 1);
+      const width = embedded.width * scale;
+      const height = embedded.height * scale;
+      if (y - height - 44 < BOTTOM_LIMIT) {
+        page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+        page.drawRectangle({ x: 0, y: PAGE_HEIGHT - 8, width: PAGE_WIDTH, height: 8, color: accent });
+        page.drawText("EstateDesk | Move-out report", { x: LEFT, y: 805, size: 9, font: bold, color: ink });
+        page.drawText(clean(input.reference), { x: RIGHT - regular.widthOfTextAtSize(clean(input.reference), 8), y: 805, size: 8, font: regular, color: muted });
+        y = 780;
+      }
+      const caption = `${photo.label} — ${photo.fileName}`;
+      drawWrapped(page, caption, LEFT + 8, y, CONTENT_WIDTH - 16, 9, bold, ink, 12);
+      y -= 20;
+      page.drawImage(embedded, { x: LEFT + (CONTENT_WIDTH - width) / 2, y: y - height, width, height });
+      y -= height + 24;
+    }
+  }
+
   const note = input.closed
     ? "This statement records the handover settlement. Current balances may change when later payments are posted. A refund is complete only when its payment has been recorded. Retain this report with receipts and handover records."
     : "This is a preliminary report. Review final rent, utilities, inspection findings, meter readings, and agreed costs before handover. Proposed refunds and amounts owed remain subject to the final settlement.";
-  ensure(155);
+  ensure(205);
   drawSection("Review and verification");
   const noteLines = wrap(note, 352, 9, regular);
-  const noteHeight = Math.max(76, noteLines.length * 13 + 28);
+  const noteHeight = Math.max(128, noteLines.length * 13 + 72);
   page.drawRectangle({ x: LEFT, y: y - noteHeight + 8, width: 360, height: noteHeight, color: input.closed ? accentWash : amberWash, borderColor: border, borderWidth: 0.5 });
   noteLines.forEach((line, index) => page.drawText(line, { x: LEFT + 11, y: y - 9 - index * 13, size: 9, font: regular, color: ink }));
+  const signLineY = y - noteHeight + 36;
+  page.drawLine({ start: { x: LEFT + 12, y: signLineY }, end: { x: LEFT + 166, y: signLineY }, thickness: 0.6, color: muted });
+  page.drawLine({ start: { x: LEFT + 190, y: signLineY }, end: { x: LEFT + 344, y: signLineY }, thickness: 0.6, color: muted });
+  page.drawText("Management representative · signature / date", { x: LEFT + 12, y: signLineY - 12, size: 6.5, font: regular, color: muted });
+  page.drawText("Tenant · acknowledgement / date", { x: LEFT + 190, y: signLineY - 12, size: 6.5, font: regular, color: muted });
   const qr = await pdf.embedPng(await createDocumentVerificationQrDataUrl(input.reportUrl));
   const qrX = RIGHT - 104;
   page.drawRectangle({ x: qrX - 7, y: y - 112, width: 104, height: 119, color: white, borderColor: border, borderWidth: 0.7 });

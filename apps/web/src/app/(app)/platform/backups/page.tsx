@@ -3,10 +3,24 @@ import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { getPlatformControl } from "@/lib/platform/control";
 import {
+  Activity,
+  ArchiveRestore,
+  Building2,
+  CheckCircle2,
+  Clock3,
+  Cloud,
+  Database,
+  FileCheck2,
+  HardDrive,
+  RotateCcw,
+  ShieldCheck,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+import {
   Badge,
   EmptyRow,
   PageHeader,
-  StatCard,
   Surface,
   formatDateTime,
   formatNumber,
@@ -55,6 +69,34 @@ function checkpointTone(status: BackupCheckpoint["status"]) {
   }
 
   return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-300/30 dark:bg-amber-300/10 dark:text-amber-100";
+}
+
+function BackupMetric({ label, value, note, icon: Icon }: {
+  label: string;
+  value: string | number;
+  note?: string;
+  icon: LucideIcon;
+}) {
+  return (
+    <article className="min-w-0 rounded-2xl border border-border bg-card/90 p-4 shadow-sm">
+      <div className="flex min-w-0 items-start gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Icon aria-hidden="true" className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="whitespace-normal text-xs font-semibold leading-5 text-muted-foreground">{label}</p>
+          <p className="mt-1 whitespace-normal text-xl font-semibold leading-tight tracking-tight text-foreground [overflow-wrap:break-word]">{value}</p>
+          {note ? <p className="mt-1 whitespace-normal text-xs leading-5 text-muted-foreground [overflow-wrap:break-word]">{note}</p> : null}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function checkpointIcon(name: string) {
+  if (name === "Primary database") return Database;
+  if (name === "Organization exports") return ArchiveRestore;
+  return HardDrive;
 }
 
 export default async function PlatformBackupsPage({
@@ -179,13 +221,13 @@ export default async function PlatformBackupsPage({
       ) : null}
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Organizations covered" value={formatNumber(organizations)} />
-        <StatCard label="Users covered" value={formatNumber(users)} />
-        <StatCard label="Asset storage" value={formatBytes(assetBytes)} note={`${formatNumber(assets._count)} files`} />
-        <StatCard label="Audit events in 7d" value={formatNumber(auditLogs)} />
-        <StatCard label="Approved exports in 7d" value={formatNumber(approvedExports)} />
-        <StatCard label="Pending exports" value={formatNumber(pendingExports)} />
-        <StatCard
+        <BackupMetric icon={Building2} label="Organizations covered" value={formatNumber(organizations)} />
+        <BackupMetric icon={Users} label="Users covered" value={formatNumber(users)} />
+        <BackupMetric icon={HardDrive} label="Asset storage" value={formatBytes(assetBytes)} note={`${formatNumber(assets._count)} files`} />
+        <BackupMetric icon={Activity} label="Audit events in 7d" value={formatNumber(auditLogs)} />
+        <BackupMetric icon={FileCheck2} label="Approved exports in 7d" value={formatNumber(approvedExports)} />
+        <BackupMetric icon={Clock3} label="Pending exports" value={formatNumber(pendingExports)} />
+        <BackupMetric icon={ShieldCheck}
           label="Operator checkpoint"
           value={control.lastBackupStatus ?? (latestAudit ? "Signal only" : "-")}
           note={
@@ -196,7 +238,7 @@ export default async function PlatformBackupsPage({
                 : undefined
           }
         />
-        <StatCard
+        <BackupMetric icon={CheckCircle2}
           label="Checkpoint note"
           value={control.lastBackupNote?.slice(0, 40) ?? "-"}
           note={control.lastBackupNote && control.lastBackupNote.length > 40 ? "…" : undefined}
@@ -253,11 +295,14 @@ export default async function PlatformBackupsPage({
         description="Operational checkpoints used to confirm the platform can be restored, exported, and audited."
       >
         <div className="min-w-0 divide-y divide-border 2xl:hidden">
-          {checkpoints.map((checkpoint) => (
-            <article key={checkpoint.name} className="space-y-2.5 px-3 py-3.5 sm:px-4">
+          {checkpoints.map((checkpoint) => {
+            const Icon = checkpointIcon(checkpoint.name);
+            return (
+              <article key={checkpoint.name} className="space-y-2.5 px-3 py-3.5 sm:px-4">
               <div className="flex items-start justify-between gap-3">
-                <h3 className="break-words text-sm font-semibold leading-5 text-foreground">
-                  {checkpoint.name}
+                <h3 className="flex min-w-0 items-center gap-2 break-words text-sm font-semibold leading-5 text-foreground">
+                  <Icon aria-hidden="true" className="size-4 shrink-0 text-primary" />
+                  <span>{checkpoint.name}</span>
                 </h3>
                 <Badge tone={checkpointTone(checkpoint.status)}>
                   {checkpoint.status}
@@ -280,8 +325,9 @@ export default async function PlatformBackupsPage({
               <p className="break-words text-sm leading-6 text-muted-foreground">
                 {checkpoint.detail}
               </p>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
 
         <div className="hidden max-w-full overflow-x-auto 2xl:block">
@@ -416,6 +462,7 @@ export default async function PlatformBackupsPage({
       <Surface title="Recovery policy">
         <div className="grid gap-0 divide-y divide-slate-100 dark:divide-white/10 md:grid-cols-3 md:divide-x md:divide-y-0">
           <div className="p-4">
+            <Database aria-hidden="true" className="mb-3 size-5 text-primary" />
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
               Database
             </p>
@@ -424,6 +471,7 @@ export default async function PlatformBackupsPage({
             </p>
           </div>
           <div className="p-4">
+            <Cloud aria-hidden="true" className="mb-3 size-5 text-primary" />
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
               Files
             </p>
@@ -432,6 +480,7 @@ export default async function PlatformBackupsPage({
             </p>
           </div>
           <div className="p-4">
+            <RotateCcw aria-hidden="true" className="mb-3 size-5 text-primary" />
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
               Exports
             </p>
