@@ -13,6 +13,7 @@ type OrgDashboardHeaderProps = {
   userRole?: string;
   unreadCount?: number;
   onMenuClick?: () => void;
+  showStaffTools?: boolean;
 };
 
 export function OrgDashboardHeader({
@@ -22,6 +23,7 @@ export function OrgDashboardHeader({
   userRole = "Organization Admin",
   onMenuClick,
   unreadCount = 0,
+  showStaffTools = true,
 }: OrgDashboardHeaderProps) {
   return (
     <header className="ed-shell-panel sticky top-0 z-[110] border-b bg-card/95 shadow-sm backdrop-blur-xl lg:ml-72">
@@ -53,16 +55,16 @@ export function OrgDashboardHeader({
         </div>
 
         <div className="ml-2 flex shrink-0 items-center gap-2">
-          <Link data-workspace-action="true" href="/dashboard/org/search" aria-label="Search organisation" className="ios-button ed-soft-button touch-target flex items-center justify-center border"><Search className="h-4 w-4" /></Link>
+          {showStaffTools && <Link data-workspace-action="true" href="/dashboard/org/search" aria-label="Search organisation" className="ios-button ed-soft-button touch-target flex items-center justify-center border"><Search className="h-4 w-4" /></Link>}
           <HeaderThemeToggle />
 
-          <Link data-workspace-action="true"
+          {showStaffTools && <Link data-workspace-action="true"
             href="/dashboard/org/notifications"
             aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`}
             className="relative ios-button ed-soft-button touch-target flex items-center justify-center border shadow-sm lg:h-10 lg:w-10"
           >
             <Bell className="h-4 w-4" />{unreadCount > 0 && <span className="absolute -right-1 -top-1 rounded-full bg-red-600 px-1.5 text-[10px] font-bold text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}
-          </Link>
+          </Link>}
 
           <WorkspaceIdentity name={userName} role={userRole} />
         </div>

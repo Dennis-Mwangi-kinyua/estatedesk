@@ -25,6 +25,8 @@ export function getRedirectAfterLogin(input: RedirectInput): string {
       : "/platform";
   }
 
+  if (activeOrgRole === "SECURITY") return activeOrgId ? "/dashboard/gate" : "/login?error=missing_org_context";
+
   if (activeOrgRole === "TENANT" || hasTenantProfile) {
     return "/dashboard/tenant";
   }

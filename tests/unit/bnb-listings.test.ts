@@ -17,12 +17,15 @@ function form(overrides: Record<string, unknown> = {}) {
 }
 test("BnB posting validates money, guest capacity, amenities, and contact information", () => {
   assert.equal(parseBnbForm(form()).success, true);
-  for (const changes of [{ nightlyRate: -1 }, { nightlyRate: 0 }, { nightlyRate: 1.111 }, { cleaningFee: -1 }, { maxGuests: 0 }, { maxGuests: 2.5 }, { bedrooms: -1 }, { bathrooms: 0 }, { minimumNights: 0 }, { amenities: ["unknown"] }, { contactPhone: "javascript:alert(1)" }, { contactEmail: "bad" }, { status: "invalid" }, { description: "short" }]) {
+  for (const changes of [{ nightlyRate: -1 }, { nightlyRate: 0 }, { nightlyRate: 1.111 }, { cleaningFee: -1 }, { maxGuests: 0 }, { maxGuests: 2.5 }, { bedrooms: -1 }, { bathrooms: 0 }, { minimumNights: 0 }, { latitude: 91, longitude: 36 }, { latitude: -1 }, { latitude: "invalid", longitude: 36 }, { amenities: ["unknown"] }, { contactPhone: "javascript:alert(1)" }, { contactEmail: "bad" }, { status: "invalid" }, { description: "short" }]) {
     assert.equal(bnbSchema.safeParse({ ...valid, ...changes }).success, false, JSON.stringify(changes));
   }
   const studio = bnbSchema.parse({ ...valid, bedrooms: 0 });
   assert.equal(studio.bedrooms, 0);
   assert.equal(studio.address, null);
+  const mapped = bnbSchema.parse({ ...valid, latitude: "-1.2921", longitude: "36.8219" });
+  assert.equal(mapped.latitude, -1.2921);
+  assert.equal(mapped.longitude, 36.8219);
 });
 test("only admins and managers can use Airbnb routes, including nested editing URLs", () => {
   for (const role of ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "TENANT", "LANDLORD"] as const) {

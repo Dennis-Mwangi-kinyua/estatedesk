@@ -7,7 +7,8 @@ export type OrgRole =
   | "OFFICE"
   | "ACCOUNTANT"
   | "CARETAKER"
-  | "TENANT";
+  | "TENANT"
+  | "SECURITY";
 
 type SidebarLink = {
   label: string;
@@ -20,7 +21,8 @@ export const SIDEBAR_LINKS: readonly SidebarLink[] = [
   { label: "Identity verification", href: "/dashboard/org/identity-verification", icon: workspaceIconFor("/dashboard/org/security"), roles: ["ADMIN", "MANAGER", "OFFICE"] },
   { label: "Service providers", href: "/dashboard/org/service-providers", icon: workspaceIconFor("/dashboard/org/issues"), roles: ["ADMIN", "MANAGER", "OFFICE"] },
   { label: "Community board", href: "/dashboard/org/community", icon: workspaceIconFor("/dashboard/org/community"), roles: ["ADMIN", "MANAGER", "OFFICE"] },
-  { label: "Gate access", href: "/dashboard/gate", icon: workspaceIconFor("/dashboard/gate"), roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"] },
+  { label: "Account security", href: "/dashboard/security", icon: workspaceIconFor("/dashboard/security"), roles: ["SECURITY"] },
+  { label: "Gate access", href: "/dashboard/gate", icon: workspaceIconFor("/dashboard/gate"), roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER", "SECURITY"] },
   {
     label: "Overview",
     href: "/dashboard/org",
@@ -43,7 +45,7 @@ export const SIDEBAR_LINKS: readonly SidebarLink[] = [
     label: "Properties",
     href: "/dashboard/org/properties",
     icon: workspaceIconFor("/dashboard/org/properties"),
-    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
+    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER", "SECURITY"],
   },
   {
     label: "Airbnb",
@@ -55,13 +57,13 @@ export const SIDEBAR_LINKS: readonly SidebarLink[] = [
     label: "Buildings",
     href: "/dashboard/org/buildings",
     icon: workspaceIconFor("/dashboard/org/buildings"),
-    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
+    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER", "SECURITY"],
   },
   {
     label: "Units",
     href: "/dashboard/org/units",
     icon: workspaceIconFor("/dashboard/org/units"),
-    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
+    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER", "SECURITY"],
   },
   {
     label: "Tenants",
@@ -145,7 +147,7 @@ export const SIDEBAR_LINKS: readonly SidebarLink[] = [
     label: "Issues",
     href: "/dashboard/org/issues",
     icon: workspaceIconFor("/dashboard/org/issues"),
-    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"],
+    roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER", "SECURITY"],
   },
   {
     label: "Completion reports",

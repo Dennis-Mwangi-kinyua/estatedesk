@@ -6,7 +6,7 @@ import { ROLE_META, type StaffRole } from "@/features/staff/constants/role-meta"
 import { DeferredLink } from "@/components/navigation/app-links";
 
 
-const ROLE_ICONS = { ADMIN: ShieldCheck, MANAGER: UserRoundCog, OFFICE: BriefcaseBusiness, ACCOUNTANT: Landmark, CARETAKER: Wrench };
+const ROLE_ICONS = { ADMIN: ShieldCheck, MANAGER: UserRoundCog, OFFICE: BriefcaseBusiness, ACCOUNTANT: Landmark, CARETAKER: Wrench, SECURITY: ShieldCheck };
 
 export function StaffRoleIcon({ role, className = "h-3.5 w-3.5" }: { role: StaffRole; className?: string }) {
   const Icon = ROLE_ICONS[role];

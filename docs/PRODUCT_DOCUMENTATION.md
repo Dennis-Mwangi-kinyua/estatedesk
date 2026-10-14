@@ -143,8 +143,10 @@ EstateDesk supports service accountability and field updates:
 
 - issue tickets and repairs
 - inspections and status follow-up
-- notices and move-out workflows
+- notices and move-out workflows, including private notices to one current tenant
 - caretaker/field assignment and tracking
+- role-controlled unit numbering, profiles, and pricing details
+- BnB listings with optional map coordinates that open in Google Maps for guest directions
 
 ### Visibility and Accountability
 

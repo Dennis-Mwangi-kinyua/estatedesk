@@ -74,7 +74,7 @@ export async function requireOrgMembership(
     const control = await getPlatformControl();
     const role = session.activeOrgRole;
     const isFieldPortal =
-      role === "TENANT" || role === "CARETAKER" || role === "LANDLORD";
+      role === "TENANT" || role === "CARETAKER" || role === "SECURITY" || role === "LANDLORD";
     const isOrgWorkspace =
       role === "ADMIN" ||
       role === "MANAGER" ||

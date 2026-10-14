@@ -2391,6 +2391,7 @@ enum MarketingCommissionStatus {
 }
 
 enum OrgRole {
+  SECURITY
   ADMIN
   MANAGER
   OFFICE
@@ -2983,6 +2984,8 @@ model BnbListing {
   description  String
   location     String
   address      String?
+  latitude     Decimal?         @db.Decimal(10, 7)
+  longitude    Decimal?         @db.Decimal(10, 7)
   propertyType String           @default("APARTMENT")
   bedrooms     Int              @default(1)
   bathrooms    Int              @default(1)

@@ -19,6 +19,7 @@ import {
 type TenantDashboardSidebarProps = {
   organizationName: string;
   hasActiveLease: boolean;
+  hasVisitorAccess?: boolean;
   mobileOpen: boolean;
   setMobileOpen: (value: boolean) => void;
 };
@@ -118,14 +119,15 @@ function TenantSidebarNavItem({
 export function TenantDashboardSidebar({
   organizationName,
   hasActiveLease,
+  hasVisitorAccess = false,
   mobileOpen,
   setMobileOpen,
 }: TenantDashboardSidebarProps) {
   const pathname = usePathname();
   const drawerRef = useRef<HTMLDivElement>(null);
   const visibleLinks = useMemo(
-    () => getTenantSidebarLinks(hasActiveLease),
-    [hasActiveLease],
+    () => getTenantSidebarLinks(hasActiveLease, hasVisitorAccess),
+    [hasActiveLease, hasVisitorAccess],
   );
 
   const closeMobile = useCallback(() => {

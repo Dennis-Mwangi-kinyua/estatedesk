@@ -41,6 +41,7 @@ const SHARED_GUIDANCE: RoleGuidanceItem[] = [
 ];
 
 const ROLE_GUIDANCE: Record<StaffRole, RoleGuidanceItem[]> = {
+  SECURITY: [{ title: "Gate access", description: "Create security logins and manage assigned property gates.", href: "/dashboard/gate", actionLabel: "Open gate access" }, ...SHARED_GUIDANCE],
   ADMIN: [
     {
       title: "Security controls",

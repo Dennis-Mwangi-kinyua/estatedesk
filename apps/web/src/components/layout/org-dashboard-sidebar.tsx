@@ -64,7 +64,7 @@ export function OrgDashboardSidebar({
         </nav>
 
         <div className="space-y-2 p-4">
-          <InAppHelpNav workspace="org" orgRole={role} />
+          {role !== "SECURITY" && <InAppHelpNav workspace="org" orgRole={role} />}
           <LogoutButton />
         </div>
       </aside>
@@ -132,7 +132,7 @@ export function OrgDashboardSidebar({
 
             <div className="shrink-0 border-t border-slate-200/80 px-3 pb-4 pt-3 [padding-bottom:max(1rem,env(safe-area-inset-bottom))] dark:border-white/10">
               <div className="space-y-2 rounded-2xl bg-slate-50 p-2 dark:bg-slate-900">
-                <InAppHelpNav workspace="org" orgRole={role} compact />
+                {role !== "SECURITY" && <InAppHelpNav workspace="org" orgRole={role} compact />}
                 <LogoutButton mobile onClick={closeMobile} />
               </div>
             </div>

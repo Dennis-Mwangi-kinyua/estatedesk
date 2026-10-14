@@ -7,11 +7,17 @@ export const MAX_BNB_PHOTO_BYTES = 2 * 1024 * 1024;
 export const MAX_BNB_UPLOAD_BYTES = 6 * 1024 * 1024;
 const money = z.coerce.number().finite().min(0).max(9999999999.99).refine((n) => Math.abs(n * 100 - Math.round(n * 100)) < 0.0001, "Use at most two decimal places.");
 const optionalText = (max: number) => z.string().trim().max(max).transform((v) => v || null);
+const coordinate = (min: number, max: number) => z.preprocess(
+  value => value === "" || value === null || value === undefined ? null : value,
+  z.coerce.number().finite().min(min).max(max).nullable(),
+);
 export const bnbSchema = z.object({
   title: z.string().trim().min(5, "Enter a title of at least 5 characters.").max(120),
   description: z.string().trim().min(30, "Describe the stay in at least 30 characters.").max(5000),
   location: z.string().trim().min(2).max(160),
   address: optionalText(220),
+  latitude: coordinate(-90, 90),
+  longitude: coordinate(-180, 180),
   propertyType: z.enum(BNB_TYPES),
   bedrooms: z.coerce.number().int().min(0).max(50),
   bathrooms: z.coerce.number().int().min(1).max(50),
@@ -26,6 +32,10 @@ export const bnbSchema = z.object({
   contactPhone: z.string().trim().min(7).max(25).regex(/^\+?[\d\s()-]+$/, "Enter a valid phone number."),
   contactEmail: z.union([z.literal(""), z.email().max(254)]).transform((v) => v || null),
   status: z.enum(["DRAFT", "PUBLISHED", "PAUSED"]),
+}).superRefine((data, context) => {
+  if ((data.latitude === null) !== (data.longitude === null)) {
+    context.addIssue({ code: "custom", path: [data.latitude === null ? "latitude" : "longitude"], message: "Enter both map coordinates or leave both blank." });
+  }
 });
 export type BnbFormValues = z.infer<typeof bnbSchema>;
 export type BnbFormState = { error?: string; fieldErrors?: Record<string, string[] | undefined> };

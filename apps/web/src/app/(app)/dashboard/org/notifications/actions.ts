@@ -355,13 +355,15 @@ export async function markNotificationReadAction(formData: FormData) {
   const id = String(formData.get("notificationId") ?? "").trim();
   if (!id) throw new Error("Missing notification id.");
   await readPersonalNotification(session, id);
-  revalidatePath("/", "layout");
+  revalidatePath("/dashboard/org/notifications");
+  revalidatePath("/dashboard/org", "layout");
 }
 
 export async function markAllOrgNotificationsReadAction() {
   const { session } = await requireOrgReviewer();
   await readAllPersonalNotifications(session);
-  revalidatePath("/", "layout");
+  revalidatePath("/dashboard/org/notifications");
+  revalidatePath("/dashboard/org", "layout");
 }
 
 export async function sendPaymentRemindersAction() {

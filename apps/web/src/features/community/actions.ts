@@ -16,7 +16,9 @@ export async function publishNoticeAction(_state: NoticeState, form: FormData): 
     const result = await publishCommunityNotice(orgId, session.userId, Object.fromEntries(form));
     await writeAuditLog({ orgId, actorUserId: session.userId, action: "COMMUNITY_NOTICE_PUBLISHED", entityType: "CommunityNotice", entityId: result.id, metadata: { recipients: result.recipients } });
     revalidatePath("/dashboard/org/community"); revalidatePath("/dashboard/tenant/community"); revalidatePath("/dashboard/tenant/notices"); revalidatePath("/guest-stay");
-    return { message: `Official notice published and delivered to ${result.recipients} current occupant account(s).` };
+    return { message: result.targeted
+      ? "Official notice sent to the selected tenant."
+      : `Official notice published and delivered to ${result.recipients} current occupant account(s).` };
   } catch (error) { return { error: error instanceof Error && error.name !== "ZodError" ? error.message : "Check the property, title, and notice message." }; }
 }
 export async function acknowledgeNotice(_state: NoticeState, form: FormData): Promise<NoticeState> {

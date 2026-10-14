@@ -10,6 +10,6 @@ export default async function EditBnbPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const listing = await prisma.bnbListing.findFirst({ where: { OR: [{ id }, { slug: id }], orgId: session.activeOrgId!, deletedAt: null }, include: { images: bnbImages, org: { select: { currencyCode: true } } } });
   if (!listing) notFound();
-  const initial = { ...listing, propertyType: listing.propertyType as BnbFormValues["propertyType"], amenities: listing.amenities as BnbFormValues["amenities"], nightlyRate: Number(listing.nightlyRate), cleaningFee: Number(listing.cleaningFee), images: listing.images.map((image) => ({ id: image.id, url: bnbPhotoUrl(image) })) };
+  const initial = { ...listing, propertyType: listing.propertyType as BnbFormValues["propertyType"], amenities: listing.amenities as BnbFormValues["amenities"], latitude: listing.latitude === null ? null : Number(listing.latitude), longitude: listing.longitude === null ? null : Number(listing.longitude), nightlyRate: Number(listing.nightlyRate), cleaningFee: Number(listing.cleaningFee), images: listing.images.map((image) => ({ id: image.id, url: bnbPhotoUrl(image) })) };
   return <main id="main-content" className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6 lg:p-8"><WorkspaceHero kind="org" eyebrow="Airbnb" title="Edit BnB listing" description="Keep your photos, rates, and guest information up to date." /><BnbForm listing={initial} contactName={session.fullName} currency={listing.org.currencyCode} /></main>;
 }

@@ -1,4 +1,5 @@
 "use server";
+import { hasActiveSecurityGate } from "./availability";
 import { createHash, randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
@@ -21,8 +22,8 @@ export async function createVisitorPass(_state: VisitorState, form: FormData): P
   if (!limit.allowed) return { error: "You have created too many passes. Please try again later." };
   const lease = await prisma.lease.findFirst({ where: { orgId: session.activeOrgId!, tenant: { userId: session.userId, deletedAt: null }, status: "ACTIVE", deletedAt: null }, select: { id: true, unit: { select: { propertyId: true } } } });
   if (!lease) return { error: "An active tenancy is required to invite a visitor." };
-  const gate = await prisma.gateAssignment.count({ where: { orgId: session.activeOrgId!, propertyId: lease.unit.propertyId } });
-  if (!gate) return { error: "Your property manager needs to assign gate staff before you can create a visitor pass." };
+  const gate = await hasActiveSecurityGate(session.activeOrgId!, lease.unit.propertyId);
+  if (!gate) return { error: "Visitor invitations are available after your property manager sets up an active security account for this property." };
   const token = randomBytes(32).toString("base64url");
   const pass = await prisma.visitorPass.create({ data: { ...data, validFrom: new Date(data.validFrom), validUntil: new Date(data.validUntil), orgId: session.activeOrgId!, tenantUserId: session.userId, leaseId: lease.id, propertyId: lease.unit.propertyId, tokenHash: hash(token) } });
   // Fragment keeps the secret out of HTTP request URLs and referrer logs.
@@ -66,11 +67,12 @@ export async function assignGateStaff(_state: VisitorState, form: FormData): Pro
   const orgId = session.activeOrgId!;
   const propertyId = String(form.get("propertyId"));
   const userId = String(form.get("userId"));
-  const [property, member] = await Promise.all([prisma.property.findFirst({ where: { id: propertyId, orgId, deletedAt: null } }), prisma.membership.findFirst({ where: { orgId, userId, role: { in: ["CARETAKER", "OFFICE", "ADMIN", "MANAGER"] }, deactivatedAt: null, employmentEndedAt: null, user: { deletedAt: null } } })]);
+  const [property, member] = await Promise.all([prisma.property.findFirst({ where: { id: propertyId, orgId, deletedAt: null } }), prisma.membership.findFirst({ where: { orgId, userId, role: "SECURITY", deactivatedAt: null, employmentEndedAt: null, user: { deletedAt: null, status: "ACTIVE" } } })]);
   if (!property || !member) return { error: "Select a current staff member and property in your organization." };
   if (form.get("remove") === "1") await prisma.gateAssignment.deleteMany({ where: { orgId, userId, propertyId } });
   else await prisma.gateAssignment.upsert({ where: { orgId_userId_propertyId: { orgId, userId, propertyId } }, create: { orgId, userId, propertyId }, update: {} });
   await writeAuditLog({ orgId, actorUserId: session.userId, action: form.get("remove") === "1" ? "GATE_ACCESS_REMOVED" : "GATE_ACCESS_ASSIGNED", entityType: "Property", entityId: propertyId, metadata: { userId } });
   revalidatePath("/dashboard/gate");
+  revalidatePath("/dashboard/tenant", "layout");
   return { message: "Gate access updated." };
 }

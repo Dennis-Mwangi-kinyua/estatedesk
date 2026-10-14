@@ -65,6 +65,7 @@ test("legacy copies collapse while later reminders remain visible", () => {
   const scope = personalNotificationScope({userId: "user", tenantId: "tenant"});
   assert.ok(scope.OR);
   assert.equal(scope.OR.some(recipient => recipient.userId === "staff"), false);
+  assert.deepEqual(personalNotificationScope({userId: "manager"}), { userId: "manager" });
 });
 
 test("view acknowledges only owned copies, leaves delivery status alone, and returns a tenant-safe URL", async () => {

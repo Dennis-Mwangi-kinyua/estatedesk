@@ -20,6 +20,8 @@ export default async function DashboardPage() {
     case "TENANT":
       redirect("/dashboard/tenant");
 
+    case "SECURITY":
+      redirect("/dashboard/gate");
     case "CARETAKER":
       redirect("/dashboard/caretaker");
 

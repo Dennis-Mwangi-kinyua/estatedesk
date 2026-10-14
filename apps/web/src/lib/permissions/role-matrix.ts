@@ -51,6 +51,7 @@ export const ORG_ROLE_PERMISSIONS: Record<OrgRole, readonly OrgPermission[]> = {
     "reports.export",
   ],
   CARETAKER: ["caretaker.fieldwork", "maintenance.manage", "inspections.manage"],
+  SECURITY: [],
   TENANT: [],
   LANDLORD: ["reports.view"],
 };

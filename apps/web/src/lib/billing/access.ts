@@ -53,7 +53,7 @@ export async function getOrgPlanUsage(orgId: string): Promise<PlanUsage> {
       where: {
         orgId,
         role: {
-          in: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER"],
+          in: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "SECURITY"],
         },
         user: { deletedAt: null },
       },

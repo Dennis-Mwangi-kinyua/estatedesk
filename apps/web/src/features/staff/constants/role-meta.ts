@@ -4,6 +4,7 @@ export const ORG_ROLES = [
   "OFFICE",
   "ACCOUNTANT",
   "CARETAKER",
+  "SECURITY",
   "TENANT",
 ] as const;
 
@@ -13,6 +14,7 @@ export const STAFF_ROLES = [
   "OFFICE",
   "ACCOUNTANT",
   "CARETAKER",
+  "SECURITY",
 ] as const;
 
 export const TENANT_ROLE = "TENANT" as const;
@@ -71,6 +73,8 @@ export const ROLE_META: Record<OrgRole, RoleMeta> = {
     cardClass: "from-white to-orange-50",
   },
 
+  SECURITY: { label: "Security", shortLabel: "SC", description: "Gate verification and visitor admission for assigned properties.", badgeClass: "border-teal-200 bg-teal-50 text-teal-800", cardClass: "from-white to-teal-50" },
+
   TENANT: {
     label: "Tenant",
     shortLabel: "TN",
@@ -86,6 +90,7 @@ export const STAFF_ROLE_META: Record<StaffRole, RoleMeta> = {
   OFFICE: ROLE_META.OFFICE,
   ACCOUNTANT: ROLE_META.ACCOUNTANT,
   CARETAKER: ROLE_META.CARETAKER,
+  SECURITY: ROLE_META.SECURITY,
 };
 
 export const DIRECTORY_META = {

@@ -1,3 +1,4 @@
+import { getTenantVisitorAccess } from "@/features/visitors/availability";
 import { ProductUpdatesBanner } from "@/features/updates/banner";
 import { ReactNode } from "react";
 import { TenantDashboardShell } from "@/components/layout/tenant-dashboard-shell";
@@ -98,12 +99,15 @@ export default async function TenantLayout({
     redirect("/dashboard/billing-required");
   }
 
+  const hasVisitorAccess = Boolean(activeLease) && await getTenantVisitorAccess(tenant.org.id, session.userId).catch(() => false);
+
   return (
     <TenantDashboardShell
       organizationName={tenant.org.name}
       propertyName={activeLease?.unit.property.name}
       userName={tenant.fullName}
       hasActiveLease={Boolean(activeLease)}
+      hasVisitorAccess={hasVisitorAccess}
       unreadNotificationCount={portalContext.unreadNotificationCount}
     >
       {access ? <SubscriptionWarning access={access} /> : null}

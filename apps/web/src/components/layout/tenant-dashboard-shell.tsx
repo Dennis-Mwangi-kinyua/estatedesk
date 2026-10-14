@@ -13,6 +13,7 @@ type TenantDashboardShellProps = {
   propertyName?: string;
   userName: string;
   hasActiveLease: boolean;
+  hasVisitorAccess?: boolean;
   unreadNotificationCount?: number;
 };
 
@@ -22,6 +23,7 @@ export function TenantDashboardShell({
   propertyName,
   userName,
   hasActiveLease,
+  hasVisitorAccess = false,
   unreadNotificationCount = 0,
 }: TenantDashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -31,6 +33,7 @@ export function TenantDashboardShell({
       <TenantDashboardSidebar
         organizationName={organizationName}
         hasActiveLease={hasActiveLease}
+        hasVisitorAccess={hasVisitorAccess}
         mobileOpen={mobileOpen}
         setMobileOpen={setMobileOpen}
       />

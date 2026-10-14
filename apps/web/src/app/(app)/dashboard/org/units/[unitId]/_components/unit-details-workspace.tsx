@@ -24,7 +24,7 @@ export function UnitDetailsWorkspace({ data, orgRole }: { data: UnitDetailsViewD
 
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px]">
           <div className="space-y-8">
-            <UnitProfilePanel unit={unit} currencyCode={currencyCode} />
+            <UnitProfilePanel unit={unit} currencyCode={currencyCode} canEdit={orgRole === "ADMIN" || orgRole === "MANAGER"} />
             <UnitVacancyListingPanel unit={unit} currencyCode={currencyCode} orgRole={orgRole} />
             <UnitPropertyContextPanel unit={unit} currencyCode={currencyCode} />
             <UnitLeasingPanel unit={unit} currencyCode={currencyCode} />

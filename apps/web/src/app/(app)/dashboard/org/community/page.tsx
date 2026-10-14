@@ -4,6 +4,16 @@ import { PublishNoticeForm } from "@/features/community/forms";
 export default async function CommunityManagementPage() {
   const session = await requireOrgRole(["ADMIN", "MANAGER", "OFFICE"]);
   const orgId = session.activeOrgId!;
-  const [properties, notices] = await Promise.all([prisma.property.findMany({ where: { orgId, deletedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } }), prisma.communityNotice.findMany({ where: { orgId }, orderBy: { publishedAt: "desc" }, take: 100, include: { _count: { select: { recipients: true } }, recipients: { where: { readAt: { not: null } }, select: { id: true } } } })]);
-  return <main className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6"><header><h1 className="text-3xl font-semibold">Community notice board</h1><p className="mt-2 text-muted-foreground">One official source for apartment announcements, service interruptions, safety updates, and community communication.</p></header><PublishNoticeForm properties={properties} /><section className="space-y-4"><h2 className="text-2xl font-semibold">Published notices</h2>{notices.map(notice => <article key={notice.id} className="space-y-3 rounded-2xl border bg-card p-5"><h3 className="text-xl font-semibold">{notice.title}</h3><p className="text-xs text-muted-foreground">{properties.find(p => p.id === notice.propertyId)?.name ?? "Property"} · {notice.publishedAt.toLocaleString("en-KE", { timeZone: "Africa/Nairobi" })} EAT</p><p className="whitespace-pre-wrap break-words">{notice.message}</p><p className="text-sm font-medium">Delivered: {notice._count.recipients} · Read: {notice.recipients.length}</p></article>)}</section></main>;
+  const [properties, leases, notices] = await Promise.all([
+    prisma.property.findMany({ where: { orgId, deletedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    prisma.lease.findMany({ where: { orgId, status: "ACTIVE", deletedAt: null, unit: { deletedAt: null }, tenant: { deletedAt: null } }, select: { tenant: { select: { id: true, fullName: true } }, unit: { select: { property: { select: { id: true, name: true } } } } } }),
+    prisma.communityNotice.findMany({ where: { orgId }, orderBy: { publishedAt: "desc" }, take: 100, include: { _count: { select: { recipients: true } }, recipients: { where: { readAt: { not: null } }, select: { id: true } } } }),
+  ]);
+  const tenants = [...new Map(leases.map(lease => [lease.tenant.id, {
+    id: lease.tenant.id,
+    fullName: lease.tenant.fullName,
+    propertyId: lease.unit.property.id,
+    propertyName: lease.unit.property.name,
+  }])).values()];
+  return <main className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6"><header><h1 className="text-3xl font-semibold">Community notice board</h1><p className="mt-2 text-muted-foreground">One official source for apartment announcements, service interruptions, safety updates, and community communication.</p></header><PublishNoticeForm properties={properties} tenants={tenants} /><section className="space-y-4"><h2 className="text-2xl font-semibold">Published notices</h2>{notices.map(notice => <article key={notice.id} className="space-y-3 rounded-2xl border bg-card p-5"><h3 className="text-xl font-semibold">{notice.title}</h3><p className="text-xs text-muted-foreground">{properties.find(p => p.id === notice.propertyId)?.name ?? "Property"} · {notice.publishedAt.toLocaleString("en-KE", { timeZone: "Africa/Nairobi" })} EAT</p><p className="whitespace-pre-wrap break-words">{notice.message}</p><p className="text-sm font-medium">Delivered: {notice._count.recipients} · Read: {notice.recipients.length}</p></article>)}</section></main>;
 }

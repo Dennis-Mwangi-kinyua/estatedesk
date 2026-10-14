@@ -32,7 +32,7 @@ export function CaretakerDashboardSidebar() {
 
           <div className="flex-1 overflow-y-auto px-3 py-4">
             <nav className="space-y-1">
-              <HoverPrefetchLink href="/dashboard/gate" className="ed-nav-item flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium"><SidebarSticker href="/dashboard/gate" />Gate access</HoverPrefetchLink>
+              <HoverPrefetchLink href="/dashboard/gate" aria-current={pathname === "/dashboard/gate" ? "page" : undefined} className={clsx("flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium", pathname === "/dashboard/gate" ? "ed-nav-item-active" : "ed-nav-item")}><SidebarSticker href="/dashboard/gate" />Gate access</HoverPrefetchLink>
               {CARETAKER_NAV_ITEMS.map((item) => {
                 const active =
                   pathname === item.href || (item.href !== "/dashboard/caretaker" && pathname.startsWith(`${item.href}/`));

@@ -14,6 +14,7 @@ const PRIORITY: Record<OrgRole, string[]> = {
   ACCOUNTANT: ["Overview", "Payments", "Accounting", "Reports"],
   CARETAKER: ["Overview", "Issues", "Units", "Buildings"],
   TENANT: ["Overview"],
+  SECURITY: ["Gate access", "Account security"],
 };
 
 export function OrgMobileNav({

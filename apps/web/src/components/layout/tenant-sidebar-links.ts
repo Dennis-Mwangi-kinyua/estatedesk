@@ -109,9 +109,9 @@ export const TENANT_SIDEBAR_LINKS: readonly TenantSidebarLink[] = [
   },
 ] as const;
 
-export function getTenantSidebarLinks(hasActiveLease: boolean) {
+export function getTenantSidebarLinks(hasActiveLease: boolean, hasVisitorAccess = false) {
   return TENANT_SIDEBAR_LINKS.filter(
-    (item) => hasActiveLease || !item.requiresActiveLease,
+    (item) => (hasActiveLease || !item.requiresActiveLease) && (item.href !== "/dashboard/tenant/visitors" || hasVisitorAccess),
   );
 }
 

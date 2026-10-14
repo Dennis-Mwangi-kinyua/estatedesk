@@ -44,6 +44,7 @@ export function OrgDashboardShell({
 
       <OrgDashboardHeader
         unreadCount={unreadCount}
+        showStaffTools={role !== "SECURITY"}
         title={organizationName}
         subtitle={`${userRole} workspace`}
         onMenuClick={() => setMobileOpen(true)}

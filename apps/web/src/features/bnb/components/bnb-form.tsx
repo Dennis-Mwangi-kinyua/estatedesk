@@ -41,6 +41,11 @@ export function BnbForm({ listing, contactName, currency }: { listing?: InitialL
           <label className="space-y-2 text-sm font-medium" htmlFor="propertyType"><span className="block">Stay type</span><select id="propertyType" name="propertyType" defaultValue={listing?.propertyType ?? "APARTMENT"} className="h-12 w-full rounded-xl border border-input bg-background px-3">{BNB_TYPES.map((type) => <option key={type} value={type}>{type.toLowerCase().replaceAll("_", " ")}</option>)}</select>{state.fieldErrors?.propertyType && <span className="text-red-600">Choose a valid stay type.</span>}</label>
         </div>
         {field("address", "Address or directions (optional)", { maxLength: 220 })}
+        <div className="grid gap-5 sm:grid-cols-2">
+          {field("latitude", "Map latitude (optional)", { type: "number", min: -90, max: 90, step: "any", placeholder: "-1.2921" })}
+          {field("longitude", "Map longitude (optional)", { type: "number", min: -180, max: 180, step: "any", placeholder: "36.8219" })}
+        </div>
+        <p className="-mt-3 text-sm text-muted-foreground">Add both coordinates to give guests a direct Google Maps link for directions.</p>
         {text("description", "Description", 5000, true)}
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
           {field("bedrooms", "Bedrooms", { type: "number", min: 0, max: 50, required: true, defaultValue: 1 })}

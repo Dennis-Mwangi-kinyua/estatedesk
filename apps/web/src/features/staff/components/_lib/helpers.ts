@@ -31,6 +31,7 @@ export const ROLE_CAPABILITIES: Record<StaffRole, string[]> = {
     "Review finance reports and payment verification.",
     "Support billing and reconciliation workflows.",
   ],
+  SECURITY: ["Verify passes for assigned property gates.", "Record single-entry visitor admissions."],
   CARETAKER: [
     "Work within mapped properties, apartments, or blocks.",
     "Handle assigned inspections and maintenance follow-up.",

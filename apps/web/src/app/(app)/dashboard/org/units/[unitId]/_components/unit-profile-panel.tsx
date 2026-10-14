@@ -1,12 +1,15 @@
 import type { UnitDetailsViewData } from "../_lib/types";
 import { DetailItem, formatCurrency, formatDate, formatUnitTypeLabel } from "./unit-details-ui";
+import { UnitEditForm } from "./unit-edit-form";
 
 export function UnitProfilePanel({
   unit,
   currencyCode,
+  canEdit,
 }: {
   unit: UnitDetailsViewData["unit"];
   currencyCode: string;
+  canEdit: boolean;
 }) {
   return (
           <section className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
@@ -63,6 +66,7 @@ export function UnitProfilePanel({
                 </p>
               </div>
             ) : null}
+            {canEdit ? <UnitEditForm unit={unit} /> : null}
           </section>
   );
 }
