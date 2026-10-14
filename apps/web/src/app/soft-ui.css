@@ -222,15 +222,15 @@ body.estate-glass-system .tenant-shell-header h1 {
   [data-workspace="caretaker"] .caretaker-card-grid { grid-template-columns: minmax(0, 1fr); gap: .875rem; }
 }
 
-/* Explicit logout styling survives shared action and dark theme rules. */
-body.estate-glass-system [data-logout-form] button {
+/* Explicit logout styling stays red in every workspace and theme. */
+[data-logout-form] button {
   background: #dc2626 !important; color: #fff !important; border: 1px solid #dc2626 !important;
   border-radius: .75rem; min-height: 44px;
 }
-body.estate-glass-system [data-logout-form] button:hover { background: #b91c1c !important; border-color: #b91c1c !important; }
-body.estate-glass-system [data-logout-form] button :is(span, svg) { color: inherit !important; }
-body.estate-glass-system [data-logout-form] button > span { background: transparent !important; }
-body.estate-glass-system [data-logout-form] button:focus-visible { outline: 2px solid #ef4444; outline-offset: 3px; }
+[data-logout-form] button:hover { background: #b91c1c !important; border-color: #b91c1c !important; }
+[data-logout-form] button :is(span, svg) { color: inherit !important; }
+[data-logout-form] button > span { background: transparent !important; }
+[data-logout-form] button:focus-visible { outline: 2px solid #ef4444; outline-offset: 3px; }
 
 /* Avatar dimensions remain equal when surrounding flex layouts shrink. */
 body.estate-glass-system :is([data-profile-avatar], [data-profile-photo], [data-slot="avatar"]) {

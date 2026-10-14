@@ -17,14 +17,21 @@ test("notification navigation stays available while read acknowledgement is pend
       builder.onResolve({ filter: /^(react|next\/navigation)$/ }, args => ({ path: args.path, namespace: "fixture" }));
       builder.onLoad({ filter: /.*/, namespace: "fixture" }, args => ({ contents: args.path === "react" ? "export const useState = initial => [initial, () => {}];" : "export const useRouter = () => ({ push: href => globalThis.notificationNavigationFixture.routes.push(href), refresh: () => globalThis.notificationNavigationFixture.refreshes++ });", loader: "js" }));
     } }] });
-    const module = { exports: {} as { NotificationViewButton: (props: object) => { props: { children: [{ props: { onClick: () => Promise<void> } }] } } } };
+    type Element = { props: { children?: Element[]; onClick?: () => Promise<void> } };
+    const module = { exports: {} as { NotificationViewButton: (props: object) => Element } };
     new Function("require", "module", "exports", bundle.outputFiles[0].text)(createRequire(path.resolve("package.json")), module, module.exports);
+    const click = (element: Element) => {
+      const wrapper = element.props.children?.[0];
+      const button = wrapper?.props.children?.[0];
+      assert.equal(typeof button?.props.onClick, "function");
+      return button!.props.onClick!;
+    };
     const destination = "/dashboard/caretaker/issues/work-order";
     let complete!: (value: Response) => void;
     let requestSignal: AbortSignal | null | undefined;
     globalThis.fetch = async (_url, options) => { requestSignal = options?.signal; return new Promise<Response>(resolve => { complete = resolve; }); };
-    const button = module.exports.NotificationViewButton({ notificationId: "notice", href: destination, onViewed: () => { state.viewed++; } });
-    const pending = button.props.children[0].props.onClick();
+    const button = module.exports.NotificationViewButton({ notificationId: "notice", href: destination, onViewedAction: () => { state.viewed++; } });
+    const pending = click(button)();
     assert.deepEqual(state.routes, [destination]);
     assert.equal(state.viewed, 0);
     assert.ok(requestSignal instanceof AbortSignal);
@@ -36,8 +43,8 @@ test("notification navigation stays available while read acknowledgement is pend
 
     state.viewed = 0; state.readEvents = 0; state.routes = [];
     globalThis.fetch = async () => { throw new Error("Network timed out"); };
-    const failed = module.exports.NotificationViewButton({ notificationId: "notice", href: destination, onViewed: () => { state.viewed++; } });
-    await failed.props.children[0].props.onClick();
+    const failed = module.exports.NotificationViewButton({ notificationId: "notice", href: destination, onViewedAction: () => { state.viewed++; } });
+    await click(failed)();
     assert.deepEqual(state.routes, [destination]);
     assert.equal(state.viewed, 0);
     assert.equal(state.readEvents, 0);
@@ -45,7 +52,7 @@ test("notification navigation stays available while read acknowledgement is pend
     state.routes = [];
     globalThis.fetch = async () => Response.json({ actionUrl: destination });
     const unknown = module.exports.NotificationViewButton({ notificationId: "notice" });
-    await unknown.props.children[0].props.onClick();
+    await click(unknown)();
     assert.deepEqual(state.routes, [destination]);
   } finally {
     globalThis.fetch = originalFetch;

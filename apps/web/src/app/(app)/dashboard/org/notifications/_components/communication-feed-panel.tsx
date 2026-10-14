@@ -1,6 +1,6 @@
 import { NotificationViewButton } from "@/components/notifications/notification-view-button";
+import { NotificationReadButton } from "@/components/notifications/notification-read-button";
 import { readNotificationActionUrl, resolveNotificationActionUrl } from "@/lib/push/notification-links";
-import { markAllOrgNotificationsReadAction, markNotificationReadAction } from "@/app/(app)/dashboard/org/notifications/actions";
 import {
   cn,
   formatDateTime,
@@ -51,11 +51,14 @@ export function CommunicationFeedPanel({
             description="Recent notifications sent to tenants, staff, and caretakers."
           />
 
-          <form action={markAllOrgNotificationsReadAction}>
-            <button data-workspace-action="true" type="submit" className={`${secondaryButtonClassName} sm:w-auto`}>
+          {unreadCount > 0 ? (
+            <NotificationReadButton
+              all
+              className={`${secondaryButtonClassName} sm:w-auto`}
+            >
               Mark all read
-            </button>
-          </form>
+            </NotificationReadButton>
+          ) : null}
         </div>
 
         <div className="mt-5 flex min-w-0 flex-wrap gap-2">
@@ -151,17 +154,13 @@ export function CommunicationFeedPanel({
                         <a href={`/api/org/subscription-invoices/${notification.id}`} target="_blank" rel="noopener noreferrer">View invoice</a>
                         <a href={`/api/org/subscription-invoices/${notification.id}?download=1`}>Download invoice</a>
                       </div>
-                    ) : notification.user?.id === membership.userId ? <div className="mt-3"><NotificationViewButton notificationId={notification.id} href={resolveNotificationActionUrl({ type: notification.type, title: notification.title, audience: "org_staff", actionUrl: readNotificationActionUrl(notification.providerResponse) })} /></div> : null}
+                    ) : notification.user?.id === membership.userId ? <div className="mt-3"><NotificationViewButton notificationId={notification.id} href={resolveNotificationActionUrl({ type: notification.type, title: notification.title, audience: "org_staff", actionUrl: readNotificationActionUrl(notification.providerResponse) })} title={notification.title} message={notification.message} /></div> : null}
                     {!notification.readAt && notification.user?.id === membership.userId ? (
-                      <form action={markNotificationReadAction} className="mt-3">
-                        <input type="hidden" name="notificationId" value={notification.id} />
-                        <button data-workspace-action="true"
-                          type="submit"
-                          className="inline-flex h-9 items-center justify-center rounded-xl border border-border bg-background px-3 text-xs font-medium text-foreground transition hover:bg-muted/20"
-                        >
+                      <div className="mt-3">
+                        <NotificationReadButton notificationId={notification.id} className="inline-flex h-9 items-center justify-center rounded-xl border border-border bg-background px-3 text-xs font-medium text-foreground transition hover:bg-muted/20 disabled:cursor-wait disabled:opacity-60">
                           Mark read
-                        </button>
-                      </form>
+                        </NotificationReadButton>
+                      </div>
                     ) : null}
                   </div>
                 </div>

@@ -1,4 +1,5 @@
 import type { CaretakerNotificationsPageData } from "../_lib/types";
+import { DashboardAutoRefresh } from "@/features/dashboard/components/dashboard-auto-refresh";
 import { NotificationsHeader } from "./notifications-header";
 import { NotificationsList } from "./notifications-list";
 import { NotificationsSidebar } from "./notifications-sidebar";
@@ -11,6 +12,7 @@ export function NotificationsWorkspace({
 }) {
   return (
     <div className="mx-auto w-full max-w-7xl space-y-5 pb-6 sm:space-y-6">
+      <DashboardAutoRefresh interval={60_000} />
       <NotificationsHeader data={data} />
       <NotificationsStats data={data} />
 

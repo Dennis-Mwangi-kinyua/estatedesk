@@ -1,4 +1,3 @@
-import { UnitNamesEditor } from "@/components/forms/unit-names-editor";
 import type { OrgRole } from "@prisma/client";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { getOrgUnitHref } from "@/lib/units/url";
@@ -81,7 +80,6 @@ export function UnitsUnitListSection({
         </div>
       </div>
 
-      {orgRole && ["ADMIN", "MANAGER"].includes(orgRole) && <div className="p-4"><UnitNamesEditor propertyId={selectedProperty.id} units={units.map(unit=>({id:unit.id,houseNo:unit.houseNo,buildingName:unit.building?.name}))}/></div>}
       <div className="divide-y divide-border">
         {units.map((unit) => (
           <article
@@ -126,6 +124,19 @@ export function UnitsUnitListSection({
             </div>
 
             <div className="flex flex-wrap gap-2 sm:justify-end">
+              {orgRole && ["ADMIN", "MANAGER"].includes(orgRole) ? (
+                <DeferredLink
+                  href={`${getOrgUnitHref({
+                    id: unit.id,
+                    houseNo: unit.houseNo,
+                    buildingName: unit.building?.name,
+                    propertyName: selectedProperty.name,
+                  })}?edit=1#unit-profile-edit`}
+                  className={buttonSecondaryClassName}
+                >
+                  Edit particulars
+                </DeferredLink>
+              ) : null}
               <DeferredLink
                 href={getOrgUnitHref({
                   id: unit.id,

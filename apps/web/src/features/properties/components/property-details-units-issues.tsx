@@ -1,4 +1,3 @@
-import { UnitNamesEditor } from "@/components/forms/unit-names-editor";
 import Link from "next/link";
 import type { PropertyDetails } from "@/features/properties/queries/get-property-details";
 import { getOrgUnitHref } from "@/lib/units/url";
@@ -31,7 +30,6 @@ export function PropertyDetailsUnitsIssues({
           </span>
         </div>
 
-        {canRenameUnits && <div className="mb-5"><UnitNamesEditor propertyId={property.id} units={property.units.map(unit=>({id:unit.id,houseNo:unit.houseNo,buildingName:unit.buildingName}))} scopeLabel="units on this property"/></div>}
         <div className="grid gap-4 md:grid-cols-2">
           {property.units.length ? (
             property.units.map((unit) => (
@@ -71,7 +69,20 @@ export function PropertyDetailsUnitsIssues({
                   </div>
                 </div>
 
-                <div className="mt-4 flex justify-end">
+                <div className="mt-4 flex flex-wrap justify-end gap-4">
+                  {canRenameUnits ? (
+                    <Link
+                      href={`${getOrgUnitHref({
+                        id: unit.id,
+                        houseNo: unit.houseNo,
+                        propertyName: property.name,
+                        buildingName: unit.buildingName,
+                      })}?edit=1#unit-profile-edit`}
+                      className="text-sm font-semibold text-primary transition hover:underline"
+                    >
+                      Edit particulars
+                    </Link>
+                  ) : null}
                   <Link
                     href={getOrgUnitHref({
                       id: unit.id,

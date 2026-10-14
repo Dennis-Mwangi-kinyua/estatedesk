@@ -6,10 +6,12 @@ export function UnitProfilePanel({
   unit,
   currencyCode,
   canEdit,
+  editProfile,
 }: {
   unit: UnitDetailsViewData["unit"];
   currencyCode: string;
   canEdit: boolean;
+  editProfile: boolean;
 }) {
   return (
           <section className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
@@ -66,7 +68,7 @@ export function UnitProfilePanel({
                 </p>
               </div>
             ) : null}
-            {canEdit ? <UnitEditForm unit={unit} /> : null}
+            {canEdit ? <UnitEditForm unit={unit} initiallyOpen={editProfile} /> : null}
           </section>
   );
 }

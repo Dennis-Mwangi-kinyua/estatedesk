@@ -1,8 +1,8 @@
 import { resolveNotificationActionUrl, readNotificationActionUrl } from "@/lib/push/notification-links";
 import { NotificationViewButton } from "@/components/notifications/notification-view-button";
+import { NotificationReadButton } from "@/components/notifications/notification-read-button";
 import { Send } from "lucide-react";
 import { Clock3 } from "@/components/shared/colored-icons";
-import { markCaretakerNotificationReadAction } from "../actions";
 import {
   formatDateTime,
   formatEnum,
@@ -69,21 +69,13 @@ export function NotificationCard({
             </span>
           </div>
 
-          <div className="mt-3"><NotificationViewButton notificationId={notification.id} href={resolveNotificationActionUrl({ type: notification.type, title: notification.title, audience: "caretaker", actionUrl: readNotificationActionUrl(notification.providerResponse) })} /></div>
+          <div className="mt-3"><NotificationViewButton notificationId={notification.id} href={resolveNotificationActionUrl({ type: notification.type, title: notification.title, audience: "caretaker", actionUrl: readNotificationActionUrl(notification.providerResponse) })} title={notification.title} message={notification.message} /></div>
           {isUnread ? (
-            <form action={markCaretakerNotificationReadAction} className="mt-3">
-              <input
-                type="hidden"
-                name="notificationId"
-                value={notification.id}
-              />
-              <button data-workspace-action="true"
-                type="submit"
-                className="inline-flex items-center justify-center rounded-2xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-muted/30"
-              >
+            <div className="mt-3">
+              <NotificationReadButton notificationId={notification.id} className="inline-flex items-center justify-center rounded-2xl border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-muted/30 disabled:cursor-wait disabled:opacity-60">
                 Mark as read
-              </button>
-            </form>
+              </NotificationReadButton>
+            </div>
           ) : null}
         </div>
       </div>

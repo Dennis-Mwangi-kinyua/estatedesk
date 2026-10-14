@@ -9,7 +9,7 @@ import { UnitProfilePanel } from "./unit-profile-panel";
 import { UnitPropertyContextPanel } from "./unit-property-context-panel";
 import { UnitVacancyListingPanel } from "./unit-vacancy-listing-panel";
 
-export function UnitDetailsWorkspace({ data, orgRole }: { data: UnitDetailsViewData; orgRole?: OrgRole | null }) {
+export function UnitDetailsWorkspace({ data, orgRole, editProfile = false }: { data: UnitDetailsViewData; orgRole?: OrgRole | null; editProfile?: boolean }) {
   const { unit, currencyCode } = data;
   const currentLease = unit.leases.find((l) => l.status === "ACTIVE") ?? unit.leases.find((l) => l.status === "PENDING") ?? null;
   const totalOpenIssues = unit.issues.filter((i) => i.status === "OPEN" || i.status === "IN_PROGRESS").length;
@@ -24,7 +24,7 @@ export function UnitDetailsWorkspace({ data, orgRole }: { data: UnitDetailsViewD
 
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px]">
           <div className="space-y-8">
-            <UnitProfilePanel unit={unit} currencyCode={currencyCode} canEdit={orgRole === "ADMIN" || orgRole === "MANAGER"} />
+            <UnitProfilePanel unit={unit} currencyCode={currencyCode} canEdit={orgRole === "ADMIN" || orgRole === "MANAGER"} editProfile={editProfile} />
             <UnitVacancyListingPanel unit={unit} currencyCode={currencyCode} orgRole={orgRole} />
             <UnitPropertyContextPanel unit={unit} currencyCode={currencyCode} />
             <UnitLeasingPanel unit={unit} currencyCode={currencyCode} />

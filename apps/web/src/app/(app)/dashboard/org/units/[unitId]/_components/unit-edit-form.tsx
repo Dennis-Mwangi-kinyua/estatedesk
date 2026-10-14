@@ -25,10 +25,16 @@ function Field({
   </label>;
 }
 
-export function UnitEditForm({ unit }: { unit: UnitDetailsViewData["unit"] }) {
+export function UnitEditForm({
+  unit,
+  initiallyOpen = false,
+}: {
+  unit: UnitDetailsViewData["unit"];
+  initiallyOpen?: boolean;
+}) {
   const action = updateUnitProfileAction.bind(null, unit.id);
   const [state, formAction, pending] = useActionState(action, {} as UnitProfileActionState);
-  return <details className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+  return <details id="unit-profile-edit" open={initiallyOpen} className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
     <summary className="cursor-pointer py-1 text-sm font-semibold text-slate-800">Edit unit name, numbering and details</summary>
     <form action={formAction} className="mt-4 space-y-4">
       <p className="text-sm text-slate-600">Changes to this unit’s rent and fees update its listed/default details. Existing leases and charges keep their agreed amounts.</p>

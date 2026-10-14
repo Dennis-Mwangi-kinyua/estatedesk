@@ -2,6 +2,7 @@ import type {
   NotificationFilter,
   PageData,
 } from "@/app/(app)/dashboard/org/notifications/_lib/types";
+import { DashboardAutoRefresh } from "@/features/dashboard/components/dashboard-auto-refresh";
 import { CommunicationFeedPanel } from "@/app/(app)/dashboard/org/notifications/_components/communication-feed-panel";
 import { MoveOutQueuePanel } from "@/app/(app)/dashboard/org/notifications/_components/move-out-queue-panel";
 import { NotificationsHero } from "@/app/(app)/dashboard/org/notifications/_components/notifications-hero";
@@ -30,6 +31,7 @@ export function NotificationsWorkspace({
 
   return (
     <div className="org-theme-content notifications-page uniform-page-actions mx-auto w-full min-w-0 max-w-7xl space-y-5 px-0 pb-24 pt-2 sm:px-2">
+      <DashboardAutoRefresh interval={60_000} />
       <NotificationsHero
         membership={membership}
         approvalQueueCount={approvalQueueCount}

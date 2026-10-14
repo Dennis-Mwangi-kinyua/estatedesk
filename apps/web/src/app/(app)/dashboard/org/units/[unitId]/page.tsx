@@ -5,12 +5,15 @@ import { UnitDetailsWorkspace } from "./_components/unit-details-workspace";
 
 export const dynamic = "force-dynamic";
 
-export default async function UnitDetailsPage({ params }: UnitDetailsPageProps) {
+export default async function UnitDetailsPage({ params, searchParams }: UnitDetailsPageProps) {
   const session = await requireManagementAccess();
-  const { unitId } = await params;
+  const [{ unitId }, query] = await Promise.all([
+    params,
+    searchParams ?? Promise.resolve({ edit: undefined }),
+  ]);
   const requestedUnitRef = decodeURIComponent(unitId);
 
   const data = await getUnitDetailsData(session.activeOrgId!, requestedUnitRef);
 
-  return <UnitDetailsWorkspace data={data} orgRole={session.activeOrgRole} />;
+  return <UnitDetailsWorkspace data={data} orgRole={session.activeOrgRole} editProfile={query.edit === "1"} />;
 }

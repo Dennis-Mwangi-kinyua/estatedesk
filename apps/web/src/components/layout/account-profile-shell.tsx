@@ -37,7 +37,7 @@ function AccountNavigation({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function LogoutForm({ onClick }: { onClick?: () => void }) {
-  return <form action={logoutAction}>
+  return <form data-logout-form action={logoutAction}>
     <button
       type="submit"
       onClick={onClick}

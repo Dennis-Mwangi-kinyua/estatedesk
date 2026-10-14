@@ -1,12 +1,10 @@
 import { NotificationViewButton } from "@/components/notifications/notification-view-button";
+import { NotificationReadButton } from "@/components/notifications/notification-read-button";
+import { DashboardAutoRefresh } from "@/features/dashboard/components/dashboard-auto-refresh";
 import Link from "@/components/navigation/workspace-link";
 import { Send } from "lucide-react";
 import { BellRing as Bell, CircleCheck as CheckCircle2, Inbox } from "@/components/shared/colored-icons";
 import { PageShell, SurfaceCard } from "@/components/theme/ed-dashboard-shell";
-import {
-  markAllTenantNotificationsReadAction,
-  markTenantNotificationReadAction,
-} from "../actions";
 import {
   formatDateTime,
   formatEnumLabel,
@@ -53,6 +51,7 @@ export function NotificationsWorkspace({
 
   return (
     <PageShell>
+      <DashboardAutoRefresh interval={60_000} />
       <SurfaceCard className="p-5 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -69,14 +68,14 @@ export function NotificationsWorkspace({
             </p>
           </div>
 
-          <form action={markAllTenantNotificationsReadAction}>
-            <button data-workspace-action="true"
-              type="submit"
-              className="inline-flex h-11 items-center justify-center rounded-2xl bg-neutral-950 px-5 text-sm font-medium text-white transition hover:bg-neutral-800"
+          {unreadCount > 0 ? (
+            <NotificationReadButton
+              all
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-neutral-950 px-5 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-wait disabled:opacity-60"
             >
               Mark all read
-            </button>
-          </form>
+            </NotificationReadButton>
+          ) : null}
         </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -174,24 +173,13 @@ export function NotificationsWorkspace({
                         <span>{formatDateTime(notification.createdAt)}</span>
                       </div>
 
-                      <div className="mt-3"><NotificationViewButton notificationId={notification.id} href={notification.actionHref} /></div>
+                      <div className="mt-3"><NotificationViewButton notificationId={notification.id} href={notification.actionHref} title={notification.title} message={notification.message} /></div>
                       {!notification.readAt ? (
-                        <form
-                          action={markTenantNotificationReadAction}
-                          className="mt-3"
-                        >
-                          <input
-                            type="hidden"
-                            name="notificationId"
-                            value={notification.id}
-                          />
-                          <button data-workspace-action="true"
-                            type="submit"
-                            className="inline-flex h-9 items-center justify-center rounded-xl border border-border bg-card px-3 text-xs font-medium text-foreground/80 transition hover:bg-muted/30"
-                          >
+                        <div className="mt-3">
+                          <NotificationReadButton notificationId={notification.id}>
                             Mark read
-                          </button>
-                        </form>
+                          </NotificationReadButton>
+                        </div>
                       ) : null}
                     </div>
                   </div>

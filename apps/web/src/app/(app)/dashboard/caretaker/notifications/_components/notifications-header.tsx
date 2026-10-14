@@ -4,7 +4,7 @@ import {
   panelBodyClassName,
   panelShellClassName,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
-import { markAllCaretakerNotificationsReadAction } from "../actions";
+import { NotificationReadButton } from "@/components/notifications/notification-read-button";
 import type { CaretakerNotificationsPageData } from "../_lib/types";
 
 export function NotificationsHeader({
@@ -36,15 +36,15 @@ export function NotificationsHeader({
           </div>
 
           {data.unreadCount > 0 ? (
-            <form action={markAllCaretakerNotificationsReadAction}>
-              <button data-workspace-action="true"
-                type="submit"
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
-              >
+            <NotificationReadButton
+              all
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30 disabled:cursor-wait disabled:opacity-60"
+            >
+              <>
                 <CheckCircle2 className="h-4 w-4" />
                 Read all
-              </button>
-            </form>
+              </>
+            </NotificationReadButton>
           ) : null}
         </div>
       </div>
