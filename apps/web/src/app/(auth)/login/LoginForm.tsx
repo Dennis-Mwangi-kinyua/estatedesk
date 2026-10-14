@@ -10,6 +10,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
+import styles from "./login.module.css";
 import type { LoginActionState } from "./actions";
 
 type LoginActionHandler = (
@@ -27,7 +28,7 @@ const InputShell = memo(function InputShell({
   children: ReactNode;
 }) {
   return (
-    <div className="group flex min-h-11 items-center gap-3 rounded-lg border border-slate-300 bg-white px-3 transition duration-150 focus-within:border-slate-950 focus-within:shadow-[0_0_0_3px_rgba(15,23,42,0.10)] sm:min-h-12 sm:px-3.5">
+    <div className={`${styles.field} group`}>
       {children}
     </div>
   );
@@ -75,8 +76,8 @@ export default function LoginForm({
 
       {isPending && typeof document !== "undefined"
         ? createPortal(
-        <div className="login-auth-overlay px-5" role="status" aria-live="polite" aria-atomic="true">
-          <div className="login-auth-card w-full max-w-[340px] rounded-3xl border border-white/80 bg-white px-8 py-8 text-center shadow-[0_28px_90px_rgba(15,23,42,0.25)]">
+        <div className={`${styles.loadingOverlay} login-auth-overlay px-5`} role="status" aria-live="polite" aria-atomic="true">
+          <div className={`${styles.loadingCard} login-auth-card w-full max-w-[340px] rounded-3xl border border-white/80 bg-white px-8 py-8 text-center shadow-[0_28px_90px_rgba(15,23,42,0.25)]`}>
             <div aria-hidden="true" className="relative mx-auto flex h-20 w-20 items-center justify-center">
               <div className="absolute inset-0 rounded-full border border-slate-100" />
               <div className="login-loading-ring absolute inset-0 rounded-full border-[3px] border-transparent border-r-teal-200 border-t-teal-600" />
@@ -96,7 +97,7 @@ export default function LoginForm({
         )
         : null}
 
-      <div className="px-5 py-6 sm:px-7">
+      <div className={styles.form}>
         <form action={formAction} className="flex flex-col gap-4">
           {returnTo ? <input type="hidden" name="returnTo" value={returnTo} /> : null}
           <div className="flex flex-col gap-2">
@@ -115,7 +116,7 @@ export default function LoginForm({
                 placeholder="you@company.com or landlord01"
                 disabled={isPending}
                 aria-invalid={Boolean(state.fieldErrors?.email?.length)}
-                className="h-full w-full bg-transparent text-[16px] text-slate-950 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed sm:text-[15px]"
+                className={styles.input}
               />
             </InputShell>
 
@@ -154,14 +155,14 @@ export default function LoginForm({
                 placeholder="Enter your password"
                 disabled={isPending}
                 aria-invalid={Boolean(state.fieldErrors?.password?.length)}
-                className="h-full w-full bg-transparent text-[16px] text-slate-950 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed sm:text-[15px]"
+                className={styles.input}
               />
 
               <button
                 type="button"
                 onClick={togglePassword}
                 disabled={isPending}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-500 transition active:scale-95 hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className={styles.passwordToggle}
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 title={showPassword ? "Hide password" : "Show password"}
                 aria-pressed={showPassword}
@@ -194,14 +195,14 @@ export default function LoginForm({
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_26px_rgba(13,148,136,0.28)] transition duration-150 active:scale-[0.99] hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-200 disabled:cursor-not-allowed disabled:bg-teal-400 disabled:shadow-none sm:min-h-12"
+            className={styles.submit}
           >
             <span>{isPending ? "Verifying..." : "Log in"}</span>
             {!isPending ? <ArrowRight className="h-4 w-4" /> : null}
           </button>
         </form>
 
-        <div className="mt-5 border-t border-slate-200 pt-5">
+        <div className={styles.formFooter}>
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-slate-600">
               Need an account?
@@ -213,7 +214,7 @@ export default function LoginForm({
               </Link>
             </p>
 
-            <div className="hidden items-center gap-1.5 text-xs text-slate-500 sm:inline-flex">
+            <div className={styles.protected}>
               <ShieldCheck className="h-4 w-4 text-slate-700" />
               Protected
             </div>

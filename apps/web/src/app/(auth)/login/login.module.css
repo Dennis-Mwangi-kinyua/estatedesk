@@ -1,0 +1,169 @@
+.page, .loadingOverlay {
+  --login-canvas: #f8fafb;
+  --login-aside: #f0f7f7;
+  --login-surface: #ffffff;
+  --login-ink: #162c35;
+  --login-muted: #526570;
+  --login-border: #dbe5e8;
+  --login-accent: #0f766e;
+  --login-button: #0f766e;
+  --login-button-ink: #ffffff;
+  --login-focus: #14b8a6;
+  --login-wash: #e4f3ef;
+  --login-blue-bg: #edf4ff; --login-blue-edge: #ceddf4; --login-blue-ink: #245bb0;
+  --login-green-bg: #edf8f2; --login-green-edge: #c8e7d7; --login-green-ink: #14744c;
+  --login-sky-bg: #edf7fb; --login-sky-edge: #c6e4ef; --login-sky-ink: #126b8d;
+  --login-amber-bg: #fff8e8; --login-amber-edge: #efdfb4; --login-amber-ink: #956010;
+  --login-teal-bg: #eaf7f4; --login-teal-edge: #c4e5dc; --login-teal-ink: #0f766e;
+  --login-orange-bg: #fff3eb; --login-orange-edge: #efd6c2; --login-orange-ink: #a94f20;
+  color-scheme: light;
+}
+:global(.dark) .page, :global(.dark) .loadingOverlay {
+  --login-canvas: #111b22;
+  --login-aside: #12242a;
+  --login-surface: #192930;
+  --login-ink: #edf5f5;
+  --login-muted: #b2c4ca;
+  --login-border: #34474e;
+  --login-accent: #7cdec9;
+  --login-button: #73d9c4;
+  --login-button-ink: #082c29;
+  --login-focus: #7cdec9;
+  --login-wash: #203e3c;
+  --login-blue-bg: #1b2e43; --login-blue-edge: #304f6a; --login-blue-ink: #9cc8ff;
+  --login-green-bg: #19372c; --login-green-edge: #315a47; --login-green-ink: #8cddaf;
+  --login-sky-bg: #19343f; --login-sky-edge: #315866; --login-sky-ink: #8ed6ec;
+  --login-amber-bg: #383323; --login-amber-edge: #645735; --login-amber-ink: #f4d38a;
+  --login-teal-bg: #1a3835; --login-teal-edge: #315b55; --login-teal-ink: #8be0ce;
+  --login-orange-bg: #3a2c25; --login-orange-edge: #654b3b; --login-orange-ink: #f6ba94;
+  color-scheme: dark;
+}
+:global(body):has(.page) { overflow: hidden; }
+:global(body):has(.page) :global(.fixed[aria-label="Change color theme"]) { display: none !important; }
+.page {
+  position: fixed; inset: 0; overflow: auto;
+  display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+  background: var(--login-canvas); color: var(--login-ink);
+}
+.page h1, .page h2, .page h3 { color: var(--login-ink) !important; }
+.page a { text-decoration: none; }
+.page a:focus-visible, .page button:focus-visible { outline: 2px solid var(--login-focus); outline-offset: 4px; }
+.services {
+  display: flex; flex-direction: column; gap: 24px; min-width: 0;
+  padding: 32px clamp(28px, 4vw, 64px);
+  border-right: 1px solid var(--login-border); background: var(--login-aside);
+}
+.brand { display: inline-flex; align-items: center; gap: 12px; width: fit-content; font-size: 20px; font-weight: 650; letter-spacing: -.03em; color: var(--login-ink) !important; }
+.brandIcon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: var(--login-wash); color: var(--login-accent); }
+.brandIcon svg { width: 23px; height: 23px; }
+.overview { margin-block: auto; width: 100%; max-width: 600px; }
+.eyebrow { margin: 0; font-size: 10px; line-height: 1.5; font-weight: 650; letter-spacing: .16em; text-transform: uppercase; color: var(--login-accent) !important; }
+.overview h2 { margin: 12px 0 0; font-size: clamp(28px, 2.7vw, 40px); line-height: 1.15; font-weight: 650; letter-spacing: -.04em; }
+.overview h2 span { color: var(--login-accent); }
+.description { margin: 14px 0 0; max-width: 470px; font-size: 14px; line-height: 1.65; color: var(--login-muted); }
+.serviceGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+.serviceCard { min-width: 0; padding: 16px; border: 1px solid var(--service-edge); border-radius: 12px; background: var(--service-bg); }
+.serviceCard > svg { height: 21px; width: 21px; color: var(--service-ink); }
+.serviceCard h3 { margin: 10px 0 0; font-size: 13px; line-height: 1.4; font-weight: 650; letter-spacing: -.01em; }
+.serviceCard p { margin: 5px 0 0; font-size: 12px; line-height: 1.6; color: var(--login-muted); }
+.explore { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; margin-top: 16px; font-size: 13px; font-weight: 600; color: var(--login-accent) !important; }
+.explore svg { width: 15px; height: 15px; }
+.access { display: flex; align-items: flex-start; gap: 10px; border-top: 1px solid var(--login-border); padding-top: 18px; font-size: 12px; line-height: 1.7; color: var(--login-muted); }
+.access svg { flex: none; width: 18px; height: 18px; margin-top: 3px; color: var(--login-accent); }
+.access p { margin: 0; }
+.main { display: flex; flex-direction: column; gap: 20px; min-width: 0; padding: 24px clamp(24px, 4vw, 64px); }
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.nav a { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; font-size: 12px; color: var(--login-muted) !important; }
+.nav svg { width: 15px; height: 15px; flex: none; }
+.navRight { display: flex; align-items: center; gap: 16px; }
+.page .main .nav .themeControl { width: 36px !important; height: 36px !important; min-height: 36px !important; border-radius: 10px !important; border-color: var(--login-border) !important; background: var(--login-surface) !important; color: var(--login-ink) !important; box-shadow: none !important; }
+.formContent { width: 100%; max-width: 420px; margin: auto; padding-block: 24px; }
+.intro > .brandIcon { margin-bottom: 16px; }
+.intro h1 { margin: 10px 0 0; font-size: clamp(30px, 3vw, 38px); line-height: 1.15; font-weight: 650; letter-spacing: -.04em; }
+.intro > p:last-child { margin: 12px 0 0; font-size: 14px; line-height: 1.65; color: var(--login-muted); }
+.formCard { margin-top: 24px; border: 1px solid var(--login-border); border-radius: 16px; background: var(--login-surface); box-shadow: 0 8px 30px rgb(0 0 0 / 3%); }
+.form { padding: 24px; }
+.form label { font-size: 13px; font-weight: 600; color: var(--login-ink) !important; }
+.form a { font-size: 12px; color: var(--login-ink) !important; }
+.field { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 12px; border: 1px solid var(--login-border); border-radius: 9px; background: var(--login-canvas) !important; transition: border-color .15s, box-shadow .15s; }
+.field:focus-within { border-color: var(--login-focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--login-focus) 18%, transparent); }
+.field > svg { color: var(--login-muted) !important; }
+.page .form .field .input { width: 100%; min-width: 0; min-height: 44px; padding: 0 !important; border: 0 !important; border-radius: 0 !important; outline: none; box-shadow: none !important; background: transparent !important; color: var(--login-ink) !important; -webkit-text-fill-color: var(--login-ink) !important; caret-color: var(--login-ink) !important; font-size: 16px; color-scheme: inherit; }
+.page .form .field .input::placeholder { color: var(--login-muted) !important; -webkit-text-fill-color: var(--login-muted) !important; opacity: 1; }
+.passwordToggle { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 40px; flex: none; border: 0; border-radius: 6px; background: transparent !important; color: var(--login-muted) !important; }
+.passwordToggle:hover { color: var(--login-ink) !important; }
+.submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 46px; margin-top: 2px; padding: 11px 16px; border: 0; border-radius: 9px; background: var(--login-button) !important; color: var(--login-button-ink) !important; font-size: 14px; font-weight: 650; transition: filter .15s; }
+.submit:hover { filter: brightness(.94); }
+.submit:disabled, .field input:disabled, .passwordToggle:disabled { cursor: not-allowed; opacity: .65; }
+.formFooter { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--login-border); }
+.formFooter p { color: var(--login-muted) !important; }
+.formFooter a { font-weight: 650; }
+.protected { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--login-muted) !important; }
+.protected svg { width: 14px; height: 14px; color: var(--login-accent) !important; }
+.caption { margin: 18px 0 0; text-align: center; font-size: 11px; line-height: 1.7; color: var(--login-muted); }
+.mobileSummary { display: none; }
+.footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 11px; color: var(--login-muted); }
+.footer span:last-child { display: inline-flex; align-items: center; gap: 5px; }
+.footer svg { width: 14px; height: 14px; }
+.loadingOverlay { color: var(--login-ink); }
+.loadingCard { border-color: var(--login-border) !important; background: var(--login-surface) !important; }
+.loadingCard h3 { color: var(--login-ink) !important; }
+.loadingCard p { color: var(--login-muted) !important; }
+.loadingCard p:first-of-type { color: var(--login-accent) !important; }
+@media (min-width: 1024px) and (max-height: 800px) {
+  .services { padding: 20px 32px; gap: 18px; }
+  .overview h2 { font-size: 30px; }
+  .description { margin-top: 10px; font-size: 13px; line-height: 1.55; }
+  .serviceGrid { gap: 10px; margin-top: 16px; }
+  .serviceCard { padding: 12px; }
+  .serviceCard h3 { margin-top: 7px; }
+  .serviceCard p { font-size: 11px; line-height: 1.5; }
+  .access { padding-top: 12px; }
+  .main { padding-top: 18px; padding-bottom: 18px; gap: 14px; }
+  .formContent { padding-block: 12px; }
+  .intro > .brandIcon { display: none; }
+  .intro h1 { font-size: 32px; }
+  .formCard { margin-top: 20px; }
+  .form { padding: 20px; }
+  .caption { margin-top: 14px; }
+}
+@media (max-width: 1023px) {
+  .page { display: block; }
+  .services { display: none; }
+  .main { min-height: 100%; padding: max(16px, env(safe-area-inset-top)) 24px max(16px, env(safe-area-inset-bottom)); gap: 20px; }
+  .formContent { max-width: 440px; padding-block: 24px; }
+  .mobileSummary { display: block; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--login-border); font-size: 12px; line-height: 1.7; color: var(--login-muted); }
+  .mobileSummary p { margin: 0; }
+  .mobileSummary p:first-child { margin-bottom: 4px; font-weight: 600; color: var(--login-ink); }
+}
+@media (max-width: 380px) {
+  .main { padding-inline: 16px; }
+  .navRight { gap: 10px; }
+  .nav a { font-size: 11px; }
+  .form { padding: 20px 16px; }
+  .protected { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field, .submit { transition: none; }
+}
+
+@media (min-width: 1024px) and (max-height: 740px) {
+  .services { padding: 16px 28px; gap: 14px; }
+  .overview h2 { font-size: 28px; }
+  .serviceGrid { gap: 8px; }
+  .serviceCard { padding: 10px; }
+  .access { padding-top: 10px; font-size: 11px; }
+  .main { padding-top: 16px; padding-bottom: 16px; }
+  .formContent { padding-block: 8px; }
+  .formCard { margin-top: 16px; }
+  .form { padding: 18px 20px; }
+  .caption { margin-top: 12px; }
+}
+@media (max-width: 1023px) {
+  .main { gap: 16px; }
+  .formContent { padding-block: 18px; }
+  .intro > .brandIcon { width: 36px; height: 36px; margin-bottom: 12px; }
+  .form { padding: 20px; }
+  .mobileSummary { margin-top: 18px; padding-top: 14px; }
+  .caption { margin-top: 14px; }
+}
