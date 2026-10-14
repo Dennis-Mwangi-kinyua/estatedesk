@@ -71,7 +71,7 @@ export function PublicAccessHeader({
       <header className="modern-public-header fixed inset-x-0 top-0 z-[100] shrink-0 border-b border-slate-200/80 bg-white/95 shadow-[0_14px_34px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#0d1117]/95 dark:shadow-[0_14px_34px_rgba(0,0,0,0.22)]">
         {/* Incident banner is rendered via IncidentBannerSlot from server parents when needed. */}
         <div className="mx-auto flex h-16 max-w-[1536px] items-center justify-between gap-3 px-3 sm:px-6 lg:px-8">
-          <div className="flex w-full items-center justify-between gap-2 lg:contents">
+          <div className="flex w-full items-center justify-between gap-2 2xl:contents">
             <Link
               href="/"
               aria-label="Go to EstateDesk home"
@@ -83,7 +83,7 @@ export function PublicAccessHeader({
               <span className="truncate">EstateDesk</span>
             </Link>
 
-            <div ref={mobileMenuRef} className="relative flex items-center gap-2 lg:hidden">
+            <div ref={mobileMenuRef} className="relative flex items-center gap-2 2xl:hidden">
               <HeaderThemeToggle className="h-11 w-11" />
               <button data-workspace-action="true"
                 type="button"
@@ -175,7 +175,7 @@ export function PublicAccessHeader({
             </div>
           </div>
 
-          <nav className="hidden lg:flex lg:w-auto lg:flex-1 lg:items-center lg:justify-end lg:gap-2">
+          <nav className="hidden 2xl:flex 2xl:w-auto 2xl:flex-1 2xl:items-center 2xl:justify-end 2xl:gap-2">
             <div className="flex items-center gap-2">
               {visibleLinks.map((item) => {
                 const isActive = active === item.key;
@@ -184,7 +184,7 @@ export function PublicAccessHeader({
                   <Link data-workspace-action="true"
                     key={item.href}
                     href={item.href}
-                    className={`public-access-nav-link inline-flex min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-lg border px-3 text-sm font-semibold transition xl:px-3.5 ${
+                    className={`public-access-nav-link inline-flex shrink-0 min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-lg border px-3 text-sm font-semibold transition xl:px-3.5 ${
                       isActive
                         ? "public-access-nav-link-active border-slate-300 bg-white text-slate-950 shadow-sm dark:border-white/20 dark:bg-white dark:text-[#0b0f16]"
                         : "border-transparent bg-transparent text-slate-950 hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:border-white/25 dark:hover:bg-white/[0.14] dark:hover:text-white"

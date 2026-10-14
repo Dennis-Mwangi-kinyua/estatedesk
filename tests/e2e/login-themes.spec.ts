@@ -3,13 +3,15 @@ import { expect, test } from "playwright/test";
 for (const theme of ["light", "dark"] as const) {
   test(`login fits laptop screens and keeps ${theme} text readable`, async ({ page }) => {
     await page.addInitScript(value => localStorage.setItem("theme", value), theme);
-    for (const viewport of [{ width: 1366, height: 768 }, { width: 1280, height: 720 }, { width: 1024, height: 768 }]) {
+    for (const viewport of [{ width: 1920, height: 1080 }, { width: 1536, height: 864 }, { width: 1366, height: 768 }, { width: 1280, height: 720 }, { width: 1024, height: 768 }]) {
       await page.setViewportSize(viewport);
       await page.goto("/login");
       await expect(page.locator("html")).toHaveClass(new RegExp(theme));
       const dimensions = await page.locator("[data-login-page]").evaluate(element => ({ height: element.clientHeight, scrollHeight: element.scrollHeight, width: element.clientWidth, scrollWidth: element.scrollWidth }));
       expect(dimensions.scrollHeight).toBeLessThanOrEqual(dimensions.height + 1);
       expect(dimensions.scrollWidth).toBe(dimensions.width);
+      const clippedLabels = await page.locator("header span").evaluateAll(elements => elements.filter(element => element.clientWidth > 0 && element.scrollWidth > element.clientWidth + 1).map(element => element.textContent));
+      expect(clippedLabels).toEqual([]);
       await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
       await expect(page.getByRole("heading", { name: "Records & reporting" })).toBeVisible();
       await expect(page.getByRole("button", { name: "Log in", exact: true })).toBeInViewport();
@@ -35,9 +37,9 @@ for (const theme of ["light", "dark"] as const) {
 
 test("theme switching preserves visible login fields and the saved choice", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "light" });
+  await page.addInitScript(() => { if (!localStorage.getItem("theme")) localStorage.setItem("theme", "light"); });
   await page.goto("/login");
-  await page.evaluate(() => localStorage.setItem("theme", "light"));
-  await page.reload();
+  await expect(page.locator("html")).toHaveClass(/light/);
   await page.getByLabel("Email or username").fill("caretaker01");
   await page.getByRole("button", { name: "Change color theme", exact: true }).click();
   await expect(page.locator("html")).toHaveClass(/dark/);
@@ -58,6 +60,12 @@ for (const theme of ["light", "dark"] as const) {
       await page.goto("/login");
       const root = page.locator("[data-login-page]");
       expect(await root.evaluate(el => el.scrollWidth)).toBeLessThanOrEqual(viewport.width);
+      expect(await root.evaluate(el => el.scrollHeight)).toBeLessThanOrEqual(viewport.height + 1);
+      if (viewport.height >= 375) {
+        const main = page.locator("[data-login-page] main");
+        expect(await main.evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
+        await expect(page.getByRole("link", { name: "Create one" })).toBeInViewport();
+      }
       await page.getByLabel("Email or username").fill("tenant@example.test");
       await page.getByLabel("Password", {exact:true}).fill("test-password");
       const login = page.getByRole("button", {name:"Log in",exact:true});
