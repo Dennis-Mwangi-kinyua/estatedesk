@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import bcrypt from "bcryptjs";
+import { verifyLoginPassword } from "@/lib/auth/verify-login-password";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
@@ -96,11 +96,10 @@ async function getLoginRateLimitError({
 }): Promise<LoginActionState | null> {
   try {
     const limiter = await withTimeout(
-      checkRateLimit({
-        key: `login:${ipAddress}:${identifier}`,
-        limit: 8,
-        windowMs: 60_000,
-      }),
+      Promise.all([
+        checkRateLimit({ key: `login-ip:${ipAddress}`, limit: 30, windowMs: 60_000 }),
+        checkRateLimit({ key: `login:${ipAddress}:${identifier}`, limit: 8, windowMs: 60_000 }),
+      ]).then(results => results.find(result => !result.allowed) ?? results[0]),
       LOGIN_RATE_LIMIT_TIMEOUT_MS,
       "login rate limit check",
     );
@@ -125,7 +124,8 @@ async function getLoginRateLimitError({
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "login rate limit check failed";
-    console.warn("login rate limit skipped:", message);
+    console.warn("login rate limit unavailable:", message);
+    return { success: false, error: GENERIC_LOGIN_ERROR_MESSAGE };
   }
 
   return null;
@@ -216,39 +216,20 @@ export async function loginAction(
       },
     );
 
-    if (!user || user.deletedAt) {
-      return {
-        success: false,
-        error: INVALID_CREDENTIALS_MESSAGE,
-      };
+    const passwordMatches = await timed(
+      makeLabel("login-bcrypt-compare", requestId),
+      () => verifyLoginPassword(password, user?.deletedAt ? null : user?.passwordHash),
+    );
+
+    if (!user || user.deletedAt || !passwordMatches) {
+      return { success: false, error: INVALID_CREDENTIALS_MESSAGE };
     }
 
+    // Reveal account status only after the caller proves knowledge of its password.
     if (user.status === "SUSPENDED" || user.status === "DISABLED") {
       redirect(`/account-suspended?status=${encodeURIComponent(user.status)}`);
     }
-
-    if (user.status !== "ACTIVE") {
-      redirect("/account-suspended");
-    }
-
-    if (!user.passwordHash || typeof user.passwordHash !== "string") {
-      return {
-        success: false,
-        error: INVALID_CREDENTIALS_MESSAGE,
-      };
-    }
-
-    const passwordMatches = await timed(
-      makeLabel("login-bcrypt-compare", requestId),
-      async () => bcrypt.compare(password, user.passwordHash),
-    );
-
-    if (!passwordMatches) {
-      return {
-        success: false,
-        error: INVALID_CREDENTIALS_MESSAGE,
-      };
-    }
+    if (user.status !== "ACTIVE") redirect("/account-suspended");
 
     // Platform admins do not need org membership or tenant profile
     if (

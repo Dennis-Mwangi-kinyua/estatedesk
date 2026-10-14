@@ -119,7 +119,7 @@ export function publicPageMetadata({
     alternates: {
       canonical: url,
       languages: {
-        "en-KE": url,
+        en: url,
         "x-default": url,
       },
     },
@@ -130,7 +130,6 @@ export function publicPageMetadata({
       siteName: SITE_NAME,
       type,
       locale: "en_KE",
-      alternateLocale: ["en_US", "en_GB", "en_AE", "en_ZA"],
       images: [
         {
           url: "/opengraph-image",

@@ -69,8 +69,9 @@ describe("PWA launch screen", () => {
       "utf8",
     );
 
-    assert.match(layout, /display-mode: standalone/);
-    assert.match(layout, /dataset\.pwaLaunch="visible"/);
+    const init = readFileSync(resolve(process.cwd(), "apps/web/public/theme-init.js"), "utf8");
+    assert.match(init, /display-mode: standalone/);
+    assert.match(init, /dataset\.pwaLaunch="visible"/);
     assert.match(layout, /<PwaLaunchScreen \/>/);
     assert.match(launchScreen, /MINIMUM_VISIBLE_TIME_MS/);
     assert.match(launchScreen, /dataset\.pwaLaunch = "ready"/);

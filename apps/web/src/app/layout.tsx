@@ -1,6 +1,5 @@
 import { SiteExperience } from "@/components/shared/site-experience";
 import type { Metadata, Viewport } from "next";
-import { cookies } from "next/headers";
 import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
 import { WebVitalsReporter } from "@/components/monitoring/web-vitals-reporter";
 import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
@@ -9,7 +8,6 @@ import { PwaLaunchScreen } from "@/components/pwa/pwa-launch-screen";
 import { PwaExperienceLoader } from "@/components/pwa/pwa-experience-loader";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { ServiceWorkerUpdatePrompt } from "@/components/pwa/service-worker-update-prompt";
-import { InlineScript } from "@/components/layout/inline-script";
 import { SkipToMain } from "@/components/layout/skip-to-main";
 import { IncidentBanner } from "@/components/marketing/incident-banner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
@@ -22,11 +20,7 @@ import {
   SITE_NAME,
   getSiteUrl,
 } from "@/lib/seo";
-import {
-  THEME_COOKIE_NAME,
-  THEME_INIT_SCRIPT,
-  getServerResolvedTheme,
-} from "@/lib/theme/preference";
+import { serializeJsonForHtml } from "@/lib/security/safe-json";
 import "./globals.css";
 import "./system-glass.css";
 import "./modern-ui.css";
@@ -234,31 +228,22 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const serverResolvedTheme = getServerResolvedTheme(
-    cookieStore.get(THEME_COOKIE_NAME)?.value,
-  );
-  const htmlClassName = ["antialiased", serverResolvedTheme]
-    .filter(Boolean)
-    .join(" ");
 
   return (
     <html
       lang="en"
-      className={htmlClassName}
+      className="antialiased"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
-        <InlineScript id="estatedesk-theme-init" html={THEME_INIT_SCRIPT} />
-        <InlineScript
-          id="estatedesk-pwa-launch-init"
-          html={`(function(){try{var standalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;if(standalone){document.documentElement.dataset.pwaLaunch="visible";document.documentElement.dataset.pwaLaunchStartedAt=String(performance.now());var dark=window.matchMedia("(prefers-color-scheme: dark)").matches;var color=dark?"#020617":"#f8fafc";document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta){meta.setAttribute("content",color)})}}catch(e){}})();`}
-        />
-        <InlineScript
+        {/* Parser-blocking first-party script applies the saved theme before paint. */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script id="estatedesk-theme-init" src="/theme-init.js" />
+        <script
           id="estatedesk-structured-data"
-          scriptType="application/ld+json"
-          html={JSON.stringify(structuredData)}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(structuredData) }}
         />
       </head>
       <body className="estate-glass-system ed-mobile-first min-h-dvh bg-background antialiased">

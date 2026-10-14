@@ -6,6 +6,8 @@ export type SeoIndexItem = {
 };
 
 export const marketCoverageItems = [
+  { title: "Property teams in Africa", href: "/property-management-software-africa", description: "Evaluate connected property operations for African teams, with country-specific requirements and a practical pilot process.", keywords: ["property management software Africa", "African property teams"] },
+  { title: "Remote and diaspora landlords", href: "/remote-property-management-software", description: "Connect owners abroad with local tenancy, collection, maintenance, and reporting records.", keywords: ["remote property management", "diaspora landlord software"] },
   {
     title: "Property management software in Kenya",
     href: "/property-management-software-kenya",

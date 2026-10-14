@@ -1,0 +1,126 @@
+{
+  "checkedAt": "2026-10-13T20:53:37.647Z",
+  "base": "http://127.0.0.1:3200",
+  "results": [
+    {
+      "path": "/",
+      "status": 200,
+      "durationMs": 24,
+      "bytes": 287712,
+      "headers": {
+        "cache-control": "public, max-age=0, s-maxage=60, stale-while-revalidate=60",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net; script-src-attr 'none'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; frame-src https://www.googletagmanager.com https://td.doubleclick.net; worker-src 'self' blob:; upgrade-insecure-requests",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-vercel-cache": null
+      },
+      "errors": []
+    },
+    {
+      "path": "/login",
+      "status": 200,
+      "durationMs": 7,
+      "bytes": 70831,
+      "headers": {
+        "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'nonce-ODNjNzJkOTItMjk4MS00MTJlLThiMTgtMDQ1NWNlODFjYzE5' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net; script-src-attr 'none'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; frame-src https://www.googletagmanager.com https://td.doubleclick.net; worker-src 'self' blob:; upgrade-insecure-requests",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-vercel-cache": null
+      },
+      "errors": []
+    },
+    {
+      "path": "/services",
+      "status": 200,
+      "durationMs": 9,
+      "bytes": 237604,
+      "headers": {
+        "cache-control": "public, max-age=0, s-maxage=60, stale-while-revalidate=60",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net; script-src-attr 'none'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; frame-src https://www.googletagmanager.com https://td.doubleclick.net; worker-src 'self' blob:; upgrade-insecure-requests",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-vercel-cache": null
+      },
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-africa",
+      "status": 200,
+      "durationMs": 9,
+      "bytes": 145067,
+      "headers": {
+        "cache-control": "s-maxage=60, stale-while-revalidate=31535940",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net; script-src-attr 'none'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; frame-src https://www.googletagmanager.com https://td.doubleclick.net; worker-src 'self' blob:; upgrade-insecure-requests",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-vercel-cache": null
+      },
+      "errors": []
+    },
+    {
+      "path": "/remote-property-management-software",
+      "status": 200,
+      "durationMs": 7,
+      "bytes": 143638,
+      "headers": {
+        "cache-control": "s-maxage=60, stale-while-revalidate=31535940",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net; script-src-attr 'none'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; frame-src https://www.googletagmanager.com https://td.doubleclick.net; worker-src 'self' blob:; upgrade-insecure-requests",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-vercel-cache": null
+      },
+      "errors": []
+    },
+    {
+      "path": "/robots.txt",
+      "status": 200,
+      "durationMs": 7,
+      "bytes": 3618,
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net; script-src-attr 'none'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; frame-src https://www.googletagmanager.com https://td.doubleclick.net; worker-src 'self' blob:; upgrade-insecure-requests",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-vercel-cache": null
+      },
+      "errors": []
+    },
+    {
+      "path": "/sitemap-index.xml",
+      "status": 200,
+      "durationMs": 4,
+      "bytes": 552,
+      "headers": {
+        "cache-control": "s-maxage=3600, stale-while-revalidate=86400",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net; script-src-attr 'none'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; frame-src https://www.googletagmanager.com https://td.doubleclick.net; worker-src 'self' blob:; upgrade-insecure-requests",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-vercel-cache": null
+      },
+      "errors": []
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "durationMs": 5,
+      "bytes": 5782,
+      "headers": {
+        "cache-control": "s-maxage=3600, stale-while-revalidate=86400",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net; script-src-attr 'none'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; frame-src https://www.googletagmanager.com https://td.doubleclick.net; worker-src 'self' blob:; upgrade-insecure-requests",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-vercel-cache": null
+      },
+      "errors": []
+    }
+  ]
+}

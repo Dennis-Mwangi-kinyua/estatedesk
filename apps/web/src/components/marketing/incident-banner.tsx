@@ -1,11 +1,14 @@
+import { unstable_cache } from "next/cache";
 import { AlertTriangle } from "lucide-react";
 import { getPlatformControl, defaultIncidentMessage } from "@/lib/platform/control";
+
+const getCachedIncidentControl = unstable_cache(getPlatformControl, ["public-incident-banner"], { revalidate: 60 });
 
 export async function IncidentBanner() {
   let control: Awaited<ReturnType<typeof getPlatformControl>> | null = null;
 
   try {
-    control = await getPlatformControl();
+    control = await getCachedIncidentControl();
   } catch {
     return null;
   }

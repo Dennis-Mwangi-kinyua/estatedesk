@@ -1,38 +1,28 @@
-name: Sitemap Ping
+name: Submit Sitemaps
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
 
 permissions:
   contents: read
 
 jobs:
-  ping-search-engines:
+  submit:
     if: ${{ vars.PRODUCTION_SITEMAP_PING_ENABLED == 'true' }}
-    name: Ping Google and Bing sitemaps
+    name: Submit through authenticated Google and Bing APIs
     runs-on: ubuntu-latest
     timeout-minutes: 5
-
     steps:
-      - name: Ping sitemap index
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Submit sitemap index
         env:
-          APP_URL: ${{ secrets.PRODUCTION_APP_URL }}
-        run: |
-          if [ -z "$APP_URL" ]; then
-            echo "PRODUCTION_APP_URL secret is not configured."
-            exit 1
-          fi
-
-          SITEMAP_URL="${APP_URL%/}/sitemap-index.xml"
-          ENCODED_SITEMAP_URL="$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$SITEMAP_URL")"
-
-          echo "Pinging Google for ${SITEMAP_URL}"
-          curl --fail --silent --show-error --max-time 30 \
-            "https://www.google.com/ping?sitemap=${ENCODED_SITEMAP_URL}" || true
-
-          echo "Pinging Bing for ${SITEMAP_URL}"
-          curl --fail --silent --show-error --max-time 30 \
-            "https://www.bing.com/ping?sitemap=${ENCODED_SITEMAP_URL}" || true
+          APP_URL: ${{ vars.PRODUCTION_APP_URL || 'https://estatedesk.co.ke' }}
+          GOOGLE_SEARCH_CONSOLE_SITE_URL: ${{ vars.GOOGLE_SEARCH_CONSOLE_SITE_URL }}
+          GOOGLE_SEARCH_CONSOLE_CREDENTIALS: ${{ secrets.GOOGLE_SEARCH_CONSOLE_CREDENTIALS }}
+          BING_WEBMASTER_API_KEY: ${{ secrets.BING_WEBMASTER_API_KEY }}
+        run: node scripts/submit-sitemaps.mjs

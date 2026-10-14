@@ -1,6 +1,8 @@
 import MarketingHomePage from "@/components/marketing/marketing-home-page";
 import { publicPageMetadata } from "@/lib/seo";
 
+export const revalidate = 60;
+
 export const metadata = publicPageMetadata({
   title: "Property Management Software for Kenya, East Africa and Dubai",
   description:

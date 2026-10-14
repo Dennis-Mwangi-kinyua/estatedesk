@@ -2,6 +2,8 @@ name: Uptime
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
 
 permissions:
   contents: read
@@ -11,22 +13,19 @@ jobs:
     name: Health check
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    if: ${{ vars.HEALTHCHECK_ENABLED == 'true' }}
+    if: ${{ vars.HEALTHCHECK_ENABLED != 'false' }}
 
     steps:
       - name: Check liveness endpoint
         env:
-          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+          HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL || 'https://estatedesk.co.ke' }}
         run: |
           test -n "$HEALTHCHECK_URL"
           curl --fail --silent --show-error --max-time 10 "$HEALTHCHECK_URL/api/health"
 
-      - name: Check readiness endpoint
+      - name: Verify detailed health is not public
         env:
-          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
-          CRON_SECRET: ${{ secrets.PRODUCTION_CRON_SECRET }}
+          HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL || 'https://estatedesk.co.ke' }}
         run: |
-          test -n "$HEALTHCHECK_URL"
-          curl --fail --silent --show-error --max-time 15 \
-            --header "Authorization: Bearer $CRON_SECRET" \
-            "$HEALTHCHECK_URL/api/health?deep=1"
+          status=$(curl --silent --show-error --max-time 15 --output /dev/null --write-out '%{http_code}' "$HEALTHCHECK_URL/api/health?deep=1")
+          test "$status" = "401"

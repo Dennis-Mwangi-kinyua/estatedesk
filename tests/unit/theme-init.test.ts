@@ -33,23 +33,14 @@ describe("theme initialization", () => {
     assert.match(buildThemeCookie("system"), /SameSite=Lax/);
   });
 
-  it("inlines theme init in the root layout head", () => {
+  it("applies the theme before paint without request-time root cookies", () => {
     const layout = readFileSync(join(ROOT, "apps/web/src/app/layout.tsx"), "utf8");
-    const inlineScript = readFileSync(
-      join(ROOT, "apps/web/src/components/layout/inline-script.tsx"),
-      "utf8",
-    );
-
-    assert.match(layout, /THEME_INIT_SCRIPT/);
-    assert.match(layout, /InlineScript/);
-    assert.match(layout, /id="estatedesk-theme-init"/);
-    assert.match(inlineScript, /text\/plain/);
-    assert.match(inlineScript, /suppressHydrationWarning/);
-    assert.doesNotMatch(layout, /from "next\/script"/);
-    assert.match(THEME_INIT_SCRIPT, /localStorage\.getItem/);
+    const script = readFileSync(join(ROOT, "apps/web/public/theme-init.js"), "utf8");
+    assert.match(layout, /id="estatedesk-theme-init" src="\/theme-init.js"/);
+    assert.doesNotMatch(layout, /await cookies\(/);
+    assert.match(script, /localStorage\.getItem/);
+    assert.match(script, /classList\.add\(resolvedTheme\)/);
+    assert.match(script, new RegExp(THEME_STORAGE_KEY));
     assert.match(THEME_INIT_SCRIPT, /classList\.add\(resolvedTheme\)/);
-    assert.match(layout, /getServerResolvedTheme/);
-    assert.match(layout, /THEME_COOKIE_NAME/);
-    assert.match(layout, new RegExp(THEME_STORAGE_KEY));
   });
 });

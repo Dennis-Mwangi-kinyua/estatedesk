@@ -4,6 +4,8 @@ set -euo pipefail
 # shellcheck source=scripts/lib/load-env.sh
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/load-env.sh"
 
+export PGCONNECT_TIMEOUT="${PGCONNECT_TIMEOUT:-15}"
+
 : "${RESTORE_DATABASE_URL:?RESTORE_DATABASE_URL is required and must be disposable}"
 : "${BACKUP_FILE:?BACKUP_FILE is required}"
 
@@ -11,6 +13,8 @@ if [[ "${CONFIRM_DISPOSABLE_RESTORE_DATABASE:-}" != "YES" ]]; then
   echo "Refusing to restore. Set CONFIRM_DISPOSABLE_RESTORE_DATABASE=YES for a disposable drill database."
   exit 1
 fi
+
+node "$repo_root/scripts/validate-restore-target.mjs"
 
 if [[ ! -f "$BACKUP_FILE" ]]; then
   echo "Backup file not found: $BACKUP_FILE"

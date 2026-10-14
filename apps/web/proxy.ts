@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { contentSecurityPolicy } from "./src/lib/security/content-security-policy";
 import {
   getSessionCookieName,
   hasValidSessionCookieShape,
@@ -21,17 +22,15 @@ const PROTECTED_PREFIXES = [
   "/charges",
   "/tenants",
   "/reports",
+  "/inspections",
+  "/issues",
+  "/move-outs",
+  "/taxes",
+  "/api-keys",
   "/api",
 ];
 
 const PUBLIC_PREFIXES = [
-  "/api/health",
-  "/api/cron/notifications",
-  "/api/cron/retention",
-  "/api/auth/accept-invite",
-  "/api/public/vacant-houses",
-  // Soft-auth badge endpoint: returns count 0 without a session (no 401 noise).
-  "/api/pwa/badge-count",
   "/login",
   "/register",
   "/forgot-password",
@@ -135,9 +134,18 @@ function checkRateLimit(key: string) {
   };
 }
 
+const PUBLIC_API_PATHS = new Set([
+  "/api/health", "/api/cron/tenant-credit", "/api/cron/notifications", "/api/cron/retention",
+  "/api/webhooks/mpesa", "/api/webhooks/kcb-ipn", "/api/webhooks/kra-etims", "/api/webhooks/whatsapp",
+  "/api/monitoring/web-vitals", "/api/monitoring/client-errors", "/api/indexnow/key",
+  "/api/push/vapid-public-key", "/api/auth/accept-invite", "/api/public/vacant-houses", "/api/pwa/badge-count",
+]);
+
 function isPublicPath(pathname: string) {
-  // Daraja has no browser session. The webhook authenticates its own callback secret.
-  if (pathname === "/api/webhooks/mpesa" || pathname === "/api/webhooks/mpesa/") return true;
+  if (pathname.startsWith("/api/")) {
+    const normalized = pathname.replace(/\/$/, "");
+    return PUBLIC_API_PATHS.has(normalized) || /^\/api\/(og\/vacancy|marketing\/referrals)\/[^/]+\/?$/.test(pathname);
+  }
   return PUBLIC_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
@@ -162,7 +170,8 @@ function shouldNoIndex(pathname: string) {
   );
 }
 
-function applySecurityHeaders(response: NextResponse, pathname: string) {
+function applySecurityHeaders(response: NextResponse, pathname: string, csp?: string) {
+  if (csp) response.headers.set("Content-Security-Policy", csp);
   const isPrivate = shouldNoIndex(pathname);
 
   response.headers.set("X-Frame-Options", "DENY");
@@ -246,16 +255,26 @@ export function proxy(req: NextRequest) {
   const hasSession = hasValidSessionCookieShape(sessionCookieValue);
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-estatedesk-pathname", pathname);
+  requestHeaders.delete("x-nonce");
+  requestHeaders.delete("content-security-policy");
+  const strictScripts = shouldNoIndex(pathname) || /^\/(login|register|forgot-password|reset-password|verify-email|accept-invite)(\/|$)/.test(pathname);
+  const nonce = strictScripts ? Buffer.from(crypto.randomUUID()).toString("base64") : undefined;
+  const csp = contentSecurityPolicy({ nonce, development: process.env.NODE_ENV !== "production" });
+  if (nonce) {
+    requestHeaders.set("x-nonce", nonce);
+    requestHeaders.set("Content-Security-Policy", csp);
+  }
+  const secureResponse = (response: NextResponse, path: string) => applySecurityHeaders(response, path, csp);
 
-  if (pathname.startsWith("/api") && isBrowserApiNavigation(req)) {
+  if (pathname.startsWith("/api") && !pathname.startsWith("/api/marketing/referrals/") && isBrowserApiNavigation(req)) {
     const url = req.nextUrl.clone();
     url.pathname = "/are-you-lost";
     url.searchParams.set("from", pathname);
-    return applySecurityHeaders(NextResponse.redirect(url), pathname);
+    return secureResponse(NextResponse.redirect(url), pathname);
   }
 
   if (isPublicPath(pathname)) {
-    return applySecurityHeaders(
+    return secureResponse(
       NextResponse.next({ request: { headers: requestHeaders } }),
       pathname,
     );
@@ -263,7 +282,7 @@ export function proxy(req: NextRequest) {
 
   if (isProtectedPath(pathname) && !hasSession) {
     if (pathname.startsWith("/api")) {
-      return applySecurityHeaders(
+      return secureResponse(
         NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
         pathname,
       );
@@ -271,11 +290,11 @@ export function proxy(req: NextRequest) {
 
     const url = req.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("next", pathname);
-    return applySecurityHeaders(NextResponse.redirect(url), pathname);
+    url.searchParams.set("returnTo", `${pathname}${req.nextUrl.search}`);
+    return secureResponse(NextResponse.redirect(url), pathname);
   }
 
-  const response = applySecurityHeaders(
+  const response = secureResponse(
     NextResponse.next({ request: { headers: requestHeaders } }),
     pathname,
   );

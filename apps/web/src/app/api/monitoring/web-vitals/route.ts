@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { PayloadTooLargeError, readBoundedJson } from "@/lib/security/bounded-json";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 const webVitalSchema = z.object({
   id: z.string().max(160),
-  name: z.string().max(40),
-  value: z.number(),
+  name: z.enum(["CLS", "FCP", "FID", "INP", "LCP", "TTFB"]),
+  value: z.number().nonnegative(),
   rating: z.string().max(40).optional(),
   delta: z.number().optional(),
   navigationType: z.string().max(80).optional(),
@@ -22,6 +23,15 @@ function getClientIp(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const origin = request.headers.get("origin");
+  if (origin && origin !== new URL(request.url).origin) {
+    return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
+  }
+  let payload: unknown;
+  try { payload = await readBoundedJson(request, 4096); }
+  catch (error) {
+    return NextResponse.json({ error: "Invalid web vital payload." }, { status: error instanceof PayloadTooLargeError ? 413 : 400 });
+  }
   try {
     const limiter = await checkRateLimit({
       key: `web-vitals:${getClientIp(request)}`,
@@ -38,11 +48,12 @@ export async function POST(request: Request) {
         },
       );
     }
-  } catch (error) {
-    console.warn("web-vitals rate limit skipped:", error);
+  } catch {
+    // Telemetry is optional: drop it during limiter outages rather than accept unlimited writes.
+    return new Response(null, { status: 204 });
   }
 
-  const parsed = webVitalSchema.safeParse(await request.json().catch(() => null));
+  const parsed = webVitalSchema.safeParse(payload);
 
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid web vital payload." }, { status: 400 });

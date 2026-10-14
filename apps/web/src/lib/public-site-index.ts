@@ -11,6 +11,8 @@ export type PublicSiteIndexItem = {
 };
 
 export const publicSiteIndexItems: readonly PublicSiteIndexItem[] = [
+  { title: "Property teams in Africa", path: "/property-management-software-africa", description: "Evaluate EstateDesk for African property teams, including connectivity and market-specific requirements.", priority: "0.8", changefreq: "monthly" },
+  { title: "Remote and diaspora landlords", path: "/remote-property-management-software", description: "Coordinate overseas owner oversight with local management records and statements.", priority: "0.8", changefreq: "monthly" },
   {
     title: "BnB & short stays",
     path: "/stays",

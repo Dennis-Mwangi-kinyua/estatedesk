@@ -23,6 +23,8 @@ const PRIVATE_ROUTE_PREFIXES = [
   "/buildings",
   "/charges",
   "/reports",
+  "/inspections",
+  "/issues",
   "/move-outs",
   "/change-password",
   "/taxes",

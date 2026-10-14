@@ -52,3 +52,6 @@ prod
 next-env.d.ts
 
 /app/generated/prisma
+
+# Local database recovery artifacts
+/backups/*.dump.sha256

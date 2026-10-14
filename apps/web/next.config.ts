@@ -3,6 +3,7 @@ import { availableParallelism } from "node:os";
 import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
 import type { NextConfig } from "next";
+import { contentSecurityPolicy } from "./src/lib/security/content-security-policy";
 import { config as loadEnv } from "dotenv";
 
 
@@ -59,38 +60,10 @@ function vacancyImageRemotePatterns() {
   return patterns;
 }
 
-const cspDirectives = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  "object-src 'none'",
-  "img-src 'self' data: blob: https:",
-  "font-src 'self' data:",
-  "style-src 'self' 'unsafe-inline'",
-  [
-    "script-src 'self' 'unsafe-inline'",
-    isProduction ? "" : "'unsafe-eval'",
-    "https://www.googletagmanager.com",
-    "https://www.google-analytics.com",
-    "https://www.googleadservices.com",
-    "https://googleads.g.doubleclick.net",
-  ]
-    .filter(Boolean)
-    .join(" "),
-  [
-    "connect-src 'self'",
-    "https://www.google-analytics.com",
-    "https://region1.google-analytics.com",
-    "https://stats.g.doubleclick.net",
-  ].join(" "),
-  "frame-src https://www.googletagmanager.com https://td.doubleclick.net",
-  "worker-src 'self' blob:",
-  isProduction ? "upgrade-insecure-requests" : "",
-].filter(Boolean);
+const csp = contentSecurityPolicy({ development: !isProduction });
 
 const SECURITY_HEADERS = [
-  { key: "Content-Security-Policy", value: cspDirectives.join("; ") },
+  { key: "Content-Security-Policy", value: csp },
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -119,11 +92,11 @@ const PRIVATE_HEADERS = [
 const PUBLIC_EDGE_CACHE_HEADERS = [
   {
     key: "Cache-Control",
-    value: "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+    value: "public, max-age=0, s-maxage=60, stale-while-revalidate=60",
   },
   {
     key: "CDN-Cache-Control",
-    value: "public, max-age=3600, stale-while-revalidate=86400",
+    value: "public, max-age=60, stale-while-revalidate=60",
   },
 ];
 
@@ -139,6 +112,7 @@ const PUBLIC_FAST_EDGE_CACHE_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   env: {
     NEXT_PUBLIC_APP_VERSION: webPackage.version,
   },

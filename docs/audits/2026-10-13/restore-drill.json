@@ -1,0 +1,22 @@
+{
+  "startedAt": "2026-10-13T20:45:50Z",
+  "finishedAt": "2026-10-13T20:45:51Z",
+  "durationSeconds": 1,
+  "backupAgeSecondsAtCompletion": 45,
+  "target": "New disposable local PostgreSQL 18 database",
+  "backupChecksumVerified": true,
+  "restoreCommandSucceeded": true,
+  "coreTablesQueried": [
+    "Organization",
+    "Payment",
+    "Tenant",
+    "Lease",
+    "IssueTicket"
+  ],
+  "productionDataModified": false,
+  "limitations": [
+    "Local restore timing does not establish production infrastructure recovery time.",
+    "Restored application account login was not exercised.",
+    "Backup data and row counts are retained locally, not committed."
+  ]
+}

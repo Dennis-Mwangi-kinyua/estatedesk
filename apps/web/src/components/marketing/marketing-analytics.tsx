@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const CONSENT_KEY = "estatedesk:analytics-consent";
@@ -41,7 +42,7 @@ function eventForAnchor(anchor: HTMLAnchorElement) {
   return null;
 }
 
-export function MarketingAnalytics() {
+function PublicMarketingAnalytics() {
   const bootstrapId = gaMeasurementId ?? googleAdsId;
   const [consent, setConsent] = useState("unset");
 
@@ -154,4 +155,11 @@ export function MarketingAnalytics() {
       ) : null}
     </>
   );
+}
+
+export function MarketingAnalytics() {
+  const pathname = usePathname();
+  const isMarketingPage = pathname === "/" || /^\/(services|pricing|contact|faq|guides|vacancies|stays|property-management-markets|property-management-software-(kenya|dubai|africa)|remote-property-management-software|landlord-software|rent-tracking-software|water-billing-software)(\/|$)/.test(pathname ?? "");
+  if (!isMarketingPage) return null;
+  return <PublicMarketingAnalytics />;
 }

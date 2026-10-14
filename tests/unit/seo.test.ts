@@ -63,7 +63,7 @@ describe("seo helpers", () => {
       "https://app.example/water-billing-software",
     );
     assert.deepEqual(metadata.alternates?.languages, {
-      "en-KE": "https://app.example/water-billing-software",
+      en: "https://app.example/water-billing-software",
       "x-default": "https://app.example/water-billing-software",
     });
     assertRobotsObject(metadata.robots);

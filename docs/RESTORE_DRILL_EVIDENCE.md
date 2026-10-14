@@ -1,8 +1,8 @@
 # Restore Drill Evidence
 
-Status: **BACKUP CAPTURED AND VALIDATED — FULL RESTORE STILL REQUIRED ON DISPOSABLE DATABASE**
+Status: **BACKUP CAPTURED, CHECKSUM VERIFIED, AND RESTORED ON A DISPOSABLE LOCAL DATABASE**
 
-Last updated: 2026-07-04
+Last updated: 2026-10-13
 
 ## Purpose
 
@@ -73,3 +73,8 @@ Complete every field below after the disposable restore:
 - Drop or rotate the disposable restore database credentials
 - Store backup checksum and drill notes in your operations vault
 - Update `docs/PRE_LAUNCH_STATUS.md`
+## 2026-10-13 recovery drill
+
+A fresh read-only production backup was checksum-verified and restored successfully into a newly created local PostgreSQL 18 database. The restore completed in 1 second; the backup was 45 seconds old at completion. All five core business tables were queried successfully. The production database was not modified.
+
+Sanitized evidence: [restore-drill.json](audits/2026-10-13/restore-drill.json). The verified backup is retained with private file permissions at `backups/estatedesk-20261013T204310Z.dump`. Backup contents and row counts remain local and are not committed. The temporary restored database has been stopped and removed. This measures a local database restore, not full production infrastructure recovery. Restored application login and an end-to-end disaster recovery exercise remain unverified.

@@ -3,7 +3,7 @@ import { expect, test } from "playwright/test";
 test("public trust and login surfaces are available", async ({ page }) => {
   await page.goto("/login");
 
-  await expect(page).toHaveTitle(/Login Page - EstateDesk Dashboard/);
+  await expect(page).toHaveTitle(/Sign in to EstateDesk/);
   await expect(page.getByLabel("Email or username")).toBeVisible();
   await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Show password" })).toBeVisible();

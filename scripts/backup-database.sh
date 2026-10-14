@@ -4,7 +4,8 @@ set -euo pipefail
 # shellcheck source=scripts/lib/load-env.sh
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/load-env.sh"
 
-backup_database_url="${DIRECT_URL:-${DATABASE_URL:-}}"
+backup_database_url="${BACKUP_DATABASE_URL:-${DIRECT_URL:-${DATABASE_URL:-}}}"
+export PGCONNECT_TIMEOUT="${PGCONNECT_TIMEOUT:-15}"
 : "${backup_database_url:?DIRECT_URL or DATABASE_URL is required}"
 
 backup_dir="${BACKUP_DIR:-./backups}"

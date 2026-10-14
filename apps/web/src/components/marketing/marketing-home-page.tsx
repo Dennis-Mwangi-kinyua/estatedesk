@@ -43,6 +43,8 @@ const homepageFeatures = [
 
 const homepageFaqItems = marketingFaqItems.slice(0, 8);
 const seoHubLinks = [
+  ["Property teams in Africa", "/property-management-software-africa"],
+  ["Remote and diaspora landlords", "/remote-property-management-software"],
   ["Property management software Kenya", "/property-management-software-kenya"],
   ["Property management software Dubai", "/property-management-software-dubai"],
   ["Landlord software", "/landlord-software"],
