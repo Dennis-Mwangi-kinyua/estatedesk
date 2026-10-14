@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageShell, SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { redirect } from "next/navigation";
 import { requireTenantAccess } from "@/lib/permissions/guards";
@@ -71,6 +72,7 @@ export default async function TenantNoticesPage({
     <PageShell>
       <div className="tenant-notices-page space-y-4 sm:space-y-6">
         <NoticesHeader activeUnit={activeLease?.unit ?? null} />
+        <Link href="/dashboard/tenant/community" className="block rounded-2xl border bg-card p-5"><strong>Official community notice board →</strong><p className="mt-1 text-sm text-muted-foreground">Apartment announcements and communication from your property management team.</p></Link>
         <FlashMessages
           successMessage={successMessage}
           errorMessage={errorMessage}

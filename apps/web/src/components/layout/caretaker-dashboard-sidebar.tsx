@@ -32,6 +32,7 @@ export function CaretakerDashboardSidebar() {
 
           <div className="flex-1 overflow-y-auto px-3 py-4">
             <nav className="space-y-1">
+              <HoverPrefetchLink href="/dashboard/gate" className="ed-nav-item flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium"><SidebarSticker href="/dashboard/gate" />Gate access</HoverPrefetchLink>
               {CARETAKER_NAV_ITEMS.map((item) => {
                 const active =
                   pathname === item.href || (item.href !== "/dashboard/caretaker" && pathname.startsWith(`${item.href}/`));
@@ -67,7 +68,7 @@ export function CaretakerDashboardSidebar() {
 
           <div className="shrink-0 space-y-2 border-t border-border p-3">
             <InAppHelpNav workspace="caretaker" compact />
-            <form action={logoutAction}>
+            <form data-logout-form action={logoutAction}>
               <button data-action-kind="destructive" data-workspace-action="true"
                 type="submit"
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"

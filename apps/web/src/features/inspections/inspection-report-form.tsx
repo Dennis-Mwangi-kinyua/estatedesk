@@ -8,7 +8,7 @@ import { ClipboardCheck } from "@/components/shared/colored-icons";
 import { completeInspectionAction } from "./actions/complete-inspection-action";
 import { inspectionChecklistFields } from "@/app/(app)/dashboard/caretaker/inspections/[inspectionId]/_lib/constants";
 
-export function InspectionReportForm({ inspectionId }: { inspectionId: string }) {
+export function InspectionReportForm({ inspectionId, backHref = "/dashboard/caretaker/inspections" }: { inspectionId: string; backHref?: string }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
@@ -37,7 +37,7 @@ export function InspectionReportForm({ inspectionId }: { inspectionId: string })
     });
   }
 
-  if (submitted) return <div role="status" className="rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-4 text-sm text-foreground sm:p-5"><div className="flex items-start gap-3"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-500/10 text-emerald-700"><Check aria-hidden="true" className="size-5" /></span><div><p className="font-semibold">Inspection report submitted</p><p className="mt-1 text-muted-foreground">Your part is complete. Management will review the findings, final bills, deposit, and key handover. The lease remains active until management records the move-out close-out.</p><Link href="/dashboard/caretaker/inspections" className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted/30">Back to inspections</Link></div></div></div>;
+  if (submitted) return <div role="status" className="rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-4 text-sm text-foreground sm:p-5"><div className="flex items-start gap-3"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-500/10 text-emerald-700"><Check aria-hidden="true" className="size-5" /></span><div><p className="font-semibold">Inspection report submitted</p><p className="mt-1 text-muted-foreground">Your part is complete. Management will review the findings, final bills, deposit, and key handover. The lease remains active until management records the move-out close-out.</p><Link href={backHref} className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted/30">Back to inspections</Link></div></div></div>;
 
   return (
     <form className="space-y-6 sm:space-y-8" onSubmit={submit}>

@@ -53,7 +53,7 @@ export default async function InspectionPage({ params }: { params: Promise<{ ins
 
       <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
         <div className="border-b border-border px-4 py-4 sm:px-6"><h2 className="text-lg font-semibold text-foreground">{scheduled ? "Inspection report" : inspection.status === "COMPLETED" ? "Submitted report" : "Inspection details"}</h2><p className="mt-1 text-sm text-muted-foreground">{scheduled ? "Record the property condition, add supporting photos, and submit for review." : "Review the inspection status and submitted notes."}</p></div>
-        <div className="p-4 sm:p-6 lg:p-8">{scheduled ? <InspectionReportForm inspectionId={inspection.id} /> : <div className="rounded-2xl border border-border bg-muted/10 p-4 sm:p-5"><p className="text-sm font-medium text-muted-foreground">Report notes</p><p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-foreground">{inspection.notes ?? "No report notes have been submitted."}</p></div>}</div>
+        <div className="p-4 sm:p-6 lg:p-8">{scheduled ? <InspectionReportForm inspectionId={inspection.id} backHref={backHref} /> : <div className="rounded-2xl border border-border bg-muted/10 p-4 sm:p-5"><p className="text-sm font-medium text-muted-foreground">Report notes</p><p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-foreground">{inspection.notes ?? "No report notes have been submitted."}</p></div>}</div>
       </section>
     </main>
   );

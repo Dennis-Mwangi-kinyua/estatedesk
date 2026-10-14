@@ -1,0 +1,7 @@
+import { prisma } from "@/lib/prisma";
+import { ReadNotice } from "./forms";
+export async function CommunityBoard({ tenantId, reservationId }: { tenantId?: string; reservationId?: string }) {
+  if (!tenantId && !reservationId) return null;
+  const recipients = await prisma.communityNoticeRecipient.findMany({ where: reservationId ? { reservationId } : { tenantId }, include: { notice: { include: { org: { select: { name: true } } } } }, orderBy: { notice: { publishedAt: "desc" } }, take: 100 });
+  return <section className="space-y-4"><header><h2 className="text-2xl font-semibold">Community notice board</h2><p className="mt-2 text-sm text-muted-foreground">Official communication from your property management team.</p></header>{!recipients.length && <p className="rounded-xl border bg-card p-5 text-sm text-muted-foreground">No official community notices yet.</p>}{recipients.map(r => <article key={r.id} className="space-y-3 rounded-2xl border bg-card p-5"><p className="text-xs font-semibold uppercase tracking-wide text-primary">Official notice · {r.readAt ? "Read" : "Unread"}</p><h3 className="text-xl font-semibold">{r.notice.title}</h3><p className="text-xs text-muted-foreground">{r.notice.org.name} · {r.notice.publishedAt.toLocaleString("en-KE", { timeZone: "Africa/Nairobi" })} EAT</p><p className="whitespace-pre-wrap break-words leading-relaxed">{r.notice.message}</p>{!r.readAt && <ReadNotice id={r.id} guest={!!reservationId} />}</article>)}</section>;
+}

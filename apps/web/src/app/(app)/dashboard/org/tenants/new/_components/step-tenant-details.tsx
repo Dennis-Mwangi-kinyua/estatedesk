@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { inputClassName, stepPanelClassName, textareaClassName } from "../_lib/constants";
 import { FieldLabel, SectionTitle } from "./ui-primitives";
@@ -11,6 +12,7 @@ export function StepTenantDetails({ isPending }: { isPending: boolean }) {
         description="Capture the tenant’s identity and contact information."
       />
 
+      <p className="mt-3 text-sm">ID already registered? <Link href="/dashboard/org/identity-verification" className="text-primary underline">Request platform authentication to link the existing account</Link>.</p>
       <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
         <label className="block">
           <FieldLabel required>Full name</FieldLabel>

@@ -267,6 +267,7 @@ export async function loadNotificationsPageData(
       title: true,
       message: true,
       type: true,
+      providerResponse: true,
       channel: true,
       status: true,
       readAt: true,

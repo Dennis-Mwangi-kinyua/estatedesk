@@ -1,3 +1,4 @@
+import { stayAvailability } from "@/features/bnb/availability";
 import Image from "next/image";
 import Link from "@/components/navigation/workspace-link";
 import { MapPin, Plus } from "lucide-react";
@@ -7,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { WorkspaceHero } from "@/components/shared/workspace-hero";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { bnbImages } from "@/features/bnb/queries";
+import { bnbImages, bnbReservationDates } from "@/features/bnb/queries";
 import { bnbMoney, bnbPhotoUrl } from "@/features/bnb/validation";
 import { ListingControls } from "@/features/bnb/components/listing-controls";
 
@@ -21,7 +22,7 @@ export default async function AirbnbPage({ searchParams }: { searchParams: Promi
   const total = await prisma.bnbListing.count({ where });
   const page = Math.min(requestedPage, Math.max(1, Math.ceil(total / 12)));
   const [listings, org] = await Promise.all([
-    prisma.bnbListing.findMany({ where, include: { images: { ...bnbImages, take: 1 } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: (page - 1) * 12, take: 12 }),
+    prisma.bnbListing.findMany({ where, include: { reservations: bnbReservationDates, images: { ...bnbImages, take: 1 } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: (page - 1) * 12, take: 12 }),
     prisma.organization.findUniqueOrThrow({ where: { id: session.activeOrgId! }, select: { currencyCode: true } }),
   ]);
   const pageUrl = (next: number) => `/dashboard/org/airbnb?${new URLSearchParams({ q, ...(status ? { status } : {}), page: String(next) })}`;
@@ -36,8 +37,8 @@ export default async function AirbnbPage({ searchParams }: { searchParams: Promi
     <p className="text-sm text-muted-foreground">{total} {total === 1 ? "listing" : "listings"}</p>
     {listings.length === 0 ? <section className="rounded-2xl border border-dashed bg-card p-10 text-center space-y-4"><BedDouble className="mx-auto h-10 w-10 text-muted-foreground" /><h2 className="text-xl font-semibold">{q || status ? "No matching stays" : "Your first BnB starts here"}</h2><p className="text-muted-foreground">{q || status ? "Try another search or status." : "Add photos, a nightly rate, and the details that make your space special."}</p><Button asChild><Link href={q || status ? "/dashboard/org/airbnb" : "/dashboard/org/airbnb/new"}>{q || status ? "Clear filters" : "Post a BnB"}</Link></Button></section> : <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">{listings.map((listing) => <article key={listing.id} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
       <div className="relative aspect-[4/3] bg-muted">{listing.images[0] ? <Image src={bnbPhotoUrl(listing.images[0])} alt={listing.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw" className="object-cover" /> : <div className="flex h-full items-center justify-center"><BedDouble className="h-12 w-12 text-muted-foreground" /></div>}<span className="absolute left-3 top-3 rounded-full bg-background/95 px-3 py-1 text-xs font-semibold">{listing.status.toLowerCase()}</span></div>
-      <div className="space-y-4 p-5"><h2 className="text-lg font-semibold">{listing.title}</h2><p className="flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4 shrink-0" />{listing.location}</p><p className="flex items-center gap-2 text-sm"><Users className="h-4 w-4" />{listing.maxGuests} guests · {listing.bedrooms === 0 ? "Studio" : `${listing.bedrooms} bedrooms`} · {listing.beds} beds</p><p className="text-lg font-bold">{bnbMoney(Number(listing.nightlyRate), org.currencyCode)}<span className="text-sm font-normal text-muted-foreground"> / night</span></p>
-        <div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link href={`/dashboard/org/airbnb/${encodeURIComponent(listing.slug)}/edit`}>Edit listing</Link></Button>{listing.status === "PUBLISHED" && <Button asChild variant="ghost"><Link href={`/stays/${listing.slug}`}>View public listing</Link></Button>}</div>
+      <div className="space-y-4 p-5"><p className="inline-block rounded-full border bg-muted px-3 py-1 text-xs font-semibold">{stayAvailability(listing.availableFrom, listing.reservations).label}</p><h2 className="text-lg font-semibold">{listing.title}</h2><p className="flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4 shrink-0" />{listing.location}</p><p className="flex items-center gap-2 text-sm"><Users className="h-4 w-4" />{listing.maxGuests} guests · {listing.bedrooms === 0 ? "Studio" : `${listing.bedrooms} bedrooms`} · {listing.beds} beds</p><p className="text-lg font-bold">{bnbMoney(Number(listing.nightlyRate), org.currencyCode)}<span className="text-sm font-normal text-muted-foreground"> / night</span></p>
+        <div className="flex flex-wrap gap-2"><Button asChild><Link href={`/dashboard/org/airbnb/${encodeURIComponent(listing.slug)}/bookings`}>Bookings & guest access</Link></Button><Button asChild variant="outline"><Link href={`/dashboard/org/airbnb/${encodeURIComponent(listing.slug)}/edit`}>Edit listing</Link></Button>{listing.status === "PUBLISHED" && <Button asChild variant="ghost"><Link href={`/stays/${listing.slug}`}>View public listing</Link></Button>}</div>
         <ListingControls id={listing.id} published={listing.status === "PUBLISHED"} />
       </div>
     </article>)}</div>}

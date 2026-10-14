@@ -1,0 +1,30 @@
+/* Public pages use the dashboard palette and solid surfaces in both themes. */
+body.estate-glass-system:has(.modern-public-header) {
+  --background: var(--system-glass-canvas);
+  --foreground: var(--system-glass-ink);
+  --card: var(--system-glass-fill);
+  --card-foreground: var(--system-glass-ink);
+  --muted-foreground: var(--system-glass-muted);
+  background: var(--background) !important;
+  color: var(--foreground);
+}
+body.estate-glass-system:has(.modern-public-header) :is(main, section, article, header, footer, aside, div, a, button, span)[class*="gradient"] {
+  background-image: none !important;
+}
+body.estate-glass-system:has(.modern-public-header) [class*="text-transparent"] {
+  color: var(--foreground) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+body.estate-glass-system:has(.modern-public-header) .modern-public-header {
+  background: var(--card) !important;
+  border-color: var(--border);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 4%);
+  backdrop-filter: none;
+}
+body.estate-glass-system:has(.modern-public-header) :is(a, button):focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 3px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  body:has(.modern-public-header) article { transition: border-color .15s, box-shadow .15s; }
+  body:has(.modern-public-header) article:has(a):hover { border-color: var(--primary); }
+}

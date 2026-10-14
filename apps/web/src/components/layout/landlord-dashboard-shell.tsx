@@ -155,7 +155,7 @@ export function LandlordDashboardShell({
           <InAppHelpNav workspace="landlord" compact />
         </div>
 
-        <form action={logoutAction} className="absolute inset-x-4 bottom-4">
+        <form data-logout-form action={logoutAction} className="absolute inset-x-4 bottom-4">
           <button data-action-kind="destructive" data-workspace-action="true"
             type="submit"
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
@@ -239,7 +239,7 @@ export function LandlordDashboardShell({
               <InAppHelpNav workspace="landlord" compact />
             </div>
 
-            <form action={logoutAction} className="mt-4">
+            <form data-logout-form action={logoutAction} className="mt-4">
               <button data-action-kind="destructive" data-workspace-action="true"
                 type="submit"
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50"

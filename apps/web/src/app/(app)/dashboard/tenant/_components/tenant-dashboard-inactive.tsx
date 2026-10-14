@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Building2, CalendarDays, House as Home, ShieldCheck } from "@/components/shared/colored-icons";
 import { StatCard, SurfaceCard, TenantWorkspace } from "@/components/theme/ed-dashboard-shell";
 import type { TenantDashboardHistoryRecord } from "../_lib/types";
@@ -37,10 +38,10 @@ export function TenantDashboardInactive({
                 Account retained
               </div>
               <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                No active tenancy
+                Past tenant — account retained
               </h1>
               <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-                Your account remains available, but your previous lease has been
+                Your past leases, payments, bills and records remain available. Your previous lease has been
                 closed. Current property activity is hidden until an organization
                 assigns a new unit or completes a profile transfer.
               </p>
@@ -49,6 +50,7 @@ export function TenantDashboardInactive({
         </div>
       </section>
 
+      <Link href="/dashboard/tenant/history" className="inline-flex rounded-xl bg-primary px-5 py-3 font-semibold text-primary-foreground">View all my past records</Link>
       <section className="grid gap-3 sm:grid-cols-3">
         <StatCard icon={<Home className="h-4 w-4" />} label="Active unit" value="None" />
         <StatCard

@@ -47,7 +47,7 @@ export async function createLeaseSignatureEnvelope(input: {
   const jurisdiction = input.jurisdiction ?? "KENYA";
   const signingOrder = input.signingOrder ?? "SEQUENTIAL";
   const requestedAdditional = input.additionalSigners ?? [];
-  const additionalUsers = await prisma.user.findMany({ where: { id: { in: requestedAdditional.map((item) => item.userId) }, status: "ACTIVE", OR: [{ memberships: { some: { orgId: lease.orgId, employmentEndedAt: null } } }, { tenant: { orgId: lease.orgId, deletedAt: null } }, { landlordProfiles: { some: { orgId: lease.orgId, isActive: true, deletedAt: null } } }] }, select: { id: true, fullName: true, email: true, phone: true } });
+  const additionalUsers = await prisma.user.findMany({ where: { id: { in: requestedAdditional.map((item) => item.userId) }, status: "ACTIVE", OR: [{ memberships: { some: { orgId: lease.orgId, employmentEndedAt: null } } }, { tenant: { some: { orgId: lease.orgId, deletedAt: null } } }, { landlordProfiles: { some: { orgId: lease.orgId, isActive: true, deletedAt: null } } }] }, select: { id: true, fullName: true, email: true, phone: true } });
   if (additionalUsers.length !== new Set(requestedAdditional.map((item) => item.userId)).size) throw new Error("Every additional signer must have an active EstateDesk login.");
   const userMap = new Map(additionalUsers.map((user) => [user.id, user]));
   const extraTokens = requestedAdditional.map((item) => ({ item, user: userMap.get(item.userId)!, token: newToken() }));

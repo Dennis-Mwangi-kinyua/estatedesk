@@ -325,7 +325,10 @@ export async function loginAction(
       );
     }
 
-    if (!primaryMembership && !tenant) {
+    const provider = !primaryMembership && !tenant ? await prisma.serviceProvider.findUnique({ where: { userId: user.id }, select: { status: true } }) : null;
+    if (provider && ["SUSPENDED", "DELETED"].includes(provider.status)) redirect("/account-suspended");
+
+    if (!primaryMembership && !tenant && !provider) {
       // If the account isn't linked to any organization or tenant yet,
       // send the user to the register/onboarding request page so they
       // can request access or start onboarding instead of showing an error.
@@ -377,6 +380,7 @@ export async function loginAction(
               activeOrgId: primaryMembership?.orgId ?? null,
               preferredPlatformMode: await getPreferredPlatformMode(),
               hasTenantProfile: Boolean(tenant),
+              hasServiceProvider: Boolean(provider),
             }),
     );
 

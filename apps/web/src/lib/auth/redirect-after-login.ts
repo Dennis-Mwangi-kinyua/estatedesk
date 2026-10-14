@@ -5,6 +5,7 @@ type RedirectInput = {
   activeOrgRole: OrgRole | null;
   activeOrgId: string | null;
   hasTenantProfile: boolean;
+  hasServiceProvider?: boolean;
   /** Restored from the platform mode cookie when present. */
   preferredPlatformMode?: "admin" | "developer" | null;
 };
@@ -49,6 +50,8 @@ export function getRedirectAfterLogin(input: RedirectInput): string {
 
     return "/dashboard/org";
   }
+
+  if (input.hasServiceProvider) return "/provider";
 
   return "/login?error=no_active_role";
 }

@@ -1,6 +1,7 @@
 import type { OrgRole, PlatformRole } from "@/lib/auth/session";
 
 const TENANT_HISTORY_ONLY_PATHS = new Set([
+  "/dashboard/tenant/history",
   "/dashboard/tenant",
   "/dashboard/tenant/profile",
 ]);

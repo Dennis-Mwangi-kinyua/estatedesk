@@ -1,3 +1,4 @@
+import { ProductUpdatesBanner } from "@/features/updates/banner";
 import { cookies } from "next/headers";
 import { ReactNode } from "react";
 import { requirePlatformRole } from "@/lib/permissions/guards";
@@ -28,6 +29,7 @@ export default async function PlatformLayout({
       isSuperAdmin={session.platformRole === "SUPER_ADMIN"}
       initialPreferredMode={initialPreferredMode}
     >
+      <ProductUpdatesBanner userId={session.userId} audience={session.platformRole as "PLATFORM_ADMIN" | "SUPER_ADMIN"} />
       {children}
     </PlatformShell>
   );

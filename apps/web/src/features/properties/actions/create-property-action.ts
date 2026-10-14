@@ -1,4 +1,5 @@
 "use server";
+import { isDuplicateIdentityError, DUPLICATE_ID_MESSAGE } from "@/features/identity/policy";
 
 import { Prisma, PropertyType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -136,6 +137,7 @@ export async function createPropertyAction(formData: FormData): Promise<Property
       await assertCanCreateUnit(orgId, plannedUnits);
     }
   } catch (error) {
+    if (isDuplicateIdentityError(error)) redirectWithError(DUPLICATE_ID_MESSAGE);
     redirectWithError(
       error instanceof Error ? error.message : "Plan limit reached.",
     );
@@ -166,6 +168,7 @@ export async function createPropertyAction(formData: FormData): Promise<Property
       parsedUnitPlans,
     });
   } catch (error) {
+    if (isDuplicateIdentityError(error)) redirectWithError(DUPLICATE_ID_MESSAGE);
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"

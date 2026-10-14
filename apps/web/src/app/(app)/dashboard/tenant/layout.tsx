@@ -1,3 +1,4 @@
+import { ProductUpdatesBanner } from "@/features/updates/banner";
 import { ReactNode } from "react";
 import { TenantDashboardShell } from "@/components/layout/tenant-dashboard-shell";
 import { getCurrentTenantShell } from "@/lib/tenant/get-current-tenant";
@@ -112,6 +113,7 @@ export default async function TenantLayout({
         tenantId={tenant.id}
         userId={session.userId}
       />
+      <ProductUpdatesBanner userId={session.userId} audience={"TENANT"} />
       {children}
     </TenantDashboardShell>
   );

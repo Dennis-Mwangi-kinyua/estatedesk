@@ -158,7 +158,7 @@ export function CaretakerMobileSidebar({
         </div>
 
         <div className="shrink-0 border-t border-border px-3 py-4">
-          <form action={logoutAction}>
+          <form data-logout-form action={logoutAction}>
             <button data-action-kind="destructive" data-workspace-action="true"
               type="submit"
               className="ios-button flex w-full items-center justify-center gap-2 border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-100"

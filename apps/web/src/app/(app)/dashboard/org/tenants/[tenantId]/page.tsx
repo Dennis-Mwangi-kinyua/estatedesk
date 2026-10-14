@@ -1,3 +1,4 @@
+import { ReinstatePanel } from "@/features/tenancy/reinstate-panel";
 import { RecordOrgPayment } from "@/features/charges/components/record-org-payment";
 import { InitialChargesPanel } from "@/features/charges/components/initial-charges-panel";
 import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
@@ -42,5 +43,5 @@ export default async function TenantDetailsPage({ params }: TenantDetailsPagePro
     redirect(`/dashboard/org/tenants/${encodeURIComponent(data.canonicalSlug)}`);
   }
 
-  return <TenantDetailsWorkspace data={data} orgRole={session.activeOrgRole} initialCharges={<>{memberHasOrgPermission(session, "payments.verify") ? <RecordOrgPayment orgId={session.activeOrgId} tenantId={data.tenant.id} /> : null}<InitialChargesPanel orgId={session.activeOrgId} tenantId={data.tenant.id} canConfirm={memberHasOrgPermission(session, "payments.verify")} /></>} />;
+  return <>{["ADMIN", "MANAGER", "OFFICE"].includes(session.activeOrgRole) && !data.hasActiveLease && !data.isDeleted && !data.isBlacklisted ? <ReinstatePanel tenantId={data.tenant.id} orgId={session.activeOrgId} /> : null}<TenantDetailsWorkspace data={data} orgRole={session.activeOrgRole} initialCharges={<>{memberHasOrgPermission(session, "payments.verify") ? <RecordOrgPayment orgId={session.activeOrgId} tenantId={data.tenant.id} /> : null}<InitialChargesPanel orgId={session.activeOrgId} tenantId={data.tenant.id} canConfirm={memberHasOrgPermission(session, "payments.verify")} /></>} /></>;
 }

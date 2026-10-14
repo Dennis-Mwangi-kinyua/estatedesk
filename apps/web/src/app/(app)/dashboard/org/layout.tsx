@@ -1,3 +1,4 @@
+import { ProductUpdatesBanner } from "@/features/updates/banner";
 import { getUnreadNotificationAlert } from "@/lib/notifications/unread-alert";
 import type { ReactNode } from "react";
 import { OrgDashboardShell } from "@/components/layout/org-dashboard-shell";
@@ -97,6 +98,7 @@ export default async function OrgLayout({
         orgId={session.activeOrgId!}
         userId={session.userId}
       />
+      <ProductUpdatesBanner userId={session.userId} audience={session.activeOrgRole!} />
       {children}
     </OrgDashboardShell>
   );

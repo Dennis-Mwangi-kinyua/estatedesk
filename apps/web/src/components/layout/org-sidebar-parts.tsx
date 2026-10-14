@@ -115,7 +115,7 @@ export const LogoutButton = memo(function LogoutButton({
   onClick?: () => void;
 }) {
   return (
-    <form action={logoutAction} onSubmit={onClick}>
+    <form data-logout-form action={logoutAction} onSubmit={onClick}>
       <button data-action-kind="destructive" data-workspace-action="true"
         type="submit"
         className={[

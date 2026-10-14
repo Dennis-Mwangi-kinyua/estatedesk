@@ -1,4 +1,5 @@
 import { NotificationViewButton } from "@/components/notifications/notification-view-button";
+import { readNotificationActionUrl, resolveNotificationActionUrl } from "@/lib/push/notification-links";
 import { markAllOrgNotificationsReadAction, markNotificationReadAction } from "@/app/(app)/dashboard/org/notifications/actions";
 import {
   cn,
@@ -150,7 +151,7 @@ export function CommunicationFeedPanel({
                         <a href={`/api/org/subscription-invoices/${notification.id}`} target="_blank" rel="noopener noreferrer">View invoice</a>
                         <a href={`/api/org/subscription-invoices/${notification.id}?download=1`}>Download invoice</a>
                       </div>
-                    ) : notification.user?.id === membership.userId ? <div className="mt-3"><NotificationViewButton notificationId={notification.id} /></div> : null}
+                    ) : notification.user?.id === membership.userId ? <div className="mt-3"><NotificationViewButton notificationId={notification.id} href={resolveNotificationActionUrl({ type: notification.type, title: notification.title, audience: "org_staff", actionUrl: readNotificationActionUrl(notification.providerResponse) })} /></div> : null}
                     {!notification.readAt && notification.user?.id === membership.userId ? (
                       <form action={markNotificationReadAction} className="mt-3">
                         <input type="hidden" name="notificationId" value={notification.id} />

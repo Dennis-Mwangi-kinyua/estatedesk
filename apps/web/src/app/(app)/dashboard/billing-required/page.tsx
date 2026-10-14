@@ -63,7 +63,7 @@ export default async function BillingRequiredPage() {
           >
             Contact support
           </a>
-          <form action={logoutAction}>
+          <form data-logout-form action={logoutAction}>
             <button data-action-kind="destructive" data-workspace-action="true"
               type="submit"
               className="ios-button inline-flex h-11 w-full items-center justify-center rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white sm:w-auto"

@@ -1,3 +1,4 @@
+import { PreviousOccupants } from "@/features/tenancy/previous-occupants";
 import { InitialChargesPanel } from "@/features/charges/components/initial-charges-panel";
 import { getCurrentTenantWithActiveLease } from "@/lib/tenant/get-current-tenant";
 import { getTenantDashboardData } from "@/lib/tenant/get-tenant-dashboard-data";
@@ -61,6 +62,7 @@ export default async function TenantDashboardPage() {
   ]);
 
   return (
+    <>
     <TenantDashboardWorkspace
       initialCharges={<InitialChargesPanel canPay orgId={tenant.orgId} tenantId={tenant.id} />}
       data={{
@@ -79,5 +81,7 @@ export default async function TenantDashboardPage() {
         portalContext,
       }}
     />
+    <PreviousOccupants userId={session.userId} orgId={tenant.orgId} />
+    </>
   );
 }

@@ -33,7 +33,7 @@ export const ProfileHeader = memo(function ProfileHeader({
       <div className="px-5 pb-5 pt-6 sm:px-6 lg:px-8 lg:pt-8">
         <div className="flex flex-col items-center text-center lg:flex-row lg:items-center lg:justify-between lg:text-left">
           <div className="flex flex-col items-center lg:flex-row lg:items-center lg:gap-5">
-            <div className="relative h-24 w-24 overflow-hidden rounded-[28px] bg-neutral-100 shadow-[0_10px_30px_rgba(0,0,0,0.08)] ring-4 ring-white">
+            <div data-profile-photo className="relative h-24 w-24 shrink-0 aspect-square overflow-hidden rounded-full bg-neutral-100 shadow-[0_10px_30px_rgba(0,0,0,0.08)] ring-4 ring-white">
               {tenant.profileImageUrl ? (
                 <Image
                   src={tenant.profileImageUrl}

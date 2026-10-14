@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { DUPLICATE_ID_MESSAGE, isDuplicateIdentityError } from "@/features/identity/policy";
 
 export class ClientSafeError extends Error {
   constructor(message: string) {
@@ -41,6 +42,8 @@ export function isInternalErrorMessage(message: string) {
 }
 
 export function safeClientMessage(error: unknown, fallback: string) {
+  if (isDuplicateIdentityError(error)) return DUPLICATE_ID_MESSAGE;
+  if (error instanceof Error && /INVALID_ID_NUMBER/.test(error.message)) return "Enter a valid ID number (5–30 letters or digits).";
   if (error instanceof ClientSafeError) {
     return error.message;
   }

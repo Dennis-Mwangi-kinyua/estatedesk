@@ -9,6 +9,9 @@ const FINANCE: readonly OrgRole[] = ["ADMIN", "MANAGER", "ACCOUNTANT"];
 
 // Shared by server authorization and navigation. Unlisted sections are denied.
 export const ORG_WORKSPACE_ROLES: Record<string, readonly OrgRole[]> = {
+  "identity-verification": OPERATIONS,
+  "service-providers": OPERATIONS,
+  community: OPERATIONS,
   insights: MANAGEMENT, profile: MANAGEMENT, help: MANAGEMENT, search: MANAGEMENT,
   security: MANAGEMENT, support: MANAGEMENT,
   properties: OPERATIONS, buildings: OPERATIONS, units: OPERATIONS,
@@ -37,6 +40,8 @@ export function canAccessWorkspacePath(
   } catch {
     return false;
   }
+  // Provider ownership and hiring are authorised by their resource guards.
+  if (path === "/provider" || path === "/service-providers" || /^\/service-providers\/[^/]+$/.test(path)) return true;
   if (["/dashboard", "/profile", "/access-denied"].includes(path) || under(path, "/change-password")) return true;
   const platform = ["SUPER_ADMIN", "PLATFORM_ADMIN"].includes(session.platformRole);
   if (under(path, "/platform/control")) return session.platformRole === "SUPER_ADMIN";
@@ -45,6 +50,7 @@ export function canAccessWorkspacePath(
   if (!session.activeOrgId || !session.activeOrgRole) return false;
   const role = session.activeOrgRole;
   if (/^\/inspections\/[^/]+$/.test(path)) return role !== "TENANT";
+  if (under(path, "/dashboard/gate")) return ["ADMIN", "MANAGER", "OFFICE", "CARETAKER"].includes(role);
   if (role === "TENANT") return tenantCanAccessWorkspacePath(path);
   if (under(path, "/dashboard/tenant")) return false;
   if (under(path, "/dashboard/caretaker")) return role === "CARETAKER" && caretakerCanAccessPath(path, session.caretakerSections);

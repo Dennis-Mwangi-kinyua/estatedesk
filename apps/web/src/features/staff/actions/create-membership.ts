@@ -1,4 +1,5 @@
 "use server";
+import { DUPLICATE_ID_MESSAGE, isDuplicateIdentityError } from "@/features/identity/policy";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -91,6 +92,7 @@ export async function createMembership(
   try {
     await assertCanCreateStaffUser(orgId);
   } catch (error) {
+    if (isDuplicateIdentityError(error)) return fail(DUPLICATE_ID_MESSAGE, 1, "nationalId");
     return fail(
       error instanceof Error ? error.message : "Staff user limit reached.",
       0,
@@ -333,6 +335,7 @@ export async function createMembership(
       }
     });
   } catch (error) {
+    if (isDuplicateIdentityError(error)) return fail(DUPLICATE_ID_MESSAGE, 1, "nationalId");
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"

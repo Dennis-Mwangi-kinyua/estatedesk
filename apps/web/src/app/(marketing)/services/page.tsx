@@ -9,9 +9,9 @@ import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
 export const metadata = publicPageMetadata({
-  title: "Property Management System: M-Pesa, Accounting & KRA eTIMS",
+  title: "Property Management: Rent, Visitors, Community Notices & BnB",
   description:
-    "EstateDesk is the property management system for Kenya and beyond: tenants, M-Pesa rent, water billing, caretakers, double-entry accounting, KRA eTIMS-ready receipts, vacancies, WhatsApp ops, inspections, and staff access—built to outperform spreadsheets and generic PMS software.",
+    "EstateDesk connects property teams, tenants, BnB guests and local service providers: rent, water billing, accounting, visitor QR passes, community notices, provider hiring and ratings, verified unique IDs, retained tenancy history and reinstatement.",
   path: "/services",
   keywords: [
     "property management system Kenya",
@@ -59,14 +59,19 @@ export default function ServicesPage() {
         dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
       />
       <OperationsShowcase standalone showFooter={false} />
+      <section id="community-operations" className="mx-auto max-w-6xl space-y-4 px-4 py-10 sm:px-6"><h1 className="text-3xl font-semibold">One workspace for rental and short-stay operations</h1><p className="max-w-3xl text-lg text-muted-foreground">Connect properties, tenants, rent, water billing, maintenance, accounting, gate visitor passes, official apartment notices, and BnB guest services.</p><Link href="/register" className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 py-2 font-semibold text-primary-foreground">Create your organisation</Link></section>
       <ServicesSeoContent />
       <ContentDepthStack {...siteContentDepth} />
+      <section className="mx-auto max-w-6xl space-y-4 px-4 py-10"><h2 className="text-3xl font-bold">Local services and lasting tenancy records</h2><p className="text-lg text-muted-foreground">Organisations can post property jobs, compare nearby service providers’ portfolios, hire and rate completed work. Provider accounts are monitored by the platform, with organisation reporting and moderation. Duplicate IDs require platform authentication to link the existing account. Retained tenants can view their own past records and be reinstated into an available unit.</p><Link href="/service-providers" className="inline-flex rounded-xl bg-primary px-5 py-3 font-semibold text-primary-foreground">Explore service providers</Link></section>
       <PublicAccessFooter />
     </main>
   );
 }
 
 const services = [
+  { title: "Visitor QR passes & gate access", href: "/services#community-operations", body: "Tenants create time limited, single entry visitor QR passes. Assigned gate staff sign in, verify visitor and tenancy details, and record admission. Managers control gate assignments." },
+  { title: "BnB availability & guest services", href: "/stays", body: "Publish short stays, set availability, manage bookings and extensions, and show when occupied homes become available. Temporary guest access expires at checkout and connects guests with their host." },
+  { title: "Official community notice board", href: "/services#community-operations", body: "Property teams publish official apartment communication to current tenants and linked guest stays, with delivery totals, read acknowledgements, and a shared notice history." },
   {
     title: "Property Management Software",
     href: "/property-management-software-kenya",

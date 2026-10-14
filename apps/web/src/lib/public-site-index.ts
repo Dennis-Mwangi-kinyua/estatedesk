@@ -11,12 +11,13 @@ export type PublicSiteIndexItem = {
 };
 
 export const publicSiteIndexItems: readonly PublicSiteIndexItem[] = [
+  { path: "/service-providers", title: "Service providers", description: "Find plumbers, electricians and maintenance professionals by location, compare portfolios and hire for property jobs.", priority: "0.8", changefreq: "daily" },
   { title: "Property teams in Africa", path: "/property-management-software-africa", description: "Evaluate EstateDesk for African property teams, including connectivity and market-specific requirements.", priority: "0.8", changefreq: "monthly" },
   { title: "Remote and diaspora landlords", path: "/remote-property-management-software", description: "Coordinate overseas owner oversight with local management records and statements.", priority: "0.8", changefreq: "monthly" },
   {
     title: "BnB & short stays",
     path: "/stays",
-    description: "Browse furnished BnBs, compare nightly rates, and enquire directly with hosts.",
+    description: "Browse furnished BnBs, see availability and occupied-until dates, compare nightly rates, and enquire directly with hosts.",
     priority: "0.9",
     changefreq: "daily",
   },

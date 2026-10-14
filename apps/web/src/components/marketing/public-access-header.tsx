@@ -13,12 +13,13 @@ const clientHydration = () => true;
 const serverHydration = () => false;
 
 type PublicAccessHeaderProps = {
-  active?: "home" | "vacancies" | "stays" | "services" | "pricing" | "contact" | "faq" | "guides";
+  active?: "home" | "vacancies" | "stays" | "services" | "providers" | "pricing" | "contact" | "faq" | "guides";
   loginHref?: string;
   showPricing?: boolean;
 };
 
 const publicLinks = [
+  { href: "/service-providers", label: "Providers", key: "providers", icon: Search },
   { href: "/vacancies", label: "Vacancies", key: "vacancies", icon: Home },
   { href: "/stays", label: "BnB stays", key: "stays", icon: BedDouble },
   { href: "/services", label: "Services", key: "services", icon: Search },
@@ -82,7 +83,8 @@ export function PublicAccessHeader({
               <span className="truncate">EstateDesk</span>
             </Link>
 
-            <div ref={mobileMenuRef} className="relative lg:hidden">
+            <div ref={mobileMenuRef} className="relative flex items-center gap-2 lg:hidden">
+              <HeaderThemeToggle className="h-11 w-11" />
               <button data-workspace-action="true"
                 type="button"
                 disabled={!hydrated}

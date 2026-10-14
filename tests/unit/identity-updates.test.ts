@@ -1,0 +1,8 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { nationalIdSchema, normalizeNationalId } from "../../apps/web/src/features/identity/policy";
+import { PRODUCT_UPDATES, updatesForAudience } from "../../apps/web/src/features/updates/catalog";
+import { tenantPathRequiresActiveLease } from "../../apps/web/src/lib/permissions/access";
+test("ID comparison ignores spacing and hyphens without changing meaningful digits", () => { assert.equal(normalizeNationalId(" 0123-4567 "), "01234567"); assert.equal(nationalIdSchema.parse("ab-12345"), "AB12345"); for (const number of ["", "123", "1234/5678", "<script>"]) assert.equal(nationalIdSchema.safeParse(number).success, false); });
+test("updates are role specific and have stable unique IDs", () => { assert.equal(new Set(PRODUCT_UPDATES.map(update => update.id)).size, PRODUCT_UPDATES.length); assert.ok(updatesForAudience("TENANT").some(update => update.id.includes("tenant-history"))); assert.equal(updatesForAudience("TENANT").some(update => update.id.includes("provider-oversight")), false); assert.ok(updatesForAudience("PLATFORM_ADMIN").some(update => update.id.includes("provider-oversight"))); assert.equal(updatesForAudience("PROVIDER").some(update => update.id.includes("id-authentication")), false); });
+test("past tenants can read their history while new occupancy operations require an active lease", () => { assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/history"), false); assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/visitors"), true); assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/issues/report"), true); });

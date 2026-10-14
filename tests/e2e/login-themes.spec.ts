@@ -49,3 +49,27 @@ test("theme switching preserves visible login fields and the saved choice", asyn
   await expect(page.locator("html")).toHaveClass(/light/);
   await expect(page.getByRole("button", { name: "Log in", exact: true })).toBeVisible();
 });
+
+for (const theme of ["light", "dark"] as const) {
+  test(`mobile login stays accessible from small phones to landscape in ${theme}`, async ({ page }) => {
+    await page.addInitScript(value => localStorage.setItem("theme", value), theme);
+    for (const viewport of [{width:320,height:568},{width:360,height:640},{width:390,height:844},{width:430,height:932},{width:667,height:375},{width:320,height:320}]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/login");
+      const root = page.locator("[data-login-page]");
+      expect(await root.evaluate(el => el.scrollWidth)).toBeLessThanOrEqual(viewport.width);
+      await page.getByLabel("Email or username").fill("tenant@example.test");
+      await page.getByLabel("Password", {exact:true}).fill("test-password");
+      const login = page.getByRole("button", {name:"Log in",exact:true});
+      await login.scrollIntoViewIfNeeded();
+      await expect(login).toBeInViewport();
+      const forgot = page.getByRole("link", {name:"Forgot password?"});
+      await forgot.scrollIntoViewIfNeeded();
+      await expect(forgot).toBeInViewport();
+      const create = page.getByRole("link", {name:"Create one"});
+      await create.scrollIntoViewIfNeeded();
+      await expect(create).toBeInViewport();
+      await expect(page.getByLabel("Email or username")).toHaveValue("tenant@example.test");
+    }
+  });
+}

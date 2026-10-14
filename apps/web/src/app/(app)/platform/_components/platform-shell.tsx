@@ -106,7 +106,7 @@ function PlatformShellInner({
               <InAppHelpNav workspace="platform" compact />
             </div>
 
-            <form action={logoutAction}>
+            <form data-logout-form action={logoutAction}>
               <button data-action-kind="destructive" data-workspace-action="true"
                 type="submit"
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"

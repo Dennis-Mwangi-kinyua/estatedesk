@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
+import { PublicAccessHeader } from "@/components/marketing/public-access-header";
+import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import styles from "./login.module.css";
-import { ArrowLeft, ArrowRight, Building2, ClipboardCheck, ShieldCheck, WalletCards, Droplets, UsersRound, FileText } from "lucide-react";
+import { ArrowRight, Building2, ClipboardCheck, ShieldCheck, WalletCards, Droplets, UsersRound, FileText } from "lucide-react";
 import { publicPageMetadata } from "@/lib/seo";
 import { loginAction } from "./actions";
 import { safeReturnTo } from "@/lib/auth/safe-return-to";
@@ -33,11 +34,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <div className={styles.page} data-login-page>
+      <PublicAccessHeader />
+      <div className={styles.columns}>
       <aside aria-labelledby="login-workflow-title" className={styles.services}>
-        <Link href="/" className={styles.brand}>
-          <span className={styles.brandIcon}><Building2 aria-hidden="true" /></span>
-          <span>EstateDesk</span>
-        </Link>
         <div className={styles.overview}>
           <p className={styles.eyebrow}>Property management, connected</p>
           <h2 id="login-workflow-title">Your property operations.<br /><span>Working together.</span></h2>
@@ -63,13 +62,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
       </aside>
       <main className={styles.main}>
-        <nav className={styles.nav} aria-label="Login page navigation">
-          <Link href="/"><ArrowLeft aria-hidden="true" />EstateDesk</Link>
-          <div className={styles.navRight}>
-            <Link href="/services">Explore the platform<ArrowRight aria-hidden="true" /></Link>
-            <HeaderThemeToggle className={styles.themeControl} />
-          </div>
-        </nav>
         <div className={styles.formContent}>
           <div className={styles.intro}>
             <span className={styles.brandIcon}><Building2 aria-hidden="true" /></span>
@@ -86,11 +78,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <p>Tenancies & leases · Rent & water billing · Maintenance & inspections</p>
           </div>
         </div>
-        <footer className={styles.footer}>
-          <span>© {new Date().getFullYear()} EstateDesk</span>
-          <span><ShieldCheck aria-hidden="true" />Role-based access</span>
-        </footer>
       </main>
+      </div>
+      <PublicAccessFooter compact />
     </div>
   );
 }

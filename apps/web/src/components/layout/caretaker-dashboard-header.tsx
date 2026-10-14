@@ -58,6 +58,7 @@ export function CaretakerDashboardHeader({
 
           <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 sm:max-w-xl">
             <CaretakerSearchBar className="hidden min-w-0 flex-1 sm:block" />
+            <DeferredLink href="/dashboard/gate" className="inline-flex min-h-11 items-center rounded-xl border px-3 text-sm">Gate access</DeferredLink>
             <CaretakerLocaleToggle />
             <OfflineQueuePanel compact />
             <HeaderThemeToggle />

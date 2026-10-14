@@ -6,6 +6,7 @@ export const APP_URL = getSiteUrl()
 export const PUBLIC_SITEMAP_PATHS = [
   '/sitemap.xml',
   '/sitemap-stays.xml',
+  '/sitemap-service-providers.xml',
   '/sitemap-vacancies.xml',
   '/sitemap-vacancy-pages.xml',
   '/sitemap-rental-landings.xml',

@@ -118,6 +118,7 @@ export async function changeInitialPasswordAction(
     activeOrgRole: session.activeOrgRole,
     activeOrgId: session.activeOrgId,
     hasTenantProfile: session.activeOrgRole === "TENANT",
+    hasServiceProvider: Boolean(await prisma.serviceProvider.findUnique({ where: { userId: session.userId }, select: { id: true } })),
     preferredPlatformMode,
   });
 

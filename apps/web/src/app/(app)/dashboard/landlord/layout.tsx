@@ -1,3 +1,4 @@
+import { ProductUpdatesBanner } from "@/features/updates/banner";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { SubscriptionWarning } from "@/components/billing/subscription-warning";
@@ -48,6 +49,7 @@ export default async function LandlordLayout({
       organizationName={org?.name ?? "EstateDesk"}
     >
       <SubscriptionWarning access={access} />
+      <ProductUpdatesBanner userId={session.userId} audience={"LANDLORD"} />
       {children}
     </LandlordDashboardShell>
   );

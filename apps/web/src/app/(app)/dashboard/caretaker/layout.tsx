@@ -1,3 +1,4 @@
+import { ProductUpdatesBanner } from "@/features/updates/banner";
 import { getCaretakerUnitHref } from "@/app/(app)/dashboard/caretaker/_lib/paths";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -33,6 +34,7 @@ export default async function CaretakerLayout({
         orgId={session.activeOrgId!}
         userId={session.userId}
       />
+      <ProductUpdatesBanner userId={session.userId} audience={"CARETAKER"} />
       {children}
     </CaretakerDashboardShell>
     </WorkspaceAccessProvider>

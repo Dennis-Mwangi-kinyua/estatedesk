@@ -6,6 +6,9 @@ export type TenantSidebarLink = SidebarLink & {
 };
 
 export const TENANT_SIDEBAR_LINKS: readonly TenantSidebarLink[] = [
+  { label: "My history", href: "/dashboard/tenant/history", icon: workspaceIconFor("/dashboard/tenant/lease"), roles: ["TENANT"], requiresActiveLease: false },
+  { label: "Community board", href: "/dashboard/tenant/community", icon: workspaceIconFor("/dashboard/tenant/community"), roles: ["TENANT"], requiresActiveLease: true },
+  { label: "Visitors", href: "/dashboard/tenant/visitors", icon: workspaceIconFor("/dashboard/tenant/visitors"), roles: ["TENANT"], requiresActiveLease: true },
   {
     label: "Overview",
     href: "/dashboard/tenant",

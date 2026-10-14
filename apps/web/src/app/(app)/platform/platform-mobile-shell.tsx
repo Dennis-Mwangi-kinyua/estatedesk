@@ -203,7 +203,7 @@ export default function PlatformMobileShell({
           <div className="space-y-3 border-t border-border p-4">
             <p className="break-words text-sm font-semibold text-foreground">{fullName}</p>
             <InAppHelpNav workspace="platform" compact />
-            <form action={logoutAction}>
+            <form data-logout-form action={logoutAction}>
               <button data-action-kind="destructive" data-workspace-action="true"
                 type="submit"
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.99]"

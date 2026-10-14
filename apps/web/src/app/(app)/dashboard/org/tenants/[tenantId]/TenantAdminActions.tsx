@@ -245,9 +245,9 @@ export const TenantAdminActions = memo(function TenantAdminActions({
     if (!isDeleted && isArchived) {
       list.push({
         key: "reactivate",
-        label: "Reactivate tenant",
-        title: "Reactivate tenant",
-        description: "This will return the tenant to an active operational state.",
+        label: "Restore retained profile",
+        title: "Restore retained profile",
+        description: "Restore the tenant profile, then use the reinstatement form to allocate a vacant unit and start a new lease.",
         placeholder: "Optional note for reactivating this tenant",
         confirmLabel: "Reactivate tenant",
         tone: "success",

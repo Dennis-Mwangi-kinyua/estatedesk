@@ -1,3 +1,4 @@
+import { stayAvailability } from "@/features/bnb/availability";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -23,6 +24,7 @@ export default async function StayPage({ params }: { params: Promise<{ slug: str
   const listing = await load(slug);
   if (!listing) notFound();
   const currency = listing.org.currencyCode;
+  const availability = stayAvailability(listing.availableFrom, listing.reservations);
   return <><PublicAccessHeader active="stays" /><main id="main-content" className="mx-auto max-w-7xl space-y-7 px-4 py-8 sm:px-6 lg:px-8">
     <Link href="/stays" className="inline-flex min-h-11 items-center text-sm font-medium underline">← All stays</Link>
     <header className="space-y-3"><p className="text-sm font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">{listing.propertyType.toLowerCase().replaceAll("_", " ")} · BnB stay</p><h1 className="text-3xl font-bold sm:text-4xl">{listing.title}</h1><p className="flex items-center gap-2 text-muted-foreground"><MapPin className="h-4 w-4" />{listing.location}</p></header>
@@ -35,6 +37,8 @@ export default async function StayPage({ params }: { params: Promise<{ slug: str
         {listing.address && <section className="space-y-3"><h2 className="text-2xl font-semibold">Location & directions</h2><p className="whitespace-pre-wrap text-muted-foreground">{listing.address}</p></section>}
       </div>
       <aside className="space-y-5 rounded-2xl border bg-card p-6 shadow-lg lg:sticky lg:top-24">
+        <p className="rounded-xl border bg-muted px-4 py-3 text-sm font-semibold" role="status">{availability.label}</p>
+        {availability.nextBooking && <p className="text-xs text-muted-foreground">Next booking: {availability.nextBooking.toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi" })}</p>}
         <p className="text-3xl font-bold">{bnbMoney(Number(listing.nightlyRate), currency)}<span className="text-base font-normal text-muted-foreground"> / night</span></p>
         <dl className="space-y-3 text-sm"><div className="flex justify-between gap-3"><dt>Cleaning fee per stay</dt><dd>{bnbMoney(Number(listing.cleaningFee), currency)}</dd></div><div className="flex justify-between gap-3"><dt>Minimum stay</dt><dd>{listing.minimumNights} {listing.minimumNights === 1 ? "night" : "nights"}</dd></div></dl>
         <div className="border-t pt-5 space-y-2"><h2 className="text-lg font-semibold">Enquire with the host</h2><p className="font-medium">{listing.contactName}</p><p className="text-sm text-muted-foreground">Managed by {listing.org.name}</p></div>

@@ -30,6 +30,9 @@ const homepageAudiences = [
 ];
 
 const homepageFeatures = [
+  "Visitor QR passes with property-assigned gate verification and single-use admission.",
+  "BnB availability, booking extensions, and temporary guest access that expires at checkout.",
+  "Official apartment notice boards delivered to current tenants and linked short-stay guests.",
   "Tenant profiles, leases, occupancy, move-out history, and tribunal-ready communication packs.",
   "M-Pesa and multi-bank rent collection with combined bills that clear utilities before rent.",
   "Water billing, offline caretaker metering, IndexedDB queues, and background sync.",
@@ -140,6 +143,7 @@ export default function MarketingHomePage() {
         showFooter={false}
         variant="rentals"
       />
+      <section className="mx-auto max-w-6xl space-y-5 px-4 py-10 sm:px-6"><h2 className="text-3xl font-semibold">Your building, connected</h2><p className="max-w-3xl text-lg text-muted-foreground">Manage long-term rentals and short stays together. Welcome visitors with verified QR passes, send official community notices and give BnB guests temporary access. Hire local service providers, verify registered IDs through the platform and keep tenant records available after move-out.</p><div className="flex flex-wrap gap-3"><Link href="/services#community-operations" className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 py-2 font-semibold text-primary-foreground">Explore property operations</Link><Link href="/stays" className="inline-flex min-h-11 items-center rounded-xl border bg-card px-5 py-2 font-semibold">Find a BnB stay</Link><Link href="/service-providers" className="inline-flex min-h-11 items-center rounded-xl border bg-card px-5 py-2 font-semibold">Find & hire service providers</Link></div></section>
       <HomepageSeoContent />
       <PublicAccessFooter />
     </main>

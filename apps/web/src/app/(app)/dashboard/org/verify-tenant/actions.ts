@@ -1,5 +1,7 @@
 "use server";
+import { ClientSafeError } from "@/lib/errors/client-safe-error";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
@@ -51,6 +53,7 @@ export async function requestTenantTransferAction(formData: FormData) {
     select: {
       id: true,
       orgId: true,
+      nationalId: true,
       moveOutNotices: {
         take: 1,
         select: { id: true },
@@ -73,6 +76,7 @@ export async function requestTenantTransferAction(formData: FormData) {
   if (sourceTenant.orgId === session.activeOrgId) {
     throw new Error("This tenant already belongs to your organisation.");
   }
+  if (sourceTenant.nationalId) redirect("/dashboard/org/identity-verification");
 
   const hasMovedOut =
     sourceTenant.moveOutNotices.length > 0 || sourceTenant.leases.length === 0;
@@ -130,6 +134,7 @@ export async function approveTenantTransferAction(formData: FormData) {
     if (!transfer) {
       throw new Error("Pending transfer request could not be found.");
     }
+    if (transfer.sourceTenant.nationalId) throw new ClientSafeError("The receiving organisation must request platform ID authentication in Identity verification, then link the verified existing account.");
 
     const existingTenant = await tx.tenant.findFirst({
       where: {

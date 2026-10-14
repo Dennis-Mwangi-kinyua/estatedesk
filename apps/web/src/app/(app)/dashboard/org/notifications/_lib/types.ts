@@ -1,3 +1,5 @@
+import type { NotificationType, Prisma } from "@prisma/client";
+
 export type AllowedRole = "ADMIN" | "MANAGER" | "OFFICE" | "ACCOUNTANT";
 
 export const ALLOWED_ROLES: AllowedRole[] = [
@@ -95,7 +97,8 @@ export type NotificationItem = {
   id: string;
   title: string;
   message: string;
-  type: string;
+  type: NotificationType;
+  providerResponse: Prisma.JsonValue;
   /** Primary channel (prefer IN_APP). Prefer `channels` for display. */
   channel: string;
   /** All delivery channels for this logical event (deduped). */

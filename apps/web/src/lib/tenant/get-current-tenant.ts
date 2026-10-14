@@ -10,6 +10,7 @@ export async function getCurrentTenantShell() {
       prisma.tenant.findFirst({
         where: {
           userId: session.userId,
+          orgId: session.activeOrgId ?? "__no_active_org__",
           deletedAt: null,
         },
         select: {
@@ -35,6 +36,7 @@ export async function getCurrentTenantWithActiveLease() {
       prisma.tenant.findFirst({
         where: {
           userId: session.userId,
+          orgId: session.activeOrgId ?? "__no_active_org__",
           deletedAt: null,
         },
         include: {

@@ -88,7 +88,7 @@ export function ProfileHeader({
               <KeyRound className="h-4 w-4" />
               Change password
             </Link>
-            <form action={logoutAction}>
+            <form data-logout-form action={logoutAction}>
               <button data-action-kind="destructive" data-workspace-action="true"
                 type="submit"
                 className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-medium text-rose-700 transition hover:bg-rose-100"

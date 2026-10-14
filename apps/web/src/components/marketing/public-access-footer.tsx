@@ -6,6 +6,7 @@ const footerLinks = [
   { href: "/vacancies", label: "Vacancies" },
   { href: "/stays", label: "BnB stays" },
   { href: "/services", label: "Services" },
+  { href: "/service-providers", label: "Service providers" },
   { href: "/property-management-software-kenya", label: "Kenya" },
   { href: "/landlord-software", label: "Landlords" },
   { href: "/rent-tracking-software", label: "Rent tracking" },
@@ -25,7 +26,8 @@ const footerHighlights = [
   { icon: ShieldCheck, label: "Records" },
 ] as const;
 
-export function PublicAccessFooter() {
+export function PublicAccessFooter({ compact = false }: { compact?: boolean }) {
+  if (compact) return <footer className="public-access-footer shrink-0 border-t bg-card text-card-foreground"><div className="mx-auto flex max-w-[1536px] flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2 text-xs sm:px-6"><Link href="/" className="inline-flex min-h-9 items-center gap-2 font-semibold"><Building2 className="h-4 w-4 text-primary" />© {new Date().getFullYear()} EstateDesk</Link><nav aria-label="Footer" className="flex flex-wrap items-center gap-4">{[{href:"/services",label:"Services"},{href:"/privacy",label:"Privacy"},{href:"/terms",label:"Terms"},{href:"/contact",label:"Contact"}].map(link => <Link key={link.href} href={link.href} className="inline-flex min-h-9 items-center hover:underline">{link.label}</Link>)}</nav></div></footer>;
   return (
     <footer className="shrink-0 border-t border-neutral-200/80 bg-white/92 pb-safe text-neutral-950 backdrop-blur-2xl dark:border-white/10 dark:bg-[#0b0f16]/95 dark:text-[#f8fafc]">
       <div className="mx-auto grid max-w-[1536px] gap-3 px-3 py-3 sm:px-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center lg:px-8">
@@ -41,7 +43,7 @@ export function PublicAccessFooter() {
             EstateDesk
           </Link>
           <p className="hidden min-w-0 truncate text-xs font-medium text-neutral-500 dark:text-[#e5e7eb] sm:block">
-            Professional rental discovery and clear tenant records.
+            Properties, payments, visitors, and short stays. Connected.
           </p>
         </div>
 

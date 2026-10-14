@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 import { getUserSession } from "@/lib/auth/session";
 
 export default async function DashboardPage() {
@@ -32,6 +33,7 @@ export default async function DashboardPage() {
       redirect("/dashboard/org");
 
     default:
+      if (await prisma.serviceProvider.findUnique({ where: { userId: session.userId }, select: { id: true } })) redirect("/provider");
       redirect("/login");
   }
 }

@@ -9,6 +9,7 @@ export async function getTenantProfileData(
   const tenant = await prisma.tenant.findFirst({
     where: {
       userId,
+      orgId: activeOrgId ?? "__no_active_org__",
       deletedAt: null,
     },
     include: {

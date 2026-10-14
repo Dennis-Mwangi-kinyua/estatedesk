@@ -1,0 +1,28 @@
+import Image from "next/image";
+import Link from "next/link";
+import { publicPageMetadata } from "@/lib/seo";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { getUserSession } from "@/lib/auth/session";
+import { PublicAccessHeader } from "@/components/marketing/public-access-header";
+import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
+import { visibleProviderWhere } from "@/features/providers/service";
+import { ActionForm, panelClass, inputClass } from "@/features/providers/forms";
+import { hireForJob } from "@/features/providers/actions";
+export const dynamic = "force-dynamic";
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const provider = await prisma.serviceProvider.findFirst({ where: { id, ...visibleProviderWhere }, select: { businessName: true, category: true, location: true, bio: true } });
+  if (!provider) return { title: "Provider unavailable", robots: { index: false, follow: false } };
+  return publicPageMetadata({ title: `${provider.businessName} — ${provider.category} in ${provider.location}`, description: provider.bio.slice(0, 160), path: `/service-providers/${id}` });
+}
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const provider = await prisma.serviceProvider.findFirst({ where: { id, ...visibleProviderWhere }, include: { portfolio: { orderBy: { createdAt: "desc" } }, reviews: { include: { job: { select: { title: true, org: { select: { name: true } } } } }, orderBy: { createdAt: "desc" }, take: 50 }, _count: { select: { jobs: { where: { status: "COMPLETED" } }, reviews: true } } } });
+  if (!provider) notFound();
+  const session = await getUserSession();
+  const canHire = Boolean(session?.activeOrgId && ["ADMIN", "MANAGER", "OFFICE"].includes(session.activeOrgRole ?? ""));
+  const jobs = canHire ? await prisma.serviceJob.findMany({ where: { orgId: session!.activeOrgId!, status: "OPEN" }, select: { id: true, title: true }, take: 100, orderBy: { createdAt: "desc" } }) : [];
+  const aggregate = await prisma.providerReview.aggregate({ where: { providerId: id }, _avg: { rating: true } });
+  return <><PublicAccessHeader /><main className="mx-auto max-w-5xl space-y-6 px-4 py-10"><Link href="/service-providers" className="text-primary">← All providers</Link><section className={panelClass}><p className="font-semibold text-primary">{provider.category} · {provider.location}</p><h1 className="mt-2 text-3xl font-bold">{provider.businessName}</h1><p className="mt-3 whitespace-pre-line text-muted-foreground">{provider.bio}</p><p className="mt-4">{aggregate._avg.rating ? `${aggregate._avg.rating.toFixed(1)}/5 · ${provider._count.reviews} reviews` : "No reviews yet"} · {provider._count.jobs} completed jobs</p><p className="mt-2 font-semibold">{provider.available ? "Available for new work" : "Currently unavailable"}</p>{provider.portfolioUrl ? <a href={provider.portfolioUrl} rel="noopener noreferrer nofollow" target="_blank" className="mt-3 inline-block text-primary underline">Visit portfolio website ↗</a> : null}</section><section className={panelClass}><h2 className="mb-4 text-xl font-bold">Hire for your organisation</h2>{canHire && provider.available && jobs.length ? <ActionForm action={hireForJob} label="Send job offer"><input type="hidden" name="providerId" value={id} /><label className="block text-sm">Your open job<select name="jobId" className={inputClass}>{jobs.map(job => <option key={job.id} value={job.id}>{job.title}</option>)}</select></label><p className="text-sm text-muted-foreground">The provider accepts the offer before starting. Agree payment terms directly; this portal does not process payments.</p></ActionForm> : <Link href="/dashboard/org/service-providers" className="text-primary underline">{canHire ? "Post an open job in your organisation workspace" : "Sign in to your organisation to post a job and hire"}</Link>}</section><section><h2 className="mb-4 text-2xl font-bold">Portfolio</h2><div className="grid gap-4 sm:grid-cols-2">{provider.portfolio.map(project => <article className={panelClass} key={project.id}>{project.imageUrl ? <Image src={project.imageUrl} alt={`${project.title} project photo`} width={600} height={400} unoptimized className="mb-3 h-48 w-full rounded-xl object-cover" /> : null}{project.imageUrl ? <a className="text-primary underline" href={project.imageUrl} target="_blank" rel="noopener noreferrer nofollow">View project photo ↗</a> : null}<h3 className="mt-2 text-lg font-semibold">{project.title}</h3><p className="text-sm text-primary">{project.location}</p><p className="mt-2 whitespace-pre-line text-muted-foreground">{project.description}</p></article>)}</div>{!provider.portfolio.length ? <p className="text-muted-foreground">This provider has not added portfolio projects yet.</p> : null}</section><section><h2 className="mb-4 text-2xl font-bold">Completed-job reviews</h2><div className="space-y-3">{provider.reviews.map(review => <article key={review.id} className={panelClass}><p className="font-semibold">{review.rating}/5 · {review.job.title}</p><p className="text-sm text-muted-foreground">{review.job.org.name} · {review.createdAt.toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi" })}</p><p className="mt-2 whitespace-pre-line">{review.comment}</p></article>)}</div>{!provider.reviews.length ? <p className="text-muted-foreground">Reviews appear after organisations confirm completed work.</p> : null}</section></main><PublicAccessFooter /></>;
+}

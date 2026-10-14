@@ -46,7 +46,7 @@ export function SessionRow({ session }: { session: ManagedUserSession }) {
       </div>
 
       {session.isCurrent ? (
-        <form action={logoutAction}>
+        <form data-logout-form action={logoutAction}>
           <button data-workspace-action="true"
             type="submit"
             className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-2xl border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-muted/30 sm:w-auto"

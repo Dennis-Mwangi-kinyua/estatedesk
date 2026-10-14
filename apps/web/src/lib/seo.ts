@@ -4,11 +4,18 @@ export const SITE_NAME = "EstateDesk";
 export const SITE_TAGLINE =
   "Kenya-built property management software for rent, water, M-Pesa, KRA eTIMS-ready receipts, caretakers, and vacant houses.";
 export const SITE_DESCRIPTION =
-  "Manage properties, tenants, leases, M-Pesa rent collection, water bills and accounting with EstateDesk, built for landlords and property managers in Kenya.";
+  "Manage rentals, rent, water bills, accounting, visitor QR passes, community notices and BnB stays. Find and hire local service providers, verify unique IDs and retain tenant history with EstateDesk.";
 export const DEFAULT_SITE_URL = "https://estatedesk.co.ke";
 
 /** Product differentiators for SEO landings and structured data. */
 export const SITE_DIFFERENTIATORS = [
+  "Unique ID registration with platform authentication and approved existing-account linking",
+  "Retained tenant history and reinstatement into vacant units without losing earlier records",
+  "Role-specific product updates for staff, tenants, providers and platform operators",
+  "Find local service providers, compare portfolios, hire for property jobs and rate confirmed work",
+  "Single-use visitor QR passes verified by property-assigned gate staff",
+  "BnB bookings, live availability dates, extensions, and expiring guest access",
+  "Official apartment notice boards delivered to current tenant and guest accounts",
   "Built for Kenyan rental ops: M-Pesa, KCB, multi-bank paybills, and KES-first ledgers",
   "KRA eTIMS/eRITS-ready receipts with seller PIN, control unit, and submission payloads",
   "Combined period bills that clear service, garbage, security, and water before rent",
@@ -37,6 +44,10 @@ export const PUBLIC_LOCALES = [
 ] as const;
 
 export const SEO_KEYWORDS = [
+  "visitor QR pass Kenya",
+  "apartment community notice board",
+  "BnB management software Kenya",
+  "short stay guest portal",
   "EstateDesk",
   "best property management software Kenya",
   "property management software Kenya",

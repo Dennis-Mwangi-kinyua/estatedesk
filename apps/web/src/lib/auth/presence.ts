@@ -61,10 +61,10 @@ export async function countOnlineUsersForOrg(orgId: string, now = new Date()) {
                 },
               },
               {
-                tenant: {
+                tenant: { some: {
                   orgId,
                   deletedAt: null,
-                },
+                } },
               },
             ],
           },

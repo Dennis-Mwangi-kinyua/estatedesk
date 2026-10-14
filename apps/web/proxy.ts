@@ -11,6 +11,7 @@ type RateLimitEntry = {
 };
 
 const PROTECTED_PREFIXES = [
+  "/provider",
   "/change-password",
   "/dashboard",
   "/profile",
@@ -160,6 +161,7 @@ function isProtectedPath(pathname: string) {
 function shouldNoIndex(pathname: string) {
   return (
     isProtectedPath(pathname) ||
+    pathname.startsWith("/guest-stay") ||
     pathname.startsWith("/change-password") ||
     pathname.startsWith("/access-denied") ||
     pathname.startsWith("/sign-lease") ||

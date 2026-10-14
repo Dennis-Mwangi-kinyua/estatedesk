@@ -1,3 +1,4 @@
+import { inspectionDetailHref } from "@/lib/move-outs/inspection-navigation";
 import { getCaretakerAllowedUnitIds, type MembershipScope } from "@/lib/caretaker/access";
 import { buildCaretakerAllocationFilters } from "@/app/(app)/dashboard/caretaker/inspections/[inspectionId]/_lib/helpers";
 // src/app/print/inspections/[inspectionId]/page.tsx
@@ -292,19 +293,12 @@ export default async function InspectionPrintPage({ params }: PageProps) {
   const printedAt = new Date();
   const isCompleted = inspection.status === "COMPLETED";
 
-  const backHref = isCaretaker
-    ? `/dashboard/caretaker/inspections/${encodePublicId(
-        inspection.id,
-        "inspection",
-      )}`
-    : `/dashboard/org/inspections/${encodePublicId(
-        inspection.id,
-        "inspection",
-      )}`;
+  const hasCurrentLease = isTenant ? await prisma.lease.count({ where: { orgId: session.activeOrgId, tenant: { userId: session.userId, orgId: session.activeOrgId, deletedAt: null }, status: "ACTIVE", deletedAt: null } }) > 0 : true;
+  const backHref = isTenant && !hasCurrentLease ? "/dashboard/tenant/history" : inspectionDetailHref(session.activeOrgRole, encodePublicId(inspection.id, "inspection"));
 
   const generatedFromLabel = isCaretaker
     ? "Printed / saved from EstateDesk caretaker dashboard"
-    : "Printed / saved from EstateDesk office dashboard";
+    : isTenant ? "Printed / saved from EstateDesk tenant dashboard" : "Printed / saved from EstateDesk office dashboard";
 
   return (
     <>
@@ -347,6 +341,11 @@ export default async function InspectionPrintPage({ params }: PageProps) {
 
           .print-document * {
             box-shadow: none !important;
+            text-shadow: none !important;
+            color: #111111 !important;
+            -webkit-text-fill-color: #111111 !important;
+            opacity: 1 !important;
+            background-color: #ffffff !important;
           }
 
           .print-footer {
@@ -362,7 +361,7 @@ export default async function InspectionPrintPage({ params }: PageProps) {
               href={backHref}
               className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
-              Back to inspection
+              {isTenant && !hasCurrentLease ? "Back to my history" : "Back to inspection"}
             </Link>
 
             <div className="flex flex-wrap gap-3">

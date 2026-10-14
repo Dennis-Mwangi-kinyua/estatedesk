@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { memo } from "react";
 import { CurrencySelect } from "@/components/forms/currency-select";
@@ -111,6 +112,7 @@ export const StaffProfileFields = memo(function StaffProfileFields({
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">
             Emergency contact
+          <p className="mt-2 text-xs"><Link href="/dashboard/org/identity-verification" className="text-primary underline">ID already registered? Request platform authentication.</Link></p>
           </label>
           <input
             name="emergencyContact"

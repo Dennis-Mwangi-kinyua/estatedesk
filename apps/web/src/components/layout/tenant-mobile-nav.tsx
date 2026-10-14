@@ -7,7 +7,7 @@ import { getTenantSidebarLinks, isTenantActivePath } from "./tenant-sidebar-link
 
 export function TenantMobileNav({ hasActiveLease, onMenuClick, menuOpen = false }: { hasActiveLease: boolean; onMenuClick: () => void; menuOpen?: boolean }) {
   const pathname = usePathname();
-  const order = ["Overview", "Payments", "Maintenance & repairs", "Profile"];
+  const order = hasActiveLease ? ["Overview", "Payments", "Maintenance & repairs", "Profile"] : ["Overview", "My history", "Profile"];
   const links = getTenantSidebarLinks(hasActiveLease)
     .filter(item => order.includes(item.label))
     .sort((a, b) => order.indexOf(a.label) - order.indexOf(b.label));

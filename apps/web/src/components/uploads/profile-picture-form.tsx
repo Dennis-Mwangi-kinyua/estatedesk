@@ -30,7 +30,7 @@ export function ProfilePictureForm({ url, name = "Your profile" }: { url: string
     <form action={action} className="p-5 sm:p-6" aria-busy={pending}>
       <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
         <div className="relative shrink-0">
-          <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-3xl font-semibold text-primary ring-4 ring-background shadow-sm">
+          <div data-profile-photo className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-3xl font-semibold text-primary ring-4 ring-background shadow-sm">
             {preview || url ? <Image src={preview || url!} alt={preview ? "Preview of your new profile picture" : `${name}'s profile picture`} width={112} height={112} unoptimized={!!preview} className="h-28 w-28 object-cover" /> : initials || <Camera className="h-9 w-9" />}
           </div>
           <span aria-hidden="true" className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground"><Camera className="h-4 w-4" /></span>
