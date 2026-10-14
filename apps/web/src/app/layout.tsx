@@ -1,3 +1,4 @@
+import { ScheduledUpdateBanner } from "@/features/platform-updates/banner";
 import { SiteExperience } from "@/components/shared/site-experience";
 import type { Metadata, Viewport } from "next";
 import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
@@ -263,6 +264,7 @@ export default async function RootLayout({
             <IncidentBanner />
             {children}
           </div>
+          <ScheduledUpdateBanner />
           <ThemeToggle />
         </ThemeProvider>
       </body>

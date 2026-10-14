@@ -1,3 +1,4 @@
+export const PRODUCT_UPDATES_DISMISSED_ID = "product-updates-dismissed-permanently";
 export type UpdateAudience = "ADMIN" | "MANAGER" | "OFFICE" | "ACCOUNTANT" | "CARETAKER" | "TENANT" | "LANDLORD" | "PLATFORM_ADMIN" | "SUPER_ADMIN" | "PROVIDER";
 export type ProductUpdate = { id: string; date: string; title: string; description: string; audiences: readonly UpdateAudience[] };
 // Append a new stable ID for each released feature; never reuse an acknowledged ID.

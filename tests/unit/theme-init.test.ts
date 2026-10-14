@@ -9,16 +9,18 @@ import {
   buildThemeCookie,
   getServerResolvedTheme,
   resolveTheme,
+  isThemePreference,
 } from "../../apps/web/src/lib/theme/preference";
 
 const ROOT = join(import.meta.dirname, "..", "..");
 
 describe("theme initialization", () => {
-  it("resolves explicit and system preferences", () => {
+  it("supports only explicit light and dark preferences", () => {
     assert.equal(resolveTheme("dark"), "dark");
     assert.equal(resolveTheme("light"), "light");
-    assert.equal(resolveTheme("system", true), "dark");
-    assert.equal(resolveTheme("system", false), "light");
+    assert.equal(isThemePreference("system"), false);
+    assert.equal(isThemePreference("light"), true);
+    assert.equal(isThemePreference("dark"), true);
   });
 
   it("maps explicit theme cookies for server rendering", () => {
@@ -30,7 +32,7 @@ describe("theme initialization", () => {
 
   it("builds a theme preference cookie", () => {
     assert.match(buildThemeCookie("dark"), new RegExp(`${THEME_COOKIE_NAME}=dark`));
-    assert.match(buildThemeCookie("system"), /SameSite=Lax/);
+    assert.match(buildThemeCookie("light"), /SameSite=Lax/);
   });
 
   it("applies the theme before paint without request-time root cookies", () => {
@@ -43,4 +45,17 @@ describe("theme initialization", () => {
     assert.match(script, new RegExp(THEME_STORAGE_KEY));
     assert.match(THEME_INIT_SCRIPT, /classList\.add\(resolvedTheme\)/);
   });
+});
+
+it("migrates the old system setting once and persists only light or dark", async () => {
+  const { runInNewContext } = await import("node:vm");
+  for (const stored of ["system", "dark", "light", null]) {
+    let preference = stored;
+    const classes = new Set<string>();
+    const root = { classList: { remove: (...values: string[]) => values.forEach(value => classes.delete(value)), add: (value: string) => classes.add(value) }, style: { colorScheme: "" }, dataset: {} as Record<string, string> };
+    runInNewContext(THEME_INIT_SCRIPT, { window: { localStorage: { getItem: () => preference, setItem: (_key: string, value: string) => { preference = value; } }, matchMedia: () => ({ matches: true }) }, document: { documentElement: root, cookie: "" } });
+    assert.equal(preference, stored === "system" || stored === "dark" ? "dark" : "light");
+    assert.equal(root.dataset.theme, preference);
+    assert.equal(classes.has(preference!), true);
+  }
 });

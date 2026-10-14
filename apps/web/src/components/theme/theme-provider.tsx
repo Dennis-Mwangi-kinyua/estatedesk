@@ -12,7 +12,6 @@ import {
   THEME_STORAGE_KEY,
   buildThemeCookie,
   isThemePreference,
-  resolveTheme,
   type ResolvedTheme,
   type ThemePreference,
 } from "@/lib/theme/preference";
@@ -28,19 +27,8 @@ type ThemeContextValue = {
 const THEME_CLASSES: ResolvedTheme[] = ["light", "dark"];
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function getSystemTheme(): ResolvedTheme {
-  if (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  ) {
-    return "dark";
-  }
-
-  return "light";
-}
-
 function getStoredTheme(): Theme {
-  if (typeof window === "undefined") return "system";
+  if (typeof window === "undefined") return "light";
 
   try {
     const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -52,7 +40,8 @@ function getStoredTheme(): Theme {
     // Ignore storage access failures in restricted browser contexts.
   }
 
-  return "system";
+  const initialized = document.documentElement.dataset.theme;
+  return isThemePreference(initialized) ? initialized : "light";
 }
 
 function disableTransitionsTemporarily() {
@@ -80,11 +69,7 @@ function applyTheme(theme: Theme, resolvedTheme: ResolvedTheme) {
   root.dataset.resolvedTheme = resolvedTheme;
 
   try {
-    if (theme === "system") {
-      window.localStorage.removeItem(THEME_STORAGE_KEY);
-    } else {
-      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    }
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
 
     document.cookie = buildThemeCookie(theme);
   } catch {
@@ -94,20 +79,7 @@ function applyTheme(theme: Theme, resolvedTheme: ResolvedTheme) {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
-  const [systemTheme, setSystemTheme] =
-    useState<ResolvedTheme>(getSystemTheme);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = () => setSystemTheme(media.matches ? "dark" : "light");
-
-    handleChange();
-    media.addEventListener("change", handleChange);
-
-    return () => media.removeEventListener("change", handleChange);
-  }, []);
-
-  const resolvedTheme = resolveTheme(theme, systemTheme === "dark");
+  const resolvedTheme = theme;
 
   useEffect(() => {
     disableTransitionsTemporarily();

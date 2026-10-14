@@ -1,3 +1,4 @@
+import { PRODUCT_UPDATES_DISMISSED_ID } from "../../apps/web/src/features/updates/catalog";
 import { test, expect } from "playwright/test";
 import { randomUUID } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
@@ -27,10 +28,10 @@ test("provider registers, edits portfolio, sees relevant updates and remains res
     await expect(page.getByText("New updates for your role", { exact: false })).toBeVisible();
     await expect(page.locator("[data-product-updates]")).toContainText("Service provider marketplace");
     await expect(page.locator("[data-product-updates]")).not.toContainText("Provider oversight and reports");
-    await page.getByRole("button", { name: "Mark these updates as read" }).click();
-    await expect(page.locator("[data-product-updates] summary")).toHaveText("What’s new in EstateDesk");
+    await page.getByRole("button", { name: "Close what’s new" }).click();
+    await expect(page.locator("[data-product-updates]")).toHaveCount(0);
     await page.reload();
-    await expect(page.locator("[data-product-updates] summary")).toHaveText("What’s new in EstateDesk");
+    await expect(page.locator("[data-product-updates]")).toHaveCount(0);
     const portfolio = page.locator("section").filter({ has: page.getByRole("heading", { name: "Add a portfolio project" }) });
     await portfolio.getByLabel("Project title").fill("Kitchen tap replacement");
     await portfolio.getByLabel("Project location").fill("Westlands");
@@ -38,10 +39,28 @@ test("provider registers, edits portfolio, sees relevant updates and remains res
     await portfolio.getByRole("button", { name: "Add project", exact: true }).click();
     await expect(portfolio.getByRole("heading", { name: "Kitchen tap replacement" })).toBeVisible();
     const user = await db.user.findUniqueOrThrow({ where: { email } });
+    expect(await db.productUpdateRead.count({ where: { userId: user.id, updateId: PRODUCT_UPDATES_DISMISSED_ID } })).toBe(1);
     await db.user.update({ where: { id: user.id }, data: { profileImageUrl: "/favicon.ico" } });
     await page.reload();
     for (const theme of ["light", "dark"]) {
       await page.evaluate(theme => { document.documentElement.classList.remove("light", "dark"); document.documentElement.classList.add(theme); }, theme);
+      const faintText = await page.locator("main").evaluate(main => {
+        const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
+        const ctx = canvas.getContext("2d")!;
+        const luminance = (channels: number[]) => channels.slice(0, 3).map(channel => channel / 255).map(channel => channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4).reduce((sum, channel, index) => sum + channel * [.2126, .7152, .0722][index], 0);
+        return Array.from(main.querySelectorAll("p.text-muted-foreground, label, h2, h3, button[type=submit]")).filter(element => element.getClientRects().length && element.textContent?.trim()).flatMap(element => {
+          ctx.fillStyle = "white"; ctx.fillRect(0, 0, 1, 1);
+          const ancestors: Element[] = []; for (let parent: Element | null = element; parent; parent = parent.parentElement) ancestors.unshift(parent);
+          for (const ancestor of ancestors) { ctx.fillStyle = getComputedStyle(ancestor).backgroundColor; ctx.fillRect(0, 0, 1, 1); }
+          const background = luminance(Array.from(ctx.getImageData(0, 0, 1, 1).data));
+          ctx.fillStyle = getComputedStyle(element).color; ctx.fillRect(0, 0, 1, 1);
+          const ink = luminance(Array.from(ctx.getImageData(0, 0, 1, 1).data));
+          const ratio = (Math.max(ink, background) + .05) / (Math.min(ink, background) + .05);
+          const large = parseFloat(getComputedStyle(element).fontSize) >= 24;
+          return ratio < (large ? 3 : 4.5) ? [{ text: element.textContent?.trim(), ratio }] : [];
+        });
+      });
+      expect(faintText).toEqual([]);
       for (const width of [320, 390, 768, 1024, 1440]) {
         await page.setViewportSize({ width, height: 900 });
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
@@ -65,6 +84,7 @@ test("provider registers, edits portfolio, sees relevant updates and remains res
     await page.getByRole("button", { name: "Log in", exact: true }).click();
     await expect(page).toHaveURL(/\/provider$/);
     await expect(page.getByRole("heading", { name: "Welcome, Test service professional" })).toBeVisible();
+    await expect(page.locator("[data-product-updates]")).toHaveCount(0);
   } finally {
     const user = await db.user.findUnique({ where: { email } });
     if (user) { await db.serviceProvider.deleteMany({ where: { userId: user.id } }); await db.user.delete({ where: { id: user.id } }); }

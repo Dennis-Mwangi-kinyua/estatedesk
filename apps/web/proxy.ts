@@ -136,7 +136,7 @@ function checkRateLimit(key: string) {
 }
 
 const PUBLIC_API_PATHS = new Set([
-  "/api/health", "/api/cron/tenant-credit", "/api/cron/notifications", "/api/cron/retention",
+  "/api/platform/update-notice", "/api/health", "/api/cron/tenant-credit", "/api/cron/notifications", "/api/cron/retention",
   "/api/webhooks/mpesa", "/api/webhooks/kcb-ipn", "/api/webhooks/kra-etims", "/api/webhooks/whatsapp",
   "/api/monitoring/web-vitals", "/api/monitoring/client-errors", "/api/indexnow/key",
   "/api/push/vapid-public-key", "/api/auth/accept-invite", "/api/public/vacant-houses", "/api/pwa/badge-count",

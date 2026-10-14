@@ -1,3 +1,5 @@
+import { UpdateNoticeForm } from "@/features/platform-updates/form";
+import { getUpdateNotice } from "@/features/platform-updates/service";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { PlatformDashboard } from "./_components/platform-dashboard";
 import { getPlatformDashboardData } from "./_lib/queries";
@@ -11,5 +13,6 @@ export default async function PlatformPage() {
 
   const data = await getPlatformDashboardData();
 
-  return <PlatformDashboard data={data} />;
+  const notice = await getUpdateNotice();
+  return <div className="space-y-6"><PlatformDashboard data={data} /><UpdateNoticeForm current={notice} /></div>;
 }

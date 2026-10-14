@@ -1,8 +1,8 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useSyncExternalStore } from "react";
-import { Theme, useTheme } from "@/components/theme/theme-provider";
+import { useTheme } from "@/components/theme/theme-provider";
 
 const subscribe = () => () => {};
 const getClientSnapshot = () => true;
@@ -16,26 +16,20 @@ function ThemeToggleButton({
   className: string;
   iconClassName?: string;
 }) {
-  const { theme, resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const isHydrated = useSyncExternalStore(
     subscribe,
     getClientSnapshot,
     getServerSnapshot,
   );
   const isDark = isHydrated && resolvedTheme === "dark";
-  const currentTheme = isHydrated ? theme : "system";
-  const nextTheme: Record<Theme, Theme> = {
-    system: "light",
-    light: "dark",
-    dark: "system",
-  };
-  const Icon =
-    currentTheme === "system" ? Monitor : isDark ? Sun : Moon;
+  const Icon = isDark ? Sun : Moon;
 
   return (
     <button data-workspace-action="true"
       type="button"
-      onClick={() => setTheme(nextTheme[currentTheme])}
+      disabled={!isHydrated}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       className={className}
       aria-label={label}
       title={label}

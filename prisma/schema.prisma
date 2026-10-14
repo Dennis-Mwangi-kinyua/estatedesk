@@ -3282,3 +3282,14 @@ model ProductUpdateRead {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@id([userId, updateId])
 }
+
+/// Current platform update window, published by a platform administrator.
+model PlatformUpdateNotice {
+  id                String   @id @default("global")
+  message           String   @db.VarChar(1000)
+  startsAt          DateTime
+  endsAt            DateTime
+  publishedByUserId String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}

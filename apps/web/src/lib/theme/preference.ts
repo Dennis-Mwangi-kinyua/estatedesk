@@ -2,22 +2,17 @@ export const THEME_STORAGE_KEY = "theme";
 export const THEME_COOKIE_NAME = "estatedesk-theme";
 export const THEME_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 
-export type ThemePreference = "light" | "dark" | "system";
+export type ThemePreference = "light" | "dark";
 export type ResolvedTheme = "light" | "dark";
 
 export function isThemePreference(
   value: string | null | undefined,
 ): value is ThemePreference {
-  return value === "light" || value === "dark" || value === "system";
+  return value === "light" || value === "dark";
 }
 
-export function resolveTheme(
-  theme: ThemePreference,
-  prefersDark = false,
-): ResolvedTheme {
-  if (theme === "dark") return "dark";
-  if (theme === "light") return "light";
-  return prefersDark ? "dark" : "light";
+export function resolveTheme(theme: ThemePreference): ResolvedTheme {
+  return theme;
 }
 
 export function getServerResolvedTheme(
@@ -41,14 +36,13 @@ export const THEME_INIT_SCRIPT = `(() => {
     const cookieMaxAge = ${THEME_COOKIE_MAX_AGE_SECONDS};
     const root = document.documentElement;
     const stored = window.localStorage.getItem(storageKey);
-    const theme =
-      stored === "light" || stored === "dark" || stored === "system"
-        ? stored
-        : "system";
-    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-    const resolvedTheme = theme === "system" ? systemTheme : theme;
+    const theme = stored === "dark" || stored === "light"
+      ? stored
+      : stored === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    const resolvedTheme = theme;
+    window.localStorage.setItem(storageKey, theme);
 
     root.classList.remove("light", "dark");
     root.classList.add(resolvedTheme);

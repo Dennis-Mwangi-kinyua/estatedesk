@@ -1,6 +1,6 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useSyncExternalStore } from "react";
 import { useTheme } from "@/components/theme/theme-provider";
 
@@ -9,12 +9,6 @@ const getClientSnapshot = () => true;
 const getServerSnapshot = () => false;
 
 const OPTIONS = [
-  {
-    value: "system",
-    label: "System",
-    description: "Follow this device",
-    icon: Monitor,
-  },
   {
     value: "light",
     label: "Light",
@@ -36,7 +30,7 @@ export function AppearanceSettings() {
     getClientSnapshot,
     getServerSnapshot,
   );
-  const currentTheme = isHydrated ? theme : "system";
+  const currentTheme = isHydrated ? theme : "light";
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white/78 p-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/76">
@@ -49,7 +43,7 @@ export function AppearanceSettings() {
         </p>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid gap-2 sm:grid-cols-2">
         {OPTIONS.map((option) => {
           const Icon = option.icon;
           const active = currentTheme === option.value;
@@ -58,6 +52,7 @@ export function AppearanceSettings() {
             <button data-workspace-action="true"
               key={option.value}
               type="button"
+              disabled={!isHydrated}
               onClick={() => setTheme(option.value)}
               aria-pressed={active}
               className={[
@@ -86,7 +81,7 @@ export function AppearanceSettings() {
                   className={[
                     "mt-0.5 block text-xs",
                     active
-                      ? "text-white/72 dark:text-slate-700"
+                      ? "text-white dark:text-slate-700"
                       : "text-slate-500 dark:text-slate-400",
                   ].join(" ")}
                 >
