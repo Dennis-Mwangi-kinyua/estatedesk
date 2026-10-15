@@ -14,7 +14,8 @@ node_modules
 **/*.tsbuildinfo
 *.pem
 *.dump
-backups
+# Ignore root recovery artifacts without excluding the application Backups route.
+/backups/
 backup-routes
 .tmp*
 .qa-screenshots
