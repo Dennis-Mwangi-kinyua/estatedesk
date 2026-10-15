@@ -55,6 +55,15 @@ describe("middleware wiring", () => {
     assert.equal(response.headers.get("set-cookie"), null);
     assert.equal(response.headers.get("location"), null);
   });
+  it("requires sign-in before scanning an agreement verification QR and preserves the return target", () => {
+    const target = "/agreements/verify/" + "a".repeat(48) + "?hash=" + "b".repeat(64);
+    const response = proxy(new NextRequest(`https://example.test${target}`));
+    assert.equal(response.status, 307);
+    const location = new URL(response.headers.get("location")!);
+    assert.equal(location.pathname, "/login");
+    assert.equal(location.searchParams.get("returnTo"), target);
+    assert.equal(response.headers.get("set-cookie"), null);
+  });
   it("delegates to proxy security middleware", () => {
     const middleware = readFileSync(join(ROOT, "apps/web/src/proxy.ts"), "utf8");
     const healthRoute = readFileSync(

@@ -1,3 +1,7 @@
+import { createDocumentVerificationQrDataUrl } from "@/lib/documents/verification-qr";
+import { absoluteUrl } from "@/lib/seo";
+import Link from "next/link";
+import { agreementVerificationPath } from "@/lib/service-agreements/verification";
 import Image from "next/image";
 import { SignatureInput } from "@/components/signatures/signature-input";
 import { notFound } from "next/navigation";
@@ -9,6 +13,8 @@ export async function AgreementDetail({ id, platformView, error, ok }: { id: str
   const access = await accessibleAgreement(id);
   if (!access || (platformView && !access.platform)) notFound();
   const { document, data, platform, session } = access;
+  const verificationPath = agreementVerificationPath(document.verificationCode, document.contentHash ?? "");
+  const verificationQr = document.status === "COMPLETED" ? await createDocumentVerificationQrDataUrl(absoluteUrl(verificationPath)) : null;
   const canSign = platformView ? document.status === "ISSUED" && !!data.organizationSignature && !data.platformSignature : !platform && document.status === "ISSUED" && !data.organizationSignature;
   return <div className="engineering-workspace mx-auto min-w-0 w-full max-w-7xl space-y-6">
     <PageHeader eyebrow={document.org.name} title="Service agreement & data processing" description={`Prepared by ${data.representative}. ${document.serialNumber}`} action={document.status === "COMPLETED" ? <a href={`/api/service-agreements/${id}`} className="rounded-xl border px-4 py-3 text-sm font-semibold">Download PDF</a> : undefined} />
@@ -29,6 +35,7 @@ export async function AgreementDetail({ id, platformView, error, ok }: { id: str
     </Surface> : null}
     {platformView && document.status === "DRAFT" ? <Surface title="Send to organization for signature" description="The organization signs first. EstateDesk countersigns after submission. Downloads are released when both parties have signed."><form action={changeAgreementAction.bind(null, id)} className="p-5"><input type="hidden" name="command" value="send" /><input type="hidden" name="contentHash" value={document.contentHash ?? ""} /><button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">Send to organization for signature</button></form></Surface> : null}
     {platformView && document.status === "DRAFT" ? <Surface title="Revise unsigned draft" description="Confirm customer-specific schedules and legal terms before signing. Saving changes replaces the draft's content hash."><form action={changeAgreementAction.bind(null, id)} className="space-y-4 p-5"><input type="hidden" name="command" value="edit" /><input type="hidden" name="contentHash" value={document.contentHash ?? ""} /><label className="block space-y-2 text-sm"><span>Complete agreement text</span><textarea name="body" defaultValue={data.body} required minLength={500} maxLength={60000} rows={16} className="w-full rounded-xl border p-3 font-mono text-xs leading-6" /></label><button className="rounded-xl border px-5 py-3 text-sm font-semibold">Save draft revision</button></form></Surface> : null}
+    {verificationQr ? <Surface title="Verify this signed agreement" description="Scan with a smartphone camera. Sign in as an authorized organization or platform administrator to view the registry record."><div className="flex flex-col items-start gap-4 p-5 sm:flex-row sm:items-center"><Image unoptimized src={verificationQr} alt="QR code to verify this service agreement and DPA" width={200} height={200} className="rounded-xl border bg-white p-2" /><div className="space-y-2 text-sm"><Link href={verificationPath} className="font-semibold underline">Verify signed agreement</Link><p className="text-muted-foreground">The completed PDF includes the same QR code. Compare its signed text hash and signatures with the registered copy.</p></div></div></Surface> : null}
     <Surface title="Document history" description={`SHA-256 of the agreement text: ${document.contentHash}`}><ol className="engineering-record-grid">{document.events.map(event => <li key={event.id}><p className="text-sm font-semibold">{event.eventType.replaceAll("_", " ")}</p><p className="mt-2 text-xs text-muted-foreground">{formatDateTime(event.createdAt)}</p></li>)}</ol></Surface>
   </div>;
 }

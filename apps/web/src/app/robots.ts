@@ -7,6 +7,7 @@ import { getSiteUrl } from "@/lib/seo";
  * via Allow `/` + more-specific Disallow (Google longest-match rules).
  */
 const PRIVATE_ROUTE_PREFIXES = [
+  "/agreements/verify/",
   "/provider",
   "/service-providers/register",
   "/guest-stay",

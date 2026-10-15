@@ -106,6 +106,16 @@ test("organization-specific agreement is signed, sent, isolated, countersigned a
     const pdf=await org.context.request.get(`/api/service-agreements/${id}`);
     expect(pdf.status()).toBe(200);expect(pdf.headers()["content-type"]).toBe("application/pdf");
     expect((await pdf.body()).subarray(0,4).toString()).toBe("%PDF");
+    expect((await pdf.body()).toString("latin1")).toContain("/Subtype /Image");
+    const registry = await db.documentRecord.findUniqueOrThrow({where:{id},select:{verificationCode:true,contentHash:true}});
+    const verifyPath = `/agreements/verify/${registry.verificationCode}?hash=${registry.contentHash}`;
+    await org.page.goto(verifyPath, {waitUntil:"networkidle"});
+    await expect(org.page.getByRole("heading", {name:"Verified signed agreement",exact:true})).toBeVisible();
+    await expect(org.page.getByRole("link", {name:"Download registered agreement"})).toHaveAttribute("href", `/api/service-agreements/${id}`);
+    expect((await other.context.request.get(verifyPath)).status()).toBe(404);
+    await org.page.goto(verifyPath.replace(registry.contentHash!, "0".repeat(64)), {waitUntil:"networkidle"});
+    await expect(org.page.getByRole("heading", {name:"Agreement integrity check failed",exact:true})).toBeVisible();
+    await expect(org.page.getByRole("link", {name:"Download registered agreement"})).toHaveCount(0);
     expect(pdf.headers()["cache-control"]).toContain("no-store");
     await page.reload({waitUntil:"networkidle"});
     await expect(page.getByRole("button",{name:"Countersign and complete agreement",exact:true})).toHaveCount(0);

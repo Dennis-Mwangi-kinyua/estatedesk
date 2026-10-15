@@ -20,6 +20,12 @@ export async function accessibleAgreement(id: string) {
   if (!document) return null;
   return { session, platform, document, data: agreementData(document.metadata) };
 }
+export async function accessibleAgreementByVerificationCode(code: string) {
+  await requireAuthenticated();
+  if (!/^[a-f0-9]{48}$/.test(code)) return null;
+  const document = await prisma.documentRecord.findFirst({ where: { verificationCode: code, entityType: AGREEMENT_ENTITY }, select: { id: true } });
+  return document ? accessibleAgreement(document.id) : null;
+}
 export async function createAgreement(form: FormData) {
   const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
   const field = (key: string, min = 2, max = 8000) => {

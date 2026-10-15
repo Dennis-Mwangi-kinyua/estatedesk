@@ -23,3 +23,8 @@ test("organization agreements are available only to organization administrators"
     assert.equal(canAccessWorkspacePath({activeOrgRole, activeOrgId: "test-org", platformRole: "USER"}, "/dashboard/org/agreements/example"), activeOrgRole === "ADMIN");
   }
 });
+
+test("new DPA templates allocate organization-caused incidents without excluding processor duties", () => {
+  assert.ok(ESTATEDESK_DPA_DRAFT.includes("11. CUSTOMER RESPONSIBILITY AND INDEMNITY"));
+  for (const text of ["shall indemnify Afrisilicon Technology Limited", "credential sharing", "does not by itself establish Customer fault", "Afrisilicon's or its subprocessors' breach", "data subject's statutory rights", "not recovered twice", "backup, security, assistance, and recovery duties remain in force"]) assert.ok(ESTATEDESK_DPA_DRAFT.includes(text), text);
+});

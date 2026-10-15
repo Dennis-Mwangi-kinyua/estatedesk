@@ -1,5 +1,7 @@
+import { absoluteUrl } from "@/lib/seo";
+import { agreementIntegrity, agreementVerificationPath } from "@/lib/service-agreements/verification";
 import { createProfessionalPdf } from "@/lib/documents/professional-pdf";
-import { accessibleAgreement, hashAgreement } from "@/lib/service-agreements/service";
+import { accessibleAgreement } from "@/lib/service-agreements/service";
 import { prisma } from "@/lib/prisma";
 import { getRequestAuditMetadata } from "@/lib/audit/security";
 export const dynamic = "force-dynamic";
@@ -8,8 +10,8 @@ export async function GET(_request: Request, {params}: {params: Promise<{id: str
   if (!access) return new Response("Not found", {status: 404, headers: {"Cache-Control": "private, no-store"}});
   const {document, data, session} = access;
   if (document.status !== "COMPLETED" || !data.platformSignature || !data.organizationSignature) return new Response("Download is available after both parties sign", { status: 409, headers: {"Cache-Control": "private, no-store"} });
-  if (hashAgreement(data.body) !== document.contentHash) return new Response("Document integrity check failed", { status: 409, headers: {"Cache-Control":"private, no-store"} });
-  const pdf = await createProfessionalPdf({title: "Service agreement and DPA", documentTitle: document.title, serialNumber: document.serialNumber, organizationName: "Afrisilicon Technology Limited | EstateDesk", issuedAt: document.issuedAt, footerText: "EstateDesk | Authenticated electronic signatures recorded in the signature schedule."});
+  if (!agreementIntegrity(data, document.contentHash)) return new Response("Document integrity check failed", { status: 409, headers: {"Cache-Control":"private, no-store"} });
+  const pdf = await createProfessionalPdf({title: "Service agreement and DPA", documentTitle: document.title, serialNumber: document.serialNumber, organizationName: "Afrisilicon Technology Limited | EstateDesk", issuedAt: document.issuedAt, verificationUrl: absoluteUrl(agreementVerificationPath(document.verificationCode, document.contentHash!)), footerText: "EstateDesk | Authenticated electronic signatures recorded in the signature schedule."});
   for (const paragraph of data.body.split("\n\n")) {
     const [heading, ...lines] = paragraph.split("\n");
     if (lines.length && (/^\d+\./.test(heading) || heading === heading.toUpperCase())) {
@@ -26,6 +28,7 @@ export async function GET(_request: Request, {params}: {params: Promise<{id: str
   }
   pdf.section("Integrity reference");
   pdf.paragraph(`SHA-256 of the agreed text: ${document.contentHash}`, {size: 8});
+  await pdf.verification("Scan to check the agreement status, signed text hash, and signatures in EstateDesk. Sign in as an authorized organization or platform administrator to view or download the registered copy.");
   const request = await getRequestAuditMetadata();
   await prisma.documentEvent.create({ data: {documentId: document.id, orgId: document.orgId, actorUserId: session.userId, eventType:"DOWNLOADED",ip:request.ip,userAgent:request.userAgent,metadata:{contentHash:document.contentHash}} });
   const bytes = await pdf.save();

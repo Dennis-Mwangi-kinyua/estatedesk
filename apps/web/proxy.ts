@@ -11,6 +11,7 @@ type RateLimitEntry = {
 };
 
 const PROTECTED_PREFIXES = [
+  "/agreements/verify",
   "/provider",
   "/change-password",
   "/dashboard",

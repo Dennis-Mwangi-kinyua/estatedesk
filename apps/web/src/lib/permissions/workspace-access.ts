@@ -44,6 +44,7 @@ export function canAccessWorkspacePath(
   if (path === "/provider" || path === "/service-providers" || /^\/service-providers\/[^/]+$/.test(path)) return true;
   if (["/dashboard", "/profile", "/access-denied"].includes(path) || under(path, "/change-password")) return true;
   const platform = ["SUPER_ADMIN", "PLATFORM_ADMIN"].includes(session.platformRole);
+  if (under(path, "/agreements/verify")) return platform || (Boolean(session.activeOrgId) && session.activeOrgRole === "ADMIN");
   if (under(path, "/platform/control")) return session.platformRole === "SUPER_ADMIN";
   if (under(path, "/platform")) return platform;
   if (path === "/api-keys") return platform || (Boolean(session.activeOrgId) && session.activeOrgRole === "ADMIN");
