@@ -11,6 +11,7 @@ export type PublicSiteIndexItem = {
 };
 
 export const publicSiteIndexItems: readonly PublicSiteIndexItem[] = [
+  { title: "Data Processing Agreement", path: "/data-processing-agreement", description: "Unsigned organization-specific DPA template for Afrisilicon Technology Limited, trading as EstateDesk.", priority: "0.5", changefreq: "monthly" },
   { path: "/service-providers", title: "Service providers", description: "Find plumbers, electricians and maintenance professionals by location, compare portfolios and hire for property jobs.", priority: "0.8", changefreq: "daily" },
   { title: "Property teams in Africa", path: "/property-management-software-africa", description: "Evaluate EstateDesk for African property teams, including connectivity and market-specific requirements.", priority: "0.8", changefreq: "monthly" },
   { title: "Remote and diaspora landlords", path: "/remote-property-management-software", description: "Coordinate overseas owner oversight with local management records and statements.", priority: "0.8", changefreq: "monthly" },

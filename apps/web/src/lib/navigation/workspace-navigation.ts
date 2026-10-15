@@ -8,7 +8,7 @@ const caretaker = (paths: string[]) => paths.map(path => `/dashboard/caretaker${
 const platform = (paths: string[]) => paths.map(path => `/platform${path ? `/${path}` : ""}`);
 
 const platformAccount: NavigationSection[] = [
-  { label: "Access & security", hrefs: platform(["users", "admins", "permissions", "identity-verification", "security", "audit-logs", "support-access"]) },
+  { label: "Access & security", hrefs: platform(["users", "admins", "permissions", "identity-verification", "agreements", "security", "audit-logs", "support-access"]) },
   { label: "Settings & help", hrefs: platform(["settings", "help"]) },
 ];
 
@@ -19,7 +19,7 @@ export const WORKSPACE_NAVIGATION: Record<NavigationWorkspace, readonly Navigati
     { label: "Finance", hrefs: org(["payments", "charges", "water-bills", "accounting", "accounting/requests", "finance-requests", "expenditures", "taxes", "reports"]) },
     { label: "Operations", hrefs: [...org(["issues", "issues/resolution-reports", "inspections", "move-outs", "service-providers"]), "/dashboard/gate"] },
     { label: "Communication", hrefs: org(["notifications", "community"]) },
-    { label: "Administration", hrefs: org(["staff", "imports", "settings"]) },
+    { label: "Administration", hrefs: org(["staff", "imports", "agreements", "settings"]) },
     { label: "Account & help", hrefs: [...org(["profile", "security", "support"]), "/dashboard/security"] },
   ],
   tenant: [

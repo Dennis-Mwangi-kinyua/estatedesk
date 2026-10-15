@@ -51,6 +51,7 @@ export type PlatformNavItem = {
  * Keeps developer operators able to run the business plane without mode-switching.
  */
 export const siteOpsNavItems: readonly PlatformNavItem[] = [
+  { href: "/platform/agreements", label: "Service agreements", icon: "BookOpen", description: "Organization service agreements, DPA signing and delivery", dualMode: true },
   { href: "/platform/identity-verification", label: "ID verification", icon: "ShieldCheck", description: "Authenticate duplicate ID registrations and approve existing-account links", dualMode: true },
   { href: "/platform/service-providers", label: "Service providers", icon: "BriefcaseBusiness", description: "Registrations, online activity and reported accounts", dualMode: true },
   {

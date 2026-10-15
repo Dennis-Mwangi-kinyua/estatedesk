@@ -186,6 +186,12 @@ export const SIDEBAR_LINKS: readonly SidebarLink[] = [
     roles: ["ADMIN", "ACCOUNTANT"],
   },
   {
+    label: "Service agreements",
+    href: "/dashboard/org/agreements",
+    icon: workspaceIconFor("/dashboard/org/agreements"),
+    roles: ["ADMIN"],
+  },
+  {
     label: "Settings",
     href: "/dashboard/org/settings",
     icon: workspaceIconFor("/dashboard/org/settings"),

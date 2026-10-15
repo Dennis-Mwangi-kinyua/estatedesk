@@ -33,6 +33,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
           Organizations
         </Link>
 
+        <Link href={`/platform/agreements?orgId=${org.id}`} className="inline-flex w-fit items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold"><FileText className="h-4 w-4" />Service agreements and DPA</Link>
         <header className="org-detail-hero overflow-hidden rounded-3xl border border-border bg-card">
           <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div className="min-w-0">

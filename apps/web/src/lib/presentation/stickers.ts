@@ -101,7 +101,7 @@ function semanticLabel(label: string) {
     units: "units", tenants: "tenants", staff: "staff", users: "users", admins: "admins",
     payments: "payments", accounting: "accounting", requests: "requests", invoices: "invoices",
     expenditures: "expenditures", finance: "finance", payouts: "payouts", taxes: "taxes",
-    leases: "leases", lease: "lease", documents: "documents", profile: "profile",
+    agreements: "agreement", leases: "leases", lease: "lease", documents: "documents", profile: "profile",
     inspections: "inspections", issues: "issues", maintenance: "maintenance", tasks: "tasks",
     notifications: "notifications", notices: "notices", messages: "messages", inbox: "inbox",
     security: "security", permissions: "permissions", roles: "roles", settings: "settings",

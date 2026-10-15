@@ -23,7 +23,7 @@ export const ORG_WORKSPACE_ROLES: Record<string, readonly OrgRole[]> = {
   accounting: FINANCE, expenditures: FINANCE, reports: MANAGEMENT,
   staff: ["ADMIN", "MANAGER"], taxes: ["ADMIN", "ACCOUNTANT"],
   airbnb: ["ADMIN", "MANAGER"],
-  settings: ["ADMIN"], "verify-tenant": ["ADMIN"],
+  agreements: ["ADMIN"], settings: ["ADMIN"], "verify-tenant": ["ADMIN"],
 };
 
 function under(path: string, prefix: string) {

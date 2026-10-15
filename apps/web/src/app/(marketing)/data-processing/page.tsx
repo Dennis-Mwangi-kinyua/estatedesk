@@ -15,8 +15,14 @@ export default function DataProcessingPage() {
       eyebrow="Data"
       title="Data Processing and Retention"
       description="How EstateDesk expects organizations to think about data handling, retention, exports, backups, and deletion."
-      updatedAt="June 2, 2026"
+      updatedAt="October 15, 2026"
+      downloadHref="/data-processing-agreement"
+      downloadLabel="Read the DPA template"
       sections={[
+        {
+          title: "Organization-specific agreements",
+          body: ["EstateDesk is a product of Afrisilicon Technology Limited. The unsigned data processing agreement template is available at /data-processing-agreement. Platform administrators can prepare an organization-specific copy, sign and send it to the organization administrator for countersignature."],
+        },
         {
           title: "Processing roles",
           body: [
