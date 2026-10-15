@@ -1,3 +1,6 @@
+import Link from "@/components/navigation/workspace-link";
+import { prisma } from "@/lib/prisma";
+import { AGREEMENT_ENTITY } from "@/lib/service-agreements/contract";
 import { OrganizationSlugEditor } from "@/components/forms/organization-slug-editor";
 import { updateCurrentOrganizationSlugAction } from "@/features/organizations/actions/update-organization-slug";
 import { requireUserSession } from "@/lib/auth/session";
@@ -20,6 +23,7 @@ import {
 
 export async function OrganizationProfileSection({ data }: { data: SettingsPageData }) {
   const session = await requireUserSession();
+  const agreements = session.activeOrgRole === "ADMIN" ? await prisma.documentRecord.findMany({ where: { orgId: data.organization.id, entityType: AGREEMENT_ENTITY, status: "COMPLETED" }, orderBy: { updatedAt: "desc" }, select: { id: true, title: true } }) : [];
   return (
     <SectionCard
       id="organization-profile"
@@ -38,6 +42,7 @@ export async function OrganizationProfileSection({ data }: { data: SettingsPageD
         />
       }
     >
+      {agreements.length > 0 ? <div className="mb-5 space-y-3"><h3 className="font-semibold">Signed service agreements</h3>{agreements.map(agreement => <div key={agreement.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4"><Link href={`/dashboard/org/agreements/${agreement.id}`} className="text-sm font-medium">{agreement.title}</Link><a href={`/api/service-agreements/${agreement.id}`} className="text-sm font-semibold text-primary">Download signed PDF</a></div>)}</div> : null}
       <div className="mb-5"><OrganizationNameEditor name={data.organization.name} action={renameCurrentOrganizationAction} /></div>
       {memberHasOrgPermission(session, "org.settings.manage") && <div className="mb-5"><OrganizationSlugEditor slug={data.organization.slug} action={updateCurrentOrganizationSlugAction} /></div>}
       <form

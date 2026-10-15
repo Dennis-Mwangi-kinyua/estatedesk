@@ -63,24 +63,36 @@ export async function changeAgreement(id: string, form: FormData) {
     });
     return;
   }
+  if (command === "send") {
+    if (!platform || document.status !== "DRAFT") throw Error("Only a draft can be sent.");
+    await prisma.$transaction(async tx => {
+      const admins = await tx.membership.findMany({ where: { orgId: document.orgId, role: "ADMIN", deactivatedAt: null, employmentEndedAt: null, user: { deletedAt: null, status: "ACTIVE" } }, select: { userId: true }, distinct: ["userId"] });
+      if (!admins.length) throw Error("The organization needs an active administrator.");
+      const result = await tx.documentRecord.updateMany({ where: { id, status: "DRAFT", contentHash: hash }, data: { status: "ISSUED", issuedAt: new Date() } });
+      if (result.count !== 1) throw Error("The agreement changed. Reload to continue.");
+      await tx.documentEvent.create({ data: { documentId: id, orgId: document.orgId, actorUserId: session.userId, eventType: "SIGNING_REQUESTED", ip: request.ip, userAgent: request.userAgent, metadata: { contentHash: hash } } });
+      await tx.notification.createMany({ data: admins.map(admin => ({ orgId: document.orgId, userId: admin.userId, channel: "IN_APP" as const, type: "GENERAL" as const, status: "SENT" as const, sentAt: new Date(), title: "Service agreement ready for your signature", message: "Review and sign your service agreement first. EstateDesk will then countersign and release the completed PDF.", providerResponse: { actionUrl: `/dashboard/org/agreements/${id}`, agreementId: id } })) });
+    });
+    return;
+  }
   if (!["platform-sign", "org-sign"].includes(command)) throw Error("Unknown agreement action.");
   const platformSigning = command === "platform-sign";
-  if (platformSigning ? !platform || document.status !== "DRAFT" : platform || document.status !== "ISSUED" || !data.platformSignature) throw Error("You cannot sign this agreement in its current state.");
+  if (document.status !== "ISSUED" || (platformSigning ? !platform || !data.organizationSignature || !!data.platformSignature : platform || !!data.organizationSignature)) throw Error("You cannot sign this agreement in its current state.");
   const name = String(form.get("name") ?? "").trim();
   if (form.get("consent") !== "on" || !signatureName(name, session.fullName)) throw Error("Enter your account's full name and confirm your authority and agreement to the displayed terms.");
   const signature = { name, userId: session.userId, signedAt: new Date().toISOString(), contentHash: hash };
   const next = platformSigning ? { ...data, platformSignature: signature } : { ...data, organizationSignature: signature };
   await prisma.$transaction(async tx => {
-    const admins = platformSigning ? await tx.membership.findMany({ where: { orgId: document.orgId, role: "ADMIN", deactivatedAt: null, employmentEndedAt: null, user: { deletedAt: null, status: "ACTIVE" } }, select: { userId: true }, distinct: ["userId"] }) : [];
-    if (platformSigning && !admins.length) throw Error("The organization needs an active administrator before the agreement can be sent.");
-    const result = await tx.documentRecord.updateMany({ where: { id, orgId: document.orgId, status: platformSigning ? "DRAFT" : "ISSUED", contentHash: hash }, data: { status: platformSigning ? "ISSUED" : "COMPLETED", metadata: json(next), ...(platformSigning ? { issuedAt: new Date() } : {}) } });
+    const completed = !!next.platformSignature && !!next.organizationSignature;
+    const result = await tx.documentRecord.updateMany({ where: { id, orgId: document.orgId, status: "ISSUED", contentHash: hash, metadata: { equals: json(data) } }, data: { status: completed ? "COMPLETED" : "ISSUED", metadata: json(next) } });
     if (result.count !== 1) throw Error("This agreement has already changed or been signed. Reload to continue.");
     const evidence = { documentId: id, orgId: document.orgId, actorUserId: session.userId, ip: request.ip, userAgent: request.userAgent, metadata: { party: platformSigning ? "ESTATEDESK" : "ORGANIZATION", name, contentHash: hash, signedAt: signature.signedAt, consent: true } };
     await tx.documentEvent.createMany({ data: [
       { ...evidence, eventType: "SIGNED" },
-      { ...evidence, eventType: platformSigning ? "SIGNING_REQUESTED" : "COMPLETED" },
+      { ...evidence, eventType: completed ? "COMPLETED" : "SIGNING_REQUESTED" },
     ] });
-    if (platformSigning) await tx.notification.createMany({ data: admins.map(admin => ({ orgId: document.orgId, userId: admin.userId, channel: "IN_APP" as const, type: "GENERAL" as const, status: "SENT" as const, sentAt: new Date(), title: "Service agreement ready for your signature", message: "EstateDesk has signed your service agreement and data processing addendum. Review the terms and countersign in Service Agreements.", providerResponse: { actionUrl: `/dashboard/org/agreements/${id}`, agreementId: id } })) });
-    else if (document.issuedByUserId) await tx.notification.create({ data: { orgId: document.orgId, userId: document.issuedByUserId, channel: "IN_APP", type: "GENERAL", status: "SENT", sentAt: new Date(), title: "Service agreement countersigned", message: `${document.org.name} has countersigned its agreement. The completed copy is available in Platform Service Agreements.`, providerResponse: { actionUrl: `/platform/agreements/${id}`, agreementId: id } } });
+    const recipients = await tx.membership.findMany({ where: { orgId: document.orgId, role: "ADMIN", deactivatedAt: null, employmentEndedAt: null, user: { deletedAt: null, status: "ACTIVE" } }, select: { userId: true }, distinct: ["userId"] });
+    if (completed) await tx.notification.createMany({ data: recipients.map(admin => ({ orgId: document.orgId, userId: admin.userId, channel: "IN_APP" as const, type: "GENERAL" as const, status: "SENT" as const, sentAt: new Date(), title: "Service agreement completed", message: "Both parties have signed. Download the completed agreement from your organization profile or Service Agreements.", providerResponse: { actionUrl: `/dashboard/org/agreements/${id}`, agreementId: id } })) });
+    if (document.issuedByUserId) await tx.notification.create({ data: { orgId: document.orgId, userId: document.issuedByUserId, channel: "IN_APP", type: "GENERAL", status: "SENT", sentAt: new Date(), title: completed ? "Service agreement completed" : "Service agreement awaiting platform signature", message: completed ? `${document.org.name}'s completed agreement is available for download.` : `${document.org.name} has signed and submitted its agreement. Review and countersign for EstateDesk.`, providerResponse: { actionUrl: `/platform/agreements/${id}`, agreementId: id } } });
   });
 }

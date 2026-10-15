@@ -7,9 +7,9 @@ export async function GET(_request: Request, {params}: {params: Promise<{id: str
   const access = await accessibleAgreement((await params).id);
   if (!access) return new Response("Not found", {status: 404, headers: {"Cache-Control": "private, no-store"}});
   const {document, data, session} = access;
+  if (document.status !== "COMPLETED" || !data.platformSignature || !data.organizationSignature) return new Response("Download is available after both parties sign", { status: 409, headers: {"Cache-Control": "private, no-store"} });
   if (hashAgreement(data.body) !== document.contentHash) return new Response("Document integrity check failed", { status: 409, headers: {"Cache-Control":"private, no-store"} });
   const pdf = await createProfessionalPdf({title: "Service agreement and DPA", documentTitle: document.title, serialNumber: document.serialNumber, organizationName: "Afrisilicon Technology Limited | EstateDesk", issuedAt: document.issuedAt, footerText: "EstateDesk | Authenticated electronic signatures recorded in the signature schedule."});
-  if (document.status === "DRAFT") pdf.section("UNSIGNED DRAFT");
   for (const paragraph of data.body.split("\n\n")) {
     const [heading, ...lines] = paragraph.split("\n");
     if (lines.length && (/^\d+\./.test(heading) || heading === heading.toUpperCase())) {

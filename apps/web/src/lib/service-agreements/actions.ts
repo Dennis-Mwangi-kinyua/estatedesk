@@ -18,5 +18,6 @@ export async function changeAgreementAction(id: string, form: FormData) {
   revalidatePath("/platform/agreements", "layout");
   revalidatePath("/dashboard/org/agreements", "layout");
   revalidatePath("/dashboard/org/notifications");
+  revalidatePath("/dashboard/org/settings", "layout");
   redirect(`${base}/${id}?ok=saved`);
 }
