@@ -6,6 +6,7 @@ import { useNavigationDialog } from "@/components/navigation/use-navigation-dial
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowRight, Menu, MessageCircleQuestion, X } from "lucide-react";
 import { BookOpen, Building2, BedDouble, House as Home, LogIn, Mail, Search, UserRoundPlus as UserPlus, WalletCards } from "@/components/shared/colored-icons";
+import { usePathname } from "next/navigation";
 import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 
 const subscribeHydration = () => () => {};
@@ -34,6 +35,8 @@ export function PublicAccessHeader({
   loginHref = "/login",
   showPricing = true,
 }: PublicAccessHeaderProps) {
+  const pathname = usePathname();
+  const currentPage = publicLinks.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))?.key ?? active;
   const hydrated = useSyncExternalStore(subscribeHydration, clientHydration, serverHydration);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -43,7 +46,7 @@ export function PublicAccessHeader({
   const visibleLinks = showPricing
     ? publicLinks
     : publicLinks.filter((item) => item.key !== "pricing");
-  const spacerClassName = "h-16 md:h-[4.1rem]";
+  const spacerClassName = "h-16";
   const signInClassName =
     "items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:!border-white/20 dark:!bg-white/[0.10] dark:!text-[#f8fafc] dark:hover:!bg-white/[0.16] dark:focus-visible:ring-white";
 
@@ -71,7 +74,7 @@ export function PublicAccessHeader({
       <header className="modern-public-header fixed inset-x-0 top-0 z-[100] shrink-0 border-b border-slate-200/80 bg-white/95 shadow-[0_14px_34px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#0d1117]/95 dark:shadow-[0_14px_34px_rgba(0,0,0,0.22)]">
         {/* Incident banner is rendered via IncidentBannerSlot from server parents when needed. */}
         <div className="mx-auto flex h-16 max-w-[1536px] items-center justify-between gap-3 px-3 sm:px-6 lg:px-8">
-          <div className="flex w-full items-center justify-between gap-2 2xl:contents">
+          <div className="flex w-full items-center justify-between gap-2 xl:contents">
             <Link
               href="/"
               aria-label="Go to EstateDesk home"
@@ -83,7 +86,7 @@ export function PublicAccessHeader({
               <span className="truncate">EstateDesk</span>
             </Link>
 
-            <div ref={mobileMenuRef} className="relative flex items-center gap-2 2xl:hidden">
+            <div ref={mobileMenuRef} className="relative flex items-center gap-2 xl:hidden">
               <HeaderThemeToggle className="h-11 w-11" />
               <button data-workspace-action="true"
                 type="button"
@@ -122,17 +125,18 @@ export function PublicAccessHeader({
                   <HeaderThemeToggle className="h-9 w-9 rounded-lg" />
                 </div>
 
-                <nav className="mt-3 grid gap-1.5">
+                <nav aria-label="Public navigation" className="mt-3 grid gap-1.5">
                   <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
                     Explore
                   </p>
                   {visibleLinks.map((item) => {
-                    const isActive = active === item.key;
+                    const isActive = currentPage === item.key;
 
                     return (
                       <Link
                         key={item.href}
                         href={item.href}
+                        aria-current={isActive ? "page" : undefined}
                         onClick={() => setIsMenuOpen(false)}
                         className={`inline-flex min-h-11 items-center justify-between gap-3 rounded-lg border px-3 text-sm font-semibold transition ${
                           isActive
@@ -175,22 +179,22 @@ export function PublicAccessHeader({
             </div>
           </div>
 
-          <nav className="hidden 2xl:flex 2xl:w-auto 2xl:flex-1 2xl:items-center 2xl:justify-end 2xl:gap-2">
+          <nav aria-label="Public navigation" className="hidden xl:flex xl:w-auto xl:flex-1 xl:items-center xl:justify-end xl:gap-2">
             <div className="flex items-center gap-2">
               {visibleLinks.map((item) => {
-                const isActive = active === item.key;
+                const isActive = currentPage === item.key;
 
                 return (
                   <Link data-workspace-action="true"
                     key={item.href}
                     href={item.href}
-                    className={`public-access-nav-link inline-flex shrink-0 min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-lg border px-3 text-sm font-semibold transition xl:px-3.5 ${
+                    aria-current={isActive ? "page" : undefined}
+                    className={`public-access-nav-link inline-flex shrink-0 min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition ${
                       isActive
                         ? "public-access-nav-link-active border-slate-300 bg-white text-slate-950 shadow-sm dark:border-white/20 dark:bg-white dark:text-[#0b0f16]"
                         : "border-transparent bg-transparent text-slate-950 hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:border-white/25 dark:hover:bg-white/[0.14] dark:hover:text-white"
                     }`}
                   >
-                    <VisualSticker label={item.key} size="xs" />
                     <span className="max-w-full truncate text-current">{item.label}</span>
                   </Link>
                 );

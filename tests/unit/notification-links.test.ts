@@ -85,3 +85,10 @@ describe("notification deep links", () => {
     assert.equal(resolveNotificationActionUrl({ type: "ISSUE_CREATED", audience: "tenant", actionUrl: "/dashboard/tenant/issues?filter=open" }), "/dashboard/tenant/issues?filter=open");
   });
 });
+
+it("stored notification links reject external and ambiguous destinations", () => {
+  for (const actionUrl of ["//evil.example", "/\\evil.example", "/%2fevil.example", "/%5cevil.example", "/\nevil.example", "javascript:alert(1)", 42, null]) {
+    assert.equal(readNotificationActionUrl({ actionUrl }), null);
+  }
+  assert.equal(readNotificationActionUrl({ actionUrl: "/dashboard/org/payments?tab=pending#review" }), "/dashboard/org/payments?tab=pending#review");
+});

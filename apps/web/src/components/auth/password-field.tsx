@@ -43,8 +43,8 @@ export function PasswordField({
   const [visible, setVisible] = useState(false);
 
   return (
-    <label className="block" htmlFor={inputId}>
-      <span className={labelClassName}>{label}</span>
+    <div className="block">
+      <label className={labelClassName} htmlFor={inputId}>{label}</label>
 
       <div className={shellClassName}>
         {Icon ? (
@@ -82,6 +82,6 @@ export function PasswordField({
           <span className="sm:hidden">{visible ? "Hide" : "View"}</span>
         </button>
       </div>
-    </label>
+    </div>
   );
 }

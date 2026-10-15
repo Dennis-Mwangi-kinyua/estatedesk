@@ -2,7 +2,7 @@ import {
   formatBillingPlanLabel,
   planSupportsTrial,
 } from "@/lib/billing/plans";
-import type { BarPoint, TrendPoint } from "./types";
+import type { BarPoint } from "./types";
 
 export function formatNumber(value: number) {
   return new Intl.NumberFormat("en-KE").format(value);

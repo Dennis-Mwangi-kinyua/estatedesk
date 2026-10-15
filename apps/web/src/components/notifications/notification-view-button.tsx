@@ -5,6 +5,8 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { acknowledgeNotification } from "@/lib/notifications/acknowledge";
+import { readNotificationActionUrl } from "@/lib/push/notification-links";
 import { LoaderCircle, X } from "lucide-react";
 
 type NotificationViewButtonProps = {
@@ -32,28 +34,14 @@ export function NotificationViewButton({
   const [pending, setPending] = useState(false);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
+  const safeHref = readNotificationActionUrl({ actionUrl: href });
   const hasMessage = Boolean(title || message);
 
   async function acknowledge(refresh = true) {
-    const response = await fetch("/api/notifications/read", {
-      signal: AbortSignal.timeout(12_000),
-      keepalive: true,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(all ? { all: true } : { id: notificationId }),
-    });
-    const result = await response.json();
-    if (!response.ok) {
-      throw new Error(
-        typeof result.error === "string"
-          ? result.error
-          : "The notification could not be marked as read.",
-      );
-    }
-
-    window.dispatchEvent(new Event("estatedesk:notifications-read"));
+    if (!all && !notificationId) throw new Error("Missing notification.");
+    const actionUrl = await acknowledgeNotification(all ? { all: true } : { id: notificationId! });
     if (refresh) router.refresh();
-    return result.actionUrl as string | null;
+    return actionUrl;
   }
 
   async function view() {
@@ -73,13 +61,13 @@ export function NotificationViewButton({
       return;
     }
 
-    const opened = !all && Boolean(href);
-    if (opened) router.push(href!);
+    const opened = !all && Boolean(safeHref);
+    if (opened) router.push(safeHref!);
 
     try {
       const actionUrl = await acknowledge();
       onViewedAction?.();
-      const destination = all ? href : href ?? actionUrl;
+      const destination = all ? safeHref : safeHref ?? actionUrl;
       if (destination && !opened) router.push(destination);
     } catch {
       setError(
@@ -143,9 +131,9 @@ export function NotificationViewButton({
               ) : null}
 
               <div className="mt-6 flex flex-wrap justify-end gap-2 border-t border-border pt-4">
-                {href ? (
+                {safeHref ? (
                   <Link
-                    href={href}
+                    href={safeHref}
                     onClick={() => onViewedAction?.()}
                     className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
                   >

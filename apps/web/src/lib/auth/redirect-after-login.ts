@@ -1,59 +1,36 @@
 import type { OrgRole, PlatformRole } from "@prisma/client";
 
+export const ROLE_HOME_PATHS = {
+  ADMIN: "/dashboard/org",
+  MANAGER: "/dashboard/org",
+  OFFICE: "/dashboard/org/tenants",
+  ACCOUNTANT: "/dashboard/org/accounting",
+  CARETAKER: "/dashboard/caretaker/today",
+  TENANT: "/dashboard/tenant",
+  LANDLORD: "/dashboard/landlord",
+  SECURITY: "/dashboard/gate",
+} satisfies Record<OrgRole, string>;
+
 type RedirectInput = {
   platformRole: PlatformRole;
   activeOrgRole: OrgRole | null;
   activeOrgId: string | null;
   hasTenantProfile: boolean;
   hasServiceProvider?: boolean;
-  /** Restored from the platform mode cookie when present. */
   preferredPlatformMode?: "admin" | "developer" | null;
 };
 
+/** One policy for login, dashboard entry, and workspace home links. */
 export function getRedirectAfterLogin(input: RedirectInput): string {
-  const {
-    platformRole,
-    activeOrgRole,
-    activeOrgId,
-    hasTenantProfile,
-    preferredPlatformMode,
-  } = input;
-
-  if (platformRole === "SUPER_ADMIN" || platformRole === "PLATFORM_ADMIN") {
-    return preferredPlatformMode === "developer"
-      ? "/platform/developer"
-      : "/platform";
+  if (input.platformRole === "SUPER_ADMIN" || input.platformRole === "PLATFORM_ADMIN") {
+    return input.preferredPlatformMode === "developer" ? "/platform/developer" : "/platform";
   }
-
-  if (activeOrgRole === "SECURITY") return activeOrgId ? "/dashboard/gate" : "/login?error=missing_org_context";
-
-  if (activeOrgRole === "TENANT" || hasTenantProfile) {
-    return "/dashboard/tenant";
+  // A historical tenant profile must not override the user's active staff role.
+  if (input.activeOrgRole) {
+    if (!input.activeOrgId) return "/login?error=missing_org_context";
+    return ROLE_HOME_PATHS[input.activeOrgRole];
   }
-
-  if (activeOrgRole === "LANDLORD") {
-    return "/dashboard/landlord";
-  }
-
-  if (
-    activeOrgRole === "CARETAKER" ||
-    activeOrgRole === "ADMIN" ||
-    activeOrgRole === "MANAGER" ||
-    activeOrgRole === "OFFICE" ||
-    activeOrgRole === "ACCOUNTANT"
-  ) {
-    if (!activeOrgId) {
-      return "/login?error=missing_org_context";
-    }
-
-    if (activeOrgRole === "CARETAKER") {
-      return "/dashboard/caretaker";
-    }
-
-    return "/dashboard/org";
-  }
-
+  if (input.hasTenantProfile) return "/dashboard/tenant";
   if (input.hasServiceProvider) return "/provider";
-
   return "/login?error=no_active_role";
 }

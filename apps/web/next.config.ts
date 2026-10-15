@@ -6,7 +6,6 @@ import type { NextConfig } from "next";
 import { contentSecurityPolicy } from "./src/lib/security/content-security-policy";
 import { config as loadEnv } from "dotenv";
 
-
 /** Monorepo root (estatedesk-main) — keeps Next resolving hoisted node_modules correctly. */
 const monorepoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 // npm workspace commands run from apps/web; also load the shared root environment.
@@ -182,14 +181,13 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        source: "/offline",
-        headers: PUBLIC_FAST_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/offline-shell.html",
-        headers: PUBLIC_FAST_EDGE_CACHE_HEADERS,
-      },
+      ...[
+        "/offline",
+        "/offline-shell.html",
+        "/vacancies",
+        "/vacancies/:path*",
+      ].map((source) => ({ source, headers: PUBLIC_FAST_EDGE_CACHE_HEADERS })),
+
       {
         source: "/icons/:path*",
         headers: [
@@ -199,86 +197,27 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        source: "/",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/services",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/faq",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/landlord-software",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/rent-tracking-software",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/water-billing-software",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/property-management-software-kenya",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/property-management-software-dubai",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/privacy",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/terms",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/security",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/data-processing",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/status",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/pricing",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/contact",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/guides",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/guides/:path*",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/property-management-markets",
-        headers: PUBLIC_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/vacancies",
-        headers: PUBLIC_FAST_EDGE_CACHE_HEADERS,
-      },
-      {
-        source: "/vacancies/:path*",
-        headers: PUBLIC_FAST_EDGE_CACHE_HEADERS,
-      },
+      ...[
+        "/",
+        "/services",
+        "/faq",
+        "/landlord-software",
+        "/rent-tracking-software",
+        "/water-billing-software",
+        "/property-management-software-kenya",
+        "/property-management-software-dubai",
+        "/privacy",
+        "/terms",
+        "/security",
+        "/data-processing",
+        "/status",
+        "/pricing",
+        "/contact",
+        "/guides",
+        "/guides/:path*",
+        "/property-management-markets",
+      ].map((source) => ({ source, headers: PUBLIC_EDGE_CACHE_HEADERS })),
+
       {
         source: "/images/:path*",
         headers: [
@@ -288,98 +227,31 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        source: "/profile/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/dashboard/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/platform/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/api/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/print/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/staff/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/tenants/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/buildings/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/charges/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/reports/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/move-outs/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/change-password",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/taxes/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/api-keys",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/access-denied",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/sign-lease/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/account-suspended",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/service-terminated",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/properties",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/properties/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/units",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/units/:path*",
-        headers: PRIVATE_HEADERS,
-      },
-      {
-        source: "/are-you-lost",
-        headers: PRIVATE_HEADERS,
-      },
+      ...[
+        "/profile/:path*",
+        "/dashboard/:path*",
+        "/platform/:path*",
+        "/api/:path*",
+        "/print/:path*",
+        "/staff/:path*",
+        "/tenants/:path*",
+        "/buildings/:path*",
+        "/charges/:path*",
+        "/reports/:path*",
+        "/move-outs/:path*",
+        "/change-password",
+        "/taxes/:path*",
+        "/api-keys",
+        "/access-denied",
+        "/sign-lease/:path*",
+        "/account-suspended",
+        "/service-terminated",
+        "/properties",
+        "/properties/:path*",
+        "/units",
+        "/units/:path*",
+        "/are-you-lost",
+      ].map((source) => ({ source, headers: PRIVATE_HEADERS })),
     ];
   },
 };

@@ -1,13 +1,5 @@
 import crypto from "node:crypto";
-import {
-  getEphemeralCookieOptions,
-  getPlatformUnlockCookieName,
-  getRedirectMarkerCookieName,
-  getScopedCookieOptions,
-  getSessionCookieName,
-  getSessionCookieOptions,
-  isSessionTokenShape,
-} from "@/lib/auth/cookie-policy";
+import { isSessionTokenShape } from "@/lib/auth/cookie-policy";
 
 const SIGNED_COOKIE_VERSION = "v1";
 

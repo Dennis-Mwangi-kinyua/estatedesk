@@ -5,10 +5,13 @@ import { canDiscoverWorkspaceHref } from "@/lib/permissions/workspace-access";
 import { useCallback, useMemo, useRef } from "react";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 import { usePathname } from "next/navigation";
+import { NavigationSections } from "@/components/navigation/navigation-sections";
+import { WORKSPACE_NAVIGATION, activeNavigationHref } from "@/lib/navigation/workspace-navigation";
+import { ROLE_HOME_PATHS } from "@/lib/auth/redirect-after-login";
 import { X } from "lucide-react";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import {
-  SIDEBAR_LINKS, SIDEBAR_GROUPS, sidebarGroup,
+  SIDEBAR_LINKS,
   type OrgRole,
 } from "./org-sidebar-links";
 import {
@@ -40,6 +43,9 @@ export function OrgDashboardSidebar({
     return SIDEBAR_LINKS.filter((item) => access ? canDiscoverWorkspaceHref(access, item.href) : item.roles.includes(role));
   }, [role, access]);
 
+  const activeHref = activeNavigationHref(pathname, visibleLinks);
+  const homeHref = ROLE_HOME_PATHS[role];
+
   const closeMobile = useCallback(() => {
     setMobileOpen(false);
   }, [setMobileOpen]);
@@ -50,17 +56,12 @@ export function OrgDashboardSidebar({
     <>
       <aside className="ed-shell-panel fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r lg:flex">
         <div className="border-b border-slate-200 px-5 py-5 dark:border-white/10">
-          <SidebarBrand organizationName={organizationName} />
+          <SidebarBrand organizationName={organizationName} homeHref={homeHref} />
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {SIDEBAR_GROUPS.map((group) => <div key={group}>{visibleLinks.some(item => sidebarGroup(item.href) === group) && <p className="px-3 pb-2 pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group}</p>}{visibleLinks.filter(item => sidebarGroup(item.href) === group).map((item) => (
-            <SidebarNavItem
-              key={item.href}
-              item={item}
-              pathname={pathname}
-            />
-          ))}</div>)}
+        <nav aria-label="Organisation navigation" className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+          <NavigationSections items={visibleLinks} sections={WORKSPACE_NAVIGATION.org}
+            renderItem={item => <SidebarNavItem item={item} pathname={pathname} active={item.href === activeHref} />} />
         </nav>
 
         <div className="space-y-2 p-4">
@@ -102,7 +103,7 @@ export function OrgDashboardSidebar({
             <div className="shrink-0">
               <div className="flex items-center justify-between border-b border-slate-200 px-4 pb-4 pt-safe dark:border-white/10">
                 <div className="min-w-0">
-                  <SidebarBrand organizationName={organizationName} />
+                  <SidebarBrand organizationName={organizationName} homeHref={homeHref} />
                 </div>
 
                 <button data-workspace-action="true"
@@ -116,17 +117,10 @@ export function OrgDashboardSidebar({
               </div>
             </div>
 
-            <nav className="ios-scroll min-h-0 flex-1 overflow-y-auto px-3 py-4 overscroll-contain">
+            <nav aria-label="Organisation navigation" className="ios-scroll min-h-0 flex-1 overflow-y-auto px-3 py-4 overscroll-contain">
               <div className="space-y-2 pb-2">
-                {SIDEBAR_GROUPS.map((group) => <div key={group}>{visibleLinks.some(item => sidebarGroup(item.href) === group) && <p className="px-3 pb-2 pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group}</p>}{visibleLinks.filter(item => sidebarGroup(item.href) === group).map((item) => (
-                  <SidebarNavItem
-                    key={item.href}
-                    item={item}
-                    pathname={pathname}
-                    mobile
-                    onNavigate={closeMobile}
-                  />
-                ))}</div>)}
+                <NavigationSections items={visibleLinks} sections={WORKSPACE_NAVIGATION.org}
+                  renderItem={item => <SidebarNavItem item={item} pathname={pathname} active={item.href === activeHref} mobile onNavigate={closeMobile} />} />
               </div>
             </nav>
 

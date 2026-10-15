@@ -13,14 +13,7 @@ import {
   parsePage,
   parseStatusFilter,
 } from "./helpers";
-import {
-  PROPERTY_PAGE_SIZE,
-  UNIT_PAGE_SIZE,
-  type PropertyDirectoryItem,
-  type UnitMixGroupItem,
-  type UnitsPageData,
-  type UnitsPageView,
-} from "./types";
+import { PROPERTY_PAGE_SIZE, UNIT_PAGE_SIZE, type PropertyDirectoryItem, type UnitMixGroupItem, type UnitsPageData } from "./types";
 
 type ManagementSession = Awaited<ReturnType<typeof requireManagementAccess>>;
 

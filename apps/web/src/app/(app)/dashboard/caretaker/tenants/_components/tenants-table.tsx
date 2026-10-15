@@ -1,14 +1,7 @@
 import { DeferredLink } from "@/components/navigation/app-links";
 import { ContactActions } from "@/app/(app)/dashboard/caretaker/_components/contact-actions";
 import { getCaretakerTenantHref } from "@/app/(app)/dashboard/caretaker/_lib/paths";
-import {
-  formatDate,
-  formatTenantRent,
-  getCurrentLease,
-  leaseStatusClasses,
-  statusClasses,
-  tenantInitials,
-} from "../_lib/helpers";
+import { formatDate, formatTenantRent, getCurrentLease, leaseStatusClasses, tenantInitials } from "../_lib/helpers";
 import type { CaretakerTenantsPageData } from "../_lib/types";
 
 type TenantsTableProps = {

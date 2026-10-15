@@ -12,6 +12,7 @@ import { isActivePath, type SidebarLink } from "./org-sidebar-links";
 type SidebarNavItemProps = {
   item: SidebarLink;
   pathname: string;
+  active?: boolean;
   mobile?: boolean;
   onNavigate?: () => void;
 };
@@ -20,9 +21,10 @@ export const SidebarNavItem = memo(function SidebarNavItem({
   item,
   pathname,
   mobile = false,
+  active: activeOverride,
   onNavigate,
 }: SidebarNavItemProps) {
-  const active = isActivePath(pathname, item.href);
+  const active = activeOverride ?? isActivePath(pathname, item.href);
 
   if (mobile) {
     return (
@@ -88,11 +90,13 @@ export const SidebarNavItem = memo(function SidebarNavItem({
 
 export const SidebarBrand = memo(function SidebarBrand({
   organizationName,
+  homeHref = "/dashboard/org",
 }: {
   organizationName: string;
+  homeHref?: string;
 }) {
   return (
-    <HoverPrefetchLink href="/dashboard/org" className="flex items-center gap-3">
+    <HoverPrefetchLink href={homeHref} className="flex items-center gap-3">
       <div className="ed-brand-mark flex h-10 w-10 items-center justify-center rounded-lg shadow-sm">
         <Building2 className="h-5 w-5" />
       </div>

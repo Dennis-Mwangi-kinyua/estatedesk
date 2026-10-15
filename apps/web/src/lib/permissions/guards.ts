@@ -1,5 +1,7 @@
 import "server-only";
 
+import { getOrganizationSummary } from "@/lib/organizations/summary";
+
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
@@ -9,7 +11,6 @@ import {
   type PlatformRole,
 } from "@/lib/auth/session";
 import { auditDeniedAccess } from "@/lib/audit/security";
-import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
 import {
   hasOrgRole,
@@ -106,14 +107,7 @@ export async function requireOrgMembership(
     }
   }
 
-  const org = await retryTransientDatabaseOperation(
-    () =>
-      prisma.organization.findUnique({
-        where: { id: session.activeOrgId! },
-        select: { name: true, status: true, deletedAt: true },
-      }),
-    { label: "requireOrgMembership-find-org" },
-  );
+  const org = await getOrganizationSummary(session.activeOrgId!);
 
   if (!org || org.deletedAt || org.status !== "ACTIVE") {
     redirect(

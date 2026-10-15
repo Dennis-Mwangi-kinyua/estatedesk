@@ -87,7 +87,7 @@ export async function createProfessionalPdf(input: { title: string; serialNumber
     rows.forEach((row, rowIndex) => {
       const cells = columns.map((col, i) => wrap(row[i] ?? "", col.width - 14, 9));
       const count = Math.max(...cells.map(lines => lines.length));
-      ensure(Math.min(count * 14 + 10, 80)) && tableHeader();
+      if (ensure(Math.min(count * 14 + 10, 80))) tableHeader();
       for (let lineIndex = 0; lineIndex < count; lineIndex++) {
         if (ensure(22)) tableHeader();
         if (rowIndex % 2 === 0) page.drawRectangle({ x: margin, y: y - 4, width, height: 14, color: rgb(.98, .99, .99) });

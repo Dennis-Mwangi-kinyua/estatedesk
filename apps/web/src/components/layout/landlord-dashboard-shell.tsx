@@ -3,6 +3,8 @@
 import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 
 
+import { NavigationSections } from "@/components/navigation/navigation-sections";
+import { WORKSPACE_NAVIGATION, activeNavigationHref } from "@/lib/navigation/workspace-navigation";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 import { usePathname } from "next/navigation";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
@@ -70,23 +72,23 @@ function LandlordNav({
     return () => window.removeEventListener("hashchange", updateHash);
   }, []);
 
+  const activeHref = activeNavigationHref(pathname, navItems, activeHash);
+
   return (
     <nav className="space-y-2" aria-label="Landlord navigation">
-      {navItems.map((item) => {
-        const hashIndex = item.href.indexOf("#");
-        const hasHash = hashIndex >= 0;
-        const itemHash = hasHash ? item.href.slice(hashIndex) : "";
-        const pathOnly = hasHash ? item.href.slice(0, hashIndex) : item.href;
-        const active = hasHash
-          ? pathname === pathOnly && activeHash === itemHash
-          : pathname === item.href || pathname.startsWith(`${item.href}/`);
+      <NavigationSections items={navItems} sections={WORKSPACE_NAVIGATION.landlord} renderItem={item => {
+        const active = activeHref === item.href;
 
         return (
           <HoverPrefetchLink
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            onClick={onNavigate}
+            onClick={event => {
+              if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+              setActiveHash(item.href.includes("#") ? `#${item.href.split("#")[1]}` : "#overview");
+              onNavigate?.();
+            }}
             className={[
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
               active
@@ -107,7 +109,7 @@ function LandlordNav({
             <span className="truncate">{item.label}</span>
           </HoverPrefetchLink>
         );
-      })}
+      }} />
     </nav>
   );
 }
@@ -125,7 +127,7 @@ export function LandlordDashboardShell({
 
   return (
     <div data-workspace="landlord" className="app-mobile-canvas ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden">
-      <aside className="ed-shell-panel fixed inset-y-0 left-0 z-[100] hidden w-72 border-r p-4 lg:block">
+      <aside className="ed-shell-panel fixed inset-y-0 left-0 z-[100] hidden w-72 flex-col border-r p-4 lg:flex">
         <HoverPrefetchLink href="/dashboard/landlord" className="flex items-center gap-3">
           <div className="ed-brand-mark flex h-10 w-10 items-center justify-center rounded-lg shadow-sm">
             <Building2 className="h-5 w-5" />
@@ -147,15 +149,15 @@ export function LandlordDashboardShell({
           </p>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 min-h-0 flex-1 overflow-y-auto">
           <LandlordNav />
         </div>
 
-        <div className="absolute inset-x-4 bottom-20">
+        <div className="shrink-0 border-t border-border pb-2 pt-3">
           <InAppHelpNav workspace="landlord" compact />
         </div>
 
-        <form data-logout-form action={logoutAction} className="absolute inset-x-4 bottom-4">
+        <form data-logout-form action={logoutAction} className="shrink-0">
           <button data-action-kind="destructive" data-workspace-action="true"
             type="submit"
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"

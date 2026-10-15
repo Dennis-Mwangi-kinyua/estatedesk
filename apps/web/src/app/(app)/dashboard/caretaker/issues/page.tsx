@@ -1,4 +1,4 @@
-import { Prisma, TicketPriority, TicketStatus } from "@prisma/client";
+import { Prisma, TicketStatus } from "@prisma/client";
 import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
 import { requireCaretakerAccess } from "@/lib/permissions/guards";
 import { IssuesWorkspace } from "@/app/(app)/dashboard/caretaker/issues/_components/issues-workspace";

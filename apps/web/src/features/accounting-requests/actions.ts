@@ -2,10 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import {
-  AccountingRequestStatus,
-  AccountingRequestType,
-} from "@prisma/client";
+import { AccountingRequestType } from "@prisma/client";
 import { postAccountingRequestToPayables } from "@/lib/accounting/post-request-to-payables";
 import { ensureAccountingFoundation, postJournalEntry } from "@/lib/accounting/engine";
 import {

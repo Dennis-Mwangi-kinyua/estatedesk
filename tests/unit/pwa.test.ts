@@ -89,13 +89,10 @@ describe("service worker", () => {
       serviceWorker,
       /const CACHE_VERSION = "estatedesk-pwa-v\d+\.\d+\.\d+"/,
     );
-    assert.match(serviceWorker, /requestBadgeSync/);
-    assert.match(serviceWorker, /SYNC_APP_BADGE/);
     assert.match(serviceWorker, /SYNC_CARETAKER_OFFLINE_QUEUE/);
     assert.match(serviceWorker, /caretaker-offline-queue-sync/);
     assert.match(serviceWorker, /\/offline-shell\.html/);
     assert.match(serviceWorker, /Promise\.allSettled/);
-    assert.match(serviceWorker, /openOrFocusClient/);
     assert.doesNotMatch(serviceWorker, /self\.addEventListener\("push"/);
     assert.doesNotMatch(serviceWorker, /self\.addEventListener\("notificationclick"/);
   });

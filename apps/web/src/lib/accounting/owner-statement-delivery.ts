@@ -4,7 +4,7 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 import { generateOwnerStatementPdf } from "@/lib/documents/owner-statement-pdf";
 import { getOwnerStatement } from "@/lib/accounting/owner-statements";
 import { previousCalendarMonthRange, shouldSendOwnerStatementsToday } from "@/lib/accounting/owner-statement-policy";
-import { getAccountingSettings } from "@/lib/accounting/settings";
+
 import { sendOwnerStatementEmail } from "@/lib/notifications/owner-statement-email";
 
 type AccountingDb = PrismaClient | Prisma.TransactionClient;

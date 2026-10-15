@@ -5,7 +5,7 @@ import { OrgDashboardShell } from "@/components/layout/org-dashboard-shell";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { requireActiveSubscription } from "@/lib/billing/subscription-access";
 import { SubscriptionWarning } from "@/components/billing/subscription-warning";
-import { prisma } from "@/lib/prisma";
+import { getOrganizationSummary } from "@/lib/organizations/summary";
 import { UnreadNotificationAlertsPanel } from "@/components/notifications/unread-notification-alerts-panel";
 import {
   clearSupportSessionCookie,
@@ -26,26 +26,12 @@ export default async function OrgLayout({
   children: ReactNode;
 }) {
   const session = await requireManagementAccess();
-  const access = await requireActiveSubscription(session.activeOrgId!);
-  const membership = await prisma.membership.findFirst({
-    where: {
-      userId: session.userId,
-      orgId: session.activeOrgId!,
-      employmentEndedAt: null,
-      org: {
-        deletedAt: null,
-        status: "ACTIVE",
-      },
-    },
-    select: {
-      role: true,
-      org: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
+  const [access, organization, initialSupportSession, unread] = await Promise.all([
+    requireActiveSubscription(session.activeOrgId!),
+    getOrganizationSummary(session.activeOrgId!),
+    getActiveSupportSession(session.userId),
+    getUnreadNotificationAlert({ audience: "org_staff", orgId: session.activeOrgId!, userId: session.userId }).catch(() => null),
+  ]);
   const shellRole =
     session.activeOrgRole === "ADMIN" ||
     session.activeOrgRole === "MANAGER" ||
@@ -53,10 +39,10 @@ export default async function OrgLayout({
     session.activeOrgRole === "ACCOUNTANT"
       ? session.activeOrgRole
       : "ADMIN";
-  const organizationName = membership?.org.name ?? "EstateDesk";
-  const userRole = roleLabels[membership?.role ?? shellRole] ?? "Organization Staff";
+  const organizationName = organization?.name ?? "EstateDesk";
+  const userRole = roleLabels[shellRole] ?? "Organization Staff";
 
-  let supportSession = await getActiveSupportSession(session.userId);
+  let supportSession = initialSupportSession;
   if (supportSession && supportSession.orgId !== session.activeOrgId) {
     supportSession = null;
   }
@@ -72,7 +58,6 @@ export default async function OrgLayout({
     supportSession = null;
   }
 
-  const unread = await getUnreadNotificationAlert({ audience: "org_staff", orgId: session.activeOrgId!, userId: session.userId }).catch(() => null);
   return (
     <OrgDashboardShell
       unreadCount={unread?.count ?? 0}

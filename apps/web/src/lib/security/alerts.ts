@@ -40,6 +40,7 @@ export async function sendSecurityAlert(input: SecurityAlertInput) {
 
   try {
     const response = await fetch(webhookUrl, {
+      signal: AbortSignal.timeout(5_000),
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

@@ -18,8 +18,6 @@ type VacancyListMetadataInput = {
 export function vacancyListPaginationMetadata({
   page,
   totalItems,
-  title,
-  description,
   path,
   filterParams = {},
 }: VacancyListMetadataInput): Pick<Metadata, "alternates" | "pagination"> {

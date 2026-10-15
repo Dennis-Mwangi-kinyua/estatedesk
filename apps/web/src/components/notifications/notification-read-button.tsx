@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { acknowledgeNotification } from "@/lib/notifications/acknowledge";
 import { LoaderCircle } from "lucide-react";
 
 type NotificationReadButtonProps =
@@ -36,23 +37,8 @@ export function NotificationReadButton({
     setError("");
 
     try {
-      const response = await fetch("/api/notifications/read", {
-        signal: AbortSignal.timeout(12_000),
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(all ? { all: true } : { id: notificationId }),
-      });
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(
-          typeof result.error === "string"
-            ? result.error
-            : "Unable to mark notifications as read.",
-        );
-      }
-
+      await acknowledgeNotification(all ? { all: true } : { id: notificationId! });
       setComplete(true);
-      window.dispatchEvent(new Event("estatedesk:notifications-read"));
       router.refresh();
     } catch (failure) {
       setError(

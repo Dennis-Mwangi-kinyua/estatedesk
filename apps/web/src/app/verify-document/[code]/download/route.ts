@@ -1,10 +1,7 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { generateInvoicePdf } from "@/lib/documents/invoice-pdf";
-import {
-  isVerifiedDocumentAccessible,
-  loadVerifiedPeriodInvoiceByCode,
-} from "@/lib/documents/tenant-period-invoice";
+import { loadVerifiedPeriodInvoiceByCode } from "@/lib/documents/tenant-period-invoice";
 import { hashDocumentContent, verifiedDocumentDownloadPath } from "@/lib/documents/identity";
 import { prisma } from "@/lib/prisma";
 

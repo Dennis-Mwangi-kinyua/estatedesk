@@ -2,7 +2,7 @@
 import { DUPLICATE_ID_MESSAGE, isDuplicateIdentityError } from "@/features/identity/policy";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+
 import { hash } from "bcryptjs";
 import { OrgRole as PrismaOrgRole, Prisma, UserStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";

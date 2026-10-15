@@ -37,6 +37,8 @@ jobs:
     env:
       DATABASE_URL: postgresql://estatedesk:ci-only-password@localhost:5432/estatedesk_test
       DIRECT_URL: postgresql://estatedesk:ci-only-password@localhost:5432/estatedesk_test
+      AUTH_SECRET: ci-only-cookie-signing-secret-for-disposable-data
+      ROLE_WORKSPACE_FIXTURE: /tmp/estatedesk-role-workspaces.json
 
     steps:
       - name: Check out repository
@@ -81,8 +83,41 @@ jobs:
           TEST_DATABASE_URL: postgresql://estatedesk:ci-only-password@localhost:5432/estatedesk_test
         run: npm run test:integration
 
+      - name: Seed fictional authenticated workspaces
+        env:
+          TEST_DATABASE_URL: postgresql://estatedesk:ci-only-password@localhost:5432/estatedesk_test
+          TSX_TSCONFIG_PATH: apps/web/tsconfig.json
+        run: node --conditions=react-server --import tsx scripts/qa/seed-role-workspaces.ts
+
       - name: Run browser smoke tests
+        env:
+          TEST_DATABASE_URL: postgresql://estatedesk:ci-only-password@localhost:5432/estatedesk_test
         run: npm run test:e2e
+
+      - name: Verify disposable backup recovery
+        env:
+          ESTATEDESK_ENV_LOADED: "1"
+          BACKUP_DATABASE_URL: postgresql://estatedesk:ci-only-password@localhost:5432/estatedesk_test
+          RESTORE_DATABASE_URL: postgresql://estatedesk:ci-only-password@localhost:5432/estatedesk_restore_test
+          CONFIRM_DISPOSABLE_RESTORE_DATABASE: "YES"
+          PGPASSWORD: ci-only-password
+        run: |
+          createdb -h localhost -U estatedesk estatedesk_restore_test
+          export BACKUP_DIR="$RUNNER_TEMP/recovery"
+          export EVIDENCE_DIR="$RUNNER_TEMP/recovery-evidence"
+          npm run backup:database
+          backups=("$BACKUP_DIR"/*.dump)
+          test "${#backups[@]}" -eq 1
+          export BACKUP_FILE="${backups[0]}"
+          npm run backup:validate
+          npm run restore:drill
+
+      - name: Retain sanitized recovery evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: disposable-recovery-evidence
+          path: ${{ runner.temp }}/recovery-evidence/*.json
+          retention-days: 30
 
       - name: Build production application
         env:

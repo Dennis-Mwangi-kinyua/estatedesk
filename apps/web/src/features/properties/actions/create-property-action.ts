@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
-import { requireUserSession } from "@/lib/auth/session";
+
 import {
   assertCanCreateProperty,
   assertCanCreateUnit,

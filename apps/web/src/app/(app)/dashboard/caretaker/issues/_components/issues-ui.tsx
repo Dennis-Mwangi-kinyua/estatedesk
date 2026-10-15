@@ -3,10 +3,6 @@ import type { ComponentType, ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import { Wrench } from "@/components/shared/colored-icons";
 import { InAppGuideLink } from "@/components/help/in-app-guide-link";
-import {
-  panelBodyClassName,
-  panelShellClassName,
-} from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 
 export {
   ErrorStateCard,

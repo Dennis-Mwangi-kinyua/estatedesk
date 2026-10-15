@@ -2,15 +2,11 @@
 import { PlatformBrand } from "./platform-brand";
 import { WorkspaceIdentity } from "@/components/shared/workspace-identity";
 
-import { SidebarSticker } from "@/components/shared/sidebar-sticker";
+import { PlatformNavigation } from "./platform-navigation";
 
 import "../platform-glass.css";
 
-import { WorkspaceActions } from "@/components/shared/workspace-actions";
-
-
 import Link from "@/components/navigation/workspace-link";
-import { usePathname } from "next/navigation";
 import { ReactNode, useMemo, useState } from "react";
 import { LogOut } from "@/components/shared/colored-icons";
 import { InAppHelpNav } from "@/components/help/in-app-help-nav";
@@ -18,7 +14,6 @@ import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import {
   getNavItemsForMode,
-  isNavItemActive,
   modeMeta,
   type PlatformMode,
 } from "../_lib/nav";
@@ -36,7 +31,6 @@ function PlatformShellInner({
   fullName: string;
   isSuperAdmin: boolean;
 }) {
-  const pathname = usePathname();
   const [navQuery, setNavQuery] = useState("");
   const { mode } = usePlatformMode();
   const navItems = useMemo(
@@ -64,41 +58,8 @@ function PlatformShellInner({
           </div>
 
           <label className="mx-3 mt-3"><span className="sr-only">Find an admin tool</span><input type="search" placeholder="Find a tool…" value={navQuery} onChange={(event) => setNavQuery(event.target.value)} className="w-full rounded-xl border border-border bg-muted/40 px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-primary" /></label>
-          <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-4">
-            {navItems.filter((item) => `${item.label} ${item.description ?? ""}`.toLowerCase().includes(navQuery.toLowerCase().trim())).map((item) => {
-              const active = isNavItemActive(pathname, item.href);
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={[
-                    "platform-sidebar-link group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                    active
-                      ? isDeveloper
-                        ? "bg-teal-600 text-white dark:bg-teal-500"
-                        : "ed-nav-item-active bg-primary text-primary-foreground"
-                      : "ed-nav-item text-muted-foreground hover:bg-muted/70 hover:text-foreground",
-                  ].join(" ")}
-                >
-                  <SidebarSticker href={item.href} />
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  {item.superAdminOnly ? (
-                    <span
-                      className={[
-                        "shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide",
-                        active
-                          ? "bg-white/20 text-white"
-                          : "bg-amber-500/15 text-amber-800 dark:text-amber-200",
-                      ].join(" ")}
-                    >
-                      SA
-                    </span>
-                  ) : null}
-                </Link>
-              );
-            })}
+          <nav aria-label="Platform navigation" className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-4">
+            <PlatformNavigation items={navItems} mode={mode} query={navQuery} />
           </nav>
 
           <div className="shrink-0 border-t border-border p-4">
@@ -159,7 +120,6 @@ function PlatformShellInner({
               <div className="platform-content-frame ios-panel h-full min-w-0 overflow-hidden rounded-none border-0 border-border bg-card/90 shadow-none backdrop-blur-sm dark:bg-card/80 sm:rounded-xl sm:border sm:shadow-sm">
                 <div className="platform-theme-content ed-mobile-content h-full min-w-0 overflow-x-hidden overflow-y-auto overscroll-y-contain p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-foreground sm:p-5 lg:p-6">
                   <DeveloperSensitiveBanner isSuperAdmin={isSuperAdmin} />
-                  {pathname !== "/platform" && pathname !== "/platform/developer" && pathname !== "/platform/users/new" && <WorkspaceActions />}
                   {children}
                 </div>
               </div>

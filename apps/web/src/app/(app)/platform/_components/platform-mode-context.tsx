@@ -91,10 +91,6 @@ function writeLastPath(mode: PlatformMode, pathname: string) {
   }
 }
 
-function getServerSnapshot(): PlatformMode {
-  return "admin";
-}
-
 export function PlatformModeProvider({
   children,
   initialPreferredMode = "admin",

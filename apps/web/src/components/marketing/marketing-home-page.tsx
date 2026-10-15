@@ -139,7 +139,6 @@ export default function MarketingHomePage() {
       <OperationsShowcase
         standalone
         publicHeaderActive="home"
-        showPricingNav={false}
         showFooter={false}
         variant="rentals"
       />

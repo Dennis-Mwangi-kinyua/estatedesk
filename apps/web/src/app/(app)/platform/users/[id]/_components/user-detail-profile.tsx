@@ -1,34 +1,17 @@
-import Link from "@/components/navigation/workspace-link";
-import { PlatformPermissionType, PlatformRole } from "@prisma/client";
-import { ArrowLeft, BadgeCheck, Crown, Shield, User2, XCircle } from "lucide-react";
-import { Building2, CalendarDays, CircleCheck as CheckCircle2, KeyRound, LogIn, Mail, Phone, Save, Trash2, UsersRound as Users } from "@/components/shared/colored-icons";
-import {
-  archiveOrphanPlatformUser,
-  resetPlatformUserPassword,
-  updatePlatformUserPermissions,
-  updatePlatformUserProfile,
-  updatePlatformUserStatus,
-} from "../actions";
+import { BadgeCheck, Crown, Shield, User2 } from "lucide-react";
+import { Building2, CalendarDays, KeyRound, LogIn, Mail, Phone, UsersRound as Users } from "@/components/shared/colored-icons";
+
 import { formatDate, getInitials } from "../_lib/helpers";
 import type { getPlatformUserDetails } from "../_lib/queries";
-import {
-  ControlField,
-  EmptyState,
-  InfoRow,
-  MetricCard,
-  MiniTag,
-  SummaryRow,
-  Tag,
-} from "./user-detail-ui";
+import { EmptyState, InfoRow, MiniTag, Tag } from "./user-detail-ui";
 
 export type UserDetailWorkspaceProps = {
   details: Awaited<ReturnType<typeof getPlatformUserDetails>>;
   notice: ReturnType<typeof import("../_lib/helpers").getNotice>;
 };
 
-
-export function UserDetailProfile({ details, notice }: UserDetailWorkspaceProps) {
-  const { user, grantedPermissions, revokedPermissions, isOrphanUser, archiveConfirmation, grantedPermissionSet } = details;
+export function UserDetailProfile({ details }: UserDetailWorkspaceProps) {
+  const { user } = details;
 
   return (
           <section className="space-y-4 sm:space-y-6">

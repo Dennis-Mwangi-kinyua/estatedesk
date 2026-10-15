@@ -1,5 +1,5 @@
 import { requireTenantAccess } from "@/lib/permissions/guards";
-import { PageShell, SurfaceCard, StatCard, MutedBand, MutedPanel } from "@/components/theme/ed-dashboard-shell";
+import { PageShell, SurfaceCard, StatCard } from "@/components/theme/ed-dashboard-shell";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
@@ -86,7 +86,6 @@ function getDocumentUrl(asset: { key?: string | null }) {
 
   return null;
 }
-
 
 function EmptyState() {
   return (

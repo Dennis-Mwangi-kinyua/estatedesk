@@ -6,14 +6,7 @@ import {
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
 import { formatCurrency } from "../_lib/helpers";
 import { CURRENT_PERIOD, type CaretakerWaterBillsData } from "../_lib/types";
-import {
-  getBillHref,
-  getPendingUnitHref,
-  getReadingHref,
-  IssuedBillCard,
-  MeterReadingCard,
-  StatusBadge,
-} from "./water-bills-ui";
+import { getPendingUnitHref, getReadingHref, IssuedBillCard, MeterReadingCard, StatusBadge } from "./water-bills-ui";
 
 export function WaterBillsPendingSection({
   data,

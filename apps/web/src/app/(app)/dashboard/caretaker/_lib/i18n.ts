@@ -3,6 +3,7 @@ export type CaretakerLocale = "en" | "sw";
 export const CARETAKER_LOCALE_STORAGE_KEY = "estatedesk-caretaker-locale";
 
 export const CARETAKER_NAV_KEYS = [
+  "navGate",
   "navToday",
   "navSearch",
   "navCalendar",
@@ -63,6 +64,7 @@ export const CARETAKER_I18N = {
     language: "Language",
     english: "English",
     swahili: "Swahili",
+    navGate: "Gate access",
     navToday: "Today's Work",
     navSearch: "Search",
     navCalendar: "Calendar",
@@ -222,6 +224,7 @@ export const CARETAKER_I18N = {
     language: "Lugha",
     english: "Kiingereza",
     swahili: "Kiswahili",
+    navGate: "Lango na wageni",
     navToday: "Kazi ya leo",
     navSearch: "Tafuta",
     navCalendar: "Kalenda",
@@ -363,6 +366,7 @@ export const CARETAKER_NAV_ITEMS: Array<{
   href: string;
   labelKey: CaretakerNavKey;
 }> = [
+  { href: "/dashboard/gate", labelKey: "navGate" },
   { href: "/dashboard/caretaker/today", labelKey: "navToday" },
   { href: "/dashboard/caretaker/search", labelKey: "navSearch" },
   { href: "/dashboard/caretaker/calendar", labelKey: "navCalendar" },

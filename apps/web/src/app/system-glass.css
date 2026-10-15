@@ -88,7 +88,7 @@ body.estate-glass-system {
 
 @layer utilities {
   body.estate-glass-system .ed-theme-page { background: transparent !important; }
-  body.estate-glass-system .ed-theme-page > section[class*="border-y"] {
+  body.estate-glass-system .ed-theme-page > section[class*="border-y"]:not(.ed-theme-band-inverse) {
     background: var(--system-glass-fill) !important;
     border-color: var(--system-glass-border) !important;
   }
@@ -181,4 +181,70 @@ body.estate-glass-system {
 @layer utilities {
   body.estate-glass-system .login-screen { background: var(--system-glass-canvas) !important; }
   body.estate-glass-system .login-shell > .absolute.inset-0 { background: transparent !important; }
+}
+
+/* Size the engineering workspace by its available space beside the sidebar. */
+.developer-glass-page {
+  container-type: inline-size;
+  overflow-wrap: anywhere;
+}
+.developer-glass-page :is(.platform-stat-card, .developer-glass-tool, .workspace-panel) {
+  min-width: 0;
+}
+.developer-glass-stats {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+}
+.developer-tools-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  align-items: stretch;
+}
+.developer-glass-page .platform-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  padding: 1.25rem;
+}
+.developer-glass-page .platform-stat-card > p {
+  margin-top: 0;
+  overflow-wrap: anywhere;
+}
+.developer-glass-page .platform-stat-card > p:first-of-type {
+  font-size: clamp(1.25rem, 2.5cqi, 1.75rem);
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+.developer-glass-page .platform-stat-card > p:last-child:not(:first-of-type) {
+  margin-top: auto;
+  line-height: 1.6;
+}
+.developer-glass-hero .page-header > div {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.5rem;
+}
+.developer-glass-hero .page-header > div > :last-child {
+  flex-shrink: 1;
+  justify-content: flex-start;
+}
+.developer-glass-tool {
+  flex-direction: column;
+  padding: 1.25rem;
+}
+.developer-glass-tool > div {
+  width: 100%;
+}
+.developer-integration-row > div {
+  flex: 1 1 12rem;
+}
+.developer-glass-page .platform-badge {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.developer-glass-page .workspace-panel h2 {
+  align-items: flex-start;
+  line-height: 1.5;
+}
+@container (min-width: 60rem) {
+  .developer-details-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

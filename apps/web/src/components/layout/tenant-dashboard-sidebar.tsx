@@ -5,6 +5,8 @@ import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 import { useCallback, useMemo, useRef } from "react";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 import { usePathname } from "next/navigation";
+import { NavigationSections } from "@/components/navigation/navigation-sections";
+import { WORKSPACE_NAVIGATION } from "@/lib/navigation/workspace-navigation";
 import { X, ChevronRight } from "lucide-react";
 import { House as Home } from "@/components/shared/colored-icons";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
@@ -143,14 +145,9 @@ export function TenantDashboardSidebar({
           <TenantSidebarBrand organizationName={organizationName} />
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {visibleLinks.map((item) => (
-            <TenantSidebarNavItem
-              key={item.href}
-              item={item}
-              pathname={pathname}
-            />
-          ))}
+        <nav aria-label="Tenant navigation" className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+          <NavigationSections items={visibleLinks} sections={WORKSPACE_NAVIGATION.tenant}
+            renderItem={item => <TenantSidebarNavItem item={item} pathname={pathname} />} />
         </nav>
 
         <div className="space-y-2 p-4">
@@ -206,17 +203,10 @@ export function TenantDashboardSidebar({
               </div>
             </div>
 
-            <nav className="ios-scroll min-h-0 flex-1 overflow-y-auto px-3 py-4 overscroll-contain">
+            <nav aria-label="Tenant navigation" className="ios-scroll min-h-0 flex-1 overflow-y-auto px-3 py-4 overscroll-contain">
               <div className="space-y-2 pb-2">
-                {visibleLinks.map((item) => (
-                  <TenantSidebarNavItem
-                    key={item.href}
-                    item={item}
-                    pathname={pathname}
-                    mobile
-                    onNavigate={closeMobile}
-                  />
-                ))}
+                <NavigationSections items={visibleLinks} sections={WORKSPACE_NAVIGATION.tenant}
+                  renderItem={item => <TenantSidebarNavItem item={item} pathname={pathname} mobile onNavigate={closeMobile} />} />
               </div>
             </nav>
 

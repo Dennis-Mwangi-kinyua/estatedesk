@@ -1,6 +1,7 @@
 "use client";
 
-import { SidebarSticker } from "@/components/shared/sidebar-sticker";
+import { PlatformNavigation } from "./_components/platform-navigation";
+import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 
 import Link from "@/components/navigation/workspace-link";
 import { ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
@@ -35,48 +36,17 @@ export default function PlatformMobileShell({
   const panelId = useId();
   const [query, setQuery] = useState("");
   const drawerRef = useRef<HTMLElement>(null);
-  const visibleItems = navItems.filter((item) => `${item.label} ${item.description ?? ""}`.toLowerCase().includes(query.toLowerCase().trim()));
   const tabs = navItems.filter((item) => (mode === "admin"
     ? ["/platform", "/platform/organizations", "/platform/payments"]
     : ["/platform/developer", "/platform/system-health", "/platform/jobs"]).includes(item.href));
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const isDeveloper = mode === "developer";
 
   const closeMenu = useCallback(() => {
     menuButtonRef.current?.focus();
     setOpen(false);
   }, []);
 
-  useEffect(() => {
-    if (!open) return;
-
-    const originalOverflow = document.body.style.overflow;
-    drawerRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
-    document.body.style.overflow = "hidden";
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Tab") {
-        const controls = Array.from(drawerRef.current?.querySelectorAll<HTMLElement>('a[href], button, input, [tabindex="0"]') ?? []).filter((element) => !element.hasAttribute("disabled"));
-        const first = controls[0];
-        const last = controls[controls.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault(); last?.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault(); first?.focus();
-        }
-      }
-      if (event.key === "Escape") {
-        closeMenu();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [closeMenu, open]);
+  useNavigationDialog(open, drawerRef, closeMenu);
 
   useEffect(() => {
     // Close drawer after navigation without sync setState in effect body.
@@ -139,6 +109,7 @@ export default function PlatformMobileShell({
         role="dialog"
         aria-modal={open ? true : undefined}
         aria-label="Platform navigation"
+        tabIndex={-1}
         aria-hidden={!open}
         inert={!open}
         className={`platform-navigation-drawer workspace-navigation-panel ed-shell-panel fixed right-0 top-0 z-50 h-full w-[84%] max-w-[360px] border-l shadow-2xl transition-transform duration-300 lg:hidden ${
@@ -163,41 +134,8 @@ export default function PlatformMobileShell({
             <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
             <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find a tool…" aria-label="Filter navigation" className="min-w-0 w-full bg-transparent py-3 text-base outline-none" />
           </label>
-          <nav className="flex-1 space-y-1 overflow-auto p-3">
-            {visibleItems.length === 0 && <p role="status" className="px-3 py-6 text-sm text-muted-foreground">No tools found. Try another name.</p>}
-            {visibleItems.map((item) => {
-              const active = isNavItemActive(pathname, item.href);
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={closeMenu}
-                  aria-current={active ? "page" : undefined}
-                  className={`platform-sidebar-link flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                    active
-                      ? isDeveloper
-                        ? "bg-teal-600 text-white"
-                        : "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
-                  }`}
-                >
-                  <SidebarSticker href={item.href} />
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  {item.superAdminOnly ? (
-                    <span
-                      className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
-                        active
-                          ? "bg-white/20 text-white"
-                          : "bg-amber-500/15 text-amber-800 dark:text-amber-200"
-                      }`}
-                    >
-                      SA
-                    </span>
-                  ) : null}
-                </Link>
-              );
-            })}
+          <nav aria-label="Platform menu" className="flex-1 space-y-1 overflow-auto p-3">
+            <PlatformNavigation items={navItems} mode={mode} query={query} onNavigate={closeMenu} mobile />
           </nav>
 
           <div className="space-y-3 border-t border-border p-4">

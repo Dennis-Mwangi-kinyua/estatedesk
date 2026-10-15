@@ -95,7 +95,7 @@ export async function acceptInviteAction(
     return {
       success: true,
       message: data.message || "Invitation accepted successfully.",
-      redirectTo: data.redirectTo || "/dashboard/org",
+      redirectTo: data.redirectTo || "/dashboard",
       organizationId: data.organizationId,
     };
   } catch (error) {

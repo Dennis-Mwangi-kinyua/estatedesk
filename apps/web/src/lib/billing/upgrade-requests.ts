@@ -3,11 +3,7 @@ import "server-only";
 import { BillingPlan, Prisma, type SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { APP_PLANS } from "@/lib/billing/plans";
-import {
-  isPendingUpgradeRequest,
-  parseUpgradeRequest,
-  type UpgradeRequestRecord,
-} from "@/lib/billing/upgrade-request-policy";
+import { parseUpgradeRequest, type UpgradeRequestRecord } from "@/lib/billing/upgrade-request-policy";
 
 export {
   isPendingUpgradeRequest,

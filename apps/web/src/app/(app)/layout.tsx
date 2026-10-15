@@ -1,3 +1,4 @@
+import { getOrganizationSummary } from "@/lib/organizations/summary";
 import { WorkspaceAccessProvider } from "@/components/navigation/workspace-link";
 import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 import { WorkspaceThemeScope } from "@/components/shared/workspace-theme-scope";
@@ -54,7 +55,6 @@ export default async function AppLayout({
 
   if (shouldForceChange) {
     if (isDevDebugLoggingEnabled()) {
-      // eslint-disable-next-line no-console
       console.log("[debug] AppLayout redirecting to /change-password from", rawPath);
     }
 
@@ -70,12 +70,8 @@ export default async function AppLayout({
   // navigation. Run them together so shell latency follows the slowest query.
   const [organization, user] = await Promise.all([
     session.activeOrgId
-      ? prisma.organization.findUnique({
-          where: { id: session.activeOrgId },
-          select: { name: true },
-        }).catch((error) => {
+      ? getOrganizationSummary(session.activeOrgId).catch((error) => {
           if (isDevDebugLoggingEnabled()) {
-            // eslint-disable-next-line no-console
             console.warn("[AppLayout] organization lookup failed", error);
           }
           return null;
@@ -89,7 +85,6 @@ export default async function AppLayout({
       ? auditSensitivePageView(session, pathname).catch((error) => {
           // Audit is best-effort — never block authenticated pages on logging failures.
           if (isDevDebugLoggingEnabled()) {
-            // eslint-disable-next-line no-console
             console.warn("[AppLayout] auditSensitivePageView failed", error);
           }
         })

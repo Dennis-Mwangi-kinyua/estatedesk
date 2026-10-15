@@ -3,10 +3,10 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import type React from "react";
 import { unstable_cache } from "next/cache";
-import { Prisma } from "@prisma/client";
-import { ArrowLeft, Coins, Zap } from "lucide-react";
+
+import { Coins, Zap } from "lucide-react";
 import { Building2, ShieldCheck } from "@/components/shared/colored-icons";
-import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
+import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { PUBLIC_VACANCIES_CACHE_TAG } from "@/lib/public-vacancy-cache";
 import { publicVacancyImageUrl } from "@/lib/public-vacancy-image";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";

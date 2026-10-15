@@ -1,3 +1,4 @@
+import { getUnpostedPaymentSummary } from "@/lib/accounting/unposted-payments";
 import {
   buildAgingSummary,
   expenseRatio,
@@ -25,8 +26,7 @@ export async function getAccountingPageData(orgId: string) {
     openBills,
     properties,
     currentPeriod,
-    verifiedPayments,
-    postedPaymentJournals,
+    unpostedSummary,
     openRentCharges,
     journalCountYtd,
     journalCountMonth,
@@ -84,27 +84,7 @@ export async function getAccountingPageData(orgId: string) {
       },
       orderBy: { startsAt: "desc" },
     }),
-    prisma.payment.findMany({
-      where: {
-        orgId,
-        verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
-      },
-      select: {
-        id: true,
-        amount: true,
-        method: true,
-        targetType: true,
-        paidAt: true,
-        createdAt: true,
-        payerTenant: { select: { fullName: true } },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 200,
-    }),
-    prisma.accountingJournalEntry.findMany({
-      where: { orgId, sourceType: "PAYMENT", sourceId: { not: null } },
-      select: { sourceId: true },
-    }),
+    getUnpostedPaymentSummary(prisma, orgId),
     prisma.rentCharge.findMany({
       where: {
         orgId,
@@ -160,19 +140,8 @@ export async function getAccountingPageData(orgId: string) {
       ])
     : [null, null, null];
 
-  const postedPaymentIds = new Set(
-    postedPaymentJournals
-      .map((entry) => entry.sourceId)
-      .filter((id): id is string => Boolean(id)),
-  );
-
-  const unpostedPayments = verifiedPayments
-    .filter((payment) => !postedPaymentIds.has(payment.id))
-    .slice(0, 8);
-
-  const unpostedPaymentsCount = verifiedPayments.filter(
-    (payment) => !postedPaymentIds.has(payment.id),
-  ).length;
+  const unpostedPayments = unpostedSummary.payments;
+  const unpostedPaymentsCount = unpostedSummary.count;
 
   const expenseAccounts = accounts.filter((account) => account.type === "EXPENSE");
   const liabilityAccounts = accounts.filter(

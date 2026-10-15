@@ -185,7 +185,6 @@ export default async function WebsiteControlCenterPage({
     activeSessions,
     activeApiKeys,
     failedNotifications,
-    rateBuckets,
     organizations,
     deletedOrgs,
   ] = await Promise.all([
@@ -194,7 +193,6 @@ export default async function WebsiteControlCenterPage({
     prisma.userSession.count({ where: { expiresAt: { gt: new Date() } } }),
     prisma.apiKey.count({ where: { isActive: true } }),
     prisma.notification.count({ where: { status: "FAILED" } }),
-    prisma.rateLimitBucket.count(),
     prisma.organization.findMany({
       where: { deletedAt: null },
       orderBy: { name: "asc" },

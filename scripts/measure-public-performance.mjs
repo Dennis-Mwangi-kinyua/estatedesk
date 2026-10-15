@@ -17,7 +17,8 @@ try {
       new PerformanceObserver(list => { for (const entry of list.getEntries()) window.__lab.lcpMs = entry.startTime; }).observe({ type: "largest-contentful-paint", buffered: true });
       new PerformanceObserver(list => { for (const entry of list.getEntries()) if (!entry.hadRecentInput) window.__lab.cls += entry.value; }).observe({ type: "layout-shift", buffered: true });
     });
-    const response = await page.goto(new URL(path, base).href, { waitUntil: "networkidle", timeout: 90_000 });
+    const response = await page.goto(new URL(path, base).href, { waitUntil: "domcontentloaded", timeout: 90_000 });
+    await page.waitForTimeout(3000);
     const metrics = await page.evaluate(() => {
       const nav = performance.getEntriesByType("navigation")[0];
       return { ...window.__lab, ttfbMs: nav.responseStart - nav.startTime, domContentLoadedMs: nav.domContentLoadedEventEnd, transferredBytes: performance.getEntriesByType("resource").reduce((sum, entry) => sum + entry.transferSize, nav.transferSize), horizontalOverflow: document.documentElement.scrollWidth > innerWidth };
@@ -26,7 +27,7 @@ try {
     await context.close();
   }
 } finally { await browser.close(); }
-const report = { checkedAt: new Date().toISOString(), base, method: "Single cold browser sample per route; mobile viewport; 4x CPU slowdown; 150ms latency; 1.6Mbps download. CLS is a page-load sample, not session-window field CLS; INP is not measured. Results depend on runner geography.", results };
+const report = { checkedAt: new Date().toISOString(), base, method: "Single cold browser sample per route; mobile viewport; 4x CPU slowdown; 150ms latency; 1.6Mbps download. Three-second observation after DOM readiness. CLS is a page-load sample, not session-window field CLS; INP is not measured. Results depend on runner geography.", results };
 const output = process.env.AUDIT_OUTPUT || "/tmp/estatedesk-mobile-lab.json";
 await writeFile(output, JSON.stringify(report, null, 2));
 console.log(JSON.stringify(report, null, 2));

@@ -119,5 +119,5 @@ export function readNotificationActionUrl(providerResponse: unknown) {
   }
 
   const actionUrl = (providerResponse as { actionUrl?: unknown }).actionUrl;
-  return typeof actionUrl === "string" && actionUrl.startsWith("/") ? actionUrl : null;
+  return typeof actionUrl === "string" && isNotificationUrlAllowed(actionUrl, "default") ? actionUrl : null;
 }

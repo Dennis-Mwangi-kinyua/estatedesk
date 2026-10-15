@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "@/components/navigation/workspace-link";
 import { TicketStatus } from "@prisma/client";
 import { encodePublicId } from "@/lib/public-id";
@@ -43,10 +44,13 @@ export function IssueDetailSections({
 
           {issue.photoAsset ? (
             <div className="overflow-hidden rounded-2xl border border-border bg-muted/10">
-              <img
+              <Image
+                unoptimized
+                width={1200}
+                height={800}
                 src={getIssuePhotoUrl(issue.photoAsset.key)}
                 alt={`Evidence for ${issue.title}`}
-                className="max-h-80 w-full object-cover"
+                className="h-auto max-h-80 w-full object-cover"
               />
               <div className="border-t border-border px-4 py-2 text-xs font-medium text-muted-foreground">
                 {issue.photoAsset.fileName}

@@ -1,4 +1,3 @@
-import { Gift } from "lucide-react";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { computeRentRewards } from "@/lib/rewards/rent-rewards";

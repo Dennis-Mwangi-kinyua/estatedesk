@@ -7,10 +7,12 @@ import { getTenantSidebarLinks, isTenantActivePath } from "./tenant-sidebar-link
 
 export function TenantMobileNav({ hasActiveLease, onMenuClick, menuOpen = false }: { hasActiveLease: boolean; onMenuClick: () => void; menuOpen?: boolean }) {
   const pathname = usePathname();
-  const order = hasActiveLease ? ["Overview", "Payments", "Maintenance & repairs", "Profile"] : ["Overview", "My history", "Profile"];
+  const order = hasActiveLease
+    ? ["/dashboard/tenant", "/dashboard/tenant/payments", "/dashboard/tenant/issues", "/dashboard/tenant/profile"]
+    : ["/dashboard/tenant", "/dashboard/tenant/history", "/dashboard/tenant/profile"];
   const links = getTenantSidebarLinks(hasActiveLease)
-    .filter(item => order.includes(item.label))
-    .sort((a, b) => order.indexOf(a.label) - order.indexOf(b.label));
+    .filter(item => order.includes(item.href))
+    .sort((a, b) => order.indexOf(a.href) - order.indexOf(b.href));
 
   return (
     <nav aria-label="Tenant quick navigation" className="tenant-mobile-dock fixed inset-x-0 bottom-0 z-[85] lg:hidden">

@@ -1,16 +1,14 @@
 "use client";
 
-import { SidebarSticker } from "@/components/shared/sidebar-sticker";
+import { CaretakerNavigation } from "./caretaker-navigation";
+import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 
-import { DeferredLink } from "@/components/navigation/app-links";
 import { X } from "lucide-react";
 import { LogOut } from "@/components/shared/colored-icons";
 import { useCallback, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { logoutAction } from "@/features/auth/actions/logout-action";
-import { CARETAKER_NAV_ITEMS } from "@/app/(app)/dashboard/caretaker/_lib/i18n";
-import { CaretakerNavLabel } from "@/app/(app)/dashboard/caretaker/_components/caretaker-nav-label";
 
 type Props = {
   open: boolean;
@@ -43,16 +41,7 @@ export function CaretakerMobileSidebar({
     });
   }, [onClose, returnFocusRef]);
 
-  useEffect(() => {
-    if (!open) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [open]);
+  useNavigationDialog(open, drawerRef, handleClose, 1280);
 
   useEffect(() => {
     if (!hasMountedRef.current) {
@@ -86,7 +75,9 @@ export function CaretakerMobileSidebar({
         id="caretaker-mobile-drawer"
         data-caretaker-mobile-drawer
         role="dialog"
-        aria-modal="true"
+        aria-modal={open ? true : undefined}
+        aria-hidden={!open}
+        tabIndex={-1}
         aria-label="Caretaker navigation"
         className={clsx(
           "ed-shell-panel absolute left-0 top-0 flex h-full w-[88%] max-w-[360px] flex-col border-r shadow-2xl transition-transform duration-300",
@@ -124,37 +115,7 @@ export function CaretakerMobileSidebar({
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-4">
-          <nav className="space-y-1.5">
-            {CARETAKER_NAV_ITEMS.map((item) => {
-              const active =
-                pathname === item.href || (item.href !== "/dashboard/caretaker" && pathname.startsWith(`${item.href}/`));
-
-
-              return (
-                <DeferredLink
-                  key={item.href}
-                  href={item.href}
-                  className={clsx(
-                    "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition active:scale-[0.99]",
-                    active ? "ed-nav-item-active" : "ed-nav-item",
-                  )}
-                >
-                  <span
-                    className={clsx(
-                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition",
-                      active ? "ed-nav-icon-active" : "ed-nav-icon",
-                    )}
-                  >
-                    <SidebarSticker href={item.href} />
-                  </span>
-
-                  <span className="truncate">
-                    <CaretakerNavLabel labelKey={item.labelKey} />
-                  </span>
-                </DeferredLink>
-              );
-            })}
-          </nav>
+          <CaretakerNavigation mobile onNavigate={handleClose} />
         </div>
 
         <div className="shrink-0 border-t border-border px-3 py-4">

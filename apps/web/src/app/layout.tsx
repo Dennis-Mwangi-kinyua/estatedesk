@@ -260,7 +260,7 @@ export default async function RootLayout({
           <ServiceWorkerUpdatePrompt />
           <PwaExperienceLoader />
           <PwaInstallPrompt />
-          <div id="main-content" className="ed-mobile-first-root min-h-dvh w-full min-w-0">
+          <div id="main-content" tabIndex={-1} className="ed-mobile-first-root min-h-dvh w-full min-w-0">
             <IncidentBanner />
             {children}
           </div>

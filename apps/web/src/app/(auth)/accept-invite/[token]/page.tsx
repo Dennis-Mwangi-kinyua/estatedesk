@@ -52,7 +52,7 @@ export default function AcceptInvitePage() {
   const [message, setMessage] = useState<string>(
     "Preparing your invitation..."
   );
-  const [redirectTo, setRedirectTo] = useState<string>("/dashboard/org");
+  const [redirectTo, setRedirectTo] = useState<string>("/dashboard");
 
   const acceptInvite = useCallback(async () => {
     if (!token) {
@@ -86,7 +86,7 @@ export default function AcceptInvitePage() {
 
       setStatus("success");
       setMessage(data.message || "Invitation accepted successfully.");
-      setRedirectTo(safeReturnTo(data.redirectTo) || "/dashboard/org");
+      setRedirectTo(safeReturnTo(data.redirectTo) || "/dashboard");
     } catch (error) {
       setStatus("error");
       setMessage(getErrorMessage(error));
@@ -145,7 +145,7 @@ export default function AcceptInvitePage() {
             </button>
 
             <Link
-              href="/dashboard/org"
+              href="/dashboard"
               className="block text-center text-sm font-medium text-slate-600 transition hover:text-slate-950"
             >
               Go to organization dashboard

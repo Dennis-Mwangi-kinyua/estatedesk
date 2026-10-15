@@ -13,7 +13,7 @@ test("role overviews preserve actions and data in responsive light and dark layo
     builder.onLoad({filter: /.*/, namespace: "fixture"}, args => ({contents: args.path === "help" ? 'export function InAppGuideHint() { return null; }' : 'import React from "react"; export default function Link(props) { return React.createElement("a", props); }', loader: "js", resolveDir: process.cwd()}));
   }}]});
   await page.goto("/register");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
   const styles = await page.locator('link[rel="stylesheet"]').evaluateAll(links => links.map(link => (link as HTMLLinkElement).href));
   await setFixtureContent(page, `<html><head><meta name="viewport" content="width=device-width, initial-scale=1">${styles.map(href => `<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system"><main class="estate-workspace p-4"><div id="fixture"></div></main></body></html>`);
   await installWorkspaceStyles(page);

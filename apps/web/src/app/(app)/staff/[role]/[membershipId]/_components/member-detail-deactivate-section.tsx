@@ -1,6 +1,6 @@
 import { deactivateMembershipAction } from "@/features/staff/actions/deactivate-membership";
 import type { MemberDetailWorkspaceProps } from "./member-detail-workspace";
-import { panelBodyClassName, panelShellClassName } from "./member-detail-ui";
+import { panelBodyClassName } from "./member-detail-ui";
 
 const inputClassName =
   "h-11 w-full rounded-2xl border border-red-500/20 bg-background px-4 text-sm text-foreground outline-none transition focus:border-red-500/40 focus:ring-4 focus:ring-red-500/10";

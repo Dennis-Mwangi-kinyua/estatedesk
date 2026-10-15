@@ -282,10 +282,6 @@ function getResolutionReportRedirectTarget(formData: FormData) {
 export async function approveIssueResolutionReportAction(formData: FormData) {
   const reportId = String(formData.get("reportId") ?? "");
   const issueId = String(formData.get("issueId") ?? "");
-  const page = String(formData.get("page") ?? "1");
-  const activeFilter = normalizeIssueStatusFilter(
-    String(formData.get("filter") ?? "all"),
-  );
   const officeNotes = String(formData.get("officeNotes") ?? "").trim();
   const redirectTarget = getResolutionReportRedirectTarget(formData);
 
@@ -382,10 +378,6 @@ export async function approveIssueResolutionReportAction(formData: FormData) {
 export async function rejectIssueResolutionReportAction(formData: FormData) {
   const reportId = String(formData.get("reportId") ?? "");
   const issueId = String(formData.get("issueId") ?? "");
-  const page = String(formData.get("page") ?? "1");
-  const activeFilter = normalizeIssueStatusFilter(
-    String(formData.get("filter") ?? "all"),
-  );
   const officeNotes = String(formData.get("officeNotes") ?? "").trim();
   const redirectTarget = getResolutionReportRedirectTarget(formData);
 

@@ -26,7 +26,7 @@ test("tenant dashboard and profile have balanced cards and mobile layouts", asyn
     }}],
   });
   await page.goto("/register");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
   const styles = await page.locator('link[rel="stylesheet"]').evaluateAll(links => links.map(link => (link as HTMLLinkElement).href));
   await setFixtureContent(page, `<html><head><meta name="viewport" content="width=device-width,initial-scale=1">${styles.map(href=>`<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system ed-mobile-first"><div id="fixture"></div></body></html>`);
   await installWorkspaceStyles(page);

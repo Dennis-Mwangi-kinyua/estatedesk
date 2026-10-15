@@ -1,15 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ensureTenantSlug } from "@/lib/tenants/slug";
-import {
-  formatCurrency,
-  formatDate,
-  formatDateTime,
-  formatStatus,
-  getLeaseUnitLabel,
-  getUnitLabel,
-  toNumberValue,
-} from "./helpers";
+import { formatCurrency, formatDate, formatStatus, getLeaseUnitLabel, getUnitLabel, toNumberValue } from "./helpers";
 
 export async function loadTenantDetailsData(orgId: string, tenantId: string, activeOrgRole?: string | null) {
   if (!tenantId?.trim()) notFound();

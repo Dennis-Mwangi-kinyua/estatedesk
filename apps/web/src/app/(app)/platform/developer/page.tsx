@@ -127,7 +127,7 @@ export default async function DeveloperPortalPage({
   }
 
   return (
-    <div className="developer-glass-page mx-auto w-full max-w-7xl space-y-4 sm:space-y-6">
+    <div className="developer-glass-page mx-auto min-w-0 w-full max-w-7xl space-y-4 sm:space-y-6">
       {params.error === "super-admin-only" ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50 sm:px-4">
           That tool requires a <strong>super admin</strong>. Platform admins can run
@@ -174,7 +174,7 @@ export default async function DeveloperPortalPage({
       </section>
 
       {unavailableMetrics > 0 && <div role="status" className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm"><p>Some operational metrics could not be loaded. Available data and developer tools are shown below.</p><div className="mt-2 flex flex-wrap gap-4"><Link href="/platform/developer" className="font-semibold underline">Retry metrics</Link><Link href="/platform/system-health" className="font-semibold underline">Check system health</Link></div></div>}
-      <section className="developer-glass-stats grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-4">
+      <section className="developer-glass-stats grid gap-4">
         <StatCard label="Active API keys" value={metricNumber(activeApiKeys)} />
         <StatCard
           label="Queued notifications"
@@ -206,7 +206,7 @@ export default async function DeveloperPortalPage({
         title="Developer tools"
         description="Choose a tool to manage integrations, monitor operations, or support your workspaces."
       >
-        <div className="grid grid-cols-1 gap-2 p-3 min-[480px]:grid-cols-2 min-[480px]:gap-3 min-[480px]:p-4 xl:grid-cols-3">
+        <div className="developer-tools-grid grid gap-4 p-4 sm:p-5">
           {tools.map((tool) => {
 
             return (
@@ -220,19 +220,19 @@ export default async function DeveloperPortalPage({
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-semibold leading-5 text-slate-950 dark:text-white">
+                    <p className="min-w-0 text-sm font-semibold leading-6 text-slate-950 dark:text-white">
                       {tool.label}
                     </p>
                     <div className="flex shrink-0 items-center gap-1 pt-0.5">
                       {tool.superAdminOnly ? (
-                        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-800 dark:bg-amber-500/20 dark:text-amber-200">
-                          SA
+                        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 dark:bg-amber-500/20 dark:text-amber-200">
+                          Restricted
                         </span>
                       ) : null}
                       <ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-teal-600 dark:group-hover:text-teal-300" />
                     </div>
                   </div>
-                  <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
                     {tool.description}
                   </p>
                 </div>
@@ -242,7 +242,7 @@ export default async function DeveloperPortalPage({
         </div>
       </Surface>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="developer-details-grid grid gap-5">
         <Surface
           title="Integration readiness"
           description="Snapshot of configured external integrations for this environment."
@@ -270,7 +270,7 @@ export default async function DeveloperPortalPage({
             {integrationReadiness.integrations.slice(0, 8).map((item) => (
               <div
                 key={item.id}
-                className="flex items-start justify-between gap-3 px-3 py-3 sm:items-center sm:px-4"
+                className="developer-integration-row flex min-w-0 flex-wrap items-start justify-between gap-3 px-4 py-4 sm:px-5"
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-slate-900 dark:text-slate-100">

@@ -20,8 +20,10 @@ export async function publishUpdateNotice(_state: UpdateNoticeActionState, form:
   return { message: "Update notice published. Users will see it within one minute." };
 }
 
-export async function withdrawUpdateNotice(_state: UpdateNoticeActionState, _form: FormData): Promise<UpdateNoticeActionState> {
+export async function withdrawUpdateNotice(...args: [UpdateNoticeActionState, FormData]): Promise<UpdateNoticeActionState> {
   const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], { redirectTo: "/dashboard" });
+  // Keep the useActionState signature; this action does not consume form fields.
+  void args;
   await prisma.platformUpdateNotice.deleteMany({ where: { id: UPDATE_NOTICE_ID } });
   await writePlatformAuditLog({ actorUserId: session.userId, action: "PLATFORM_UPDATE_NOTICE_WITHDRAWN", entityType: "PlatformUpdateNotice", entityId: UPDATE_NOTICE_ID });
   revalidatePath("/platform");

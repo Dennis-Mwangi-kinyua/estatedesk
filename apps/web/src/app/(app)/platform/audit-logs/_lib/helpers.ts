@@ -53,13 +53,6 @@ export function getPageSize(value?: string) {
   return Math.min(parsed, 100);
 }
 
-type SearchParams = Promise<{
-  page?: string;
-  pageSize?: string;
-  q?: string;
-  action?: string;
-}>;
-
 const auditLogSelect = {
   id: true,
   createdAt: true,
@@ -87,10 +80,6 @@ const auditLogSelect = {
     },
   },
 } satisfies Prisma.AuditLogSelect;
-
-type AuditLogItem = Prisma.AuditLogGetPayload<{
-  select: typeof auditLogSelect;
-}>;
 
 const PLATFORM_ROLE_VALUES: readonly PlatformRole[] = [
   PlatformRole.USER,

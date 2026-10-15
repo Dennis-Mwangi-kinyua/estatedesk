@@ -306,6 +306,7 @@ async function resolveMembershipForSession(
         id: activeMembershipId,
         userId,
         employmentEndedAt: null,
+        deactivatedAt: null,
       },
     });
 
@@ -317,7 +318,7 @@ async function resolveMembershipForSession(
   }
 
   return prisma.membership.findFirst({
-    where: { userId, employmentEndedAt: null },
+    where: { userId, employmentEndedAt: null, deactivatedAt: null },
     orderBy: { createdAt: "asc" },
   });
 }
@@ -698,7 +699,7 @@ export async function switchActiveMembership(
 
   const { session: dbSession, tokenHash } = await findSessionByToken(token);
 
-  if (!dbSession) {
+  if (!dbSession || dbSession.expiresAt <= new Date()) {
     clearSessionCookie(cookieStore);
     redirect("/login");
   }
@@ -715,6 +716,7 @@ export async function switchActiveMembership(
       id: membershipId,
       userId: dbSession.userId,
       employmentEndedAt: null,
+      deactivatedAt: null,
     },
     include: {
       org: {

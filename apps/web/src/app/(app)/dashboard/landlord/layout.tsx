@@ -6,6 +6,7 @@ import { LandlordDashboardShell } from "@/components/layout/landlord-dashboard-s
 import { requireUserSession } from "@/lib/auth/session";
 import { requireActiveSubscription } from "@/lib/billing/subscription-access";
 import { prisma } from "@/lib/prisma";
+import { getOrganizationSummary } from "@/lib/organizations/summary";
 
 export const dynamic = "force-dynamic";
 
@@ -37,10 +38,7 @@ export default async function LandlordLayout({
         displayName: true,
       },
     }),
-    prisma.organization.findUnique({
-      where: { id: session.activeOrgId },
-      select: { name: true },
-    }),
+    getOrganizationSummary(session.activeOrgId),
   ]);
 
   return (

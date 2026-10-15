@@ -33,4 +33,4 @@ if (uiMarker) {
   fs.writeFileSync(`${outDir}/ui.tsx`, `${ui}\n`);
 }
 
-console.log("pre", pre.split("\n").length, "jsx", jsx.split("\n").length);
+console.log("pre", pre.split("\n").length, "jsx", jsx.split("\n").length)
