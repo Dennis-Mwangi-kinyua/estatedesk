@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { TrustPage } from "@/components/marketing/trust-page";
 import { trustContentDepth } from "@/lib/content-depth/marketing-depth";
 import { publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Security",
   description:
     "EstateDesk security overview covering role-based access, organization isolation, audit logs, private routes, backups, and operational monitoring.",

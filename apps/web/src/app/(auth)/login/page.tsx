@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
@@ -9,7 +10,7 @@ import { loginAction } from "./actions";
 import { safeReturnTo } from "@/lib/auth/safe-return-to";
 import LoginForm from "./LoginForm";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Sign in to EstateDesk",
   description: "Sign in to manage properties, leases, rent payments, maintenance, and your team in one connected EstateDesk workspace.",
   path: "/login",

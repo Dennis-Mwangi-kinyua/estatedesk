@@ -1,10 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
 import { Building2, Mail } from "@/components/shared/colored-icons";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { privatePageMetadata } from "@/lib/seo";
 
-export const metadata = privatePageMetadata;
+export const metadata: Metadata = privatePageMetadata;
 
 type PageProps = {
   searchParams?: Promise<{

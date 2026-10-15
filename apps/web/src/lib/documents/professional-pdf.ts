@@ -102,6 +102,14 @@ export async function createProfessionalPdf(input: { title: string; serialNumber
       y -= 8;
     });
   }
+  async function signatureImage(data: string) {
+    const image = await pdf.embedPng(data);
+    const scale = Math.min(260 / image.width, 90 / image.height);
+    const height = image.height * scale;
+    ensure(height + 16);
+    page.drawImage(image, { x: margin, y: y - height, width: image.width * scale, height });
+    y -= height + 16;
+  }
   async function verification(note: string) {
     if (!input.verificationUrl) throw new Error("A verification URL is required for this document.");
     ensure(140);
@@ -123,5 +131,5 @@ export async function createProfessionalPdf(input: { title: string; serialNumber
     });
     return pdf.save({ useObjectStreams: false, addDefaultPage: false });
   }
-  return { paragraph, section, details, table, verification, save };
+  return { paragraph, section, details, table, signatureImage, verification, save };
 }

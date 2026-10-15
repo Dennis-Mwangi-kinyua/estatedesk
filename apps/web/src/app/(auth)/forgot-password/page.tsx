@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { forgotPasswordAction } from "@/app/(auth)/forgot-password/actions";
 import { publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Forgot Password",
   description:
     "Request a secure password reset link for your EstateDesk account.",

@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "@/components/navigation/workspace-link";
 import type { MouseEvent } from "react";
 import { buttonPrimaryClassName, buttonSecondaryClassName } from "../_lib/constants";

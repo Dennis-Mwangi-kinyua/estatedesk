@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";

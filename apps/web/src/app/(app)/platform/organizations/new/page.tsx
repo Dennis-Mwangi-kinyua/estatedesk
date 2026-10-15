@@ -14,5 +14,5 @@ export default async function NewOrganizationPage({ searchParams }: { searchPara
   if (requestId && !request) notFound();
   if (request && request.status !== "QUALIFIED") return <div className="rounded-xl border border-border bg-card p-5"><h1 className="font-semibold">Qualify this request first</h1><p className="mt-2 text-sm text-muted-foreground">Review the applicant’s requirements and mark the request qualified before creating their organisation.</p><a className="mt-3 inline-block text-sm text-primary underline" href="/platform/onboarding">Back to onboarding</a></div>;
   const initialValues = request ? { organizationName: request.companyName, organizationEmail: request.workEmail, organizationPhone: request.phone ?? "", adminFullName: request.fullName, adminEmail: request.workEmail, adminPhone: request.phone ?? "" } : undefined;
-  return <NewOrganizationWorkspace key={requestId ?? "new"} initialValues={initialValues} onboardingRequestId={requestId} createOrganizationAction={createOrganizationAction} checkAvailability={checkOrganizationAvailability} />;
+  return <NewOrganizationWorkspace key={requestId ?? "new"} initialValues={initialValues} onboardingRequestId={requestId} createOrganizationAction={createOrganizationAction} checkAvailabilityAction={checkOrganizationAvailability} />;
 }

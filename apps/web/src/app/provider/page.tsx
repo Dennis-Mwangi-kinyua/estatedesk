@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ProfileAvatar } from "@/components/uploads/profile-avatar";
 import { ProfilePictureProvider } from "@/components/uploads/profile-picture-context";
 import { ProductUpdatesBanner } from "@/features/updates/banner";
@@ -9,7 +10,7 @@ import { saveProvider, addPortfolio, deletePortfolio, applyToJob, updateProvider
 import { SERVICE_CATEGORIES } from "@/features/providers/policy";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 export const dynamic = "force-dynamic";
-export const metadata = { title: "My provider portal | EstateDesk", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "My provider portal | EstateDesk", robots: { index: false, follow: false } };
 export default async function Page({ searchParams }: { searchParams: Promise<{ category?: string; location?: string }> }) {
   const { session, provider } = await requireProvider();
   const picture = await prisma.user.findUniqueOrThrow({ where: { id: session.userId }, select: { profileImageUrl: true } });

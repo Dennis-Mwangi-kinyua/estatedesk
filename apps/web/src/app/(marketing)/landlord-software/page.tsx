@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { landlordLandingContent } from "@/components/marketing/seo-landing-content";
 import { SeoLandingPage } from "@/components/marketing/seo-landing-page";
 import { publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Landlord Software for Rent, Tenants and Vacancies",
   description:
     "EstateDesk landlord software helps landlords manage tenants, leases, rent balances, water bills, vacant units, maintenance, inspections, staff access, and reports online.",

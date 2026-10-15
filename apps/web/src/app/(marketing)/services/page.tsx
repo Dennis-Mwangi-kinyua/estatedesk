@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Layers3 } from "lucide-react";
 import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
@@ -8,7 +9,7 @@ import { PublicAccessFooter } from "@/components/marketing/public-access-footer"
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Property Management: Rent, Visitors, Community Notices & BnB",
   description:
     "EstateDesk connects property teams, tenants, BnB guests and local service providers: rent, water billing, accounting, visitor QR passes, community notices, provider hiring and ratings, verified unique IDs, retained tenancy history and reinstatement.",

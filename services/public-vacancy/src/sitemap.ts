@@ -1,36 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import {
-  publicRentalLandingPaths,
-  publicRentalLocationPaths,
-  rentalLocationSlug,
-} from "@/lib/public-rental-seo";
+import { rentalInventorySitemapEntries } from "@/lib/seo/rental-inventory";
 import { APP_URL, buildUrlEntry, formatDate, wrapUrlset } from "@/lib/sitemap-utils";
 import { vacancyPublicSlug } from "./slug";
-
-function categorySlug(type: string) {
-  switch (type) {
-    case "BEDSITTER":
-      return "bedsitters";
-    case "STUDIO":
-      return "studios";
-    case "SINGLE_ROOM":
-      return "single-rooms";
-    case "APARTMENT":
-      return "apartments";
-    case "SHOP":
-      return "shops";
-    case "OFFICE":
-      return "offices";
-    case "STALL":
-      return "stalls";
-    case "WAREHOUSE":
-      return "warehouses";
-    case "GODOWN":
-      return "godowns";
-    default:
-      return rentalLocationSlug(type);
-  }
-}
 
 const publicVacantUnitWhere = {
   status: "VACANT" as const,
@@ -100,41 +71,7 @@ export async function buildRentalLandingSitemapXml() {
     take: 50_000,
   });
 
-  const landingPages = new Map<string, string>();
-  const today = formatDate(new Date());
-
-  for (const landingPage of publicRentalLandingPaths()) {
-    landingPages.set(landingPage.path, today);
-  }
-
-  for (const locationPage of publicRentalLocationPaths()) {
-    landingPages.set(locationPage.path, today);
-  }
-
-  for (const unit of units) {
-    const location = unit.property.location ?? unit.property.address ?? unit.property.name;
-    const locationSlug = rentalLocationSlug(location);
-    const unitCategorySlug = categorySlug(unit.type);
-
-    if (!locationSlug) continue;
-
-    const locationLoc = `/vacancies/${locationSlug}`;
-    const lastmod = formatDate(unit.updatedAt);
-    const existingLocationLastmod = landingPages.get(locationLoc);
-
-    if (!existingLocationLastmod || existingLocationLastmod < lastmod) {
-      landingPages.set(locationLoc, lastmod);
-    }
-
-    if (!unitCategorySlug) continue;
-
-    const loc = `/vacancies/${locationSlug}/${unitCategorySlug}`;
-    const existingLastmod = landingPages.get(loc);
-
-    if (!existingLastmod || existingLastmod < lastmod) {
-      landingPages.set(loc, lastmod);
-    }
-  }
+  const landingPages = rentalInventorySitemapEntries(units);
 
   const urls = Array.from(landingPages.entries())
     .map(([loc, lastmod]) =>

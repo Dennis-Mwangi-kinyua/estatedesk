@@ -40,14 +40,29 @@ describe("middleware wiring", () => {
     }
     assert.equal(proxy(new NextRequest("https://example.test/api/receipts/receipt-id", { headers: { accept: "text/html" } })).status, 401);
   });
+  it("allows service agreement PDFs while keeping authentication and session cookies intact", () => {
+    const cookie = `${getSessionCookieName()}=v1.${"a".repeat(64)}.${"b".repeat(32)}`;
+    for (const method of ["GET", "HEAD"]) {
+      const url = "https://example.test/api/service-agreements/agreement-id";
+      const response = proxy(new NextRequest(url, { method, headers: { accept: "text/html", "sec-fetch-dest": "document", cookie } }));
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get("location"), null);
+      assert.equal(response.headers.get("set-cookie"), null);
+      assert.equal(proxy(new NextRequest(url, { method, headers: { accept: "text/html" } })).status, 401);
+    }
+    const response = proxy(new NextRequest("https://example.test/are-you-lost?from=%2Fapi%2Fother", { headers: { cookie } }));
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("set-cookie"), null);
+    assert.equal(response.headers.get("location"), null);
+  });
   it("delegates to proxy security middleware", () => {
-    const middleware = readFileSync(join(ROOT, "apps/web/middleware.ts"), "utf8");
+    const middleware = readFileSync(join(ROOT, "apps/web/src/proxy.ts"), "utf8");
     const healthRoute = readFileSync(
       join(ROOT, "apps/web/src/app/api/health/route.ts"),
       "utf8",
     );
 
-    assert.match(middleware, /proxy as middleware/);
+    assert.match(middleware, /proxy as handleRequest/);
     assert.match(healthRoute, /await getUserSession\(\)/);
     assert.match(healthRoute, /\["SUPER_ADMIN", "PLATFORM_ADMIN"\]\.includes\(session.platformRole\)/);
     assert.match(healthRoute, /session.mustChangePassword \|\| session.requiresTermsAcceptance/);

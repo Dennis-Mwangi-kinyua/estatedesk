@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "@/components/navigation/workspace-link";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 

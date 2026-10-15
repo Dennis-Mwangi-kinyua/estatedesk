@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "@/components/navigation/workspace-link";
 import { ArrowRight, Lock, Shield } from "lucide-react";
 import { BookOpen } from "@/components/shared/colored-icons";
@@ -10,7 +11,7 @@ import {
 import { PageHeader } from "../../_components/control-plane";
 
 export const dynamic = "force-dynamic";
-export const metadata = privatePageMetadata;
+export const metadata: Metadata = privatePageMetadata;
 
 export default async function DeveloperSystemDocsHubPage() {
   await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {

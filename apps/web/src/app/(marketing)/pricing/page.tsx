@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
 import { Check, Layers3, FileBarChart2, X } from "lucide-react";
@@ -8,7 +9,7 @@ import { siteContentDepth } from "@/lib/content-depth/site-topics";
 import { APP_PLAN_ORDER, APP_PLANS } from "@/lib/billing/plans";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "EstateDesk Pricing for Kenya, East Africa and Dubai",
   description:
     "Compare EstateDesk property management software pricing for Kenya, East Africa, Dubai, the UAE, and global rental teams: Free, Pro at KES 3,000 per month, Plus at KES 6,500 per month, and Custom plans.",

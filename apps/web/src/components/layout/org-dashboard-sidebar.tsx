@@ -1,5 +1,3 @@
-"use client";
-
 import { useWorkspaceAccess } from "@/components/navigation/workspace-link";
 import { canDiscoverWorkspaceHref } from "@/lib/permissions/workspace-access";
 import { useCallback, useMemo, useRef } from "react";

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, FileText, LockKeyhole, MessageSquare } from "lucide-react";
 import { BellRing as Bell, Building2, CircleCheck as CheckCircle2, ClipboardCheck, Droplets, House as Home, KeyRound, Landmark, ShieldCheck, Wrench } from "@/components/shared/colored-icons";
@@ -5,7 +6,7 @@ import { RegisterRequestForm } from "./register-request-form";
 import { RegisterStatusToast } from "./register-status-toast";
 import { publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Sign Up - EstateDesk Dashboard",
   description:
     "Create an EstateDesk account or request workspace access for property management, tenant records, billing, maintenance, reports, and team onboarding.",

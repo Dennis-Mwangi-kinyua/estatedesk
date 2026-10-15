@@ -1,3 +1,4 @@
+import { rentalLandingRobots } from "@/lib/seo/rental-landing-metadata";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
@@ -333,7 +334,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const rentalLocation = getPublicRentalLocation(id);
 
   if (rentalLocation) {
-    return publicPageMetadata({
+    return { ...publicPageMetadata({
       title: buildRentalLocationTitle(id),
       description: buildRentalLocationDescription(id),
       path: `/vacancies/${id}`,
@@ -344,7 +345,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         `bedsitters in ${rentalLocation.label}`,
         `rental units ${rentalLocation.label}`,
       ],
-    });
+    }), robots: await rentalLandingRobots(id) };
   }
 
   const { unit, databaseUnavailable } = await getVacancyUnitOrUnavailable(id);

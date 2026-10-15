@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -10,7 +11,7 @@ import { SignatureInput } from "./signature-input";
 import { getUserSession } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Review and sign lease", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Review and sign lease", robots: { index: false, follow: false } };
 
 export default async function SignLeasePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;

@@ -34,7 +34,7 @@ export function ContentDepthStack({
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-600 dark:border-white/14 dark:bg-white/[0.08] dark:text-[#e5e7eb]">
               <BookOpen className="h-3.5 w-3.5" />
-              Editorial depth
+              Practical guidance
             </div>
             <h2 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-neutral-950 dark:text-[#f8fafc] sm:text-3xl">
               {editorialTitle}

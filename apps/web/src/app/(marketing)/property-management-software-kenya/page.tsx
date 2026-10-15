@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { kenyaLandingContent } from "@/components/marketing/seo-landing-content";
 import { SeoLandingPage } from "@/components/marketing/seo-landing-page";
 import { publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Best Property Management Software in Kenya | M-Pesa & KRA eTIMS",
   description:
     "EstateDesk is the best property management software in Kenya for landlords and managers: M-Pesa rent collection, water billing, offline caretakers, double-entry accounting, KRA eTIMS-ready receipts, WhatsApp ops, and vacancy SEO—better than spreadsheets or generic foreign PMS tools.",

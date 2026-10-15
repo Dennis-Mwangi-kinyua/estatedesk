@@ -22,16 +22,16 @@ type CreateOrganizationAction = (
 
 export function NewOrganizationWorkspace({
   createOrganizationAction,
-  checkAvailability,
+  checkAvailabilityAction,
   initialValues,
   onboardingRequestId,
 }: {
   createOrganizationAction: CreateOrganizationAction;
   initialValues?: Record<string, string>;
   onboardingRequestId?: string;
-  checkAvailability: (values: Record<string, string>) => Promise<Record<string, string[]>>;
+  checkAvailabilityAction: (values: Record<string, string>) => Promise<Record<string, string[]>>;
 }) {
-  const form = useNewOrgForm(createOrganizationAction, checkAvailability, initialValues, onboardingRequestId ? `organisation-draft:${onboardingRequestId}` : "organisation-draft");
+  const form = useNewOrgForm(createOrganizationAction, checkAvailabilityAction, initialValues, onboardingRequestId ? `organisation-draft:${onboardingRequestId}` : "organisation-draft");
   const [reviewConfirmed, setReviewConfirmed] = useState(false);
   const errorRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);

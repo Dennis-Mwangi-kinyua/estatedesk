@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight, Globe2, SearchCheck } from "lucide-react";
@@ -10,7 +11,7 @@ import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 import { marketCoverageItems, marketCoverageKeywords } from "@/lib/seo-index";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Property Management Software Markets and Use Cases",
   description:
     "Explore EstateDesk property management software pages for Kenya, East Africa, Dubai, UAE, landlords, rent tracking, water billing, vacancies, services, and pricing.",

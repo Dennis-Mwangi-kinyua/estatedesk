@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "@/components/navigation/workspace-link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Lock } from "lucide-react";
@@ -10,7 +11,7 @@ import {
 } from "@/lib/platform/system-docs";
 
 export const dynamic = "force-dynamic";
-export const metadata = privatePageMetadata;
+export const metadata: Metadata = privatePageMetadata;
 
 type PageProps = {
   params: Promise<{ slug: string }>;

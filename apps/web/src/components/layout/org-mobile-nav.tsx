@@ -1,5 +1,3 @@
-"use client";
-
 import { activeNavigationHref } from "@/lib/navigation/workspace-navigation";
 import { usePathname } from "next/navigation";
 import { DeferredLink } from "@/components/navigation/app-links";

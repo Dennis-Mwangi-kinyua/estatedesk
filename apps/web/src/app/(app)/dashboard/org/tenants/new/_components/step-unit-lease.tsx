@@ -1,5 +1,3 @@
-"use client";
-
 import { UnitCombobox } from "../unit-combobox";
 import { inputClassName, stepPanelClassName } from "../_lib/constants";
 import { formatCurrency } from "../_lib/helpers";

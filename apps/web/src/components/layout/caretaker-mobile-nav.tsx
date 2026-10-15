@@ -1,5 +1,3 @@
-"use client";
-
 import { CaretakerNavigation } from "./caretaker-navigation";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 

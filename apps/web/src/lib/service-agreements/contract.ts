@@ -1,6 +1,6 @@
 export const AGREEMENT_ENTITY = "ESTATEDESK_SERVICE_AGREEMENT";
 export const AGREEMENT_VERSION = "2026-10-15.1";
-export type AgreementSignature = { name: string; userId: string; signedAt: string; contentHash: string };
+export type AgreementSignature = { name: string; userId: string; signedAt: string; contentHash: string; method?: "TYPED" | "DRAWN" | "UPLOADED"; imageData?: string; imageHash?: string };
 export type AgreementData = {
   templateVersion: string; body: string; representative: string;
   platformSignature?: AgreementSignature; organizationSignature?: AgreementSignature;

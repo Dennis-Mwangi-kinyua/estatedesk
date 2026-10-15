@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Layers3 } from "lucide-react";
 import { BookOpen } from "@/components/shared/colored-icons";
@@ -12,7 +13,7 @@ import {
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Property Management Guides",
   description:
     "Long-form EstateDesk guides on rent tracking, water billing, caretaker workflows, tenant issues, vacancy marketing, diaspora landlords, move-outs, and rental operations in Kenya and beyond.",

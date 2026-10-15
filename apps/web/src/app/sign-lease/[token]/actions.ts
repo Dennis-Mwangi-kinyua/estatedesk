@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { declineLease, signLease } from "@/lib/leases/signing";
 import { requireUserSession } from "@/lib/auth/session";
-import { validateImageBytes, validateImageFile } from "@/lib/uploads/secure-image";
+import { readElectronicSignature } from "@/lib/uploads/electronic-signature";
 
 function evidence(headerStore: Headers) {
   return { ipAddress: headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ?? headerStore.get("x-real-ip"), userAgent: headerStore.get("user-agent") };
@@ -15,27 +15,8 @@ export async function signLeaseAction(formData: FormData) {
   const token = String(formData.get("token") ?? "");
   const signatureText = String(formData.get("signatureText") ?? "");
   const headerStore = await headers();
-  const signatureMethod = String(formData.get("signatureMethod") ?? "TYPED") as "TYPED" | "DRAWN" | "UPLOADED";
-  let signatureImage: Uint8Array | null = null;
-  if (signatureMethod === "DRAWN") {
-    const data = String(formData.get("signatureData") ?? "");
-    if (data.startsWith("data:image/png;base64,")) {
-      signatureImage = validateImageBytes(
-        Buffer.from(data.slice(data.indexOf(",") + 1), "base64"),
-        { maxBytes: 2_000_000, allowedMimeTypes: ["image/png"] },
-      ).buffer;
-    }
-  } else if (signatureMethod === "UPLOADED") {
-    const file = formData.get("signatureFile");
-    if (!(file instanceof File)) throw new Error("Upload a PNG signature image.");
-    signatureImage = (
-      await validateImageFile(file, {
-        maxBytes: 2_000_000,
-        allowedMimeTypes: ["image/png"],
-      })
-    ).buffer;
-  }
-  await signLease({ token, userId: session.userId, signatureText, signatureMethod, signatureImage, consent: formData.get("consent") === "on", ...evidence(headerStore) });
+  const signature = await readElectronicSignature(formData);
+  await signLease({ token, userId: session.userId, signatureText, signatureMethod: signature.method, signatureImage: signature.bytes, consent: formData.get("consent") === "on", ...evidence(headerStore) });
   redirect(`/sign-lease/${encodeURIComponent(token)}?completed=1`);
 }
 

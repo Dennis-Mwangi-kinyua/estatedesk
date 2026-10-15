@@ -1,5 +1,3 @@
-"use client";
-
 import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 
 import { useCallback, useMemo, useRef } from "react";

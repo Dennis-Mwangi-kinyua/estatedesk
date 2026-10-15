@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { CircleHelp as HelpCircle, Search } from "@/components/shared/colored-icons";
@@ -15,7 +16,7 @@ import {
 import { guideTopicLink, sharedWorkflowScenarios } from "@/lib/content-depth/site-topics";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Property Management Software FAQ for Kenya, East Africa and Dubai",
   description:
     "Detailed EstateDesk FAQ for landlords and property managers in Kenya, East Africa, Dubai, and global rental markets: tenant records, rent tracking, water billing, vacancies, caretakers, inspections, reports, pricing, and searchable property operations.",

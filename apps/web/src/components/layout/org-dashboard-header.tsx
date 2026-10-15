@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "@/components/navigation/workspace-link";
 import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
 import { Menu } from "lucide-react";

@@ -1,10 +1,12 @@
+import { getUserSession } from "@/lib/auth/session";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { House as Home, LifeBuoy, Search, ShieldCheck } from "@/components/shared/colored-icons";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { privatePageMetadata } from "@/lib/seo";
 
-export const metadata = privatePageMetadata;
+export const metadata: Metadata = privatePageMetadata;
 
 const serviceLinks = [
   {
@@ -27,10 +29,13 @@ const serviceLinks = [
   },
 ];
 
-export default function AreYouLostPage() {
+export default async function AreYouLostPage() {
+  const session = await getUserSession();
+  const workspaceHref = session ? "/dashboard" : "/login";
+  const workspaceLabel = session ? "Return to workspace" : "Sign in to workspace";
   return (
     <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
-      <PublicAccessHeader active="home" showPricing />
+      <PublicAccessHeader active="home" showPricing loginHref={workspaceHref} loginLabel={session ? "Workspace" : "Sign in"} />
 
       <section className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-center px-4 py-10 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-white/80 bg-white p-5 shadow-[0_24px_70px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900/90 sm:p-8">
@@ -43,7 +48,7 @@ export default function AreYouLostPage() {
               This is not a public EstateDesk page.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
-              API addresses are reserved for secure system communication. You can continue with one of the public services below.
+              This address cannot be opened as a page. Return to your workspace or choose one of the services below.
             </p>
           </div>
 
@@ -77,10 +82,10 @@ export default function AreYouLostPage() {
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
-              href="/login"
+              href={workspaceHref}
               className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
             >
-              Sign in to workspace
+              {workspaceLabel}
             </Link>
             <Link
               href="/"

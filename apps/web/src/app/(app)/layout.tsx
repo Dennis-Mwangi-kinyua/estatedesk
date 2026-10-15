@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getOrganizationSummary } from "@/lib/organizations/summary";
 import { WorkspaceAccessProvider } from "@/components/navigation/workspace-link";
 import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
@@ -21,7 +22,7 @@ import { AppActionFeedback } from "@/components/shared/app-action-feedback";
 import { DestructiveActionGuard } from "@/components/shared/destructive-action-guard";
 import { tenantCanAccessWorkspacePath } from "@/lib/permissions/access";
 
-export const metadata = privatePageMetadata;
+export const metadata: Metadata = privatePageMetadata;
 
 export default async function AppLayout({
   children,

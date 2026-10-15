@@ -1,9 +1,10 @@
+import type { Metadata } from "next";
 import MarketingHomePage from "@/components/marketing/marketing-home-page";
 import { publicPageMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Property Management Software for Kenya, East Africa and Dubai",
   description:
     "EstateDesk is property management software for landlords and property managers in Kenya, East Africa, Dubai, and global rental markets to manage tenants, leases, rent, water bills, caretakers, inspections, maintenance, reports, and vacant houses online.",

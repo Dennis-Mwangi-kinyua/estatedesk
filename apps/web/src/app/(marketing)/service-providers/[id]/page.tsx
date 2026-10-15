@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { publicPageMetadata } from "@/lib/seo";
@@ -10,7 +11,7 @@ import { visibleProviderWhere } from "@/features/providers/service";
 import { ActionForm, panelClass, inputClass } from "@/features/providers/forms";
 import { hireForJob } from "@/features/providers/actions";
 export const dynamic = "force-dynamic";
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const provider = await prisma.serviceProvider.findFirst({ where: { id, ...visibleProviderWhere }, select: { businessName: true, category: true, location: true, bio: true } });
   if (!provider) return { title: "Provider unavailable", robots: { index: false, follow: false } };

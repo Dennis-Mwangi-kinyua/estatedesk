@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Activity, CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
@@ -7,7 +8,7 @@ import { sharedTopicGuides } from "@/lib/content-depth/site-topics";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "System Status",
   description:
     "EstateDesk system status and production health check information for public pages, dashboards, API health, and operational monitoring.",

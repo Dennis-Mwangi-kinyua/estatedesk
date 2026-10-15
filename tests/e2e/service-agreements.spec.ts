@@ -26,6 +26,7 @@ async function sign(page: Page, button: string) {
   if (await updates.isVisible()) {await updates.click();await expect(updates).toBeHidden();}
   const label = await page.getByText(/^Your full account name:/).innerText();
   await page.getByLabel(/Your full account name:/).fill(label.replace("Your full account name:","").trim());
+  await page.getByLabel("Type name", {exact:true}).check();
   await page.getByRole("checkbox").check();
   await page.getByRole("button", {name:button,exact:true}).click();
   await expect(page).toHaveURL(/ok=saved/, {timeout:30_000});
@@ -93,6 +94,7 @@ test("organization-specific agreement is signed, sent, isolated, countersigned a
     expect((await org.context.request.get(`/api/service-agreements/${id}`)).status()).toBe(409);
     await page.reload({waitUntil:"networkidle"});
     await page.getByLabel(/Your full account name:/).fill("Someone Else");
+    await page.getByLabel("Type name", {exact:true}).check();
     await page.getByRole("checkbox").check();
     await page.getByRole("button", {name:"Countersign and complete agreement",exact:true}).click();
     await expect(page).toHaveURL(/error=action/);await page.waitForLoadState("networkidle");

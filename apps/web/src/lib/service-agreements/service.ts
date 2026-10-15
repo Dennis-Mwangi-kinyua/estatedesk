@@ -1,5 +1,6 @@
 import "server-only";
 import crypto from "node:crypto";
+import { readElectronicSignature } from "@/lib/uploads/electronic-signature";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAuthenticated, requireOrgRole, requirePlatformRole } from "@/lib/permissions/guards";
@@ -80,13 +81,14 @@ export async function changeAgreement(id: string, form: FormData) {
   if (document.status !== "ISSUED" || (platformSigning ? !platform || !data.organizationSignature || !!data.platformSignature : platform || !!data.organizationSignature)) throw Error("You cannot sign this agreement in its current state.");
   const name = String(form.get("name") ?? "").trim();
   if (form.get("consent") !== "on" || !signatureName(name, session.fullName)) throw Error("Enter your account's full name and confirm your authority and agreement to the displayed terms.");
-  const signature = { name, userId: session.userId, signedAt: new Date().toISOString(), contentHash: hash };
+  const captured = await readElectronicSignature(form);
+  const signature = { method: captured.method, ...(captured.imageData ? { imageData: captured.imageData, imageHash: captured.imageHash } : {}), name, userId: session.userId, signedAt: new Date().toISOString(), contentHash: hash };
   const next = platformSigning ? { ...data, platformSignature: signature } : { ...data, organizationSignature: signature };
   await prisma.$transaction(async tx => {
     const completed = !!next.platformSignature && !!next.organizationSignature;
     const result = await tx.documentRecord.updateMany({ where: { id, orgId: document.orgId, status: "ISSUED", contentHash: hash, metadata: { equals: json(data) } }, data: { status: completed ? "COMPLETED" : "ISSUED", metadata: json(next) } });
     if (result.count !== 1) throw Error("This agreement has already changed or been signed. Reload to continue.");
-    const evidence = { documentId: id, orgId: document.orgId, actorUserId: session.userId, ip: request.ip, userAgent: request.userAgent, metadata: { party: platformSigning ? "ESTATEDESK" : "ORGANIZATION", name, contentHash: hash, signedAt: signature.signedAt, consent: true } };
+    const evidence = { documentId: id, orgId: document.orgId, actorUserId: session.userId, ip: request.ip, userAgent: request.userAgent, metadata: { party: platformSigning ? "ESTATEDESK" : "ORGANIZATION", name, contentHash: hash, signedAt: signature.signedAt, signatureMethod: captured.method, signatureImageHash: captured.imageHash ?? null, consent: true } };
     await tx.documentEvent.createMany({ data: [
       { ...evidence, eventType: "SIGNED" },
       { ...evidence, eventType: completed ? "COMPLETED" : "SIGNING_REQUESTED" },

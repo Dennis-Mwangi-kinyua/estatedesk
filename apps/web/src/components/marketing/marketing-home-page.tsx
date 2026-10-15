@@ -135,14 +135,13 @@ export default function MarketingHomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
       />
-      <h1 className="sr-only">EstateDesk property management and rental listings</h1>
       <OperationsShowcase
         standalone
         publicHeaderActive="home"
         showFooter={false}
         variant="rentals"
       />
-      <section className="mx-auto max-w-6xl space-y-5 px-4 py-10 sm:px-6"><h2 className="text-3xl font-semibold">Your building, connected</h2><p className="max-w-3xl text-lg text-muted-foreground">Manage long-term rentals and short stays together. Welcome visitors with verified QR passes, send official community notices and give BnB guests temporary access. Hire local service providers, verify registered IDs through the platform and keep tenant records available after move-out.</p><div className="flex flex-wrap gap-3"><Link href="/services#community-operations" className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 py-2 font-semibold text-primary-foreground">Explore property operations</Link><Link href="/stays" className="inline-flex min-h-11 items-center rounded-xl border bg-card px-5 py-2 font-semibold">Find a BnB stay</Link><Link href="/service-providers" className="inline-flex min-h-11 items-center rounded-xl border bg-card px-5 py-2 font-semibold">Find & hire service providers</Link></div></section>
+      <section className="mx-auto max-w-6xl space-y-5 px-4 py-10 sm:px-6"><h1 className="text-3xl font-semibold">Property management software for Kenyan rental teams</h1><p className="max-w-3xl text-lg text-muted-foreground">Manage long-term rentals and short stays together. Welcome visitors with verified QR passes, send official community notices and give BnB guests temporary access. Hire local service providers, verify registered IDs through the platform and keep tenant records available after move-out.</p><div className="flex flex-wrap gap-3"><Link href="/services#community-operations" className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 py-2 font-semibold text-primary-foreground">Explore property operations</Link><Link href="/stays" className="inline-flex min-h-11 items-center rounded-xl border bg-card px-5 py-2 font-semibold">Find a BnB stay</Link><Link href="/service-providers" className="inline-flex min-h-11 items-center rounded-xl border bg-card px-5 py-2 font-semibold">Find & hire service providers</Link></div></section>
       <HomepageSeoContent />
       <PublicAccessFooter />
     </main>
@@ -178,14 +177,14 @@ function HomepageSeoContent() {
                 Property management software
               </div>
               <h2 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl dark:text-slate-50">
-                What EstateDesk does — and why it wins
+                Manage your properties from one workspace
               </h2>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-600 sm:text-base dark:text-slate-300">
                 EstateDesk is Kenya-built property management software: M-Pesa rent
                 collection, water billing, offline caretaker metering, double-entry
                 accounting, KRA eTIMS-ready receipts, WhatsApp ops, public vacancy SEO,
                 and role-based staff access. It replaces spreadsheets, notebooks, and
-                generic foreign PMS tools that ignore how Kenyan rentals actually run.
+                disconnected tools with records your office and field teams can share.
               </p>
 
               <div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -199,8 +198,8 @@ function HomepageSeoContent() {
                     "Offline meter queues, SLAs, inspections, unit QR, accounting, and vacancies—not three disconnected apps.",
                   ],
                   [
-                    "Ranks & operates",
-                    "Public vacancy pages that tenants find on Google, plus private dashboards for managers, accountants, and caretakers.",
+                    "Publish available rentals",
+                    "Publish available units with rent and viewing details, and manage enquiries alongside your property records.",
                   ],
                 ].map(([title, body]) => (
                   <article

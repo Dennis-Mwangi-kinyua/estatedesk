@@ -1,5 +1,3 @@
-"use client";
-
 import { usePathname } from "next/navigation";
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { DeferredLink } from "@/components/navigation/app-links";

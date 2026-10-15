@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight, MessageSquare } from "lucide-react";
@@ -10,7 +11,7 @@ import { ReferralCodeField } from "@/components/marketing/referral-code-field";
 import { publicPageMetadata } from "@/lib/seo";
 import { contactSalesAction } from "./actions";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Help - EstateDesk Dashboard",
   description:
     "Get EstateDesk help for onboarding, property management workflows, tenant records, billing, caretaker operations, reports, and rollout support.",

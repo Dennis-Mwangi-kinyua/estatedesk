@@ -205,6 +205,7 @@ function isBrowserApiNavigation(req: NextRequest) {
   // These authenticated routes intentionally serve browser downloads.
   if (/^\/api\/move-outs\/[^/]+\/(report|refund-proof)\/?$/.test(req.nextUrl.pathname)) return false;
 
+  if (/^\/api\/service-agreements\/[^/]+\/?$/.test(req.nextUrl.pathname)) return false;
   if (/^\/api\/receipts\/[^/]+\/?$/.test(req.nextUrl.pathname)) return false;
   if (/^\/api\/org\/subscription-invoices\/[^/]+\/?$/.test(req.nextUrl.pathname)) return false;
 

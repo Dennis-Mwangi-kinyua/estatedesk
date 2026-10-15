@@ -21,6 +21,7 @@ export async function GET(_request: Request, {params}: {params: Promise<{id: str
   pdf.paragraph(`Status: ${document.status}`);
   for (const [index, signature] of [data.platformSignature, data.organizationSignature].entries()) {
     pdf.section(index ? "Organization signature" : "EstateDesk signature");
+    if (signature?.imageData) await pdf.signatureImage(signature.imageData);
     pdf.paragraph(signature ? `Name: ${signature.name}\nAuthenticated account: ${signature.userId}\nSigned at: ${signature.signedAt}\nAgreement text SHA-256: ${signature.contentHash}\nConsent and signing authority recorded.` : "Not signed");
   }
   pdf.section("Integrity reference");

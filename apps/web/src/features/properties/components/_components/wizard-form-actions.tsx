@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";

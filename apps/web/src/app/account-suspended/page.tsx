@@ -1,9 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Ban } from "lucide-react";
 import { Mail } from "@/components/shared/colored-icons";
 import { privatePageMetadata } from "@/lib/seo";
 
-export const metadata = privatePageMetadata;
+export const metadata: Metadata = privatePageMetadata;
 
 type SuspendedAccountPageProps = {
   searchParams?: Promise<{

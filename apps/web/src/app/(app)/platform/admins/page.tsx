@@ -1,10 +1,11 @@
+import type { Metadata } from "next";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { privatePageMetadata } from "@/lib/seo";
 import { AdminsWorkspace } from "./_components/admins-workspace";
 import { getPlatformAdmins } from "./_lib/queries";
 
 export const dynamic = "force-dynamic";
-export const metadata = privatePageMetadata;
+export const metadata: Metadata = privatePageMetadata;
 
 export default async function PlatformAdminsPage() {
   await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {

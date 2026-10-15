@@ -1,10 +1,11 @@
+import type { Metadata } from "next";
 import { SecurityAccountForm } from "@/features/visitors/security-account-form";
 import { Building2, CheckCircle2, QrCode, ShieldCheck, UserRound, UsersRound } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { gateAccess } from "@/features/visitors/access";
 import { GateVerifier, GateAssignmentForm } from "@/features/visitors/forms";
 
-export const metadata = { title: "Gate access", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Gate access", robots: { index: false, follow: false } };
 
 export default async function GatePage() {
   const { orgId, manager, propertyIds } = await gateAccess();

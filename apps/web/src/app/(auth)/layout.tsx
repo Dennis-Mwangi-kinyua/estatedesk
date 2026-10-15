@@ -1,7 +1,8 @@
+import type { Metadata } from "next";
 import { connection } from "next/server";
 import { authPageMetadata } from "@/lib/seo";
 
-export const metadata = authPageMetadata;
+export const metadata: Metadata = authPageMetadata;
 
 export default async function AuthLayout({
   children,

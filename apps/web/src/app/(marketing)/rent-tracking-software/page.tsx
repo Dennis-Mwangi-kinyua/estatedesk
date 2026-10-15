@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { rentTrackingLandingContent } from "@/components/marketing/seo-landing-content";
 import { SeoLandingPage } from "@/components/marketing/seo-landing-page";
 import { publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Rent Tracking Software for Landlords and Property Managers",
   description:
     "EstateDesk rent tracking software helps property teams track rent charges, tenant balances, paid and unpaid tenants, payment records, verification, reminders, and reports.",

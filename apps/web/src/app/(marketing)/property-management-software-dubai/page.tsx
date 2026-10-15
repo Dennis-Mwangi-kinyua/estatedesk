@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { dubaiLandingContent } from "@/components/marketing/seo-landing-content";
 import { SeoLandingPage } from "@/components/marketing/seo-landing-page";
 import { publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Property Management Software for Dubai and UAE",
   description:
     "EstateDesk supports Dubai, UAE, diaspora, and remote property teams with online tenant records, rent tracking, maintenance, inspections, vacancies, reports, and staff access.",

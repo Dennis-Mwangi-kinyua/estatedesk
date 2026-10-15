@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { TrustPage } from "@/components/marketing/trust-page";
 import { trustContentDepth } from "@/lib/content-depth/marketing-depth";
 import {
@@ -7,7 +8,7 @@ import {
 } from "@/lib/legal/trust-content";
 import { publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Privacy Policy",
   description:
     "EstateDesk privacy policy for property management software users, organizations, tenants, staff, and public vacancy visitors.",

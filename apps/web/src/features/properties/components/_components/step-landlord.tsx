@@ -1,5 +1,3 @@
-"use client";
-
 import type { LandlordMode, LandlordProfileOption } from "../_lib/types";
 import {
   calloutInfoClassName,

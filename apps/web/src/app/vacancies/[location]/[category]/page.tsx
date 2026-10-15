@@ -1,3 +1,6 @@
+import { notFound } from "next/navigation";
+import { rentalLandingRobots } from "@/lib/seo/rental-landing-metadata";
+import { rentalCategoryType } from "@/lib/seo/rental-inventory";
 import type { Metadata } from "next";
 import VacanciesPage from "@/app/(marketing)/vacancies/page";
 import { publicPageMetadata } from "@/lib/seo";
@@ -18,35 +21,11 @@ type PageProps = {
 
 export const revalidate = 300;
 
-function categoryToUnitType(category: string) {
-  switch (category.toLowerCase()) {
-    case "bedsitters":
-      return "BEDSITTER";
-    case "studios":
-      return "STUDIO";
-    case "single-rooms":
-      return "SINGLE_ROOM";
-    case "apartments":
-      return "APARTMENT";
-    case "shops":
-      return "SHOP";
-    case "offices":
-      return "OFFICE";
-    case "stalls":
-      return "STALL";
-    case "warehouses":
-      return "WAREHOUSE";
-    case "godowns":
-      return "GODOWN";
-    default:
-      return undefined;
-  }
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { location, category } = await params;
 
-  return publicPageMetadata({
+  if (!rentalCategoryType(category)) notFound();
+  return { ...publicPageMetadata({
     title: buildRentalLandingTitle(location, category),
     description: buildRentalLandingDescription(location, category),
     path: `/vacancies/${location}/${category}`,
@@ -56,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       `vacant ${categorySearchTerm(category)} ${locationLabel(location)}`,
       `houses for rent ${locationLabel(location)}`,
     ],
-  });
+  }), robots: await rentalLandingRobots(location, category) };
 }
 
 export function generateStaticParams() {
@@ -68,7 +47,8 @@ export function generateStaticParams() {
 
 export default async function VacancySearchLandingPage({ params }: PageProps) {
   const { location, category } = await params;
-  const type = categoryToUnitType(category);
+  const type = rentalCategoryType(category);
+  if (!type) notFound();
 
   return (
     <VacanciesPage

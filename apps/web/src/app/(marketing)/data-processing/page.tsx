@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { TrustPage } from "@/components/marketing/trust-page";
 import { trustContentDepth } from "@/lib/content-depth/marketing-depth";
 import { publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Data Processing and Retention",
   description:
     "EstateDesk data processing and retention overview for organizations managing tenant, lease, billing, property, and staff records.",

@@ -128,9 +128,9 @@ export const sharedTopicGuides = [
 ] as const;
 
 export const sharedEditorialDepth = [
-  "Property management content should answer real operational questions, not just list features. Landlords want to know how rent follow-up works when a tenant pays late. Managers want to know how caretaker readings become tenant bills. Tenants want to know how maintenance requests are tracked after submission. EstateDesk public pages are written around those practical workflows so search engines and readers find useful depth instead of shallow marketing copy.",
-  "Search intent for rental software often mixes geography, role, and workflow. One visitor may search for property management software in Kenya, another for landlord software, another for rent tracking, and another for water billing. EstateDesk uses dedicated public pages for each intent, then links them together through services, FAQ, markets, and homepage guides so the site builds topical authority across the full rental operations journey.",
-  "Content depth also means explaining how records connect. A lease connects to a tenant and unit. Rent connects to balances and payment history. Water billing connects to readings and move-out review. Issues connect to caretakers and inspections. Vacancies connect to public discovery. When those connections are described clearly, the site becomes more useful for humans and easier for search systems to understand what EstateDesk actually does.",
+  "Start with your properties, units, and current tenants. Connect each tenancy to its lease, opening balance, rent amount, and water meter so your team can follow the same records from move-in to move-out.",
+  "At month-end, review outstanding balances, match verified payments, and follow up with tenants from their account records. Caretakers can capture meter readings in the field while the office reviews charges and tracks unresolved maintenance requests.",
+  "Give each team member access for their role. Owners can review their portfolio, office staff can manage daily work, and tenants can view their records and raise issues. Review the available plans and confirm the payment and tax integrations needed for your rollout.",
 ] as const;
 
 export const siteContentDepth: ContentDepthSections = {
@@ -140,6 +140,6 @@ export const siteContentDepth: ContentDepthSections = {
   problems: [...sharedProblemsSolved],
   guidesTitle: "Explore related EstateDesk guides",
   guides: [...sharedTopicGuides],
-  editorialTitle: "Why content depth matters in property management software",
+  editorialTitle: "Bring your rental records into one workflow",
   editorial: [...sharedEditorialDepth],
 };

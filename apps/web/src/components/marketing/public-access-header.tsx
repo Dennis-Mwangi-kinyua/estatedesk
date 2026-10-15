@@ -16,6 +16,7 @@ const serverHydration = () => false;
 type PublicAccessHeaderProps = {
   active?: "home" | "vacancies" | "stays" | "services" | "providers" | "pricing" | "contact" | "faq" | "guides";
   loginHref?: string;
+  loginLabel?: string;
   showPricing?: boolean;
 };
 
@@ -33,6 +34,7 @@ const publicLinks = [
 export function PublicAccessHeader({
   active = "home",
   loginHref = "/login",
+  loginLabel = "Sign in",
   showPricing = true,
 }: PublicAccessHeaderProps) {
   const pathname = usePathname();
@@ -164,7 +166,7 @@ export function PublicAccessHeader({
                     className={`inline-flex min-h-11 text-sm ${signInClassName}`}
                   >
                     <LogIn className="h-4 w-4 shrink-0" />
-                    <span className="truncate">Sign in</span>
+                    <span className="truncate">{loginLabel}</span>
                   </Link>
                   <Link data-workspace-action="true"
                     href="/register"
@@ -210,7 +212,7 @@ export function PublicAccessHeader({
                 className={`inline-flex min-h-10 min-w-0 text-sm ${signInClassName}`}
               >
                 <LogIn className="h-4 w-4 shrink-0" />
-                <span className="truncate">Sign in</span>
+                <span className="truncate">{loginLabel}</span>
               </Link>
               <Link data-workspace-action="true"
                 href="/register"
