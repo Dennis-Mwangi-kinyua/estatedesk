@@ -127,7 +127,7 @@ export default async function DeveloperPortalPage({
   }
 
   return (
-    <div className="developer-glass-page mx-auto min-w-0 w-full max-w-7xl space-y-4 sm:space-y-6">
+    <div className="engineering-workspace developer-glass-page mx-auto min-w-0 w-full max-w-7xl space-y-4 sm:space-y-6">
       {params.error === "super-admin-only" ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50 sm:px-4">
           That tool requires a <strong>super admin</strong>. Platform admins can run
@@ -174,7 +174,7 @@ export default async function DeveloperPortalPage({
       </section>
 
       {unavailableMetrics > 0 && <div role="status" className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm"><p>Some operational metrics could not be loaded. Available data and developer tools are shown below.</p><div className="mt-2 flex flex-wrap gap-4"><Link href="/platform/developer" className="font-semibold underline">Retry metrics</Link><Link href="/platform/system-health" className="font-semibold underline">Check system health</Link></div></div>}
-      <section className="developer-glass-stats grid gap-4">
+      <section className="engineering-metrics developer-glass-stats grid gap-4">
         <StatCard label="Active API keys" value={metricNumber(activeApiKeys)} />
         <StatCard
           label="Queued notifications"

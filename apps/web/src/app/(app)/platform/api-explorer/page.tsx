@@ -138,11 +138,11 @@ export default async function ApiExplorerPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="engineering-workspace mx-auto min-w-0 w-full max-w-7xl space-y-6">
       <PageHeader
         eyebrow="Developer portal"
         title="API & webhooks"
-        description="Reference for public APIs, inbound webhooks, cron endpoints, and recent API key activity. Super admins manage credentials under API Keys."
+        description="Reference for public APIs, inbound webhooks, cron endpoints, and recent API key activity. Manage credentials under API Keys."
         action={
           <Link
             href="/platform/api-keys"
@@ -154,7 +154,7 @@ export default async function ApiExplorerPage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="engineering-metrics grid gap-4">
         <StatCard label="Active API keys" value={formatNumber(activeKeys)} />
         <StatCard label="Revoked keys" value={formatNumber(revokedKeys)} />
         <StatCard label="Documented endpoints" value={formatNumber(endpoints.length)} />
@@ -168,7 +168,7 @@ export default async function ApiExplorerPage() {
         title="Endpoint catalog"
         description="High-value surface area for external and operational integrations."
       >
-        <div className="divide-y divide-border lg:hidden">
+        <div className="engineering-record-grid engineering-card-view">
           {endpoints.map((endpoint) => (
             <article
               key={`${endpoint.method}:${endpoint.path}`}
@@ -191,7 +191,7 @@ export default async function ApiExplorerPage() {
           ))}
         </div>
 
-        <div className="hidden overflow-x-auto lg:block">
+        <div className="engineering-table-view hidden max-w-full overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -234,7 +234,7 @@ export default async function ApiExplorerPage() {
         </div>
       </Surface>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="engineering-panels grid gap-5">
         <Surface
           title="Public vacant-houses usage"
           description="External sites should call with a vacant-listings API key only."
@@ -269,7 +269,7 @@ export default async function ApiExplorerPage() {
             {webhookIntegrations.slice(0, 10).map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between gap-3 px-4 py-3"
+                className="engineering-status-row flex flex-wrap items-start justify-between gap-3 px-4 py-4"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -278,7 +278,7 @@ export default async function ApiExplorerPage() {
                       {item.name}
                     </p>
                   </div>
-                  <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 whitespace-normal text-xs text-slate-500 dark:text-slate-400">
                     {item.nextAction}
                   </p>
                 </div>
@@ -298,7 +298,7 @@ export default async function ApiExplorerPage() {
         title="Live tools"
         description="Quick checks against public and health endpoints from this environment."
       >
-        <div className="grid gap-3 p-4 lg:grid-cols-2">
+        <div className="engineering-summary-grid grid gap-4 p-5">
           <div className="rounded-xl border border-border bg-muted/30 p-4">
             <p className="text-sm font-semibold text-foreground">Health probe</p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -316,7 +316,7 @@ export default async function ApiExplorerPage() {
           <div className="rounded-xl border border-border bg-muted/30 p-4">
             <p className="text-sm font-semibold text-foreground">Vacant houses API</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Requires a Bearer key. Create keys under API Keys (super admin), then call:
+              Requires a Bearer key. Create a key under API Keys, then call:
             </p>
             <code className="mt-2 block overflow-x-auto rounded-lg bg-card px-3 py-2 text-[11px]">
               curl -H &quot;Authorization: Bearer edk_vacant_…&quot; /api/public/vacant-houses
@@ -339,7 +339,7 @@ export default async function ApiExplorerPage() {
                 <p className="font-medium text-foreground">
                   {event.provider} · {event.statusCode}
                 </p>
-                <p className="truncate text-xs text-muted-foreground">
+                <p className="whitespace-normal text-xs text-muted-foreground">
                   {event.summary ?? event.path}
                 </p>
               </div>
@@ -358,7 +358,7 @@ export default async function ApiExplorerPage() {
 
       <Surface
         title="Recent API keys"
-        description="Ordered by last use. Full create/revoke controls are on the super-admin API Keys page."
+        description="Ordered by last use. Create and revoke controls are on the API Keys page."
       >
         <div className="divide-y divide-slate-100 dark:divide-white/10">
           {recentKeys.map((key) => (

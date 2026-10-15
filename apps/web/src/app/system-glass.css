@@ -248,3 +248,119 @@ body.estate-glass-system {
 @container (min-width: 60rem) {
   .developer-details-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Engineering pages share readable cards sized to the workspace, not the screen. */
+.engineering-workspace {
+  container: engineering / inline-size;
+  overflow-wrap: anywhere;
+}
+.engineering-workspace :is(section, article, form, fieldset, .grid > *, .flex > *) {
+  min-width: 0;
+}
+.engineering-metrics {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  align-items: start;
+}
+.engineering-panels,
+.engineering-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  align-items: start;
+}
+.engineering-record-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: 1rem;
+  padding: 1.25rem;
+  align-items: stretch;
+  list-style: none;
+}
+.engineering-workspace .engineering-record-grid > :is(article, li, div) {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+.engineering-workspace .engineering-record-grid > li {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: .75rem;
+}
+.engineering-workspace .engineering-record-grid > :is(article, li, div) > .flex {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.engineering-record-grid > p {
+  grid-column: 1 / -1;
+}
+body.estate-glass-system .engineering-workspace :is(p, h1, h2, h3, dd, dt, a, span, code, pre) {
+  overflow-wrap: anywhere;
+}
+.engineering-workspace :is(code, pre) {
+  white-space: pre-wrap;
+}
+body.estate-glass-system .engineering-workspace .platform-badge {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+.engineering-workspace .platform-stat-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 9rem;
+  padding: 1.25rem;
+}
+.engineering-workspace .platform-stat-card > p:first-of-type {
+  font-size: clamp(1.25rem, 2.5cqi, 1.75rem);
+  line-height: 1.35;
+}
+.engineering-workspace .platform-stat-card > p:last-child:not(:first-of-type) {
+  font-size: .75rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+.engineering-workspace .page-header > div {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.5rem;
+}
+.engineering-workspace .page-header > div > :last-child {
+  flex-shrink: 1;
+  justify-content: flex-start;
+}
+.engineering-workspace .workspace-panel > div:first-child > h2 {
+  align-items: flex-start;
+  line-height: 1.5;
+}
+.engineering-workspace .engineering-status-row > div {
+  flex: 1 1 12rem;
+}
+.engineering-filter-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+.engineering-workspace :is(button, input, select, textarea) {
+  max-width: 100%;
+}
+body.estate-glass-system .engineering-workspace button {
+  min-height: 2.75rem;
+  height: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+@container engineering (min-width: 76rem) {
+  .engineering-card-view { display: none; }
+  .engineering-table-view { display: block; }
+}
+@layer utilities {
+  body.estate-glass-system .engineering-workspace :is(.workspace-panel, .platform-stat-card, .developer-glass-tool) {
+    background: var(--card) !important;
+    border-color: var(--border) !important;
+    border-radius: 1.25rem;
+    box-shadow: 0 2px 8px rgb(15 23 42 / 4%);
+    backdrop-filter: none;
+  }
+  body.estate-glass-system .engineering-workspace .workspace-panel > div:first-child {
+    padding: 1.25rem;
+  }
+}

@@ -195,7 +195,7 @@ export default async function PlatformRateLimitsPage() {
   ).sort((a, b) => b.totalHits - a.totalHits);
 
   return (
-    <div className="min-w-0 max-w-full space-y-6 overflow-x-clip">
+    <div className="engineering-workspace mx-auto min-w-0 w-full max-w-7xl space-y-6">
       <PageHeader
         eyebrow="Developer portal"
         title="Rate limits"
@@ -214,7 +214,7 @@ export default async function PlatformRateLimitsPage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="engineering-metrics grid gap-4">
         <StatCard label="Tracked buckets" value={formatNumber(totalBuckets)} />
         <StatCard label="Active windows" value={formatNumber(activeBuckets)} />
         <StatCard label="Expired windows" value={formatNumber(expiredBuckets)} />
@@ -232,7 +232,7 @@ export default async function PlatformRateLimitsPage() {
         title="Configured policies"
         description="Current application-level throttles. Database-backed buckets persist across requests; proxy buckets are process-local."
       >
-        <div className="min-w-0 divide-y divide-border 2xl:hidden">
+        <div className="engineering-record-grid engineering-card-view">
           {policies.map((policy) => {
             const color = colorForRate(policy.name);
             return (
@@ -265,7 +265,7 @@ export default async function PlatformRateLimitsPage() {
           })}
         </div>
 
-        <div className="hidden max-w-full overflow-x-auto 2xl:block">
+        <div className="engineering-table-view hidden max-w-full overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -306,7 +306,7 @@ export default async function PlatformRateLimitsPage() {
       </Surface>
 
       <Surface title="Bucket scopes">
-        <div className="min-w-0 divide-y divide-border 2xl:hidden">
+        <div className="engineering-record-grid engineering-card-view">
           {groupedScopes.map((scope) => {
             const color = colorForRate(scope.scope);
             return (
@@ -353,7 +353,7 @@ export default async function PlatformRateLimitsPage() {
           ) : null}
         </div>
 
-        <div className="hidden max-w-full overflow-x-auto 2xl:block">
+        <div className="engineering-table-view hidden max-w-full overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -419,7 +419,7 @@ export default async function PlatformRateLimitsPage() {
         title="Hottest buckets"
         description="Highest-count persistent buckets. Super admins can reset a bucket to immediately unthrottle a client."
       >
-        <div className="min-w-0 divide-y divide-border 2xl:hidden">
+        <div className="engineering-record-grid engineering-card-view">
           {topBuckets.map((bucket) => {
             const color = colorForRate(bucket.key);
             return (
@@ -472,7 +472,7 @@ export default async function PlatformRateLimitsPage() {
           ) : null}
         </div>
 
-        <div className="hidden max-w-full overflow-x-auto 2xl:block">
+        <div className="engineering-table-view hidden max-w-full overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>

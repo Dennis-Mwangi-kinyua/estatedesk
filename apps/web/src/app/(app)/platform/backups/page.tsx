@@ -1,3 +1,4 @@
+import Link from "@/components/navigation/workspace-link";
 import { prisma } from "@/lib/prisma";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { requirePlatformRole } from "@/lib/permissions/guards";
@@ -102,7 +103,7 @@ function checkpointIcon(name: string) {
 export default async function PlatformBackupsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ ok?: string }>;
+  searchParams?: Promise<{ ok?: string; error?: string }>;
 }) {
   await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/dashboard",
@@ -123,6 +124,7 @@ export default async function PlatformBackupsPage({
     exportRequests,
     approvedExports,
     pendingExports,
+    latestRestore,
   ] = await Promise.all([
     platformBackupQuery("backups-count-organizations", () =>
       prisma.organization.count({ where: { deletedAt: null } }),
@@ -169,18 +171,29 @@ export default async function PlatformBackupsPage({
     platformBackupQuery("backups-pending-exports", () =>
       prisma.dataExportRequest.count({ where: { status: "PENDING" } }),
     ),
+    platformBackupQuery("backups-latest-restore", () =>
+      prisma.auditLog.findFirst({
+        where: { action: "PLATFORM_RESTORE_DRILL_RECORDED" },
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true, metadata: true },
+      }),
+    ),
   ]);
 
+  const restoreMetadata = latestRestore?.metadata;
+  const restoreNote = restoreMetadata && typeof restoreMetadata === "object" && !Array.isArray(restoreMetadata) && typeof restoreMetadata.note === "string"
+    ? restoreMetadata.note
+    : null;
   const assetBytes = Number(assets._sum.size ?? 0);
   const checkpoints: BackupCheckpoint[] = [
     {
       name: "Primary database",
-      status: latestAudit ? "Ready" : "Review",
-      cadence: "Provider PITR",
-      latest: latestAudit?.createdAt ?? null,
-      detail: latestAudit
-        ? `Latest write activity: ${latestAudit.action}`
-        : "No audit activity has been recorded yet.",
+      status: control.lastBackupStatus === "Ready" ? "Ready" : "Review",
+      cadence: "Operator checkpoint",
+      latest: control.lastBackupStatus === "Restore drill OK" ? null : control.lastBackupAt,
+      detail: control.lastBackupStatus === "Ready"
+        ? "An operator recorded a successful backup. Confirm provider retention and archive availability separately."
+        : "Backup verification is needed. Recent application activity does not prove a recoverable backup exists.",
     },
     {
       name: "Organization exports",
@@ -202,13 +215,15 @@ export default async function PlatformBackupsPage({
   ];
 
   return (
-    <div className="min-w-0 max-w-full space-y-6 overflow-x-clip">
+    <div className="engineering-workspace mx-auto min-w-0 w-full max-w-7xl space-y-6">
       <PageHeader
         eyebrow="Developer portal"
         title="Backup and recovery"
-        description="Platform-level backup readiness, recovery checkpoints, export activity, and operator-recorded restore drills. Run dump/restore scripts from the host; record outcomes here for audit."
+        description="Review recovery records, export activity, and operator-reported backup evidence. Record completed checks here after verifying your backup provider or recovery tools."
+        action={<Link href="/platform/data-management" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold">Manage data exports</Link>}
       />
 
+      {params.error ? <p role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:bg-amber-500/10 dark:text-amber-100">Select a valid checkpoint status and provide an evidence note of 10–2,000 characters.</p> : null}
       {params.ok === "checkpoint" ? (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
           Backup checkpoint recorded.
@@ -220,7 +235,7 @@ export default async function PlatformBackupsPage({
         </div>
       ) : null}
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="engineering-metrics grid gap-4">
         <BackupMetric icon={Building2} label="Organizations covered" value={formatNumber(organizations)} />
         <BackupMetric icon={Users} label="Users covered" value={formatNumber(users)} />
         <BackupMetric icon={HardDrive} label="Asset storage" value={formatBytes(assetBytes)} note={`${formatNumber(assets._count)} files`} />
@@ -229,41 +244,41 @@ export default async function PlatformBackupsPage({
         <BackupMetric icon={Clock3} label="Pending exports" value={formatNumber(pendingExports)} />
         <BackupMetric icon={ShieldCheck}
           label="Operator checkpoint"
-          value={control.lastBackupStatus ?? (latestAudit ? "Signal only" : "-")}
+          value={control.lastBackupStatus === "Restore drill OK" ? "Not recorded" : control.lastBackupStatus ?? "Not recorded"}
           note={
-            control.lastBackupAt
+            control.lastBackupStatus !== "Restore drill OK" && control.lastBackupAt
               ? formatDateTime(control.lastBackupAt)
-              : latestAudit
-                ? formatDateTime(latestAudit.createdAt)
-                : undefined
+              : "Provider backup evidence required"
           }
         />
         <BackupMetric icon={CheckCircle2}
-          label="Checkpoint note"
-          value={control.lastBackupNote?.slice(0, 40) ?? "-"}
-          note={control.lastBackupNote && control.lastBackupNote.length > 40 ? "…" : undefined}
+          label="Latest restore drill"
+          value={latestRestore ? "Recorded" : "Not recorded"}
+          note={latestRestore ? formatDateTime(latestRestore.createdAt) : "Run a disposable recovery drill, then record the result"}
         />
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="engineering-panels grid gap-5">
         <Surface
           title="Record backup checkpoint"
           description="After running scripts/backup-database.sh or provider PITR snapshot, record status for the control plane."
         >
-          <form action={recordBackupCheckpointAction} className="space-y-3 p-4">
-            <select
+          <form action={recordBackupCheckpointAction} className="space-y-3 p-5">
+            <label htmlFor="backup-status" className="block text-sm font-medium">Checkpoint status</label>
+            <select id="backup-status"
               name="status"
-              defaultValue="Ready"
+              defaultValue="Review"
               className="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm"
             >
               <option value="Ready">Ready</option>
               <option value="Review">Review</option>
               <option value="Failed">Failed</option>
             </select>
-            <textarea
-              name="note"
-              rows={3}
-              placeholder="e.g. Nightly dump validated, SHA256 checked"
+            <label htmlFor="backup-note" className="block text-sm font-medium">Backup evidence</label>
+            <textarea id="backup-note"
+              name="note" required minLength={10} maxLength={2000}
+              rows={4}
+              placeholder="Archive or snapshot identifier, validation result, and storage location. Do not include secrets."
               className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
             />
             <button data-workspace-action="true" className="h-11 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground">
@@ -276,11 +291,13 @@ export default async function PlatformBackupsPage({
           title="Record restore drill"
           description="After scripts/restore-drill.sh, log completion for compliance evidence."
         >
-          <form action={markRestoreDrillAction} className="space-y-3 p-4">
-            <textarea
-              name="note"
-              rows={3}
-              placeholder="Restore drill notes / ticket ID"
+          <form action={markRestoreDrillAction} className="space-y-3 p-5">
+            <p className="text-sm leading-6 text-muted-foreground">Latest recorded drill: {latestRestore ? formatDateTime(latestRestore.createdAt) : "None recorded"}. This records evidence; it does not run a restore.</p>
+            <label htmlFor="restore-note" className="block text-sm font-medium">Restore drill evidence</label>
+            <textarea id="restore-note"
+              name="note" required minLength={10} maxLength={2000}
+              rows={4}
+              placeholder="Disposable target, archive identifier, validation result, and evidence ticket. Do not include secrets."
               className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
             />
             <button data-workspace-action="true" className="h-11 w-full rounded-xl border border-border bg-card text-sm font-semibold">
@@ -294,7 +311,7 @@ export default async function PlatformBackupsPage({
         title="Recovery checkpoints"
         description="Operational checkpoints used to confirm the platform can be restored, exported, and audited."
       >
-        <div className="min-w-0 divide-y divide-border 2xl:hidden">
+        <div className="engineering-record-grid engineering-card-view">
           {checkpoints.map((checkpoint) => {
             const Icon = checkpointIcon(checkpoint.name);
             return (
@@ -330,7 +347,7 @@ export default async function PlatformBackupsPage({
           })}
         </div>
 
-        <div className="hidden max-w-full overflow-x-auto 2xl:block">
+        <div className="engineering-table-view hidden max-w-full overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -372,7 +389,7 @@ export default async function PlatformBackupsPage({
         title="Recent export recovery requests"
         description="Approved exports are recovery artifacts for individual organizations and can be downloaded from Data Management."
       >
-        <div className="min-w-0 divide-y divide-border 2xl:hidden">
+        <div className="engineering-record-grid engineering-card-view">
           {exportRequests.map((request) => (
             <article key={request.id} className="space-y-2.5 px-3 py-3.5 sm:px-4">
               <div className="flex items-start justify-between gap-3">
@@ -412,7 +429,7 @@ export default async function PlatformBackupsPage({
           ) : null}
         </div>
 
-        <div className="hidden max-w-full overflow-x-auto 2xl:block">
+        <div className="engineering-table-view hidden max-w-full overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -459,8 +476,16 @@ export default async function PlatformBackupsPage({
         </div>
       </Surface>
 
+      <Surface title="Recorded backup evidence" description="Operator-submitted evidence is separate from automated provider verification.">
+        <div className="engineering-summary-grid grid gap-4 p-5">
+          <div className="rounded-xl border border-border p-4"><h3 className="text-sm font-semibold">Backup checkpoint</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{control.lastBackupNote ?? "No backup evidence note has been recorded."}</p></div>
+          <div className="rounded-xl border border-border p-4"><h3 className="text-sm font-semibold">Restore drill</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{restoreNote ?? "No restore drill evidence note has been recorded."}</p></div>
+        </div>
+        <p className="border-t border-border p-5 text-sm leading-6 text-muted-foreground">Latest application activity: {latestAudit ? formatDateTime(latestAudit.createdAt) : "Not recorded"}. Application activity is not backup evidence.</p>
+      </Surface>
+
       <Surface title="Recovery policy">
-        <div className="grid gap-0 divide-y divide-slate-100 dark:divide-white/10 md:grid-cols-3 md:divide-x md:divide-y-0">
+        <div className="engineering-record-grid">
           <div className="p-4">
             <Database aria-hidden="true" className="mb-3 size-5 text-primary" />
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">

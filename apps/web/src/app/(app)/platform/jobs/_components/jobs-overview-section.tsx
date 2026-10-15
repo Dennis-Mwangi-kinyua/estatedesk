@@ -72,14 +72,16 @@ export function JobsOverviewSection({
       />
 
       <Surface title="Filters">
-        <form className="grid gap-3 p-4 lg:grid-cols-[minmax(0,1fr)_180px_140px_auto]">
+        <form className="engineering-filter-grid grid gap-3 p-5">
           <input
+            aria-label="Search jobs"
             name="q"
             defaultValue={q}
             placeholder="Search jobs, organizations, recipients, KRA filing keys"
             className="min-h-11 min-w-0 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-slate-400 dark:border-white/10 dark:bg-slate-900"
           />
           <select
+            aria-label="Run status"
             name="jobStatus"
             defaultValue={jobStatus}
             className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-slate-400 dark:border-white/10 dark:bg-slate-900"
@@ -90,6 +92,7 @@ export function JobsOverviewSection({
             <option value="FAILED">Failed</option>
           </select>
           <select
+            aria-label="Rows per page"
             name="pageSize"
             defaultValue={String(pageSize)}
             className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-slate-400 dark:border-white/10 dark:bg-slate-900"
@@ -105,7 +108,7 @@ export function JobsOverviewSection({
         </form>
       </Surface>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="engineering-metrics grid gap-4">
         <StatCard label="Queued notifications" value={formatNumber(queued)} note={`Oldest ${formatAge(oldestQueued?.createdAt)}`} />
         <StatCard label="Failed notifications" value={formatNumber(failed)} note={`Oldest ${formatAge(oldestFailed?.createdAt)}`} />
         <StatCard label="Queued over 15m" value={formatNumber(queuedOver15m)} note={`${formatNumber(queuedOver1h)} over 1h`} />
@@ -113,7 +116,7 @@ export function JobsOverviewSection({
       </section>
 
       <Surface title="Scheduled jobs" description="Manual runs are guarded by platform role checks and written to the audit log. Scheduled HTTP runs require a production cron secret.">
-        <div className="grid gap-3 p-4 md:grid-cols-2">
+        <div className="engineering-summary-grid grid gap-4 p-5">
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-900">
             <p className="font-semibold text-slate-950 dark:text-white">Notification dispatch</p>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">
@@ -130,7 +133,7 @@ export function JobsOverviewSection({
       </Surface>
 
       <Surface title="Recent job runs">
-        <div className="grid min-w-0 gap-3 p-3 sm:p-4 2xl:hidden">
+        <div className="engineering-record-grid engineering-card-view">
           {jobRuns.map((run) => {
             const color = colorForJobEntry(run.jobName);
             return (
@@ -171,7 +174,7 @@ export function JobsOverviewSection({
           })}
           {jobRuns.length === 0 ? <MobileEmpty label="No job runs recorded yet." /> : null}
         </div>
-        <div className="hidden max-w-full overflow-x-auto 2xl:block">
+        <div className="engineering-table-view hidden max-w-full overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -236,13 +239,13 @@ export function JobsOverviewSection({
         title="Integration readiness"
         description="Structural map for approved and pending external providers. Missing keys mean the adapter is not ready for live traffic; pending approval means credentials can be wired once the provider relationship is cleared."
       >
-        <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="engineering-record-grid">
           {integrationReadiness.integrations.map((provider) => {
             const color = colorForJobEntry(provider.id);
             return (
             <div key={provider.id} className={`relative overflow-hidden rounded-lg border p-4 pl-5 ${color.card}`}>
               <span className={`absolute inset-y-0 left-0 w-1 ${color.bar}`} aria-hidden="true" />
-              <div className="flex items-center justify-between gap-3">
+              <div className="engineering-status-row flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold text-slate-950 dark:text-white">{provider.name}</p>
                   <p className="mt-1 text-xs uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">

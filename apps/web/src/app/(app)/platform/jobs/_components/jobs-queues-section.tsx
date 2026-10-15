@@ -37,7 +37,7 @@ export function JobsQueuesSection({
   return (
     <>
       <Surface title="Queued notification backlog">
-        <div className="grid min-w-0 gap-3 p-3 sm:p-4 2xl:hidden">
+        <div className="engineering-record-grid engineering-card-view">
           {queuedNotifications.map((item) => {
             const color = colorForJobEntry(item.org.name);
             return (
@@ -63,7 +63,7 @@ export function JobsQueuesSection({
           })}
           {queuedNotifications.length === 0 ? <MobileEmpty label="No queued notifications found." /> : null}
         </div>
-        <div className="hidden max-w-full overflow-x-auto 2xl:block">
+        <div className="engineering-table-view hidden max-w-full overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -114,7 +114,7 @@ export function JobsQueuesSection({
             </JobActionButton>
           </form>
         </div>
-        <div className="grid min-w-0 gap-3 p-3 sm:p-4 2xl:hidden">
+        <div className="engineering-record-grid engineering-card-view">
           {failedNotifications.map((item) => {
             const color = colorForJobEntry(item.org.name);
             return (
@@ -131,7 +131,7 @@ export function JobsQueuesSection({
                 <MobileField label="Recipient">{item.tenant?.fullName ?? item.user?.fullName ?? "-"}</MobileField>
                 <MobileField label="Type">{labelize(item.type)}</MobileField>
                 <MobileField label="Error">{readProviderError(item.providerResponse)}</MobileField>
-                <div className="flex items-center justify-between gap-3">
+                <div className="engineering-status-row flex flex-wrap items-start justify-between gap-3">
                   <MobileField label="Age">{formatAge(item.createdAt)}</MobileField>
                   <form action={retryFailedNotificationAction}>
                     <HiddenReturnTo value={returnTo} />
@@ -147,7 +147,7 @@ export function JobsQueuesSection({
           })}
           {failedNotifications.length === 0 ? <MobileEmpty label="No failed notifications found." /> : null}
         </div>
-        <div className="hidden max-w-full overflow-x-auto 2xl:block">
+        <div className="engineering-table-view hidden max-w-full overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>
@@ -193,7 +193,7 @@ export function JobsQueuesSection({
       </Surface>
 
       <Surface title="KRA retryable attempts">
-        <div className="grid min-w-0 gap-3 p-3 sm:p-4 2xl:hidden">
+        <div className="engineering-record-grid engineering-card-view">
           {retryableKraAttempts.map((attempt) => {
             const color = colorForJobEntry(attempt.rentalReturn.org.name);
             return (
@@ -228,7 +228,7 @@ export function JobsQueuesSection({
           })}
           {retryableKraAttempts.length === 0 ? <MobileEmpty label="No retryable KRA attempts found." /> : null}
         </div>
-        <div className="hidden max-w-full overflow-x-auto 2xl:block">
+        <div className="engineering-table-view hidden max-w-full overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
               <tr>

@@ -18,8 +18,11 @@ export async function recordBackupCheckpointAction(formData: FormData) {
     redirectTo: "/dashboard",
   });
 
-  const note = readString(formData, "note") || "Manual backup checkpoint recorded";
-  const status = readString(formData, "status") || "Ready";
+  const note = readString(formData, "note");
+  const status = readString(formData, "status");
+  if (!["Ready", "Review", "Failed"].includes(status) || note.length < 10 || note.length > 2000) {
+    redirect(`${PAGE}?error=invalid-evidence`);
+  }
 
   await updatePlatformControl(
     {
@@ -55,18 +58,10 @@ export async function markRestoreDrillAction(formData: FormData) {
     redirectTo: "/dashboard",
   });
 
-  const note =
-    readString(formData, "note") ||
-    "Restore drill completed — see scripts/restore-drill.sh evidence";
-
-  await updatePlatformControl(
-    {
-      lastBackupAt: new Date(),
-      lastBackupNote: note,
-      lastBackupStatus: "Restore drill OK",
-    },
-    session.userId,
-  );
+  const note = readString(formData, "note");
+  if (note.length < 10 || note.length > 2000) {
+    redirect(`${PAGE}?error=invalid-evidence`);
+  }
 
   await writePlatformAuditLog({
     actorUserId: session.userId,

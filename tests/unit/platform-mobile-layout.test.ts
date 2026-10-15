@@ -83,6 +83,7 @@ describe("platform mobile layout", () => {
       const source = readFileSync(path, "utf8");
       const hasMobileView =
         source.includes("ResponsiveDataList") ||
+        (source.includes("engineering-card-view") && source.includes("engineering-table-view")) ||
         source.includes("lg:hidden") ||
         source.includes("md:hidden") ||
         source.includes("2xl:hidden");

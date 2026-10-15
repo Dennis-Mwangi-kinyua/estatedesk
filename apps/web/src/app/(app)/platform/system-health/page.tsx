@@ -134,7 +134,7 @@ export default async function SystemHealthPage() {
 
   if (!metrics) {
     return (
-      <div className="ed-mobile-first space-y-4">
+      <div className="engineering-workspace ed-mobile-first space-y-4">
         <PageHeader
           eyebrow="Developer portal"
           title="System health"
@@ -148,7 +148,7 @@ export default async function SystemHealthPage() {
   }
 
   return (
-    <div className="ed-mobile-first mx-auto w-full max-w-7xl space-y-4 sm:space-y-6">
+    <div className="engineering-workspace ed-mobile-first mx-auto min-w-0 w-full max-w-7xl space-y-4 sm:space-y-6">
       <PageHeader
         eyebrow="Developer portal"
         title="System health"
@@ -178,7 +178,7 @@ export default async function SystemHealthPage() {
               : "Blocking environment issues remain — fix fails before scale."
           }
         >
-          <div className="grid gap-2 border-b border-border p-3 sm:grid-cols-3 sm:p-4">
+          <div className="engineering-summary-grid grid gap-4 border-b border-border p-4 sm:p-5">
             <div className="rounded-xl border border-border bg-muted/20 p-3">
               <p className="text-[10px] font-semibold uppercase text-muted-foreground">
                 Soft-launch env
@@ -202,7 +202,7 @@ export default async function SystemHealthPage() {
               </p>
             </div>
           </div>
-          <ul className="divide-y divide-border">
+          <ul className="engineering-record-grid">
             {readiness.checks.map((check) => (
               <li
                 key={check.id}
@@ -236,7 +236,7 @@ export default async function SystemHealthPage() {
         </Surface>
       ) : null}
 
-      <section className="ed-keep-cols grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
+      <section className="engineering-metrics grid gap-4">
         <StatCard label="Organizations" value={formatNumber(metrics.orgs)} />
         <StatCard label="Users" value={formatNumber(metrics.users)} />
         <StatCard label="Queued notifications" value={formatNumber(metrics.queued)} />
@@ -270,7 +270,7 @@ export default async function SystemHealthPage() {
             No recent gateway failures or stuck pending payments.
           </p>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="engineering-record-grid">
             {metrics.recentFailedPayments.map((payment) => (
               <li
                 key={payment.id}
@@ -312,7 +312,7 @@ export default async function SystemHealthPage() {
             No KRA integration errors recorded.
           </p>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="engineering-record-grid">
             {metrics.kraErrors.map((item) => (
               <li key={item.id} className="space-y-2 px-3 py-3.5 sm:px-4">
                 <div className="flex flex-wrap items-start justify-between gap-2">
