@@ -1,3 +1,5 @@
+import { requirePlatformRole } from "@/lib/permissions/guards";
+import { OrganizationBillingCard } from "../_components/organization-billing-card";
 import Link from "@/components/navigation/workspace-link";
 import { BillingPlan, Prisma, SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -13,8 +15,6 @@ import {
   PageHeader,
   PaginationControls,
   StatCard,
-  formatDateTime,
-  toneForStatus,
 } from "../_components/control-plane";
 import {
   applyUpgradeRequestAction,
@@ -32,6 +32,7 @@ type SearchParams = Promise<{
   ok?: string;
   error?: string;
   message?: string;
+  upgrades?: string;
 }>;
 
 const STATUS_VALUES = Object.values(SubscriptionStatus);
@@ -82,96 +83,20 @@ function buildWhere({
   return where;
 }
 
-/** Stable distinct colors per organization for scannable billing rows. */
-const ORG_COLOR_PALETTE = [
-  {
-    row: "bg-sky-50/90 dark:bg-sky-500/10",
-    bar: "bg-sky-500",
-    chip: "border-sky-200 bg-sky-100 text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/15 dark:text-sky-100",
-  },
-  {
-    row: "bg-emerald-50/90 dark:bg-emerald-500/10",
-    bar: "bg-emerald-500",
-    chip: "border-emerald-200 bg-emerald-100 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-100",
-  },
-  {
-    row: "bg-teal-50/90 dark:bg-teal-500/10",
-    bar: "bg-teal-500",
-    chip: "border-teal-200 bg-teal-100 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/15 dark:text-teal-100",
-  },
-  {
-    row: "bg-amber-50/90 dark:bg-amber-500/10",
-    bar: "bg-amber-500",
-    chip: "border-amber-200 bg-amber-100 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-100",
-  },
-  {
-    row: "bg-rose-50/90 dark:bg-rose-500/10",
-    bar: "bg-rose-500",
-    chip: "border-rose-200 bg-rose-100 text-rose-900 dark:border-rose-500/30 dark:bg-rose-500/15 dark:text-rose-100",
-  },
-  {
-    row: "bg-cyan-50/90 dark:bg-cyan-500/10",
-    bar: "bg-cyan-500",
-    chip: "border-cyan-200 bg-cyan-100 text-cyan-900 dark:border-cyan-500/30 dark:bg-cyan-500/15 dark:text-cyan-100",
-  },
-  {
-    row: "bg-teal-50/90 dark:bg-teal-500/10",
-    bar: "bg-teal-500",
-    chip: "border-teal-200 bg-teal-100 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/15 dark:text-teal-100",
-  },
-  {
-    row: "bg-teal-50/90 dark:bg-teal-500/10",
-    bar: "bg-teal-500",
-    chip: "border-teal-200 bg-teal-100 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/15 dark:text-teal-100",
-  },
-  {
-    row: "bg-teal-50/90 dark:bg-teal-500/10",
-    bar: "bg-teal-500",
-    chip: "border-teal-200 bg-teal-100 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/15 dark:text-teal-100",
-  },
-  {
-    row: "bg-orange-50/90 dark:bg-orange-500/10",
-    bar: "bg-orange-500",
-    chip: "border-orange-200 bg-orange-100 text-orange-950 dark:border-orange-500/30 dark:bg-orange-500/15 dark:text-orange-100",
-  },
-  {
-    row: "bg-lime-50/90 dark:bg-lime-500/10",
-    bar: "bg-lime-500",
-    chip: "border-lime-200 bg-lime-100 text-lime-950 dark:border-lime-500/30 dark:bg-lime-500/15 dark:text-lime-100",
-  },
-  {
-    row: "bg-pink-50/90 dark:bg-pink-500/10",
-    bar: "bg-pink-500",
-    chip: "border-pink-200 bg-pink-100 text-pink-900 dark:border-pink-500/30 dark:bg-pink-500/15 dark:text-pink-100",
-  },
-] as const;
-
-function colorForOrg(orgId: string, index: number) {
-  if (index < ORG_COLOR_PALETTE.length) {
-    return ORG_COLOR_PALETTE[index];
-  }
-
-  let hash = 0;
-  for (let i = 0; i < orgId.length; i += 1) {
-    hash = (hash * 31 + orgId.charCodeAt(i)) >>> 0;
-  }
-  return ORG_COLOR_PALETTE[hash % ORG_COLOR_PALETTE.length];
-}
-
 function BillingLoadError({ transient }: { transient: boolean }) {
   return (
     <div className="ed-mobile-first space-y-4 sm:space-y-5">
       <PageHeader
         eyebrow="Billing"
-        title="Subscriptions"
+        title="Organization billing"
         description="Subscription plans, renewal windows, and recent plan changes with server-side filtering."
       />
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50">
         <p className="font-semibold">Could not load subscriptions right now</p>
         <p className="mt-1">
           {transient
-            ? "The database request timed out or failed temporarily (common on Neon cold starts). Refresh the page in a moment."
-            : "The database request failed. Refresh the page, and if it keeps happening check connectivity and the Prisma schema."}
+            ? "Billing is temporarily unavailable. Refresh in a moment."
+            : "Billing could not be loaded. Refresh the page or contact platform support if the problem continues."}
         </p>
       </div>
     </div>
@@ -183,6 +108,7 @@ export default async function PlatformBillingPage({
 }: {
   searchParams: SearchParams;
 }) {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
   const params = await searchParams;
   const q = (params.q ?? "").trim();
   const status = parseStatus(params.status);
@@ -205,13 +131,6 @@ export default async function PlatformBillingPage({
       trialEndsAt: Date | null;
       cancelledAt: Date | null;
       org: { id: string; name: string; slug: string; status: string };
-      planChanges: Array<{
-        id: string;
-        fromPlan: BillingPlan | null;
-        toPlan: BillingPlan;
-        effectiveFrom: Date;
-        reason: string | null;
-      }>;
     }>;
     totalFiltered: number;
     total: number;
@@ -238,10 +157,7 @@ export default async function PlatformBillingPage({
                   status: true,
                 },
               },
-              planChanges: {
-                orderBy: { effectiveFrom: "desc" },
-                take: 2,
-              },
+
             },
           }),
           prisma.subscription.count({ where }),
@@ -280,22 +196,12 @@ export default async function PlatformBillingPage({
     console.error("[PlatformBillingPage] upgrade queue load failed", error);
   }
 
-  const orderedOrgIds = Array.from(
-    new Set(subscriptions.map((sub) => sub.org.id)),
-  );
-  const orgColorById = new Map(
-    orderedOrgIds.map((orgId, index) => [
-      orgId,
-      colorForOrg(orgId, index),
-    ] as const),
-  );
-
   return (
     <div className="ed-mobile-first space-y-4 sm:space-y-5">
       <PageHeader
         eyebrow="Billing"
-        title="Subscriptions"
-        description="Confirm paid upgrade requests, review plan limits, and manage renewal windows. Orgs cannot self-assign paid plans."
+        title="Organization billing"
+        description="Open an organization card to review its subscription, manage renewals, and generate invoices. Filter by organization, plan, or subscription status."
       />
 
       {params.ok === "upgrade-applied" ? (
@@ -311,7 +217,7 @@ export default async function PlatformBillingPage({
       {params.error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-900 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-50">
           {params.message
-            ? decodeURIComponent(params.message)
+            ? params.message
             : "Could not process that billing action."}
         </div>
       ) : null}
@@ -324,6 +230,8 @@ export default async function PlatformBillingPage({
         <StatCard label="Upgrade queue" value={pendingUpgrades.length} />
       </section>
 
+      <details id="upgrade-requests" open={!!params.error || !!params.ok || params.upgrades === "open"} className="rounded-2xl border border-border bg-card">
+        <summary className="cursor-pointer px-4 py-4 text-sm font-semibold">Upgrade requests ({pendingUpgrades.length}) · Review payments and plan changes</summary>
       <section className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="border-b border-border px-3 py-3 sm:px-4 sm:py-4">
           <h2 className="text-base font-semibold text-foreground">
@@ -355,7 +263,7 @@ export default async function PlatformBillingPage({
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <Link
-                        href={`/platform/organizations/${subscription.org.slug}`}
+                        href={`/platform/billing/${subscription.org.id}`}
                         className="text-sm font-semibold text-foreground underline-offset-4 hover:underline"
                       >
                         {subscription.org.name}
@@ -451,17 +359,20 @@ export default async function PlatformBillingPage({
           </ul>
         )}
       </section>
+      </details>
 
       <section className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm sm:rounded-[26px]">
         <form className="grid gap-2.5 border-b border-border p-3 sm:gap-3 sm:p-4 lg:grid-cols-[1fr_160px_160px_auto]">
           <input
             name="q"
+            aria-label="Search organization or billing email"
             defaultValue={q}
             placeholder="Search organization or billing email"
             className="min-h-11 w-full rounded-xl border border-border bg-muted/40 px-3 text-sm outline-none focus:border-foreground sm:rounded-2xl sm:px-4 sm:py-3"
           />
           <select
             name="plan"
+            aria-label="Subscription plan"
             defaultValue={plan ?? ""}
             className="min-h-11 w-full rounded-xl border border-border bg-muted/40 px-3 text-sm font-medium outline-none focus:border-foreground sm:rounded-2xl sm:px-4 sm:py-3"
           >
@@ -474,6 +385,7 @@ export default async function PlatformBillingPage({
           </select>
           <select
             name="status"
+            aria-label="Subscription status"
             defaultValue={status ?? ""}
             className="min-h-11 w-full rounded-xl border border-border bg-muted/40 px-3 text-sm font-medium outline-none focus:border-foreground sm:rounded-2xl sm:px-4 sm:py-3"
           >
@@ -497,90 +409,8 @@ export default async function PlatformBillingPage({
             No subscriptions found.
           </div>
         ) : (
-          <div className="divide-y divide-border">
-            {subscriptions.map((subscription) => {
-              const color =
-                orgColorById.get(subscription.org.id) ??
-                colorForOrg(subscription.org.id, 0);
-
-              return (
-                <div
-                  key={subscription.id}
-                  className={`relative space-y-3 p-3 sm:space-y-4 sm:p-5 ${color.row}`}
-                >
-                  <span
-                    className={`absolute inset-y-0 left-0 w-1 ${color.bar}`}
-                    aria-hidden="true"
-                  />
-                  <div className="flex flex-col gap-3 pl-2 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0">
-                      <Link
-                        href={`/platform/organizations/${subscription.org.slug}`}
-                        className="text-base font-semibold text-foreground underline-offset-4 hover:underline"
-                      >
-                        {subscription.org.name}
-                      </Link>
-                      <p className="mt-1 truncate text-sm text-muted-foreground">
-                        /{subscription.org.slug}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <span
-                        className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${color.chip}`}
-                      >
-                        {subscription.plan}
-                      </span>
-                      <Badge tone={toneForStatus(subscription.status)}>
-                        {subscription.status}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-2 pl-2 text-sm text-muted-foreground md:grid-cols-3">
-                    <p className="min-w-0 break-words">
-                      Billing email: {subscription.billingEmail ?? "—"}
-                    </p>
-                    <p>
-                      Period start:{" "}
-                      {formatDateTime(subscription.currentPeriodStart)}
-                    </p>
-                    <p>
-                      Period end: {formatDateTime(subscription.currentPeriodEnd)}
-                    </p>
-                    <p>
-                      Trial start: {formatDateTime(subscription.trialStartsAt)}
-                    </p>
-                    <p>Trial end: {formatDateTime(subscription.trialEndsAt)}</p>
-                    <p>
-                      Cancelled at: {formatDateTime(subscription.cancelledAt)}
-                    </p>
-                  </div>
-
-                  {subscription.planChanges.length > 0 ? (
-                    <div className="grid gap-2 pl-2 md:grid-cols-2">
-                      {subscription.planChanges.map((change) => (
-                        <div
-                          key={change.id}
-                          className="rounded-xl border border-border bg-background/70 p-3 text-sm sm:rounded-2xl"
-                        >
-                          <span className="font-medium text-foreground">
-                            {change.fromPlan ?? "—"} to {change.toPlan}
-                          </span>
-                          <span className="ml-2 text-muted-foreground">
-                            {formatDateTime(change.effectiveFrom)}
-                          </span>
-                          {change.reason ? (
-                            <p className="mt-1 text-muted-foreground">
-                              {change.reason}
-                            </p>
-                          ) : null}
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 xl:grid-cols-3 sm:p-5">
+            {subscriptions.map(subscription => <OrganizationBillingCard key={subscription.id} subscription={{organizationId:subscription.org.id,organizationName:subscription.org.name,plan:APP_PLANS[subscription.plan].name,status:subscription.status,billingEmail:subscription.billingEmail,periodEnd:subscription.currentPeriodEnd}} />)}
           </div>
         )}
 

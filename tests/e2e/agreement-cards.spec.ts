@@ -26,14 +26,17 @@ test("agreement cards clearly label status and signatures, remain clickable, and
     await page.setViewportSize({width,height:1000});
     for (const theme of ["light","dark"]) {
       await page.locator("html").evaluate((element,value)=>element.setAttribute("class",value),theme);
-      await expect(page.getByRole("link")).toHaveCount(6);
+      await expect(page.locator('a[href^="/platform/agreements/agreement-"]')).toHaveCount(6);
       await expect(page.getByText("Awaiting organization signature",{exact:true})).toBeVisible();
-      await expect(page.getByText("Signed by both parties",{exact:true})).toBeVisible();
+      await expect(page.locator('a[href="/platform/agreements/agreement-2"]').getByText("Signed by both parties",{exact:true})).toBeVisible();
       await expect(page.getByText("Cancellation reason:",{exact:true})).toBeVisible();
       expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await expect(page.getByRole("link",{name:/Open organization billing/})).toHaveAttribute("href","/platform/billing/org-billing-test");
+      await expect(page.getByRole("link",{name:/View DPA agreement/})).toHaveAttribute("href","/platform/agreements/dpa-test");
+      await expect(page.getByRole("link",{name:"Download signed DPA",exact:true})).toHaveAttribute("href","/api/service-agreements/dpa-test");
       const heading = page.getByRole("heading",{name:"A clear view. A lighter day.",exact:true});
       expect(await heading.evaluate(el=>({singleLine:el.getBoundingClientRect().height <= parseFloat(getComputedStyle(el).lineHeight)+1,fits:el.scrollWidth <= el.clientWidth+1}))).toEqual({singleLine:true,fits:true});
-      const cards = page.getByRole("link");
+      const cards = page.locator('a[href^="/platform/agreements/agreement-"]');
       for (let index=0;index<6;index++) await expect(cards.nth(index)).toHaveAttribute("href",`/platform/agreements/agreement-${index}`);
       await page.screenshot({path:testInfo.outputPath(`agreement-cards-${width}-${theme}.png`),fullPage:true});
     }

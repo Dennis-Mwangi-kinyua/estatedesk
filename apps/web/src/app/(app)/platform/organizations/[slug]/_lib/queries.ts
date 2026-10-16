@@ -1,3 +1,4 @@
+import { AGREEMENT_ENTITY } from "@/lib/service-agreements/contract";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
@@ -67,6 +68,7 @@ async function loadOrganizationDetailData(
     recentMembers,
     recentAuditLogs,
     recentMessages,
+    currentAgreement,
   ] =
     await Promise.all([
       prisma.payment.aggregate({
@@ -128,6 +130,11 @@ async function loadOrganizationDetailData(
           sender: { select: { fullName: true, email: true } },
         },
       }),
+      prisma.documentRecord.findFirst({
+        where: { orgId: org.id, entityType: AGREEMENT_ENTITY, status: { in: ["DRAFT", "ISSUED", "COMPLETED"] } },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        select: { id: true, status: true, serialNumber: true, createdAt: true },
+      }),
     ]);
 
   const featureKeys = jsonKeys(org.settings?.features);
@@ -142,5 +149,6 @@ async function loadOrganizationDetailData(
     recentMembers,
     recentAuditLogs,
     recentMessages,
+    currentAgreement,
   };
 }

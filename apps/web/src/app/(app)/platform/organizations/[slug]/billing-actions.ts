@@ -82,7 +82,7 @@ export async function organizationBillingAction(
       success = "Subscription renewed for 30 days.";
     }
     await writePlatformAuditLog({ actorUserId: session.userId, action: `PLATFORM_SUBSCRIPTION_${operation.toUpperCase()}`, entityType: "Subscription", entityId: subscription.id, metadata: { orgId, slug: subscription.org.slug } });
-    for (const path of [`/platform/organizations/${subscription.org.slug}`, "/platform/billing", "/platform/subscriptions", "/dashboard/org/settings", "/dashboard/org/notifications"]) revalidatePath(path);
+    for (const path of [`/platform/billing/${orgId}`, `/platform/billing/${subscription.org.slug}`, `/platform/organizations/${subscription.org.slug}`, "/platform/billing", "/platform/subscriptions", "/dashboard/org/settings", "/dashboard/org/notifications"]) revalidatePath(path);
     return { success, invoice, error: deliveryError };
   } catch (error) {
     console.error("[organizationBillingAction]", error);

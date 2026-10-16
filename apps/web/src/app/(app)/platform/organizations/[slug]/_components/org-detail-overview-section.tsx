@@ -1,3 +1,4 @@
+import { OrganizationDpaCard } from "./organization-dpa-card";
 import { OrganizationSlugEditor } from "@/components/forms/organization-slug-editor";
 import { updatePlatformOrganizationSlugAction } from "@/features/organizations/actions/update-organization-slug";
 import { OrgBillingActions } from "./org-billing-actions";
@@ -33,7 +34,6 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
           Organizations
         </Link>
 
-        <Link href={`/platform/agreements?orgId=${org.id}`} className="inline-flex w-fit items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold"><FileText className="h-4 w-4" />Service agreements and DPA</Link>
         <header className="org-detail-hero overflow-hidden rounded-3xl border border-border bg-card">
           <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div className="min-w-0">
@@ -56,13 +56,15 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
         </header>
       </div>
 
-      <nav aria-label="Organisation sections" className="grid grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-2 sm:grid-cols-6 sm:p-3">{[{id:"profile",label:"Profile",Icon:Building2},{id:"billing",label:"Billing",Icon:CreditCard},{id:"operations",label:"Operations",Icon:Settings},{id:"payments",label:"Payments",Icon:Receipt},{id:"members",label:"Members",Icon:Users},{id:"audit",label:"Audit activity",Icon:ShieldCheck}].map(({id,label,Icon})=><Link key={id} href={`#organisation-${id}`} className="flex min-h-14 flex-col items-center justify-center gap-1.5 rounded-xl px-1 py-2 text-center text-xs font-medium text-muted-foreground transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Icon aria-hidden="true" className="h-5 w-5 text-primary"/>{label}</Link>)}</nav>
+      <nav aria-label="Organisation sections" className="grid grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-2 sm:grid-cols-7 sm:p-3">{[{id:"profile",label:"Profile",Icon:Building2},{id:"billing",label:"Billing",Icon:CreditCard},{id:"agreement",label:"DPA agreement",Icon:FileText},{id:"operations",label:"Operations",Icon:Settings},{id:"payments",label:"Payments",Icon:Receipt},{id:"members",label:"Members",Icon:Users},{id:"audit",label:"Audit activity",Icon:ShieldCheck}].map(({id,label,Icon})=><Link key={id} href={`#organisation-${id}`} className="flex min-h-14 flex-col items-center justify-center gap-1.5 rounded-xl px-1 py-2 text-center text-xs font-medium text-muted-foreground transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Icon aria-hidden="true" className="h-5 w-5 text-primary"/>{label}</Link>)}</nav>
       <section className="organisation-summary grid grid-cols-2 gap-3 xl:grid-cols-4">
         <OrgSummaryCard label="Status" value={org.status} note={`Created ${formatDate(org.createdAt)}`} />
         <OrgSummaryCard label="Tenants" value={formatNumber(org._count.tenants)} note={`${formatNumber(org._count.leases)} leases`} />
         <OrgSummaryCard label="Properties" value={formatNumber(org._count.properties)} note={`${formatNumber(unitCount)} units`} />
         <OrgSummaryCard label="Recognized paid" value={formatCurrency(paidTotal)} note={`${formatNumber(org._count.payments)} payments`} />
       </section>
+
+      <OrganizationDpaCard organizationId={org.id} agreement={props.currentAgreement} />
 
       <section className="grid items-start gap-5 xl:grid-cols-2">
         <OrgSurface id="organisation-profile" title="Workspace profile" description="Identity, contact details and workspace preferences." className="organisation-profile-card">
@@ -96,6 +98,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
                   <InfoTile label="Trial end" value={formatDate(org.subscription.trialEndsAt)} />
                   <InfoTile label="Billing email" value={org.subscription.billingEmail ?? "-"} />
                 </div>
+                <Link href={`/platform/billing/${org.id}`} className="inline-flex min-h-11 items-center rounded-xl border border-border px-4 text-sm font-semibold">Open organization billing →</Link>
                 <OrgBillingActions orgId={org.id} cancelled={org.subscription.status === "CANCELLED"} />
               </div>
             ) : (
