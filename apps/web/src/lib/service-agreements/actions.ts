@@ -5,7 +5,7 @@ import { createAgreement, changeAgreement } from "./service";
 export async function createAgreementAction(form: FormData) {
   let id: string;
   try { id = (await createAgreement(form)).id; }
-  catch (error) { unstable_rethrow(error); redirect("/platform/agreements?error=creation"); }
+  catch (error) { unstable_rethrow(error); redirect("/platform/agreements/new?error=creation"); }
   revalidatePath("/platform/agreements");
   redirect(`/platform/agreements/${id}`);
 }

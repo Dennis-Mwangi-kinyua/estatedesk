@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { hash } from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { configureTestDatabase } from "../integration/database-safety";
 import { readFile } from "node:fs/promises";
@@ -27,7 +27,7 @@ async function sign(page: Page, button: string) {
   const label = await page.getByText(/^Your full account name:/).innerText();
   await page.getByLabel(/Your full account name:/).fill(label.replace("Your full account name:","").trim());
   await page.getByLabel("Type name", {exact:true}).check();
-  await page.getByRole("checkbox").check();
+  await page.getByRole("checkbox").first().check();
   await page.getByRole("button", {name:button,exact:true}).click();
   await expect(page).toHaveURL(/ok=saved/, {timeout:30_000});
   await page.waitForLoadState("networkidle");
@@ -60,6 +60,7 @@ test("organization-specific agreement is signed, sent, isolated, countersigned a
     expect(nonce).toBeTruthy();
     const inlineNonces = await page.locator("script:not([src])").evaluateAll(elements => elements.filter(element => element.textContent && (element as HTMLScriptElement).type !== "application/ld+json").map(element => (element as HTMLScriptElement).nonce));
     expect(inlineNonces.every(value => value === nonce)).toBe(true);
+    await page.getByRole("link",{name:"New agreement",exact:true}).click();
     await page.getByLabel("Organization",{exact:true}).selectOption(f.orgId);
     await page.getByLabel("Customer's full legal name").fill("Fictional Agreement Test Organization");
     await page.getByLabel("EstateDesk privacy and incident contact email").fill("privacy@example.test");
@@ -95,7 +96,7 @@ test("organization-specific agreement is signed, sent, isolated, countersigned a
     await page.reload({waitUntil:"networkidle"});
     await page.getByLabel(/Your full account name:/).fill("Someone Else");
     await page.getByLabel("Type name", {exact:true}).check();
-    await page.getByRole("checkbox").check();
+    await page.getByRole("checkbox").first().check();
     await page.getByRole("button", {name:"Countersign and complete agreement",exact:true}).click();
     await expect(page).toHaveURL(/error=action/);await page.waitForLoadState("networkidle");
     await sign(page,"Countersign and complete agreement");
@@ -121,6 +122,26 @@ test("organization-specific agreement is signed, sent, isolated, countersigned a
     await expect(page.getByRole("button",{name:"Countersign and complete agreement",exact:true})).toHaveCount(0);
     await expect(page.getByText("COMPLETED",{exact:true})).toHaveCount(2);
     for(const width of [360,1280]) {await page.setViewportSize({width,height:1000});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
+    await expect(page.getByRole("button",{name:"Cancel agreement",exact:true})).toHaveCount(0);
+    const completed = await db.documentRecord.findUniqueOrThrow({where:{id}});
+    const draftMetadata = {...completed.metadata as Prisma.JsonObject};
+    delete draftMetadata.platformSignature;
+    delete draftMetadata.organizationSignature;
+    const draftId = randomUUID();
+    const cancelledDraft = await db.documentRecord.create({data:{orgId:f.orgId,entityType:completed.entityType,entityId:draftId,documentType:"OTHER",status:"DRAFT",title:"Disposable cancellation test agreement",serialNumber:`ED-SA-${draftId}`,verificationCode:randomUUID().replaceAll("-","")+randomUUID().replaceAll("-","").slice(0,16),contentHash:completed.contentHash,metadata:draftMetadata as Prisma.InputJsonObject}});
+    try {
+      await page.goto(`/platform/agreements/${cancelledDraft.id}`,{waitUntil:"networkidle"});
+      await page.getByLabel("Cancellation reason",{exact:true}).fill("Disposable QA draft cancelled before it was sent.");
+      await page.getByRole("checkbox",{name:/I confirm this agreement should be cancelled/}).check();
+      await page.getByRole("button",{name:"Cancel agreement",exact:true}).click();
+      await expect(page).toHaveURL(/ok=saved/);
+      await expect(page.getByRole("button",{name:"Cancel agreement",exact:true})).toHaveCount(0);
+      expect((await db.documentRecord.findUniqueOrThrow({where:{id:cancelledDraft.id}})).status).toBe("REVOKED");
+      expect(await db.documentEvent.count({where:{documentId:cancelledDraft.id,eventType:"REVOKED"}})).toBe(1);
+      expect((await other.context.request.get(`/platform/agreements/${cancelledDraft.id}`,{maxRedirects:0})).status()).not.toBe(200);
+      await page.goto(`/platform/agreements?view=cancelled&orgId=${f.orgId}`,{waitUntil:"networkidle"});
+      await expect(page.locator(`a[href="/platform/agreements/${cancelledDraft.id}"]`)).toContainText("Disposable QA draft cancelled before it was sent.");
+    } finally { await db.documentRecord.delete({where:{id:cancelledDraft.id}}); }
     expect(clientErrors).toEqual([]);
   } finally {await platform.context.close();await org.context.close();await other.context.close();await db.organization.delete({where:{id:otherOrg.id}});await db.user.delete({where:{id:otherUser.id}});await db.$disconnect();}
 });

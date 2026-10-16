@@ -1,3 +1,4 @@
+import { canCancelAgreement } from "./listing";
 import "server-only";
 import crypto from "node:crypto";
 import { readElectronicSignature } from "@/lib/uploads/electronic-signature";
@@ -59,6 +60,21 @@ export async function changeAgreement(id: string, form: FormData) {
   const hash = String(form.get("contentHash") ?? "");
   if (!document.contentHash || hash !== document.contentHash || hashAgreement(data.body) !== hash) throw Error("The agreement changed. Reload and review it before continuing.");
   const request = await getRequestAuditMetadata();
+  if (command === "cancel") {
+    if (!canCancelAgreement(platform, document.status)) throw Error("Only drafts and pending agreements can be cancelled by platform administrators.");
+    const reason = String(form.get("reason") ?? "").trim();
+    if (form.get("confirmCancellation") !== "on" || reason.length < 5 || reason.length > 1000) throw Error("Provide a cancellation reason and confirm cancellation.");
+    await prisma.$transaction(async tx => {
+      const result = await tx.documentRecord.updateMany({where:{id,orgId:document.orgId,status:document.status,contentHash:hash,metadata:{equals:json(data)}},data:{status:"REVOKED",revokedAt:new Date(),revocationReason:reason}});
+      if (result.count !== 1) throw Error("The agreement changed. Reload before cancelling.");
+      await tx.documentEvent.create({data:{documentId:id,orgId:document.orgId,actorUserId:session.userId,eventType:"REVOKED",ip:request.ip,userAgent:request.userAgent,metadata:{action:"AGREEMENT_CANCELLED",reason,previousStatus:document.status,contentHash:hash}}});
+      if (document.status === "ISSUED") {
+        const admins = await tx.membership.findMany({where:{orgId:document.orgId,role:"ADMIN",deactivatedAt:null,employmentEndedAt:null,user:{deletedAt:null,status:"ACTIVE"}},select:{userId:true},distinct:["userId"]});
+        await tx.notification.createMany({data:admins.map(admin=>({orgId:document.orgId,userId:admin.userId,channel:"IN_APP" as const,type:"GENERAL" as const,status:"SENT" as const,sentAt:new Date(),title:"Service agreement signing request cancelled",message:`EstateDesk cancelled ${document.serialNumber}. Reason: ${reason}`,providerResponse:{actionUrl:"/dashboard/org/agreements",agreementId:id}}))});
+      }
+    });
+    return;
+  }
   if (command === "edit") {
     if (!platform || document.status !== "DRAFT") throw Error("Only an unsigned draft can be edited.");
     const body = String(form.get("body") ?? "").trim();

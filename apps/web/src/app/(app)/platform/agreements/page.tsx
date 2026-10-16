@@ -1,38 +1,42 @@
-import { AgreementPartyFields } from "@/components/service-agreements/agreement-party-fields";
 import Link from "@/components/navigation/workspace-link";
+import { Plus, ArrowRight, Search } from "lucide-react";
+import type { Prisma, DocumentStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { agreementData, AGREEMENT_ENTITY } from "@/lib/service-agreements/contract";
-import { createAgreementAction } from "@/lib/service-agreements/actions";
-import { Badge, PageHeader, Surface, formatDateTime } from "../_components/control-plane";
+import { agreementViews, agreementView, agreementListHref } from "@/lib/service-agreements/listing";
+import { AgreementCard } from "@/components/service-agreements/agreement-card";
+import { PageHeader, Surface } from "../_components/control-plane";
 export const dynamic = "force-dynamic";
-export default async function Page({ searchParams }: { searchParams: Promise<{orgId?: string; error?: string}> }) {
-  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
+const PAGE_SIZE = 12;
+export default async function Page({ searchParams }: { searchParams: Promise<{orgId?: string; q?: string; view?: string; page?: string}> }) {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
   const params = await searchParams;
-  const [orgs, documents] = await Promise.all([
-    prisma.organization.findMany({ where: { deletedAt: null }, orderBy: { name: "asc" }, select: { id: true, name: true }, take: 500 }),
-    prisma.documentRecord.findMany({ where: { entityType: AGREEMENT_ENTITY, ...(params.orgId ? {orgId: params.orgId} : {}) }, orderBy: { createdAt: "desc" }, take: 50, include: { org: { select: { name: true } } } }),
+  const view = agreementView(params.view);
+  const q = params.q?.trim().slice(0,200) ?? "";
+  const filters = {orgId:params.orgId,q};
+  const where: Prisma.DocumentRecordWhereInput = {entityType:AGREEMENT_ENTITY,...(params.orgId ? {orgId:params.orgId} : {}),...(q ? {OR:[{title:{contains:q,mode:"insensitive"}},{serialNumber:{contains:q,mode:"insensitive"}},{org:{name:{contains:q,mode:"insensitive"}}}]} : {})};
+  const [orgs, groups] = await Promise.all([
+    prisma.organization.findMany({where:{deletedAt:null},orderBy:{name:"asc"},select:{id:true,name:true}}),
+    prisma.documentRecord.groupBy({by:["status"],where,_count:{_all:true}}),
   ]);
-  return <div className="engineering-workspace mx-auto min-w-0 w-full max-w-7xl space-y-6">
-    <PageHeader eyebrow="Platform administration" title="Service agreements" description="Prepare an organization-specific service agreement and DPA, send it to the organization to sign first, then countersign for EstateDesk to release downloads for both parties." />
-    {params.error ? <p role="alert" className="rounded-xl border p-4 text-sm">Could not create the draft. Check all required fields, contact email, organization, and schedule lengths, then try again.</p> : null}
-    <Surface title="Recent agreements" description="Latest 50 agreements. Drafts are private to platform administrators. Send an agreement for the organization to sign first."><div className="engineering-record-grid">{documents.map(doc => <Link key={doc.id} href={`/platform/agreements/${doc.id}`} className="space-y-3 rounded-xl border border-border p-5"><Badge>{doc.status === "ISSUED" ? agreementData(doc.metadata).organizationSignature ? "AWAITING PLATFORM SIGNATURE" : "AWAITING ORGANIZATION SIGNATURE" : doc.status}</Badge><h2 className="text-base font-semibold">{doc.org.name}</h2><p className="text-sm text-muted-foreground">{formatDateTime(doc.createdAt)}</p><p className="text-sm font-semibold">Review agreement →</p></Link>)}{!documents.length ? <p className="text-sm text-muted-foreground">No agreements yet. Create an unsigned draft below.</p> : null}</div></Surface>
-    <Surface title="Prepare organization agreement" description="Organization details and draft schedules are prefilled. Confirm the legal name and complete customer-specific commercial and infrastructure details. Review the generated draft before signing; no agreement is sent at this step.">
-      <form action={createAgreementAction} className="space-y-5 p-5">
-        <div className="engineering-summary-grid grid gap-4">
-          <AgreementPartyFields organizations={orgs} initialOrgId={params.orgId} />
-          <Field name="provider" label="EstateDesk contracting legal entity" defaultValue="Afrisilicon Technology Limited, trading as EstateDesk" />
-          <Field name="contact" label="EstateDesk privacy and incident contact email" type="email" defaultValue={process.env.ESTATEDESK_PRIVACY_EMAIL ?? session.email ?? ""} />
-          <Field name="representative" label="EstateDesk representative preparing the agreement" defaultValue={session.fullName} />
-        </div>
-        <Schedule name="services" label="Service and commercial schedule" placeholder="Services and scope, plan and fees, start date, duration, support contact, termination notice, and customer responsibilities." />
-        <Schedule name="infrastructure" label="Subprocessors, hosting locations, and safeguards" placeholder="List actual providers, purposes, countries, authorization and transfer safeguards, access controls, security measures, and backup arrangements. Do not include passwords or keys." />
-        <Schedule name="retention" label="Retention and exit schedule" placeholder="Data categories and retention periods; export and deletion window; backup expiry; legal holds; who handles exit requests." />
-        <p className="text-sm leading-6 text-muted-foreground">This draft uses a Kenyan-law template and needs review for the parties’ circumstances before signing. It does not certify legal compliance or infrastructure safeguards.</p>
-        <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">Create unsigned draft</button>
-      </form>
+  const countFor = (statuses: readonly DocumentStatus[]) => groups.reduce((sum,group) => sum + (!statuses.length || statuses.includes(group.status) ? group._count._all : 0),0);
+  const total = countFor(view.statuses);
+  const pageCount = Math.max(1,Math.ceil(total/PAGE_SIZE));
+  const requestedPage = Number(params.page);
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? Math.min(requestedPage,pageCount) : 1;
+  const documents = await prisma.documentRecord.findMany({where:{...where,...(view.statuses.length ? {status:{in:[...view.statuses]}} : {})},orderBy:[{createdAt:"desc"},{id:"desc"}],skip:(page-1)*PAGE_SIZE,take:PAGE_SIZE,include:{org:{select:{name:true}}}});
+  const newHref = `/platform/agreements/new${params.orgId ? `?orgId=${encodeURIComponent(params.orgId)}` : ""}`;
+  return <div className="engineering-workspace mx-auto w-full min-w-0 max-w-7xl space-y-6">
+    <PageHeader eyebrow="Platform administration" title="Service agreements" description="Track organization agreements from draft to signature, manage cancelled requests, and open completed agreements for download and verification." action={<Link href={newHref} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"><Plus className="size-4" aria-hidden="true" />New agreement</Link>} />
+    <nav aria-label="Agreement categories" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {agreementViews.map(item => <Link key={item.key} href={agreementListHref(item.key,filters)} aria-current={view.key === item.key ? "page" : undefined} className={`flex min-w-0 flex-col gap-2 rounded-2xl border p-4 shadow-sm transition hover:border-primary/50 focus-visible:outline-2 focus-visible:outline-primary ${view.key === item.key ? "border-primary bg-primary/5" : "border-border bg-card"}`}><div className="flex items-start justify-between gap-2"><span className="text-sm font-semibold">{item.label}</span><span className="text-xl font-bold tabular-nums">{countFor(item.statuses)}</span></div><p className="text-xs leading-5 text-muted-foreground">{item.description}</p></Link>)}
+      <Link href={newHref} className="flex min-w-0 flex-col justify-between gap-3 rounded-2xl border border-dashed border-primary/50 bg-primary/5 p-4 transition hover:bg-primary/10"><span className="flex items-center gap-2 text-sm font-semibold"><Plus className="size-5" aria-hidden="true" />Create a new agreement</span><p className="text-xs leading-5 text-muted-foreground">Choose an organization and prepare its service agreement and DPA.</p><span className="inline-flex items-center gap-2 text-xs font-semibold text-primary">Start an unsigned draft<ArrowRight className="size-4" aria-hidden="true" /></span></Link>
+    </nav>
+    <Surface title="Find an agreement" description="Search by organization, agreement title, or document number. Category counts reflect these filters."><form method="get" className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] sm:p-5"><input type="hidden" name="view" value={view.key} /><label className="space-y-2 text-sm"><span className="font-medium">Search agreements</span><input type="search" name="q" defaultValue={q} maxLength={200} placeholder="Organization or document number" className="min-h-11 w-full rounded-xl border border-input bg-background px-3" /></label><label className="space-y-2 text-sm"><span className="font-medium">Organization</span><select name="orgId" defaultValue={params.orgId ?? ""} className="min-h-11 w-full min-w-0 rounded-xl border border-input bg-background px-3"><option value="">All organizations</option>{orgs.map(org => <option key={org.id} value={org.id}>{org.name}</option>)}</select></label><div className="flex items-end gap-2"><button className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"><Search className="size-4" aria-hidden="true" />Apply filters</button>{q || params.orgId ? <Link href={agreementListHref(view.key)} className="inline-flex min-h-11 items-center rounded-xl border px-3 text-sm font-medium">Clear</Link> : null}</div></form></Surface>
+    <Surface title={view.label} description={`${total} ${total === 1 ? "agreement" : "agreements"}${total ? ` · Showing ${(page-1)*PAGE_SIZE+1}–${Math.min(page*PAGE_SIZE,total)}` : ""}. Open a card to review its terms, signatures, and history.`}>
+      {documents.length ? <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 xl:grid-cols-3 sm:p-5">{documents.map(doc => {const data=agreementData(doc.metadata); return <AgreementCard key={doc.id} agreement={{id:doc.id,organization:doc.org.name,serialNumber:doc.serialNumber,status:doc.status,createdAt:doc.createdAt.toISOString(),updatedAt:doc.updatedAt.toISOString(),organizationSigned:!!data.organizationSignature,platformSigned:!!data.platformSignature,templateVersion:data.templateVersion,cancellationReason:doc.revocationReason}} />;})}</div> : <div className="space-y-3 p-8 text-center"><p className="font-semibold">No {view.label.toLowerCase()} {q || params.orgId ? "match your filters" : "yet"}.</p><p className="text-sm text-muted-foreground">{view.key === "cancelled" ? "Cancelled drafts and signing requests will appear here with their cancellation reason." : "Choose another category, adjust your filters, or create a new agreement."}</p><Link href={newHref} className="inline-flex min-h-11 items-center rounded-xl border px-4 text-sm font-semibold">Create a new agreement</Link></div>}
+      {pageCount > 1 ? <nav aria-label="Agreement pagination" className="flex flex-wrap items-center justify-between gap-3 border-t border-border p-4 text-sm"><span>Page {page} of {pageCount}</span><div className="flex gap-2">{page > 1 ? <Link href={agreementListHref(view.key,{...filters,page:page-1})} className="inline-flex min-h-11 items-center rounded-xl border px-4">Previous</Link> : null}{page < pageCount ? <Link href={agreementListHref(view.key,{...filters,page:page+1})} className="inline-flex min-h-11 items-center rounded-xl border px-4">Next</Link> : null}</div></nav> : null}
     </Surface>
   </div>;
 }
-function Field({ name, label, defaultValue, type = "text" }: {name: string; label: string; defaultValue?: string; type?: string}) { return <label className="block space-y-2 text-sm"><span>{label}</span><input name={name} type={type} required minLength={2} maxLength={240} defaultValue={defaultValue} className="w-full rounded-xl border p-3" /></label>; }
-function Schedule({name, label, placeholder}: {name: string; label: string; placeholder: string}) {return <label className="block space-y-2 text-sm"><span>{label}</span><textarea name={name} required minLength={20} maxLength={8000} rows={4} placeholder={placeholder} defaultValue={name === "services" ? "EstateDesk property-management services for the selected organization, covering its configured portfolio, occupancy, billing, payments, documents and reporting. Fees, subscription term and support follow the organization’s agreed subscription schedule; confirm these details before sending." : name === "infrastructure" ? "Processing is limited to providing the organization’s configured EstateDesk services. Access is restricted to authorized accounts. Confirm and record the current hosting providers, countries, subprocessors, transfer safeguards and backup arrangements before sending." : "Retention follows the organization’s configured retention policy and applicable recordkeeping requirements. Confirm data-category periods, the export and deletion window, backup expiry, legal holds and the exit contact before sending."} className="w-full rounded-xl border p-3 text-sm leading-6" /></label>;}

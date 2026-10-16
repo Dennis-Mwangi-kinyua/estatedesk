@@ -1,3 +1,4 @@
+import { PlatformDashboardHeading } from "./platform-dashboard-heading";
 
 import { PlatformSticker as VisualSticker } from "./platform-sticker";
 import Link from "@/components/navigation/workspace-link";
@@ -15,11 +16,7 @@ export function PlatformDashboard({ data }: { data: PlatformDashboardData }) {
       <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-3 py-4 sm:px-4 lg:px-6 lg:py-6">
         <section className="platform-glass-hero relative overflow-hidden rounded-3xl border border-sky-200/70 bg-gradient-to-br from-sky-50 via-white to-emerald-50 p-5 dark:border-white/10 dark:from-slate-900 dark:via-slate-950 dark:to-emerald-950/40 sm:p-7">
           <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-sky-700 dark:text-sky-300">Your admin workspace</p>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">A clear view. A lighter day.</h1>
-              <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">Keep your people, organizations, and payments moving. Pick a task to get started.</p>
-            </div>
+            <PlatformDashboardHeading />
           </div>
           <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
             {[
