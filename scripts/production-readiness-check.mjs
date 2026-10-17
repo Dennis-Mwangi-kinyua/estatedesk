@@ -4,7 +4,7 @@
  * Usage: node scripts/production-readiness-check.mjs
  *
  * Exit 0 if required env looks present; exit 1 if blocking env fails.
- * Operator gates (legal, restore, GSC) are always printed as pending.
+ * Local evidence is reported separately from external operator gates.
  */
 
 import { existsSync, readFileSync } from "node:fs";
@@ -42,6 +42,7 @@ function has(key) {
 const checks = [
   { key: "DATABASE_URL", required: true, label: "Database" },
   { key: "DIRECT_URL", required: false, label: "Direct DB URL (migrations)" },
+  { key: "AUTH_SECRET", required: true, label: "Session signing secret" },
   {
     key: "NEXT_PUBLIC_APP_URL",
     required: true,
@@ -55,6 +56,7 @@ const checks = [
     alt: "ALERT_WEBHOOK_URL",
   },
   { key: "MPESA_CONSUMER_KEY", required: false, label: "M-Pesa consumer key" },
+  { key: "MPESA_ORG_ID", required: false, label: "M-Pesa receiving organization" },
   { key: "MPESA_CONSUMER_SECRET", required: false, label: "M-Pesa secret" },
   { key: "MPESA_SHORTCODE", required: false, label: "M-Pesa shortcode" },
   { key: "MPESA_PASSKEY", required: false, label: "M-Pesa passkey" },
@@ -73,9 +75,9 @@ const checks = [
 
 const operatorGates = [
   "Kenya legal counsel sign-off → docs/KENYA_LEGAL_REVIEW.md",
-  "Disposable backup restore drill → docs/RESTORE_DRILL_EVIDENCE.md",
+  "Off-site encrypted backup retention and recurring restore evidence → docs/RESTORE_DRILL_EVIDENCE.md",
   "Live M-Pesa STK E2E on production domain",
-  "External uptime on /api/health and /api/health?deep=1",
+  "Verify deployed uptime workflow is running and alerts reach the operator",
   "Submit sitemap-index.xml to GSC/Bing",
   "Manual accessibility QA matrix → docs/ACCESSIBILITY_QA.md",
 ];
@@ -84,6 +86,7 @@ let blockingFails = 0;
 let warns = 0;
 
 console.log("EstateDesk production readiness (env)\n");
+console.log("Local evidence: disposable restore completed 2026-10-13; uptime and search submission workflows exist.\n");
 
 for (const check of checks) {
   const ok = has(check.key) || (check.alt ? has(check.alt) : false);

@@ -6,6 +6,7 @@ import {
   useActionState,
   useCallback,
   useState,
+  useEffect,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
@@ -47,6 +48,9 @@ export default function LoginForm({
   );
 
   const [showPassword, setShowPassword] = useState(false);
+  useEffect(() => {
+    if (state.success && state.redirectTo?.startsWith("/") && !state.redirectTo.startsWith("//")) window.location.replace(state.redirectTo);
+  }, [state.success, state.redirectTo]);
 
   const globalError = state?.error ?? null;
 

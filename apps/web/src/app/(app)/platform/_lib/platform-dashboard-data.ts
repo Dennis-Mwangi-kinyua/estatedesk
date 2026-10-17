@@ -1,3 +1,4 @@
+import { platformActionCounts } from "@/lib/billing/action-queues";
 import { prisma } from "@/lib/prisma";
 import { countOnlineUsers } from "@/lib/auth/presence";
 import { buildBars, addMonths, startOfMonth } from "./helpers";
@@ -42,6 +43,7 @@ export async function getPlatformDashboardData() {
     recentOnboardingRequests,
     organizationSeries,
     revenueSeries,
+    actionCounts,
   ] = await Promise.all([
     platformQuery("platform-total-users", () =>
       prisma.user.count({ where: { deletedAt: null } }),
@@ -219,12 +221,14 @@ export async function getPlatformDashboardData() {
 
     getOrganizationSeries(6),
     getRevenueSeries(6),
+    platformActionCounts(),
   ]);
 
   const currentRevenue = Number(currentRevenueAgg._sum.amount ?? 0);
   const previousRevenue = Number(previousRevenueAgg._sum.amount ?? 0);
 
   return {
+    actionCounts,
     totalUsers,
     onlineUsers,
     totalRootAdmins,

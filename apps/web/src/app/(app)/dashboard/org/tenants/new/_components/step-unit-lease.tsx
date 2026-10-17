@@ -3,6 +3,7 @@ import { inputClassName, stepPanelClassName } from "../_lib/constants";
 import { formatCurrency } from "../_lib/helpers";
 import type { AvailableUnit } from "../_lib/types";
 import { FieldLabel, SectionTitle } from "./ui-primitives";
+import { OpeningArrearsFields } from "./opening-arrears-fields";
 
 export function StepUnitLease({
   isPending,
@@ -116,6 +117,7 @@ export function StepUnitLease({
             disabled={isPending}
           />
         </label>
+        <OpeningArrearsFields disabled={isPending} currencyCode={currencyCode} />
       </div>
     </div>
   );

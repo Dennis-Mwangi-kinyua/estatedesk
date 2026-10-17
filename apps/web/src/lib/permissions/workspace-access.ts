@@ -2,6 +2,7 @@ import { caretakerCanAccessPath } from "../caretaker/workspace-policy";
 import type { OrgRole, PlatformRole } from "@prisma/client";
 import { canReceiveOrgMandates, type OrgPermission } from "./role-matrix";
 import { tenantCanAccessWorkspacePath } from "./access";
+import { rolePolicyBlocksPath, type OrgRolePolicy } from "./org-role-policy";
 
 const MANAGEMENT: readonly OrgRole[] = ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"];
 const OPERATIONS: readonly OrgRole[] = ["ADMIN", "MANAGER", "OFFICE"];
@@ -23,7 +24,7 @@ export const ORG_WORKSPACE_ROLES: Record<string, readonly OrgRole[]> = {
   accounting: FINANCE, expenditures: FINANCE, reports: MANAGEMENT,
   staff: ["ADMIN", "MANAGER"], taxes: ["ADMIN", "ACCOUNTANT"],
   airbnb: ["ADMIN", "MANAGER"],
-  agreements: ["ADMIN"], settings: ["ADMIN"], "verify-tenant": ["ADMIN"],
+  agreements: ["ADMIN", "MANAGER"], settings: ["ADMIN"], "verify-tenant": ["ADMIN"],
 };
 
 function under(path: string, prefix: string) {
@@ -31,7 +32,7 @@ function under(path: string, prefix: string) {
 }
 
 export function canAccessWorkspacePath(
-  session: { platformRole: PlatformRole; activeOrgRole: OrgRole | null; activeOrgId: string | null; grantedPermissions?: readonly string[]; caretakerSections?: readonly string[]; caretakerUnitPaths?: readonly string[] },
+  session: { platformRole: PlatformRole; activeOrgRole: OrgRole | null; activeOrgId: string | null; grantedPermissions?: readonly string[]; orgRolePolicy?: OrgRolePolicy; caretakerSections?: readonly string[]; caretakerUnitPaths?: readonly string[] },
   pathname: string,
 ) {
   let path: string;
@@ -40,11 +41,12 @@ export function canAccessWorkspacePath(
   } catch {
     return false;
   }
+  if (session.activeOrgId && rolePolicyBlocksPath(session.orgRolePolicy, path)) return false;
   // Provider ownership and hiring are authorised by their resource guards.
   if (path === "/provider" || path === "/service-providers" || /^\/service-providers\/[^/]+$/.test(path)) return true;
   if (["/dashboard", "/profile", "/access-denied"].includes(path) || under(path, "/change-password")) return true;
   const platform = ["SUPER_ADMIN", "PLATFORM_ADMIN"].includes(session.platformRole);
-  if (under(path, "/agreements/verify")) return platform || (Boolean(session.activeOrgId) && session.activeOrgRole === "ADMIN");
+  if (under(path, "/agreements/verify")) return platform || (Boolean(session.activeOrgId) && (session.activeOrgRole === "ADMIN" || session.activeOrgRole === "MANAGER"));
   if (under(path, "/platform/control")) return session.platformRole === "SUPER_ADMIN";
   if (under(path, "/platform")) return platform;
   if (path === "/api-keys") return platform || (Boolean(session.activeOrgId) && session.activeOrgRole === "ADMIN");
@@ -63,7 +65,9 @@ export function canAccessWorkspacePath(
   const section = under(path, "/dashboard/org") ? path.split("/")[3] : path.split("/")[1];
   if (section && ORG_WORKSPACE_ROLES[section]?.includes(role)) return true;
   if (!canReceiveOrgMandates(role)) return false;
-  const grants = session.grantedPermissions ?? [];
+  const grants = [...(session.grantedPermissions ?? []),
+    ...Object.entries(session.orgRolePolicy?.permissions ?? {}).filter(([, decision]) => decision === "allow").map(([permission]) => permission),
+  ].filter(permission => session.orgRolePolicy?.permissions[permission as OrgPermission] !== "deny");
   if (under(path, "/dashboard/org/accounting/requests")) return grants.includes("finance.requests.review");
   const sectionPermissions: Record<string, readonly OrgPermission[]> = {
     settings: ["org.settings.manage"], staff: ["org.users.manage", "org.users.delete"],

@@ -32,8 +32,8 @@ test("verification QR points to a private hash-bound registry page and embeds in
   assert.ok(Buffer.from(bytes).toString("latin1").includes("/Subtype /Image"));
   assert.equal((await PDFDocument.load(bytes)).getPageCount(),1);
 });
-test("verification pages are available to platform admins and organization admins only", () => {
+test("verification pages are available to platform admins and organization admins or managers", () => {
   const path = `/agreements/verify/${"a".repeat(48)}`;
-  for (const role of ["ADMIN","MANAGER","TENANT","CARETAKER"] as const) assert.equal(canAccessWorkspacePath({platformRole:"USER",activeOrgRole:role,activeOrgId:"org"},path),role==="ADMIN");
+  for (const role of ["ADMIN","MANAGER","TENANT","CARETAKER"] as const) assert.equal(canAccessWorkspacePath({platformRole:"USER",activeOrgRole:role,activeOrgId:"org"},path),role==="ADMIN" || role==="MANAGER");
   assert.equal(canAccessWorkspacePath({platformRole:"PLATFORM_ADMIN",activeOrgRole:null,activeOrgId:null},path),true);
 });

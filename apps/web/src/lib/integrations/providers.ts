@@ -37,7 +37,7 @@ export const integrationProviders = [
       { key: "MPESA_CALLBACK_SECRET", label: "Callback secret", requiredForLive: true },
     ],
     localFoundation: "Payment records, checkout IDs, callbacks, tenant ledgers.",
-    nextAction: "Activate Daraja app credentials and replace STK stub with live adapter.",
+    nextAction: "Configure organization-scoped Daraja credentials and complete live STK/callback verification.",
   },
   {
     id: "ke-kcb-buni-ipn",

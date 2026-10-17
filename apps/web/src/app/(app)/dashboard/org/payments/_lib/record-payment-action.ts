@@ -1,7 +1,7 @@
 "use server";
 import { prisma } from "@/lib/prisma";
 import { requireOrgPermission } from "@/lib/permissions/guards";
-import { roleHasOrgPermission } from "@/lib/permissions/role-matrix";
+import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
 import { readString, revalidatePaymentSurfaces } from "./payment-action-shared";
 import { verifyPayment } from "./verify-payment";
 import { normalizeTransactionReference, isUniqueConstraintError } from "@/lib/payments/transaction-reference";
@@ -34,7 +34,7 @@ export async function recordCashPaymentAction(form: FormData) {
     proofAssetId = await saveImagePayloadAsset({ payload: { base64: Buffer.from(await proof.arrayBuffer()).toString("base64"), fileName: proof.name, mimeType: proof.type, size: proof.size }, uploadDir: "payment-proof", filePrefix: "cash", orgId, unitId: lease.unitId, submittedByUserId: session.userId, purpose: "payment_proof" });
   }
   const proofAsset = proofAssetId ? await prisma.asset.findUnique({ where: { id: proofAssetId }, select: { key: true } }) : null;
-  const canVerify = roleHasOrgPermission(session.activeOrgRole, "payments.verify");
+  const canVerify = memberHasOrgPermission(session, "payments.verify");
   try {
     await prisma.$transaction(async tx => {
       const payment = await tx.payment.create({ data: { orgId, payerTenantId: lease.tenant.id, payerUserId: lease.tenant.userId, payerName: lease.tenant.fullName, method: "CASH", amount: rawAmount, externalReference: receiptReference, transactionReferenceKey: key, reference: receiptReference, targetType: "COMBINED", gatewayStatus: "PENDING", verificationStatus: "PENDING", paidAt, notes: evidence, callbackRaw: { source: "staff_cash_entry", combined: true, leaseId, period, transactionMessage: evidence, proofAssetId, proofImageUrl: proofAsset?.key ?? null, recordedByUserId: session.userId } } });

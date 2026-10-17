@@ -1,4 +1,5 @@
 import "server-only";
+import { OPENING_ARREARS_PREFIX } from "@/lib/tenants/opening-arrears";
 
 import {
   GatewayStatus,
@@ -61,6 +62,7 @@ function getLatestReceiptUrlFromPayments(
 }
 
 function periodBillTypeLabel(lines: CombinedBillLine[]): CombinedBill["typeLabel"] {
+  if (lines.length && lines.every(line => line.label.startsWith(OPENING_ARREARS_PREFIX))) return "Previous arrears";
   const hasRent = lines.some((line) => line.kind === "RENT");
   const hasWater = lines.some((line) => line.kind === "WATER");
   const hasOther = lines.some((line) => line.kind === "OTHER");

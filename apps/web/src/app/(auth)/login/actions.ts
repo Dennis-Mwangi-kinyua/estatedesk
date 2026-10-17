@@ -39,6 +39,7 @@ const loginSchema = z.object({
 
 export type LoginActionState = {
   success: boolean;
+  redirectTo?: string;
   error?: string;
   fieldErrors?: {
     email?: string[];
@@ -267,7 +268,9 @@ export async function loginAction(
           }),
       );
 
-      redirect(returnTo ?? destination);
+      const redirectTo = returnTo ?? destination;
+      if (headerStore.has("next-action")) return { success: true, redirectTo };
+      redirect(redirectTo);
     }
 
     const primaryMembership = await timed(
@@ -384,7 +387,12 @@ export async function loginAction(
             }),
     );
 
-    return redirect(user.mustChangePassword || !user.termsAcceptedAt ? destination : returnTo ?? destination);
+    const redirectTo = user.mustChangePassword || !user.termsAcceptedAt ? destination : returnTo ?? destination;
+    // Complete the action before loading a different authenticated layout. A
+    // streamed redirect can retain the login render's cached unauthenticated
+    // context while trying to render the destination in the same response.
+    if (headerStore.has("next-action")) return { success: true, redirectTo };
+    return redirect(redirectTo);
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;

@@ -2,7 +2,9 @@
 
 This matrix tracks documentation and operational evidence that must be complete before commercial launch. It prevents polished templates from being mistaken for finished work.
 
-Last reviewed: 2026-07-11
+Last reviewed: 2026-10-17
+
+Current engineering evidence: [17 October review](audits/2026-10-17/README.md). External approvals and deployed-account state remain unverified unless linked below.
 
 ## Summary
 
@@ -17,18 +19,18 @@ Last reviewed: 2026-07-11
 | API reference | Complete | `docs/API.md` |
 | Operations runbook | Complete | `docs/OPERATIONS.md`, `docs/production-deploy-checklist.md` |
 | Sitemap documentation | Complete | `SITEMAPS.md`, `docs/SEO_INDEXING.md` |
-| QA report (smoke + unit) | Complete | `docs/QA_REPORT.md` (2026-07-10) |
+| QA evidence | Current review recorded | `docs/audits/2026-10-17/README.md`; older July QA is historical |
 | Payment product rules | Complete (live prod E2E pending) | Combined bills + gateway/manual settlement; verify/manage permission split |
 | Plan integrity | Complete | Org cannot self-assign paid plans; upgrade queue on `/platform/billing`; import limits |
 | Production readiness UI | Complete | `/platform/system-health` readiness + `npm run production:check` |
 | Go-live runbook | Complete | `docs/PRODUCTION_GO_LIVE.md` |
-| DB migration health | Complete | `prisma migrate status` up to date (2026-07-10) |
+| DB migrations | Disposable database validated; production status unverified | 78 migrations apply locally, including native push |
 | In-app help links | Complete | Role-scoped protected routes at `/dashboard/{org,tenant,caretaker,landlord}/help` and `/platform/help` |
 | Theme coherence | Complete | Shared `ed-dashboard-shell` primitives and tenant/org surface migration |
 | Accessibility QA | In progress | Automated baseline in `tests/unit/accessibility-baseline.test.ts`; manual matrix in `docs/ACCESSIBILITY_QA.md` |
 | Kenya legal / privacy review | In progress | Counsel packet in `docs/KENYA_LEGAL_TECHNICAL_ALIGNMENT.md`; sign-off pending in `docs/KENYA_LEGAL_REVIEW.md` |
-| Backup restore drill | In progress | Backup captured and validated in `docs/RESTORE_DRILL_EVIDENCE.md`; disposable full restore still required |
-| Search Console automation | Partial | Manual GSC submission documented; automated workflows not yet in repo |
+| Backup restore drill | Local drill complete; off-site retention pending | Actual restores recorded on 13 and 17 October; `docs/RESTORE_DRILL_EVIDENCE.md` |
+| Search Console automation | Implemented; account connection pending | `.github/workflows/sitemap-ping.yml`, `scripts/submit-sitemaps.mjs`; successful submission needs verified property credentials |
 | Full microservices cutover | Not started (by design) | Modular monorepo Phase 1 — `docs/architecture/SERVICES.md` |
 
 ## Launch blockers
@@ -52,17 +54,17 @@ Last reviewed: 2026-07-11
 ### Backup restore drill
 
 - Document: `docs/RESTORE_DRILL_EVIDENCE.md`
-- Status: **Backup validated; full disposable restore still required**
+- Status: **Local restore completed; off-site encrypted retention and recurring recovery evidence still required**
 - Owner: Engineering / operations
-- Exit criteria: disposable restore drill completed with RPO/RTO evidence and smoke-test sign-off
-- Completed so far: `npm run backup:database`, `npm run backup:validate`, enhanced `npm run restore:drill` with JSON evidence output
+- Exit criteria: production backup retention/location approved, scheduled backup success verified, and recurring restore with application smoke-test evidence
+- Completed so far: actual disposable restores on 13 and 17 October, checksum verification and JSON timing/row-count evidence. A local test restore does not establish a production recovery SLA.
 
 ## Non-blocking but recommended before scale
 
 | Item | Document / location | Status |
 | --- | --- | --- |
-| External uptime monitoring | `docs/LAUNCH_READINESS.md` | Configure provider + `HEALTHCHECK_ENABLED` |
-| Background jobs | Platform manual controls | Automatic cron schedules and cron API endpoints removed |
+| External uptime monitoring | `.github/workflows/uptime.yml` | 15-minute workflow implemented; deployed runs and alert receipt need operator verification |
+| Background jobs | Platform manual controls | Tenant-credit cron remains scheduled; native push requires regular Notifications job execution |
 | Analytics and ads tags | `docs/ENVIRONMENT.md` | Enable only after legal/consent review |
 | Integration providers | `docs/INTEGRATION_READINESS.md` | Enable per provider as approved |
 
@@ -72,3 +74,6 @@ Last reviewed: 2026-07-11
 2. Change the status row in this matrix
 3. Add date, owner, and link to proof in the evidence doc
 4. Remove the item from **Launch blockers** once signed off
+## Mobile release
+
+Core native workflows are implemented; see `apps/mobile/README.md`. Expo/store accounts, APNs/FCM credentials, final store assets/disclosures, physical-device checks, and mobile dependency advisories remain release gates. No store submission has been made.

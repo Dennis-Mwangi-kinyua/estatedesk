@@ -2,12 +2,12 @@
 
 import { TenantStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { requireUserSession } from "@/lib/auth/session";
+import { requireOrgPermission } from "@/lib/permissions/guards";
+import { parseOpeningArrears } from "@/lib/tenants/opening-arrears";
 import { safeServerActionError } from "@/lib/errors/server-error-log";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { accountLoginUrl } from "@/lib/notifications/account-login-url";
 import { buildAllocationDraft } from "@/lib/notifications/recipient-message";
-import { getAuthorizedOrgContext } from "./_lib/authorization";
 import {
   isValidUsername,
   normalizeUsername,
@@ -28,13 +28,8 @@ export async function createTenantAction(
   formData: FormData,
 ): Promise<CreateTenantActionState> {
   try {
-    const session = await requireUserSession();
-    const membership = await getAuthorizedOrgContext(
-      session.userId,
-      session.activeOrgId,
-    );
-
-    const orgId = membership.orgId;
+    const session = await requireOrgPermission("tenants.manage");
+    const orgId = session.activeOrgId!;
 
     const fullName = toRequiredString(formData.get("fullName"), "Full name");
     const phone = toRequiredString(formData.get("phone"), "Phone");
@@ -102,6 +97,11 @@ export async function createTenantAction(
     if (Number.isNaN(leaseStartDate.getTime())) {
       throw new Error("Lease start date is invalid.");
     }
+    const existingLease = formData.get("existingLease") === "on";
+    if (existingLease && (!unitId || !leaseStartDateRaw || leaseStartDate > new Date())) {
+      throw new Error("Assign a unit and enter the original lease start date (not in the future) for an existing lease.");
+    }
+    const openingArrears = parseOpeningArrears(formData, { existingLease, unitId, leaseStartDate });
 
     if (unitId && statusRaw !== "ACTIVE") {
       throw new Error(
@@ -143,6 +143,9 @@ export async function createTenantAction(
       deposit,
       username,
       password,
+      existingLease,
+      openingArrears,
+      actorUserId: session.userId,
     });
 
     revalidatePath("/dashboard/org/tenants");

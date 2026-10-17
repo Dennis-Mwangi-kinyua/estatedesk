@@ -12,7 +12,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 /** Bump when schema/client changes so the dev global cache is recreated. */
-const PRISMA_SCHEMA_VERSION = "stability-pool-v9-product-updates";
+const PRISMA_SCHEMA_VERSION = "stability-pool-v10-native-push";
 
 const DATABASE_URL = getDatabaseUrl();
 

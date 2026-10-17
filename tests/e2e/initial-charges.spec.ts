@@ -20,6 +20,7 @@ test("first rent and deposit appear in both portals; confirmation issues shared 
   await page.context().addCookies([{ ...fixture.cookies.manager, url: baseURL! }]);
   await tenant.addCookies([{ ...fixture.cookies.tenant, url: baseURL! }]);
   await outsider.addCookies([{ ...fixture.cookies.outsider, url: baseURL! }]);
+  await page.addLocatorHandler(page.getByRole("button", { name: "Close what’s new", exact: true }), async button => { await button.click(); });
   try {
     await page.goto(`/dashboard/org/tenants/${fixture.tenantSlug}`, { waitUntil: "domcontentloaded" });
     const panel = page.getByRole("region", { name: "First rent and deposit" });
@@ -28,6 +29,7 @@ test("first rent and deposit appear in both portals; confirmation issues shared 
     await expect(panel.getByText("Waived", { exact: true })).toBeVisible();
     await expect(panel.getByText(`Total remaining: ${money(30000)}`, { exact: true })).toBeVisible();
     const tenantPage = await tenant.newPage();
+    await tenantPage.addLocatorHandler(tenantPage.getByRole("button", { name: "Close what’s new", exact: true }), async button => { await button.click(); });
     await tenantPage.goto("/dashboard/tenant", { waitUntil: "domcontentloaded" });
     await expect(tenantPage.getByRole("region", { name: "First rent and deposit" })).toBeVisible();
     const startingCharges = tenantPage.getByRole("region", { name: "First rent and deposit" });

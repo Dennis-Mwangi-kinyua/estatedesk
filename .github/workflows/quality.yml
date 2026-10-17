@@ -39,6 +39,8 @@ jobs:
       DIRECT_URL: postgresql://estatedesk:ci-only-password@localhost:5432/estatedesk_test
       AUTH_SECRET: ci-only-cookie-signing-secret-for-disposable-data
       ROLE_WORKSPACE_FIXTURE: /tmp/estatedesk-role-workspaces.json
+      MOVEOUT_BROWSER_FIXTURE: /tmp/estatedesk-moveout-browser-fixture.json
+      TENANT_START_BROWSER_FIXTURE: /tmp/estatedesk-tenant-start-browser-fixture.json
 
     steps:
       - name: Check out repository
@@ -47,7 +49,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
@@ -65,6 +67,12 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Typecheck native application
+        run: npm run mobile:typecheck
+
+      - name: Check Expo SDK dependency compatibility
+        run: npm run check -w @estatedesk/mobile
 
       - name: Lint
         run: npm run lint
@@ -87,7 +95,10 @@ jobs:
         env:
           TEST_DATABASE_URL: postgresql://estatedesk:ci-only-password@localhost:5432/estatedesk_test
           TSX_TSCONFIG_PATH: apps/web/tsconfig.json
-        run: node --conditions=react-server --import tsx scripts/qa/seed-role-workspaces.ts
+        run: |
+          node --conditions=react-server --import tsx scripts/qa/seed-role-workspaces.ts
+          node --conditions=react-server --import tsx scripts/qa/seed-move-out.ts
+          node --conditions=react-server --import tsx scripts/qa/seed-tenant-start.ts
 
       - name: Run browser smoke tests
         env:

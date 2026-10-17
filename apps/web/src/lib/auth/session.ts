@@ -22,10 +22,12 @@ import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { isSecurityGatePathname } from "@/lib/auth/security-gate";
 import { prisma } from "@/lib/prisma";
 import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
+import { readOrgRolePolicies, rolePolicyBlocksPath, type OrgRolePolicy } from "@/lib/permissions/org-role-policy";
 
 export type { OrgRole, PlatformRole, ScopeType };
 
 export type AppSession = {
+  orgRolePolicy?: OrgRolePolicy;
   grantedPermissions?: string[];
   userId: string;
   email: string | null;
@@ -548,6 +550,15 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
         )
       : null;
 
+    const settings = activeMembership ? await prisma.organizationSettings.findUnique({
+      where: { orgId: activeMembership.orgId }, select: { roleAccess: true },
+    }) : null;
+    const orgRolePolicy = activeMembership
+      ? readOrgRolePolicies(settings?.roleAccess)[activeMembership.role]
+      : undefined;
+    // API handlers that read sessions directly must honor blocked sections too.
+    if (pathname.startsWith("/api/") && rolePolicyBlocksPath(orgRolePolicy, pathname)) return null;
+
     return {
       userId: user.id,
       email: user.email,
@@ -558,6 +569,7 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       activeOrgId: activeMembership?.orgId ?? null,
       activeOrgRole: activeMembership?.role ?? null,
       grantedPermissions: activeMembership?.grantedPermissions ?? [],
+      orgRolePolicy,
       membershipScope: activeMembership
         ? {
             scopeType: activeMembership.scopeType,
@@ -599,6 +611,14 @@ export async function clearUserSession(): Promise<void> {
   }
 
   clearSessionCookie(cookieStore);
+}
+
+/** Resolve the current live login for session-bound native device registration. */
+export async function getCurrentSessionId(): Promise<string | null> {
+  const { token } = await readSessionTokenFromCookies();
+  if (!token) return null;
+  const { session } = await findSessionByToken(token);
+  return session && session.expiresAt > new Date() ? session.id : null;
 }
 
 export async function getManagedUserSessions(

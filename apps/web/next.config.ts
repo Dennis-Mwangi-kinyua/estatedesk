@@ -10,7 +10,7 @@ import { config as loadEnv } from "dotenv";
 const monorepoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 // npm workspace commands run from apps/web; also load the shared root environment.
 // Existing deployment and app-specific values retain precedence.
-loadEnv({ path: path.join(monorepoRoot, ".env"), quiet: true });
+if (!process.env.TEST_DATABASE_URL) loadEnv({ path: path.join(monorepoRoot, ".env"), quiet: true });
 const isProduction = process.env.NODE_ENV === "production";
 const webPackage = JSON.parse(
   readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "package.json"), "utf8"),

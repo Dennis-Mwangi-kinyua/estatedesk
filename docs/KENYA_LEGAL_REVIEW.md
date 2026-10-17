@@ -2,7 +2,7 @@
 
 Status: **TECHNICAL ALIGNMENT COMPLETE — QUALIFIED KENYAN COUNSEL SIGN-OFF STILL REQUIRED**
 
-Last updated: 2026-07-04
+Last updated: 2026-10-17 (technical handoff only; no counsel approval)
 
 This is a review checklist, not legal advice or legal approval.
 
@@ -45,3 +45,7 @@ This is a review checklist, not legal advice or legal approval.
 - Final approval evidence:
 
 When complete, update `docs/PRE_LAUNCH_STATUS.md`.
+
+## Mobile implementation review addendum
+
+Counsel should also review the native mobile sign-in/session flow, Expo SecureStore, notification permission/withdrawal flows, Expo/APNs/FCM involvement and transfers, store privacy disclosures, payment evidence, and account/deletion procedures. Push payloads use a generic update notice and fetch authorized content after opening. Device registrations are tied to live server sessions and removed on logout/revocation. Confirm these statements against physical-device behavior before approving published disclosures.

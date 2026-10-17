@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Database dumps and checksums must remain private on shared machines.
+umask 077
+
 # shellcheck source=scripts/lib/load-env.sh
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/load-env.sh"
 

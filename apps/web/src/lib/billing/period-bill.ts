@@ -1,4 +1,5 @@
 import "server-only";
+import { isOpeningArrearsCharge } from "@/lib/tenants/opening-arrears";
 
 import { Prisma, type PrismaClient } from "@prisma/client";
 import {
@@ -164,6 +165,7 @@ export async function getPeriodBillForTenant({
   });
 
   const lines: PeriodBillLine[] = [];
+  const hasOpeningArrears = lease.rentCharges.some(isOpeningArrearsCharge);
   let dueDate = new Date();
 
   for (const charge of lease.rentCharges) {
@@ -201,7 +203,7 @@ export async function getPeriodBillForTenant({
 
   // If no rent charge yet but lease is active, surface expected rent for the period
   // so tenants still see a combined bill once water exists (payment path will upsert).
-  if (!lines.some((l) => l.kind === "RENT")) {
+  if (!hasOpeningArrears && !lines.some((l) => l.kind === "RENT")) {
     const monthly = toLedgerNumber(lease.monthlyRent);
     lines.push({
       kind: "RENT",
@@ -214,7 +216,7 @@ export async function getPeriodBillForTenant({
   }
 
   // Unit-level fees before RentCharge rows are materialized by the pay flow.
-  if (!lease.rentCharges.some((charge) => charge.chargeType === "SERVICE_CHARGE")) {
+  if (!hasOpeningArrears && !lease.rentCharges.some((charge) => charge.chargeType === "SERVICE_CHARGE")) {
     const serviceCharge = toLedgerNumber(lease.unit.serviceCharge ?? 0);
     if (serviceCharge > 0) {
       lines.push({
@@ -228,7 +230,7 @@ export async function getPeriodBillForTenant({
     }
   }
 
-  if (!lease.rentCharges.some((charge) => charge.chargeType === "OTHER")) {
+  if (!hasOpeningArrears && !lease.rentCharges.some((charge) => charge.chargeType === "OTHER")) {
     const garbageFee = toLedgerNumber(lease.unit.garbageFee ?? 0);
     if (garbageFee > 0) {
       lines.push({
@@ -243,7 +245,7 @@ export async function getPeriodBillForTenant({
   }
 
   if (
-    !lease.rentCharges.some(
+    !hasOpeningArrears && !lease.rentCharges.some(
       (charge) =>
         charge.chargeType === "SECURITY" ||
         /security/i.test(charge.description ?? ""),

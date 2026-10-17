@@ -1,4 +1,5 @@
 import { focusField } from "./helpers";
+import { parseOpeningArrears } from "@/lib/tenants/opening-arrears";
 
 export function validateStepOne(form: HTMLFormElement): string | null {
   const data = new FormData(form);
@@ -49,6 +50,13 @@ export function validateStepThree(form: HTMLFormElement): string | null {
   const unitId = String(data.get("unitId") ?? "").trim();
   const dueDayRaw = String(data.get("dueDay") ?? "").trim();
   const status = String(data.get("status") ?? "").trim();
+  const existingLease = data.get("existingLease") === "on";
+  const start = String(data.get("leaseStartDate") ?? "");
+  if (existingLease && (!unitId || !start || Number.isNaN(new Date(start).getTime()) || new Date(start) > new Date())) {
+    return "Assign a unit and enter the original lease start date (not in the future) for an existing lease.";
+  }
+  try { parseOpeningArrears(data, { existingLease, unitId: unitId || null, leaseStartDate: new Date(start || Date.now()) }); }
+  catch (error) { return error instanceof Error ? error.message : "Review previous arrears."; }
 
   if (!unitId) {
     return null;

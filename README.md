@@ -58,6 +58,8 @@ EstateDesk lets a **property organization** run day-to-day operations without sp
 
 **Public discovery** (vacancies, landings, guides) sits next to **authenticated workspaces** that are never sitemapped and use `noindex`.
 
+The **Expo mobile app** lives in `apps/mobile` and targets Android and iOS. See [mobile setup and current feature scope](apps/mobile/README.md) for development builds, backend configuration, and release requirements. Current validation and remaining external launch gates are recorded in [17 October readiness evidence](docs/audits/2026-10-17/README.md).
+
 ---
 
 ## Who uses it
@@ -89,7 +91,7 @@ Keyboard (platform shell): **`Alt+Shift+A`** → Admin mode · **`Alt+Shift+D`**
 ### Billing & payments
 - **Combined period bills** (rent + water on one card for `YYYY-MM`)  
 - Full or **partial** payment amounts  
-- Allocation: **rent lines first, then water**  
+- Allocation: **service charge → garbage → security → other fees/penalties → water → rent**
 - **Pay Now** → method chooser (eCitizen-style):  
   - **Instant gateway** (M-Pesa STK) → auto-settles bill on success  
   - **Manual M-Pesa / bank** → paste code/SMS → **PENDING until org verifies**  
@@ -248,7 +250,7 @@ Application source for product features lives under **`apps/web/src/...`**.
 
 ### Prerequisites
 
-- **Node.js 20+**  
+- **Node.js 24.3+ (24 LTS)**
 - **npm 10+**  
 - **PostgreSQL** (local or Neon)  
 - git  
@@ -439,7 +441,7 @@ Each persona has a dedicated layout shell (sidebar + mobile nav). Shared dashboa
 ### Combined period bill
 - Invoice merges **rent + water** for the same `YYYY-MM`.  
 - Tenant can pay **full** or **partial** balance.  
-- Settlement order: **rent (and other lease charges) → water**.  
+- Settlement order: **service charge → garbage → security → other fees/penalties → water → rent**.
 - Overpay becomes unapplied amount.  
 
 ### Pay Now flow
@@ -726,4 +728,4 @@ For the deepest in-product engineering reference (auth flows, payment state mach
 
 ---
 
-*README last updated: 2026-07-10.*
+*README last updated: 2026-10-17.*

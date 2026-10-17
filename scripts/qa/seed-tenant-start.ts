@@ -25,7 +25,7 @@ async function main() {
     await f.prisma.userSession.create({ data: { userId, activeMembershipId: membership.id, tokenHash: hashOpaqueToken(token, "session"), expiresAt: new Date(Date.now() + 86400000) } });
     cookies[label] = { name: getSessionCookieName(), value: createSessionCookieValue(token), secure: process.env.NODE_ENV === "production" };
   }
-  await writeFile("/tmp/estatedesk-tenant-start-browser-fixture.json", JSON.stringify({ orgId: f.org.id, leaseId: lease.id, tenantId: lease.tenantId, tenantSlug: lease.tenant.slug, day: nairobiDate(), cookies }), { mode: 0o600 });
+  await writeFile(process.env.TENANT_START_BROWSER_FIXTURE || "/tmp/estatedesk-tenant-start-browser-fixture.json", JSON.stringify({ orgId: f.org.id, leaseId: lease.id, tenantId: lease.tenantId, tenantSlug: lease.tenant.slug, day: nairobiDate(), cookies }), { mode: 0o600 });
   await f.prisma.$disconnect();
   console.log("Isolated initial-charge browser fixture created.");
 }

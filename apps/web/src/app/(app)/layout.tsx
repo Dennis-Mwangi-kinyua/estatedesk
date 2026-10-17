@@ -93,7 +93,7 @@ export default async function AppLayout({
   ]);
   const orgLabel = organization?.name ?? orgLabelFallback;
   return (
-    <WorkspaceAccessProvider access={{ grantedPermissions: session.grantedPermissions, platformRole: session.platformRole, activeOrgRole: session.activeOrgRole, activeOrgId: session.activeOrgId }}>
+    <WorkspaceAccessProvider access={{ orgRolePolicy: session.orgRolePolicy, grantedPermissions: session.grantedPermissions, platformRole: session.platformRole, activeOrgRole: session.activeOrgRole, activeOrgId: session.activeOrgId }}>
     <ProfilePictureProvider url={user?.profileImageUrl ?? null}>
     <div className="estate-workspace app-mobile-canvas app-sensitive-surface ed-mobile-surface relative min-h-dvh w-full min-w-0 overflow-x-hidden">
       <WorkspaceThemeScope />

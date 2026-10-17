@@ -52,7 +52,7 @@ test("gate dashboards share the workspace shell, fit both themes and retain assi
       }
       await page.getByLabel("Pass code", { exact: true }).fill(code);
       await page.getByRole("button", { name: "Verify details" }).click();
-      if (role === "OFFICE") await expect(page.getByRole("alert")).toContainText("assigned");
+      if (role === "OFFICE") await expect(page.getByRole("alert").filter({ hasText: "assigned" })).toContainText("assigned");
       else await expect(page.getByText("Expected gate visitor", { exact: true })).toBeVisible();
     }
   } finally {

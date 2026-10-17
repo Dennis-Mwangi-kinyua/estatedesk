@@ -30,6 +30,8 @@ export function buildPreview(
   const password = String(data.get("password") ?? "");
 
   return {
+    existingLease: data.get("existingLease") === "on",
+    openingArrears: [...data.entries()].filter(([key, value]) => key.startsWith("openingArrears:") && Number(value) > 0).map(([key, value]) => ({ period: key.slice("openingArrears:".length), amount: Number(value).toFixed(2) })),
     fullName,
     phone,
     email,

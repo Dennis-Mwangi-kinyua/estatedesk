@@ -150,3 +150,8 @@ node scripts/sync-cloudflare-images-env.mjs production
 ```
 
 Redeploy production after changing the variables. Never commit `.env` or paste API tokens into issue reports.
+
+
+## Native mobile notifications
+
+`NATIVE_PUSH_ENABLED` defaults to false. Set it to true only after applying the native push migration and testing an Expo development build with the organization's Expo/APNs/FCM credentials. `EXPO_ACCESS_TOKEN` is a server-only push-service access token; never expose it as `EXPO_PUBLIC_*`. The mobile build uses `EXPO_PROJECT_ID` and `EXPO_PUBLIC_API_URL`. Native push runs through the existing platform Notifications job; automatic job scheduling is not configured. See `apps/mobile/README.md` for receipt reconciliation and release checks.

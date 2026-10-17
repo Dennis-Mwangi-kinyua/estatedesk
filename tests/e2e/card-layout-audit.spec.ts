@@ -14,6 +14,7 @@ test("management cards contain long content and remain comfortable beside naviga
     "@/lib/public-id": 'export const encodePublicId=(id,scope)=>scope+"-"+id;',
     "inspection-report-form": 'export function InspectionReportForm(){return null}',
     "settlement-preview-action": 'export async function getSettlementPreview(){return {issues:[],depositHeld:25000,outstandingBills:0,lines:[]}}',
+    "next/navigation": 'export const useRouter=()=>({refresh(){},push(){},replace(){}});',
     "next/link": 'import React from "react";export default function Link({prefetch,...props}){return React.createElement("a",props)}',
     "@/components/navigation/app-links": 'import React from "react";export function DeferredLink({prefetch,...props}){return React.createElement("a",props)}',
     "@/lib/ledger": 'export const formatLedgerCurrency=n=>new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES"}).format(n);export const formatLedgerDate=()=>"12 Oct 2026";',
@@ -28,7 +29,7 @@ test("management cards contain long content and remain comfortable beside naviga
     builder.onResolve({ filter: /inspection-report-form$/ }, () => ({ path: "inspection-report-form", namespace: "fixture" }));
     builder.onResolve({ filter: /settlement-preview-action$/ }, () => ({ path: "settlement-preview-action", namespace: "fixture" }));
     builder.onResolve({ filter: /settings-data$/ }, () => ({ path: "settings-data", namespace: "fixture" }));
-    builder.onResolve({ filter: /^(next\/link|@\/components\/navigation\/app-links|@\/lib\/ledger|@\/components\/help\/in-app-guide-(hint|link)|@\/components\/notifications\/notification-view-button|@\/app\/\(app\)\/dashboard\/org\/notifications\/actions)$/ }, args => ({ path: args.path, namespace: "fixture" }));
+    builder.onResolve({ filter: /^(next\/navigation|next\/link|@\/components\/navigation\/app-links|@\/lib\/ledger|@\/components\/help\/in-app-guide-(hint|link)|@\/components\/notifications\/notification-view-button|@\/app\/\(app\)\/dashboard\/org\/notifications\/actions)$/ }, args => ({ path: args.path, namespace: "fixture" }));
     builder.onLoad({ filter: /.*/, namespace: "fixture" }, args => ({ contents: args.path === "settings-data" ? 'export const formatLabel=s=>String(s).replaceAll("_"," ");' : mocks[args.path], loader: "ts", resolveDir: process.cwd() }));
   } }] });
   await page.goto("/register");

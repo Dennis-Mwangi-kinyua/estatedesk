@@ -23,7 +23,7 @@ export default defineConfig({
     {
       name: "mobile-chromium",
       // Live lifecycle mutations run once; responsive fixtures cover mobile separately.
-      testIgnore: ["**/authenticated-workspaces.spec.ts"],
+      testIgnore: ["**/authenticated-workspaces.spec.ts", "**/initial-charges.spec.ts", "**/move-out-lifecycle.spec.ts"],
       use: { ...devices["Pixel 7"] },
     },
   ],

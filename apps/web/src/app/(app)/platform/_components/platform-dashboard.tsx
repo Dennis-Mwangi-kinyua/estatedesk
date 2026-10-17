@@ -1,3 +1,4 @@
+import { PlatformActionAlerts } from "./platform-action-alerts";
 import { PlatformDashboardHeading } from "./platform-dashboard-heading";
 
 import { PlatformSticker as VisualSticker } from "./platform-sticker";
@@ -34,6 +35,7 @@ export function PlatformDashboard({ data }: { data: PlatformDashboardData }) {
           recentOnboardingRequests={recentOnboardingRequests}
         />
 
+        <PlatformActionAlerts counts={data.actionCounts ?? {overdue:0,upgrades:0,countersignatures:0}} />
         <PlatformDashboardMetrics data={data} />
 
         <PlatformDashboardAside data={data} />

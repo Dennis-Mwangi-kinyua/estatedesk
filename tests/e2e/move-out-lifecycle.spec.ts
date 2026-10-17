@@ -8,6 +8,16 @@ import { configureTestDatabase } from "../integration/database-safety";
 // Authenticated routes compile on first use in the development browser server.
 test.setTimeout(120_000);
 test.use({ actionTimeout: 30_000 });
+// Both workflows mutate the same seeded notice and inspection.
+test.describe.configure({ mode: "serial" });
+
+test.beforeEach(async ({ page }) => {
+  await page.addLocatorHandler(page.getByRole("button", { name: "Close what’s new", exact: true }), async button => {
+    await button.click();
+    await expect(button).toHaveCount(0);
+    await page.waitForLoadState("networkidle");
+  });
+});
 
 
 test("tenant cancels a notice and scheduled inspection without losing their session", async ({ page, baseURL }) => {
@@ -64,7 +74,7 @@ test("move-out handover, private refund proof, report permissions and retained r
     console.log("Opening move-out workspace");
     await page.goto("/dashboard/org/move-outs");
     await page.getByRole("link", { name: "Open notice" }).click();
-    await expect(page).toHaveURL(/\/dashboard\/org\/move-outs\/[^/]+$/);
+    await expect(page).toHaveURL(/\/dashboard\/org\/move-outs\/[^/]+$/, { timeout: 30_000 });
     const form = page.getByRole("heading", { name: "Review settlement and complete handover" }).locator("..");
     await expect(form.getByLabel("Deposit actually held")).toHaveValue("12000.00", { timeout: 30_000 });
     console.log("Filling handover form");

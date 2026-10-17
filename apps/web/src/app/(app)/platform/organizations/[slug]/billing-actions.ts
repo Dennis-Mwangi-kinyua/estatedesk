@@ -7,6 +7,8 @@ import { writePlatformAuditLog } from "@/lib/audit/security";
 import { sendTransactionalEmail } from "@/lib/notifications/email";
 import { DEFAULT_SUBSCRIPTION_PAYMENT_INSTRUCTIONS, createSubscriptionInvoice, subscriptionInvoiceAmount, renewedSubscriptionPeriod } from "@/lib/billing/subscription-invoice";
 import { APP_PLANS } from "@/lib/billing/plans";
+import { saveSubscriptionInvoice, recordSubscriptionPayment } from "@/lib/billing/invoice-ledger-service";
+import { moneyMinor } from "@/lib/billing/invoice-ledger";
 import { randomUUID } from "node:crypto";
 
 export type BillingActionState = { error?: string; success?: string; invoice?: { filename: string; content: string } };
@@ -18,7 +20,7 @@ export async function organizationBillingAction(
   const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], { redirectTo: "/dashboard" });
   const orgId = String(formData.get("orgId") ?? "");
   const operation = String(formData.get("operation") ?? "");
-  if (!["renew", "invoice", "cancel"].includes(operation)) return { error: "Invalid billing action." };
+  if (!["renew", "invoice", "cancel", "payment"].includes(operation)) return { error: "Invalid billing action." };
   try {
     const subscription = await prisma.subscription.findUnique({ where: { orgId }, include: { org: { select: { name: true, slug: true, email: true } } } });
     if (!subscription) return { error: "No subscription is linked to this organisation." };
@@ -26,13 +28,23 @@ export async function organizationBillingAction(
     let success: string;
     let invoice: BillingActionState["invoice"];
     let deliveryError: string | undefined;
-    if (operation === "invoice") {
+    if (operation === "payment") {
+      if (formData.get("confirmed") !== "on") return {error:"Confirm that the payment has been received."};
+      const reference = String(formData.get("paymentReference") ?? "").trim();
+      const id = String(formData.get("paymentId") ?? "");
+      const paidAt = String(formData.get("paidAt") ?? "");
+      if (reference.length < 3 || reference.length > 120 || !/^[a-f0-9-]{36}$/i.test(id) || !/^\d{4}-\d{2}-\d{2}$/.test(paidAt) || !Number.isFinite(Date.parse(paidAt)) || new Date(paidAt) > now) return {error:"Provide a valid payment reference and payment date."};
+      await recordSubscriptionPayment({orgId,invoiceId:String(formData.get("invoiceId") ?? ""),payment:{id,reference,amountMinor:moneyMinor(String(formData.get("amount") ?? "")),paidAt:new Date(paidAt).toISOString(),recordedAt:now.toISOString(),recordedBy:session.userId}});
+      success = "Payment recorded. Review the balance before renewing the subscription.";
+    } else if (operation === "invoice") {
       const to = subscription.billingEmail || subscription.org.email;
       const amount = subscriptionInvoiceAmount(subscription.plan, subscription.metadata);
       const paymentInstructions = process.env.ESTATEDESK_SUBSCRIPTION_PAYMENT_INSTRUCTIONS?.trim() || DEFAULT_SUBSCRIPTION_PAYMENT_INSTRUCTIONS;
       if (!paymentInstructions) return { error: "Configure EstateDesk subscription payment instructions before sending an invoice." };
       const reference = `ED-${subscription.id}-${subscription.currentPeriodEnd.toISOString().slice(0, 10)}`;
-      const pdf = await createSubscriptionInvoice({ reference, organisation: subscription.org.name, plan: APP_PLANS[subscription.plan].name, amount, issuedAt: now, renewalDate: subscription.currentPeriodEnd, paymentInstructions });
+      const saved = await saveSubscriptionInvoice({orgId,actorUserId:session.userId,reference,data:{version:1,organisation:subscription.org.name,plan:APP_PLANS[subscription.plan].name,amountMinor:moneyMinor(amount.toFixed(2)),issuedAt:now.toISOString(),renewalDate:subscription.currentPeriodEnd.toISOString(),paymentInstructions,payments:[]}});
+      const snapshot = saved.data;
+      const pdf = await createSubscriptionInvoice({ reference, organisation: snapshot.organisation, plan: snapshot.plan, amount:snapshot.amountMinor / 100, issuedAt:new Date(snapshot.issuedAt), renewalDate:new Date(snapshot.renewalDate), paymentInstructions:snapshot.paymentInstructions });
       invoice = { filename: `${reference}.pdf`, content: Buffer.from(pdf).toString("base64") };
       success = "Invoice ready to download.";
       if (formData.get("sendEmail") === "on") {

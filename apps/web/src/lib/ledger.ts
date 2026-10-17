@@ -1,4 +1,5 @@
 import "server-only";
+import { OPENING_ARREARS_PREFIX, isOpeningArrearsCharge } from "@/lib/tenants/opening-arrears";
 
 import {
   NotificationChannel,
@@ -246,7 +247,11 @@ export async function allocateCombinedPeriodPayment({
   let appliedWaterBillId: string | null = null;
   let appliedAnyLeaseCharge = false;
 
-  if (lease.status === "ACTIVE") {
+  const openingCharge = await db.rentCharge.findFirst({ where: {
+    orgId, leaseId: lease.id, period, chargeType: "OTHER",
+    description: { startsWith: OPENING_ARREARS_PREFIX },
+  }, select: { chargeType: true, description: true } });
+  if (lease.status === "ACTIVE" && !openingCharge) {
     // Ensure a rent charge exists for the period so rent+water can form one bill.
     const rentCharge = await db.rentCharge.upsert({
       where: {
@@ -592,7 +597,10 @@ export async function getOrgLedger(
             },
             rentCharges: {
               where: {
-                period,
+                OR: [
+                  { period },
+                  { period: { lt: period }, chargeType: "OTHER", description: { startsWith: OPENING_ARREARS_PREFIX }, balance: { gt: 0 } },
+                ],
                 status: { not: "WAIVED" },
               },
               select: {
@@ -601,6 +609,7 @@ export async function getOrgLedger(
                 amountPaid: true,
                 balance: true,
                 chargeType: true,
+                description: true,
               },
               orderBy: {
                 dueDate: "asc",
@@ -693,8 +702,8 @@ export async function getOrgLedger(
     const rentCharges = tenant.leases.flatMap((lease) =>
       lease.rentCharges.map((charge) => ({
         dueDate: charge.dueDate,
-        amountDue: toLedgerNumber(charge.amountDue),
-        amountPaid: toLedgerNumber(charge.amountPaid),
+        amountDue: isOpeningArrearsCharge(charge) ? toLedgerNumber(charge.balance) : toLedgerNumber(charge.amountDue),
+        amountPaid: isOpeningArrearsCharge(charge) ? 0 : toLedgerNumber(charge.amountPaid),
         balance: toLedgerNumber(charge.balance),
         label: charge.chargeType,
         unit: lease.unit,

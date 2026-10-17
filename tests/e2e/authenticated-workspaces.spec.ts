@@ -25,10 +25,21 @@ for (const role of ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "TE
     await page.getByLabel("Password", { exact: true }).fill(account.password);
     await page.getByRole("button", { name: "Log in", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`${account.home.replaceAll("/", "\\/")}(?:\\?|$)`), { timeout: 30_000 });
+    // The URL changes before the full-document login navigation completes.
+    await page.waitForLoadState("networkidle");
     const response = await page.goto(account.home, { waitUntil: "domcontentloaded" });
     expect(response?.status()).toBe(200);
     if (role !== "PROVIDER") expect(response?.headers()["cache-control"]).toContain("no-store");
+    expect(response?.headers()["referrer-policy"]).toBe("same-origin");
     await expect(page.locator("main").first()).toBeVisible();
+    const updates = page.getByRole("button", { name: "Close what’s new", exact: true });
+    if (await page.locator("[data-product-updates]").count()) {
+      await expect(updates).toBeVisible();
+      await updates.click();
+      await expect(updates).toHaveCount(0);
+      await page.waitForLoadState("networkidle");
+      await page.goto(account.home, { waitUntil: "networkidle" });
+    }
     await page.keyboard.press("Tab");
     await expect(page.getByRole("link", { name: "Skip to main content", exact: true })).toBeFocused();
     await page.keyboard.press("Enter");

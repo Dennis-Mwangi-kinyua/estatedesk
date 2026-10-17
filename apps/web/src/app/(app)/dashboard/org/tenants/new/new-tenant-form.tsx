@@ -9,7 +9,7 @@ import {
   type MouseEvent,
 } from "react";
 import { createTenantAction } from "@/features/tenants/actions/create-tenant-action";
-import { FormActionsDesktop, FormActionsMobile } from "./_components/form-actions";
+import { FormActions } from "./_components/form-actions";
 import { NewTenantGuidance } from "./_components/new-tenant-guidance";
 import { NewTenantHeader } from "./_components/new-tenant-header";
 import { StepAccountDetails } from "./_components/step-account-details";
@@ -212,14 +212,7 @@ export function NewTenantForm({
                 <StepPreview preview={preview} />
               </section>
 
-              <FormActionsDesktop
-                step={step}
-                isPending={isPending}
-                onBack={handleBack}
-                onNext={handleNext}
-              />
-
-              <FormActionsMobile
+              <FormActions
                 step={step}
                 isPending={isPending}
                 onBack={handleBack}

@@ -1,4 +1,5 @@
 import type { OrgRole } from "@prisma/client";
+import type { OrgRolePolicy } from "./org-role-policy";
 
 export const ORG_PERMISSIONS = [
   "move-outs.arrears.approve",
@@ -68,7 +69,9 @@ export const DELEGATABLE_ORG_ROLES = ["MANAGER", "OFFICE", "ACCOUNTANT"] as cons
 export function canReceiveOrgMandates(role: OrgRole | null | undefined) {
   return !!role && (DELEGATABLE_ORG_ROLES as readonly OrgRole[]).includes(role);
 }
-export function memberHasOrgPermission(member: { activeOrgRole?: OrgRole | null; grantedPermissions?: readonly string[] }, permission: OrgPermission) {
+export function memberHasOrgPermission(member: { activeOrgRole?: OrgRole | null; grantedPermissions?: readonly string[]; orgRolePolicy?: OrgRolePolicy }, permission: OrgPermission) {
+  const decision = member.orgRolePolicy?.permissions[permission];
+  if (decision) return decision === "allow";
   return roleHasOrgPermission(member.activeOrgRole, permission) || (canReceiveOrgMandates(member.activeOrgRole) && !!member.grantedPermissions?.includes(permission));
 }
 export function validateOrgMandates(values: unknown[]): OrgPermission[] {

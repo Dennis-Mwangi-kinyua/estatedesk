@@ -28,9 +28,14 @@
     "generate:web-push-keys": "node scripts/generate-web-push-keys.mjs",
     "extension:package": "mkdir -p dist && rm -f dist/estatedesk-browser-extension.zip && cd extensions/estatedesk && zip -r ../../dist/estatedesk-browser-extension.zip .",
     "billing:backfill-initial-charges": "TSX_TSCONFIG_PATH=apps/web/tsconfig.json node --conditions=react-server --import tsx scripts/backfill-initial-charges.ts",
-    "security:audit": "npm audit --omit=dev --audit-level=high",
+    "security:audit": "node scripts/audit-web-production.mjs",
+    "security:audit:mobile": "npm audit --workspace @estatedesk/mobile --omit=dev --audit-level=high",
     "audit:public": "node scripts/audit-public-site.mjs",
-    "audit:performance": "node scripts/measure-public-performance.mjs"
+    "audit:performance": "node scripts/measure-public-performance.mjs",
+    "mobile:start": "npm run start -w @estatedesk/mobile",
+    "mobile:android": "npm run android -w @estatedesk/mobile",
+    "mobile:ios": "npm run ios -w @estatedesk/mobile",
+    "mobile:typecheck": "npm run typecheck -w @estatedesk/mobile"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1018.0",

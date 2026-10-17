@@ -28,7 +28,7 @@ async function main() {
   const token = randomBytes(32).toString("hex");
   const { hashOpaqueToken } = await import("../../apps/web/src/lib/crypto/tokens");
   await f.prisma.invitation.create({ data: { orgId: f.org.id, email: accounts.INVITEE.email, role: "OFFICE", token: hashOpaqueToken(token, "invitation"), invitedById: accounts.ADMIN.id, expiresAt: new Date(Date.now() + 86400000) } });
-  await writeFile("/tmp/estatedesk-role-workspaces.json", JSON.stringify({ orgId: f.org.id, accounts, invitationToken: token }), { mode: 0o600 });
+  await writeFile(process.env.ROLE_WORKSPACE_FIXTURE || "/tmp/estatedesk-role-workspaces.json", JSON.stringify({ orgId: f.org.id, accounts, invitationToken: token }), { mode: 0o600 });
   await f.prisma.$disconnect();
   console.log("Disposable role-workspace fixture created.");
 }

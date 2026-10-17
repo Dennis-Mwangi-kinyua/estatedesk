@@ -3,6 +3,7 @@ import "server-only";
 import { Prisma, type ChargeType, type PrismaClient } from "@prisma/client";
 import { postJournalEntry } from "@/lib/accounting/engine";
 import { getAccountingSettings, usesAccrualRecognition } from "@/lib/accounting/settings";
+import { isOpeningArrearsCharge } from "@/lib/tenants/opening-arrears";
 
 type AccountingDb = PrismaClient | Prisma.TransactionClient;
 
@@ -64,7 +65,8 @@ export async function postRentChargeAccrual(
     return null;
   }
 
-  const creditKey = incomeSystemKeyForChargeType(charge.chargeType);
+  const opening = isOpeningArrearsCharge(charge);
+  const creditKey = opening ? "OPENING_EQUITY" : incomeSystemKeyForChargeType(charge.chargeType);
   const unit = charge.lease.unit;
   const dimensions = {
     propertyId: unit?.propertyId,
@@ -79,10 +81,10 @@ export async function postRentChargeAccrual(
   const entry = await postJournalEntry({
     db,
     orgId: charge.orgId,
-    entryDate: charge.dueDate,
-    description: `${charge.chargeType} charge accrued · ${charge.period}`,
+    entryDate: opening ? new Date() : charge.dueDate,
+    description: opening ? `Opening tenant receivable · ${charge.period}` : `${charge.chargeType} charge accrued · ${charge.period}`,
     memo: charge.description,
-    sourceType: "RENT_CHARGE_ACCRUAL",
+    sourceType: opening ? "OPENING_BALANCE" : "RENT_CHARGE_ACCRUAL",
     sourceId: charge.id,
     userId,
     lines,

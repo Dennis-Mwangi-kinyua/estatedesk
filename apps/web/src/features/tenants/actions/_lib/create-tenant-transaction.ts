@@ -3,6 +3,8 @@ import { Prisma, TenantStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ensureTenantIdentity } from "@/lib/tenants/identity";
 import { createInitialLeaseCharges } from "@/lib/billing/initial-lease-charges";
+import { OPENING_ARREARS_PREFIX, type OpeningArrearsEntry } from "@/lib/tenants/opening-arrears";
+import { postRentChargeAccrual } from "@/lib/accounting/billing";
 import { normalizeUsername } from "./credentials";
 
 type CreateTenantTransactionInput = {
@@ -25,6 +27,9 @@ type CreateTenantTransactionInput = {
   deposit: Prisma.Decimal | null;
   username: string;
   password: string;
+  existingLease?: boolean;
+  openingArrears?: OpeningArrearsEntry[];
+  actorUserId?: string;
 };
 
 export async function executeCreateTenantTransaction(
@@ -194,7 +199,25 @@ export async function executeCreateTenantTransaction(
       });
 
       allocation = { property: unit.property.name, unit: unit.houseNo, currency: unit.property.org.currencyCode, monthlyRent: lease.monthlyRent.toString(), deposit: lease.deposit?.toString() ?? null, startDate: lease.startDate.toISOString(), dueDay: lease.dueDay ?? 5 };
-      await createInitialLeaseCharges(tx, lease);
+      if (!input.existingLease) await createInitialLeaseCharges(tx, lease);
+      for (const entry of input.openingArrears ?? []) {
+        const amount = new Prisma.Decimal(entry.amount);
+        const [year, month] = entry.period.split("-").map(Number);
+        const day = Math.min(lease.dueDay ?? 5, new Date(Date.UTC(year, month, 0)).getUTCDate());
+        const charge = await tx.rentCharge.create({ data: {
+          orgId: input.orgId, leaseId: lease.id, period: entry.period, chargeType: "OTHER",
+          description: `${OPENING_ARREARS_PREFIX}${entry.period} (imported unpaid balance)`,
+          amountDue: amount, amountPaid: 0, balance: amount,
+          dueDate: new Date(Date.UTC(year, month - 1, day)), status: "UNPAID",
+        } });
+        await postRentChargeAccrual(tx, charge.id, input.actorUserId);
+      }
+      if (input.openingArrears?.length && input.actorUserId) await tx.auditLog.create({ data: {
+        orgId: input.orgId, actorUserId: input.actorUserId, action: "TENANT_OPENING_ARREARS_IMPORTED",
+        entityType: "Tenant", entityId: tenant.id,
+        metadata: { leaseId: lease.id, entries: input.openingArrears,
+          total: input.openingArrears.reduce((sum, entry) => sum.add(entry.amount), new Prisma.Decimal(0)).toFixed(2) },
+      } });
 
       await tx.unit.update({
         where: {

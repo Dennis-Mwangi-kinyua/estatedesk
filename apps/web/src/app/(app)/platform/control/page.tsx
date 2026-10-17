@@ -228,12 +228,12 @@ export default async function WebsiteControlCenterPage({
   const maintenancePreview = defaultMaintenanceMessage(control);
 
   return (
-    <div className="ed-mobile-first space-y-4 sm:space-y-6">
+    <div className="ed-mobile-first mx-auto w-full max-w-[1600px] space-y-6 pb-8 sm:space-y-8">
       <ControlOrgTableFilter />
       <PageHeader
         eyebrow="Developer portal · Super admin"
-        title="Website control center"
-        description="Full power over the EstateDesk website: incident banners, maintenance, public surfaces, queues, sessions, API keys, organizations, and emergency ops. Every action is audit-logged."
+        title="Platform control center"
+        description="Monitor platform access, manage service availability, and take focused action across organizations. Every change is recorded in the audit log."
         action={
           <div className="platform-action-group">
             <Link data-workspace-action="true"
@@ -268,14 +268,14 @@ export default async function WebsiteControlCenterPage({
         <div className="flex items-start gap-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
-            <strong>Extreme control.</strong> These switches affect the live website for all
+            <strong>Live platform controls.</strong> These switches affect the live website for all
             tenants, public visitors, cron, and APIs. Prefer scoped org tools when possible.
             Last updated {formatDateTime(control.updatedAt)}.
           </p>
         </div>
       </div>
 
-      <section className="ed-keep-cols grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
+      <section className="ed-keep-cols grid grid-cols-2! gap-3 lg:grid-cols-4!">
         <StatCard label="Active kill switches" value={formatNumber(activeKills)} />
         <StatCard
           label="Incident banner"
@@ -294,7 +294,10 @@ export default async function WebsiteControlCenterPage({
         <StatCard label="Failed notifications" value={formatNumber(failedNotifications)} />
       </section>
 
-      {/* Incident controls — dedicated, mobile-first */}
+      <nav aria-label="Control center sections" className="flex flex-wrap gap-2 rounded-2xl border border-border bg-card p-3">{[["availability", "Service availability"], ["features", "Feature access"], ["operations", "Security & operations"], ["users", "User accounts"], ["organizations", "Organizations"]].map(([id, label]) => <a key={id} href={`#${id}`} className="rounded-xl px-4 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground">{label}</a>)}</nav>
+      <section id="availability" className="scroll-mt-24 space-y-4">
+        <div><p className="text-xs font-semibold uppercase tracking-widest text-primary">01 · Availability</p><h2 className="mt-1 text-xl font-semibold tracking-tight">Service status & communication</h2><p className="mt-1 text-sm text-muted-foreground">Keep customers informed and control which services are available.</p></div>
+        <div className="grid items-start gap-5 xl:grid-cols-2!">
       <Surface
         title="Incident controls"
         description="Communicate degraded service without fully locking dashboards. Platform operators still pass maintenance locks."
@@ -505,13 +508,15 @@ export default async function WebsiteControlCenterPage({
         </form>
       </Surface>
 
-      {/* Global feature overrides — mobile-first cards, table from lg */}
+      </div></section>
+      {/* Feature controls */}
       <Surface
-        title="Global feature overrides"
+        id="features"
+        title="Feature access across organizations"
         description="Force a feature on/off website-wide, or inherit per-org settings. Use FORCE-ALL-ORGS to rewrite every organization."
       >
         {/* Phone / tablet cards (default) */}
-        <ul className="ed-global-feature-list divide-y divide-border lg:hidden">
+        <ul className="control-feature-grid grid gap-4 bg-muted/20 p-4 md:grid-cols-2 xl:grid-cols-3 sm:p-5">
           {PLATFORM_FEATURE_FLAG_KEYS.map((key) => {
             const current =
               key in control.globalFeatures
@@ -521,10 +526,10 @@ export default async function WebsiteControlCenterPage({
                 : "inherit";
 
             return (
-              <li key={key} className="space-y-3 px-3 py-4 sm:px-4">
+              <li key={key} className="flex min-w-0 flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <p className="min-w-0 break-all text-sm font-semibold leading-5 text-foreground">
-                    {key}
+                    {{ taxes: "Tax management", waterBilling: "Water billing", inspections: "Inspections", tenantPortal: "Tenant portal", whatsappNotifications: "WhatsApp notifications", kraIntegration: "KRA integration", mpesaPayments: "M-Pesa payments" }[key]}
                   </p>
                   <Badge
                     tone={
@@ -612,116 +617,13 @@ export default async function WebsiteControlCenterPage({
           })}
         </ul>
 
-        {/* Desktop table */}
-        <div className="ed-global-feature-table hidden overflow-x-auto lg:block">
-          <table className="w-full min-w-[720px] text-sm">
-            <thead className="bg-slate-50 text-left text-slate-500 dark:bg-slate-900 dark:text-slate-300">
-              <tr>
-                <th className="px-4 py-3 font-medium">Feature</th>
-                <th className="px-4 py-3 font-medium">Override</th>
-                <th className="px-4 py-3 font-medium">Set</th>
-                <th className="px-4 py-3 font-medium">Force all orgs</th>
-              </tr>
-            </thead>
-            <tbody>
-              {PLATFORM_FEATURE_FLAG_KEYS.map((key) => {
-                const current =
-                  key in control.globalFeatures
-                    ? control.globalFeatures[key]
-                      ? "on"
-                      : "off"
-                    : "inherit";
 
-                return (
-                  <tr key={key} className="border-t border-slate-100 dark:border-white/10">
-                    <td className="whitespace-normal px-4 py-3 font-medium text-slate-950 dark:text-white">
-                      {key}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        tone={
-                          current === "on"
-                            ? toneForStatus("ACTIVE")
-                            : current === "off"
-                              ? toneForStatus("DISABLED")
-                              : toneForStatus("PENDING")
-                        }
-                      >
-                        {current.toUpperCase()}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      <form
-                        action={updateGlobalFeatureKillAction}
-                        className="flex flex-wrap gap-1"
-                      >
-                        <input type="hidden" name="featureKey" value={key} />
-                        <button data-workspace-action="true"
-                          name="mode"
-                          value="on"
-                          className="rounded-lg border border-emerald-200 px-2 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-50"
-                        >
-                          On
-                        </button>
-                        <button data-workspace-action="true"
-                          name="mode"
-                          value="off"
-                          className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
-                        >
-                          Off
-                        </button>
-                        <button data-workspace-action="true"
-                          name="mode"
-                          value="inherit"
-                          className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                        >
-                          Inherit
-                        </button>
-                      </form>
-                    </td>
-                    <td className="px-4 py-3">
-                      <form
-                        action={forceAllOrgsFeatureAction}
-                        className="flex flex-wrap items-center gap-2"
-                      >
-                        <input type="hidden" name="featureKey" value={key} />
-                        <input type="hidden" name="enabled" value="true" />
-                        <input
-                          name="confirmation"
-                          placeholder="FORCE-ALL-ORGS"
-                          className="h-8 w-36 rounded-lg border border-slate-200 px-2 text-xs dark:border-white/10 dark:bg-slate-950"
-                        />
-                        <button data-workspace-action="true" className="rounded-lg bg-slate-950 px-2 py-1 text-xs font-semibold text-white dark:bg-white dark:text-slate-950">
-                          Force ON all
-                        </button>
-                      </form>
-                      <form
-                        action={forceAllOrgsFeatureAction}
-                        className="mt-1 flex flex-wrap items-center gap-2"
-                      >
-                        <input type="hidden" name="featureKey" value={key} />
-                        <input type="hidden" name="enabled" value="false" />
-                        <input
-                          name="confirmation"
-                          placeholder="FORCE-ALL-ORGS"
-                          className="h-8 w-36 rounded-lg border border-slate-200 px-2 text-xs dark:border-white/10 dark:bg-slate-950"
-                        />
-                        <button data-workspace-action="true" className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-50">
-                          Force OFF all
-                        </button>
-                      </form>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
       </Surface>
 
-      {/* Nuclear website ops */}
-      <div className="grid gap-4 xl:grid-cols-2">
-        <Surface title="Session & credential nuclear" description="Immediate website-wide access control.">
+      <section id="operations" className="scroll-mt-24 space-y-4">
+        <div><p className="text-xs font-semibold uppercase tracking-widest text-primary">02 · Operations</p><h2 className="mt-1 text-xl font-semibold tracking-tight">Security & background processing</h2><p className="mt-1 text-sm text-muted-foreground">Platform-wide actions require the confirmation shown on each card.</p></div>
+      <div className="grid items-start gap-5 xl:grid-cols-2">
+        <Surface title="Sessions & credentials" description="Immediate website-wide access control.">
           <div className="space-y-4 p-4">
             <form action={revokeAllSessionsAction} className="rounded-xl border border-red-200 bg-red-50/50 p-4 dark:border-red-500/30 dark:bg-red-500/5">
               <div className="flex items-center gap-2 text-sm font-semibold text-red-900 dark:text-red-100">
@@ -779,7 +681,7 @@ export default async function WebsiteControlCenterPage({
           </div>
         </Surface>
 
-        <Surface title="Jobs & queue nuclear" description="Background processing control for the whole website.">
+        <Surface title="Jobs & notification queues" description="Background processing control for the whole website.">
           <div className="space-y-4 p-4">
             <form action={runAllCronJobsAction} className="rounded-xl border border-teal-200 bg-teal-50/60 p-4 dark:border-teal-500/30 dark:bg-teal-500/10">
               <div className="flex items-center gap-2 text-sm font-semibold text-teal-950 dark:text-teal-100">
@@ -823,9 +725,11 @@ export default async function WebsiteControlCenterPage({
         </Surface>
       </div>
 
-      {/* User force controls */}
+      </section>
+      {/* User account controls */}
       <Surface
-        title="User force controls"
+        id="users"
+        title="User account controls"
         description="Suspend, disable, or force password change by email, username, or user id."
       >
         <div className="grid gap-4 p-4 lg:grid-cols-2">
@@ -850,7 +754,8 @@ export default async function WebsiteControlCenterPage({
 
       {/* Org controls — mobile-first cards, wide table from lg */}
       <Surface
-        title="Organization website control"
+        id="organizations"
+        title="Organization controls"
         description="Force org status, billing override, support entry into the live org workspace, soft-delete, and restore. Filter by name or slug."
       >
         <div className="border-b border-border p-3 sm:p-4">
@@ -877,12 +782,12 @@ export default async function WebsiteControlCenterPage({
         ) : (
           <>
             {/* Phone / tablet cards */}
-            <ul className="ed-org-control-list divide-y divide-border lg:hidden">
+            <ul className="control-organization-grid grid items-start gap-4 bg-muted/20 p-4 xl:grid-cols-2 2xl:grid-cols-3 sm:p-5">
               {organizations.map((org) => (
                 <li
                   key={org.id}
                   data-org-filter={`${org.name} ${org.slug}`.toLowerCase()}
-                  className="control-org-row space-y-3 px-3 py-4 sm:px-4"
+                  className="control-org-row min-w-0 space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -904,6 +809,7 @@ export default async function WebsiteControlCenterPage({
                     </div>
                   </div>
 
+                  <Link href={`/platform/organizations/${org.slug}/access`} className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-medium">Manage role access</Link>
                   <div className="space-y-1.5">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                       Force status
@@ -1008,129 +914,7 @@ export default async function WebsiteControlCenterPage({
             </ul>
 
             {/* Desktop table */}
-            <div className="ed-org-control-table hidden overflow-x-auto lg:block">
-              <table className="w-full min-w-[960px] text-sm" id="control-org-table">
-                <thead className="bg-muted/40 text-left text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3 font-medium">Organization</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 font-medium">Plan</th>
-                    <th className="px-4 py-3 font-medium">Force status</th>
-                    <th className="px-4 py-3 font-medium">Billing override</th>
-                    <th className="px-4 py-3 font-medium">Support / delete</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {organizations.map((org) => (
-                    <tr
-                      key={org.id}
-                      data-org-filter={`${org.name} ${org.slug}`.toLowerCase()}
-                      className="control-org-row border-t border-border align-top"
-                    >
-                      <td className="whitespace-normal px-4 py-3">
-                        <Link
-                          href={`/platform/organizations/${org.slug}`}
-                          className="font-semibold text-foreground hover:underline"
-                        >
-                          {org.name}
-                        </Link>
-                        <p className="mt-1 text-xs text-muted-foreground">/{org.slug}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge tone={toneForStatus(org.status)}>{org.status}</Badge>
-                      </td>
-                      <td className="whitespace-normal px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {org.subscription
-                          ? `${org.subscription.plan} · ${org.subscription.status}`
-                          : "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <form action={forceOrgStatusAction} className="flex flex-wrap gap-1">
-                          <input type="hidden" name="orgId" value={org.id} />
-                          {(["ACTIVE", "SUSPENDED", "DISABLED"] as const).map((status) => (
-                            <button data-workspace-action="true"
-                              key={status}
-                              name="status"
-                              value={status}
-                              className="rounded-lg border border-slate-200 px-2 py-1 text-[11px] font-semibold hover:bg-slate-50 dark:border-white/10"
-                            >
-                              {status}
-                            </button>
-                          ))}
-                        </form>
-                      </td>
-                      <td className="px-4 py-3">
-                        <form action={overrideSubscriptionAction} className="space-y-1">
-                          <input type="hidden" name="orgId" value={org.id} />
-                          <select
-                            name="plan"
-                            defaultValue={org.subscription?.plan ?? "PRO"}
-                            className="h-8 w-full rounded-lg border border-slate-200 px-2 text-xs dark:border-white/10 dark:bg-slate-950"
-                          >
-                            <option value="FREE">FREE</option>
-                            <option value="PRO">PRO</option>
-                            <option value="PLUS">PLUS</option>
-                            <option value="ENTERPRISE">ENTERPRISE</option>
-                          </select>
-                          <select
-                            name="status"
-                            defaultValue={org.subscription?.status ?? "ACTIVE"}
-                            className="h-8 w-full rounded-lg border border-slate-200 px-2 text-xs dark:border-white/10 dark:bg-slate-950"
-                          >
-                            <option value="ACTIVE">ACTIVE</option>
-                            <option value="TRIALING">TRIALING</option>
-                            <option value="PAST_DUE">PAST_DUE</option>
-                            <option value="CANCELLED">CANCELLED</option>
-                            <option value="EXPIRED">EXPIRED</option>
-                          </select>
-                          <button data-workspace-action="true" className="h-8 w-full rounded-lg bg-slate-950 text-[11px] font-semibold text-white dark:bg-white dark:text-slate-950">
-                            Override
-                          </button>
-                        </form>
-                      </td>
-                      <td className="px-4 py-3">
-                        <form action={enterOrgAsSupportAction} className="space-y-1">
-                          <input type="hidden" name="orgId" value={org.id} />
-                          <input
-                            name="reason"
-                            required
-                            minLength={8}
-                            placeholder="Support reason"
-                            className="h-8 w-full rounded-lg border border-border bg-card px-2 text-xs"
-                          />
-                          <select
-                            name="hours"
-                            defaultValue="2"
-                            className="h-8 w-full rounded-lg border border-border bg-card px-2 text-xs"
-                          >
-                            <option value="1">1h</option>
-                            <option value="2">2h</option>
-                            <option value="4">4h</option>
-                            <option value="8">8h</option>
-                          </select>
-                          <button data-workspace-action="true" className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border border-teal-200 bg-teal-50 text-[11px] font-semibold text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-100">
-                            <Building2 className="h-3 w-3" />
-                            Enter as support
-                          </button>
-                        </form>
-                        <form action={softDeleteOrgAction} className="mt-2 space-y-1">
-                          <input type="hidden" name="orgId" value={org.id} />
-                          <input type="hidden" name="slug" value={org.slug} />
-                          <input
-                            name="confirmation"
-                            placeholder={org.slug}
-                            className="h-8 w-full rounded-lg border border-red-200 px-2 text-xs dark:border-red-500/30 dark:bg-slate-950"
-                          />
-                          <button data-workspace-action="true" className="h-8 w-full rounded-lg border border-red-200 text-[11px] font-semibold text-red-700 hover:bg-red-50">
-                            Soft-delete (type slug)
-                          </button>
-                        </form>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+
           </>
         )}
 

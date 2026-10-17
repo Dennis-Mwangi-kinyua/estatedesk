@@ -3,6 +3,20 @@ import type { MouseEvent } from "react";
 import { buttonPrimaryClassName, buttonSecondaryClassName } from "../_lib/constants";
 import type { Step } from "../_lib/types";
 
+export function FormActions(props: {
+  step: Step;
+  isPending: boolean;
+  onBack: () => void;
+  onNext: (event: MouseEvent<HTMLButtonElement>) => void;
+}) {
+  return (
+    <>
+      <FormActionsDesktop {...props} />
+      <FormActionsMobile {...props} />
+    </>
+  );
+}
+
 export function FormActionsDesktop({
   step,
   isPending,

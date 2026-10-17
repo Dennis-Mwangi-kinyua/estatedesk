@@ -113,7 +113,7 @@ export type CombinedBillLine = {
 export type CombinedBill = {
   id: string;
   source: "RENT_CHARGE" | "WATER_BILL" | "PERIOD_BILL";
-  typeLabel: "Rent" | "Water Bill" | "Service Charge" | "Garbage" | "Rent + Water";
+  typeLabel: "Rent" | "Water Bill" | "Service Charge" | "Garbage" | "Rent + Water" | "Previous arrears";
   period: string;
   dueDate: Date;
   amountDue: number;

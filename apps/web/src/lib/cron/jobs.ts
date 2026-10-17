@@ -3,6 +3,7 @@ import "server-only";
 import { buildRetentionReport } from "@/lib/data-retention/report";
 import { queueDuePaymentNotifications } from "@/lib/ledger";
 import { dispatchQueuedNotifications } from "@/lib/notifications/dispatch";
+import { dispatchNativePush } from "@/lib/mobile/push";
 import { sendSecurityAlert } from "@/lib/security/alerts";
 import { runScheduledOwnerStatementDelivery } from "@/lib/accounting/owner-statement-delivery";
 import { processLeaseSigningLifecycle } from "@/lib/leases/signing";
@@ -22,10 +23,12 @@ export async function runNotificationCron(input?: {
       const reminders = await queueDuePaymentNotifications();
       const leaseSigning = await processLeaseSigningLifecycle();
       const dispatch = await dispatchQueuedNotifications();
+      const nativePush = await dispatchNativePush();
 
       return {
         remindersQueued: reminders.queued,
         leaseSigning,
+        nativePush,
         ...dispatch,
       };
     },

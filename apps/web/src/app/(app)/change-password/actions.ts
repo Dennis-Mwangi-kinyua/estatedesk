@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
 import {
   parsePlatformModeCookie,
@@ -15,6 +15,7 @@ import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 export type ChangePasswordState = {
   error: string | null;
+  redirectTo?: string;
 };
 
 const TERMS_VERSION = "2026-06-02";
@@ -126,5 +127,6 @@ export async function changeInitialPasswordAction(
   revalidatePath("/change-password");
   revalidatePath(destination);
 
+  if ((await headers()).has("next-action")) return { error: null, redirectTo: destination };
   redirect(destination);
 }

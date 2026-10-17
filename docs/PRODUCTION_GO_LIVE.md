@@ -20,15 +20,16 @@ Engineering can ship product capability. **Commercial full-scale** still needs t
 4. `npm run production:check` (fix env fails)
 5. Smoke: login platform admin, org admin, tenant, caretaker
 6. Live STK on production callback URL
-7. Confirm crons fire with `CRON_SECRET`
+7. Verify the platform manual jobs, including notifications and native push; tenant-credit remains scheduled; notifications require manual execution.
 
 ## Operator gates (human)
 
 Copy into your launch ticket and tick:
 
 - [ ] Kenya counsel sign-off (`docs/KENYA_LEGAL_REVIEW.md`)
-- [ ] Disposable restore drill evidence (`docs/RESTORE_DRILL_EVIDENCE.md`)
-- [ ] Production crons enabled: notifications, retention, owner-statements
+- [x] Disposable local restore drill evidence (`docs/RESTORE_DRILL_EVIDENCE.md`)
+- [ ] Production off-site encrypted retention and recurring recovery verification
+- [ ] Operator process established for platform manual jobs: notifications, retention, owner-statements
 - [ ] External uptime on `/api/health` and deep health
 - [ ] `SECURITY_ALERT_WEBHOOK_URL` delivers to Slack/Discord/Pager
 - [ ] M-Pesa Daraja live: STK → callback → verify/allocate → receipt

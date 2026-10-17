@@ -8,7 +8,8 @@
     "./health": "./src/health.ts",
     "./public-vacancy": "./src/public-vacancy.ts",
     "./mpesa": "./src/mpesa.ts",
-    "./events": "./src/events.ts"
+    "./events": "./src/events.ts",
+    "./mobile": "./src/mobile.ts"
   },
   "dependencies": {
     "zod": "^4.3.6"

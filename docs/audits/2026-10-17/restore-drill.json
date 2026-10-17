@@ -1,0 +1,15 @@
+{
+  "startedAt": "2026-10-17T10:10:03Z",
+  "finishedAt": "2026-10-17T10:10:04Z",
+  "durationSeconds": 1,
+  "backupFile": "/tmp/estatedesk-20261017-backup/estatedesk-20261017T100947Z.dump",
+  "backupTimestampUtc": "2026-10-17T10:09:47Z",
+  "rpoSeconds": 17,
+  "counts": {
+    "organizations": 1,
+    "payments": 0,
+    "tenants": 1,
+    "leases": 1,
+    "issueTickets": 0
+  }
+}

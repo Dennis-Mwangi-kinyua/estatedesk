@@ -25,6 +25,8 @@ export type ActionState = {
 };
 
 export type PreviewData = {
+  existingLease?: boolean;
+  openingArrears?: { period: string; amount: string }[];
   fullName: string;
   phone: string;
   email: string;

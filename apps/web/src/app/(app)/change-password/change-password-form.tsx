@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "@/components/navigation/workspace-link";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { ExternalLink } from "lucide-react";
 import { KeyRound, ShieldCheck } from "@/components/shared/colored-icons";
 import { PasswordField } from "@/components/auth/password-field";
@@ -24,6 +24,9 @@ export function ChangePasswordForm({
     changeInitialPasswordAction,
     initialState,
   );
+  useEffect(() => {
+    if (state.redirectTo?.startsWith("/") && !state.redirectTo.startsWith("//")) window.location.replace(state.redirectTo);
+  }, [state.redirectTo]);
 
   return (
     <form action={formAction} className="space-y-4">

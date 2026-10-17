@@ -1,5 +1,7 @@
 # EstateDesk QA Report
 
+Historical July report. Current validation and remaining launch gates are in [17 October evidence](audits/2026-10-17/README.md).
+
 **Date:** 2026-07-10  
 **Scope:** Stability pass, public site smoke, SEO indexability, automated unit suites  
 **Environment:** Local monorepo (`apps/web`), Next.js 16.2.6, Neon PostgreSQL pooler  

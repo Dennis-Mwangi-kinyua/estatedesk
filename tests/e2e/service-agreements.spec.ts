@@ -18,7 +18,7 @@ async function signIn(browser: Browser, baseURL: string, account: {email: string
   await expect(page).not.toHaveURL(/\/login(?:\?|$)/, {timeout:30_000});
   await page.waitForLoadState("networkidle");
   const updates = page.getByRole("button", {name:"Close what’s new",exact:true});
-  if(await updates.isVisible()) {await updates.click();await page.waitForLoadState("networkidle");}
+  if(await page.locator("[data-product-updates]").count()) {await expect(updates).toBeVisible();await updates.click();await expect(updates).toBeHidden();await page.waitForLoadState("networkidle");}
   return {context,page};
 }
 async function sign(page: Page, button: string) {
@@ -32,14 +32,15 @@ async function sign(page: Page, button: string) {
   await expect(page).toHaveURL(/ok=saved/, {timeout:30_000});
   await page.waitForLoadState("networkidle");
 }
-test("organization-specific agreement is signed, sent, isolated, countersigned and downloadable", async ({browser,baseURL}, testInfo) => {
+for (const organizationRole of ["ADMIN", "MANAGER"] as const) {
+test(`${organizationRole} can view, sign, verify and download an organization agreement`, async ({browser,baseURL}, testInfo) => {
   test.skip(!process.env.ROLE_WORKSPACE_FIXTURE, "Requires fictional local workspaces");
   test.skip(testInfo.project.name !== "chromium", "Workflow mutations run once");
   test.setTimeout(180_000);
   expect(new URL(baseURL!).hostname).toMatch(/^(127\.0\.0\.1|localhost)$/);
   const f = JSON.parse(await readFile(process.env.ROLE_WORKSPACE_FIXTURE!,"utf8"));
   const platform = await signIn(browser,baseURL!,f.accounts.PLATFORM_ADMIN);
-  const org = await signIn(browser,baseURL!,f.accounts.ADMIN);
+  const org = await signIn(browser,baseURL!,f.accounts[organizationRole]);
   const dbUrl = configureTestDatabase();
   if (!dbUrl) throw Error("TEST_DATABASE_URL is required for isolated agreement workflow tests");
   const db = new PrismaClient({adapter: new PrismaPg({connectionString: dbUrl})});
@@ -68,7 +69,9 @@ test("organization-specific agreement is signed, sent, isolated, countersigned a
     await page.getByLabel("Subprocessors, hosting locations, and safeguards").fill("Disposable local PostgreSQL only. No production services or personal data used.");
     await page.getByLabel("Retention and exit schedule").fill("Disposable test records only. Remove after verification; no real retention promise.");
     await page.getByRole("button",{name:"Create unsigned draft"}).click();
-    await expect(page).toHaveURL(/\/platform\/agreements\/[^/?]+$/, {timeout:30_000});
+    // The creation page also matches a generic final path segment. Wait for
+    // the persisted agreement ID before reading it or issuing scoped requests.
+    await expect(page).toHaveURL(/\/platform\/agreements\/(?!new$)[^/?]+$/, {timeout:30_000});
     await page.waitForLoadState("networkidle");
     const id = new URL(page.url()).pathname.split("/").at(-1)!;
     const draft=await org.context.request.get(`/api/service-agreements/${id}`);
@@ -77,10 +80,13 @@ test("organization-specific agreement is signed, sent, isolated, countersigned a
     await page.getByLabel("Complete agreement text").fill(original+"\n\nCustomer-specific QA appendix: no live agreement is being executed.");
     await page.getByRole("button",{name:"Save draft revision"}).click();
     await expect(page).toHaveURL(/ok=saved/);await page.waitForLoadState("networkidle");
-    await page.getByRole("button", {name:"Send to organization for signature",exact:true}).click();
+    await Promise.all([
+      page.waitForResponse(response => response.request().method() === "POST" && response.url().includes(`/agreements/${id}`)),
+      page.getByRole("button", {name:"Send to organization for signature",exact:true}).click(),
+    ]);
     await expect(page).toHaveURL(/ok=saved/);await page.waitForLoadState("networkidle");
     expect((await platform.context.request.get(`/api/service-agreements/${id}`)).status()).toBe(409);
-    const delivery = await db.notification.findFirst({where:{orgId:f.orgId,userId:f.accounts.ADMIN.id,title:"Service agreement ready for your signature"},orderBy:{createdAt:"desc"}});
+    const delivery = await db.notification.findFirst({where:{orgId:f.orgId,userId:f.accounts[organizationRole].id,title:"Service agreement ready for your signature",providerResponse:{path:["actionUrl"],equals:`/dashboard/org/agreements/${id}`}},orderBy:{createdAt:"desc"}});
     expect((delivery?.providerResponse as {actionUrl?: string})?.actionUrl).toBe(`/dashboard/org/agreements/${id}`);
     await expect(page.getByLabel("Complete agreement text")).toHaveCount(0);
     expect((await other.context.request.get(`/api/service-agreements/${id}`)).status()).toBe(404);
@@ -145,3 +151,4 @@ test("organization-specific agreement is signed, sent, isolated, countersigned a
     expect(clientErrors).toEqual([]);
   } finally {await platform.context.close();await org.context.close();await other.context.close();await db.organization.delete({where:{id:otherOrg.id}});await db.user.delete({where:{id:otherUser.id}});await db.$disconnect();}
 });
+}

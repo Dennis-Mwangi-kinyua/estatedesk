@@ -137,6 +137,7 @@ function checkRateLimit(key: string) {
 }
 
 const PUBLIC_API_PATHS = new Set([
+  "/api/mobile/login",
   "/api/platform/update-notice", "/api/health", "/api/cron/tenant-credit", "/api/cron/notifications", "/api/cron/retention",
   "/api/webhooks/mpesa", "/api/webhooks/kcb-ipn", "/api/webhooks/kra-etims", "/api/webhooks/whatsapp",
   "/api/monitoring/web-vitals", "/api/monitoring/client-errors", "/api/indexnow/key",
@@ -181,7 +182,9 @@ function applySecurityHeaders(response: NextResponse, pathname: string, csp?: st
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set(
     "Referrer-Policy",
-    isPrivate ? "no-referrer" : "strict-origin-when-cross-origin",
+    // Keep private URLs off other origins while preserving same-origin POST
+    // Origin headers required by Next's Server Action CSRF checks.
+    isPrivate ? "same-origin" : "strict-origin-when-cross-origin",
   );
   response.headers.set(
     "Permissions-Policy",
@@ -209,6 +212,8 @@ function isBrowserApiNavigation(req: NextRequest) {
   if (/^\/api\/service-agreements\/[^/]+\/?$/.test(req.nextUrl.pathname)) return false;
   if (/^\/api\/receipts\/[^/]+\/?$/.test(req.nextUrl.pathname)) return false;
   if (/^\/api\/org\/subscription-invoices\/[^/]+\/?$/.test(req.nextUrl.pathname)) return false;
+
+  if (/^\/api\/platform\/subscription-invoices\/[^/]+\/?$/.test(req.nextUrl.pathname)) return false;
 
   const accept = req.headers.get("accept") ?? "";
   const destination = req.headers.get("sec-fetch-dest") ?? "";

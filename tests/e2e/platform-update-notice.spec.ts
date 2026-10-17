@@ -15,10 +15,12 @@ test("platform admins publish an EAT update window visible to users and can with
   const visitor = await browser.newContext();
   try {
     await page.goto("/login");
+    await page.getByRole("button", { name: "Show password", exact: true }).click();
+    await expect(page.getByLabel("Password", { exact: true })).toHaveAttribute("type", "text");
     await page.getByLabel("Email or username").fill(email);
     await page.getByLabel("Password", { exact: true }).fill("test-updates-password");
     await page.getByRole("button", { name: "Log in", exact: true }).click();
-    await expect(page).toHaveURL(/\/platform$/);
+    await expect(page).toHaveURL(/\/platform$/, { timeout: 30_000 });
     const start = new Date(Date.now() + 24 * 3600000);
     const localStart = new Date(start.getTime() + 3 * 3600000).toISOString().slice(0, 16);
     await page.getByLabel("Update date and time (EAT)").fill(localStart);

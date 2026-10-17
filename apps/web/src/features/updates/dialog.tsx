@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { acknowledgeProductUpdates } from "./actions";
 import type { ProductUpdate, UpdateAudience } from "./catalog";
@@ -10,16 +9,14 @@ export function ProductUpdatesDialog({ audience, updates }: { audience: UpdateAu
   const dialogRef = useRef<HTMLDialogElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [state, submit, pending] = useActionState(acknowledgeProductUpdates, {});
-  const router = useRouter();
 
   useEffect(() => {
     if (state.message) {
       dialogRef.current?.close();
-      router.refresh();
     } else if (!dialogRef.current?.open) {
       dialogRef.current?.showModal();
     }
-  }, [state.message, router]);
+  }, [state.message]);
 
   if (state.message) return null;
   return (

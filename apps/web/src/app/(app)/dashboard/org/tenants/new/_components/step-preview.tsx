@@ -14,6 +14,7 @@ export function StepPreview({ preview }: { preview: PreviewData | null }) {
       />
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
+        {preview?.existingLease ? <InfoCard title="Existing lease and previous arrears"><div className="space-y-2 text-sm"><p>Initial rent and deposit charges will not be recreated.</p>{preview.openingArrears?.map(entry => <p key={entry.period}>{entry.period}: {entry.amount}</p>)}<p className="font-semibold">Total previous arrears: {(preview.openingArrears ?? []).reduce((sum, entry) => sum + Math.round(Number(entry.amount) * 100), 0) / 100}</p></div></InfoCard> : null}
         <InfoCard title="Tenant profile">
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>

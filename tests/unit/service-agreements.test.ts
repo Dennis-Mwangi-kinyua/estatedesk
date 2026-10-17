@@ -18,13 +18,21 @@ test("typed signatures must match the authenticated person's full name", () => {
   assert.equal(signatureName("mary wanjiku", "Mary Wanjiku"), true);
   assert.equal(signatureName("Another Person", "Mary Wanjiku"), false);
 });
-test("organization agreements are available only to organization administrators", () => {
+test("organization agreements are available to organization administrators and managers", () => {
   for (const activeOrgRole of ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "TENANT", "CARETAKER"] as const) {
-    assert.equal(canAccessWorkspacePath({activeOrgRole, activeOrgId: "test-org", platformRole: "USER"}, "/dashboard/org/agreements/example"), activeOrgRole === "ADMIN");
+    assert.equal(canAccessWorkspacePath({activeOrgRole, activeOrgId: "test-org", platformRole: "USER"}, "/dashboard/org/agreements/example"), activeOrgRole === "ADMIN" || activeOrgRole === "MANAGER");
   }
 });
 
 test("new DPA templates allocate organization-caused incidents without excluding processor duties", () => {
   assert.ok(ESTATEDESK_DPA_DRAFT.includes("11. CUSTOMER RESPONSIBILITY AND INDEMNITY"));
   for (const text of ["shall indemnify Afrisilicon Technology Limited", "credential sharing", "does not by itself establish Customer fault", "Afrisilicon's or its subprocessors' breach", "data subject's statutory rights", "not recovered twice", "backup, security, assistance, and recovery duties remain in force"]) assert.ok(ESTATEDESK_DPA_DRAFT.includes(text), text);
+});
+
+test("agreement verification permits managers only with an organization context", () => {
+  for (const activeOrgRole of ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "TENANT", "CARETAKER"] as const) {
+    const session = { activeOrgRole, activeOrgId: "test-org", platformRole: "USER" as const };
+    assert.equal(canAccessWorkspacePath(session, "/agreements/verify/example"), ["ADMIN", "MANAGER"].includes(activeOrgRole));
+    assert.equal(canAccessWorkspacePath({ ...session, activeOrgId: null }, "/agreements/verify/example"), false);
+  }
 });

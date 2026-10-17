@@ -97,6 +97,7 @@ model User {
 
 /// Server-side user session with active organization membership context.
 model UserSession {
+  nativePushDevices  NativePushDevice[]
   id                 String      @id @default(cuid())
   userId             String
   userAgent          String?
@@ -418,6 +419,8 @@ model OrganizationSettings {
   orgId                String       @unique
   branding             Json?
   features             Json?
+  /// Platform-managed organization role permissions and workspace restrictions.
+  roleAccess           Json?
   customFields         Json?
   notificationDefaults Json?
   createdAt            DateTime     @default(now())
@@ -2002,6 +2005,7 @@ model Expenditure {
 
 /// User or tenant notification queued/sent through a delivery channel.
 model Notification {
+  nativePushDeliveries NativePushDelivery[]
   id               String              @id @default(cuid())
   orgId            String
   userId           String?
@@ -2029,6 +2033,36 @@ model Notification {
   @@index([orgId, status, createdAt])
   @@index([orgId, channel, status])
   @@index([tenantId, readAt])
+}
+
+/// Native push belongs to a live login, so logout/revocation removes registration.
+model NativePushDevice {
+  id         String @id @default(cuid())
+  token      String @unique
+  sessionId  String
+  orgId      String
+  platform   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  session    UserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  deliveries NativePushDelivery[]
+
+  @@index([sessionId])
+}
+
+model NativePushDelivery {
+  id             String @id @default(cuid())
+  deviceId       String
+  notificationId String
+  status         String @default("CLAIMED")
+  ticketId       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  device         NativePushDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, notificationId])
+  @@index([status, createdAt])
 }
 
 /// Browser/device Web Push subscription for an authenticated user.

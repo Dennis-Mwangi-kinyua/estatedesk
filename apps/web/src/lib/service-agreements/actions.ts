@@ -12,7 +12,7 @@ export async function createAgreementAction(form: FormData) {
 export async function changeAgreementAction(id: string, form: FormData) {
   let failed = false;
   try { await changeAgreement(id, form); } catch (error) { unstable_rethrow(error); failed = true; }
-  const platform = String(form.get("command")) !== "org-sign";
+  const platform = String(form.get("command")) !== "org-sign" && form.get("returnTo") !== "org";
   const base = platform ? "/platform/agreements" : "/dashboard/org/agreements";
   if (failed) redirect(`${base}/${id}?error=action`);
   revalidatePath("/platform/agreements", "layout");
