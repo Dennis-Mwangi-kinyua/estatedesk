@@ -6,6 +6,8 @@ import {
   mobileMembershipsSchema, mobileIssuesSchema, mobileMetersSchema, mobilePaymentMethodsSchema, mobileNotificationsSchema,
   type MobilePaymentInput,
   mobilePaymentHistorySchema,
+  mobileLeasesSchema, mobileMoveOutsSchema, mobileWorkOrdersSchema, mobilePortfolioSchema,
+  type MobileWorkOrderInput,
 } from "@estatedesk/contracts/mobile";
 
 const SESSION_KEY = "estatedesk.session";
@@ -88,6 +90,14 @@ export async function getNotifications() { return mobileNotificationsSchema.pars
 export async function readNotification(id: string) { return request("/notifications", { method: "POST", body: { id } }); }
 export async function registerPush(token: string, platform: "ios" | "android") { return request("/push", { method: "POST", body: { token, platform } }); }
 export async function disablePush() { return request("/push", { method: "DELETE" }); }
+export async function getLeases() { return mobileLeasesSchema.parse(await request("/tenant/leases")); }
+export async function getMoveOuts() { return mobileMoveOutsSchema.parse(await request("/tenant/move-outs")); }
+export async function getWorkOrders() { return mobileWorkOrdersSchema.parse(await request("/caretaker/issues")); }
+export async function updateWorkOrder(body: MobileWorkOrderInput) { return request("/caretaker/issues", { method: "POST", body }); }
+export async function getPortfolio(q = "", status = "ALL", page = 1) {
+  const query = new URLSearchParams({ q, status, page: String(page) });
+  return mobilePortfolioSchema.parse(await request(`/org/units?${query}`));
+}
 
 export async function signOut() {
   // Retain credentials if revocation fails so the user can retry. Do not claim

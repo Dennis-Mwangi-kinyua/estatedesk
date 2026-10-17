@@ -43,7 +43,7 @@ export function orgViewForPath(pathname: string): OrgView | null {
     if (segments[1] === "org" && section === "units") return "properties";
     if (["org", "tenant", "caretaker", "landlord"].includes(segments[1]) && !section) return null;
   } else if (section === "api") {
-    if (segments[1] === "mobile") section = segments[3] ?? segments[2];
+    if (segments[1] === "mobile") section = segments[2] === "org" && segments[3] === "units" ? "properties" : segments[3] ?? segments[2];
     else if (["org", "tenant", "caretaker", "landlord"].includes(segments[1])) section = segments[2];
     else section = segments[1];
   } else if (["tenants", "buildings"].includes(section) && segments[1]) {

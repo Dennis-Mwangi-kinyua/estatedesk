@@ -5,6 +5,7 @@ import { requireOrgMembership } from "@/lib/permissions/guards";
 import type { MobileSession } from "@estatedesk/contracts/mobile";
 import { prisma } from "@/lib/prisma";
 import { rolePolicyBlocksPath } from "@/lib/permissions/org-role-policy";
+import { mobileFeatures } from "./features";
 export { isNativeRequest } from "./request-policy";
 
 export function mobileJson(body: unknown, status = 200) {
@@ -38,6 +39,7 @@ export async function sessionSummary(session: AppSession): Promise<MobileSession
     organizationId: session.activeOrgId,
     currencyCode: org?.currencyCode ?? "KES",
     canViewBills: !rolePolicyBlocksPath(session.orgRolePolicy, "/api/mobile/tenant/bills"),
+    features: mobileFeatures(session),
   };
 }
 

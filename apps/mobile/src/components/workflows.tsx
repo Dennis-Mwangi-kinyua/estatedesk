@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import * as Notifications from "expo-notifications";
 import { enablePush } from "../notifications";
-import { ActivityIndicator, Alert, Linking, Text, View } from "react-native";
+import { ActivityIndicator, Alert, BackHandler, Linking, Text, View } from "react-native";
 import type { MobileSession, MobileBills, MobileIssues, MobileMeters } from "@estatedesk/contracts/mobile";
 import * as api from "../api";
 import { Button, Field, styles } from "./ui";
+import { LeasesPanel, MoveOutsPanel, WorkOrdersPanel, PortfolioPanel } from "./workspace-panels";
 
-type Screen = "home" | "bills" | "issues" | "meters" | "organizations" | "notifications" | "payment" | "history";
+type Screen = "home" | "bills" | "issues" | "meters" | "organizations" | "notifications" | "payment" | "history" | "leases" | "move-outs" | "work-orders" | "portfolio";
 type Bill = MobileBills["bills"][number];
 
 export function Workflows({ session, refreshSession, onError, logout }: {
@@ -23,6 +24,11 @@ export function Workflows({ session, refreshSession, onError, logout }: {
   const [notifications, setNotifications] = useState<Awaited<ReturnType<typeof api.getNotifications>>>([]);
   const [methods, setMethods] = useState<Awaited<ReturnType<typeof api.getPaymentMethods>>>([]);
   const [history, setHistory] = useState<Awaited<ReturnType<typeof api.getPaymentHistory>>>([]);
+  const [leases, setLeases] = useState<Awaited<ReturnType<typeof api.getLeases>>>([]);
+  const [moveOuts, setMoveOuts] = useState<Awaited<ReturnType<typeof api.getMoveOuts>>>([]);
+  const [workOrders, setWorkOrders] = useState<Awaited<ReturnType<typeof api.getWorkOrders>>>([]);
+  const [portfolio, setPortfolio] = useState<Awaited<ReturnType<typeof api.getPortfolio>> | null>(null);
+  const [priority, setPriority] = useState("MEDIUM");
   const [bill, setBill] = useState<Bill | null>(null);
   const [method, setMethod] = useState("");
   const [amount, setAmount] = useState("");
@@ -49,10 +55,19 @@ export function Workflows({ session, refreshSession, onError, logout }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const listener = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (busyRef.current) return true;
+      if (screen === "home") return false;
+      setScreen("home"); setNotice(""); return true;
+    });
+    return () => listener.remove();
+  }, [screen]);
+
   async function run(action: () => Promise<void>) {
-    if (busyRef.current) return;
+    if (busyRef.current) return false;
     busyRef.current = true; setBusy(true); setNotice("");
-    try { await action(); } catch (error) { onError(error); } finally { busyRef.current = false; setBusy(false); }
+    try { await action(); return true; } catch (error) { onError(error); return false; } finally { busyRef.current = false; setBusy(false); }
   }
   async function load(target: Screen) {
     await run(async () => {
@@ -62,6 +77,10 @@ export function Workflows({ session, refreshSession, onError, logout }: {
       if (target === "organizations") setMemberships(await api.getMemberships());
       if (target === "notifications") setNotifications(await api.getNotifications());
       if (target === "history") setHistory(await api.getPaymentHistory());
+      if (target === "leases") setLeases(await api.getLeases());
+      if (target === "move-outs") setMoveOuts(await api.getMoveOuts());
+      if (target === "work-orders") setWorkOrders(await api.getWorkOrders());
+      if (target === "portfolio") setPortfolio(await api.getPortfolio());
       setScreen(target);
     });
   }
@@ -108,10 +127,22 @@ export function Workflows({ session, refreshSession, onError, logout }: {
         <Button label="Payment history" onPress={() => void load("history")} disabled={busy} secondary />
         <Button label="Maintenance requests" onPress={() => void load("issues")} disabled={busy} />
       </> : session.role === "CARETAKER" ? <Button label="Submit meter readings" onPress={() => void load("meters")} disabled={busy} /> : null}
+      {session.features.includes("leases") ? <Button label="My leases and tenancy history" onPress={() => void load("leases")} disabled={busy} secondary /> : null}
+      {session.features.includes("move-outs") ? <Button label="Move-out and inspection progress" onPress={() => void load("move-outs")} disabled={busy} secondary /> : null}
+      {session.features.includes("caretaker-issues") ? <Button label="Maintenance work orders" onPress={() => void load("work-orders")} disabled={busy} /> : null}
+      {session.features.includes("portfolio") ? <Button label="Property units and occupancy" onPress={() => void load("portfolio")} disabled={busy} /> : null}
       <Button label="Notifications" onPress={() => void load("notifications")} disabled={busy} secondary />
       <Button label="Switch organization" onPress={() => void load("organizations")} disabled={busy} secondary />
+      <Button label="Refresh workspace" onPress={() => void run(refreshSession)} disabled={busy} secondary />
       <Button label="Open website" onPress={() => void Linking.openURL(`${api.websiteUrl()}/login`).catch(onError)} secondary />
-    </> : screen === "bills" ? <>
+    </> : screen === "leases" ? <LeasesPanel leases={leases} currency={session.currencyCode} busy={busy} refresh={() => void load("leases")} />
+      : screen === "move-outs" ? <MoveOutsPanel notices={moveOuts} busy={busy} refresh={() => void load("move-outs")} />
+      : screen === "work-orders" ? <WorkOrdersPanel orders={workOrders} busy={busy} refresh={() => void load("work-orders")} update={input => run(async () => {
+        await api.updateWorkOrder(input); setWorkOrders(await api.getWorkOrders());
+        setNotice(input.action === "complete" ? "Completion report submitted for office review." : input.action === "note" ? "Progress note saved." : "Work started.");
+      })} />
+      : screen === "portfolio" ? <PortfolioPanel data={portfolio} currency={session.currencyCode} busy={busy} search={(query, status, page) => run(async () => { setPortfolio(await api.getPortfolio(query, status, page)); })} />
+      : screen === "bills" ? <>
       <Text style={styles.title}>Your bills</Text>
       <Text style={styles.cardTitle}>Outstanding: {money(bills?.totalBalance ?? 0)}</Text>
       {bills?.bills.length === 0 ? <Text style={styles.subtitle}>No bills to show yet.</Text> : null}
@@ -149,10 +180,12 @@ export function Workflows({ session, refreshSession, onError, logout }: {
         <Text style={styles.cardTitle}>Report a problem</Text>
         {issues?.units.map(unit => <Button key={unit.id} label={`${unitId === unit.id ? "✓ " : ""}${unit.label}`} onPress={() => chooseUnit(unit.id)} disabled={busy} secondary />)}
         {issues?.units.length === 0 ? <Text style={styles.subtitle}>An active lease is required to report a problem.</Text> : null}
+        <Text style={styles.label}>Priority</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{["LOW", "MEDIUM", "HIGH", "URGENT"].map(value => <Button key={value} label={value} disabled={busy} selected={priority === value} secondary={priority !== value} onPress={() => setPriority(value)} />)}</View>
         <Field label="Issue title" value={title} onChangeText={setTitle} maxLength={200} editable={!busy} />
         <Field label="Describe the problem" value={description} onChangeText={setDescription} multiline maxLength={5000} editable={!busy} />
         <Button label="Submit request" disabled={busy || !unitId || !title.trim() || !description.trim()} onPress={() => void run(async () => {
-          await api.submitIssue({ unitId, title, description, priority: "MEDIUM" }); setTitle(""); setDescription(""); setIssues(await api.getIssues()); setNotice("Maintenance request submitted.");
+          await api.submitIssue({ unitId, title, description, priority }); setTitle(""); setDescription(""); setIssues(await api.getIssues()); setNotice("Maintenance request submitted.");
         })} />
       </View>
       {issues?.issues.map(item => <View key={item.id} style={styles.card}><Text style={styles.cardTitle}>{item.title}</Text><Text style={styles.subtitle}>{item.status} · {item.priority}</Text><Text style={styles.subtitle}>{item.description}</Text></View>)}

@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from "react-native";
 
-export function Button({ label, onPress, disabled, secondary, checked }: { label: string; onPress: () => void; disabled?: boolean; secondary?: boolean; checked?: boolean }) {
-  return <Pressable accessibilityRole={checked === undefined ? "button" : "checkbox"} accessibilityState={{ disabled: !!disabled, ...(checked === undefined ? {} : { checked }) }} disabled={disabled} onPress={onPress}
+export function Button({ label, onPress, disabled, secondary, checked, selected }: { label: string; onPress: () => void; disabled?: boolean; secondary?: boolean; checked?: boolean; selected?: boolean }) {
+  return <Pressable accessibilityRole={checked === undefined ? "button" : "checkbox"} accessibilityState={{ disabled: !!disabled, ...(checked === undefined ? {} : { checked }), ...(selected === undefined ? {} : { selected }) }} disabled={disabled} onPress={onPress}
     style={({ pressed }) => [styles.button, secondary && styles.secondary, (disabled || pressed) && { opacity: 0.55 }]}>
     <Text style={[styles.buttonText, secondary && { color: "#12392f" }]}>{label}</Text>
   </Pressable>;

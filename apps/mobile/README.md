@@ -1,6 +1,6 @@
 # EstateDesk mobile
 
-Native Android and iOS app built with Expo and React Native. Includes secure login/logout, first-login password and terms setup, organization switching, tenant bills, partial M-Pesa STK/manual payment submission and history, tenant maintenance requests, caretaker meter submissions, and personal notifications. Other organization workflows continue on the website. Native push registration and delivery are implemented behind `NATIVE_PUSH_ENABLED`; Expo/APNs/FCM configuration and physical-device validation remain release requirements.
+Native Android and iOS app built with Expo and React Native. Includes secure login/logout, first-login password and terms setup, organization switching, tenant bills, partial M-Pesa STK/manual payment submission and history, tenant maintenance requests, caretaker meter submissions, personal notifications, tenant lease/history and move-out progress, caretaker maintenance work orders, and a scoped staff unit directory. Other organization workflows continue on the website. Native push registration and delivery are implemented behind `NATIVE_PUSH_ENABLED`; Expo/APNs/FCM configuration and physical-device validation remain release requirements.
 
 ## Local development
 
@@ -74,6 +74,10 @@ All endpoints require the native request boundary and a live session. Mutations 
 | `GET /api/mobile/tenant/payments/history` | Current tenant payment status; check before retrying an uncertain STK request |
 | `GET/POST /api/mobile/caretaker/meters` | Assigned pending meters / submit reading for approval |
 | `GET/POST /api/mobile/notifications` | Own in-app feed / acknowledge owned notification |
+| `GET /api/mobile/tenant/leases` | Current and historical leases owned by the signed-in tenant |
+| `GET /api/mobile/tenant/move-outs` | Own move-out statuses and scheduled inspections |
+| `GET/POST /api/mobile/caretaker/issues` | Scoped work orders / start, add progress, submit a completion report |
+| `GET /api/mobile/org/units?q=&status=&page=` | Searchable, paginated inventory for admins, managers and office staff |
 | `POST/DELETE /api/mobile/push` | Register / disable device push for the current login |
 
 Manual payments remain pending until organization verification. STK submission does not prove payment: the existing signed callback settles it. No real provider requests are required by the automated API tests.
@@ -87,3 +91,15 @@ Device registrations belong to a server login: deleting/revoking the session rem
 ## Current validation
 
 Both Android and iOS JavaScript/Hermes bundles export successfully. Native code compilation, cookie transport, notification permission flows, token refresh and delivery, VoiceOver/TalkBack, and app-store reviews still require development builds and devices. See [current engineering evidence](../../docs/audits/2026-10-17/README.md).
+
+## Mobile workspace parity
+
+- Tenants can review current and historical leases, contractual rent/deposit amounts, due days, and move-out/inspection progress. Lease signing, downloads, and creating/cancelling move-out notices still use the website. Contractual deposits are labelled separately from actual money held.
+- Caretakers can see work assigned directly to them or within their assigned units, start eligible work, save progress notes, and submit text completion reports. Reports reuse the web approval workflow and remain pending office review; submitting a report does not close the issue. Photo evidence still uses the website.
+- Organization admins, managers, and office staff can search property/building/unit names, filter occupancy, and browse 25 units per page. Membership property/building/unit scopes and blocked views apply. Inventory edits remain on the website.
+- New workspace buttons are advertised by the authenticated session endpoint and hidden when the role or organization policy denies them. Older backend sessions default to no new capabilities.
+- Tenant maintenance reports now support low, medium, high, and urgent priorities. Android's hardware back button returns to the mobile home screen from a workflow and is held while a submission runs.
+
+Validation evidence: [mobile workspace expansion](../../docs/audits/2026-10-17/mobile-parity.md).
+
+The corresponding backend routes must be deployed before testing these new screens. TypeScript checks and JavaScript/Hermes exports do not establish native-device validation; the first Android build still depends on SDK/NDK downloads.

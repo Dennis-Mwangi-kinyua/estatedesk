@@ -58,7 +58,7 @@ EstateDesk lets a **property organization** run day-to-day operations without sp
 
 **Public discovery** (vacancies, landings, guides) sits next to **authenticated workspaces** that are never sitemapped and use `noindex`.
 
-The **Expo mobile app** lives in `apps/mobile` and targets Android and iOS. See [mobile setup and current feature scope](apps/mobile/README.md) for development builds, backend configuration, and release requirements. Current validation and remaining external launch gates are recorded in [17 October readiness evidence](docs/audits/2026-10-17/README.md).
+The **Expo mobile app** lives in `apps/mobile` and targets Android and iOS. Native workspaces include tenant billing, payments, lease history and move-out progress; caretaker meters and maintenance work orders; and a scoped staff unit directory. See [mobile setup and current feature scope](apps/mobile/README.md) for development builds, backend configuration, and release requirements. Current validation and remaining external launch gates are recorded in [17 October readiness evidence](docs/audits/2026-10-17/README.md).
 
 ---
 

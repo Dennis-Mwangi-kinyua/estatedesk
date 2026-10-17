@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export const mobileFeatureSchema = z.enum(["leases", "move-outs", "caretaker-issues", "portfolio"]);
+export type MobileFeature = z.infer<typeof mobileFeatureSchema>;
+
 export const mobileSessionSchema = z.object({
   fullName: z.string(),
   role: z.string().nullable(),
@@ -10,6 +13,7 @@ export const mobileSessionSchema = z.object({
   organizationId: z.string().nullable().default(null),
   currencyCode: z.string().length(3).default("KES"),
   canViewBills: z.boolean().default(true),
+  features: z.array(mobileFeatureSchema).default([]),
 });
 export type MobileSession = z.infer<typeof mobileSessionSchema>;
 
@@ -79,3 +83,35 @@ export const mobilePaymentHistorySchema = z.array(z.object({
   id: z.string(), amount: z.number(), gatewayStatus: z.string(), verificationStatus: z.string(),
   createdAt: z.string(), reference: z.string().nullable(),
 }));
+
+export const mobileLeasesSchema = z.array(z.object({
+  id: z.string(), propertyName: z.string(), unitLabel: z.string(), buildingName: z.string().nullable(),
+  status: z.string(), startDate: z.string(), endDate: z.string().nullable(),
+  monthlyRent: z.number(), deposit: z.number().nullable(), dueDay: z.number(),
+}));
+export const mobileMoveOutsSchema = z.array(z.object({
+  id: z.string(), propertyName: z.string(), unitLabel: z.string(), status: z.string(),
+  noticeDate: z.string(), moveOutDate: z.string(), inspectionAt: z.string().nullable(),
+  inspectionStatus: z.string().nullable(),
+}));
+export const mobileWorkOrdersSchema = z.array(z.object({
+  id: z.string(), title: z.string(), description: z.string(), status: z.string(), priority: z.string(),
+  unitLabel: z.string().nullable(), propertyName: z.string().nullable(), createdAt: z.string(),
+  progressNotes: z.string().nullable(), canStart: z.boolean(), canUpdate: z.boolean(),
+  pendingReport: z.boolean(), reportStatus: z.string().nullable(),
+}));
+export const mobileWorkOrderInputSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("start"), issueId: z.string().min(1).max(200) }),
+  z.object({ action: z.literal("note"), issueId: z.string().min(1).max(200), progressNote: z.string().trim().min(4).max(2000) }),
+  z.object({ action: z.literal("complete"), issueId: z.string().min(1).max(200), workSummary: z.string().trim().min(10).max(5000), materialsUsed: z.string().trim().max(2000).default(""), tenantInstructions: z.string().trim().max(2000).default("") }),
+]);
+export type MobileWorkOrderInput = z.infer<typeof mobileWorkOrderInputSchema>;
+export const mobilePortfolioQuerySchema = z.object({
+  q: z.string().trim().max(100).default(""),
+  status: z.enum(["ALL", "VACANT", "OCCUPIED", "RESERVED", "UNDER_MAINTENANCE"]).default("ALL"),
+  page: z.coerce.number().int().min(1).max(10000).default(1),
+});
+export const mobilePortfolioSchema = z.object({
+  total: z.number().int(), page: z.number().int(), totalPages: z.number().int(),
+  units: z.array(z.object({ id: z.string(), houseNo: z.string(), propertyName: z.string(), buildingName: z.string().nullable(), type: z.string(), status: z.string(), rentAmount: z.number(), isActive: z.boolean() })),
+});
