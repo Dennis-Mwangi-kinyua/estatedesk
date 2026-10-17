@@ -1,3 +1,4 @@
+import { ArrowUpRight, Bath, BedDouble, Building2, DoorOpen, Pencil, Trash2 } from "lucide-react";
 import type { OrgRole } from "@prisma/client";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { getOrgUnitHref } from "@/lib/units/url";
@@ -80,87 +81,81 @@ export function UnitsUnitListSection({
         </div>
       </div>
 
-      <div className="divide-y divide-border">
-        {units.map((unit) => (
-          <article
-            key={unit.id}
-            className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <DeferredLink
-                  href={getOrgUnitHref({
-                    id: unit.id,
-                    houseNo: unit.houseNo,
-                    buildingName: unit.building?.name,
-                    propertyName: selectedProperty.name,
-                  })}
-                  className="text-base font-semibold text-foreground transition hover:text-primary"
-                >
-                  Unit {unit.houseNo}
-                </DeferredLink>
-                <span
-                  className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusClasses(
-                    unit.status,
-                  )}`}
-                >
-                  {formatEnumLabel(unit.status)}
-                </span>
-                {!unit.isActive ? (
-                  <FilterPill tone="info">Inactive</FilterPill>
-                ) : null}
+      <div className="grid grid-cols-1 items-stretch gap-4 bg-muted/10 p-4 md:grid-cols-2 xl:grid-cols-3 sm:gap-5 sm:p-6">
+        {units.map((unit) => {
+          const href = getOrgUnitHref({
+            id: unit.id,
+            houseNo: unit.houseNo,
+            buildingName: unit.building?.name,
+            propertyName: selectedProperty.name,
+          });
+          return (
+            <article
+              key={unit.id}
+              aria-label={`Unit ${unit.houseNo}`}
+              className="group flex min-w-0 flex-col rounded-2xl border border-border bg-card text-card-foreground shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex min-w-0 flex-1 flex-col p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 text-primary">
+                    <DoorOpen className="h-5 w-5" aria-hidden="true" />
+                  </div>
+                  <div className="flex min-w-0 flex-wrap justify-end gap-2">
+                    <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusClasses(unit.status)}`}>
+                      {formatEnumLabel(unit.status)}
+                    </span>
+                    {!unit.isActive ? <FilterPill tone="info">Inactive</FilterPill> : null}
+                  </div>
+                </div>
+
+                <h3 className="mt-4 break-words text-lg font-semibold tracking-tight text-foreground">
+                  <DeferredLink href={href} className="rounded-sm transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    Unit {unit.houseNo}
+                  </DeferredLink>
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">{formatUnitTypeLabel(unit.type, unit.bedrooms)}</p>
+                <div className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
+                  <Building2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span className="min-w-0 break-words">{unit.building?.name ?? "No building assigned"}</span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+                  {unit.bedrooms != null && unit.bedrooms > 0 ? (
+                    <span className="inline-flex items-center gap-1.5"><BedDouble className="h-4 w-4" aria-hidden="true" />{unit.bedrooms} {unit.bedrooms === 1 ? "bedroom" : "bedrooms"}</span>
+                  ) : null}
+                  {unit.bathrooms != null && unit.bathrooms > 0 ? (
+                    <span className="inline-flex items-center gap-1.5"><Bath className="h-4 w-4" aria-hidden="true" />{unit.bathrooms} {unit.bathrooms === 1 ? "bathroom" : "bathrooms"}</span>
+                  ) : null}
+                </div>
+
+                <div className="mt-auto pt-5">
+                  <div className="border-t border-border pt-4">
+                    <p className="text-xs font-medium text-muted-foreground">Monthly rent</p>
+                    <p className="mt-1 break-words text-xl font-semibold tracking-tight text-foreground tabular-nums">{formatCurrency(unit.rentAmount, currencyCode)}</p>
+                  </div>
+                </div>
               </div>
 
-              <p className="mt-1 text-sm text-muted-foreground">
-                {unit.building?.name ?? "No building"} ·{" "}
-                {formatUnitTypeLabel(unit.type, unit.bedrooms)}
-                {unit.bedrooms ? ` · ${unit.bedrooms} bed` : ""}
-                {unit.bathrooms ? ` · ${unit.bathrooms} bath` : ""}
-              </p>
-
-              <p className="mt-2 text-sm font-semibold text-foreground">
-                {formatCurrency(unit.rentAmount, currencyCode)}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-2 sm:justify-end">
-              {orgRole && ["ADMIN", "MANAGER"].includes(orgRole) ? (
-                <DeferredLink
-                  href={`${getOrgUnitHref({
-                    id: unit.id,
-                    houseNo: unit.houseNo,
-                    buildingName: unit.building?.name,
-                    propertyName: selectedProperty.name,
-                  })}?edit=1#unit-profile-edit`}
-                  className={buttonSecondaryClassName}
-                >
-                  Edit particulars
+              <div className="space-y-2 border-t border-border bg-muted/10 p-4">
+                <DeferredLink href={href} className={`${buttonPrimaryClassName} w-full gap-2`} aria-label={`View unit ${unit.houseNo}`}>
+                  View unit <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                 </DeferredLink>
-              ) : null}
-              <DeferredLink
-                href={getOrgUnitHref({
-                  id: unit.id,
-                  houseNo: unit.houseNo,
-                  buildingName: unit.building?.name,
-                  propertyName: selectedProperty.name,
-                })}
-                className={buttonPrimaryClassName}
-              >
-                View unit
-              </DeferredLink>
-
-              <form action={deleteUnitAction} className="inline">
-                <input type="hidden" name="unitId" value={unit.id} />
-                <button data-workspace-action="true"
-                  type="submit"
-                  className={buttonSecondaryClassName}
-                >
-                  Delete
-                </button>
-              </form>
-            </div>
-          </article>
-        ))}
+                <div className="flex flex-wrap items-center gap-2">
+                  {orgRole && ["ADMIN", "MANAGER"].includes(orgRole) ? (
+                    <DeferredLink href={`${href}?edit=1#unit-profile-edit`} className={`${buttonSecondaryClassName} min-w-0 flex-1 gap-2 px-3 text-xs`} aria-label={`Edit particulars for unit ${unit.houseNo}`}>
+                      <Pencil className="h-3.5 w-3.5 shrink-0" aria-hidden="true" /> Edit particulars
+                    </DeferredLink>
+                  ) : null}
+                  <form action={deleteUnitAction} className="min-w-0 flex-1">
+                    <input type="hidden" name="unitId" value={unit.id} />
+                    <button data-workspace-action="true" data-action-kind="destructive" type="submit" aria-label={`Delete unit ${unit.houseNo}`} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-border bg-background px-3 text-xs font-medium text-muted-foreground transition hover:border-destructive/30 hover:bg-destructive/5 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                      <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" /> Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
