@@ -23,3 +23,6 @@ test-results
 playwright-report
 docs/qa
 dist
+
+# Local private uploads, including browser-test evidence
+**/.private/

@@ -60,3 +60,6 @@ next-env.d.ts
 
 # Local database recovery artifacts
 /backups/*.dump.sha256
+
+# Local private uploads, including browser-test evidence
+**/.private/
