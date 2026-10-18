@@ -13,5 +13,15 @@ test("native routing respects advertised billing and feature capabilities", () =
   for (const route of ["payments", "water-bills", "invoice", "lease", "notices", "documents", "visitors"]) assert.equal(nativeTenantDestination(`/dashboard/tenant/${route}`, restricted), null);
 });
 test("unconverted routes never resolve to a different native workflow", () => {
-  for (const route of ["/dashboard/security", "/dashboard/tenant/rewards", "https://external.test", "/dashboard/tenant/invoice/2026-10/download"]) assert.equal(nativeTenantDestination(route, session), null);
+  for (const route of ["https://external.test", "/dashboard/tenant/invoice/2026-10/download"]) assert.equal(nativeTenantDestination(route, session), null);
+});
+
+test("new tenant services and account aliases stay native", () => {
+  for (const [path, screen] of [
+    ["/dashboard/security", "security"],
+    ["/dashboard/tenant/profile/change-password", "security"],
+    ["/dashboard/tenant/rewards", "rewards"],
+    ["/dashboard/tenant/inspections", "tenant-inspections"],
+    ["/dashboard/tenant/move-out", "move-outs"],
+  ]) assert.equal(nativeTenantDestination(path, session), screen);
 });

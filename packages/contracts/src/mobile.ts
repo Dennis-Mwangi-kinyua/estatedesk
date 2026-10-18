@@ -1,4 +1,5 @@
 import { z } from "zod";
+export * from "./mobile-native-services";
 
 export const mobileFeatureSchema = z.enum(["leases", "move-outs", "caretaker-issues", "portfolio", "documents", "payment-review", "inspections", "visitors", "gate"]);
 export type MobileFeature = z.infer<typeof mobileFeatureSchema>;
@@ -58,7 +59,9 @@ export const mobileIssueInputSchema = z.object({
 });
 export const mobileIssuesSchema = z.object({
   units: z.array(z.object({ id: z.string(), label: z.string() })),
-  issues: z.array(z.object({ id: z.string(), title: z.string(), description: z.string(), status: z.string(), priority: z.string(), createdAt: z.string() })),
+  issues: z.array(z.object({ id: z.string(), title: z.string(), description: z.string(), status: z.string(), priority: z.string(), createdAt: z.string(),
+    resolution: z.object({ id: z.string(), workSummary: z.string(), materialsUsed: z.string().nullable(), tenantInstructions: z.string().nullable() }).nullable().optional(),
+  })),
 });
 export const mobileReadingInputSchema = z.object({
   unitId: z.string().min(1).max(200), period: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),
@@ -201,3 +204,5 @@ export const mobileProfileSchema = z.object({
   nextOfKinName: z.string(), nextOfKinRelationship: z.string(), nextOfKinPhone: z.string(), nextOfKinEmail: z.string(),
 });
 export type MobileProfileInput = z.infer<typeof mobileProfileInputSchema>;
+export { nativeWorkspaceQuerySchema, nativeWorkspacePageSchema, nativeLegalSchema, type NativeWorkspaceRecord, type NativeWorkspacePage } from "./native-workspace";
+export { nativeActionDefinitionSchema, nativeActionRequestSchema, nativeActionResultSchema, nativeActionFormData, type NativeActionLink, type NativeActionDefinition, type NativeActionField, type NativeActionRequest, type NativeActionResult } from "./native-actions";

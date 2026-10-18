@@ -1,8 +1,28 @@
 # EstateDesk mobile
 
+Production service availability and release verification: [mobile backend release review](../../docs/mobile-production-release-review.md). After building the web backend, run `npm run mobile:deployment:check` from the repository root. Both Vercel configurations run this route-manifest check to reject a deployment missing native service handlers. Simulator device creation does not deploy backend services.
+
+## Native tenant expansion (2026-10-18)
+
+The tenant service directory now routes rewards, security, inspections and move-out entry points to React Native screens. It no longer offers the full web workspace or falls back to a web page when a native capability is unavailable. Organization and platform tools open native workflows or native record browsers. Full native parity across all roles remains unfinished.
+
+New native workflows include reward balances/catalog/requests/history; password changes and device-session revocation; paginated tenant inspections with checklist details and PDF sharing; move-out submission and withdrawal; typed lease signatures and declining a signature request; and confirmation of office-approved maintenance completion reports. Signing downloads the envelope's exact source PDF, checks its SHA-256 hash and records document access. The signing form requires opening the contract and accepting the envelope's consent text. Drawn/uploaded signatures are not yet available in the native signing form. Native inspection detail currently includes checklist and notes; evidence-photo presentation remains outstanding.
+
+Deploy `/api/mobile/security`, `/api/mobile/tenant/{rewards,inspections,lease-signing}`, `/api/mobile/tenant/lease-signing/[id]/document`, `/api/mobile/tenant/issues/confirm`, and the updated issues/move-outs endpoints alongside the app. These routes retain server-side role, ownership, organization, section and active-lease checks and reuse existing mutation logic. Signing and other mutations are never automatically retried. Older backends cannot serve the new screens. Device checks, signed-in API checks and visual validation on iOS/Android remain necessary; source checks do not establish full feature parity or store readiness.
+
 ## Shared mobile presentation
 
 Android and iOS use the same bundled colored Feather icons for native tenant cards and navigation. Tenant grids use measured equal-width columns with 12-point gutters, aligned rows, content-aware heights and full-card press feedback. Larger text reduces the number of columns. Management uses native cards with the website’s authorized navigation structure.
+
+## Phone and iPad page structure
+
+Dashboard content uses a centered maximum width of 1,100 points; secondary workflows use a 760-point reading width with adaptive page margins. Forms and lists share card borders, padding, typography and input backgrounds. Profile groups contact details and next of kin into separate cards, with paired fields on wider tablets and stacked fields on phones or with larger text. The tenant tab bar remains centered at a readable width on iPad. Secondary screens use a compact Back toolbar; tenant sign-out is available under Account. iOS native form fields include a Done accessory to dismiss phone and numeric keyboards.
+
+## Mobile-first card layout and recovery
+
+Shared grids use two columns on phone content widths of at least 260 points at standard text sizes, three on tablet widths from 680 points, and four from 960 points. System text above 1.35 scale uses a single column. Pixel rounding keeps complete rows inside the measured width. Dashboard cards grow with text and use full-card tap targets, colored Feather icons and consistent gutters. The tenant welcome actions form a compact group; management tools end with recent activity; caretaker summary cards now open their matching native workflows.
+
+A root render-error boundary can reopen the native workspace without deleting saved credentials or field drafts. It does not recover native-process crashes or preserve unsaved form state. HTTP parsing retains authorization status even when a proxy returns HTML; unexpected HTML becomes a recoverable request error. Native crash reporting, device performance profiling, and signed-in workflow testing still remain release checks.
 
 ## Native community, expenditures and profile
 
@@ -12,47 +32,25 @@ Validation: mobile and web TypeScript checks, 42 mobile/presentation unit tests,
 
 ## Native tenant navigation and responsiveness
 
-Both platforms now route payments, water bills, invoices, leases, payment/tenancy history, move-out progress, documents, visitors, notifications, Account and Help to native screens when their capabilities are advertised. Account shows the current session details and links to native account tools; contact and next-of-kin editing use the native Profile screen; password/security settings still require their existing web workflows. The invoice screen lists bill periods and shares authorized PDFs using the native share sheet.
+Both platforms now route payments, water bills, invoices, leases, payment/tenancy history, move-out progress, documents, visitors, notifications, Account and Help to native screens when their capabilities are advertised. Account shows the current session details and links to native account tools; contact and next-of-kin editing use the native Profile screen; password/security settings use the native Security screen. The invoice screen lists bill periods and shares authorized PDFs using the native share sheet.
 
-Opening a workflow changes screens immediately and shows loading/retry states while data arrives. Returning Home retains the dashboard and its search/summary state. Hidden tenant dashboards suspend foreground-resume refresh, and grids retain their last positive measured width to avoid collapsing while hidden. Manual refresh remains available. These are source improvements; smoothness still needs device profiling.
+Opening a workflow changes screens immediately and shows loading/retry states while data arrives. Returning Home retains the dashboard and its search/summary state. Hidden tenant dashboards suspend foreground-resume refresh, and grids retain their last positive measured width during layout transitions. The root ScrollView always retains its RefreshControl; only its refreshing/enabled state changes. Removing that control when leaving Home remounted the native content tree and reset the selected workflow, causing service cards to appear inactive. A regression test exercises the real app shell with the installed iOS/Android ScrollView structures and verifies that both local Help and a failed Bills request retain their destination. Manual refresh remains available. These are source improvements; smoothness still needs device profiling.
 
-This is still a partial native migration. RentRewards, tenant inspection details, lease signing, move-out submission/withdrawal, security administration and many platform management actions still open web workflows. They need dedicated native APIs and screens before the apps can be described as fully native.
+All active screens render natively. Full management action parity remains incomplete; see the native record-browser limitations below.
 
-## iOS startup troubleshooting
+## Native navigation and management screens
 
-An installed development binary without `RNCWebViewModule` can fail before React registers the app and show “App entry not found”. Rebuild with `npm run mobile:ios` after adding native dependencies; Metro reload alone cannot install them. WebView now loads only when an additional web workflow is opened, so this optional integration no longer runs during native app registration. A missing module shows a rebuild message in that workflow.
+The app renders React Native screens throughout. The old WebView component has been removed. Sign-in help, mandatory terms and privacy reading, tenant help, field tools and management records remain inside the app. Terms and privacy use the same source text as the website. Existing portal endpoints remain server-side for older installed clients.
 
-On 2026-10-18, the iOS simulator build completed and reached the native sign-in screen after rebuilding with the WebView pod. Signed-in pages still require visual validation with a valid account.
+Tenant tabs retain Home, Services, Activity and Account. Caretaker and gate workspaces use measured responsive cards with colored, tinted icon tiles. Dashboard and native record screens use a 1,100-point maximum width; focused forms use a 760-point reading width. All tool cards wrap for larger text. Android Back returns to Home and all workflows retain a native Back toolbar.
 
-## Organization and platform dashboards
+Management tools use `GET /api/mobile/workspace/screen?kind=organization|platform&path=<exact-authorized-menu-path>&q=<search>&page=1`. Records use explicit field allowlists, 25-row pages with one lookahead row, search, status badges and expandable details. Authorization checks the live workspace, exact authorized menu entry, role/view policy and organization membership. Portfolio records additionally retain property/building/unit scope; views that cannot safely represent a narrow assignment require organization-wide access. Unknown scope types fail closed. API vault locking remains enforced and hashes/credentials/private payloads are excluded.
 
-Management opens a native React Native dashboard. Organization, Admin and Developer views use responsive card grids, colored icons, feature search and authorized API summaries. Admin and Developer tool lists match the web modes; tests compare their destinations directly. Native unit browsing, payment review and gate workflows are used when available. Additional feature pages still open individually in the authenticated in-app web workspace; these have not all been converted to native screens.
+Native record browsing covers organization properties, buildings, tenants, leases, charges, water bills, payments, maintenance, inspections, move-outs, vacancy inquiries, staff, community notices, chart of accounts, requests, expenditures, taxes, imports, reports, short stays, profile, settings, support messages, service jobs, identity requests and agreements. Platform browsers cover organizations, users/operators, subscriptions, payments, expenditure records, audit/security events, scheduled job runs, messages, onboarding, marketers, export requests, reports, permissions, feature configuration, service providers, integration readiness, configuration presence and backup/control snapshots. Search and insights currently provide limited organization/unit lookup. Support-access browsing does not grant a support session. Controls, creation, editing, approval, exporting and signing are not implied by the ability to browse a record.
 
-There are no native organization-switch controls. Platform mode changes happen within the native dashboard, without automatically opening a full-screen browser. API role policies continue to authorize every destination.
+Deploy the new `/api/mobile/workspace/screen`, `/api/mobile/help` and `/api/mobile/legal` routes with this app. Account setup can read legal documents before completion; Help only returns guide articles allowed for the current role. API vault unlock is not yet native. Each read supports error recovery; mutations are never automatically retried.
 
-The native forms include vertical input padding, multiline top alignment and wrapping button rows for iOS larger-text layouts. Workspace modals establish their own safe-area provider, and their toolbars wrap on narrow screens. The tenant keyboard dismisses interactively on iOS.
-
-`/api/mobile/workspace` returns authorized summaries and tools; `/api/mobile/workspace/portal` bootstraps individual web workflows. Deploy the existing backend endpoints and proxy exceptions with the app. Device checks remain necessary for larger text, keyboard behavior, document sharing and authenticated web workflow completion.
-
-## Complete tenant workspace (iOS and Android)
-
-Tenant navigation is designed for phone use: a persistent bottom bar opens **Home**, **Services**, **Activity** and **Account**. Home prioritizes outstanding bills and payment access, large everyday shortcuts, rent/repair summaries and tenancy details. Services contains searchable feature cards. Activity shows recent payments and messages. Account opens the authenticated profile. Switching tabs retains loaded summaries and returns to the top; opening a workflow also resets the scroll position. Signing into another account starts on Home. Android Back returns from Services or Activity to Home before leaving the app.
-
-Pull down on a dashboard tab to refresh the session and reload summaries, or use its refresh button. The bottom bar stays outside scrolling content and hides during keyboard input, setup, offline mode, native workflows and the full-screen web workspace. Buttons are disabled while a native workflow is loading/submitting. Search supports clearing the query and dismissing the keyboard; opening a workflow dismisses it too. Cards open the matching native workflow or web section directly. The layout switches to a single column on narrow screens or with larger system text. Missing summaries show an unavailable state rather than a zero balance. Physical iOS/Android checks for navigation, pull-to-refresh, keyboard handling, safe areas and screen-reader focus remain release requirements.
-
-**Open full workspace**, under Services, opens the responsive web tenant portal inside a full-screen in-app WebView using the current mobile login. The existing native quick workflows remain available. Community notices, RentRewards redemption, expenditures, profile/next-of-kin editing, password and session security, lease signing, move-out submission/withdrawal, maintenance resolution confirmation, inspections, invoice history and statements use the same pages, actions and authorization as the website. This is a hybrid implementation: these additional workflows require a connection and are displayed as web screens inside the app.
-
-Use **All features** in the workspace toolbar for every tenant navigation entry, including account history and help. Active-lease, gate availability and organization policy checks remain enforced by the web pages. The menu itself lists entry points; a listed entry does not grant access. Inactive tenants retain the website's history/profile/security behavior. Closing the workspace refreshes the native session and clears loaded native workflow state, including after profile changes, organization switches and payments.
-
-The `/api/mobile/tenant/portal` bootstrap validates the existing live tenant session and setup gates, then installs its HttpOnly cookie in the in-app browser. Credentials are sent only in the initial request header to the fixed backend endpoint, never in a URL or injected script. It does not create an additional login. Incognito mode, disabled shared/third-party cookies and disabled browser caching keep this separate from the user's system browser. Android clears previous WebView cookies when opening a workspace; iOS uses a nonpersistent data store. External HTTPS, phone and email links open through the device, without forwarding mobile credentials. Other external schemes are blocked. Web logout/session revocation is rechecked when returning to native screens.
-
-Owned lease/invoice/inspection PDFs, receipts, payment statements and move-out reports use the existing authorized download routes and native sharing. Document links are restricted to the configured origin and known routes; downloaded content must be a PDF. No arbitrary webpage can ask the native bridge to fetch a URL with credentials.
-
-Deploy the new bootstrap route and proxy exception together with the app. **A new iOS/Android development build is required** to include `react-native-webview`; a Metro reload alone is insufficient. Run `npx expo prebuild --no-install` from this directory before rebuilding previously generated native projects. Device validation must cover first-open cookie transport, closing/reopening with another account, organization switching, expiry/revocation, web mutations and their error states, lease signature drawing, file selection, PDF sharing, Android back, offline retry, VoiceOver/TalkBack and narrow screens. Source checks and bundle exports do not establish device validation.
-
-Parity and validation evidence: [tenant workspace audit](../../docs/audits/2026-10-18/mobile-tenant-parity.md).
-
-Native Android and iOS app built with Expo and React Native. Includes secure login/logout, first-login password and terms setup, organization switching, tenant bills, partial M-Pesa STK/manual payment submission and history, tenant maintenance requests, caretaker meter submissions, personal notifications, tenant lease/history and move-out progress, caretaker maintenance work orders, and a scoped staff unit directory. Additional organization and platform workflows open in the authenticated in-app web workspace. Native push registration and delivery are implemented behind `NATIVE_PUSH_ENABLED`; Expo/APNs/FCM configuration and physical-device validation remain release requirements.
+Full action parity remains unfinished: the new management record screens do not yet implement every web creation/editing/approval workflow. Existing native tenant, payment review, gate and field mutations remain available. Drawn/uploaded signatures and inspection evidence presentation still need completion. Test signed-in iOS and Android devices before release; bundle exports do not prove crash freedom or visual parity.
 
 ## Local development
 
@@ -100,7 +98,7 @@ Link to your organization's Expo project. If EAS cannot write the dynamic app co
 
 The native app stores the signed cookie in Expo SecureStore and explicitly sends it in the `Cookie` header. It never saves the password. Requests require `X-EstateDesk-Client: native` and reject browser Origin/Fetch Metadata headers; no CORS access is enabled. The client header is not authentication. Existing session expiry, revocation, account status, and device limits apply. Native cookie transport must be verified on real iOS and Android development builds before release.
 
-Accounts requiring a password change or terms acceptance complete setup in the app. Organization switching lists only active memberships owned by the signed-in user and clears the previous workspace data. Opening the website does not transfer the mobile session; users sign in there separately.
+Accounts requiring a password change or terms acceptance complete setup in the app. Organization switching lists only active memberships owned by the signed-in user and clears the previous workspace data. No mobile workflow opens the website for account setup or help.
 
 ## Validation and release
 
@@ -146,7 +144,7 @@ Both Android and iOS JavaScript/Hermes bundles export successfully. Native code 
 
 ## Mobile workspace parity
 
-- Tenants can review current and historical leases, contractual rent/deposit amounts, due days, and move-out/inspection progress in native quick screens. Lease signing and creating/cancelling move-out notices are available in the complete in-app tenant workspace. Available lease PDFs can be viewed and shared in the app. Contractual deposits are labelled separately from actual money held.
+- Tenants can review current and historical leases, contractual rent/deposit amounts, due days, and move-out/inspection progress in native quick screens. Typed lease signing and creating/withdrawing move-out notices use native screens. Available lease PDFs can be viewed and shared in the app. Contractual deposits are labelled separately from actual money held.
 - Caretakers can see work assigned directly to them or within their assigned units, start eligible work, save progress notes, and submit completion reports with optional photo evidence. Reports reuse the web approval workflow and remain pending office review; submitting a report does not close the issue.
 - Organization admins, managers, and office staff can search property/building/unit names, filter occupancy, and browse 25 units per page. Membership property/building/unit scopes and blocked views apply. Inventory edits remain on the website.
 - New workspace buttons are advertised by the authenticated session endpoint and hidden when the role or organization policy denies them. Older backend sessions default to no new capabilities. This client sends `X-EstateDesk-Capabilities: 2026-10-18`; the server keeps the original four-feature enum for older installed clients so a backend rollout does not break their session parsing. This header only negotiates display capabilities and grants no permissions.
@@ -190,3 +188,19 @@ npm run mobile:android
 Deploy the corresponding backend before enabling the new screens. No store binary or production deployment is performed by editing this source.
 
 Device checks: deny/allow camera access, choose a HEIC/library photo, preview/share a PDF on both platforms, save a draft then force-close/reopen offline, retry an uncertain sync, switch accounts/organizations, revoke a session, and scan/admit/revoke/expire a visitor pass. Check VoiceOver/TalkBack and narrow screens. See [implementation and validation evidence](../../docs/audits/2026-10-18/mobile-expansion.md).
+
+## Native platform and developer workspaces
+
+Both workspaces use native collection pages, full-screen record pages, searchable lists, status filters, pagination and native action forms. Back navigation retains the previous workspace's search and page state. No platform operation is rendered in a WebView.
+
+Platform operations include organization/owner creation, role-access policies, billing invoices/payments/renewals/cancellation, ID verification requests/review/linking, service agreement draft/revision/send/cancellation/reminders/typed signing/PDF download, provider moderation/report resolution, referral attribution, onboarding, messages, expenditures and operator provisioning. Developer operations include API vault/key management, feature flags, job/notification retries, rate-limit resets, export approval/rejection/ZIP download, backup evidence and the existing super-admin website controls. Read-only account and permissions views preserve the web restrictions.
+
+Reports now show operational indicators and separate sampled payment volume by currency. Global search covers the web's five resource types. API exploration uses the shared web endpoint catalog; system health uses the web readiness service. Developer Home loads its own queue/key/export/job metrics. Provider reports and notification queues have dedicated native pages.
+
+## Release and validation limits
+
+The backend must be deployed with every mobile route before the installed app can use these services. A live route audit on 18 October found 10 missing routes, including the shared workspace screen/action handlers. Editing or bundling native JavaScript does not publish these handlers.
+
+Run `npm run mobile:deployment:check` after a production build and `npm run mobile:services:check` after deployment. The live check uses no account credentials and does not validate authenticated workflows. See [platform native release evidence](../../docs/platform-native-release.md).
+
+Agreement signing currently supports typed electronic signatures. Web drawing/upload signature variants are not implemented in these native forms. ZIP exports are limited to 27 MB decoded; the web's export row limits still apply. Local source tests and bundle exports do not establish complete signed-in iOS/Android device validation.

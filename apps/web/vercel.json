@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "cd ../.. && npm install",
-  "buildCommand": "prisma generate --schema ../../prisma/schema.prisma && ESTATEDESK_BUILD_WITHOUT_DATABASE=true next build",
+  "buildCommand": "prisma generate --schema ../../prisma/schema.prisma && NODE_OPTIONS=--max-old-space-size=4096 ESTATEDESK_BUILD_WITHOUT_DATABASE=true next build --webpack && node ../../scripts/check-mobile-deployment.mjs",
   "framework": "nextjs",
   "crons": [
     {

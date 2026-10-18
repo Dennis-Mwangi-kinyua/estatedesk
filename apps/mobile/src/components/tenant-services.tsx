@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Alert, Text, View } from "react-native";
 import { mobileExpenditureInputSchema, mobileProfileInputSchema } from "@estatedesk/contracts/mobile";
 import * as api from "../api";
-import { Button, Field, styles } from "./ui";
+import { Button, Field, FormColumns, styles } from "./ui";
 type Run = (action: () => Promise<void>) => Promise<boolean>;
 const date = (value: string) => new Date(value).toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi", day: "numeric", month: "short", year: "numeric" });
 
@@ -71,7 +71,12 @@ export function ProfilePanel({ profile, busy, run, refresh }: {
   ] as const;
   return <><Text accessibilityRole="header" style={styles.title}>My profile</Text><Text style={styles.subtitle}>{profile.fullName}</Text>
     {saved ? <Text accessibilityLiveRegion="polite" style={styles.subtitle}>Profile updated.</Text> : null}
-    <View style={styles.card}>{fields.map(([key, title]) => <Field key={key} label={title} value={values[key]} onChangeText={value => { setSaved(false); setValues(current => ({ ...current, [key]: value })); }} editable={!busy} maxLength={key.toLowerCase().includes("phone") ? 30 : 120} keyboardType={key.toLowerCase().includes("phone") ? "phone-pad" : key.toLowerCase().includes("email") ? "email-address" : "default"} autoCapitalize={key.toLowerCase().includes("email") ? "none" : "words"} />)}
+    <View style={styles.card}><Text style={styles.cardTitle}>Contact details</Text><Text style={styles.subtitle}>Keep your phone and email up to date.</Text>
+      <FormColumns>{fields.slice(0, 2).map(([key, title]) => <Field key={key} label={title} value={values[key]} onChangeText={value => { setSaved(false); setValues(current => ({ ...current, [key]: value })); }} editable={!busy} maxLength={key.toLowerCase().includes("phone") ? 30 : 120} keyboardType={key.toLowerCase().includes("phone") ? "phone-pad" : key.toLowerCase().includes("email") ? "email-address" : "default"} autoCapitalize={key.toLowerCase().includes("email") ? "none" : "words"} />)}</FormColumns>
+    </View>
+    <View style={styles.card}><Text style={styles.cardTitle}>Next of kin</Text><Text style={styles.subtitle}>Who should your property team contact when needed?</Text>
+      <FormColumns>{fields.slice(2, 4).map(([key, title]) => <Field key={key} label={title} value={values[key]} onChangeText={value => { setSaved(false); setValues(current => ({ ...current, [key]: value })); }} editable={!busy} maxLength={key.toLowerCase().includes("phone") ? 30 : 120} keyboardType={key.toLowerCase().includes("phone") ? "phone-pad" : key.toLowerCase().includes("email") ? "email-address" : "default"} autoCapitalize={key.toLowerCase().includes("email") ? "none" : "words"} />)}</FormColumns>
+      <FormColumns>{fields.slice(4, 6).map(([key, title]) => <Field key={key} label={title} value={values[key]} onChangeText={value => { setSaved(false); setValues(current => ({ ...current, [key]: value })); }} editable={!busy} maxLength={key.toLowerCase().includes("phone") ? 30 : 120} keyboardType={key.toLowerCase().includes("phone") ? "phone-pad" : key.toLowerCase().includes("email") ? "email-address" : "default"} autoCapitalize={key.toLowerCase().includes("email") ? "none" : "words"} />)}</FormColumns>
     <Button label="Save profile" disabled={busy || !input.success} onPress={() => { if (input.success) void run(async () => { await api.updateProfile(input.data); setSaved(true); await refresh(); }); }} /></View>
   </>;
 }

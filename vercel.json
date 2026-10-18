@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "npm install",
-  "buildCommand": "ESTATEDESK_BUILD_WITHOUT_DATABASE=true npm run build",
+  "buildCommand": "NODE_OPTIONS=--max-old-space-size=4096 ESTATEDESK_BUILD_WITHOUT_DATABASE=true npm run build && npm run mobile:deployment:check",
   "outputDirectory": "apps/web/.next",
   "crons": [
     {

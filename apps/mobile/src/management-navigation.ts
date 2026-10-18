@@ -9,6 +9,6 @@ export function linksForManagementMode(links: MobileWorkspaceLink[], mode: Manag
   if (mode === "organization") return links;
   return links.filter(link => {
     const route = link.path.replace(/^\/platform\/?/, "");
-    return mode === "admin" ? !developerOnly.has(route) : !adminOnly.has(route);
+    return mode === "admin" ? !developerOnly.has(route) && !route.startsWith("jobs/") : !adminOnly.has(route);
   });
 }

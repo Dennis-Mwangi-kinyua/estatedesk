@@ -10,9 +10,11 @@ import {
 import { prisma } from "@/lib/prisma";
 import { ALL_PLATFORM_PERMISSIONS } from "./constants";
 import { normalizeUsername } from "./helpers";
+import { requirePlatformRole } from "@/lib/permissions/guards";
 
 export async function createPlatformAdmin(formData: FormData) {
   "use server";
+  const actor = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
 
   const fullName = String(formData.get("fullName") ?? "").trim();
   const username = normalizeUsername(String(formData.get("username") ?? ""));
@@ -28,6 +30,7 @@ export async function createPlatformAdmin(formData: FormData) {
 
   const isRootSuperAdmin =
     String(formData.get("isRootSuperAdmin") ?? "") === "on";
+  if ((platformRoleRaw === "SUPER_ADMIN" || isRootSuperAdmin) && actor.platformRole !== "SUPER_ADMIN") throw new Error("Only a super admin can create a super admin account.");
 
   const selectedPermissions = formData
     .getAll("permissions")
@@ -143,6 +146,7 @@ export async function createPlatformAdmin(formData: FormData) {
 
 export async function deletePlatformAdmin(formData: FormData) {
   "use server";
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
 
   const userId = String(formData.get("userId") ?? "").trim();
 

@@ -1,3 +1,8 @@
+import { ApiError, readMobileResponse } from "./http-response";
+import { nativeWorkspacePageSchema, nativeLegalSchema } from "@estatedesk/contracts/mobile";
+import { nativeActionDefinitionSchema, nativeActionResultSchema, type NativeActionRequest } from "@estatedesk/contracts/mobile";
+export { ApiError } from "./http-response";
+import { mobileRewardsSchema, mobileSecuritySchema, mobileTenantInspectionsSchema, mobileLeaseSigningSchema, type MobileLeaseSigningInput, type MobileSecurityInput, type MobileMoveOutInput } from "@estatedesk/contracts/mobile";
 import { mobileProfileSchema, type MobileProfileInput, mobileCommunitySchema, mobileExpendituresSchema, type MobileExpenditureInput } from "@estatedesk/contracts/mobile";
 import { File, Directory, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
@@ -18,6 +23,8 @@ import {
   type MobileWorkOrderInput,
 } from "@estatedesk/contracts/mobile";
 
+const SUPPORT_KEY = "estatedesk.support";
+const VAULT_KEY = "estatedesk.vault";
 const PROFILE_KEY = "estatedesk.profile";
 const SESSION_KEY = "estatedesk.session";
 const configuredUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -35,13 +42,13 @@ function baseUrl() {
   return url.origin;
 }
 
-export class ApiError extends Error {
-  constructor(message: string, readonly status: number) { super(message); }
-}
 
 async function request(path: string, options: { method?: string; body?: unknown; form?: FormData; anonymous?: boolean } = {}) {
   const origin = baseUrl();
-  const cookie = options.anonymous ? null : await SecureStore.getItemAsync(SESSION_KEY);
+  const sessionCookie = options.anonymous ? null : await SecureStore.getItemAsync(SESSION_KEY);
+  const vaultCookie = sessionCookie && /^\/workspace\/(screen|action)(\?|$)/.test(path) ? await SecureStore.getItemAsync(VAULT_KEY) : null;
+  const supportCookie = sessionCookie ? await SecureStore.getItemAsync(SUPPORT_KEY) : null;
+  const cookie = [sessionCookie, vaultCookie, supportCookie].filter(Boolean).join("; ") || null;
   const send = () => sendRequest(origin, cookie, path, options);
   if (!options.method || options.method === "GET") return reads.run(`${cookie ?? "anonymous"}\0${path}`, send);
   // Any mutation may change the organization, identity, or the records shown.
@@ -67,19 +74,15 @@ async function sendRequest(origin: string, cookie: string | null, path: string, 
       body: options.form ?? (options.body ? JSON.stringify(options.body) : undefined),
       signal: controller.signal,
     });
-    const body: unknown = await response.json();
-    if (!response.ok) {
-      const message = typeof body === "object" && body && "error" in body && typeof body.error === "string"
-        ? body.error : "The request could not be completed.";
-      if (response.status === 401 && !options.anonymous) {
-        reads.clear();
-        await clearDrafts(); await clearDocumentCache(); await SecureStore.deleteItemAsync(PROFILE_KEY); await SecureStore.deleteItemAsync(SESSION_KEY);
-      }
-      throw new ApiError(message, response.status);
-    }
-    return body;
+    return await readMobileResponse(response);
   } catch (error) {
-    if (error instanceof ApiError) throw error;
+    if (error instanceof ApiError) {
+      if (error.status === 401 && !options.anonymous) {
+        reads.clear();
+        await clearDrafts(); await clearDocumentCache(); await SecureStore.deleteItemAsync(SUPPORT_KEY); await SecureStore.deleteItemAsync(VAULT_KEY); await SecureStore.deleteItemAsync(PROFILE_KEY); await SecureStore.deleteItemAsync(SESSION_KEY);
+      }
+      throw error;
+    }
     throw new Error("Unable to reach EstateDesk. Check your connection and try again.");
   } finally { clearTimeout(timeout); }
 }
@@ -88,7 +91,7 @@ export async function signIn(email: string, password: string) {
   const result = mobileLoginResponseSchema.parse(await request("/login", {
     method: "POST", body: { email, password }, anonymous: true,
   }));
-  await clearDrafts(); await clearDocumentCache(); await SecureStore.deleteItemAsync(PROFILE_KEY);
+  await clearDrafts(); await clearDocumentCache(); await SecureStore.deleteItemAsync(SUPPORT_KEY); await SecureStore.deleteItemAsync(VAULT_KEY); await SecureStore.deleteItemAsync(PROFILE_KEY);
   await SecureStore.setItemAsync(SESSION_KEY, result.sessionCookie, {
     keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
   });
@@ -115,10 +118,57 @@ export async function getBills() { return mobileBillsSchema.parse(await request(
 export async function getWorkspaceDashboard(kind: MobileWorkspaceKind, section = "summary") {
   return mobileWorkspaceDashboardSchema.parse(await request(`/workspace?kind=${kind}&section=${section}`));
 }
+export async function getNativeWorkspace(kind: MobileWorkspaceKind, path: string, q = "", page = 1) {
+  const query = `kind=${kind}&path=${encodeURIComponent(path)}&q=${encodeURIComponent(q)}&page=${page}`;
+  return nativeWorkspacePageSchema.parse(await request(`/workspace/screen?${query}`));
+}
+export async function getLegal(kind: "terms" | "privacy") {
+  return nativeLegalSchema.parse(await request(`/legal?kind=${kind}`));
+}
+export async function getHelp(q = "", page = 1) {
+  return nativeWorkspacePageSchema.parse(await request(`/help?q=${encodeURIComponent(q)}&page=${page}`));
+}
+export async function getNativeAction(input: Omit<NativeActionRequest, "values">) {
+  const query = Object.entries(input).filter(([, value]) => value !== undefined).map(([key, value]) => `${key}=${encodeURIComponent(value!)}`).join("&");
+  return nativeActionDefinitionSchema.parse(await request(`/workspace/action?${query}`));
+}
+export async function submitNativeAction(input: NativeActionRequest) {
+  const result = nativeActionResultSchema.parse(await request("/workspace/action", { method: "POST", body: input }));
+  if (result.contextChanged) {
+    reads.clear(); await clearDrafts(); await clearDocumentCache(); await SecureStore.deleteItemAsync(PROFILE_KEY);
+    if (result.sessionCookie) await SecureStore.setItemAsync(SESSION_KEY, result.sessionCookie, { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY });
+    if (result.supportCookie) await SecureStore.setItemAsync(SUPPORT_KEY, result.supportCookie, { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY });
+    else await SecureStore.deleteItemAsync(SUPPORT_KEY);
+  }
+  if (result.vaultCookie) await SecureStore.setItemAsync(VAULT_KEY, result.vaultCookie, { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY });
+  return result;
+}
+export async function shareActionDocument(document: { filename: string; content: string }) {
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(document.content) || document.content.length > 36_000_000) throw new Error("Invalid document.");
+  const bytes = Uint8Array.from(atob(document.content), character => character.charCodeAt(0));
+  if (String.fromCharCode(...bytes.slice(0, 5)) !== "%PDF-") throw new Error("The document is not a PDF.");
+  documentsDirectory().create({ intermediates: true, idempotent: true });
+  const name = document.filename.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/^\.+/, "") || "document.pdf";
+  const file = new File(documentsDirectory(), name);
+  file.write(bytes);
+  if (!await Sharing.isAvailableAsync()) throw new Error("Sharing is unavailable on this device.");
+  await Sharing.shareAsync(file.uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" });
+}
+export async function shareActionFile(attachment: { filename: string; content: string; mimeType: "application/zip" }) {
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(attachment.content) || attachment.content.length > 36_000_000) throw new Error("Invalid export file.");
+  const bytes = Uint8Array.from(atob(attachment.content), character => character.charCodeAt(0));
+  if (bytes[0] !== 0x50 || bytes[1] !== 0x4b) throw new Error("The export is not a ZIP archive.");
+  documentsDirectory().create({ intermediates: true, idempotent: true });
+  const name = attachment.filename.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/^\.+/, "") || "export.zip";
+  const file = new File(documentsDirectory(), name);
+  file.write(bytes);
+  if (!await Sharing.isAvailableAsync()) throw new Error("Sharing is unavailable on this device.");
+  await Sharing.shareAsync(file.uri, { mimeType: attachment.mimeType, UTI: "public.zip-archive" });
+}
 export async function getMemberships() { return mobileMembershipsSchema.parse(await request("/memberships")); }
 export async function switchMembership(membershipId: string) {
   const result = await request("/memberships", { method: "POST", body: { membershipId } });
-  await clearDocumentCache(); await SecureStore.deleteItemAsync(PROFILE_KEY);
+  await clearDocumentCache(); await SecureStore.deleteItemAsync(SUPPORT_KEY); await SecureStore.deleteItemAsync(VAULT_KEY); await SecureStore.deleteItemAsync(PROFILE_KEY);
   return result;
 }
 export async function completeSetup(body: { currentPassword: string; newPassword: string; confirmPassword: string; acceptedTerms: true }) { return request("/account/setup", { method: "POST", body }); }
@@ -148,11 +198,21 @@ export async function signOut() {
   await request("/logout", { method: "POST" });
   await clearDrafts();
   await clearDocumentCache();
-  await SecureStore.deleteItemAsync(PROFILE_KEY);
+  await SecureStore.deleteItemAsync(SUPPORT_KEY); await SecureStore.deleteItemAsync(VAULT_KEY); await SecureStore.deleteItemAsync(PROFILE_KEY);
   await SecureStore.deleteItemAsync(SESSION_KEY);
 }
 
 export function websiteUrl() { return baseUrl(); }
+export async function getRewards() { return mobileRewardsSchema.parse(await request("/tenant/rewards")); }
+export async function confirmIssue(issueId: string, reportId: string, tenantFeedback: string) { await request("/tenant/issues/confirm", { method: "POST", body: { issueId, reportId, tenantFeedback } }); }
+export async function requestReward(rewardId: string) { await request("/tenant/rewards", { method: "POST", body: { rewardId } }); }
+export async function getSecurity() { return mobileSecuritySchema.parse(await request("/security")); }
+export async function updateSecurity(body: MobileSecurityInput) { await request("/security", { method: "POST", body }); }
+export async function updateMoveOut(body: MobileMoveOutInput) { await request("/tenant/move-outs", { method: "POST", body }); }
+export async function getTenantInspections(page = 1) { return mobileTenantInspectionsSchema.parse(await request(`/tenant/inspections?page=${page}`)); }
+export async function getLeaseSigning() { return mobileLeaseSigningSchema.parse(await request("/tenant/lease-signing")); }
+export async function submitLeaseSignature(body: MobileLeaseSigningInput) { await request("/tenant/lease-signing", { method: "POST", body }); }
+export async function openLeaseSigningDocument(id: string) { await downloadPdf(`/api/mobile/tenant/lease-signing/${encodeURIComponent(id)}/document`, `lease-to-sign-${id.replace(/[^a-zA-Z0-9-]/g, "")}`, true); }
 
 // Only hand credentials to the fixed backend bootstrap, never a navigated URL.
 export async function tenantWorkspaceSource(path: string) {
@@ -193,7 +253,7 @@ async function downloadPdf(path: string, filename: string, share: boolean) {
   try {
     const response = await fetch(`${baseUrl()}${path}`, { credentials: "omit", redirect: "error", headers: { "X-EstateDesk-Client": "native", ...(cookie ? { Cookie: cookie } : {}) }, signal: controller.signal });
     if (!response.ok) {
-      if (response.status === 401) { await clearDrafts(); await clearDocumentCache(); await SecureStore.deleteItemAsync(PROFILE_KEY); await SecureStore.deleteItemAsync(SESSION_KEY); }
+      if (response.status === 401) { await clearDrafts(); await clearDocumentCache(); await SecureStore.deleteItemAsync(SUPPORT_KEY); await SecureStore.deleteItemAsync(VAULT_KEY); await SecureStore.deleteItemAsync(PROFILE_KEY); await SecureStore.deleteItemAsync(SESSION_KEY); }
       throw new ApiError("Unable to download this document. Refresh and try again.", response.status);
     }
     if (!response.headers.get("content-type")?.includes("application/pdf")) throw new Error("The server did not return a PDF.");

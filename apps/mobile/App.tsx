@@ -1,16 +1,16 @@
+import { AppErrorBoundary } from "./src/components/app-error-boundary";
 import { useCallback, useEffect, useRef, useState, type ComponentRef } from "react";
 import {
-  ActivityIndicator, Keyboard, KeyboardAvoidingView, Linking, Platform, Pressable,
+  ActivityIndicator, InputAccessoryView, Keyboard, KeyboardAvoidingView, Platform, Pressable,
   RefreshControl, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { OfflineWorkspace } from "./src/components/offline-workspace";
 import { Workflows } from "./src/components/workflows";
-import { TenantWorkspace } from "./src/components/tenant-workspace";
 import { TenantNavigation, type TenantTab } from "./src/components/tenant-navigation";
-import type { MobileSession, MobileWorkspaceKind } from "@estatedesk/contracts/mobile";
-import { ApiError, getSession, getCachedSession, hasSavedSession, signIn, signOut, websiteUrl } from "./src/api";
+import type { MobileSession } from "@estatedesk/contracts/mobile";
+import { ApiError, getSession, getCachedSession, hasSavedSession, signIn, signOut } from "./src/api";
 
 function Button({ label, onPress, disabled = false, secondary = false }: {
   label: string; onPress: () => void; disabled?: boolean; secondary?: boolean;
@@ -22,16 +22,20 @@ function Button({ label, onPress, disabled = false, secondary = false }: {
 }
 
 function Workspace() {
+  const [error, setError] = useState("");
   const { width } = useWindowDimensions();
   const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
   const previousScreen = useRef("home");
+  const [activeScreen, setActiveScreen] = useState("home");
   const [tenantTab, setTenantTab] = useState<TenantTab>("home");
   const chooseTenantTab = useCallback((tab: TenantTab) => {
-    Keyboard.dismiss(); setTenantTab(tab); scroll.current?.scrollTo({ y: 0, animated: false });
+    Keyboard.dismiss(); setError(""); setTenantTab(tab); scroll.current?.scrollTo({ y: 0, animated: false });
   }, []);
   const [tenantHome, setTenantHome] = useState({ visible: true, busy: false });
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const onNavigationChange = useCallback((screen: string, working: boolean) => {
+    if (working || previousScreen.current !== screen) setError("");
+    setActiveScreen(screen);
     setTenantHome({ visible: screen === "home", busy: working });
     if (previousScreen.current !== screen) { scroll.current?.scrollTo({ y: 0, animated: false }); previousScreen.current = screen; }
   }, []);
@@ -40,15 +44,14 @@ function Workspace() {
     const hidden = Keyboard.addListener("keyboardDidHide", () => setKeyboardVisible(false));
     return () => { shown.remove(); hidden.remove(); };
   }, []);
-  const [workspace, setWorkspace] = useState<{ kind: "tenant" | MobileWorkspaceKind; path: string } | null>(null);
-  const [workspaceRevision, setWorkspaceRevision] = useState(0);
   const [offline, setOffline] = useState(false);
   const [session, setSession] = useState<MobileSession | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(true);
-  const [error, setError] = useState("");
   const [retrySession, setRetrySession] = useState(false);
+  const [accountHelp, setAccountHelp] = useState(false);
+  const canRefreshTenant = session?.role === "TENANT" && tenantHome.visible && !offline && !session.requiresAccountSetup && !tenantHome.busy;
 
   const handleError = useCallback((cause: unknown) => {
     if (cause instanceof ApiError && cause.status === 401) {
@@ -66,8 +69,12 @@ function Workspace() {
       }
     } catch (cause) {
       if (!(cause instanceof ApiError)) {
-        const cached = await getCachedSession();
-        if (cached) { setSession(cached); setOffline(true); setRetrySession(false); return; }
+        try {
+          const cached = await getCachedSession();
+          if (cached) { setSession(cached); setOffline(true); setRetrySession(false); return; }
+        } catch {
+          // Keychain failures must remain inside the reconnect flow.
+        }
       }
       setRetrySession(!(cause instanceof ApiError && cause.status === 401));
       handleError(cause);
@@ -98,24 +105,18 @@ function Workspace() {
     Keyboard.dismiss();
     setBusy(true); setError("");
     try {
-      await signOut(); setWorkspace(null); setTenantTab("home"); setSession(null); setRetrySession(false);
+      await signOut(); setTenantTab("home"); setSession(null); setRetrySession(false);
     } catch (cause) { handleError(cause); }
     finally { setBusy(false); }
   }
 
-  async function openWebsite() {
-    try { await Linking.openURL(`${websiteUrl()}/login`); }
-    catch (cause) { handleError(cause); }
-  }
-
   return <SafeAreaView style={styles.safe}>
-    {workspace && session && !offline && !session.requiresAccountSetup ? <TenantWorkspace kind={workspace.kind} initialPath={workspace.path} onError={handleError} close={() => {
-      setWorkspace(null); setWorkspaceRevision(value => value + 1); setBusy(true); void restore();
-    }} /> : null}
     <StatusBar style="dark" />
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView ref={scroll} contentContainerStyle={[styles.content, { paddingHorizontal: width < 360 ? 16 : 24 }, session && { maxWidth: 1100 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
-        refreshControl={session?.role === "TENANT" && tenantHome.visible && !offline && !session.requiresAccountSetup ? <RefreshControl refreshing={busy} enabled={!tenantHome.busy} tintColor="#14634e" colors={["#14634e"]} onRefresh={() => { if (!busy && !tenantHome.busy) { setBusy(true); void restore(); } }} /> : undefined}>
+      <ScrollView ref={scroll} contentContainerStyle={[styles.content, { paddingHorizontal: width < 360 ? 16 : width >= 768 ? 32 : 24 }, session && { maxWidth: ["home", "platform-home", "native-workspace"].includes(activeScreen) ? 1100 : 760 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+        // Keep this child mounted: adding/removing RefreshControl changes the
+        // native ScrollView tree and remounts Workflows, resetting its screen.
+        refreshControl={<RefreshControl refreshing={!!canRefreshTenant && busy} enabled={!!canRefreshTenant && !busy} tintColor={canRefreshTenant ? "#14634e" : "transparent"} colors={canRefreshTenant ? ["#14634e"] : ["transparent"]} onRefresh={() => { if (canRefreshTenant && !busy) { setBusy(true); void restore(); } }} />}>
         <View style={[styles.brand, session && { marginVertical: 4 }, session?.role === "TENANT" && { justifyContent: "center" }]}><Text style={styles.logo}>E</Text><Text style={styles.brandText}>EstateDesk</Text></View>
         {!session ? <Text style={styles.eyebrow}>YOUR PROPERTY WORKSPACE</Text> : null}
         {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
@@ -138,24 +139,28 @@ function Workspace() {
             <Button label={busy ? "Signing in…" : "Sign in"} onPress={() => void login()}
               disabled={busy || !email.trim() || !password} />
           </View>}
-          <Button label="Account help on the website" onPress={() => void openWebsite()} secondary />
-        </> : offline ? <OfflineWorkspace session={session} reconnect={async () => { setSession(await getSession()); setOffline(false); setError(""); }} onError={handleError} logout={() => void logout()} /> : <Workflows key={`${session.userId}:${session.organizationId}:${session.role}:${session.platformRole}:${workspaceRevision}`} session={session}
+          <Button label={accountHelp ? "Hide account help" : "Account help"} onPress={() => setAccountHelp(value => !value)} secondary />
+          {accountHelp ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>Signing in</Text><Text style={styles.subtitle}>Use the email or username and password provided by your organization. If your password or access needs resetting, contact your organization administrator. Check your connection and try again if the service is unavailable.</Text></View> : null}
+        </> : offline ? <OfflineWorkspace session={session} reconnect={async () => { setSession(await getSession()); setOffline(false); setError(""); }} onError={handleError} logout={() => void logout()} /> : <Workflows key={`${session.userId}:${session.organizationId}:${session.role}:${session.platformRole}`} session={session}
           tenantTab={tenantTab} selectTenantTab={chooseTenantTab} onNavigationChange={onNavigationChange}
-          openTenantWorkspace={path => { Keyboard.dismiss(); setWorkspace({ kind: "tenant", path: path ?? "/dashboard/tenant" }); }}
-          openWorkspace={(kind, path) => { Keyboard.dismiss(); setWorkspace({ kind, path }); }}
           refreshSession={async () => { setError(""); setSession(await getSession()); }}
           onError={handleError} logout={() => void logout()} />}
 
       </ScrollView>
+      {Platform.OS === "ios" ? <InputAccessoryView nativeID="estatedesk-input-toolbar">
+        <View style={{ backgroundColor: "#f6f8f7", borderTopWidth: 1, borderTopColor: "#dce6df", paddingHorizontal: 16, paddingVertical: 6, alignItems: "flex-end" }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Dismiss keyboard" onPress={Keyboard.dismiss} style={{ minHeight: 44, minWidth: 64, alignItems: "center", justifyContent: "center" }}><Text style={{ color: "#14634e", fontSize: 16, fontWeight: "600" }}>Done</Text></Pressable>
+        </View>
+      </InputAccessoryView> : null}
     </KeyboardAvoidingView>
-    {session?.role === "TENANT" && tenantHome.visible && !offline && !session.requiresAccountSetup && !workspace && !keyboardVisible ? <TenantNavigation selected={tenantTab} disabled={busy || tenantHome.busy}
+    {session?.role === "TENANT" && tenantHome.visible && !offline && !session.requiresAccountSetup && !keyboardVisible ? <TenantNavigation selected={tenantTab} disabled={busy || tenantHome.busy}
       select={chooseTenantTab}
       account={() => chooseTenantTab("account")} /> : null}
   </SafeAreaView>;
 }
 
 export default function App() {
-  return <SafeAreaProvider><Workspace /></SafeAreaProvider>;
+  return <SafeAreaProvider><AppErrorBoundary><Workspace /></AppErrorBoundary></SafeAreaProvider>;
 }
 
 const styles = StyleSheet.create({

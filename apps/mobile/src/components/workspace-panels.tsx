@@ -1,8 +1,9 @@
+import { StatusBadge } from "./screen-layout";
 import { PhotoField } from "./photo-field";
 import type { Photo } from "../photos";
 import { useState } from "react";
 import { Alert, Text, View } from "react-native";
-import type * as api from "../api";
+import * as api from "../api";
 import type { MobileWorkOrderInput } from "@estatedesk/contracts/mobile";
 import { Button, Field, styles } from "./ui";
 
@@ -18,7 +19,7 @@ export function LeasesPanel({ leases, currency, busy, refresh }: { leases: Resul
     {leases.length === 0 ? <Text style={styles.subtitle}>No leases are linked to this account.</Text> : null}
     {leases.map(lease => <View key={lease.id} style={styles.card}>
       <Text style={styles.cardTitle}>{lease.propertyName} · Unit {lease.unitLabel}</Text>
-      <Text style={styles.label}>{label(lease.status)}{lease.buildingName ? ` · ${lease.buildingName}` : ""}</Text>
+      <StatusBadge status={lease.status} />{lease.buildingName ? <Text style={styles.subtitle}>{lease.buildingName}</Text> : null}
       <Text style={styles.subtitle}>Starts {date(lease.startDate)}{lease.endDate ? ` · Ends ${date(lease.endDate)}` : " · No fixed end date"}</Text>
       <Text style={styles.label}>Monthly rent: {money(lease.monthlyRent, currency)}</Text>
       <Text style={styles.subtitle}>Rent due on day {lease.dueDay} of each month</Text>
@@ -28,18 +29,27 @@ export function LeasesPanel({ leases, currency, busy, refresh }: { leases: Resul
   </>;
 }
 
-export function MoveOutsPanel({ notices, busy, refresh }: { notices: Result<typeof api.getMoveOuts>; busy: boolean; refresh: () => void }) {
+export function MoveOutsPanel({ notices, busy, refresh, run, reload }: { notices: Result<typeof api.getMoveOuts>; busy: boolean; refresh: () => void; run: (action: () => Promise<void>) => Promise<boolean>; reload: () => Promise<void> }) {
+  const [moveOutDate, setMoveOutDate] = useState(""); const [notes, setNotes] = useState(""); const [message, setMessage] = useState("");
+  const open = notices.some(item => ["SUBMITTED", "INSPECTION_SCHEDULED", "INSPECTION_COMPLETED"].includes(item.status));
   return <>
     <Text style={styles.title}>Move-out progress</Text>
     <Text style={styles.subtitle}>Track your submitted notices and inspections. Your tenancy stays active until management completes handover.</Text>
+    {message ? <Text accessibilityLiveRegion="polite" style={styles.subtitle}>{message}</Text> : null}
+    {!open ? <View style={styles.card}><Text style={styles.cardTitle}>Give move-out notice</Text>
+      <Field label="Planned move-out date (YYYY-MM-DD)" value={moveOutDate} onChangeText={setMoveOutDate} maxLength={10} editable={!busy} />
+      <Field label="Notes (optional)" value={notes} onChangeText={setNotes} maxLength={1000} multiline editable={!busy} />
+      <Button label="Submit notice" disabled={busy || !/^\d{4}-\d{2}-\d{2}$/.test(moveOutDate)} onPress={() => Alert.alert("Submit move-out notice?", `Planned move-out: ${moveOutDate}. Your tenancy remains active until handover.`, [{ text: "Cancel", style: "cancel" }, { text: "Submit", onPress: () => void run(async () => { await api.updateMoveOut({ action: "submit", moveOutDate, notes }); setMoveOutDate(""); setNotes(""); setMessage("Move-out notice submitted."); await reload(); }) }])} />
+    </View> : null}
     {notices.length === 0 ? <Text style={styles.subtitle}>You have no move-out notices.</Text> : null}
     {notices.map(notice => <View key={notice.id} style={styles.card}>
       <Text style={styles.cardTitle}>{notice.propertyName} · Unit {notice.unitLabel}</Text>
-      <Text style={styles.label}>{label(notice.status)}</Text>
+      <StatusBadge status={notice.status} />
       <Text style={styles.subtitle}>Notice submitted: {date(notice.noticeDate)}</Text>
       <Text style={styles.subtitle}>Planned move-out: {date(notice.moveOutDate)}</Text>
       <Text style={styles.subtitle}>Inspection: {notice.inspectionStatus ? label(notice.inspectionStatus) : "Not scheduled"}</Text>
       {notice.inspectionAt ? <Text style={styles.subtitle}>{new Date(notice.inspectionAt).toLocaleString("en-KE", { timeZone: "Africa/Nairobi" })} EAT</Text> : null}
+      {["SUBMITTED", "INSPECTION_SCHEDULED"].includes(notice.status) ? <Button label="Withdraw notice" secondary disabled={busy} onPress={() => Alert.alert("Withdraw this notice?", "Any scheduled inspection will be cancelled. Your lease remains active.", [{ text: "Keep notice", style: "cancel" }, { text: "Withdraw", style: "destructive", onPress: () => void run(async () => { await api.updateMoveOut({ action: "withdraw", noticeId: notice.id }); setMessage("Move-out notice withdrawn."); await reload(); }) }])} /> : null}
     </View>)}
     <Button label="Refresh move-out progress" onPress={refresh} disabled={busy} secondary />
   </>;

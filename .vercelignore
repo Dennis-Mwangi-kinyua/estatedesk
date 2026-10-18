@@ -26,3 +26,9 @@ dist
 
 # Local private uploads, including browser-test evidence
 **/.private/
+
+# Native SDKs and simulator/device binaries are not web deployment inputs.
+/apps/mobile/android/
+/apps/mobile/ios/
+/apps/mobile/.expo/
+/apps/mobile/dist/

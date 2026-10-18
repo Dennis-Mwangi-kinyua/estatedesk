@@ -132,6 +132,9 @@ const nextConfig: NextConfig = {
     remotePatterns: vacancyImageRemotePatterns(),
   },
   experimental: {
+    // Keep the full admin/mobile route graph within Vercel's 8 GB builder.
+    webpackMemoryOptimizations: true,
+    webpackBuildWorker: true,
     // Keep production builds parallel while avoiding excessive workers on
     // small CI/deployment builders.
     cpus: Math.min(4, availableParallelism()),

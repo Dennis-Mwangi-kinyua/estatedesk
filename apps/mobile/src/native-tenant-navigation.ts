@@ -1,6 +1,11 @@
 import type { MobileSession } from "@estatedesk/contracts/mobile";
 
 export const nativeTenantRoutes = {
+  "/dashboard/security": "security",
+  "/dashboard/tenant/profile/change-password": "security",
+  "/dashboard/tenant/rewards": "rewards",
+  "/dashboard/tenant/inspections": "tenant-inspections",
+  "/dashboard/tenant/move-out": "move-outs",
   "/dashboard/tenant/community": "community",
   "/dashboard/tenant/expenditures": "expenditures",
   "/dashboard/tenant/payments": "bills",

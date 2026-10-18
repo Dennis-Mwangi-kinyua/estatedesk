@@ -6,7 +6,7 @@ const config: ExpoConfig = {
   version: "0.1.0",
   platforms: ["ios", "android"],
   scheme: "estatedesk",
-  orientation: "portrait",
+  orientation: "default",
   userInterfaceStyle: "light",
   ios: {
     bundleIdentifier: "ke.co.estatedesk.mobile",

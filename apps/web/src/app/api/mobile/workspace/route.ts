@@ -21,10 +21,20 @@ export async function GET(request: Request) {
       if (allowed(path)) tasks.push({ metric: { title, emoji, path, detail }, value: value() });
     };
     if (kind === "platform") {
+      const developer = new URL(request.url).searchParams.get("section") === "developer";
+      if (developer) {
+        count("Active API keys", "🔑", "/platform/api-keys", () => prisma.apiKey.count({ where: { isActive: true } }), "Enabled API credentials");
+        count("Queued notifications", "📨", "/platform/jobs", () => prisma.notification.count({ where: { status: "QUEUED" } }), "Waiting for dispatch");
+        count("Failed notifications", "🔔", "/platform/jobs", () => prisma.notification.count({ where: { status: "FAILED" } }), "Review and retry in Jobs");
+        count("Failed jobs · 24h", "⏱️", "/platform/system-health", () => prisma.cronJobRun.count({ where: { status: "FAILED", startedAt: { gte: new Date(Date.now() - 86400000) } } }), "Scheduled jobs requiring review");
+        count("Pending exports", "🗄️", "/platform/data-management", () => prisma.dataExportRequest.count({ where: { status: "PENDING" } }), "Awaiting operator review");
+      } else {
       count("Organizations", "🏢", "/platform/organizations", () => prisma.organization.count({ where: { deletedAt: null } }), "Across the platform");
       count("User accounts", "👥", "/platform/users", () => prisma.user.count({ where: { deletedAt: null } }), "Accounts not deleted");
       count("Subscriptions", "💼", "/platform/subscriptions", () => prisma.subscription.count(), "All subscription records");
       count("Platform operators", "🛡️", "/platform/admins", () => prisma.user.count({ where: { deletedAt: null, platformRole: { in: ["SUPER_ADMIN", "PLATFORM_ADMIN"] } } }), "Current operator accounts");
+        count("Pending ID reviews", "🪪", "/platform/identity-verification", () => prisma.identityVerificationRequest.count({ where: { status: "PENDING" } }), "Authenticate identity and consent");
+      }
     } else {
       if (allowed("/dashboard/org/units")) {
         const scope = session.membershipScope;

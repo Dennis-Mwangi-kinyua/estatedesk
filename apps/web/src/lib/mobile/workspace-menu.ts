@@ -41,14 +41,17 @@ export function mobileWorkspaceLinks(session: AppSession, kind: MobileWorkspaceK
     { title: "Staff permissions", path: "/dashboard/org/staff/permissions", description: "Manage staff access and mandates." },
     { title: "API keys", path: "/api-keys", description: "Manage organization API credentials." },
   ]
-    : [...adminNavItems, ...developerNavItems].map(item => ({ title: item.label, path: item.href, description: item.description ?? "" }));
+    : [...[...adminNavItems, ...developerNavItems].map(item => ({ title: item.label, path: item.href, description: item.description ?? "" })),
+      { title: "Notification queue", path: "/platform/jobs/notifications", description: "Inspect queued and failed deliveries and retry failed notifications." },
+      { title: "Provider reports", path: "/platform/service-providers/reports", description: "Review and resolve reported provider accounts." },
+    ];
   const navigation = kind === "organization" ? WORKSPACE_NAVIGATION.org : [...WORKSPACE_NAVIGATION["platform-admin"], ...WORKSPACE_NAVIGATION["platform-developer"]];
   return [...new Map(candidates.map(item => [item.path, item])).values()]
     .filter(item => canAccessWorkspacePath(session, item.path))
     .map(item => {
       const key = item.path.split("/")[kind === "organization" ? 3 : 2] ?? "";
       const [emoji, description] = presentation[key] ?? ["🗂️", `Open ${item.title.toLowerCase()} and manage your workspace.`];
-      return { ...item, emoji, description: item.description || description, group: navigation.find(group => group.hrefs.includes(item.path))?.label ?? "Workspace tools" };
+      return { ...item, emoji, description: item.description || description, group: navigation.find(group => group.hrefs.includes(item.path === "/platform/service-providers/reports" ? "/platform/service-providers" : item.path === "/platform/jobs/notifications" ? "/platform/jobs" : item.path))?.label ?? "Workspace tools" };
     });
 }
 

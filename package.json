@@ -35,7 +35,9 @@
     "mobile:start": "npm run start -w @estatedesk/mobile",
     "mobile:android": "npm run android -w @estatedesk/mobile",
     "mobile:ios": "npm run ios -w @estatedesk/mobile",
-    "mobile:typecheck": "npm run typecheck -w @estatedesk/mobile"
+    "mobile:typecheck": "npm run typecheck -w @estatedesk/mobile",
+    "mobile:deployment:check": "node scripts/check-mobile-deployment.mjs",
+    "mobile:services:check": "node scripts/check-live-mobile-services.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1018.0",

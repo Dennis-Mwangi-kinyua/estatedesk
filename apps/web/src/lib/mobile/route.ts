@@ -43,7 +43,16 @@ export async function actionResult(action: () => Promise<unknown>, successPath: 
   } catch (error) {
     if (!isRedirectError(error)) throw error;
     const url = new URL(getURLFromRedirectError(error) ?? "/", "https://estatedesk.invalid");
-    if (url.origin !== "https://estatedesk.invalid" || url.pathname !== successPath || url.searchParams.has("error")) throw error;
+    if (url.origin !== "https://estatedesk.invalid" || url.pathname !== successPath) throw error;
+    if (url.searchParams.has("error")) {
+      const messages: Record<string, string> = {
+        missing_move_out_date: "Choose your planned move-out date.",
+        invalid_move_out_date: "Choose a valid date on or after today and your lease start date; keep notes within 1,000 characters.",
+        no_active_lease: "An active lease is required to submit a move-out notice.",
+        duplicate_open_notice: "You already have an open move-out notice. Refresh to view it.",
+      };
+      return mobileJson({ error: messages[url.searchParams.get("error") ?? ""] ?? "Unable to complete the request. Check your details and try again." }, 400);
+    }
     return mobileJson({ ok: true, status: url.searchParams.get("status") });
   }
 }
