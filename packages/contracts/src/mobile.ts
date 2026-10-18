@@ -1,9 +1,11 @@
 import { z } from "zod";
 
-export const mobileFeatureSchema = z.enum(["leases", "move-outs", "caretaker-issues", "portfolio"]);
+export const mobileFeatureSchema = z.enum(["leases", "move-outs", "caretaker-issues", "portfolio", "documents", "payment-review", "inspections", "visitors", "gate"]);
 export type MobileFeature = z.infer<typeof mobileFeatureSchema>;
 
 export const mobileSessionSchema = z.object({
+  platformRole: z.enum(["USER", "SUPER_ADMIN", "PLATFORM_ADMIN"]).default("USER"),
+  userId: z.string().default(""),
   fullName: z.string(),
   role: z.string().nullable(),
   organizationName: z.string().nullable(),
@@ -115,3 +117,87 @@ export const mobilePortfolioSchema = z.object({
   total: z.number().int(), page: z.number().int(), totalPages: z.number().int(),
   units: z.array(z.object({ id: z.string(), houseNo: z.string(), propertyName: z.string(), buildingName: z.string().nullable(), type: z.string(), status: z.string(), rentAmount: z.number(), isActive: z.boolean() })),
 });
+
+export const mobileDocumentsSchema = z.array(z.object({
+  id: z.string(), kind: z.enum(["receipt", "lease"]), title: z.string(), date: z.string(),
+}));
+export const mobilePaymentReviewInputSchema = z.object({
+  id: z.string().min(1).max(200), action: z.enum(["verify", "reject"]), note: z.string().trim().min(5).max(2000),
+});
+export const mobilePaymentReviewSchema = z.object({
+  page: z.number(), hasMore: z.boolean(), payments: z.array(z.object({
+    id: z.string(), amount: z.number(), method: z.string(), reference: z.string().nullable(),
+    payer: z.string(), proof: z.string().nullable(), createdAt: z.string(),
+  })),
+});
+export const mobileInspectionFields = [
+  { name: "cleanlinessOk", label: "Cleanliness is acceptable" },
+  { name: "wallsOk", label: "Walls are in good condition" },
+  { name: "doorsWindowsOk", label: "Doors and windows are okay" },
+  { name: "plumbingOk", label: "Plumbing is okay" },
+  { name: "electricalOk", label: "Electrical fixtures are okay" },
+  { name: "keysReturned", label: "Keys have been returned" },
+  { name: "meterReadingsTaken", label: "Meter readings captured" },
+  { name: "damageObserved", label: "Damage has been observed" },
+] as const;
+export const mobileInspectionInputSchema = z.object({
+  inspectionId: z.string().min(1).max(200), summary: z.string().trim().min(1).max(2000),
+  recommendations: z.string().trim().max(2000),
+  cleanlinessOk: z.enum(["yes", "no"]), wallsOk: z.enum(["yes", "no"]),
+  doorsWindowsOk: z.enum(["yes", "no"]), plumbingOk: z.enum(["yes", "no"]),
+  electricalOk: z.enum(["yes", "no"]), keysReturned: z.enum(["yes", "no"]),
+  meterReadingsTaken: z.enum(["yes", "no"]), damageObserved: z.enum(["yes", "no"]),
+}).refine(value => value.damageObserved !== "yes" || !!value.recommendations, "Describe damage and recommended repairs.");
+export const mobileInspectionsSchema = z.array(z.object({
+  id: z.string(), reference: z.string(), unit: z.string(), property: z.string(),
+  scheduledAt: z.string(), status: z.string(), summary: z.string().nullable(), recommendations: z.string().nullable(),
+}));
+export const mobileVisitorInputSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("create"), visitorName: z.string().trim().min(2).max(120), visitorPhone: z.string().max(25), vehiclePlate: z.string().max(25), validFrom: z.iso.datetime({ offset: true }), validUntil: z.iso.datetime({ offset: true }) }),
+  z.object({ action: z.literal("revoke"), id: z.string().min(1).max(200) }),
+  z.object({ action: z.literal("verify"), token: z.string().regex(/^[A-Za-z0-9_-]{43}$/) }),
+  z.object({ action: z.literal("admit"), id: z.string().min(1).max(200) }),
+]);
+export const mobileVisitorsSchema = z.array(z.object({
+  id: z.string(), visitorName: z.string(), validFrom: z.string(), validUntil: z.string(), status: z.string(),
+}));
+export const mobileVisitorResultSchema = z.object({
+  message: z.string().optional(), url: z.string().optional(), qr: z.string().optional(),
+  pass: z.object({ id: z.string(), visitorName: z.string(), visitorPhone: z.string().nullable(), vehiclePlate: z.string().nullable(), tenant: z.string(), unit: z.string(), property: z.string(), validFrom: z.string(), validUntil: z.string(), status: z.string() }).optional(),
+});
+
+export type MobileVisitorInput = z.infer<typeof mobileVisitorInputSchema>;
+export { tenantWorkspaceLinks, tenantWorkspaceEntry, tenantNavigation, tenantDocumentPath } from "./tenant-workspace";
+export { mobileWorkspaceKindSchema, mobileWorkspaceDashboardSchema, type MobileWorkspaceKind, type MobileWorkspaceDashboard, type MobileWorkspaceLink } from "./workspace-dashboard";
+
+export const mobileCommunitySchema = z.array(z.object({
+  id: z.string(), title: z.string(), message: z.string(), organizationName: z.string(),
+  publishedAt: z.string(), readAt: z.string().nullable(),
+}));
+export const mobileNoticeReadSchema = z.object({ id: z.string().min(1).max(200) });
+export const mobileExpenditureInputSchema = z.object({
+  description: z.string().trim().min(3).max(1000),
+  amount: z.number().positive().max(100000000).refine(value => Math.abs(value * 100 - Math.round(value * 100)) < 0.00001),
+  incurredAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => {
+    const parsed = new Date(`${value}T00:00:00.000Z`);
+    return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+  }),
+  category: z.enum(["TENANT_REPAIR", "TENANT_SERVICE", "TRANSPORT", "OTHER"]),
+  payee: z.string().trim().max(200).default(""), reference: z.string().trim().max(200).default(""), notes: z.string().trim().max(2000).default(""),
+});
+export const mobileExpendituresSchema = z.object({
+  page: z.number().int(), hasMore: z.boolean(), currencyCode: z.string().length(3),
+  items: z.array(z.object({ id: z.string(), description: z.string(), amount: z.number(), currencyCode: z.string().length(3), category: z.string(), incurredAt: z.string(), status: z.string() })),
+});
+
+export type MobileExpenditureInput = z.infer<typeof mobileExpenditureInputSchema>;
+export const mobileProfileInputSchema = z.object({
+  phone: z.string().trim().min(1).max(30), email: z.union([z.literal(""), z.email().max(120)]),
+  nextOfKinName: z.string().trim().min(1).max(200), nextOfKinRelationship: z.string().trim().min(1).max(100),
+  nextOfKinPhone: z.string().trim().min(1).max(30), nextOfKinEmail: z.union([z.literal(""), z.email().max(120)]),
+});
+export const mobileProfileSchema = z.object({
+  fullName: z.string(), phone: z.string(), email: z.string(),
+  nextOfKinName: z.string(), nextOfKinRelationship: z.string(), nextOfKinPhone: z.string(), nextOfKinEmail: z.string(),
+});
+export type MobileProfileInput = z.infer<typeof mobileProfileInputSchema>;

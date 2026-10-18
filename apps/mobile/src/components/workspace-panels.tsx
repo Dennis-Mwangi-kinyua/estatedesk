@@ -1,3 +1,5 @@
+import { PhotoField } from "./photo-field";
+import type { Photo } from "../photos";
 import { useState } from "react";
 import { Alert, Text, View } from "react-native";
 import type * as api from "../api";
@@ -43,10 +45,12 @@ export function MoveOutsPanel({ notices, busy, refresh }: { notices: Result<type
   </>;
 }
 
-export function WorkOrdersPanel({ orders, busy, refresh, update }: {
+export function WorkOrdersPanel({ orders, busy, refresh, update, onError }: {
   orders: Result<typeof api.getWorkOrders>; busy: boolean; refresh: () => void;
-  update: (input: MobileWorkOrderInput) => Promise<boolean>;
+  update: (input: MobileWorkOrderInput, photo?: Photo | null) => Promise<boolean>;
+  onError: (error: unknown) => void;
 }) {
+  const [photo, setPhoto] = useState<Photo | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [summary, setSummary] = useState("");
@@ -57,7 +61,7 @@ export function WorkOrdersPanel({ orders, busy, refresh, update }: {
   function complete(issueId: string) {
     Alert.alert("Submit completion report?", "The office will review your report before the tenant confirms the work. This does not close the issue immediately.", [
       { text: "Cancel", style: "cancel" },
-      { text: "Submit report", onPress: () => { void update({ action: "complete", issueId, workSummary: summary, materialsUsed: materials, tenantInstructions: instructions }).then(success => { if (success) { setSelected(null); setSummary(""); setMaterials(""); setInstructions(""); } }); } },
+      { text: "Submit report", onPress: () => { void update({ action: "complete", issueId, workSummary: summary, materialsUsed: materials, tenantInstructions: instructions }, photo).then(success => { if (success) { setSelected(null); setPhoto(null); setSummary(""); setMaterials(""); setInstructions(""); } }); } },
     ]);
   }
   return <>
@@ -78,7 +82,7 @@ export function WorkOrdersPanel({ orders, busy, refresh, update }: {
       {order.reportStatus ? <Text style={styles.label}>Completion report: {label(order.reportStatus)}</Text> : null}
       {order.canStart ? <Button label="Start work" disabled={busy} onPress={() => { void update({ action: "start", issueId: order.id }); }} /> : null}
       {order.canUpdate && !order.pendingReport ? <Button label={selected === order.id ? "Hide work report" : "Update progress or submit report"} disabled={busy} secondary onPress={() => {
-        setSelected(selected === order.id ? null : order.id); setNote(""); setSummary(""); setMaterials(""); setInstructions("");
+        setSelected(selected === order.id ? null : order.id); setPhoto(null); setNote(""); setSummary(""); setMaterials(""); setInstructions("");
       }} /> : null}
       {selected === order.id && order.canUpdate && !order.pendingReport ? <>
         <Field label="Progress note" value={note} onChangeText={setNote} multiline maxLength={2000} editable={!busy} />
@@ -86,6 +90,7 @@ export function WorkOrdersPanel({ orders, busy, refresh, update }: {
         <Field label="Work completed (at least 10 characters)" value={summary} onChangeText={setSummary} multiline maxLength={5000} editable={!busy} />
         <Field label="Materials used (optional)" value={materials} onChangeText={setMaterials} multiline maxLength={2000} editable={!busy} />
         <Field label="Instructions for the tenant (optional)" value={instructions} onChangeText={setInstructions} multiline maxLength={2000} editable={!busy} />
+        <PhotoField photo={photo} change={setPhoto} busy={busy} onError={onError} />
         <Button label="Submit completion report" disabled={busy || summary.trim().length < 10} onPress={() => complete(order.id)} />
       </> : null}
       {order.pendingReport ? <Text style={styles.subtitle}>Awaiting review. Refresh to see the latest status.</Text> : null}

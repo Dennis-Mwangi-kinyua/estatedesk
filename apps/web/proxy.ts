@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { contentSecurityPolicy } from "./src/lib/security/content-security-policy";
+import { isTenantPortalRequest } from "./src/lib/mobile/portal-policy";
 import {
   getSessionCookieName,
   hasValidSessionCookieShape,
@@ -206,6 +207,9 @@ function applySecurityHeaders(response: NextResponse, pathname: string, csp?: st
 
 function isBrowserApiNavigation(req: NextRequest) {
   if (req.method !== "GET" && req.method !== "HEAD") return false;
+  // The native tenant bootstrap deliberately commits an HTML document/cookie.
+  // The route still validates the live tenant session and setup gates.
+  if (["/api/mobile/tenant/portal", "/api/mobile/workspace/portal"].includes(req.nextUrl.pathname) && isTenantPortalRequest(req)) return false;
   // These authenticated routes intentionally serve browser downloads.
   if (/^\/api\/move-outs\/[^/]+\/(report|refund-proof)\/?$/.test(req.nextUrl.pathname)) return false;
 

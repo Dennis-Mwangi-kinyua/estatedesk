@@ -1,7 +1,8 @@
+import { nativeForm } from "@/lib/mobile/form";
 import { prisma } from "@/lib/prisma";
 import { mobileWorkOrderInputSchema } from "@estatedesk/contracts/mobile";
 import { mobileJson } from "@/lib/mobile/api";
-import { nativeRoute, nativeBody, actionResult } from "@/lib/mobile/route";
+import { nativeRoute, actionResult } from "@/lib/mobile/route";
 import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
 import { caretakerCanStartIssue, caretakerCanUpdateIssue } from "@/lib/caretaker/issue-actions";
 import { getCaretakerManageableIssue } from "@/app/(app)/dashboard/caretaker/issues/_lib/access";
@@ -31,7 +32,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   return nativeRoute(request, async session => {
-    const input = await nativeBody(request, mobileWorkOrderInputSchema);
+    const { input, form } = await nativeForm(request, mobileWorkOrderInputSchema);
+    if (form.has("photo") && input.action !== "complete") return mobileJson({ error: "Evidence photos belong on a completion report." }, 400);
     const issue = await getCaretakerManageableIssue({ orgId: session.activeOrgId!, caretakerUserId: session.userId, membershipScope: session.membershipScope, issueId: input.issueId });
     if (!issue) return mobileJson({ error: "Work order not found in your assigned area." }, 404);
     if (input.action === "start" ? !caretakerCanStartIssue(issue, session.userId) : !caretakerCanUpdateIssue(issue, session.userId)) {
@@ -41,7 +43,6 @@ export async function POST(request: Request) {
       const pending = await prisma.issueResolutionReport.count({ where: { issueId: issue.id, orgId: session.activeOrgId!, status: { in: ["SUBMITTED", "OFFICE_APPROVED"] } } });
       if (pending) return mobileJson({ error: "A completion report is already awaiting review." }, 409);
     }
-    const form = new FormData();
     for (const [key, value] of Object.entries(input)) if (key !== "action") form.set(key, value);
     const action = input.action === "start" ? startCaretakerIssueAction : input.action === "note" ? addCaretakerIssueProgressNoteAction : submitIssueResolutionReportAction;
     return actionResult(() => action(form), getCaretakerIssueHref(issue.id));

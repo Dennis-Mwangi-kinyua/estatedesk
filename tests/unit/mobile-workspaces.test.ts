@@ -5,13 +5,13 @@ import { mobileFeatures } from "../../apps/web/src/lib/mobile/features";
 import { orgViewForPath } from "../../apps/web/src/lib/permissions/org-role-policy";
 
 test("mobile workspaces follow roles and blocked views", () => {
-  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "TENANT" }), ["leases", "move-outs"]);
-  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "CARETAKER" }), ["caretaker-issues"]);
-  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "OFFICE" }), ["portfolio"]);
-  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "ACCOUNTANT" }), []);
+  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "TENANT" }), ["leases", "move-outs", "documents", "visitors"]);
+  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "CARETAKER" }), ["caretaker-issues", "inspections", "gate"]);
+  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "OFFICE" }), ["portfolio", "gate"]);
+  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "ACCOUNTANT" }), ["payment-review"]);
   assert.deepEqual(mobileFeatures({ activeOrgId: null, activeOrgRole: "TENANT" }), []);
-  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "TENANT", orgRolePolicy: { permissions: {}, blockedViews: ["leases"] } }), ["move-outs"]);
-  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "MANAGER", orgRolePolicy: { permissions: {}, blockedViews: ["properties"] } }), []);
+  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "TENANT", orgRolePolicy: { permissions: {}, blockedViews: ["leases"] } }), ["move-outs", "documents", "visitors"]);
+  assert.deepEqual(mobileFeatures({ activeOrgId: "org", activeOrgRole: "MANAGER", orgRolePolicy: { permissions: {}, blockedViews: ["properties"] } }), ["gate", "payment-review"]);
   assert.equal(orgViewForPath("/api/mobile/org/units"), "properties");
   assert.equal(orgViewForPath("/api/mobile/tenant/leases"), "leases");
   assert.equal(orgViewForPath("/api/mobile/tenant/move-outs"), "move-outs");

@@ -5,13 +5,14 @@ import { requireOrgMembership } from "@/lib/permissions/guards";
 import type { MobileSession } from "@estatedesk/contracts/mobile";
 import { prisma } from "@/lib/prisma";
 import { rolePolicyBlocksPath } from "@/lib/permissions/org-role-policy";
-import { mobileFeatures } from "./features";
+import { getTenantVisitorAccess } from "@/features/visitors/availability";
+import { mobileFeatures, advertisedMobileFeatures } from "./features";
 export { isNativeRequest } from "./request-policy";
 
 export function mobileJson(body: unknown, status = 200) {
   return Response.json(body, {
     status,
-    headers: { "Cache-Control": "no-store", Vary: "Cookie" },
+    headers: { "Cache-Control": "no-store", Vary: "Cookie, X-EstateDesk-Capabilities" },
   });
 }
 
@@ -23,13 +24,21 @@ export async function mobileSession(): Promise<AppSession | Response> {
   return session;
 }
 
-export async function sessionSummary(session: AppSession): Promise<MobileSession> {
+export async function sessionSummary(session: AppSession, revision: string | null = null): Promise<MobileSession> {
   const org = session.activeOrgId
     ? await prisma.organization.findUnique({
         where: { id: session.activeOrgId }, select: { name: true, currencyCode: true },
       })
     : null;
+  let features = advertisedMobileFeatures(mobileFeatures(session), revision);
+  if (features.includes("visitors") && !await getTenantVisitorAccess(session.activeOrgId!, session.userId)) features = features.filter(feature => feature !== "visitors");
+  if (features.includes("gate") && !["ADMIN", "MANAGER"].includes(session.activeOrgRole ?? "")) {
+    const gate = await prisma.gateAssignment.findFirst({ where: { orgId: session.activeOrgId!, userId: session.userId }, select: { id: true } });
+    if (!gate) features = features.filter(feature => feature !== "gate");
+  }
   return {
+    platformRole: session.platformRole,
+    userId: session.userId,
     fullName: session.fullName,
     role: session.activeOrgRole ?? session.platformRole,
     organizationName: org?.name ?? null,
@@ -39,7 +48,7 @@ export async function sessionSummary(session: AppSession): Promise<MobileSession
     organizationId: session.activeOrgId,
     currencyCode: org?.currencyCode ?? "KES",
     canViewBills: !rolePolicyBlocksPath(session.orgRolePolicy, "/api/mobile/tenant/bills"),
-    features: mobileFeatures(session),
+    features,
   };
 }
 

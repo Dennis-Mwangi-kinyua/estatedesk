@@ -1,5 +1,6 @@
 "use server";
 
+import { fieldSubmission } from "@/lib/mobile/submission";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCaretakerAllowedUnitIds } from "@/lib/caretaker/access";
@@ -138,6 +139,9 @@ export async function quickSubmitMeterReading(
     };
   }
 
+  const submission = await fieldSubmission(formData, session, "native-meter");
+  if (submission?.replay) return { success: "Reading already received.", submittedUnitId: unit.id };
+
   const existingReading = await prisma.meterReading.findUnique({
     where: {
       unitId_period: {
@@ -214,6 +218,7 @@ export async function quickSubmitMeterReading(
   }
 
   await prisma.$transaction(async (tx) => {
+    await submission?.acknowledge(tx);
     await tx.meterReading.create({
       data: {
         unitId: unit.id,

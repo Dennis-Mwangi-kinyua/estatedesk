@@ -5,6 +5,6 @@ export async function GET(request: Request) {
   try {
     const session = await mobileSession();
     if (session instanceof Response) return session;
-    return mobileJson(await sessionSummary(session));
+    return mobileJson(await sessionSummary(session, request.headers.get("X-EstateDesk-Capabilities")));
   } catch (error) { return mobileError(error); }
 }

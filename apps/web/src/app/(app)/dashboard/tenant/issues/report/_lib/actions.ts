@@ -1,5 +1,6 @@
 "use server";
 
+import { uploadIssuePhoto } from "@/features/issues/actions/upload-issue-photo";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireTenantAccess } from "@/lib/permissions/guards";
@@ -105,6 +106,8 @@ export async function reportIssueAction(formData: FormData) {
     .filter(Boolean)
     .join(" / ");
 
+  const photo = formData.get("photo");
+  const photoAssetId = photo instanceof File && photo.size > 0 ? await uploadIssuePhoto({ photo, orgId: session.activeOrgId!, unitId: allowedUnit.id, submittedByUserId: session.userId }) : undefined;
   await prisma.$transaction(async (tx) => {
     const issue = await tx.issueTicket.create({
       data: {
@@ -112,6 +115,7 @@ export async function reportIssueAction(formData: FormData) {
         propertyId: allowedUnit.propertyId,
         unitId: allowedUnit.id,
         reportedByUserId: session.userId,
+        photoAssetId,
         title,
         description,
         priority,

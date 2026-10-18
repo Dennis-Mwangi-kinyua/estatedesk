@@ -6,6 +6,7 @@ import {
   NoticeStatus,
   OrgRole,
 } from "@prisma/client";
+import { fieldSubmission } from "@/lib/mobile/submission";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
@@ -69,6 +70,8 @@ export async function completeInspectionAction(formData: FormData) {
     throw new Error("Inspection not found or not allocated to you.");
   }
 
+  const submission = await fieldSubmission(formData, session, "native-inspection");
+  if (submission?.replay && inspection.inspectorUserId === session.userId) return;
   if (session.activeOrgRole === "CARETAKER") {
     if (!caretakerCanCompleteInspection(inspection, session.userId)) throw new Error("Only the assigned caretaker can complete this scheduled inspection.");
   } else if (!canInspectUnit(memberships, inspection.notice.lease.unit)) throw new Error("This inspection is outside your organisation scope.");
@@ -181,6 +184,7 @@ export async function completeInspectionAction(formData: FormData) {
   });
 
   await prisma.$transaction(async (tx) => {
+    await submission?.acknowledge(tx);
     const reportSaved = await tx.inspection.updateMany({
       where: { id: inspection.id, status: "SCHEDULED", ...(session.activeOrgRole === "CARETAKER" ? { inspectorUserId: session.userId } : {}) },
       data: {

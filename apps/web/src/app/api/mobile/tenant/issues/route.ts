@@ -1,7 +1,8 @@
+import { nativeForm } from "@/lib/mobile/form";
 import { prisma } from "@/lib/prisma";
 import { mobileIssueInputSchema, type MobileIssues } from "@estatedesk/contracts/mobile";
 import { mobileJson } from "@/lib/mobile/api";
-import { nativeRoute, nativeBody, actionResult } from "@/lib/mobile/route";
+import { nativeRoute, actionResult } from "@/lib/mobile/route";
 import { reportIssueAction } from "@/app/(app)/dashboard/tenant/issues/report/_lib/actions";
 
 export async function GET(request: Request) {
@@ -21,10 +22,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   return nativeRoute(request, async session => {
-    const input = await nativeBody(request, mobileIssueInputSchema);
+    const { input, form } = await nativeForm(request, mobileIssueInputSchema);
     const lease = await prisma.lease.findFirst({ where: { unitId: input.unitId, orgId: session.activeOrgId!, status: "ACTIVE", deletedAt: null, tenant: { userId: session.userId, deletedAt: null } }, select: { id: true } });
     if (!lease) return mobileJson({ error: "Choose a unit on your active lease." }, 403);
-    const form = new FormData();
     for (const [key, value] of Object.entries(input)) form.set(key, value);
     return actionResult(() => reportIssueAction(form), "/dashboard/tenant/issues");
   }, { role: "TENANT" });

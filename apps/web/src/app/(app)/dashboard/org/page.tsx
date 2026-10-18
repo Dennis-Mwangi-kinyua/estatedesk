@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getCachedOrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { getVacancyInquiryAlerts } from "@/features/dashboard/server/get-vacancy-inquiry-alerts";
 import { OrgDashboardWorkspace } from "./_components/org-dashboard-workspace";
+import { mobileWorkspaceLinks } from "@/lib/mobile/workspace-menu";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,7 @@ export default async function OrganizationDashboardPage() {
 
   return (
     <OrgDashboardWorkspace
+      featureLinks={mobileWorkspaceLinks(session, "organization")}
       initialData={dataResult.value}
       initialVacancyInquiries={vacancyInquiries}
       organizationName={organizationName}

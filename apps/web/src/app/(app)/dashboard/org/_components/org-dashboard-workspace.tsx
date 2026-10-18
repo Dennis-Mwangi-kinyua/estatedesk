@@ -14,6 +14,8 @@ import { OrgDashboardActivity } from "./org-dashboard-activity";
 import { OrgDashboardHeader } from "./org-dashboard-header";
 import { OrgDashboardSnapshot } from "./org-dashboard-snapshot";
 import { OrgDashboardStats } from "./org-dashboard-stats";
+import { OrgFeatureGrid } from "./org-feature-grid";
+import type { MobileWorkspaceLink } from "@estatedesk/contracts/mobile";
 import {
   getPollingIntervalMs,
   isBackgroundRefreshEnabled,
@@ -32,6 +34,7 @@ export function OrgDashboardWorkspace({
   orgId,
   orgRole,
   interval = 30_000,
+  featureLinks = [],
 }: {
   initialData: OrgDashboardSummary;
   initialVacancyInquiries: VacancyInquiryAlertItem[];
@@ -39,6 +42,7 @@ export function OrgDashboardWorkspace({
   orgId: string;
   orgRole?: OrgRole | null;
   interval?: number;
+  featureLinks?: MobileWorkspaceLink[];
 }) {
   const [data, setData] = useState(initialData);
   const [vacancyInquiries, setVacancyInquiries] = useState(
@@ -120,6 +124,7 @@ export function OrgDashboardWorkspace({
         organizationName={organizationName}
         orgRole={orgRole}
       />
+      <OrgFeatureGrid features={featureLinks} />
       {(orgRole === "ADMIN" || orgRole === "MANAGER") && (data.totalProperties === 0 || data.totalUnits === 0 || data.totalTenants === 0 || data.activeLeases === 0 || data.totalPayments === 0) && <section className="rounded-2xl border border-border bg-card p-4" aria-labelledby="setup-progress-title">
         <h2 id="setup-progress-title" className="font-semibold">Finish setting up your organisation</h2>
         <p className="mt-1 text-sm text-muted-foreground">Complete these steps to start managing your portfolio.</p>
