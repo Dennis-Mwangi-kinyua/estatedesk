@@ -30,15 +30,15 @@ export function StatCard({
         : "text-foreground";
 
   const content = (
-    <div className="flex h-full min-h-[7.5rem] flex-col justify-between gap-3 sm:min-h-[8rem]">
+      <div className="flex h-full min-h-[7.5rem] min-w-0 flex-col justify-between gap-3 sm:min-h-[8rem]">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-semibold uppercase leading-snug tracking-[0.08em] text-muted-foreground sm:text-xs">
+        <p className="min-w-0 break-words text-[10px] font-semibold uppercase leading-snug tracking-[0.06em] text-muted-foreground sm:text-xs sm:tracking-[0.08em]">
           {label}
         </p>
         <MetricSticker label={typeof label === "string" ? label : undefined} icon={Icon} />
       </div>
       <div className="min-w-0">
-        <p className={`text-2xl font-semibold tracking-tight sm:text-3xl ${valueClassName}`}>
+        <p className={`text-xl font-semibold tracking-tight tabular-nums sm:text-3xl ${valueClassName}`}>
           {value}
         </p>
         {note ? (

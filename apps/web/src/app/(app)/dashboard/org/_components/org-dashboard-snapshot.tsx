@@ -221,12 +221,12 @@ export function OrgDashboardSnapshot({ data }: { data: OrgDashboardSummary }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-2 xl:grid-cols-3 xl:gap-4 xl:p-6">
+      <div className="grid grid-cols-2 gap-2.5 p-3 min-[420px]:grid-cols-3 sm:gap-3 sm:p-5 lg:grid-cols-4 2xl:grid-cols-5 2xl:gap-4 2xl:p-6">
         {ordered.map((signal) => (
           <DeferredLink
             key={signal.title}
             href={signal.href}
-            className={`group flex min-h-[9.5rem] flex-col rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-sm sm:min-h-[10rem] sm:p-4 ${
+            className={`group flex min-h-[9.5rem] min-w-0 flex-col rounded-2xl border p-3 transition hover:-translate-y-0.5 hover:shadow-sm sm:min-h-[10rem] sm:p-4 ${
               signal.accent
                 ? "border-amber-200 bg-amber-50/80 hover:border-amber-300 dark:border-amber-500/30 dark:bg-amber-500/10"
                 : "border-border bg-muted/10 hover:border-border/80 hover:bg-muted/15"

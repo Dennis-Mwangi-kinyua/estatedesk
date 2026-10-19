@@ -15,7 +15,7 @@ export function OrgDashboardStats({ data }: { data: OrgDashboardSummary }) {
         </p>
       </div>
 
-      <div className="workspace-card-grid grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+      <div className="workspace-card-grid grid grid-cols-2 gap-2.5 min-[420px]:grid-cols-3 md:gap-3 xl:grid-cols-4">
         <StatCard
           label="Occupancy"
           value={`${data.occupancyRate}%`}

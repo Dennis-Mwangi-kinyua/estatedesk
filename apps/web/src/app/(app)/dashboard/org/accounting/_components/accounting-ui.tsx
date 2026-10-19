@@ -48,28 +48,23 @@ export function StatCard({
 }) {
   return (
     <div
-      className={`rounded-2xl border ${
+      className={`flex min-h-[5.75rem] min-w-0 flex-col justify-between rounded-2xl border shadow-[0_1px_2px_rgba(15,23,42,0.035)] ${
         highlight
-          ? "border-primary/20 bg-primary/5"
-          : "border-border bg-muted/10"
-      } ${compact ? "px-3 py-3" : "px-4 py-4"}`}
+          ? "border-primary/20 bg-primary/[0.045]"
+          : "border-border/90 bg-card"
+      } ${compact ? "p-3 sm:p-3.5" : "p-4"}`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            {label}
-          </p>
-          <p
-            className={`mt-1.5 font-semibold text-foreground ${
-              compact ? "text-lg" : "text-2xl"
-            }`}
-          >
-            {value}
-          </p>
-        </div>
+      <div className="flex min-w-0 items-center justify-between gap-2.5">
+        <p className="min-w-0 text-[10px] font-semibold uppercase leading-4 tracking-[0.12em] text-muted-foreground sm:text-[11px] sm:tracking-[0.14em]">
+          {label}
+        </p>
         {Icon ? (
           <span
-            className={`inline-flex shrink-0 items-center justify-center rounded-2xl border border-border bg-background text-primary ${
+            className={`inline-flex shrink-0 items-center justify-center rounded-xl border ${
+              highlight
+                ? "border-primary/15 bg-primary/10 text-primary"
+                : "border-border bg-muted/40 text-primary"
+            } ${
               compact ? "h-8 w-8" : "h-10 w-10"
             }`}
           >
@@ -77,6 +72,13 @@ export function StatCard({
           </span>
         ) : null}
       </div>
+      <p
+        className={`mt-3 min-w-0 break-words font-semibold leading-tight tracking-[-0.025em] tabular-nums text-foreground [font-variant-numeric:tabular-nums] ${
+          compact ? "text-[clamp(0.9rem,1.65vw,1.2rem)] sm:text-lg" : "text-2xl"
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
 }
