@@ -8,6 +8,7 @@ import { updateLeadAttributionAction, updateOrganizationAttributionAction } from
 import { saveOrganizationRoleAccess } from "@/app/(app)/platform/organizations/[slug]/access/actions";
 import { ORGANIZATION_ROLES, ORG_VIEW_LABELS, readOrgRolePolicies } from "@/lib/permissions/org-role-policy";
 import { ORG_PERMISSIONS } from "@/lib/permissions/role-matrix";
+import { ORG_PERMISSION_LABELS } from "@/lib/permissions/permission-labels";
 
 const field = (name: string, label: string, extra: Partial<NativeActionField> = {}): NativeActionField => ({ name, label, type: "text", ...extra });
 const option = (value: string) => ({ value, label: value.replaceAll("_", " ") });
@@ -61,7 +62,7 @@ export async function nativeOperatorActionDefinition(session: AppSession, path: 
       field("revision", "Policy revision", { type: "hidden", defaultValue: createHash("sha256").update(JSON.stringify(policy)).digest("hex") }),
       field("command", "Action", { type: "select", defaultValue: "save", options: [{ value: "save", label: "Save custom rules" }, { value: "reset", label: "Reset this role to defaults" }] }),
       field("blockedViews", "Block access to these sections", { type: "multiselect", defaultValue: JSON.stringify(policy.blockedViews), options: Object.entries(ORG_VIEW_LABELS).map(([value, label]) => ({ value, label })) }),
-    ] }, { id: "permissions", title: "Permission overrides", fields: ORG_PERMISSIONS.map(permission => field(`permission:${permission}`, permission, { type: "select", defaultValue: policy.permissions[permission] ?? "default", options: [option("default"), option("allow"), option("deny")] })) }] };
+    ] }, { id: "permissions", title: "Permission overrides", description: "Set how this role can manage workspace records and operations.", fields: ORG_PERMISSIONS.map(permission => field(`permission:${permission}`, ORG_PERMISSION_LABELS[permission], { type: "select", defaultValue: policy.permissions[permission] ?? "default", options: [{ value: "default", label: "Role default" }, { value: "allow", label: "Allow" }, { value: "deny", label: "Deny" }] })) }] };
   }
   return null;
 }

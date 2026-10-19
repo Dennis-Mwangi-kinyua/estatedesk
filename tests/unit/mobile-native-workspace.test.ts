@@ -1,5 +1,7 @@
 import { adminNavItems, developerNavItems } from "../../apps/web/src/app/(app)/platform/_lib/nav";
 import test from "node:test";
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
 import assert from "node:assert/strict";
 import { build } from "esbuild";
 import { createRequire } from "node:module";
@@ -80,7 +82,7 @@ test("native record queries are bounded, scoped, and never serialize private col
     const vault = await read(session, "platform", "/platform/api-keys", "", 1);
     assert.match(vault.notice!, /locked/);
     assert.equal(fixture.calls.length, 0);
-    fixture.rows = [{ id: "org", name: "Example Organization", status: "ACTIVE", email: "contact@example.test", phone: "fixture", slug: "example", address: "Nairobi", currencyCode: "KES", timezone: "Africa/Nairobi", createdAt: new Date("2026-10-01"), subscription: { plan: "FREE", status: "ACTIVE", currentPeriodEnd: new Date("2026-11-01") }, _count: { properties: 2, tenants: 8, memberships: 3 } }];
+    fixture.rows = [{ id: "org", name: "Example Organization", status: "ACTIVE", email: "contact@example.test", phone: "fixture", slug: "example", address: "Nairobi", currencyCode: "KES", timezone: "Africa/Nairobi", createdAt: new Date("2026-10-01"), subscription: { plan: "FREE", status: "ACTIVE", currentPeriodEnd: new Date("2026-11-01") }, documentRecords: [{ id: "agreement-target" }], _count: { properties: 2, tenants: 8, memberships: 3 } }];
     const organization = await read(session, "platform", "/platform/organizations", "", 1);
     const fields = (organization.records[0] as { fields: { label: string; value: string }[] }).fields;
     assert.equal(fields.find(field => field.label === "Properties")?.value, "2");
@@ -88,6 +90,17 @@ test("native record queries are bounded, scoped, and never serialize private col
     assert.equal(fields.find(field => field.label === "Timezone")?.value, "Africa/Nairobi");
     const organizationSelect = fixture.calls.at(-1)!.args.select as Record<string, unknown>;
     assert.ok(organizationSelect._count);
+    assert.deepEqual((organization.records[0] as { links: unknown[] }).links, [{ title: "DPA agreement", path: "/platform/agreements", recordId: "agreement-target", emoji: "🤝", description: "Review service terms, signatures and agreement actions." }]);
+    const documents = organizationSelect.documentRecords as { where: { entityType: string }; take: number };
+    assert.equal(documents.take, 1);
+    assert.ok(documents.where.entityType);
+    fixture.rows = [];
+    await read({ ...session, membershipScope: { scopeType: "ORG", scopeId: "org" } }, "organization", "/dashboard/org/agreements", "", 1, "agreement-target");
+    assert.equal((fixture.calls.at(-1)!.args.where as { id: string; orgId: string }).id, "agreement-target");
+    assert.equal((fixture.calls.at(-1)!.args.where as { orgId: string }).orgId, "org");
+    const beforeUnsupportedDetail = fixture.calls.length;
+    await read(session, "organization", "/dashboard/org/tenants", "", 1, "foreign-record");
+    assert.equal(fixture.calls.length, beforeUnsupportedDetail);
     assert.equal(organizationSelect.passwordHash, undefined);
     fixture.rows = [];
     for (const path of ["/platform/users", "/platform/admins"]) {
@@ -104,7 +117,7 @@ test("native record queries are bounded, scoped, and never serialize private col
       assert.doesNotMatch(page.notice ?? "", /still being built/, `${path} needs a native handler`);
       assert.ok(nativeWorkspacePageSchema.safeParse({ title: path, description: "Native service", emoji: "grid", page: 1, hasMore: false, records: page.records, related: [] }).success, path);
     }
-    const organizationSections = ["properties", "buildings", "tenants", "leases", "issues", "move-outs", "inspections", "water-bills", "charges", "vacancy-inquiries", "profile", "accounting", "finance-requests", "accounting/requests", "expenditures", "taxes", "staff", "staff/permissions", "community", "reports", "imports", "airbnb", "settings", "payments", "service-providers", "insights", "search", "support", "agreements", "identity-verification", "verify-tenant", "api-keys"];
+    const organizationSections = ["properties", "buildings", "tenants", "leases", "issues", "issues/resolution-reports", "move-outs", "inspections", "water-bills", "charges", "vacancy-inquiries", "profile", "accounting", "finance-requests", "accounting/requests", "expenditures", "taxes", "staff", "staff/permissions", "community", "reports", "imports", "airbnb", "settings", "payments", "service-providers", "insights", "search", "support", "agreements", "identity-verification", "verify-tenant", "api-keys"];
     for (const section of organizationSections) {
       const path = `/dashboard/org/${section}`;
       const page = await read({ ...session, membershipScope: { scopeType: "ORG", scopeId: "org" } }, "organization", path, "Example", 2);
@@ -128,4 +141,21 @@ test("native record queries are bounded, scoped, and never serialize private col
       }
     } finally { await client.$disconnect(); }
   } finally { delete globalFixture.__nativeWorkspaceTest; }
+});
+
+
+test("mobile screens cannot fall back to a website or embedded browser", async () => {
+  async function inspect(directory: string): Promise<void> {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) await inspect(path);
+      else if (/\.tsx?$/.test(path)) {
+        const source = await readFile(path, "utf8");
+        assert.doesNotMatch(source, /from ["'](?:react-native-webview|expo-web-browser)["']|Linking\.openURL|tenantWorkspaceSource|workspaceSource/, path);
+      }
+    }
+  }
+  await inspect("apps/mobile/src");
+  const mobilePackage = JSON.parse(await readFile("apps/mobile/package.json", "utf8"));
+  assert.equal(mobilePackage.dependencies["react-native-webview"], undefined);
 });

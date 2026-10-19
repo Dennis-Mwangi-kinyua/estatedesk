@@ -1,3 +1,4 @@
+import { FeatureCard } from "./feature-card";
 import { useCardGrid, cardGridStyles } from "./card-grid";
 import { AppIcon } from "./app-icon";
 import { useMemo, useState } from "react";
@@ -16,7 +17,6 @@ export function OrganizationFeatureGrid({ links, name, busy, loading, error, ope
     const needle = query.trim().toLowerCase();
     return links.filter(link => !needle || `${link.title} ${link.description} ${link.group}`.toLowerCase().includes(needle));
   }, [links, query]);
-  const palettes = ["#e9f3ec", "#edf2fc", "#fff4df", "#f4ecfa", "#e8f4f5", "#fbeee8"];
   return <View style={styles.page} onLayout={cardGrid.onLayout}>
     <View style={styles.header}>
       <Text style={styles.eyebrow}>ESTATEDESK · ORGANIZATION</Text>
@@ -31,14 +31,7 @@ export function OrganizationFeatureGrid({ links, name, busy, loading, error, ope
     <Text accessibilityLiveRegion="polite" style={styles.count}>{features.length} {query ? "matching" : "available"} features</Text>
     {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
     {loading && links.length === 0 ? <ActivityIndicator accessibilityLabel="Loading organization features" color="#14634e" /> : null}
-    <View style={cardGridStyles.grid}>{features.map((link, index) => <Pressable key={link.path} accessibilityRole="button" accessibilityLabel={link.title} accessibilityHint={link.description} accessibilityState={{ disabled: busy }} disabled={busy}
-      onPress={() => { Keyboard.dismiss(); open(link.path); }}
-      style={({ pressed }) => [cardGridStyles.card, cardGrid.cell, pressed && cardGridStyles.pressed, busy && cardGridStyles.disabled]}>
-      <View accessible={false} importantForAccessibility="no-hide-descendants" style={[styles.icon, { backgroundColor: palettes[links.indexOf(link) % palettes.length] ?? palettes[index % palettes.length] }]}><AppIcon badge={link.emoji} size={24} /></View>
-      <Text style={styles.cardTitle}>{link.title}</Text>
-      <Text style={styles.category}>{link.group}</Text><Text style={styles.description}>{link.description}</Text>
-      <View accessible={false} style={styles.openRow}><Text style={styles.open}>Open</Text><Text style={styles.arrow}>→</Text></View>
-    </Pressable>)}</View>
+    <View style={cardGridStyles.grid}>{features.map(link => <FeatureCard key={link.path} title={link.title} description={link.description} badge={link.emoji} disabled={busy} style={cardGrid.cell} onPress={() => { Keyboard.dismiss(); open(link.path); }} />)}</View>
     {!loading && features.length === 0 ? <Text style={styles.description}>{query ? "No features match. Try another name or clear the search." : "No organization features are available for this account."}</Text> : null}
     <View style={styles.controls}>
       <Pressable accessibilityRole="button" disabled={busy} onPress={notifications} style={styles.control}><AppIcon name="bell" size={20} /><Text style={styles.controlText}>My notifications</Text></Pressable>

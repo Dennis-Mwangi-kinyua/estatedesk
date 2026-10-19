@@ -1,5 +1,7 @@
 # Tenant parity in the iOS and Android apps
 
+Historical implementation report. The native screen implementation supersedes the WebView approach below; see [native app navigation](../2026-10-19/native-app-navigation.md).
+
 Implemented as native quick workflows plus the complete responsive tenant web workspace in an in-app WebView. The additional workflows are web screens inside the app, require connectivity, and reuse the website's pages, actions and authorization. No store binary or backend deployment was performed.
 
 | Tenant area | App access |

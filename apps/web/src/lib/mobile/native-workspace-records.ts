@@ -25,7 +25,7 @@ function card(id: string, title: string, status: string | undefined, fields: Rec
   return { id, title, status, subtitle, fields: Object.entries(fields).map(([label, value]) => ({ label, value: display(value) })) };
 }
 
-export async function nativeWorkspaceRecords(session: AppSession, kind: "organization" | "platform", path: string, q: string, page: number): Promise<{ records: NativeWorkspaceRecord[]; notice?: string; searchable?: boolean }> {
+export async function nativeWorkspaceRecords(session: AppSession, kind: "organization" | "platform", path: string, q: string, page: number, recordId?: string): Promise<{ records: NativeWorkspaceRecord[]; notice?: string; searchable?: boolean }> {
   const orgId = session.activeOrgId!;
   const unit = nativeUnitScope(orgId, session.membershipScope);
   const wide = nativeOrgWideAccess(session.membershipScope);
@@ -34,6 +34,7 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: "organiz
   const contains = { contains: q, mode: "insensitive" as const };
   const section = path === "/api-keys" ? "api-keys" : path.replace(kind === "platform" ? /^\/platform\/?/ : /^\/dashboard\/org\/?/, "");
   const restricted = { records: [], notice: "This view requires organization-wide access. Your assigned property, building or unit scope remains in effect." };
+  if (recordId && section !== "agreements") return { records: [], notice: "This record destination is unavailable." };
   if (section === "help" || section === "developer/docs") {
     const workspace = kind === "platform" ? "platform" : "org";
     const articles = guideArticles.filter(article => canAccessGuideSlug(article.slug, workspace, session.activeOrgRole) && (!q || `${article.title} ${article.summary}`.toLowerCase().includes(q.toLowerCase())));
@@ -66,6 +67,12 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: "organiz
         const rows = await prisma.issueTicket.findMany({ where: { orgId, ...(wide ? {} : { unit }), ...(q ? { title: contains } : {}) }, ...limit, orderBy: newest,
           select: { id: true, title: true, status: true, priority: true, description: true, createdAt: true, assignedTo: { select: { fullName: true } } } });
         return { records: rows.map(row => card(row.id, row.title, row.status, { Priority: row.priority, Description: row.description, Assigned: row.assignedTo?.fullName, Reported: row.createdAt })) };
+      }
+      case "issues/resolution-reports": {
+        const rows = await prisma.issueResolutionReport.findMany({ where: { orgId, issue: { ...(wide ? {} : { unit }), ...(q ? { title: contains } : {}) } }, ...limit,
+          orderBy: [{ submittedAt: "desc" }, { id: "desc" }], select: { id: true, status: true, workSummary: true, materialsUsed: true, tenantInstructions: true, officeNotes: true, tenantFeedback: true, submittedAt: true,
+            caretaker: { select: { fullName: true } }, issue: { select: { title: true, unit: { select: { houseNo: true, property: { select: { name: true } } } } } } } });
+        return { records: rows.map(row => card(row.id, row.issue.title, row.status, { Property: row.issue.unit?.property.name, Unit: row.issue.unit?.houseNo, Caretaker: row.caretaker.fullName, "Work completed": row.workSummary, Materials: row.materialsUsed, "Tenant instructions": row.tenantInstructions, "Office notes": row.officeNotes, "Tenant feedback": row.tenantFeedback, Submitted: row.submittedAt })) };
       }
       case "move-outs": {
         const rows = await prisma.moveOutNotice.findMany({ where: { lease: { orgId, deletedAt: null, unit }, ...(q ? { referenceCode: contains } : {}) }, ...limit, orderBy: newest,
@@ -170,7 +177,7 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: "organiz
   }
   if (section === "agreements") {
     if (kind === "organization" && !wide) return restricted;
-    const rows = await prisma.documentRecord.findMany({ where: { entityType: AGREEMENT_ENTITY, ...(kind === "organization" ? { orgId, status: { in: ["ISSUED", "COMPLETED"] } } : {}), ...(q ? { title: contains } : {}) }, ...limit, orderBy: newest,
+    const rows = await prisma.documentRecord.findMany({ where: { entityType: AGREEMENT_ENTITY, ...(recordId ? { id: recordId } : {}), ...(kind === "organization" ? { orgId, status: { in: ["ISSUED", "COMPLETED"] } } : {}), ...(q ? { title: contains } : {}) }, ...limit, orderBy: newest,
       select: { id: true, title: true, status: true, serialNumber: true, createdAt: true, issuedAt: true, revokedAt: true, revocationReason: true, contentHash: true, metadata: true, org: { select: { name: true } } } });
     return { records: rows.map(row => { const data = agreementData(row.metadata); const record = card(row.id, row.title, row.status, { Organization: row.org.name, Number: row.serialNumber,
       "Agreement text": data.body, "Organization signature": data.organizationSignature ? `${data.organizationSignature.name} · ${data.organizationSignature.signedAt}` : "Not signed",
@@ -215,10 +222,13 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: "organiz
       case "organizations": case "support-access": {
         const rows = await prisma.organization.findMany({ where: { deletedAt: null, ...(q ? { name: contains } : {}) }, ...limit, orderBy: newest, select: { id: true, name: true, slug: true, status: true, email: true, phone: true, address: true, currencyCode: true, timezone: true, createdAt: true,
           subscription: { select: { plan: true, status: true, currentPeriodEnd: true } },
+          documentRecords: { where: { entityType: AGREEMENT_ENTITY, status: { in: ["DRAFT", "ISSUED", "COMPLETED"] } }, orderBy: newest, take: 1, select: { id: true } },
           _count: { select: { properties: { where: { deletedAt: null } }, tenants: { where: { deletedAt: null } }, memberships: { where: { deactivatedAt: null } } } } } });
-        return { records: rows.map(row => card(row.id, row.name, row.status, { Email: row.email, Phone: row.phone, Address: row.address, Slug: row.slug,
+        return { records: rows.map(row => { const record = card(row.id, row.name, row.status, { Email: row.email, Phone: row.phone, Address: row.address, Slug: row.slug,
           Currency: row.currencyCode, Timezone: row.timezone, Properties: row._count.properties, Tenants: row._count.tenants, "Active memberships": row._count.memberships,
-          Plan: row.subscription?.plan, "Subscription status": row.subscription?.status, Renewal: row.subscription?.currentPeriodEnd, Registered: row.createdAt })) };
+          Plan: row.subscription?.plan, "Subscription status": row.subscription?.status, Renewal: row.subscription?.currentPeriodEnd, Registered: row.createdAt });
+          record.links = [{ title: "DPA agreement", path: "/platform/agreements", ...(row.documentRecords?.[0] ? { recordId: row.documentRecords[0].id } : {}), emoji: "🤝", description: "Review service terms, signatures and agreement actions." }];
+          return record; }) };
       }
       case "feature-flags": {
         const rows = await prisma.organization.findMany({ where: { deletedAt: null, ...(q ? { name: contains } : {}) }, ...limit, orderBy: newest, select: { id: true, name: true, settings: { select: { features: true } } } });

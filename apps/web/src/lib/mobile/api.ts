@@ -25,11 +25,14 @@ export async function mobileSession(): Promise<AppSession | Response> {
 }
 
 export async function sessionSummary(session: AppSession, revision: string | null = null): Promise<MobileSession> {
-  const org = session.activeOrgId
-    ? await prisma.organization.findUnique({
-        where: { id: session.activeOrgId }, select: { name: true, currencyCode: true },
-      })
-    : null;
+  const [org, user] = await Promise.all([
+    session.activeOrgId
+      ? prisma.organization.findUnique({
+          where: { id: session.activeOrgId }, select: { name: true, currencyCode: true },
+        })
+      : null,
+    prisma.user.findUnique({ where: { id: session.userId }, select: { profileImageUrl: true } }),
+  ]);
   let features = advertisedMobileFeatures(mobileFeatures(session), revision);
   if (features.includes("visitors") && !await getTenantVisitorAccess(session.activeOrgId!, session.userId)) features = features.filter(feature => feature !== "visitors");
   if (features.includes("gate") && !["ADMIN", "MANAGER"].includes(session.activeOrgRole ?? "")) {
@@ -40,6 +43,7 @@ export async function sessionSummary(session: AppSession, revision: string | nul
     platformRole: session.platformRole,
     userId: session.userId,
     fullName: session.fullName,
+    profileImageUrl: user?.profileImageUrl ?? null,
     role: session.activeOrgRole ?? session.platformRole,
     organizationName: org?.name ?? null,
     requiresAccountSetup: session.mustChangePassword || session.requiresTermsAcceptance,

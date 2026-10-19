@@ -169,7 +169,7 @@ export default async function PlatformOrganizationsPage({
             No organizations match the current filters.
           </div>
         ) : (
-          <div className="organization-directory-grid grid min-w-0 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="organization-directory-grid grid min-w-0 gap-3 p-3 sm:grid-cols-2 sm:gap-4 sm:p-4 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
             {organizations.map((org, index) => (
               <OrganizationWorkspaceCard
                 key={org.id}

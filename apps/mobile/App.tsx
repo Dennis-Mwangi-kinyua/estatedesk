@@ -1,4 +1,6 @@
 import { AppErrorBoundary } from "./src/components/app-error-boundary";
+import { AppIcon } from "./src/components/app-icon";
+import { mobileTheme } from "./src/components/ui";
 import { useCallback, useEffect, useRef, useState, type ComponentRef } from "react";
 import {
   ActivityIndicator, InputAccessoryView, Keyboard, KeyboardAvoidingView, Platform, Pressable,
@@ -117,7 +119,10 @@ function Workspace() {
         // Keep this child mounted: adding/removing RefreshControl changes the
         // native ScrollView tree and remounts Workflows, resetting its screen.
         refreshControl={<RefreshControl refreshing={!!canRefreshTenant && busy} enabled={!!canRefreshTenant && !busy} tintColor={canRefreshTenant ? "#14634e" : "transparent"} colors={canRefreshTenant ? ["#14634e"] : ["transparent"]} onRefresh={() => { if (canRefreshTenant && !busy) { setBusy(true); void restore(); } }} />}>
-        <View style={[styles.brand, session && { marginVertical: 4 }, session?.role === "TENANT" && { justifyContent: "center" }]}><Text style={styles.logo}>E</Text><Text style={styles.brandText}>EstateDesk</Text></View>
+        {!session || offline ? <View style={styles.brand}>
+          <View style={styles.logo}><AppIcon name="home" size={22} color="#ffffff" /></View>
+          <Text style={styles.brandText}>EstateDesk</Text>
+        </View> : null}
         {!session ? <Text style={styles.eyebrow}>YOUR PROPERTY WORKSPACE</Text> : null}
         {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
         {busy ? <ActivityIndicator accessibilityLabel="Loading" color="#14634e" style={{ marginVertical: 12 }} /> : null}
@@ -164,11 +169,11 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#f3f6f3" },
+  safe: { flex: 1, backgroundColor: mobileTheme.color.canvas },
   content: { padding: 24, paddingBottom: 48, gap: 16, width: "100%", maxWidth: 600, alignSelf: "center", flexGrow: 1 },
-  brand: { flexDirection: "row", alignItems: "center", gap: 10, marginVertical: 22 },
-  logo: { backgroundColor: "#14634e", color: "white", fontSize: 24, fontWeight: "800", paddingHorizontal: 13, paddingVertical: 6, borderRadius: 12 },
-  brandText: { fontSize: 24, fontWeight: "700", color: "#12392f" },
+  brand: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4, marginBottom: 8 },
+  logo: { width: 38, height: 38, backgroundColor: mobileTheme.color.brand, alignItems: "center", justifyContent: "center", borderRadius: mobileTheme.radius.control },
+  brandText: { fontSize: 19, lineHeight: 24, fontWeight: "700", letterSpacing: -0.35, color: mobileTheme.color.ink },
   eyebrow: { fontSize: 11, letterSpacing: 2, color: "#597066", fontWeight: "700" },
   title: { fontSize: 32, fontWeight: "700", color: "#12392f" },
   subtitle: { fontSize: 16, lineHeight: 24, color: "#53675e" },

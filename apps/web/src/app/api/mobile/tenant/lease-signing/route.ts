@@ -1,6 +1,8 @@
 import { rolePolicyBlocksPath } from "@/lib/permissions/org-role-policy";
 import { prisma } from "@/lib/prisma";
-import { nativeRoute, nativeBody } from "@/lib/mobile/route";
+import { nativeRoute } from "@/lib/mobile/route";
+import { readBoundedJson } from "@/lib/security/bounded-json";
+import { nativeSignature } from "@/lib/mobile/signature";
 import { mobileJson } from "@/lib/mobile/api";
 import { nativeTenantSection } from "@/lib/mobile/tenant-section";
 import { mobileLeaseSigningInputSchema } from "@estatedesk/contracts/mobile";
@@ -25,7 +27,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   return nativeRoute(request, async session => {
     if (rolePolicyBlocksPath(session.orgRolePolicy, "/api/mobile/tenant/leases") || !await nativeTenantSection(session, "/dashboard/tenant/lease")) return mobileJson({ error: "Lease access is unavailable." }, 403);
-    const input = await nativeBody(request, mobileLeaseSigningInputSchema);
+    if (!request.headers.get("content-type")?.startsWith("application/json")) return mobileJson({ error: "JSON required." }, 400);
+    const input = mobileLeaseSigningInputSchema.parse(await readBoundedJson(request, 384000));
     const signer = await prisma.leaseSignatureSigner.findFirst({ where: { id: input.signerId, userId: session.userId, status: "PENDING", envelope: { orgId: session.activeOrgId!, sourceDocumentHash: input.sourceDocumentHash, lease: { deletedAt: null, tenant: { userId: session.userId, deletedAt: null } } } }, select: { id: true, envelopeId: true } });
     if (!signer) return mobileJson({ error: "This signing request has changed or is unavailable. Refresh your leases." }, 409);
     const signingUrl = await issuePendingLeaseSigningUrl(signer.id, session.userId);
@@ -33,7 +36,10 @@ export async function POST(request: Request) {
     const token = signingUrl.slice("/sign-lease/".length);
     const evidence = { ipAddress: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? request.headers.get("x-real-ip"), userAgent: request.headers.get("user-agent") };
     try {
-      if (input.action === "sign") await signLease({ token, userId: session.userId, signatureText: input.signatureText, signatureMethod: "TYPED", consent: input.consent, ...evidence });
+      if (input.action === "sign") {
+        const signature = await nativeSignature(input);
+        await signLease({ token, userId: session.userId, signatureText: input.signatureText, signatureMethod: signature.method, signatureImage: signature.bytes, consent: input.consent, ...evidence });
+      }
       else await declineLease({ token, reason: input.reason, ...evidence });
     } catch (error) {
       // Signing validation messages are safe to show to the assigned signer.

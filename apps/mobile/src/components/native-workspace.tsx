@@ -1,5 +1,6 @@
+import { FeatureCard } from "./feature-card";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Keyboard, Pressable, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Keyboard, Text, TextInput, View } from "react-native";
 import type { MobileWorkspaceKind, NativeWorkspacePage } from "@estatedesk/contracts/mobile";
 import * as api from "../api";
 import { AppIcon, IconTile } from "./app-icon";
@@ -10,10 +11,10 @@ import { NativeActionForm } from "./native-action-form";
 import { NativeRecordList } from "./native-record-list";
 import { WorkspaceRecordPage } from "./workspace-record-page";
 
-export type WorkspaceTarget = { kind: MobileWorkspaceKind; path: string; title: string; emoji: string; description: string };
+export type WorkspaceTarget = { recordId?: string; kind: MobileWorkspaceKind; path: string; title: string; emoji: string; description: string };
 
 /** Native record browser. Never renders HTML, remote scripts, or a WebView. */
-export function NativeWorkspace({ target, open, onError, reviewPayments, help = false, onMutationBusy = () => {}, onContextChange }: { target: WorkspaceTarget; open: (target: WorkspaceTarget) => void; onError: (error: unknown) => void; reviewPayments?: () => void; help?: boolean; onMutationBusy?: (busy: boolean) => void; onContextChange?: () => Promise<void> }) {
+export function NativeWorkspace({ target, open, onBack, onError, reviewPayments, help = false, onMutationBusy = () => {}, onContextChange }: { target: WorkspaceTarget; open: (target: WorkspaceTarget) => void; onBack: () => void; onError: (error: unknown) => void; reviewPayments?: () => void; help?: boolean; onMutationBusy?: (busy: boolean) => void; onContextChange?: () => Promise<void> }) {
   const [action, setAction] = useState<{ actionId: string; recordId?: string } | null>(null);
   const [data, setData] = useState<NativeWorkspacePage | null>(null);
   const [query, setQuery] = useState("");
@@ -28,7 +29,7 @@ export function NativeWorkspace({ target, open, onError, reviewPayments, help = 
   const detail = data?.records.find(record => record.id === expanded);
   useEffect(() => {
     let active = true;
-    const queryKey = JSON.stringify([target.kind, target.path, search, page, help]);
+    const queryKey = JSON.stringify([target.kind, target.path, target.recordId, search, page, help]);
     const changedQuery = previousQuery.current !== queryKey;
     previousQuery.current = queryKey;
     // Keep the current records and detail visible during a refresh. A different
@@ -36,19 +37,19 @@ export function NativeWorkspace({ target, open, onError, reviewPayments, help = 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setBusy(true); setError("");
     if (changedQuery) { setData(null); setExpanded(null); }
-    void (help ? api.getHelp(search, page) : api.getNativeWorkspace(target.kind, target.path, search, page)).then(result => {
-      if (active) setData(result);
+    void (help ? api.getHelp(search, page) : api.getNativeWorkspace(target.kind, target.path, search, page, target.recordId)).then(result => {
+      if (active) { setData(result); if (target.recordId && result.records.some(record => record.id === target.recordId)) setExpanded(target.recordId); }
     }).catch(cause => {
       if (!active) return;
       if (cause instanceof api.ApiError && cause.status === 401) onError(cause);
       else setError(cause instanceof Error ? cause.message : "Unable to load records.");
     }).finally(() => { if (active) setBusy(false); });
     return () => { active = false; };
-  }, [target.kind, target.path, search, page, revision, onError, help]);
+  }, [target.kind, target.path, target.recordId, search, page, revision, onError, help]);
   const applySearch = () => { if (!busy) { Keyboard.dismiss(); setPage(1); setSearch(query.trim()); setRevision(value => value + 1); } };
   const actionForm = action ? <NativeActionForm request={{ kind: target.kind, path: target.path, ...action }} onError={onError} onBusyChange={onMutationBusy} close={(completed, contextChanged) => { setAction(null); if (contextChanged && onContextChange) void onContextChange().catch(onError); else if (completed) setRevision(value => value + 1); }} /> : null;
   return <View style={{ gap: 22 }} onLayout={grid.onLayout}>
-    {detail ? <WorkspaceRecordPage record={detail} workspace={target.title} emoji={target.emoji} close={() => setExpanded(null)} act={(actionId, recordId) => setAction({ actionId, recordId })}>{actionForm}</WorkspaceRecordPage> : actionForm}
+    {detail ? <WorkspaceRecordPage record={detail} workspace={target.title} emoji={target.emoji} close={() => target.recordId ? onBack() : setExpanded(null)} open={link => { setExpanded(null); open({ ...link, kind: target.kind }); }} act={(actionId, recordId) => setAction({ actionId, recordId })}>{actionForm}</WorkspaceRecordPage> : actionForm}
     <View style={dashboardStyles.hero}>
       <Text style={dashboardStyles.eyebrow}>{target.kind === "platform" ? "PLATFORM WORKSPACE" : "ORGANIZATION WORKSPACE"}</Text>
       <IconTile badge={target.emoji} size={28} />
@@ -76,9 +77,7 @@ export function NativeWorkspace({ target, open, onError, reviewPayments, help = 
         <Text accessibilityLiveRegion="polite" style={styles.label}>Page {page}</Text>
         <Button label="Next" icon="arrow-right" secondary disabled={busy || !data.hasMore} onPress={() => setPage(value => value + 1)} />
       </View>
-      {data.related.length ? <DashboardSection title="Related tools"><View style={gridStyles.grid}>{data.related.map(link => <Pressable key={link.path} accessibilityRole="button" accessibilityLabel={link.title} disabled={busy} onPress={() => open({ ...link, kind: target.kind })} style={({ pressed }) => [gridStyles.card, grid.cell, pressed && gridStyles.pressed]}>
-        <IconTile badge={link.emoji} /><Text style={dashboardStyles.cardTitle}>{link.title}</Text><Text style={styles.subtitle}>{link.description}</Text><View style={gridStyles.footer}><Text style={gridStyles.footerText}>Open tool</Text><AppIcon name="arrow-right" size={16} /></View>
-      </Pressable>)}</View></DashboardSection> : null}
+      {data.related.length ? <DashboardSection title="Related tools"><View style={gridStyles.grid}>{data.related.map(link => <FeatureCard key={link.path} title={link.title} description={link.description} badge={link.emoji} disabled={busy} style={grid.cell} onPress={() => open({ ...link, kind: target.kind })} />)}</View></DashboardSection> : null}
       <Button label="Refresh records" icon="refresh-cw" disabled={busy} secondary onPress={() => setRevision(value => value + 1)} />
     </> : null}
   </View>;

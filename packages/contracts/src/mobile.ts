@@ -8,6 +8,7 @@ export const mobileSessionSchema = z.object({
   platformRole: z.enum(["USER", "SUPER_ADMIN", "PLATFORM_ADMIN"]).default("USER"),
   userId: z.string().default(""),
   fullName: z.string(),
+  profileImageUrl: z.string().url().nullable().default(null),
   role: z.string().nullable(),
   organizationName: z.string().nullable(),
   requiresAccountSetup: z.boolean(),
@@ -117,6 +118,7 @@ export const mobilePortfolioQuerySchema = z.object({
   page: z.coerce.number().int().min(1).max(10000).default(1),
 });
 export const mobilePortfolioSchema = z.object({
+  canEdit: z.boolean().default(false),
   total: z.number().int(), page: z.number().int(), totalPages: z.number().int(),
   units: z.array(z.object({ id: z.string(), houseNo: z.string(), propertyName: z.string(), buildingName: z.string().nullable(), type: z.string(), status: z.string(), rentAmount: z.number(), isActive: z.boolean() })),
 });

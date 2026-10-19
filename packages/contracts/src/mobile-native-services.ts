@@ -29,7 +29,7 @@ export const mobileLeaseSigningSchema = z.array(z.object({
   sourceDocumentHash: z.string(), expiresAt: z.string(), canSign: z.boolean(),
 }));
 export const mobileLeaseSigningInputSchema = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("sign"), signerId: z.string().min(1).max(200), signatureText: z.string().trim().min(2).max(200), consent: z.literal(true), sourceDocumentHash: z.string().min(1).max(200) }),
+  z.object({ action: z.literal("sign"), signerId: z.string().min(1).max(200), signatureText: z.string().trim().min(2).max(200), consent: z.literal(true), sourceDocumentHash: z.string().min(1).max(200), signatureMethod: z.enum(["TYPED", "DRAWN", "UPLOADED"]).default("TYPED"), signatureData: z.string().max(350000).optional() }),
   z.object({ action: z.literal("decline"), signerId: z.string().min(1).max(200), reason: z.string().trim().min(5).max(1000), sourceDocumentHash: z.string().min(1).max(200) }),
 ]);
 export type MobileLeaseSigningInput = z.infer<typeof mobileLeaseSigningInputSchema>;
@@ -37,5 +37,6 @@ export const mobileTenantInspectionsSchema = z.object({
   page: z.number(), hasMore: z.boolean(), items: z.array(z.object({
     id: z.string(), unitLabel: z.string(), status: z.string(), scheduledAt: z.string(), completedAt: z.string().nullable(),
     inspectorName: z.string(), notes: z.string().nullable(), checklist: z.record(z.string(), z.unknown()).nullable(), reportPath: z.string(),
+    photos: z.array(z.object({ id: z.string(), label: z.string() })).default([]),
   })),
 });

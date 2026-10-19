@@ -4,6 +4,7 @@ import { nativeActionLinkSchema } from "./native-actions";
 export const nativeWorkspaceQuerySchema = z.object({
   kind: z.enum(["organization", "platform"]),
   path: z.string().min(1).max(200),
+  recordId: z.string().min(1).max(200).optional(),
   q: z.string().trim().max(100).default(""),
   page: z.coerce.number().int().min(1).max(10000).default(1),
 });
@@ -11,6 +12,7 @@ export const nativeWorkspaceRecordSchema = z.object({
   id: z.string(), title: z.string(), subtitle: z.string().default(""),
   status: z.string().optional(),
   fields: z.array(z.object({ label: z.string(), value: z.string() })),
+  links: z.array(z.object({ title: z.string(), path: z.string(), recordId: z.string().optional(), emoji: z.string(), description: z.string() })).optional(),
   actions: z.array(nativeActionLinkSchema).optional(),
 });
 export const nativeWorkspacePageSchema = z.object({

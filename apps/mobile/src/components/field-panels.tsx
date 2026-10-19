@@ -9,6 +9,7 @@ import { PhotoField } from "./photo-field";
 import { Button, Field, styles } from "./ui";
 type Run = (action: () => Promise<void>) => Promise<boolean>;
 export async function syncDraft(draft: Draft) {
+  if (draft.kind === "form") throw new Error("Open this form and review it before submitting.");
   if (draft.kind === "meter") await api.submitReading(draft.body, draft.photos, draft.id);
   else await api.submitInspection(draft.body, draft.photos, draft.id);
   await removeDraft(draft.id, draft.scope);

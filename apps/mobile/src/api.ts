@@ -7,6 +7,7 @@ import { mobileProfileSchema, type MobileProfileInput, mobileCommunitySchema, mo
 import { File, Directory, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { clearDrafts } from "./drafts";
+import { clearFormDrafts } from "./form-drafts";
 import { attachmentForm, clearEvidenceCache, type Photo } from "./photos";
 import { tenantDocumentPath, mobileDocumentsSchema, mobilePaymentReviewSchema, mobileInspectionsSchema, mobileVisitorsSchema, mobileVisitorResultSchema, type MobileVisitorInput } from "@estatedesk/contracts/mobile";
 import * as SecureStore from "expo-secure-store";
@@ -69,6 +70,7 @@ async function sendRequest(origin: string, cookie: string | null, path: string, 
         ...(options.form ? {} : { "Content-Type": "application/json" }),
         "X-EstateDesk-Client": "native",
         "X-EstateDesk-Capabilities": "2026-10-18",
+        "X-EstateDesk-Signatures": "image-v1",
         ...(cookie ? { Cookie: cookie } : {}),
       },
       body: options.form ?? (options.body ? JSON.stringify(options.body) : undefined),
@@ -118,8 +120,8 @@ export async function getBills() { return mobileBillsSchema.parse(await request(
 export async function getWorkspaceDashboard(kind: MobileWorkspaceKind, section = "summary") {
   return mobileWorkspaceDashboardSchema.parse(await request(`/workspace?kind=${kind}&section=${section}`));
 }
-export async function getNativeWorkspace(kind: MobileWorkspaceKind, path: string, q = "", page = 1) {
-  const query = `kind=${kind}&path=${encodeURIComponent(path)}&q=${encodeURIComponent(q)}&page=${page}`;
+export async function getNativeWorkspace(kind: MobileWorkspaceKind, path: string, q = "", page = 1, recordId?: string) {
+  const query = `kind=${kind}&path=${encodeURIComponent(path)}&q=${encodeURIComponent(q)}&page=${page}${recordId ? `&recordId=${encodeURIComponent(recordId)}` : ""}`;
   return nativeWorkspacePageSchema.parse(await request(`/workspace/screen?${query}`));
 }
 export async function getLegal(kind: "terms" | "privacy") {
@@ -202,7 +204,7 @@ export async function signOut() {
   await SecureStore.deleteItemAsync(SESSION_KEY);
 }
 
-export function websiteUrl() { return baseUrl(); }
+export function backendOrigin() { return baseUrl(); }
 export async function getRewards() { return mobileRewardsSchema.parse(await request("/tenant/rewards")); }
 export async function confirmIssue(issueId: string, reportId: string, tenantFeedback: string) { await request("/tenant/issues/confirm", { method: "POST", body: { issueId, reportId, tenantFeedback } }); }
 export async function requestReward(rewardId: string) { await request("/tenant/rewards", { method: "POST", body: { rewardId } }); }
@@ -214,20 +216,6 @@ export async function getLeaseSigning() { return mobileLeaseSigningSchema.parse(
 export async function submitLeaseSignature(body: MobileLeaseSigningInput) { await request("/tenant/lease-signing", { method: "POST", body }); }
 export async function openLeaseSigningDocument(id: string) { await downloadPdf(`/api/mobile/tenant/lease-signing/${encodeURIComponent(id)}/document`, `lease-to-sign-${id.replace(/[^a-zA-Z0-9-]/g, "")}`, true); }
 
-// Only hand credentials to the fixed backend bootstrap, never a navigated URL.
-export async function tenantWorkspaceSource(path: string) {
-  const cookie = await SecureStore.getItemAsync(SESSION_KEY);
-  if (!cookie) throw new ApiError("Please sign in again.", 401);
-  return { uri: `${baseUrl()}/api/mobile/tenant/portal?path=${encodeURIComponent(path)}`,
-    headers: { Cookie: cookie, "X-EstateDesk-Client": "native" } };
-}
-export async function workspaceSource(kind: MobileWorkspaceKind, path: string) {
-  const cookie = await SecureStore.getItemAsync(SESSION_KEY);
-  if (!cookie) throw new ApiError("Please sign in again.", 401);
-  return { uri: `${baseUrl()}/api/mobile/workspace/portal?kind=${kind}&path=${encodeURIComponent(path)}`,
-    headers: { Cookie: cookie, "X-EstateDesk-Client": "native" } };
-}
-
 export async function getDocuments() { return mobileDocumentsSchema.parse(await request("/tenant/documents")); }
 export async function getReviewPayments(page = 1) { return mobilePaymentReviewSchema.parse(await request(`/org/payments?page=${page}`)); }
 export async function reviewPayment(id: string, action: "verify" | "reject", note: string) { return request("/org/payments", { method: "POST", body: { id, action, note } }); }
@@ -238,11 +226,11 @@ export async function visitorAction(body: MobileVisitorInput) {
   return mobileVisitorResultSchema.parse(await request(body.action === "verify" || body.action === "admit" ? "/gate/visitors" : "/tenant/visitors", { method: "POST", body }));
 }
 const documentsDirectory = () => new Directory(Paths.cache, "estatedesk-documents");
-export async function clearDocumentCache() { const dir = documentsDirectory(); if (dir.exists) dir.delete(); clearEvidenceCache(); }
+export async function clearDocumentCache() { const dir = documentsDirectory(); if (dir.exists) dir.delete(); clearEvidenceCache(); await clearFormDrafts(); }
 export async function openDocument(kind: "receipt" | "lease", id: string, share: boolean) {
   return downloadPdf(`/api/mobile/tenant/documents/${kind}/${encodeURIComponent(id)}`, `${kind}-${id.replace(/[^a-zA-Z0-9-]/g, "")}`, share);
 }
-export async function openTenantWebDocument(url: string) {
+export async function shareTenantDocument(url: string) {
   const path = tenantDocumentPath(url, baseUrl());
   if (!path) throw new Error("This document link is unavailable.");
   return downloadPdf(path, "tenant-document", true);
@@ -272,4 +260,11 @@ export async function readCommunity(id: string) { return request("/tenant/commun
 export async function getExpenditures(page = 1) { return mobileExpendituresSchema.parse(await request(`/tenant/expenditures?page=${page}`)); }
 export async function createExpenditure(body: MobileExpenditureInput) { return request("/tenant/expenditures", { method: "POST", body }); }
 export async function getProfile() { return mobileProfileSchema.parse(await request("/tenant/profile")); }
+export async function updateProfilePicture(photo: Photo) { return request("/profile-picture", { method: "POST", form: attachmentForm({}, { photo }) }); }
+export async function deleteProfilePicture() { return request("/profile-picture", { method: "DELETE" }); }
+export async function getInspectionPhoto(inspectionId: string, assetId: string) {
+  const result = await request(`/tenant/inspections/${encodeURIComponent(inspectionId)}/photos/${encodeURIComponent(assetId)}`) as { dataUri?: unknown };
+  if (typeof result.dataUri !== "string" || result.dataUri.length > 2800000 || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+=*$/.test(result.dataUri)) throw new Error("This inspection photo could not be displayed.");
+  return result.dataUri;
+}
 export async function updateProfile(body: MobileProfileInput) { return request("/tenant/profile", { method: "POST", body }); }

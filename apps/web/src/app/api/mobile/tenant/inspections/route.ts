@@ -3,6 +3,7 @@ import { nativeRoute } from "@/lib/mobile/route";
 import { mobileJson } from "@/lib/mobile/api";
 import { nativeTenantSection } from "@/lib/mobile/tenant-section";
 import { encodePublicId } from "@/lib/public-id";
+import { inspectionPhotos } from "@/lib/mobile/inspection-photos";
 
 export async function GET(request: Request) {
   return nativeRoute(request, async session => {
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
     });
     return mobileJson({ page, hasMore: rows.length > 25, items: rows.slice(0, 25).map(row => ({
       id: row.id, status: row.status, scheduledAt: row.scheduledAt, completedAt: row.completedAt, inspectorName: row.inspector.fullName,
-      notes: row.notes, checklist: row.checklist, unitLabel: `${row.notice.lease.unit.property.name} · Unit ${row.notice.lease.unit.houseNo}`,
+      notes: row.notes, checklist: row.checklist, photos: inspectionPhotos(row.checklist), unitLabel: `${row.notice.lease.unit.property.name} · Unit ${row.notice.lease.unit.houseNo}`,
       reportPath: `/dashboard/tenant/inspections/${encodePublicId(row.id, "inspection")}/download`,
     })) });
   }, { role: "TENANT" });

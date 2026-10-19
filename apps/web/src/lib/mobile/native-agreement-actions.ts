@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { accessibleAgreement, createAgreement, changeAgreement } from "@/lib/service-agreements/service";
 import { revalidatePath } from "next/cache";
 import { GET as downloadAgreement } from "@/app/api/service-agreements/[id]/route";
+import { nativeSignature } from "./signature";
 
 const field = (name: string, label: string, extra: Partial<NativeActionField> = {}): NativeActionField => ({ name, label, type: "text", ...extra });
 export function nativeAgreementPageActions(kind: "organization" | "platform", path: string): NativeActionLink[] {
@@ -52,7 +53,7 @@ export async function nativeAgreementActionDefinition(session: AppSession, kind:
   const fields: NativeActionField[] = [field("contentHash", "Reviewed document hash", { type: "hidden", required: true, defaultValue: document.contentHash ?? "" })];
   if (id === "agreement.edit") fields.push(field("body", "Complete agreement text (500–60,000 characters)", { type: "multiline", required: true, maxLength: 60000, defaultValue: data.body }));
   if (id === "agreement.cancel") fields.push(field("reason", "Cancellation reason", { type: "multiline", required: true, maxLength: 1000 }), field("confirmCancellation", "I confirm this agreement and any pending signing request should be cancelled", { type: "checkbox", required: true }));
-  if (id === "agreement.sign") fields.push(field("name", "Your full account name", { required: true, defaultValue: session.fullName, maxLength: 160 }), field("consent", "I have read this agreement, agree to its terms, consent to signing electronically, and am authorized to bind the contracting party", { type: "checkbox", required: true }));
+  if (id === "agreement.sign") fields.push(field("name", "Your full account name", { required: true, defaultValue: session.fullName, maxLength: 160 }), field("signature", "Signature", { type: "signature", required: true, defaultValue: '{"signatureMethod":"TYPED"}', maxLength: 350200 }), field("consent", "I have read this agreement, agree to its terms, consent to signing electronically, and am authorized to bind the contracting party", { type: "checkbox", required: true }));
   return { id, title: action.title, description: document.title, submitLabel: action.title, destructive: action.destructive, confirmation: `${action.title}? Your action applies to the reviewed version of this agreement.`, groups: [
     ...(id === "agreement.sign" ? [{ id: "review", title: "Read the complete agreement", description: data.body, fields: [] }] : []),
     { id: "details", title: action.title, fields },
@@ -73,7 +74,14 @@ export async function executeNativeAgreementAction(kind: "organization" | "platf
     const command = id === "agreement.sign" ? kind === "platform" ? "platform-sign" : "org-sign" : id.slice("agreement.".length);
     if (!["edit", "send", "cancel", "remind", "platform-sign", "org-sign"].includes(command)) throw new Error("Unknown agreement action.");
     form.set("command", command);
-    form.set("signatureMethod", "TYPED");
+    if (id === "agreement.sign") {
+      const value = JSON.parse(String(form.get("signature") || '{"signatureMethod":"TYPED"}'));
+      const signature = await nativeSignature(value);
+      form.set("signatureMethod", signature.method);
+      if (signature.method === "UPLOADED" && signature.bytes) form.set("signatureFile", new File([new Uint8Array(signature.bytes)], "signature.png", { type: "image/png" }));
+      if (signature.method === "DRAWN") form.set("signatureData", signature.imageData!);
+      form.delete("signature");
+    }
     await changeAgreement(recordId, form);
   }
   revalidatePath("/platform/agreements", "layout");

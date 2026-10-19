@@ -1,5 +1,5 @@
 import type { Photo } from "./photo-types";
-export type Draft = { id: string; scope: string; kind: "meter" | "inspection"; label: string; createdAt: string; body: Record<string, string | number>; photos: Record<string, Photo> };
+export type Draft = { id: string; scope: string; kind: "meter" | "inspection" | "form"; label: string; createdAt: string; body: Record<string, string | number>; photos: Record<string, Photo> };
 type Entry = { id: string; scope: string; chunks: number; pending?: true };
 export type DraftStorage = {
   get: (key: string) => Promise<string | null>; set: (key: string, value: string) => Promise<void>; remove: (key: string) => Promise<void>;
@@ -45,12 +45,12 @@ export function createDraftStore(storage: DraftStorage) {
       const id = storage.id();
       const draft: Draft = { ...input, id, createdAt: storage.now() };
       // Reserve enough tracked chunks before touching files or keychain content.
-      const pending: Entry = { id, scope: input.scope, chunks: 40, pending: true };
+      const pending: Entry = { id, scope: input.scope, chunks: input.kind === "form" ? 180 : 40, pending: true };
       await storage.set(INDEX, JSON.stringify([...index, pending]));
       try {
         draft.photos = await storage.copyPhotos(id, input.photos);
         const json = JSON.stringify(draft);
-        if (json.length > 16000) throw new Error("Draft is too large. Shorten the report notes.");
+        if (json.length > (input.kind === "form" ? 80000 : 16000)) throw new Error("Draft is too large. Shorten the report notes.");
         let chunks = 0;
         // <= 1800 UTF-8 bytes per entry, including non-ASCII notes.
         const characters = Array.from(json);

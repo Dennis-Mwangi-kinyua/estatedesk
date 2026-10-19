@@ -1,4 +1,5 @@
 import "server-only";
+import { nativeResolutionDefinition, nativeResolutionActions } from "./native-resolution-actions";
 import { nativeOperatorPageActions, nativeOperatorRecordActions, nativeOperatorActionDefinition } from "./native-operator-actions";
 import { nativeAgreementPageActions, nativeAgreementRecordActions, nativeAgreementActionDefinition } from "./native-agreement-actions";
 import { nativeIdentityPageActions, nativeIdentityRecordActions, nativeIdentityActionDefinition } from "./native-identity-actions";
@@ -9,6 +10,7 @@ import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
 import { nativeOrgWideAccess } from "./native-workspace-policy";
 import { PROPERTY_TYPES } from "@/features/properties/components/_lib/constants";
 import { ALLOWED_UNIT_TYPES } from "@/features/properties/actions/_lib/parse-unit-plans";
+import { nativeInventoryDefinition } from "./native-inventory-actions";
 import { PlatformPermissionType } from "@prisma/client";
 import { openingArrearsPeriods } from "@/lib/tenants/opening-arrears";
 import { nativePlatformPageActions, nativePlatformRecordActions, nativePlatformActionDefinition } from "./native-platform-actions";
@@ -39,6 +41,7 @@ export function nativePageActions(session: AppSession, kind: "organization" | "p
 }
 
 export function nativeRecordActions(kind: "organization" | "platform", path: string, status?: string): NativeActionLink[] {
+  if (kind === "organization" && path === "/dashboard/org/issues/resolution-reports") return nativeResolutionActions(status);
   const agreement = nativeAgreementRecordActions(kind, path, status);
   if (agreement.length) return agreement;
   const identity = nativeIdentityRecordActions(kind, path, status);
@@ -60,6 +63,8 @@ export function nativeRecordActions(kind: "organization" | "platform", path: str
 }
 
 export async function nativeActionDefinition(session: AppSession, kind: "organization" | "platform", path: string, actionId: string, recordId?: string): Promise<NativeActionDefinition | null> {
+  if (kind === "organization" && actionId.startsWith("resolution.")) return nativeResolutionDefinition(session, path, actionId, recordId);
+  if (kind === "organization" && actionId === "unit.edit") return nativeInventoryDefinition(session, path, actionId, recordId);
   if (kind === "platform" && (actionId.startsWith("provider.") || actionId.startsWith("attribution.") || actionId.startsWith("organization.access."))) return nativeOperatorActionDefinition(session, path, actionId, recordId);
   if (actionId.startsWith("agreement.")) return nativeAgreementActionDefinition(session, kind, path, actionId, recordId);
   if (actionId.startsWith("identity.")) return nativeIdentityActionDefinition(session, kind, path, actionId, recordId);

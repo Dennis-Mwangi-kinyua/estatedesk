@@ -39,7 +39,7 @@ export function GatePanel({ busy, run }: { busy: boolean; run: Run }) {
     setScanning(false); setPass(null);
     void run(async () => {
       let token = value.trim();
-      if (token.includes("#")) { const url = new URL(token); if (url.origin !== api.websiteUrl() || url.pathname !== "/dashboard/gate") throw new Error("Scan an EstateDesk visitor invitation."); token = new URLSearchParams(url.hash.slice(1)).get("pass") ?? ""; }
+      if (token.includes("#")) { const url = new URL(token); if (url.origin !== api.backendOrigin() || url.pathname !== "/dashboard/gate") throw new Error("Scan an EstateDesk visitor invitation."); token = new URLSearchParams(url.hash.slice(1)).get("pass") ?? ""; }
       if (!/^[A-Za-z0-9_-]{43}$/.test(token)) throw new Error("Scan a valid visitor pass or paste its 43-character code.");
       const result = await api.visitorAction({ action: "verify", token }); setPass(result.pass ?? null); setCode("");
     });

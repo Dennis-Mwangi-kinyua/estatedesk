@@ -1,3 +1,4 @@
+import { FeatureCard } from "./feature-card";
 import { nativeTenantDestination } from "../native-tenant-navigation";
 import { useCardGrid, cardGridStyles } from "./card-grid";
 import { AppIcon, IconTile } from "./app-icon";
@@ -8,9 +9,10 @@ import * as api from "../api";
 import { DashboardAction, DashboardSection, dashboardStyles as base } from "./dashboard-ui";
 import type { TenantTab } from "./tenant-navigation";
 import { useDashboardResume } from "./use-dashboard-resume";
+import { mobileTheme } from "./ui";
 
 function Action(props: ComponentProps<typeof DashboardAction>) {
-  return <DashboardAction {...props} centered />;
+  return <DashboardAction {...props} />;
 }
 function Section({ title, description, emoji, children }: ComponentProps<typeof DashboardSection>) {
   return <View style={base.section}><View style={m.centerHeading}>
@@ -84,16 +86,21 @@ export function TenantHome({ session, busy, openNative, openPlatform, onError, t
   function refresh() { if (!loading && !busy) { setLoading(true); setPartial(false); setVersion(value => value + 1); } }
   useDashboardResume(refresh, active);
   useEffect(() => {
-    let active = true;
+    if (!active) return;
+    let current = true;
+    // Revalidate only the visible dashboard and retain successful server results.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true); setPartial(false);
     async function load<K extends keyof Summary>(key: K, task: Promise<Summary[K]>) {
       try {
         const value = await task;
-        if (active) setSummary(current => ({ ...current, [key]: value }));
+        if (current) setSummary(current => ({ ...current, [key]: value }));
       } catch (error) {
-        if (!active) return;
+        if (!current) return;
         if (error instanceof api.ApiError && error.status === 401) { onError(error); return; }
         setPartial(true);
-        setSummary(current => ({ ...current, [key]: null }));
+        // Permission failures must clear the field; network failures retain its last real value.
+        if (error instanceof api.ApiError && error.status === 403) setSummary(value => ({ ...value, [key]: null }));
       }
     }
     void Promise.all([
@@ -101,9 +108,9 @@ export function TenantHome({ session, busy, openNative, openPlatform, onError, t
       load("leases", session.features.includes("leases") ? api.getLeases() : Promise.resolve(null)),
       load("issues", api.getIssues()), load("notifications", api.getNotifications()),
       load("payments", api.getPaymentHistory()),
-    ]).then(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [session, version, onError, refreshKey]);
+    ]).then(() => { if (current) setLoading(false); });
+    return () => { current = false; };
+  }, [session, version, onError, refreshKey, active]);
   const formatter = useMemo(() => new Intl.NumberFormat("en-KE", { style: "currency", currency: session.currencyCode, maximumFractionDigits: 2 }), [session.currencyCode]);
   const money = (value: number) => formatter.format(value);
   const lease = summary.leases?.find(item => item.status === "ACTIVE");
@@ -124,7 +131,7 @@ export function TenantHome({ session, busy, openNative, openPlatform, onError, t
         <Text style={m.eyebrow}>YOUR TENANT WORKSPACE</Text>
         <Text accessibilityRole="header" style={m.greeting}>Welcome back, {session.fullName.split(" ")[0]}</Text>
         <Text style={s.heroBody}>Your rent, lease, and service requests in one place.</Text>
-        <View style={m.organizationPill}><AppIcon name="home" size={15} /><Text style={m.organizationName}>{session.organizationName ?? "EstateDesk"}</Text></View>
+        <View style={m.organizationPill}><AppIcon name="home" size={15} color="#d6ece0" /><Text style={m.organizationName}>{session.organizationName ?? "EstateDesk"}</Text></View>
       </View>
       <View style={[m.heroActions, cardGrid.columns >= 3 && { flexDirection: "row", alignItems: "stretch" }]}>
         {session.canViewBills ? <View style={cardGrid.columns >= 3 ? { flex: 1, minWidth: 0 } : undefined}><Action dark emoji="💳" title={summary.bills && summary.bills.totalBalance > 0 ? "Pay outstanding balance" : "View payments"} onPress={() => openNative("bills")} disabled={busy} /></View> : null}
@@ -135,26 +142,23 @@ export function TenantHome({ session, busy, openNative, openPlatform, onError, t
 
     <Section title="Your account at a glance">
       {loading ? <ActivityIndicator accessibilityLabel="Loading your account summary" color="#14634e" /> : null}
-      <View style={[cardGridStyles.grid, { justifyContent: "center" }]}>{metrics.map(metric => <Pressable key={metric.title} accessibilityRole="button" accessibilityLabel={`${metric.title}: ${metric.value}. ${metric.detail}`} disabled={busy} onPress={metric.onPress}
+      <View style={[cardGridStyles.grid, { justifyContent: "flex-start" }]}>{metrics.map(metric => <Pressable key={metric.title} accessibilityRole="button" accessibilityLabel={`${metric.title}: ${metric.value}. ${metric.detail}`} disabled={busy} onPress={metric.onPress}
         style={({ pressed }) => [s.metric, cardGridStyles.card, m.centerCard, gridStyle, m.compactCard, pressed && cardGridStyles.pressed, busy && cardGridStyles.disabled]}>
         <View style={s.metricHeading}><AppIcon badge={metric.emoji} size={24} /><Text style={[s.metricLabel, s.flex]}>{metric.title}</Text></View><Text style={s.metricValue}>{metric.value}</Text><Text style={s.caption}>{metric.detail}</Text>
       </Pressable>)}</View>
-      {partial ? <Text accessibilityRole="alert" style={s.notice}>Some summaries are unavailable. You can still open your features below or refresh to try again.</Text> : null}
+      {partial ? <Text accessibilityRole="alert" style={s.notice}>Some summaries are unavailable or out of date. Open a feature or refresh to try again.</Text> : null}
     </Section>
 
     <Section title="Your shortcuts" description="Bills, documents, and updates in one place.">
-      <View style={[cardGridStyles.grid, { justifyContent: "center" }]}>{[
+      <View style={[cardGridStyles.grid, { justifyContent: "flex-start" }]}>{[
         ...(session.canViewBills ? [{ title: "Water bills", emoji: "💧", description: "Usage and charges", screen: "water-bills" as const, path: "" }] : []),
         { title: "Invoices", emoji: "🧾", description: "Monthly invoices", screen: null, path: "/dashboard/tenant/invoice" },
         { title: "Notifications", emoji: "🔔", description: "Property updates", screen: "notifications" as const, path: "" },
         { title: "Documents", emoji: "📁", description: "Receipts and leases", screen: "documents" as const, path: "/dashboard/tenant/documents" },
         { title: "Account", emoji: "👤", description: "Your account details", screen: null, path: "/dashboard/tenant/profile" },
         { title: "All services", emoji: "🗂️", description: "Explore your workspace", screen: null, path: "" },
-      ].map(action => <Pressable key={action.title} accessibilityRole="button" accessibilityLabel={action.title} accessibilityHint={action.description} accessibilityState={{ disabled: busy }} disabled={busy}
-        onPress={() => action.screen === null ? action.path ? openFeature(action.path) : selectTab("services") : action.screen === "documents" && !session.features.includes("documents") ? openFeature("/dashboard/tenant/documents") : openNative(action.screen)}
-        style={({ pressed }) => [m.shortcut, cardGridStyles.card, m.centerCard, gridStyle, m.compactCard, pressed && cardGridStyles.pressed, busy && cardGridStyles.disabled]}>
-        <IconTile badge={action.emoji} /><Text style={s.cardTitle}>{action.title}</Text><Text style={s.caption}>{action.description}</Text>
-      </Pressable>)}</View>
+      ].map(action => <FeatureCard key={action.title} compact title={action.title} description={action.description} badge={action.emoji} disabled={busy} style={gridStyle}
+        onPress={() => action.title === "Account" ? selectTab("account") : action.screen === null ? action.path ? openFeature(action.path) : selectTab("services") : action.screen === "documents" && !session.features.includes("documents") ? openFeature("/dashboard/tenant/documents") : openNative(action.screen)} />)}</View>
     </Section>
 
     <Section emoji="🏡" title="Your tenancy">
@@ -223,13 +227,8 @@ export function TenantHome({ session, busy, openNative, openPlatform, onError, t
       {query ? <Text accessibilityLiveRegion="polite" style={s.caption}>{visibleGroups.reduce((total, group) => total + group.cards.length, 0)} matching features</Text> : null}
     </View>
     {visibleGroups.map(group => <Section key={group.title} title={group.title} description={group.description}>
-      <View style={[cardGridStyles.grid, { justifyContent: "center" }]}>{group.cards.map(card => <Pressable key={card.path} accessibilityRole="button" accessibilityLabel={card.title} accessibilityHint={card.description} accessibilityState={{ disabled: busy }} disabled={busy}
-        onPress={() => card.screen && (!card.feature || session.features.includes(card.feature)) && (card.screen !== "bills" || session.canViewBills) ? openNative(card.screen) : openFeature(card.path)}
-        style={({ pressed }) => [s.featureCard, m.serviceCard, cardGridStyles.card, m.centerCard, gridStyle, pressed && cardGridStyles.pressed, busy && cardGridStyles.disabled]}>
-        <View style={s.row}><IconTile badge={card.emoji} /></View>
-        <Text style={s.cardTitle}>{card.title}</Text><Text style={s.body}>{card.description}</Text>
-        <View accessible={false} style={[cardGridStyles.footer, { justifyContent: "center", width: "100%" }]}><Text style={cardGridStyles.footerText}>Open service</Text><AppIcon name="arrow-right" size={16} /></View>
-      </Pressable>)}</View>
+      <View style={[cardGridStyles.grid, { justifyContent: "flex-start" }]}>{group.cards.map(card => <FeatureCard key={card.path} title={card.title} description={card.description} badge={card.emoji} disabled={busy} style={gridStyle}
+        onPress={() => card.screen && (!card.feature || session.features.includes(card.feature)) && (card.screen !== "bills" || session.canViewBills) ? openNative(card.screen) : openFeature(card.path)} />)}</View>
     </Section>)}
     {query && visibleGroups.length === 0 ? <Text style={s.body}>No features match your search. Try another name.</Text> : null}
 
@@ -244,47 +243,47 @@ export function TenantHome({ session, busy, openNative, openPlatform, onError, t
 
 
 const m = StyleSheet.create({
-  centerText: { textAlign: "center" },
-  centerHeading: { alignItems: "center", gap: 8 },
-  centerCard: { alignItems: "center" },
+  centerText: { textAlign: "left" },
+  centerHeading: { alignItems: "flex-start", gap: 8 },
+  centerCard: { alignItems: "stretch" },
   compactCard: { minHeight: 148, padding: 16, gap: 8 },
-  sectionTitleRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
-  sectionTitle: { fontSize: 18, lineHeight: 25, textAlign: "center", flexShrink: 1 },
-  heroHeading: { alignItems: "center", gap: 8 },
-  eyebrow: { color: "#62766a", fontSize: 10, fontWeight: "700", letterSpacing: 1.5, textAlign: "center" },
-  organizationPill: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 7, paddingHorizontal: 12, borderWidth: 1, borderColor: "#dde8e1", borderRadius: 20, backgroundColor: "#ffffff" },
-  organizationName: { color: "#466153", fontSize: 12, textAlign: "center", flexShrink: 1 },
+  sectionTitleRow: { flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: 8 },
+  sectionTitle: { fontSize: 18, lineHeight: 25, textAlign: "left", flexShrink: 1 },
+  heroHeading: { alignItems: "flex-start", gap: 8 },
+  eyebrow: { color: "#afd2c0", fontSize: 10, fontWeight: "700", letterSpacing: 1.5, textAlign: "left" },
+  organizationPill: { flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: 7, paddingVertical: 7, paddingHorizontal: 12, borderWidth: 1, borderColor: "#ffffff26", borderRadius: 20, backgroundColor: "#ffffff12" },
+  organizationName: { color: "#e1f0e7", fontSize: 12, textAlign: "left", flexShrink: 1, fontWeight: "600" },
   secondaryActions: { flexDirection: "row", gap: 8, alignItems: "stretch" },
   actionCell: { flex: 1, minWidth: 0 },
-  heroActions: { gap: 8, borderTopWidth: 1, borderTopColor: "#e1e9e4", paddingTop: 14 },
+  heroActions: { gap: 8, borderTopWidth: 1, borderTopColor: "#ffffff26", paddingTop: 14 },
   shortcutIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: "#edf4f1", alignItems: "center", justifyContent: "center" },
-  hero: { padding: 18, gap: 16, backgroundColor: "#f7faf8", borderWidth: 1, borderColor: "#dce6df" },
-  greeting: { textAlign: "center", color: "#173e32", fontSize: 26, lineHeight: 34, fontWeight: "700", marginTop: 5 },
-  balance: { textAlign: "center", color: "#ffffff", fontSize: 32, lineHeight: 41, fontWeight: "700", letterSpacing: -0.6 },
+  hero: { padding: mobileTheme.space.xl, gap: 18, backgroundColor: mobileTheme.color.brandDark, borderColor: mobileTheme.color.brandDark, borderRadius: mobileTheme.radius.panel },
+  greeting: { textAlign: "left", color: "#ffffff", fontSize: 29, lineHeight: 36, fontWeight: "700", letterSpacing: -0.5, marginTop: 3 },
+  balance: { textAlign: "left", color: "#ffffff", fontSize: 32, lineHeight: 41, fontWeight: "700", letterSpacing: -0.6 },
   bell: { minWidth: 48, minHeight: 48, borderRadius: 16, backgroundColor: "#285447", alignItems: "center", justifyContent: "center" },
   bellEmoji: { fontSize: 23, lineHeight: 31 }, unreadDot: { position: "absolute", top: 9, right: 9, width: 8, height: 8, borderRadius: 4, backgroundColor: "#f5c96c" },
   shortcut: { padding: 16, minHeight: 124, gap: 8, borderRadius: 18, backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#dee7e1" },
-  shortcutEmoji: { fontSize: 26, lineHeight: 34 }, pageHeading: { gap: 8 }, pageTitle: { textAlign: "center", color: "#173e32", fontSize: 27, lineHeight: 35, fontWeight: "700" },
-  serviceCard: { minHeight: 148, padding: 16, gap: 10 }, searchInput: { textAlign: "center", fontSize: 16, minHeight: 54 },
+  shortcutEmoji: { fontSize: 26, lineHeight: 34 }, pageHeading: { gap: 8 }, pageTitle: { textAlign: "left", color: "#173e32", fontSize: 27, lineHeight: 35, fontWeight: "700" },
+  serviceCard: { minHeight: 148, padding: 16, gap: 10 }, searchInput: { textAlign: "left", fontSize: 16, minHeight: 54 },
 });
 
-// Tenant presentation stays centered without changing management dashboards.
+// Keep phone cards and section headings aligned with the shared native layout.
 const s = {
   ...base,
   ...StyleSheet.create({
     root: { gap: 24 },
-    flex: { minWidth: 0, width: "100%" },
-    row: { flexDirection: "column", alignItems: "center", gap: 12 },
-    metricHeading: { alignItems: "center", gap: 8, width: "100%" },
-    organizationText: { ...base.organizationText, flex: 0, textAlign: "center" },
-    heroBody: { ...base.heroBody, color: "#5b7064", textAlign: "center" },
-    cardTitle: { ...base.cardTitle, textAlign: "center" },
-    caption: { ...base.caption, textAlign: "center" },
-    body: { ...base.body, textAlign: "center" },
-    metricLabel: { ...base.metricLabel, textAlign: "center" },
-    metricValue: { ...base.metricValue, textAlign: "center" },
-    notice: { ...base.notice, textAlign: "center" },
-    status: { ...base.status, textAlign: "center" },
-    detail: { ...base.detail, textAlign: "center" },
+    flex: { flex: 1, minWidth: 0 },
+    row: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 12 },
+    metricHeading: { flexDirection: "row", alignItems: "center", gap: 8, width: "100%" },
+    organizationText: { ...base.organizationText, flex: 0, textAlign: "left" },
+    heroBody: { ...base.heroBody, color: "#5b7064", textAlign: "left" },
+    cardTitle: { ...base.cardTitle, textAlign: "left" },
+    caption: { ...base.caption, textAlign: "left" },
+    body: { ...base.body, textAlign: "left" },
+    metricLabel: { ...base.metricLabel, textAlign: "left" },
+    metricValue: { ...base.metricValue, textAlign: "left" },
+    notice: { ...base.notice, textAlign: "left" },
+    status: { ...base.status, textAlign: "left" },
+    detail: { ...base.detail, textAlign: "left" },
   }),
 };

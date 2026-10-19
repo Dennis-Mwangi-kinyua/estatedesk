@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const nativeActionLinkSchema = z.object({ id: z.string(), title: z.string(), destructive: z.boolean().optional() });
 export const nativeActionFieldSchema = z.object({
-  name: z.string(), label: z.string(), type: z.enum(["hidden", "text", "multiline", "email", "phone", "decimal", "integer", "password", "date", "select", "multiselect", "checkbox"]),
+  name: z.string(), label: z.string(), type: z.enum(["hidden", "text", "multiline", "email", "phone", "decimal", "integer", "password", "date", "select", "multiselect", "checkbox", "signature"]),
   required: z.boolean().optional(), maxLength: z.number().optional(), defaultValue: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
   when: z.object({ field: z.string(), equals: z.string() }).optional(),
@@ -13,7 +13,11 @@ export const nativeActionDefinitionSchema = z.object({
 });
 export const nativeActionRequestSchema = z.object({
   kind: z.enum(["organization", "platform"]), path: z.string().min(1).max(200), actionId: z.string().min(1).max(100), recordId: z.string().min(1).max(2000).optional(),
-  values: z.record(z.string().max(100), z.union([z.string().max(60000), z.array(z.string().max(10000)).max(200)])).optional(),
+  values: z.record(z.string().max(100), z.union([z.string().max(350200), z.array(z.string().max(10000)).max(200)])).optional(),
+}).superRefine((input, context) => {
+  for (const [name, value] of Object.entries(input.values ?? {})) {
+    if (name !== "signature" && typeof value === "string" && value.length > 60000) context.addIssue({ code: "custom", path: ["values", name], message: "Form text must be at most 60000 characters." });
+  }
 });
 export const nativeActionResultSchema = z.object({
   ok: z.literal(true), message: z.string(),

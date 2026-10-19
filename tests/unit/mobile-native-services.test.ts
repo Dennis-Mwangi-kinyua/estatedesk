@@ -15,8 +15,10 @@ test("native signing requires explicit consent and binds the reviewed document h
   const valid = { action: "sign", signerId: "signer", signatureText: "Tenant Name", consent: true, sourceDocumentHash: "reviewed-hash" };
   assert.ok(mobileLeaseSigningInputSchema.safeParse(valid).success);
   for (const change of [{ consent: false }, { sourceDocumentHash: "" }, { signatureText: " " }, { signerId: "" }, { action: "approve" }]) assert.equal(mobileLeaseSigningInputSchema.safeParse({ ...valid, ...change }).success, false);
-  const parsed = mobileLeaseSigningInputSchema.parse({ ...valid, userId: "forged", orgId: "forged", signatureMethod: "FORGED" });
-  assert.ok(!("userId" in parsed) && !("orgId" in parsed) && !("signatureMethod" in parsed));
+  assert.equal(mobileLeaseSigningInputSchema.safeParse({ ...valid, signatureMethod: "FORGED" }).success, false);
+  const parsed = mobileLeaseSigningInputSchema.parse({ ...valid, userId: "forged", orgId: "forged" });
+  assert.ok(!("userId" in parsed) && !("orgId" in parsed));
+  assert.equal("signatureMethod" in parsed && parsed.signatureMethod, "TYPED");
   assert.equal(mobileLeaseSigningInputSchema.safeParse({ action: "decline", signerId: "signer", sourceDocumentHash: "hash", reason: "no" }).success, false);
 });
 test("native session and notice mutations reject missing targets and unbounded data", () => {

@@ -6,6 +6,7 @@ import { Alert, Text, View } from "react-native";
 import * as api from "../api";
 import type { MobileWorkOrderInput } from "@estatedesk/contracts/mobile";
 import { Button, Field, styles } from "./ui";
+import { NativeActionForm } from "./native-action-form";
 
 type Result<T extends (...args: never[]) => unknown> = Awaited<ReturnType<T>>;
 const label = (value: string) => value.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, character => character.toUpperCase());
@@ -109,10 +110,12 @@ export function WorkOrdersPanel({ orders, busy, refresh, update, onError }: {
   </>;
 }
 
-export function PortfolioPanel({ data, currency, busy, search }: {
+export function PortfolioPanel({ data, currency, busy, search, onError, onMutationBusy }: {
   data: Result<typeof api.getPortfolio> | null; currency: string; busy: boolean;
   search: (q: string, status: string, page: number) => Promise<boolean>;
+  onError: (error: unknown) => void; onMutationBusy: (busy: boolean) => void;
 }) {
+  const [editing, setEditing] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [appliedQuery, setAppliedQuery] = useState("");
   const [status, setStatus] = useState("ALL");
@@ -121,6 +124,7 @@ export function PortfolioPanel({ data, currency, busy, search }: {
   }
   return <>
     <Text style={styles.title}>Property units</Text>
+    {editing ? <NativeActionForm request={{ kind: "organization", path: "/dashboard/org/units", actionId: "unit.edit", recordId: editing }} onError={onError} onBusyChange={onMutationBusy} close={completed => { setEditing(null); if (completed) void search(appliedQuery, status, data?.page ?? 1); }} /> : null}
     <Text style={styles.subtitle}>Search units and check occupancy across your assigned portfolio.</Text>
     <Field label="Search property, building or unit" value={q} onChangeText={setQ} maxLength={100} editable={!busy} returnKeyType="search" onSubmitEditing={() => { if (!busy) void filter(); }} />
     <Button label="Search units" disabled={busy} onPress={() => { void filter(); }} />
@@ -134,6 +138,7 @@ export function PortfolioPanel({ data, currency, busy, search }: {
       <Text style={styles.subtitle}>{unit.propertyName}{unit.buildingName ? ` / ${unit.buildingName}` : ""}</Text>
       <Text style={styles.label}>{label(unit.status)} · {label(unit.type)}{!unit.isActive ? " · Inactive" : ""}</Text>
       <Text style={styles.cardTitle}>{money(unit.rentAmount, currency)} / month</Text>
+      {data.canEdit ? <Button label={`Edit unit ${unit.houseNo}`} icon="edit-3" secondary disabled={busy} onPress={() => setEditing(unit.id)} /> : null}
     </View>)}
     <Button label="Previous page" disabled={busy || !data || data.page <= 1} secondary onPress={() => { void search(appliedQuery, status, (data?.page ?? 1) - 1); }} />
     <Button label="Next page" disabled={busy || !data || data.page >= data.totalPages} secondary onPress={() => { void search(appliedQuery, status, (data?.page ?? 1) + 1); }} />

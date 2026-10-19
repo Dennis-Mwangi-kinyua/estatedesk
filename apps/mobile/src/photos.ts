@@ -6,6 +6,7 @@ import { File, Directory, Paths } from "expo-file-system";
 import { randomUUID } from "expo-crypto";
 const evidenceDirectory = () => new Directory(Paths.cache, "estatedesk-evidence");
 export function clearEvidenceCache() { const dir = evidenceDirectory(); if (dir.exists) dir.delete(); }
+export function removePickedPhoto(photo: Photo) { const file = new File(photo.uri); if (file.exists) file.delete(); }
 export async function pickPhoto(camera: boolean): Promise<Photo | null> {
   if (camera && !(await ImagePicker.requestCameraPermissionsAsync()).granted) throw new Error("Camera access is required to take a photo. You can choose a photo instead.");
   const options: ImagePicker.ImagePickerOptions = { mediaTypes: ["images"], quality: 0.45, exif: false };

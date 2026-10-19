@@ -1,8 +1,9 @@
-import { Pressable, Text, View } from "react-native";
+import { FeatureCard } from "./feature-card";
+import { Text, View } from "react-native";
 import type { MobileSession } from "@estatedesk/contracts/mobile";
-import { AppIcon, IconTile } from "./app-icon";
+import { IconTile } from "./app-icon";
 import { Dashboard } from "./dashboard";
-import { DashboardSection, dashboardStyles as s } from "./dashboard-ui";
+import { DashboardSection } from "./dashboard-ui";
 import { useCardGrid, cardGridStyles as g } from "./card-grid";
 import { Button, styles } from "./ui";
 
@@ -31,9 +32,7 @@ export function FieldHome({ session, busy, open, refresh }: { session: MobileSes
   return <View onLayout={grid.onLayout} style={{ gap: 24 }}>
     <View style={styles.card}><IconTile name={session.role === "SECURITY" ? "shield" : session.role === "CARETAKER" ? "tool" : "home"} size={28} /><Text accessibilityRole="header" style={styles.title}>Hello, {session.fullName.split(" ")[0]}</Text><Text style={styles.subtitle}>{session.organizationName ?? "EstateDesk"} · {session.role?.replaceAll("_", " ")}</Text></View>
     <Dashboard session={session} busy={busy} open={open} />
-    <DashboardSection title="Your workspace" description="Choose a tool to get started."><View style={g.grid}>{visible.map(tool => <Pressable key={tool.target} accessibilityRole="button" accessibilityLabel={tool.title} accessibilityHint={tool.description} accessibilityState={{ disabled: busy }} disabled={busy} onPress={() => open(tool.target)} style={({ pressed }) => [g.card, grid.cell, pressed && g.pressed, busy && g.disabled]}>
-      <IconTile badge={tool.emoji} /><Text style={s.cardTitle}>{tool.title}</Text><Text style={s.body}>{tool.description}</Text><View style={g.footer}><Text style={g.footerText}>Open</Text><AppIcon name="arrow-right" size={16} /></View>
-    </Pressable>)}</View></DashboardSection>
+    <DashboardSection title="Your workspace" description="Choose a tool to get started."><View style={g.grid}>{visible.map(tool => <FeatureCard key={tool.target} title={tool.title} description={tool.description} badge={tool.emoji} disabled={busy} style={grid.cell} onPress={() => open(tool.target)} />)}</View></DashboardSection>
     <Button label="Refresh workspace" icon="refresh-cw" secondary disabled={busy} onPress={refresh} />
   </View>;
 }

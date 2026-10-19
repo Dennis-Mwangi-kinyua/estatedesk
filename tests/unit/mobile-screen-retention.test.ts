@@ -69,12 +69,13 @@ test("iOS and Android retain the selected service when refresh availability chan
           'refreshControl={session?.role === "TENANT" && tenantHome.visible && !offline && !session.requiresAccountSetup ? $1 : undefined}',
         ),
       }));
-      builder.onResolve({ filter: /^(react-native|react-native-safe-area-context|expo-status-bar)$|^\.\/src\/(api|components\/(workflows|app-error-boundary|offline-workspace|tenant-workspace|tenant-navigation))$/ }, args => ({ path: args.path, namespace: "native-test" }));
+      builder.onResolve({ filter: /^(react-native|react-native-safe-area-context|expo-status-bar)$|^\.\/src\/(api|components\/(app-icon|workflows|app-error-boundary|offline-workspace|tenant-workspace|tenant-navigation))(\.tsx?)?$|^\.\/(app-icon|workflows|app-error-boundary|offline-workspace|tenant-workspace|tenant-navigation)(\.tsx?)?$/ }, args => ({ path: args.path, namespace: "native-test" }));
       builder.onLoad({ filter: /.*/, namespace: "native-test" }, args => ({
         loader: "tsx", resolveDir: process.cwd(), contents:
           args.path === "react-native" ? native
           : args.path === "react-native-safe-area-context" ? `export {View as SafeAreaView, View as SafeAreaProvider} from 'react-native';`
           : args.path === "expo-status-bar" ? `export const StatusBar=()=>null;`
+          : args.path.includes("app-icon") ? `export const AppIcon=()=>null;export const IconTile=()=>null;`
           : args.path.endsWith("/workflows") ? workflow
           : args.path === "./src/api" ? `export class ApiError extends Error {};
             export const hasSavedSession=async()=>true;

@@ -1,3 +1,4 @@
+import { executeNativeResolutionAction } from "@/lib/mobile/native-resolution-actions";
 import { nativeActionRequestSchema, nativeActionDefinitionSchema, nativeActionFormData } from "@estatedesk/contracts/mobile";
 import { executeNativeOperatorAction } from "@/lib/mobile/native-operator-actions";
 import { prisma } from "@/lib/prisma";
@@ -26,6 +27,7 @@ import { recordBackupCheckpointAction, markRestoreDrillAction } from "@/app/(app
 import { clearExpiredRateLimitBucketsAction, clearRateLimitScopeAction } from "@/app/(app)/platform/rate-limits/actions";
 import { CREATE_ERROR_MESSAGES } from "@/app/(app)/platform/users/_lib/constants";
 import { cookies } from "next/headers";
+import { executeNativeInventoryAction } from "@/lib/mobile/native-inventory-actions";
 import { getPlatformUnlockCookieName, getSessionCookieName, getSupportSessionCookieName } from "@/lib/auth/cookies";
 
 export async function GET(request: Request) {
@@ -33,6 +35,9 @@ export async function GET(request: Request) {
     const input = nativeActionRequestSchema.parse(Object.fromEntries(new URL(request.url).searchParams));
     if (!mobileWorkspaceAllowed(session, input.kind) || !nativeWorkspaceEntry(mobileWorkspaceLinks(session, input.kind), input.path)) return mobileJson({ error: "This action is unavailable for your account." }, 403);
     const definition = await nativeActionDefinition(session, input.kind, input.path, input.actionId, input.recordId);
+    if (definition && request.headers.get("x-estatedesk-signatures") !== "image-v1") {
+      definition.groups = definition.groups.map(group => ({ ...group, fields: group.fields.filter(field => field.type !== "signature") }));
+    }
     return definition ? mobileJson(nativeActionDefinitionSchema.parse(definition)) : mobileJson({ error: "This action is unavailable or the record has changed." }, 403);
   });
 }
@@ -40,7 +45,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   return nativeRoute(request, async session => {
     if (!request.headers.get("content-type")?.startsWith("application/json")) return mobileJson({ error: "JSON required." }, 400);
-    const input = nativeActionRequestSchema.parse(await readBoundedJson(request, 262144));
+    const input = nativeActionRequestSchema.parse(await readBoundedJson(request, 640000));
     if (!mobileWorkspaceAllowed(session, input.kind) || !nativeWorkspaceEntry(mobileWorkspaceLinks(session, input.kind), input.path)) return mobileJson({ error: "This action is unavailable for your account." }, 403);
     const definition = await nativeActionDefinition(session, input.kind, input.path, input.actionId, input.recordId);
     if (!definition) return mobileJson({ error: "This action is unavailable or the record has changed." }, 403);
@@ -48,6 +53,11 @@ export async function POST(request: Request) {
     try { form = nativeActionFormData(definition, input.values ?? {}); }
     catch (cause) { return mobileJson({ error: cause instanceof Error ? cause.message : "Check the form fields." }, 400); }
     try {
+      if (input.kind === "organization" && input.actionId.startsWith("resolution.")) return mobileJson(await executeNativeResolutionAction(session, input.path, input.actionId, input.recordId, form));
+      if (input.kind === "organization" && input.actionId === "unit.edit") {
+        const result = await executeNativeInventoryAction(session, input.path, input.actionId, input.recordId, form);
+        return result.error ? mobileJson({ error: result.error }, 400) : mobileJson({ ok: true, message: result.message ?? "Unit saved." });
+      }
       if (input.kind === "platform" && (input.actionId.startsWith("provider.") || input.actionId.startsWith("attribution.") || input.actionId.startsWith("organization.access."))) return mobileJson(await executeNativeOperatorAction(input.path, input.actionId, input.recordId, form));
       if (input.actionId.startsWith("agreement.")) return mobileJson(await executeNativeAgreementAction(input.kind, input.actionId, input.recordId, form));
       if (input.actionId.startsWith("identity.")) {

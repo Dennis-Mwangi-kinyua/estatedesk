@@ -1,3 +1,4 @@
+import { AccountPage } from "./account-page";
 import { IssueResolution, LeaseSigningPanel, RewardsPanel, SecurityPanel, TenantInspectionsPanel } from "./native-account-services";
 import { LegalReader } from "./legal-reader";
 import { NativeWorkspace, type WorkspaceTarget } from "./native-workspace";
@@ -15,14 +16,14 @@ import type { Photo } from "../photos";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as Notifications from "expo-notifications";
 import { enablePush } from "../notifications";
-import { ActivityIndicator, Alert, BackHandler, Keyboard, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Alert, BackHandler, Image, Keyboard, Pressable, Text, View } from "react-native";
 import type { MobileSession, MobileBills, MobileIssues, MobileMeters } from "@estatedesk/contracts/mobile";
 import * as api from "../api";
 import { Button, Field, styles } from "./ui";
 import { LeasesPanel, MoveOutsPanel, WorkOrdersPanel, PortfolioPanel } from "./workspace-panels";
 
-type Screen = "security" | "rewards" | "tenant-inspections" | "profile" | "community" | "expenditures" | "invoices" | "help" | "water-bills" | "native-workspace" | "platform-home" | "home" | "bills" | "issues" | "meters" | "notifications" | "payment" | "history" | "leases" | "move-outs" | "work-orders" | "portfolio" | "documents" | "payment-review" | "inspections" | "visitors" | "gate" | "drafts";
-const screenIcons: Partial<Record<Screen, AppIconName>> = { security: "shield", rewards: "gift", "tenant-inspections": "clipboard", profile: "user", community: "volume-2", expenditures: "bar-chart-2", invoices: "file-text", help: "book-open", "water-bills": "droplet", bills: "credit-card", issues: "tool", meters: "droplet", notifications: "bell", payment: "credit-card", history: "clock", leases: "home", "move-outs": "package", "work-orders": "tool", portfolio: "briefcase", documents: "folder", "payment-review": "check-circle", inspections: "clipboard", visitors: "users", gate: "shield", drafts: "hard-drive" };
+type Screen = "account" | "security" | "rewards" | "tenant-inspections" | "profile" | "community" | "expenditures" | "invoices" | "help" | "water-bills" | "native-workspace" | "platform-home" | "home" | "bills" | "issues" | "meters" | "notifications" | "payment" | "history" | "leases" | "move-outs" | "work-orders" | "portfolio" | "documents" | "payment-review" | "inspections" | "visitors" | "gate" | "drafts";
+const screenIcons: Partial<Record<Screen, AppIconName>> = { account: "user", security: "shield", rewards: "gift", "tenant-inspections": "clipboard", profile: "user", community: "volume-2", expenditures: "bar-chart-2", invoices: "file-text", help: "book-open", "water-bills": "droplet", bills: "credit-card", issues: "tool", meters: "droplet", notifications: "bell", payment: "credit-card", history: "clock", leases: "home", "move-outs": "package", "work-orders": "tool", portfolio: "briefcase", documents: "folder", "payment-review": "check-circle", inspections: "clipboard", visitors: "users", gate: "shield", drafts: "hard-drive" };
 type Bill = MobileBills["bills"][number];
 
 export function Workflows({ session, refreshSession, onError, logout, tenantTab, selectTenantTab, onNavigationChange }: {
@@ -39,8 +40,12 @@ export function Workflows({ session, refreshSession, onError, logout, tenantTab,
     if (target.kind === "organization" && target.path === "/dashboard/org/notifications") { void load("notifications"); return; }
     if (target.kind === "organization" && target.path === "/dashboard/org/units" && session.features.includes("portfolio")) { void load("portfolio"); return; }
     if (target.path === "/dashboard/gate" && session.features.includes("gate")) { void load("gate"); return; }
-    Keyboard.dismiss(); setWorkspaceStack(stack => screen === "native-workspace" ? stack.at(-1)?.path === target.path ? stack : [...stack, target] : [target]); setScreen("native-workspace"); setLoadFailed(false); setNotice(""); };
+    Keyboard.dismiss(); setWorkspaceStack(stack => screen === "native-workspace" ? stack.at(-1)?.path === target.path && stack.at(-1)?.recordId === target.recordId ? stack : [...stack, target] : [target]); setScreen("native-workspace"); setLoadFailed(false); setNotice(""); };
   const [screen, setScreen] = useState<Screen>("home");
+  const accountInitials = session.fullName.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase()).join("") || "U";
+  const accountImageUrl = session.profileImageUrl;
+  const [failedAccountImageUrl, setFailedAccountImageUrl] = useState<string | null>(null);
+  const workspaceLabel = session.organizationName && session.organizationName !== "EstateDesk" ? session.organizationName : "Workspace";
   const managementAccount = ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "SUPER_ADMIN", "PLATFORM_ADMIN"].includes(session.role ?? "") || ["SUPER_ADMIN", "PLATFORM_ADMIN"].includes(session.platformRole);
   const managementVisible = screen === "platform-home" || screen === "home" && session.role !== "TENANT";
   const [busy, setBusy] = useState(false);
@@ -187,12 +192,22 @@ export function Workflows({ session, refreshSession, onError, logout, tenantTab,
   }, [screen, session.role, tenantTab, selectTenantTab, back]);
 
   return <>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 10, minHeight: 46, marginBottom: -8 }}>
+      <View style={{ width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "#14634e" }}><AppIcon name="home" size={20} color="#ffffff" /></View>
+      <Text style={{ color: "#12392f", fontSize: 19, lineHeight: 24, fontWeight: "700", letterSpacing: -0.35 }}>EstateDesk</Text>
+      <View style={{ flex: 1 }} />
+      {!session.requiresAccountSetup ? <Pressable accessibilityRole="button" accessibilityLabel={`My account, ${session.fullName}`} accessibilityHint="Open your profile and account settings" accessibilityState={{ disabled: busy }} disabled={busy}
+        onPress={() => { if (session.role === "TENANT") { setScreen("home"); selectTenantTab("account"); } else if (screen !== "account") void load("account"); }}
+        style={({ pressed }) => [{ width: 46, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: "#e3efe7", borderWidth: 1, borderColor: "#cbdccf" }, (pressed || busy) && { opacity: 0.6, transform: [{ scale: 0.96 }] }]}>
+        {accountImageUrl && failedAccountImageUrl !== accountImageUrl ? <Image source={{ uri: accountImageUrl }} onError={() => setFailedAccountImageUrl(accountImageUrl)} style={{ width: 44, height: 44, borderRadius: 22 }} /> : <Text style={{ color: "#174a3b", fontSize: 14, fontWeight: "700", letterSpacing: 0.2 }}>{accountInitials}</Text>}
+      </Pressable> : null}
+    </View>
     {legal ? <LegalReader kind={legal} close={() => setLegal(null)} onError={onError} /> : null}
     {busy ? <ActivityIndicator accessibilityLabel="Loading workspace" color="#14634e" /> : null}
     {notice ? <Text accessibilityRole="alert" style={styles.subtitle}>{notice}</Text> : null}
     {screen !== "home" ? <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
       <Pressable accessibilityRole="button" accessibilityLabel={screen === "native-workspace" && workspaceStack.length > 1 ? "Back to previous page" : "Back to home"} disabled={busy} accessibilityState={{ disabled: busy }} onPress={back} style={({ pressed }) => [{ flexDirection: "row", alignItems: "center", gap: 8, minHeight: 44, paddingRight: 12 }, (pressed || busy) && { opacity: 0.5 }]}><AppIcon name="chevron-left" size={22} /><Text style={styles.label}>Back</Text></Pressable>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexShrink: 1 }}><Text numberOfLines={1} style={[styles.subtitle, { flexShrink: 1 }]}>{session.organizationName ?? "EstateDesk"}</Text><IconTile name={screenIcons[screen] ?? "grid"} size={18} /></View>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexShrink: 1 }}><Text numberOfLines={1} style={[styles.subtitle, { flexShrink: 1 }]}>{workspaceLabel}</Text><IconTile name={screenIcons[screen] ?? "grid"} size={18} /></View>
     </View> : null}
     {session.role === "TENANT" && !session.requiresAccountSetup ? <View style={{ display: screen === "home" ? "flex" : "none" }}>
       <TenantHome refreshKey={homeRevision} active={screen === "home"} tab={tenantTab} selectTab={selectTenantTab} session={session} busy={busy} openNative={target => void load(target)} openPlatform={() => setScreen("platform-home")} onError={onError} />
@@ -216,7 +231,7 @@ export function Workflows({ session, refreshSession, onError, logout, tenantTab,
       })} />
     </View> : loadingScreen ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>{screen.replaceAll("-", " ").replace(/^./, value => value.toUpperCase())}</Text><Text style={styles.subtitle}>Loading your latest information…</Text></View> : loadFailed ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>{screen.replaceAll("-", " ").replace(/^./, value => value.toUpperCase())}</Text><Text accessibilityRole="alert" style={styles.subtitle}>{loadError || "This service could not load. Try again."}</Text><Button label="Try again" onPress={() => void load(screen)} disabled={busy} /></View> : screen === "home" && session.role === "TENANT" ? null : (screen === "platform-home" || screen === "home" && managementAccount) ? null : screen === "home" ? <>
       <FieldHome session={session} busy={busy} open={target => void load(target)} refresh={() => void run(refreshSession)} />
-    </> : screen === "native-workspace" && workspaceTarget ? <>{workspaceStack.map((target, index) => <View key={`${index}:${target.kind}:${target.path}`} style={{ display: index === workspaceStack.length - 1 ? "flex" : "none" }}><NativeWorkspace target={target} onContextChange={refreshSession} open={openTool} onError={onError} onMutationBusy={working => { busyRef.current = working; setBusy(working); }} reviewPayments={session.features.includes("payment-review") ? () => void load("payment-review") : undefined} /></View>)}</> : screen === "documents" ? <DocumentsPanel documents={documents} busy={busy} run={run} refresh={async () => setDocuments(await api.getDocuments())} />
+    </> : screen === "native-workspace" && workspaceTarget ? <>{workspaceStack.map((target, index) => <View key={`${index}:${target.kind}:${target.path}:${target.recordId ?? ""}`} style={{ display: index === workspaceStack.length - 1 ? "flex" : "none" }}><NativeWorkspace onBack={back} target={target} onContextChange={refreshSession} open={openTool} onError={onError} onMutationBusy={working => { busyRef.current = working; setBusy(working); }} reviewPayments={session.features.includes("payment-review") ? () => void load("payment-review") : undefined} /></View>)}</> : screen === "account" ? <AccountPage session={session} busy={busy} logout={logout} open={target => void load(target)} refreshSession={refreshSession} /> : screen === "documents" ? <DocumentsPanel documents={documents} busy={busy} run={run} refresh={async () => setDocuments(await api.getDocuments())} />
       : screen === "payment-review" ? <PaymentReviewPanel data={review} currency={session.currencyCode} busy={busy} run={run} load={async page => setReview(await api.getReviewPayments(page))} />
       : screen === "visitors" ? <VisitorsPanel visitors={visitors} busy={busy} run={run} refresh={async () => setVisitors(await api.getVisitors())} />
       : screen === "gate" ? <GatePanel busy={busy} run={run} />
@@ -231,15 +246,15 @@ export function Workflows({ session, refreshSession, onError, logout, tenantTab,
         await api.updateWorkOrder(input, evidence); setWorkOrders(await api.getWorkOrders());
         setNotice(input.action === "complete" ? "Completion report submitted for office review." : input.action === "note" ? "Progress note saved." : "Work started.");
       })} onError={onError} />
-      : screen === "portfolio" ? <PortfolioPanel data={portfolio} currency={session.currencyCode} busy={busy} search={(query, status, page) => run(async () => { setPortfolio(await api.getPortfolio(query, status, page)); })} />
+      : screen === "portfolio" ? <PortfolioPanel data={portfolio} currency={session.currencyCode} busy={busy} onError={onError} onMutationBusy={working => { busyRef.current = working; setBusy(working); }} search={(query, status, page) => run(async () => { setPortfolio(await api.getPortfolio(query, status, page)); })} />
       : screen === "profile" && profile ? <ProfilePanel profile={profile} busy={busy} run={run} refresh={async () => { setProfile(await api.getProfile()); await refreshSession(); }} />
       : screen === "community" ? <CommunityPanel notices={community} busy={busy} run={run} refresh={async () => setCommunity(await api.getCommunity())} />
       : screen === "expenditures" ? <ExpendituresPanel data={expenditures} busy={busy} run={run} load={async page => setExpenditures(await api.getExpenditures(page))} />
-      : screen === "help" ? <NativeWorkspace help target={{ kind: "organization", path: "help", title: "Help & guidance", emoji: "💬", description: "The website’s guides, available to read inside your app." }} open={openTool} onError={onError} /> : screen === "invoices" ? <>
+      : screen === "help" ? <NativeWorkspace onBack={back} help target={{ kind: "organization", path: "help", title: "Help & guidance", emoji: "💬", description: "The website’s guides, available to read inside your app." }} open={openTool} onError={onError} /> : screen === "invoices" ? <>
         <Text style={styles.title}>Your invoices</Text>
         {[...new Set(bills?.bills.map(item => item.period).filter(period => /^\d{4}-\d{2}$/.test(period)) ?? [])].sort().reverse().map(period => <View key={period} style={styles.card}>
           <Text style={styles.cardTitle}>{period}</Text>
-          <Button label="Share invoice PDF" disabled={busy} onPress={() => void run(() => api.openTenantWebDocument(`${api.websiteUrl()}/dashboard/tenant/invoice/${encodeURIComponent(period)}/download`))} />
+          <Button label="Share invoice PDF" disabled={busy} onPress={() => void run(() => api.shareTenantDocument(`${api.backendOrigin()}/dashboard/tenant/invoice/${encodeURIComponent(period)}/download`))} />
         </View>)}
         {!bills?.bills.some(item => /^\d{4}-\d{2}$/.test(item.period)) ? <Text style={styles.subtitle}>No monthly invoices are available.</Text> : null}
         <Button label="Refresh invoices" secondary disabled={busy} onPress={() => void load("invoices")} />
@@ -318,6 +333,6 @@ export function Workflows({ session, refreshSession, onError, logout, tenantTab,
       {notifications.map(item => <View key={item.id} style={styles.card}><Text style={styles.cardTitle}>{item.title}</Text><Text style={styles.subtitle}>{item.message}</Text>{!item.readAt ? <Button label="Mark as read" disabled={busy} onPress={() => void run(async () => { await api.readNotification(item.id); setNotifications(await api.getNotifications()); })} secondary /> : <Text style={styles.subtitle}>Read</Text>}</View>)}
       <Button label="Refresh notifications" onPress={() => void load("notifications")} disabled={busy} secondary />
     </> : null}
-    {session.requiresAccountSetup || screen === "home" && (session.role !== "TENANT" || tenantTab === "account") ? <Button label="Sign out" onPress={logout} disabled={busy} secondary /> : null}
+    {session.requiresAccountSetup || screen === "profile" || screen === "home" && session.role === "TENANT" && tenantTab === "account" ? <Button label="Sign out" onPress={logout} disabled={busy} secondary /> : null}
   </>;
 }

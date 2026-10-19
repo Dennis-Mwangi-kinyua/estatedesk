@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Alert, Text, View } from "react-native";
 import * as api from "../api";
 import { Button, Field, styles } from "./ui";
+import { SignatureField, type SignatureValue } from "./signature-field";
+import { InspectionPhoto } from "./inspection-photo";
 
 type Run = (action: () => Promise<void>) => Promise<boolean>;
 const date = (value: string) => new Date(value).toLocaleString("en-KE", { timeZone: "Africa/Nairobi" });
@@ -21,15 +23,17 @@ export function LeaseSigningPanel({ requests, busy, run, refresh }: { requests: 
   return <>{requests.map(item => <LeaseSignature key={`${item.id}:${item.sourceDocumentHash}`} item={item} busy={busy} run={run} refresh={refresh} />)}</>;
 }
 function LeaseSignature({ item, busy, run, refresh }: { item: Awaited<ReturnType<typeof api.getLeaseSigning>>[number]; busy: boolean; run: Run; refresh: () => Promise<void> }) {
+  const [signature, setSignature] = useState<SignatureValue>({ signatureMethod: "TYPED" });
   const [name, setName] = useState(item.name); const [consent, setConsent] = useState(false); const [reviewed, setReviewed] = useState(false); const [reason, setReason] = useState("");
   return <View style={styles.card}><Text style={styles.cardTitle}>Review and sign · {item.unitLabel}</Text>
     <Text style={styles.subtitle}>Expires {date(item.expiresAt)}</Text><Text selectable style={styles.subtitle}>Document SHA-256: {item.sourceDocumentHash}</Text>
     <Button label="Open lease contract" secondary disabled={busy} onPress={() => void run(async () => { await api.openLeaseSigningDocument(item.id); setReviewed(true); })} />
     <Text style={styles.subtitle}>Review the contract before signing. Your authenticated account, signature, time, IP address, device and document hash form the evidence record.</Text>
     <Field label="Full legal name as electronic signature" value={name} onChangeText={setName} maxLength={200} editable={!busy} />
+    <SignatureField value={signature} change={setSignature} disabled={busy} />
     <Button label={item.consentText} checked={consent} secondary disabled={busy} onPress={() => setConsent(value => !value)} />
     {!item.canSign ? <Text style={styles.subtitle}>An earlier signer must sign before you can continue.</Text> : null}
-    <Button label="Sign lease" disabled={busy || !reviewed || !consent || name.trim().length < 2 || !item.canSign} onPress={() => Alert.alert("Sign this lease?", `Your electronic signature will be recorded as ${name.trim()}.`, [{ text: "Cancel", style: "cancel" }, { text: "Sign lease", onPress: () => void run(async () => { await api.submitLeaseSignature({ action: "sign", signerId: item.id, signatureText: name, consent: true, sourceDocumentHash: item.sourceDocumentHash }); await refresh(); }) }])} />
+    <Button label="Sign lease" disabled={busy || !reviewed || !consent || name.trim().length < 2 || !item.canSign || signature.signatureMethod !== "TYPED" && !signature.signatureData} onPress={() => Alert.alert("Sign this lease?", `Your electronic signature will be recorded as ${name.trim()}.`, [{ text: "Cancel", style: "cancel" }, { text: "Sign lease", onPress: () => void run(async () => { await api.submitLeaseSignature({ action: "sign", signerId: item.id, signatureText: name, consent: true, sourceDocumentHash: item.sourceDocumentHash, ...signature }); await refresh(); }) }])} />
     <Field label="Reason for declining (optional)" value={reason} onChangeText={setReason} multiline maxLength={1000} editable={!busy} />
     <Button label="Decline to sign" secondary disabled={busy || reason.trim().length < 5} onPress={() => Alert.alert("Decline this lease?", "Management will receive your reason.", [{ text: "Cancel", style: "cancel" }, { text: "Decline", style: "destructive", onPress: () => void run(async () => { await api.submitLeaseSignature({ action: "decline", signerId: item.id, reason, sourceDocumentHash: item.sourceDocumentHash }); await refresh(); }) }])} />
   </View>;
@@ -84,8 +88,9 @@ export function TenantInspectionsPanel({ data, busy, run, load }: { data: Awaite
     {!data.items.length ? <Text style={styles.subtitle}>No inspections on this page.</Text> : null}
     {data.items.map(item => <View key={item.id} style={styles.card}><Text style={styles.cardTitle}>{item.unitLabel}</Text><Text style={styles.label}>{item.status}</Text><Text style={styles.subtitle}>Scheduled {date(item.scheduledAt)} · {item.inspectorName}</Text>{item.completedAt ? <Text style={styles.subtitle}>Completed {date(item.completedAt)}</Text> : null}
       {item.notes ? <Text selectable style={styles.subtitle}>{item.notes}</Text> : null}
-      {item.checklist ? Object.entries(item.checklist).map(([key, value]) => <Text key={key} style={styles.subtitle}>{key.replaceAll("_", " ")}: {typeof value === "boolean" ? value ? "Passed" : "Needs attention" : typeof value === "string" ? value : JSON.stringify(value)}</Text>) : null}
-      {item.status === "COMPLETED" ? <Button label="Share inspection report" secondary disabled={busy} onPress={() => void run(() => api.openTenantWebDocument(`${api.websiteUrl()}${item.reportPath}`))} /> : null}
+      {item.checklist ? Object.entries(item.checklist).filter(([key]) => !["roomPhotos", "checkIn"].includes(key)).map(([key, value]) => <Text key={key} style={styles.subtitle}>{key.replaceAll("_", " ")}: {typeof value === "boolean" ? value ? "Passed" : "Needs attention" : typeof value === "string" ? value : JSON.stringify(value)}</Text>) : null}
+      {item.photos.map((photo, index) => <InspectionPhoto key={`${photo.id}:${index}`} inspectionId={item.id} photo={photo} busy={busy} run={run} />)}
+      {item.status === "COMPLETED" ? <Button label="Share inspection report" secondary disabled={busy} onPress={() => void run(() => api.shareTenantDocument(`${api.backendOrigin()}${item.reportPath}`))} /> : null}
     </View>)}
     <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}><Button label="Previous" secondary disabled={busy || data.page <= 1} onPress={() => void run(() => load(data.page - 1))} /><Button label="Next" secondary disabled={busy || !data.hasMore} onPress={() => void run(() => load(data.page + 1))} /></View>
     <Button label="Refresh inspections" secondary disabled={busy} onPress={() => void run(() => load(data.page))} />
