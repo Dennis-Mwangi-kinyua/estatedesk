@@ -158,7 +158,7 @@ export default async function RegisterPage({
     <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
       <RegisterStatusToast message={message} />
       <header className="sticky top-0 z-30 border-b border-neutral-200/80 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-950 text-white">
               <Home className="h-4 w-4" />
@@ -168,21 +168,28 @@ export default async function RegisterPage({
             </span>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <nav aria-label="Sign up navigation" className="flex items-center justify-end gap-1 sm:gap-2">
+            <Link
+              href="/vacancies"
+              className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-neutral-200 bg-white px-1.5 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 sm:px-3 sm:text-sm"
+            >
+              <Home aria-hidden="true" className="h-4 w-4" />
+              Vacancies
+            </Link>
             <Link
               href="/login"
-              className="inline-flex h-10 items-center justify-center rounded-lg border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+              className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg border border-neutral-200 bg-white px-1.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 sm:px-3 sm:text-sm"
             >
               Sign in
             </Link>
             <a
               href="#request-access"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-neutral-950 px-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
+              className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-neutral-950 px-1.5 text-xs font-semibold text-white transition hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-700 focus-visible:ring-offset-2 sm:gap-2 sm:px-3 sm:text-sm"
             >
               Request access
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </a>
-          </div>
+          </nav>
         </div>
       </header>
 
