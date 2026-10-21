@@ -1,11 +1,10 @@
 import { NotificationViewButton } from "@/components/notifications/notification-view-button";
-import { NotificationReadButton } from "@/components/notifications/notification-read-button";
 import { readNotificationActionUrl, resolveNotificationActionUrl } from "@/lib/push/notification-links";
+import { Bell, CreditCard, Droplets, FileArchive, Wrench } from "lucide-react";
 import {
   cn,
   formatDateTime,
   formatEnumLabel,
-  getNotificationStatusMeta,
 } from "@/app/(app)/dashboard/org/notifications/_lib/helpers";
 import type {
   NotificationFilter,
@@ -15,11 +14,7 @@ import type {
 import {
   EmptyState,
   NotificationFilterLink,
-  PanelHeader,
-  panelBodyClassName,
-  panelItemClassName,
   panelShellClassName,
-  secondaryButtonClassName,
 } from "@/app/(app)/dashboard/org/notifications/_components/notifications-ui";
 
 type CommunicationFeedPanelProps = {
@@ -27,167 +22,122 @@ type CommunicationFeedPanelProps = {
   notifications: NotificationItem[];
   activeFilter: NotificationFilter;
   totalNotifications: number;
+  filteredCount: number;
   unreadCount: number;
-  queuedCount: number;
-  failedCount: number;
 };
+
+function getNotificationIcon(notification: NotificationItem) {
+  if (notification.type.startsWith("PAYMENT_")) return CreditCard;
+  if (notification.type === "WATER_BILL_ISSUED") return Droplets;
+  if (notification.type.startsWith("ISSUE_")) return Wrench;
+  if (`${notification.title} ${notification.message}`.toLowerCase().includes("export")) return FileArchive;
+  return Bell;
+}
+
+function deliveryLabel(status: string) {
+  if (status === "SENT") return "Delivered";
+  if (status === "FAILED") return "Delivery failed";
+  return "Queued";
+}
 
 export function CommunicationFeedPanel({
   membership,
   notifications,
   activeFilter,
   totalNotifications,
+  filteredCount,
   unreadCount,
-  queuedCount,
-  failedCount,
 }: CommunicationFeedPanelProps) {
   return (
-    <section className={panelShellClassName}>
-      <div className={`border-b border-border ${panelBodyClassName}`}>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <PanelHeader
-            eyebrow="Activity log"
-            title="Communication feed"
-            description="Recent notifications sent to tenants, staff, and caretakers."
-          />
-
-          {unreadCount > 0 ? (
-            <NotificationReadButton
-              all
-              className={`${secondaryButtonClassName} sm:w-auto`}
-            >
-              Mark all read
-            </NotificationReadButton>
-          ) : null}
+    <section aria-label="Notification inbox" className={panelShellClassName}>
+      <div className="border-b border-border px-4 py-4 sm:px-6">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">Inbox</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {unreadCount === 0 ? "You’re all caught up." : `${unreadCount} unread ${unreadCount === 1 ? "notification" : "notifications"}`}
+            </p>
+          </div>
+          <p className="text-xs text-muted-foreground">{totalNotifications} total</p>
         </div>
 
-        <div className="mt-5 flex min-w-0 flex-wrap gap-2">
+        <nav aria-label="Filter notifications" className="mt-4 flex gap-2 overflow-x-auto pb-1">
           <NotificationFilterLink filter="all" activeFilter={activeFilter} label="All" />
           <NotificationFilterLink filter="unread" activeFilter={activeFilter} label="Unread" />
           <NotificationFilterLink filter="payments" activeFilter={activeFilter} label="Payments" />
           <NotificationFilterLink filter="issues" activeFilter={activeFilter} label="Issues" />
           <NotificationFilterLink filter="moveouts" activeFilter={activeFilter} label="Move-outs" />
           <NotificationFilterLink filter="water" activeFilter={activeFilter} label="Water" />
-        </div>
+          <NotificationFilterLink filter="exports" activeFilter={activeFilter} label="Data exports" />
+        </nav>
       </div>
 
-      <div className={`grid min-w-0 gap-4 md:grid-cols-2 ${panelBodyClassName}`}>
+      <div role="list" className="divide-y divide-border">
         {notifications.length === 0 ? (
-          <EmptyState
-            title="No notifications yet"
-            message="When messages are queued or delivered, they will appear here."
-            guideTopic="rent"
-            orgRole={membership.role}
-          />
-        ) : (
-          notifications.map((notification) => {
-            const meta = getNotificationStatusMeta(notification.status);
-            const StatusIcon = meta.icon;
-
-            return (
-              <article key={notification.id} className={`${panelItemClassName} h-full`}>
-                <div className="flex items-start gap-3">
-                  <div
-                    className={cn(
-                      "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border",
-                      meta.tone,
-                    )}
-                  >
-                    <StatusIcon className="h-4 w-4" />
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="min-w-0 break-words text-sm font-semibold text-foreground">
-                        {notification.title}
-                      </p>
-                      {!notification.readAt && notification.user?.id === membership.userId && (
-                        <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                          New
-                        </span>
-                      )}
-                      <span
-                        className={cn(
-                          "rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                          meta.tone,
-                        )}
-                      >
-                        {formatEnumLabel(notification.status)}
-                      </span>
-                    </div>
-
-                    <p className="mt-2 break-words text-sm leading-6 text-muted-foreground">
-                      {notification.message}
-                    </p>
-
-                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <span>{formatEnumLabel(notification.type)}</span>
-                      <span>•</span>
-                      {(notification.channels?.length
-                        ? notification.channels
-                        : [notification.channel]
-                      ).map((channel) => (
-                        <span
-                          key={channel}
-                          className="rounded-full border border-border bg-muted/20 px-2 py-0.5 text-[10px] font-medium text-foreground"
-                        >
-                          {formatEnumLabel(channel)}
-                        </span>
-                      ))}
-                      <span>•</span>
-                      <span>
-                        {formatDateTime(notification.createdAt, membership.org.timezone)}
-                      </span>
-                    </div>
-
-                    {(notification.user || notification.tenant) && (
-                      <p className="mt-2 text-xs text-muted-foreground">
-                        Recipient:{" "}
-                        {notification.tenant?.fullName ??
-                          notification.user?.fullName ??
-                          "—"}
-                      </p>
-                    )}
-
-                    {notification.title === "Subscription invoice sent" ? (
-                      <div className="mt-3 flex gap-3 text-sm font-medium text-primary">
-                        <a href={`/api/org/subscription-invoices/${notification.id}`} target="_blank" rel="noopener noreferrer">View invoice</a>
-                        <a href={`/api/org/subscription-invoices/${notification.id}?download=1`}>Download invoice</a>
-                      </div>
-                    ) : notification.user?.id === membership.userId ? <div className="mt-3"><NotificationViewButton notificationId={notification.id} href={resolveNotificationActionUrl({ type: notification.type, title: notification.title, audience: "org_staff", actionUrl: readNotificationActionUrl(notification.providerResponse) })} title={notification.title} message={notification.message} /></div> : null}
-                    {!notification.readAt && notification.user?.id === membership.userId ? (
-                      <div className="mt-3">
-                        <NotificationReadButton notificationId={notification.id} className="inline-flex h-9 items-center justify-center rounded-xl border border-border bg-background px-3 text-xs font-medium text-foreground transition hover:bg-muted/20 disabled:cursor-wait disabled:opacity-60">
-                          Mark read
-                        </NotificationReadButton>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              </article>
-            );
-          })
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 border-t border-border p-5 sm:grid-cols-4 sm:p-6">
-        {[
-          { label: "Loaded", value: totalNotifications },
-          { label: "Unread", value: unreadCount },
-          { label: "Queued", value: queuedCount },
-          { label: "Failed", value: failedCount },
-        ].map((item) => (
-          <div
-            key={item.label}
-            className="rounded-2xl border border-border bg-muted/10 p-4"
-          >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              {item.label}
-            </p>
-            <p className="mt-2 text-xl font-semibold text-foreground">{item.value}</p>
+          <div className="p-4 sm:p-6">
+            <EmptyState
+              title={activeFilter === "all" ? "No notifications yet" : "No matching notifications"}
+              message={activeFilter === "all" ? "Updates addressed to you will appear here." : "Try another filter or check back later."}
+            />
           </div>
-        ))}
+        ) : notifications.map((notification) => {
+          const Icon = getNotificationIcon(notification);
+          const isUnread = !notification.readAt;
+          const statusTone = notification.status === "FAILED"
+            ? "border-destructive/20 bg-destructive/5 text-destructive"
+            : notification.status === "QUEUED"
+              ? "border-amber-500/20 bg-amber-500/5 text-amber-700 dark:text-amber-300"
+              : "border-emerald-600/15 bg-emerald-600/5 text-emerald-700 dark:text-emerald-300";
+
+          return (
+            <article
+              role="listitem"
+              key={notification.id}
+              className={cn("flex gap-3 px-4 py-4 transition-colors sm:gap-4 sm:px-6", isUnread && "bg-primary/[0.025]")}
+            >
+              <span className={cn(
+                "mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl border",
+                isUnread ? "border-primary/20 bg-primary/10 text-primary" : "border-border bg-muted/30 text-muted-foreground",
+              )}>
+                <Icon aria-hidden="true" className="size-4" />
+              </span>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <h3 className="min-w-0 break-words text-sm font-semibold text-foreground">{notification.title}</h3>
+                  {isUnread ? <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">New</span> : null}
+                </div>
+                <p className="mt-1.5 line-clamp-2 break-words text-sm leading-6 text-muted-foreground">{notification.message}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <time dateTime={notification.createdAt.toISOString()}>{formatDateTime(notification.createdAt, membership.org.timezone)}</time>
+                  <span aria-hidden="true">·</span>
+                  <span>{formatEnumLabel(notification.type)}</span>
+                  <span aria-hidden="true">·</span>
+                  <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-medium", statusTone)}>{deliveryLabel(notification.status)}</span>
+                </div>
+              </div>
+
+              <div className="shrink-0 self-center">
+                <NotificationViewButton
+                  notificationId={notification.id}
+                  href={resolveNotificationActionUrl({ type: notification.type, title: notification.title, audience: "org_staff", actionUrl: readNotificationActionUrl(notification.providerResponse) })}
+                  title={notification.title}
+                  message={notification.message}
+                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-background px-3 text-xs font-semibold text-foreground transition hover:bg-muted/40"
+                >
+                  View
+                </NotificationViewButton>
+              </div>
+            </article>
+          );
+        })}
       </div>
+
+      {filteredCount > notifications.length ? (
+        <p className="border-t border-border px-4 py-3 text-center text-xs text-muted-foreground sm:px-6">
+          Showing the latest {notifications.length} of {filteredCount} matching notifications.
+        </p>
+      ) : null}
     </section>
   );
 }

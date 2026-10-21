@@ -4,11 +4,8 @@ import type {
 } from "@/app/(app)/dashboard/org/notifications/_lib/types";
 import { DashboardAutoRefresh } from "@/features/dashboard/components/dashboard-auto-refresh";
 import { CommunicationFeedPanel } from "@/app/(app)/dashboard/org/notifications/_components/communication-feed-panel";
-import { MoveOutQueuePanel } from "@/app/(app)/dashboard/org/notifications/_components/move-out-queue-panel";
-import { NotificationsHero } from "@/app/(app)/dashboard/org/notifications/_components/notifications-hero";
-import { OperationsAlertsSection } from "@/app/(app)/dashboard/org/notifications/_components/operations-alerts-section";
-import { OperationsSidebar } from "@/app/(app)/dashboard/org/notifications/_components/operations-sidebar";
-import { WaterApprovalQueuePanel } from "@/app/(app)/dashboard/org/notifications/_components/water-approval-queue-panel";
+import { Bell } from "lucide-react";
+import { NotificationReadButton } from "@/components/notifications/notification-read-button";
 
 type NotificationsWorkspaceProps = {
   activeFilter: NotificationFilter;
@@ -21,36 +18,39 @@ export function NotificationsWorkspace({
 }: NotificationsWorkspaceProps) {
   const {
     membership,
-    approvalQueue,
-    approvalQueueCount,
-    moveOutQueue,
     notifications,
-    recentPayments,
-    metrics: { totalNotifications, unreadCount, queuedCount, sentCount, failedCount },
+    metrics: { totalNotifications, unreadCount, filteredCount },
   } = data;
 
   return (
-    <div className="org-theme-content notifications-page uniform-page-actions mx-auto w-full min-w-0 max-w-7xl space-y-5 px-0 pb-24 pt-2 sm:px-2">
+    <div className="org-theme-content notifications-page uniform-page-actions mx-auto w-full min-w-0 max-w-6xl space-y-6 px-0 pb-24 pt-2 sm:px-2">
       <DashboardAutoRefresh interval={60_000} />
-      <NotificationsHero
-        membership={membership}
-        approvalQueueCount={approvalQueueCount}
-        moveOutCount={moveOutQueue.length}
-        unreadCount={unreadCount}
-        queuedCount={queuedCount}
-        sentCount={sentCount}
-      />
+      <header className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{membership.org.name}</p>
+          <div className="mt-2 flex items-center gap-3">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary"><Bell aria-hidden="true" className="size-5" /></span>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Notifications</h1>
+              <p className="mt-1 text-sm text-muted-foreground">Your organisation updates and messages, in one place.</p>
+            </div>
+          </div>
+        </div>
+        {unreadCount > 0 ? (
+          <NotificationReadButton all className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-muted/30 sm:w-auto">
+            Mark all as read
+          </NotificationReadButton>
+        ) : null}
+      </header>
 
-      <CommunicationFeedPanel membership={membership} notifications={notifications}
-        activeFilter={activeFilter} totalNotifications={totalNotifications}
-        unreadCount={unreadCount} queuedCount={queuedCount} failedCount={failedCount} />
-      <section aria-label="Approvals and move-outs" className="grid min-w-0 items-start gap-5">
-        <MoveOutQueuePanel membership={membership} moveOutQueue={moveOutQueue} />
-        <WaterApprovalQueuePanel membership={membership} approvalQueue={approvalQueue} approvalQueueCount={approvalQueueCount} />
-      </section>
-      <OperationsSidebar membership={membership} approvalQueueCount={approvalQueueCount}
-        recentPayments={recentPayments} sentCount={sentCount} failedCount={failedCount} unreadCount={unreadCount} />
-      <OperationsAlertsSection />
+      <CommunicationFeedPanel
+        membership={membership}
+        notifications={notifications}
+        activeFilter={activeFilter}
+        totalNotifications={totalNotifications}
+        filteredCount={filteredCount}
+        unreadCount={unreadCount}
+      />
     </div>
   );
 }

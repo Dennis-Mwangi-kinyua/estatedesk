@@ -5,13 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { collapseNotificationFeedRows } from "@/app/(app)/dashboard/org/notifications/_lib/helpers";
 import {
   ALLOWED_ROLES,
-  type ApprovalQueueItem,
-  type MoveOutQueueItem,
   type NotificationFilter,
   type NotificationItem,
   type OrgContext,
   type PageData,
-  type PaymentItem,
 } from "@/app/(app)/dashboard/org/notifications/_lib/types";
 
 export async function getCurrentOrgContext(): Promise<OrgContext> {
@@ -86,6 +83,7 @@ export function normalizeNotificationFilter(value?: string): NotificationFilter 
     "issues",
     "moveouts",
     "water",
+    "exports",
   ];
 
   return allowed.includes(value as NotificationFilter)
@@ -137,6 +135,15 @@ function getNotificationWhereForFilter(
       ],
     };
   }
+  if (filter === "exports") {
+    return {
+      ...base,
+      OR: [
+        { title: { contains: "export", mode: "insensitive" as const } },
+        { message: { contains: "export", mode: "insensitive" as const } },
+      ],
+    };
+  }
 
   return base;
 }
@@ -145,210 +152,48 @@ export async function loadNotificationsPageData(
   filter: NotificationFilter,
 ): Promise<PageData> {
   const membership = await getCurrentOrgContext();
-
-  const approvalQueueWhere = {
-    status: "SUBMITTED" as const,
-    unit: {
-      property: {
-        orgId: membership.orgId,
-        deletedAt: null,
-      },
-    },
+  const inboxWhere = {
+    orgId: membership.orgId,
+    userId: membership.userId,
   };
-
-  const approvalQueueCount = await prisma.meterReading.count({
-    where: approvalQueueWhere,
-  });
-
-  const { orgMeterReadingDetailSelect } = await import(
-    "@/app/(app)/dashboard/org/water-bills/_lib/reading-select"
-  );
-
-  const approvalQueue = await prisma.meterReading.findMany({
-    where: approvalQueueWhere,
-    orderBy: { createdAt: "asc" },
-    take: 8,
-    select: orgMeterReadingDetailSelect,
-  });
-
-  const moveOutQueue = await prisma.moveOutNotice.findMany({
-    where: {
-      status: {
-        in: ["SUBMITTED", "INSPECTION_SCHEDULED", "INSPECTION_COMPLETED"],
+  const [rawNotifications, totalNotifications, unreadCount, filteredCount] = await Promise.all([
+    prisma.notification.findMany({
+      where: { ...getNotificationWhereForFilter(filter, membership), userId: membership.userId },
+      orderBy: { createdAt: "desc" },
+      take: 120,
+      select: {
+        id: true,
+        title: true,
+        message: true,
+        type: true,
+        providerResponse: true,
+        channel: true,
+        status: true,
+        readAt: true,
+        createdAt: true,
+        user: { select: { id: true, fullName: true, email: true, phone: true, status: true } },
+        tenant: { select: { id: true, fullName: true, email: true, phone: true, status: true } },
       },
-      lease: {
-        orgId: membership.orgId,
-        deletedAt: null,
+    }),
+    prisma.notification.count({ where: { ...inboxWhere, channel: "IN_APP" } }),
+    prisma.notification.count({ where: { ...inboxWhere, channel: "IN_APP", readAt: null } }),
+    prisma.notification.count({
+      where: {
+        ...getNotificationWhereForFilter(filter, membership),
+        userId: membership.userId,
+        channel: "IN_APP",
       },
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
-    take: 8,
-    select: {
-      id: true,
-      noticeDate: true,
-      moveOutDate: true,
-      status: true,
-      notes: true,
-      tenant: {
-        select: {
-          id: true,
-          slug: true,
-          fullName: true,
-          phone: true,
-          email: true,
-          waterBills: {
-            where: {
-              status: {
-                in: ["ISSUED", "PAYMENT_PENDING", "PAID_PENDING_VERIFICATION", "DISPUTED"],
-              },
-            },
-            select: {
-              id: true,
-              total: true,
-              status: true,
-            },
-          },
-        },
-      },
-      lease: {
-        select: {
-          id: true,
-          rentCharges: {
-            where: {
-              status: {
-                in: ["UNPAID", "PARTIAL", "OVERDUE"],
-              },
-            },
-            select: {
-              id: true,
-              amountDue: true,
-              amountPaid: true,
-              balance: true,
-              status: true,
-            },
-          },
-          unit: {
-            select: {
-              houseNo: true,
-              property: {
-                select: {
-                  name: true,
-                },
-              },
-              building: {
-                select: {
-                  name: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      inspection: {
-        select: {
-          id: true,
-          scheduledAt: true,
-          status: true,
-        },
-      },
-    },
-  });
-
-  // Fetch a wider raw window — each send fans out into multiple channel rows
-  // (IN_APP + SMS + EMAIL + …). We collapse those into one feed event below.
-  const rawNotifications = await prisma.notification.findMany({
-    where: getNotificationWhereForFilter(filter, membership),
-    orderBy: { createdAt: "desc" },
-    take: 80,
-    select: {
-      id: true,
-      title: true,
-      message: true,
-      type: true,
-      providerResponse: true,
-      channel: true,
-      status: true,
-      readAt: true,
-      createdAt: true,
-      user: {
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-          phone: true,
-          status: true,
-        },
-      },
-      tenant: {
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-          phone: true,
-          status: true,
-        },
-      },
-    },
-  });
-
-  const notifications = collapseNotificationFeedRows(rawNotifications, 18);
-
-  const recentPayments = await prisma.payment.findMany({
-    where: {
-      orgId: membership.orgId,
-    },
-    orderBy: { createdAt: "desc" },
-    take: 10,
-    select: {
-      id: true,
-      amount: true,
-      method: true,
-      targetType: true,
-      gatewayStatus: true,
-      verificationStatus: true,
-      reference: true,
-      externalReference: true,
-      createdAt: true,
-      paidAt: true,
-      payerTenant: {
-        select: {
-          fullName: true,
-        },
-      },
-      rentCharge: {
-        select: {
-          period: true,
-        },
-      },
-      waterBill: {
-        select: {
-          period: true,
-        },
-      },
-      taxCharge: {
-        select: {
-          period: true,
-          taxType: true,
-        },
-      },
-    },
-  });
+    }),
+  ]);
+  const notifications = collapseNotificationFeedRows(rawNotifications, 60);
 
   return {
     membership,
-    approvalQueue: approvalQueue as ApprovalQueueItem[],
-    approvalQueueCount,
-    moveOutQueue: moveOutQueue as MoveOutQueueItem[],
     notifications: notifications as NotificationItem[],
-    recentPayments: recentPayments as PaymentItem[],
     metrics: {
-      totalNotifications: notifications.length,
-      unreadCount: notifications.filter((item) => !item.readAt).length,
-      queuedCount: notifications.filter((item) => item.status === "QUEUED").length,
-      sentCount: notifications.filter((item) => item.status === "SENT").length,
-      failedCount: notifications.filter((item) => item.status === "FAILED").length,
+      totalNotifications,
+      unreadCount,
+      filteredCount,
     },
   };
 }

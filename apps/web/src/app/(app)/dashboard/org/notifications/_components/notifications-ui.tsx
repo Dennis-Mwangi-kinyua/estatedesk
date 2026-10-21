@@ -131,7 +131,7 @@ export function NotificationFilterLink({
       href={`/dashboard/org/notifications?filter=${filter}`}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "inline-flex min-h-11 max-w-full items-center justify-center rounded-full border px-4 text-sm font-medium transition",
+        "inline-flex min-h-11 max-w-full shrink-0 items-center justify-center whitespace-nowrap rounded-full border px-4 text-sm font-medium transition",
         active
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:bg-muted/20 hover:text-foreground",

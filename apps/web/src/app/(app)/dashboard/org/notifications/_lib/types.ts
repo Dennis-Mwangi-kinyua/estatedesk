@@ -10,7 +10,7 @@ export const ALLOWED_ROLES: AllowedRole[] = [
 ];
 
 export type OrgContext = {
-  userId?: string;
+  userId: string;
   orgId: string;
   role: AllowedRole;
   org: {
@@ -150,17 +150,11 @@ export type PaymentItem = {
 
 export type PageData = {
   membership: OrgContext;
-  approvalQueue: ApprovalQueueItem[];
-  approvalQueueCount: number;
-  moveOutQueue: MoveOutQueueItem[];
   notifications: NotificationItem[];
-  recentPayments: PaymentItem[];
   metrics: {
     totalNotifications: number;
     unreadCount: number;
-    queuedCount: number;
-    sentCount: number;
-    failedCount: number;
+    filteredCount: number;
   };
 };
 
@@ -170,7 +164,8 @@ export type NotificationFilter =
   | "payments"
   | "issues"
   | "moveouts"
-  | "water";
+  | "water"
+  | "exports";
 
 export type PageProps = {
   searchParams?: Promise<{
