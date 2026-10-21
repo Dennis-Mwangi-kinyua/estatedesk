@@ -90,7 +90,8 @@ function amountInWords(amount: number, currencyCode: string) {
 
 export async function generateReceiptPdfV2(data: ReceiptPdfData) {
   if (data.pdfTemplateVersion === 1) return generatePreviousReceiptPdf(data);
-  const doc = await createProfessionalPdf({ ...data, title: "Payment receipt" });
+  // Keep the original version-two accent values so registered PDF hashes remain valid.
+  const doc = await createProfessionalPdf({ ...data, title: "Payment receipt", accentRgb: [.04, .39, .32] });
   doc.paragraph(data.organizationName, { size: 18, strong: true });
   doc.paragraph([data.organizationAddress, data.organizationPhone, data.organizationEmail].filter(Boolean).join(" | ") || "Issuer contact details not supplied", { size: 9 });
   doc.section("Amount received");

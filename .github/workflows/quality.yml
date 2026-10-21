@@ -77,11 +77,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Install Chromium for unit tests and smoke tests
+        run: npx playwright install --with-deps chromium
+
       - name: Run unit tests
         run: npm test
-
-      - name: Install Chromium for smoke tests
-        run: npx playwright install --with-deps chromium
 
       - name: Apply test database migrations
         run: npx prisma migrate deploy
