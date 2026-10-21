@@ -15,13 +15,17 @@ test("new tenant gets first rent and deposit atomically; verified payments issue
   try {
     const unit = await f.prisma.unit.create({ data: { propertyId: f.unit.propertyId, houseNo: "NEW", rentAmount: 15000, depositAmount: 15000, status: "VACANT" } });
     const suffix = Date.now().toString();
-    await executeCreateTenantTransaction({ orgId: f.org.id, fullName: "Initial charges tenant", phone: `2548${suffix.slice(-8)}`, email: null, nationalId: null, kraPin: null, notes: null, statusRaw: "ACTIVE", nextOfKinName: "Kin", nextOfKinRelationship: "Sibling", nextOfKinPhone: "254700000000", nextOfKinEmail: null, unitId: unit.id, leaseStartDate: new Date("2026-10-10T00:00:00Z"), dueDay: 5, monthlyRent: null, deposit: null, username: `initial${suffix}`, password: "Test-only-password-123" });
+    await executeCreateTenantTransaction({ orgId: f.org.id, fullName: "Initial charges tenant", phone: `2548${suffix.slice(-8)}`, email: null, nationalId: null, kraPin: null, notes: null, statusRaw: "ACTIVE", nextOfKinName: "Kin", nextOfKinRelationship: "Sibling", nextOfKinPhone: "254700000000", nextOfKinEmail: null, unitId: unit.id, leaseStartDate: new Date("2026-10-10T00:00:00Z"), dueDay: 5, monthlyRent: new Prisma.Decimal(12500), deposit: new Prisma.Decimal(5000), username: `initial${suffix}`, password: "Test-only-password-123" });
     const lease = await f.prisma.lease.findFirstOrThrow({ where: { unitId: unit.id }, include: { tenant: true } });
     newUserId = lease.tenant.userId!;
     const charges = await f.prisma.rentCharge.findMany({ where: { leaseId: lease.id }, orderBy: { chargeType: "asc" } });
     assert.equal(charges.length, 2);
+    assert.equal(lease.monthlyRent.toFixed(2), "12500.00");
+    assert.equal(lease.deposit?.toFixed(2), "5000.00");
+    assert.equal(charges.find(charge => charge.chargeType === "RENT")?.amountDue.toFixed(2), "12500.00");
+    assert.equal(charges.find(charge => charge.chargeType === "DEPOSIT")?.amountDue.toFixed(2), "5000.00");
     assert.deepEqual(charges.map(charge => charge.chargeType).sort(), ["DEPOSIT", "RENT"]);
-    assert.equal(charges.reduce((sum, charge) => sum + Number(charge.balance), 0), 30000);
+    assert.equal(charges.reduce((sum, charge) => sum + Number(charge.balance), 0), 17500);
     assert.equal((await f.prisma.unit.findUniqueOrThrow({ where: { id: unit.id } })).status, "OCCUPIED");
     assert.equal(await depositHeldCents(f.prisma, lease), 0);
     const session = { userId: f.actor.id, email: f.actor.email, fullName: f.actor.fullName, platformRole: "USER" as const, activeOrgId: f.org.id, activeOrgRole: "MANAGER" as const, mustChangePassword: false, requiresTermsAcceptance: false, membershipScope: null };
@@ -33,14 +37,14 @@ test("new tenant gets first rent and deposit atomically; verified payments issue
         const completed = await tx.payment.findUniqueOrThrow({ where: { id: payment.id }, include: { receipt: { include: { document: true } }, allocations: true } });
         assert.equal(completed.receipt?.document?.documentType, "RECEIPT");
         assert.equal(completed.allocations.length, 1);
-        assert.equal(Number(completed.allocations[0].amount), 15000);
+        assert.equal(Number(completed.allocations[0].amount), Number(charge.amountDue));
       }, { isolationLevel: "Serializable", timeout: 15000 });
     }
     await f.prisma.$transaction(tx => createInitialLeaseCharges(tx, lease), { timeout: 15000 });
     const final = await f.prisma.rentCharge.findMany({ where: { leaseId: lease.id } });
     assert.equal(final.length, 2);
     assert.ok(final.every(charge => charge.status === "PAID" && charge.balance.eq(new Prisma.Decimal(0))));
-    assert.equal(await depositHeldCents(f.prisma, lease), 1500000);
+    assert.equal(await depositHeldCents(f.prisma, lease), 500000);
   } finally {
     await f.cleanup();
     if (newUserId) await f.prisma.user.delete({ where: { id: newUserId } });

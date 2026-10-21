@@ -206,5 +206,6 @@ export const mobileProfileSchema = z.object({
   nextOfKinName: z.string(), nextOfKinRelationship: z.string(), nextOfKinPhone: z.string(), nextOfKinEmail: z.string(),
 });
 export type MobileProfileInput = z.infer<typeof mobileProfileInputSchema>;
-export { nativeWorkspaceQuerySchema, nativeWorkspacePageSchema, nativeLegalSchema, type NativeWorkspaceRecord, type NativeWorkspacePage } from "./native-workspace";
+export { nativeWorkspaceQuerySchema, nativeWorkspacePageSchema, nativeLegalSchema, nativeGuestStaySchema, type NativeWorkspaceRecord, type NativeWorkspacePage, type NativeGuestStay } from "./native-workspace";
 export { nativeActionDefinitionSchema, nativeActionRequestSchema, nativeActionResultSchema, nativeActionFormData, type NativeActionLink, type NativeActionDefinition, type NativeActionField, type NativeActionRequest, type NativeActionResult } from "./native-actions";
+export { nativeVacancyListSchema, nativeVacancyDetailSchema, nativeVacancyInquirySchema, type NativeVacancyCard, type NativeVacancyDetail, type NativeVacancyInquiry } from "./native-vacancies";

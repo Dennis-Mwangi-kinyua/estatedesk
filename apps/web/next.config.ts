@@ -111,6 +111,7 @@ const PUBLIC_FAST_EDGE_CACHE_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  deploymentId: process.env.VERCEL_DEPLOYMENT_ID ?? process.env.NEXT_DEPLOYMENT_ID,
   poweredByHeader: false,
   env: {
     NEXT_PUBLIC_APP_VERSION: webPackage.version,
@@ -209,10 +210,13 @@ const nextConfig: NextConfig = {
         "/water-billing-software",
         "/property-management-software-kenya",
         "/property-management-software-dubai",
+        "/property-management-software-africa",
+        "/remote-property-management-software",
         "/privacy",
         "/terms",
         "/security",
         "/data-processing",
+        "/data-processing-agreement",
         "/status",
         "/pricing",
         "/contact",

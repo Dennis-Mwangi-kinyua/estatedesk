@@ -37,7 +37,7 @@ export function JobsQueuesSection({
   return (
     <>
       <Surface title="Queued notification backlog">
-        <div className="engineering-record-grid engineering-card-view">
+        <div className="engineering-record-grid jobs-card-view">
           {queuedNotifications.map((item) => {
             const color = colorForJobEntry(item.org.name);
             return (
@@ -114,7 +114,7 @@ export function JobsQueuesSection({
             </JobActionButton>
           </form>
         </div>
-        <div className="engineering-record-grid engineering-card-view">
+        <div className="engineering-record-grid jobs-card-view">
           {failedNotifications.map((item) => {
             const color = colorForJobEntry(item.org.name);
             return (
@@ -193,7 +193,7 @@ export function JobsQueuesSection({
       </Surface>
 
       <Surface title="KRA retryable attempts">
-        <div className="engineering-record-grid engineering-card-view">
+        <div className="engineering-record-grid jobs-card-view">
           {retryableKraAttempts.map((attempt) => {
             const color = colorForJobEntry(attempt.rentalReturn.org.name);
             return (

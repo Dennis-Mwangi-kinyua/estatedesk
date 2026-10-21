@@ -62,6 +62,14 @@ export function validateStepThree(form: HTMLFormElement): string | null {
     return null;
   }
 
+  for (const [field, label] of [["monthlyRent", "Agreed monthly rent"], ["deposit", "Agreed deposit"]]) {
+    const value = String(data.get(field) ?? "").trim();
+    if (!/^\d+(?:\.\d{1,2})?$/.test(value)) {
+      focusField(form, field);
+      return `${label} is required and must be a non-negative amount with up to two decimal places.`;
+    }
+  }
+
   if (status !== "ACTIVE") {
     focusField(form, "status");
     return "A tenant must be Active if you want to assign a unit during creation.";

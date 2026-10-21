@@ -133,7 +133,7 @@ export function JobsOverviewSection({
       </Surface>
 
       <Surface title="Recent job runs">
-        <div className="engineering-record-grid engineering-card-view">
+        <div className="engineering-record-grid jobs-card-view">
           {jobRuns.map((run) => {
             const color = colorForJobEntry(run.jobName);
             return (

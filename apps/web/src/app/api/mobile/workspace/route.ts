@@ -7,6 +7,7 @@ import { mobileWorkspaceAllowed, mobileWorkspaceLinks } from "@/lib/mobile/works
 import { mobileFeatures } from "@/lib/mobile/features";
 import { reviewWhere } from "@/lib/mobile/payment-review";
 import { notificationScopeForSession } from "@/lib/notifications/read";
+import { getLandlordDashboardData } from "@/app/(app)/dashboard/landlord/_lib/queries";
 
 export async function GET(request: Request) {
   return nativeRoute(request, async session => {
@@ -15,6 +16,22 @@ export async function GET(request: Request) {
     const links = mobileWorkspaceLinks(session, kind);
     if (new URL(request.url).searchParams.get("section") === "menu") return mobileJson({ kind, links, metrics: [], updates: [], partial: false, updatedAt: new Date().toISOString() });
     const allowed = (path: string) => links.some(link => link.path === path);
+    if (kind === "landlord") {
+      if (!session.activeOrgId || session.activeOrgRole !== "LANDLORD") return mobileJson({ error: "Landlord workspace access is unavailable." }, 403);
+      const [dashboard, org] = await Promise.all([
+        getLandlordDashboardData(session.activeOrgId, session.userId),
+        prisma.organization.findUnique({ where: { id: session.activeOrgId }, select: { currencyCode: true } }),
+      ]);
+      const currency = org?.currencyCode ?? "KES";
+      const root = "/dashboard/landlord";
+      const metrics = dashboard ? [
+        { title: "Properties", value: String(dashboard.properties.length), detail: "Assigned to your landlord profile", emoji: "🏘️", path: root },
+        { title: "Occupied units", value: String(dashboard.occupiedUnits), detail: `${dashboard.vacantUnits} vacant in your portfolio`, emoji: "🏡", path: root },
+        { title: "Rent collected", value: `${currency} ${dashboard.monthlyAmountPaid.toLocaleString("en-KE")}`, detail: dashboard.currentPeriod, emoji: "💳", path: "/dashboard/landlord/statements" },
+        { title: "Outstanding", value: `${currency} ${dashboard.monthlyBalance.toLocaleString("en-KE")}`, detail: "Current portfolio balance", emoji: "📊", path: "/dashboard/landlord/statements" },
+      ].filter(metric => allowed(metric.path)) : [];
+      return mobileJson({ kind, links, metrics, updates: [], partial: false, updatedAt: new Date().toISOString() } satisfies MobileWorkspaceDashboard);
+    }
     type Metric = MobileWorkspaceDashboard["metrics"][number];
     const tasks: { metric: Omit<Metric, "value">; value: Promise<number> }[] = [];
     const count = (title: string, emoji: string, path: string, value: () => Promise<number>, detail: string) => {

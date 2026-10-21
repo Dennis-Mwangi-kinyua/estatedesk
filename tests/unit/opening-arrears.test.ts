@@ -14,7 +14,7 @@ test("imports outstanding amounts exactly, leaving settled and blank months out"
   assert.deepEqual(parseOpeningArrears(form, options), [{ period: "2026-09", amount: "1250.25" }]);
 });
 test("rejects unsupported amounts, months, duplicate months and balances without a mapped existing lease", () => {
-  for (const [period, amount] of [["2026-10", "100"], ["2025-09", "100"], ["2026-09", "-1"], ["2026-09", "1.001"], ["2026-09", "1e3"], ["2026-09", "Infinity"]]) {
+  for (const [period, amount] of [["2026-10", "100"], ["2026-13", "100"], ["2026-00", "100"], ["0000-01", "100"], ["2025-9", "100"], ["2026-09", "-1"], ["2026-09", "1.001"], ["2026-09", "1e3"], ["2026-09", "Infinity"]]) {
     const form = new FormData(); form.set(`openingArrears:${period}`, amount);
     assert.throws(() => parseOpeningArrears(form, options));
   }
@@ -29,4 +29,27 @@ test("opening balance detection does not suppress normal rent or garbage charges
   assert.equal(isOpeningArrearsCharge({ chargeType: "OTHER", description: `${OPENING_ARREARS_PREFIX}2026-09` }), true);
   assert.equal(isOpeningArrearsCharge({ chargeType: "OTHER", description: "Monthly garbage fee" }), false);
   assert.equal(isOpeningArrearsCharge({ chargeType: "RENT", description: `${OPENING_ARREARS_PREFIX}2026-09` }), false);
+});
+
+test("accepts balances from any completed past year within the lease", () => {
+  const form = new FormData();
+  form.set("openingArrears:1998-01", "123.45");
+  form.set("openingArrears:2009-12", "700");
+  form.set("openingArrears:2025-09", "900.5");
+  assert.deepEqual(parseOpeningArrears(form, { ...options, leaseStartDate: new Date("1998-01-01") }), [
+    { period: "1998-01", amount: "123.45" },
+    { period: "2009-12", amount: "700.00" },
+    { period: "2025-09", amount: "900.50" },
+  ]);
+  assert.throws(() => parseOpeningArrears(form, options), /cannot predate/);
+});
+
+test("can import every month across multiple decades without a year limit", () => {
+  const form = new FormData();
+  for (let year = 1990; year < 2026; year++) {
+    for (let month = 1; month <= 12; month++) form.set(`openingArrears:${year}-${String(month).padStart(2, "0")}`, "1.25");
+  }
+  const entries = parseOpeningArrears(form, { ...options, leaseStartDate: new Date("1990-01-01") });
+  assert.equal(entries.length, 36 * 12);
+  assert.equal(entries.reduce((sum, entry) => sum + Math.round(Number(entry.amount) * 100), 0), 54000);
 });

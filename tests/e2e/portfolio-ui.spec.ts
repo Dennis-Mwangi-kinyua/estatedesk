@@ -10,7 +10,7 @@ async function mount(page: Page, tenant: boolean | "unit" | "verify" | "verify-e
  builder.onResolve({filter:/^\.\.\/actions$/},()=>({path:"unit-action",namespace:"fixture"}));
  builder.onResolve({filter:/create-tenant-action$/},()=>({path:"action",namespace:"fixture"}));
  builder.onResolve({filter:/^@\/components\/navigation\/app-links$/},()=>({path:"links",namespace:"fixture"}));
- builder.onLoad({filter:/.*/,namespace:"fixture"},args=>({contents:args.path==="public-id"?'export const encodePublicId=id=>id; export const encodePublicSlug=id=>id; export const decodePublicId=id=>id;':args.path==="unit-action"?'export const createUnitAction=async()=>{}; export const requestTenantTransferAction=async()=>{}; export const approveTenantTransferAction=async()=>{}; export const rejectTenantTransferAction=async()=>{};':args.path==="navigation"?'export const useRouter=()=>({prefetch(){},push(){}}); export const usePathname=()=>"/dashboard/org/properties";':args.path==="action"?'export const createTenantAction=async()=>({status:"error",message:"Simulated server error"});':args.path==="links"?'import React from "react"; export function DeferredLink(props){return React.createElement("a",props);} export const HoverPrefetchLink=DeferredLink;':'import React from "react"; export default function Link(props){return React.createElement("a",props);}',loader:"js",resolveDir:process.cwd()}));
+ builder.onLoad({filter:/.*/,namespace:"fixture"},args=>({contents:args.path==="public-id"?'export const encodePublicId=id=>id; export const encodePublicSlug=id=>id; export const decodePublicId=id=>id;':args.path==="unit-action"?'export const createUnitAction=async()=>{}; export const requestTenantTransferAction=async()=>{}; export const approveTenantTransferAction=async()=>{}; export const rejectTenantTransferAction=async()=>{};':args.path==="navigation"?'export const useRouter=()=>({prefetch(){},push(){}}); export const usePathname=()=>"/dashboard/org/properties";':args.path==="action"?'export const createTenantAction=async(_,data)=>{document.body.dataset.tenantSubmission=JSON.stringify(Object.fromEntries(data));return {status:"error",message:"Simulated server error"};};':args.path==="links"?'import React from "react"; export function DeferredLink(props){return React.createElement("a",props);} export const HoverPrefetchLink=DeferredLink;':'import React from "react"; export default function Link(props){return React.createElement("a",props);}',loader:"js",resolveDir:process.cwd()}));
  }}]});
  await page.goto(`/register?fixture=${Date.now()}-${Math.random()}${typeof tenant === "string" ? `#${tenant}` : tenant?"#tenant":""}`);
  const styles=await page.locator('link[rel="stylesheet"]').evaluateAll(links=>links.map(link=>(link as HTMLLinkElement).href));
@@ -89,4 +89,96 @@ test("leases show responsive cards, agreement navigation, details and pagination
  await expect(card).toBeVisible();
  await mount(page,"leases-empty");
  await expect(page.getByRole("heading",{name:"No leases found"})).toBeVisible();
+});
+
+test("tenant submission preserves details after a server error and on retry", async ({ page }) => {
+ await mount(page, true);
+ const next = () => page.getByRole("button", { name: "Continue", exact: true }).and(page.locator("button:visible")).click();
+ await page.locator('[name="fullName"]').fill("Jane Example");
+ await page.locator('[name="phone"]').fill("0712345678");
+ await next();
+ await page.locator('[name="nextOfKinName"]').fill("Alex Example");
+ await page.locator('[name="nextOfKinRelationship"]').fill("Sibling");
+ await page.locator('[name="nextOfKinPhone"]').fill("0712345679");
+ await next();
+ await next();
+ await page.locator('[name="password"]').fill("ExamplePass123");
+ await page.locator('[name="confirmPassword"]').fill("ExamplePass123");
+ await next();
+ const submit = page.locator('button[type="submit"]:visible');
+ await submit.click();
+ await expect(page.getByRole("alert")).toContainText("Simulated server error");
+ await expect(page.locator('[name="fullName"]')).toHaveValue("Jane Example");
+ await expect(page.locator('[name="phone"]')).toHaveValue("0712345678");
+ await expect(page.locator('[name="nextOfKinName"]')).toHaveValue("Alex Example");
+ await submit.click();
+ await expect(page.locator('[name="fullName"]')).toHaveValue("Jane Example");
+});
+
+async function tenantLeaseStep(page: Page, existing = false) {
+ await mount(page, true);
+ if (existing) await page.getByRole("button", { name: "Existing tenant", exact: false }).click();
+ const next = () => page.locator('button:visible').filter({ hasText: /^Continue$/ }).click();
+ await page.locator('[name="fullName"]').fill("Jane Example");
+ await page.locator('[name="phone"]').fill("0712345678");
+ await next();
+ await page.locator('[name="nextOfKinName"]').fill("Alex Example");
+ await page.locator('[name="nextOfKinRelationship"]').fill("Sibling");
+ await page.locator('[name="nextOfKinPhone"]').fill("0712345679");
+ await next();
+ await page.locator('button[aria-haspopup="listbox"]').click();
+ await page.getByRole("option", { name: /Greenview \/ Unit A12/ }).click();
+ return next;
+}
+
+test("new tenant reviews the agreed first bill instead of apartment default prices", async ({ page }) => {
+ const next = await tenantLeaseStep(page);
+ await expect(page.getByRole("heading", { name: "Previous unpaid bills" })).toHaveCount(0);
+ await expect(page.locator('[name="monthlyRent"]')).toHaveValue("15000");
+ await page.locator('[name="monthlyRent"]').fill("12500");
+ await page.locator('[name="deposit"]').fill("5000");
+ await next();
+ await page.locator('[name="password"]').fill("ExamplePass123");
+ await page.locator('[name="confirmPassword"]').fill("ExamplePass123");
+ await next();
+ await expect(page.locator("body")).not.toHaveAttribute("data-tenant-submission");
+ await expect(page.getByText(/Total first bill:/)).toContainText("17,500");
+ await expect(page.getByText(/First month rent:/)).toContainText("12,500");
+ await page.locator('button[type="submit"]:visible').click();
+ await expect(page.getByRole("alert")).toContainText("Simulated server error");
+ const submitted = JSON.parse((await page.locator("body").getAttribute("data-tenant-submission"))!);
+ expect(submitted.monthlyRent).toBe("12500");
+ expect(submitted.deposit).toBe("5000");
+ expect(submitted.existingLease).toBeUndefined();
+ await page.locator('button:visible').filter({ hasText: /^Back$/ }).click();
+ await page.locator('button:visible').filter({ hasText: /^Back$/ }).click();
+ await expect(page.locator('[name="monthlyRent"]')).toHaveValue("12500");
+ expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test("existing tenant can import several old years and review unpaid balances", async ({ page }) => {
+ const next = await tenantLeaseStep(page, true);
+ await page.locator('[name="leaseStartDate"]').fill("1998-01-01");
+ for (const year of ["1998", "2009", "2016"]) {
+  await page.getByRole("spinbutton", { name: "Year to add" }).fill(year);
+  await page.getByRole("button", { name: "Add year", exact: true }).click();
+ }
+ await page.locator('[name="openingArrears:1998-01"]').fill("123.45");
+ await page.locator('[name="openingArrears:2009-12"]').fill("700");
+ await page.locator('[name="openingArrears:2016-08"]').fill("900.5");
+ await next();
+ await page.locator('[name="password"]').fill("ExamplePass123");
+ await page.locator('[name="confirmPassword"]').fill("ExamplePass123");
+ await next();
+ await expect(page.getByText("1998-01: 123.45", { exact: true })).toBeVisible();
+ await expect(page.getByText("Total previous arrears: 1723.95", { exact: true })).toBeVisible();
+ await expect(page.getByText("Initial rent and deposit charges will not be recreated.", { exact: true })).toBeVisible();
+ await expect(page.getByText(/Total first bill:/)).toHaveCount(0);
+ await page.locator('button[type="submit"]:visible').click();
+ await expect(page.getByRole("alert")).toContainText("Simulated server error");
+ const submitted = JSON.parse((await page.locator("body").getAttribute("data-tenant-submission"))!);
+ expect(submitted.existingLease).toBe("on");
+ expect(submitted["openingArrears:1998-01"]).toBe("123.45");
+ expect(submitted["openingArrears:2009-12"]).toBe("700");
+ expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

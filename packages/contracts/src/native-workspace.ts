@@ -2,7 +2,7 @@ import { z } from "zod";
 import { nativeActionLinkSchema } from "./native-actions";
 
 export const nativeWorkspaceQuerySchema = z.object({
-  kind: z.enum(["organization", "platform"]),
+  kind: z.enum(["organization", "platform", "landlord"]),
   path: z.string().min(1).max(200),
   recordId: z.string().min(1).max(200).optional(),
   q: z.string().trim().max(100).default(""),
@@ -30,3 +30,8 @@ export const nativeLegalSchema = z.object({
   title: z.string(), description: z.string(), updatedAt: z.string(),
   sections: z.array(z.object({ title: z.string(), body: z.array(z.string()) })),
 });
+export const nativeGuestStaySchema = z.object({
+  guestName: z.string(), checkIn: z.string(), checkOut: z.string(), listing: z.string(), location: z.string(), host: z.string(),
+  requests: z.array(z.object({ id: z.string(), message: z.string(), createdAt: z.string(), resolved: z.boolean() })),
+});
+export type NativeGuestStay = z.infer<typeof nativeGuestStaySchema>;

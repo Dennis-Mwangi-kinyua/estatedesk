@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const mobileWorkspaceKindSchema = z.enum(["organization", "platform"]);
+export const mobileWorkspaceKindSchema = z.enum(["organization", "platform", "landlord"]);
 export type MobileWorkspaceKind = z.infer<typeof mobileWorkspaceKindSchema>;
 export const mobileWorkspaceLinkSchema = z.object({
   title: z.string(), path: z.string(), description: z.string(), emoji: z.string(), group: z.string(),

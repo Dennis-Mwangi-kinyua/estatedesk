@@ -89,6 +89,9 @@ export async function createTenantAction(
 
     const monthlyRent = toNonNegativeDecimal(monthlyRentRaw, "Monthly rent");
     const deposit = toNonNegativeDecimal(depositRaw, "Deposit");
+    if (unitId && (monthlyRent === null || deposit === null)) {
+      throw new Error("Enter the agreed monthly rent and deposit for this tenant. Enter 0 if no deposit is required.");
+    }
 
     const leaseStartDate = leaseStartDateRaw
       ? new Date(leaseStartDateRaw)

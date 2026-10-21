@@ -6,6 +6,7 @@ import { FieldLabel, SectionTitle } from "./ui-primitives";
 import { OpeningArrearsFields } from "./opening-arrears-fields";
 
 export function StepUnitLease({
+  existingLease,
   isPending,
   currencyCode,
   availableUnits,
@@ -13,6 +14,7 @@ export function StepUnitLease({
   selectedUnit,
   onSelectUnit,
 }: {
+  existingLease: boolean;
   isPending: boolean;
   currencyCode: string;
   availableUnits: AvailableUnit[];
@@ -23,8 +25,8 @@ export function StepUnitLease({
   return (
     <div className={stepPanelClassName}>
       <SectionTitle
-        title="Unit mapping during creation"
-        description="Assign a vacant unit now, or leave it blank and map the tenant later."
+        title={existingLease ? "Existing unit and lease" : "Unit mapping during creation"}
+        description={existingLease ? "Assign the tenant’s unit and enter their original lease start date." : "Assign a vacant unit now, or leave it blank and map the tenant later."}
       />
 
       <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -67,7 +69,7 @@ export function StepUnitLease({
         </div>
 
         <label className="block">
-          <FieldLabel>Lease start date</FieldLabel>
+          <FieldLabel required={existingLease}>{existingLease ? "Original lease start date" : "Lease start date"}</FieldLabel>
           <input
             name="leaseStartDate"
             type="date"
@@ -91,33 +93,38 @@ export function StepUnitLease({
         </label>
 
         <label className="block">
-          <FieldLabel>Monthly rent override ({currencyCode})</FieldLabel>
+          <FieldLabel required={!!selectedUnit}>Agreed monthly rent ({currencyCode})</FieldLabel>
           <input
+            key={`rent-${selectedUnitId}`}
+            defaultValue={selectedUnit?.rentAmount ?? ""}
             name="monthlyRent"
             type="number"
             min="0"
             step="0.01"
             inputMode="decimal"
-            placeholder="Leave blank to use unit rent"
+            placeholder="Enter the agreed monthly rent"
             className={inputClassName}
             disabled={isPending}
           />
         </label>
 
         <label className="block">
-          <FieldLabel>Deposit override ({currencyCode})</FieldLabel>
+          <FieldLabel required={!!selectedUnit}>Agreed deposit ({currencyCode})</FieldLabel>
           <input
+            key={`deposit-${selectedUnitId}`}
+            defaultValue={selectedUnit ? selectedUnit.depositAmount ?? 0 : ""}
             name="deposit"
             type="number"
             min="0"
             step="0.01"
             inputMode="decimal"
-            placeholder="Leave blank to use unit deposit"
+            placeholder="Enter the agreed deposit, or 0"
             className={inputClassName}
             disabled={isPending}
           />
         </label>
-        <OpeningArrearsFields disabled={isPending} currencyCode={currencyCode} />
+        <p className="text-sm text-muted-foreground md:col-span-2">{existingLease ? "These are the agreed amounts for this lease. Only the unpaid previous balances entered below are imported; initial rent and deposit are not charged again." : "Review the suggested amounts and enter what this tenant agreed to pay. These amounts create the first rent and deposit bill and set the lease rent going forward."}</p>
+        <OpeningArrearsFields existing={existingLease} disabled={isPending} currencyCode={currencyCode} />
       </div>
     </div>
   );

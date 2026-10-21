@@ -13,11 +13,14 @@ export function ServiceWorkerRegistration() {
       return;
     }
 
-    window.addEventListener("load", () => {
+    const register = () => {
       navigator.serviceWorker.register("/sw.js").catch(() => {
         // PWA support should never block the core application.
       });
-    });
+    };
+    if (document.readyState === "complete") register();
+    else window.addEventListener("load", register, { once: true });
+    return () => window.removeEventListener("load", register);
   }, []);
 
   return null;

@@ -235,5 +235,5 @@ export async function executeCreateTenantTransaction(
       tenantName: tenant.fullName,
       username: user.username ?? username,
     };
-  }, { timeout: 15_000 });
+  }, { timeout: 15_000 + (input.openingArrears?.length ?? 0) * 1_000 });
 }

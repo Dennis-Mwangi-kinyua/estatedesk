@@ -4,7 +4,7 @@ import { getProductionReadinessReport } from "@/lib/ops/production-readiness";
 import { platformEndpointDocs } from "./platform-endpoint-docs";
 import { getGlobalSearchResults } from "@/app/(app)/platform/search/_lib/queries";
 import type { AppSession } from "@/lib/auth/session";
-import type { NativeWorkspaceRecord } from "@estatedesk/contracts/mobile";
+import type { MobileWorkspaceKind, NativeWorkspaceRecord } from "@estatedesk/contracts/mobile";
 import { prisma } from "@/lib/prisma";
 import { nativeOrgWideAccess, nativeUnitScope } from "./native-workspace-policy";
 import { identityOwners } from "@/features/identity/service";
@@ -14,6 +14,9 @@ import { canAccessGuideSlug } from "@/lib/help/in-app-guides";
 import { getRuntimeEnvReport } from "@/lib/config/env";
 import { getIntegrationReadinessReport } from "@/lib/integrations";
 import { isPlatformApiKeysUnlocked } from "@/app/(app)/platform/api-keys/actions";
+import { nativeTenantRecordActions } from "./native-tenant-admin-actions";
+import { nativeBnbRecordActions } from "./native-bnb-actions";
+import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
 
 type Value = string | number | boolean | Date | null | undefined | { toString(): string };
 function display(value: Value): string {
@@ -25,21 +28,80 @@ function card(id: string, title: string, status: string | undefined, fields: Rec
   return { id, title, status, subtitle, fields: Object.entries(fields).map(([label, value]) => ({ label, value: display(value) })) };
 }
 
-export async function nativeWorkspaceRecords(session: AppSession, kind: "organization" | "platform", path: string, q: string, page: number, recordId?: string): Promise<{ records: NativeWorkspaceRecord[]; notice?: string; searchable?: boolean }> {
+export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWorkspaceKind, path: string, q: string, page: number, recordId?: string): Promise<{ records: NativeWorkspaceRecord[]; notice?: string; searchable?: boolean }> {
   const orgId = session.activeOrgId!;
   const unit = nativeUnitScope(orgId, session.membershipScope);
   const wide = nativeOrgWideAccess(session.membershipScope);
   const limit = { skip: (page - 1) * 25, take: 26 };
   const newest = [{ createdAt: "desc" as const }, { id: "desc" as const }];
   const contains = { contains: q, mode: "insensitive" as const };
-  const section = path === "/api-keys" ? "api-keys" : path.replace(kind === "platform" ? /^\/platform\/?/ : /^\/dashboard\/org\/?/, "");
+  const section = path === "/api-keys" ? "api-keys" : path.replace(kind === "platform" ? /^\/platform\/?/ : kind === "landlord" ? /^\/dashboard\/landlord\/?/ : /^\/dashboard\/org\/?/, "");
   const restricted = { records: [], notice: "This view requires organization-wide access. Your assigned property, building or unit scope remains in effect." };
-  if (recordId && section !== "agreements") return { records: [], notice: "This record destination is unavailable." };
+  if (recordId && section !== "agreements" && section !== "airbnb/bookings" && !(kind === "landlord" && ["property", "unit"].includes(section))) return { records: [], notice: "This record destination is unavailable." };
   if (section === "help" || section === "developer/docs") {
-    const workspace = kind === "platform" ? "platform" : "org";
+    const workspace = kind === "platform" ? "platform" : kind === "landlord" ? "landlord" : "org";
     const articles = guideArticles.filter(article => canAccessGuideSlug(article.slug, workspace, session.activeOrgRole) && (!q || `${article.title} ${article.summary}`.toLowerCase().includes(q.toLowerCase())));
     return { records: articles.slice(limit.skip, limit.skip + limit.take).map(article => card(article.slug, article.title, undefined,
       Object.fromEntries(article.sections.map((item, index) => [`${index + 1}. ${item.heading}`, item.paragraphs.join("\n\n")])), article.summary)) };
+  }
+  if (kind === "landlord") {
+    if (session.activeOrgRole !== "LANDLORD" || !orgId) return { records: [], notice: "Landlord workspace access is unavailable." };
+    const profile = await prisma.landlordProfile.findFirst({
+      where: { orgId, userId: session.userId, deletedAt: null, isActive: true },
+      select: {
+        id: true, displayName: true,
+        assignments: {
+          where: { active: true, endedAt: null },
+          select: {
+            property: { select: {
+              id: true, name: true, location: true, address: true,
+              units: { where: { deletedAt: null, isActive: true }, select: {
+                id: true, houseNo: true, status: true, rentAmount: true,
+                leases: { where: { deletedAt: null, status: "ACTIVE" }, take: 1, select: { startDate: true, endDate: true, monthlyRent: true, tenant: { select: { fullName: true } } } },
+              } },
+            } },
+            unit: { select: {
+              id: true, houseNo: true, status: true, rentAmount: true,
+              property: { select: { id: true, name: true, location: true, address: true } },
+              leases: { where: { deletedAt: null, status: "ACTIVE" }, take: 1, select: { startDate: true, endDate: true, monthlyRent: true, tenant: { select: { fullName: true } } } },
+            } },
+          },
+        },
+      },
+    });
+    if (!profile) return { records: [], notice: "No active landlord profile is linked to this account." };
+    const properties = new Map<string, { name: string; location: string | null; address: string | null; units: Map<string, { houseNo: string; status: string; rent: number; tenant: string | null; leaseStart: Date | null; leaseEnd: Date | null; leaseRent: number | null }> }>();
+    for (const assignment of profile.assignments) {
+      const property = assignment.property ?? assignment.unit?.property;
+      if (!property) continue;
+      const entry = properties.get(property.id) ?? { name: property.name, location: property.location, address: property.address, units: new Map() };
+      if (assignment.property) for (const unit of assignment.property.units) { const lease = unit.leases[0]; entry.units.set(unit.id, { houseNo: unit.houseNo, status: unit.status, rent: Number(unit.rentAmount), tenant: lease?.tenant.fullName ?? null, leaseStart: lease?.startDate ?? null, leaseEnd: lease?.endDate ?? null, leaseRent: lease ? Number(lease.monthlyRent) : null }); }
+      if (assignment.unit) { const unit = assignment.unit, lease = unit.leases[0]; entry.units.set(unit.id, { houseNo: unit.houseNo, status: unit.status, rent: Number(unit.rentAmount), tenant: lease?.tenant.fullName ?? null, leaseStart: lease?.startDate ?? null, leaseEnd: lease?.endDate ?? null, leaseRent: lease ? Number(lease.monthlyRent) : null }); }
+      properties.set(property.id, entry);
+    }
+    if (section === "property") {
+      if (!recordId) return { records: [], notice: "Open one of your assigned properties to review its units." };
+      const property = properties.get(recordId);
+      if (!property) return { records: [], notice: "This property is not assigned to your landlord profile." };
+      return { records: [...property.units].map(([id, unit]) => ({ ...card(id, unit.houseNo, unit.status, { Property: property.name, Tenant: unit.tenant, "Monthly rent": unit.rent, "Lease starts": unit.leaseStart, "Lease ends": unit.leaseEnd }, "Assigned unit"), links: [{ title: "Unit and tenancy details", path: "/dashboard/landlord/unit", recordId: id, emoji: "🚪", description: "Open your authorized unit and active tenancy details." }] })) };
+    }
+    if (section === "unit") {
+      if (!recordId) return { records: [], notice: "Select an assigned unit to review its tenancy." };
+      for (const property of properties.values()) {
+        const unit = property.units.get(recordId);
+        if (unit) return { records: [card(recordId, `${property.name} · ${unit.houseNo}`, unit.status, { Property: property.name, Location: property.location, Address: property.address, Tenant: unit.tenant, "Monthly rent": unit.leaseRent ?? unit.rent, "Lease starts": unit.leaseStart, "Lease ends": unit.leaseEnd }, "Assigned unit and current tenancy")] };
+      }
+      return { records: [], notice: "This unit is not assigned to your landlord profile." };
+    }
+    if (section === "statements" || section === "payouts") {
+      const rows = await prisma.accountingJournalEntry.findMany({ where: { orgId, status: "POSTED", ...(section === "payouts" ? { sourceType: "OWNER_DISTRIBUTION" } : {}), lines: { some: { landlordId: profile.id } }, ...(q ? { OR: [{ entryNumber: contains }, { description: contains }, { memo: contains }] } : {}) }, ...limit, orderBy: [{ entryDate: "desc" }, { id: "desc" }], select: { id: true, entryNumber: true, entryDate: true, description: true, memo: true, sourceType: true, lines: { where: { landlordId: profile.id }, select: { debit: true, credit: true, propertyId: true } } } });
+      const propertyIds = [...new Set(rows.flatMap(row => row.lines.map(line => line.propertyId).filter((id): id is string => Boolean(id))))];
+      const propertyNames = propertyIds.length ? await prisma.property.findMany({ where: { orgId, id: { in: propertyIds } }, select: { id: true, name: true } }) : [];
+      const names = new Map(propertyNames.map(property => [property.id, property.name]));
+      return { records: rows.map(row => card(row.id, `${row.entryNumber} · ${row.memo || row.description}`, row.sourceType, { Date: row.entryDate, Properties: [...new Set(row.lines.map(line => line.propertyId ? names.get(line.propertyId) : null).filter(Boolean))].join(", "), Income: row.lines.reduce((sum, line) => sum + Number(line.credit), 0), Expenses: row.lines.reduce((sum, line) => sum + Number(line.debit), 0) })) };
+    }
+    const rows = [...properties].filter(([, property]) => !q || `${property.name} ${property.location ?? ""} ${property.address ?? ""}`.toLowerCase().includes(q.toLowerCase())).slice(limit.skip, limit.skip + limit.take);
+    return { records: rows.map(([id, property]) => { const units = [...property.units.values()]; const occupied = units.filter(unit => unit.status === "OCCUPIED").length; return { ...card(id, property.name, undefined, { Location: property.location, Address: property.address, Units: units.length, Occupied: occupied, Vacant: units.filter(unit => unit.status === "VACANT").length, "Monthly rent roll": units.reduce((sum, unit) => sum + unit.rent, 0), Tenants: [...new Set(units.map(unit => unit.tenant).filter(Boolean))].length }, "Assigned property portfolio"), links: [{ title: "View assigned units", path: "/dashboard/landlord/property", recordId: id, emoji: "🏘️", description: "Review unit occupancy and current tenancy details." }] }; }) };
   }
   if (kind === "organization") {
     switch (section) {
@@ -51,12 +113,14 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: "organiz
       case "buildings": {
         const rows = await prisma.building.findMany({ where: { deletedAt: null, property: { orgId, deletedAt: null }, ...(wide ? {} : { units: { some: unit } }), ...(q ? { name: contains } : {}) }, ...limit, orderBy: newest,
           select: { id: true, name: true, isActive: true, notes: true, property: { select: { name: true } } } });
-        return { records: rows.map(row => card(row.id, row.name, row.isActive ? "ACTIVE" : "INACTIVE", { Property: row.property.name, Notes: row.notes })) };
+        return { records: rows.map(row => ({ ...card(row.id, row.name, row.isActive ? "ACTIVE" : "INACTIVE", { Property: row.property.name, Notes: row.notes }),
+          ...(wide && ["ADMIN", "MANAGER"].includes(session.activeOrgRole ?? "") ? { actions: [{ id: "inventory.building.delete", title: "Delete building", destructive: true }] } : {}),
+        })) };
       }
       case "tenants": {
         const rows = await prisma.tenant.findMany({ where: { orgId, deletedAt: null, ...(wide ? {} : { leases: { some: { deletedAt: null, unit } } }), ...(q ? { fullName: contains } : {}) }, ...limit, orderBy: newest,
-          select: { id: true, fullName: true, phone: true, email: true, status: true, type: true } });
-        return { records: rows.map(row => card(row.id, row.fullName, row.status, { Phone: row.phone, Email: row.email, Type: row.type })) };
+          select: { id: true, fullName: true, phone: true, email: true, status: true, type: true, archivedAt: true, blacklistedAt: true, leases: { where: { status: "ACTIVE", deletedAt: null }, select: { id: true }, take: 1 } } });
+        return { records: rows.map(row => ({ ...card(row.id, row.fullName, row.status, { Phone: row.phone, Email: row.email, Type: row.type }), actions: nativeTenantRecordActions(session, path, { archivedAt: row.archivedAt, blacklistedAt: row.blacklistedAt, hasActiveLease: row.leases.length > 0 }) })) };
       }
       case "leases": {
         const rows = await prisma.lease.findMany({ where: { orgId, deletedAt: null, tenant: { deletedAt: null }, unit, ...(q ? { tenant: { deletedAt: null, fullName: contains } } : {}) }, ...limit, orderBy: newest,
@@ -97,16 +161,32 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: "organiz
       case "vacancy-inquiries": {
         const rows = await prisma.vacancyInquiry.findMany({ where: { orgId, unit, ...(q ? { fullName: contains } : {}) }, ...limit, orderBy: newest,
           select: { id: true, fullName: true, status: true, phone: true, email: true, message: true, createdAt: true } });
-        return { records: rows.map(row => card(row.id, row.fullName, row.status, { Phone: row.phone, Email: row.email, Message: row.message, Received: row.createdAt })) };
+        return { records: rows.map(row => ({ ...card(row.id, row.fullName, row.status, { Phone: row.phone, Email: row.email, Message: row.message, Received: row.createdAt }), actions: ["ADMIN", "MANAGER", "OFFICE"].includes(session.activeOrgRole ?? "") ? [{ id: "vacancy-inquiry.status", title: "Update status" }] : [] })) };
       }
       case "profile": {
         const row = await prisma.user.findUnique({ where: { id: session.userId }, select: { id: true, fullName: true, email: true, phone: true, username: true, status: true } });
         return { records: row ? [card(row.id, row.fullName, row.status, { Username: row.username, Email: row.email, Phone: row.phone, Role: session.activeOrgRole })] : [], searchable: false };
       }
-      case "accounting": {
+      case "accounting": case "accounting/coa": {
         if (!wide) return restricted;
         const rows = await prisma.accountingAccount.findMany({ where: { orgId, ...(q ? { OR: [{ name: contains }, { code: contains }] } : {}) }, ...limit, orderBy: { code: "asc" }, select: { id: true, code: true, name: true, type: true, normalBalance: true, isActive: true } });
-        return { records: rows.map(row => card(row.id, `${row.code} · ${row.name}`, row.isActive ? "ACTIVE" : "INACTIVE", { Type: row.type, "Normal balance": row.normalBalance })) };
+        return { records: rows.map(row => ({ ...card(row.id, `${row.code} · ${row.name}`, row.isActive ? "ACTIVE" : "INACTIVE", { Type: row.type, "Normal balance": row.normalBalance }),
+          ...(path === "/dashboard/org/accounting/coa" && ["ADMIN", "MANAGER", "ACCOUNTANT"].includes(session.activeOrgRole ?? "") ? { actions: [{ id: "accounting.account.update", title: "Edit account" }] } : {}),
+        })) };
+      }
+      case "accounting/journals": {
+        if (!wide) return restricted;
+        const rows = await prisma.accountingJournalEntry.findMany({
+          where: { orgId, ...(q ? { OR: [{ entryNumber: contains }, { description: contains }] } : {}) },
+          ...limit,
+          orderBy: [{ entryDate: "desc" }, { id: "desc" }],
+          select: { id: true, entryNumber: true, entryDate: true, description: true, memo: true, status: true, sourceType: true, lines: { select: { debit: true, credit: true } } },
+        });
+        return { records: rows.map(row => card(row.id, `${row.entryNumber} · ${row.description}`, row.status, {
+          Date: row.entryDate, Source: row.sourceType,
+          Debits: row.lines.reduce((sum, line) => sum + Number(line.debit), 0),
+          Credits: row.lines.reduce((sum, line) => sum + Number(line.credit), 0), Lines: row.lines.length, Memo: row.memo,
+        })) };
       }
       case "finance-requests": case "accounting/requests": {
         if (!wide) return restricted;
@@ -128,7 +208,10 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: "organiz
         if (!wide) return restricted;
         const rows = await prisma.membership.findMany({ where: { orgId, employmentEndedAt: null, role: { not: "TENANT" }, ...(q ? { user: { fullName: contains } } : {}) }, ...limit, orderBy: newest,
           select: { id: true, role: true, scopeType: true, deactivatedAt: true, user: { select: { fullName: true, email: true } } } });
-        return { records: rows.map(row => card(row.id, row.user.fullName, row.deactivatedAt ? "INACTIVE" : "ACTIVE", { Role: row.role, Scope: row.scopeType, Email: row.user.email })) };
+        return { records: rows.map(row => ({ ...card(row.id, row.user.fullName, row.deactivatedAt ? "INACTIVE" : "ACTIVE", { Role: row.role, Scope: row.scopeType, Email: row.user.email }),
+          ...(path === "/dashboard/org/staff" && !row.deactivatedAt && memberHasOrgPermission(session, "org.users.manage") && row.role !== "ADMIN" ? { actions: [{ id: "staff.update", title: "Edit staff profile" }, ...(memberHasOrgPermission(session, "org.users.delete") ? [{ id: "staff.deactivate", title: "Deactivate staff", destructive: true }] : [])] } : {}),
+          ...(path === "/dashboard/org/staff/permissions" && session.activeOrgRole === "ADMIN" && !row.deactivatedAt && ["MANAGER", "OFFICE", "ACCOUNTANT"].includes(row.role) ? { actions: [{ id: "staff.permissions.update", title: "Manage permissions" }] } : {}),
+        })) };
       }
       case "community": {
         if (!wide) return restricted;
@@ -148,7 +231,32 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: "organiz
       case "airbnb": {
         if (!wide) return restricted;
         const rows = await prisma.bnbListing.findMany({ where: { orgId, deletedAt: null, ...(q ? { title: contains } : {}) }, ...limit, orderBy: newest, select: { id: true, title: true, location: true, status: true, nightlyRate: true, bedrooms: true, maxGuests: true } });
-        return { records: rows.map(row => card(row.id, row.title, row.status, { Location: row.location, "Nightly rate": row.nightlyRate, Bedrooms: row.bedrooms, Guests: row.maxGuests })) };
+        return { records: rows.map(row => ({ ...card(row.id, row.title, row.status, { Location: row.location, "Nightly rate": row.nightlyRate, Bedrooms: row.bedrooms, Guests: row.maxGuests }), links: [{ title: "Bookings & guest access", path: "/dashboard/org/airbnb/bookings", recordId: row.id, emoji: "🛎️", description: "Manage reservations, check-in, guest access and requests." }], actions: nativeBnbRecordActions(session, path, row.status) })) };
+      }
+      case "airbnb/bookings": {
+        if (!wide || !recordId) return { records: [], notice: "Open a listing first to manage its bookings." };
+        const listing = await prisma.bnbListing.findFirst({ where: { id: recordId, orgId, deletedAt: null }, select: { id: true, title: true, status: true, minimumNights: true, availableFrom: true, propertyId: true } });
+        if (!listing) return { records: [], notice: "This listing is unavailable in your organization." };
+        const linkedProperty = listing.propertyId ? await prisma.property.findFirst({ where: { id: listing.propertyId, orgId, deletedAt: null }, select: { name: true } }) : null;
+        const stays = await prisma.bnbReservation.findMany({ where: { listingId: listing.id, checkOut: { gte: new Date(Date.now() - 30 * 86400000) }, ...(q ? { guestName: contains } : {}) }, ...limit, orderBy: [{ checkIn: "desc" }, { id: "desc" }], select: { id: true, guestName: true, guestPhone: true, checkIn: true, checkOut: true, checkedInAt: true, checkedOutAt: true, cancelledAt: true, guestTokenHash: true, requests: { orderBy: { createdAt: "desc" }, take: 20, select: { id: true, message: true, resolvedAt: true, createdAt: true } } } });
+        const now = new Date();
+        const listingCard = { ...card(listing.id, listing.title, listing.status, { Property: linkedProperty?.name, "Minimum nights": listing.minimumNights, "Available from": listing.availableFrom }, "Listing booking workspace"), actions: [{ id: "bnb.booking.create", title: "New booking" }, { id: "bnb.settings", title: "Availability settings" }] };
+        const stayCards = stays.map(stay => {
+          const status = stay.cancelledAt ? "CANCELLED" : stay.checkedOutAt ? "CHECKED OUT" : stay.checkedInAt ? "OCCUPIED" : stay.checkOut <= now ? "ENDED" : "BOOKED";
+          const actions = stay.cancelledAt || stay.checkedOutAt ? [] : [
+            ...(!stay.checkedInAt ? [{ id: "bnb.booking.update", title: "Edit booking" }, { id: "bnb.stay.check-in", title: "Check in guest" }, { id: "bnb.stay.cancel", title: "Cancel booking", destructive: true }] : [{ id: "bnb.stay.check-out", title: "Check out guest" }]),
+            ...(stay.checkOut > now ? [stay.guestTokenHash ? { id: "bnb.stay.revoke-access", title: "Revoke guest access", destructive: true } : { id: "bnb.stay.issue-access", title: "Issue guest access" }] : []),
+          ];
+          return { ...card(stay.id, stay.guestName, status, { Phone: stay.guestPhone, "Check-in": stay.checkIn, "Check-out": stay.checkOut, "Guest login": stay.guestTokenHash ? "Issued" : "Not issued" }), actions };
+        });
+        const requestCards = stays.flatMap(stay => stay.requests.map(request => ({ ...card(request.id, "Guest request", request.resolvedAt ? "RESOLVED" : "OPEN", { Guest: stay.guestName, Message: request.message, Received: request.createdAt }), ...(!request.resolvedAt ? { actions: [{ id: "bnb.request.resolve", title: "Mark resolved" }] } : {}) })));
+        return { records: [listingCard, ...stayCards, ...requestCards], searchable: true };
+      }
+      case "units": {
+        const rows = await prisma.unit.findMany({ where: { ...unit, ...(q ? { OR: [{ houseNo: contains }, { property: { name: contains } }] } : {}) }, ...limit, orderBy: newest, select: { id: true, houseNo: true, status: true, type: true, rentAmount: true, property: { select: { name: true } } } });
+        return { records: rows.map(row => ({ ...card(row.id, `${row.property.name} · ${row.houseNo}`, row.status, { Type: row.type, Rent: row.rentAmount }),
+          ...(wide && ["ADMIN", "MANAGER"].includes(session.activeOrgRole ?? "") ? { actions: [{ id: "unit.edit", title: "Edit unit" }, { id: "inventory.unit.delete", title: "Delete unit", destructive: true }] } : {}),
+        })) };
       }
       case "settings": {
         if (!wide) return restricted;

@@ -10,16 +10,29 @@ import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
 import { nativeOrgWideAccess } from "./native-workspace-policy";
 import { PROPERTY_TYPES } from "@/features/properties/components/_lib/constants";
 import { ALLOWED_UNIT_TYPES } from "@/features/properties/actions/_lib/parse-unit-plans";
-import { nativeInventoryDefinition } from "./native-inventory-actions";
+import { nativeInventoryDefinition, nativeInventoryPageActions } from "./native-inventory-actions";
 import { PlatformPermissionType } from "@prisma/client";
 import { openingArrearsPeriods } from "@/lib/tenants/opening-arrears";
 import { nativePlatformPageActions, nativePlatformRecordActions, nativePlatformActionDefinition } from "./native-platform-actions";
 import { PLATFORM_FEATURE_FLAG_KEYS } from "@/app/(app)/platform/_lib/nav";
+import { nativeStaffActionDefinition, nativeStaffPageActions } from "./native-staff-actions";
+import { nativeTenantActionDefinition } from "./native-tenant-admin-actions";
+import { nativeAccountingActionDefinition, nativeAccountingPageActions } from "./native-accounting-actions";
+import { nativeBnbActionDefinition } from "./native-bnb-actions";
+import { nativeVacancyInquiryDefinition } from "./native-vacancy-inquiry-actions";
+import type { MobileWorkspaceKind } from "@estatedesk/contracts/mobile";
 
 const text = (name: string, label: string, extra: Partial<NativeActionField> = {}): NativeActionField => ({ name, label, type: "text", ...extra });
 const options = (values: readonly string[]) => values.map(value => ({ value, label: value.replaceAll("_", " ") }));
 
-export function nativePageActions(session: AppSession, kind: "organization" | "platform", path: string): NativeActionLink[] {
+export function nativePageActions(session: AppSession, kind: MobileWorkspaceKind, path: string): NativeActionLink[] {
+  if (kind === "landlord") return [];
+  const staff = nativeStaffPageActions(session, kind, path);
+  if (staff.length) return staff;
+  const accounting = nativeAccountingPageActions(session, kind, path);
+  if (accounting.length) return accounting;
+  const inventory = kind === "organization" ? nativeInventoryPageActions(session, path) : [];
+  if (inventory.length) return inventory;
   const agreement = nativeAgreementPageActions(kind, path);
   if (agreement.length) return agreement;
   const identity = nativeIdentityPageActions(session, kind, path);
@@ -40,7 +53,9 @@ export function nativePageActions(session: AppSession, kind: "organization" | "p
   return [];
 }
 
-export function nativeRecordActions(kind: "organization" | "platform", path: string, status?: string): NativeActionLink[] {
+export function nativeRecordActions(kind: MobileWorkspaceKind, path: string, status?: string): NativeActionLink[] {
+  if (kind === "landlord") return [];
+  if (kind === "organization" && path === "/dashboard/org/airbnb") return [];
   if (kind === "organization" && path === "/dashboard/org/issues/resolution-reports") return nativeResolutionActions(status);
   const agreement = nativeAgreementRecordActions(kind, path, status);
   if (agreement.length) return agreement;
@@ -62,9 +77,20 @@ export function nativeRecordActions(kind: "organization" | "platform", path: str
   ];
 }
 
-export async function nativeActionDefinition(session: AppSession, kind: "organization" | "platform", path: string, actionId: string, recordId?: string): Promise<NativeActionDefinition | null> {
+export async function nativeActionDefinition(session: AppSession, kind: MobileWorkspaceKind, path: string, actionId: string, recordId?: string): Promise<NativeActionDefinition | null> {
+  if (kind === "landlord") return null;
+  const bnb = await nativeBnbActionDefinition(session, path, actionId, recordId);
+  if (bnb) return bnb;
+  const inquiry = await nativeVacancyInquiryDefinition(session, path, actionId, recordId);
+  if (inquiry) return inquiry;
+  const accounting = await nativeAccountingActionDefinition(session, kind, path, actionId, recordId);
+  if (accounting) return accounting;
+  const tenant = await nativeTenantActionDefinition(session, kind, path, actionId, recordId);
+  if (tenant) return tenant;
+  const staff = await nativeStaffActionDefinition(session, kind, path, actionId, recordId);
+  if (staff) return staff;
   if (kind === "organization" && actionId.startsWith("resolution.")) return nativeResolutionDefinition(session, path, actionId, recordId);
-  if (kind === "organization" && actionId === "unit.edit") return nativeInventoryDefinition(session, path, actionId, recordId);
+  if (kind === "organization" && (actionId === "unit.edit" || actionId.startsWith("inventory."))) return nativeInventoryDefinition(session, path, actionId, recordId);
   if (kind === "platform" && (actionId.startsWith("provider.") || actionId.startsWith("attribution.") || actionId.startsWith("organization.access."))) return nativeOperatorActionDefinition(session, path, actionId, recordId);
   if (actionId.startsWith("agreement.")) return nativeAgreementActionDefinition(session, kind, path, actionId, recordId);
   if (actionId.startsWith("identity.")) return nativeIdentityActionDefinition(session, kind, path, actionId, recordId);

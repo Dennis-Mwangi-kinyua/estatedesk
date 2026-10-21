@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  startTransition,
   useActionState,
   useEffect,
   useMemo,
@@ -53,6 +54,7 @@ export function NewTenantForm({
   const [step, setStep] = useState<Step>(1);
   const [stepError, setStepError] = useState<string | null>(null);
   const [selectedUnitId, setSelectedUnitId] = useState<string>("");
+  const [existingLease, setExistingLease] = useState(false);
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [accountUsername, setAccountUsername] = useState("");
   const [accountPassword, setAccountPassword] = useState("");
@@ -82,6 +84,9 @@ export function NewTenantForm({
   }
 
   function handleNext(event: MouseEvent<HTMLButtonElement>) {
+    // React may reuse this button as the final submit button after advancing.
+    // Cancel the original click's default action so Review cannot submit it.
+    event.preventDefault();
     const form = event.currentTarget.form;
     if (!form || isPending) return;
 
@@ -172,11 +177,31 @@ export function NewTenantForm({
               id="new-tenant-form"
               ref={formRef}
               action={formAction}
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (isPending || step !== 5) return;
+                // Capture all steps before pending disables their inputs. Dispatch
+                // manually so an error response does not reset uncontrolled fields.
+                const data = new FormData(event.currentTarget);
+                startTransition(() => formAction(data));
+              }}
               className="space-y-6 min-w-0"
             >
               <input type="hidden" name="unitId" value={selectedUnitId} />
+              {existingLease ? <input type="hidden" name="existingLease" value="on" /> : null}
 
               <section className={step === 1 ? "block" : "hidden"}>
+                <div className="mb-5 grid gap-3 sm:grid-cols-2" role="group" aria-label="Tenant registration type">
+                  {[
+                    { existing: false, title: "New tenant", description: "Start a fresh tenancy. The agreed rent and deposit form the first bill." },
+                    { existing: true, title: "Existing tenant", description: "Register a tenant already living here and enter unpaid bills from previous years." },
+                  ].map(option => (
+                    <button key={option.title} type="button" aria-pressed={existingLease === option.existing} disabled={isPending} onClick={() => { setExistingLease(option.existing); setStepError(null); }} className={`rounded-2xl border p-4 text-left ${existingLease === option.existing ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border bg-card"}`}>
+                      <span className="block font-semibold">{option.title}</span>
+                      <span className="mt-1 block text-sm text-muted-foreground">{option.description}</span>
+                    </button>
+                  ))}
+                </div>
                 <StepTenantDetails isPending={isPending} />
               </section>
 
@@ -186,6 +211,7 @@ export function NewTenantForm({
 
               <section className={step === 3 ? "block" : "hidden"}>
                 <StepUnitLease
+                  existingLease={existingLease}
                   isPending={isPending}
                   currencyCode={currencyCode}
                   availableUnits={availableUnits}
@@ -209,7 +235,7 @@ export function NewTenantForm({
               </section>
 
               <section className={step === 5 ? "block" : "hidden"}>
-                <StepPreview preview={preview} />
+                <StepPreview preview={preview} currencyCode={currencyCode} />
               </section>
 
               <FormActions

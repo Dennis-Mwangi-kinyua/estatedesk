@@ -11,6 +11,9 @@ import { StatusBar } from "expo-status-bar";
 import { OfflineWorkspace } from "./src/components/offline-workspace";
 import { Workflows } from "./src/components/workflows";
 import { TenantNavigation, type TenantTab } from "./src/components/tenant-navigation";
+import { NativeGuestStay } from "./src/components/native-guest-stay";
+import { NativeVacancies } from "./src/components/native-vacancies";
+import { NativePasswordRecovery } from "./src/components/native-password-recovery";
 import type { MobileSession } from "@estatedesk/contracts/mobile";
 import { ApiError, getSession, getCachedSession, hasSavedSession, signIn, signOut } from "./src/api";
 
@@ -51,8 +54,12 @@ function Workspace() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [retrySession, setRetrySession] = useState(false);
   const [accountHelp, setAccountHelp] = useState(false);
+  const [guestMode, setGuestMode] = useState(false);
+  const [vacancyMode, setVacancyMode] = useState(false);
+  const [passwordRecoveryMode, setPasswordRecoveryMode] = useState(false);
   const canRefreshTenant = session?.role === "TENANT" && tenantHome.visible && !offline && !session.requiresAccountSetup && !tenantHome.busy;
 
   const handleError = useCallback((cause: unknown) => {
@@ -105,11 +112,11 @@ function Workspace() {
 
   async function logout() {
     Keyboard.dismiss();
-    setBusy(true); setError("");
+    setBusy(true); setLoggingOut(true); setError("");
     try {
       await signOut(); setTenantTab("home"); setSession(null); setRetrySession(false);
     } catch (cause) { handleError(cause); }
-    finally { setBusy(false); }
+    finally { setBusy(false); setLoggingOut(false); }
   }
 
   return <SafeAreaView style={styles.safe}>
@@ -127,12 +134,12 @@ function Workspace() {
         {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
         {busy ? <ActivityIndicator accessibilityLabel="Loading" color="#14634e" style={{ marginVertical: 12 }} /> : null}
 
-        {!session ? <>
+      {!session && guestMode ? <NativeGuestStay back={() => { setGuestMode(false); setError(""); }} /> : !session && vacancyMode ? <NativeVacancies back={() => { setVacancyMode(false); setError(""); }} /> : !session && passwordRecoveryMode ? <NativePasswordRecovery back={() => { setPasswordRecoveryMode(false); setError(""); }} /> : !session ? <>
           <Text style={styles.title}>{retrySession ? "Reconnect to your workspace" : "Welcome back"}</Text>
           <Text style={styles.subtitle}>Your properties, bills, and everyday tasks in one place.</Text>
           {retrySession ? <>
             <Button label="Try again" onPress={() => { setBusy(true); void restore(); }} disabled={busy} />
-            <Button label="Sign out" onPress={() => void logout()} disabled={busy} secondary />
+            <Button label={loggingOut ? "Signing out…" : "Sign out"} onPress={() => void logout()} disabled={busy} secondary />
           </> : <View style={styles.card}>
             <Text style={styles.label}>Email or username</Text>
             <TextInput accessibilityLabel="Email or username" style={styles.input} value={email} onChangeText={setEmail}
@@ -145,8 +152,11 @@ function Workspace() {
               disabled={busy || !email.trim() || !password} />
           </View>}
           <Button label={accountHelp ? "Hide account help" : "Account help"} onPress={() => setAccountHelp(value => !value)} secondary />
-          {accountHelp ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>Signing in</Text><Text style={styles.subtitle}>Use the email or username and password provided by your organization. If your password or access needs resetting, contact your organization administrator. Check your connection and try again if the service is unavailable.</Text></View> : null}
-        </> : offline ? <OfflineWorkspace session={session} reconnect={async () => { setSession(await getSession()); setOffline(false); setError(""); }} onError={handleError} logout={() => void logout()} /> : <Workflows key={`${session.userId}:${session.organizationId}:${session.role}:${session.platformRole}`} session={session}
+          {accountHelp ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>Signing in</Text><Text style={styles.subtitle}>Use the email or username and password provided by your organization. Use “Forgot password?” to request a secure reset link. Contact your organization administrator if your account is disabled. Check your connection and try again if the service is unavailable.</Text></View> : null}
+          <Button label="Forgot password?" onPress={() => { setPasswordRecoveryMode(true); setAccountHelp(false); setError(""); }} secondary />
+          <Button label="Guest stay access" onPress={() => { setGuestMode(true); setAccountHelp(false); setError(""); }} secondary />
+          <Button label="Browse vacancies" onPress={() => { setVacancyMode(true); setAccountHelp(false); setError(""); }} secondary />
+        </> : offline ? <OfflineWorkspace session={session} reconnect={async () => { setSession(await getSession()); setOffline(false); setError(""); }} onError={handleError} logout={() => void logout()} loggingOut={loggingOut} /> : <Workflows key={`${session.userId}:${session.organizationId}:${session.role}:${session.platformRole}`} session={session} loggingOut={loggingOut}
           tenantTab={tenantTab} selectTenantTab={chooseTenantTab} onNavigationChange={onNavigationChange}
           refreshSession={async () => { setError(""); setSession(await getSession()); }}
           onError={handleError} logout={() => void logout()} />}

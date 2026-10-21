@@ -37,17 +37,13 @@ html[data-pwa-launch="visible"] .pwa-launch-screen {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  display: none;
+  display: grid;
   min-height: 100dvh;
   place-items: center;
   padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem max(1.25rem, env(safe-area-inset-bottom));
   background: rgb(15 23 42 / 38%);
   -webkit-backdrop-filter: blur(14px) saturate(1.08);
   backdrop-filter: blur(14px) saturate(1.08);
-}
-
-html[data-pwa-launch] .app-route-loading {
-  display: grid;
 }
 
 .pwa-loading-card {

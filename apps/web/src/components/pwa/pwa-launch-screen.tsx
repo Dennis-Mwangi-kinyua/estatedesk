@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-const MINIMUM_VISIBLE_TIME_MS = 700;
 const MAXIMUM_VISIBLE_TIME_MS = 12_000;
 
 export function PwaLaunchScreen() {
@@ -16,10 +15,8 @@ export function PwaLaunchScreen() {
       return;
     }
 
-    const startedAt = Number(root.dataset.pwaLaunchStartedAt) || performance.now();
     let firstFrame = 0;
     let secondFrame = 0;
-    let revealTimeout = 0;
 
     const reveal = () => {
       root.dataset.pwaLaunch = "ready";
@@ -28,27 +25,22 @@ export function PwaLaunchScreen() {
     const revealAfterStablePaint = () => {
       firstFrame = window.requestAnimationFrame(() => {
         secondFrame = window.requestAnimationFrame(() => {
-          const remaining = Math.max(
-            0,
-            MINIMUM_VISIBLE_TIME_MS - (performance.now() - startedAt),
-          );
-          revealTimeout = window.setTimeout(reveal, remaining);
+          reveal();
         });
       });
     };
 
-    if (document.readyState === "complete") revealAfterStablePaint();
-    else window.addEventListener("load", revealAfterStablePaint, { once: true });
+    // Hydrated content is ready to use; images and other late resources can
+    // finish loading without keeping the launch screen over the interface.
+    revealAfterStablePaint();
 
     const safetyTimeout = window.setTimeout(reveal, MAXIMUM_VISIBLE_TIME_MS);
     const slowTimeout = window.setTimeout(() => setSlow(true), 4_000);
     const recoveryTimeout = window.setTimeout(() => setShowRecovery(true), 8_000);
 
     return () => {
-      window.removeEventListener("load", revealAfterStablePaint);
       window.cancelAnimationFrame(firstFrame);
       window.cancelAnimationFrame(secondFrame);
-      window.clearTimeout(revealTimeout);
       window.clearTimeout(safetyTimeout);
       window.clearTimeout(slowTimeout);
       window.clearTimeout(recoveryTimeout);

@@ -352,6 +352,9 @@ body.estate-glass-system .engineering-workspace button {
   .engineering-card-view { display: none; }
   .engineering-table-view { display: block; }
 }
+/* The jobs workspace is easier to scan as cards at every screen size. */
+.engineering-workspace .jobs-card-view { display: grid; }
+.engineering-workspace .jobs-card-view + .engineering-table-view { display: none; }
 @layer utilities {
   body.estate-glass-system .engineering-workspace :is(.workspace-panel, .platform-stat-card, .developer-glass-tool) {
     background: var(--card) !important;

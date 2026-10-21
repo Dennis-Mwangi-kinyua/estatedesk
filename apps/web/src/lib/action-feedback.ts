@@ -64,6 +64,7 @@ export function completedLabel(label: string) {
   if (lower === "sending") return "Sent";
   if (lower === "updating") return "Updated";
   if (lower === "creating") return "Created";
+  if (lower === "signing out") return "Signed out";
   if (lower === "working") return "Completed";
 
   return "Completed";

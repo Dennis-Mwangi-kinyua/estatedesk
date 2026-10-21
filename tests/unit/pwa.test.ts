@@ -73,7 +73,7 @@ describe("PWA launch screen", () => {
     assert.match(init, /display-mode: standalone/);
     assert.match(init, /dataset\.pwaLaunch="visible"/);
     assert.match(layout, /<PwaLaunchScreen \/>/);
-    assert.match(launchScreen, /MINIMUM_VISIBLE_TIME_MS/);
+    assert.doesNotMatch(launchScreen, /MINIMUM_VISIBLE_TIME_MS/);
     assert.match(launchScreen, /dataset\.pwaLaunch = "ready"/);
   });
 });

@@ -7,6 +7,7 @@ import { AppIcon, IconTile, type AppIconName } from "./app-icon";
 import { CommunityPanel, ExpendituresPanel, ProfilePanel } from "./tenant-services";
 import { ManagementHome } from "./management-home";
 import { TenantHome } from "./tenant-home";
+import { LandlordHome } from "./landlord-home";
 import type { TenantTab } from "./tenant-navigation";
 import { DocumentsPanel, PaymentReviewPanel, VisitorsPanel, GatePanel } from "./service-panels";
 import { InspectionsPanel, DraftsPanel, syncDraft } from "./field-panels";
@@ -26,9 +27,9 @@ type Screen = "account" | "security" | "rewards" | "tenant-inspections" | "profi
 const screenIcons: Partial<Record<Screen, AppIconName>> = { account: "user", security: "shield", rewards: "gift", "tenant-inspections": "clipboard", profile: "user", community: "volume-2", expenditures: "bar-chart-2", invoices: "file-text", help: "book-open", "water-bills": "droplet", bills: "credit-card", issues: "tool", meters: "droplet", notifications: "bell", payment: "credit-card", history: "clock", leases: "home", "move-outs": "package", "work-orders": "tool", portfolio: "briefcase", documents: "folder", "payment-review": "check-circle", inspections: "clipboard", visitors: "users", gate: "shield", drafts: "hard-drive" };
 type Bill = MobileBills["bills"][number];
 
-export function Workflows({ session, refreshSession, onError, logout, tenantTab, selectTenantTab, onNavigationChange }: {
+export function Workflows({ session, refreshSession, onError, logout, loggingOut, tenantTab, selectTenantTab, onNavigationChange }: {
   tenantTab: TenantTab; selectTenantTab: (tab: TenantTab) => void; onNavigationChange: (screen: string, busy: boolean) => void;
-  session: MobileSession; refreshSession: () => Promise<void>; onError: (error: unknown) => void; logout: () => void;
+  session: MobileSession; refreshSession: () => Promise<void>; onError: (error: unknown) => void; logout: () => void; loggingOut: boolean;
 }) {
   const [profile, setProfile] = useState<Awaited<ReturnType<typeof api.getProfile>> | null>(null);
   const [community, setCommunity] = useState<Awaited<ReturnType<typeof api.getCommunity>>>([]);
@@ -229,9 +230,11 @@ export function Workflows({ session, refreshSession, onError, logout, tenantTab,
         await api.completeSetup({ currentPassword, newPassword, confirmPassword, acceptedTerms: true });
         setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); await refreshSession();
       })} />
-    </View> : loadingScreen ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>{screen.replaceAll("-", " ").replace(/^./, value => value.toUpperCase())}</Text><Text style={styles.subtitle}>Loading your latest information…</Text></View> : loadFailed ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>{screen.replaceAll("-", " ").replace(/^./, value => value.toUpperCase())}</Text><Text accessibilityRole="alert" style={styles.subtitle}>{loadError || "This service could not load. Try again."}</Text><Button label="Try again" onPress={() => void load(screen)} disabled={busy} /></View> : screen === "home" && session.role === "TENANT" ? null : (screen === "platform-home" || screen === "home" && managementAccount) ? null : screen === "home" ? <>
+    </View> : loadingScreen ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>{screen.replaceAll("-", " ").replace(/^./, value => value.toUpperCase())}</Text><Text style={styles.subtitle}>Loading your latest information…</Text></View> : loadFailed ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>{screen.replaceAll("-", " ").replace(/^./, value => value.toUpperCase())}</Text><Text accessibilityRole="alert" style={styles.subtitle}>{loadError || "This service could not load. Try again."}</Text><Button label="Try again" onPress={() => void load(screen)} disabled={busy} /></View> : screen === "home" && session.role === "TENANT" ? null : (screen === "platform-home" || screen === "home" && managementAccount) ? null : screen === "home" && session.role === "LANDLORD" ? <>
+      <LandlordHome session={session} busy={busy} refreshKey={homeRevision} active={screen === "home"} open={link => openTool({ kind: "landlord", ...link })} onError={onError} />
+    </> : screen === "home" ? <>
       <FieldHome session={session} busy={busy} open={target => void load(target)} refresh={() => void run(refreshSession)} />
-    </> : screen === "native-workspace" && workspaceTarget ? <>{workspaceStack.map((target, index) => <View key={`${index}:${target.kind}:${target.path}:${target.recordId ?? ""}`} style={{ display: index === workspaceStack.length - 1 ? "flex" : "none" }}><NativeWorkspace onBack={back} target={target} onContextChange={refreshSession} open={openTool} onError={onError} onMutationBusy={working => { busyRef.current = working; setBusy(working); }} reviewPayments={session.features.includes("payment-review") ? () => void load("payment-review") : undefined} /></View>)}</> : screen === "account" ? <AccountPage session={session} busy={busy} logout={logout} open={target => void load(target)} refreshSession={refreshSession} /> : screen === "documents" ? <DocumentsPanel documents={documents} busy={busy} run={run} refresh={async () => setDocuments(await api.getDocuments())} />
+    </> : screen === "native-workspace" && workspaceTarget ? <>{workspaceStack.map((target, index) => <View key={`${index}:${target.kind}:${target.path}:${target.recordId ?? ""}`} style={{ display: index === workspaceStack.length - 1 ? "flex" : "none" }}><NativeWorkspace onBack={back} target={target} onContextChange={refreshSession} open={openTool} onError={onError} onMutationBusy={working => { busyRef.current = working; setBusy(working); }} reviewPayments={session.features.includes("payment-review") ? () => void load("payment-review") : undefined} /></View>)}</> : screen === "account" ? <AccountPage session={session} busy={busy} loggingOut={loggingOut} logout={logout} open={target => void load(target)} refreshSession={refreshSession} /> : screen === "documents" ? <DocumentsPanel documents={documents} busy={busy} run={run} refresh={async () => setDocuments(await api.getDocuments())} />
       : screen === "payment-review" ? <PaymentReviewPanel data={review} currency={session.currencyCode} busy={busy} run={run} load={async page => setReview(await api.getReviewPayments(page))} />
       : screen === "visitors" ? <VisitorsPanel visitors={visitors} busy={busy} run={run} refresh={async () => setVisitors(await api.getVisitors())} />
       : screen === "gate" ? <GatePanel busy={busy} run={run} />
@@ -326,13 +329,39 @@ export function Workflows({ session, refreshSession, onError, logout, tenantTab,
       </View>)}
       <Button label="Refresh meters" onPress={() => void load("meters")} disabled={busy} secondary />
     </> : screen === "notifications" ? <>
-      <Text style={styles.title}>Notifications</Text>
-      <Button label="Enable device notifications" disabled={busy} onPress={() => void run(async () => { await enablePush(); setNotice("Device notifications enabled for this organization. Logout or session revocation removes registration."); })} />
-      <Button label="Disable device notifications" disabled={busy} onPress={() => void run(async () => { await api.disablePush(); setNotice("Device notifications disabled."); })} secondary />
-      {notifications.length === 0 ? <Text style={styles.subtitle}>No notifications yet.</Text> : null}
-      {notifications.map(item => <View key={item.id} style={styles.card}><Text style={styles.cardTitle}>{item.title}</Text><Text style={styles.subtitle}>{item.message}</Text>{!item.readAt ? <Button label="Mark as read" disabled={busy} onPress={() => void run(async () => { await api.readNotification(item.id); setNotifications(await api.getNotifications()); })} secondary /> : <Text style={styles.subtitle}>Read</Text>}</View>)}
-      <Button label="Refresh notifications" onPress={() => void load("notifications")} disabled={busy} secondary />
+      <View style={styles.card}>
+        <IconTile name="bell" />
+        <Text accessibilityRole="header" style={styles.title}>Notifications</Text>
+        <Text style={styles.subtitle}>Workspace updates and device alert preferences.</Text>
+        <Text accessibilityLiveRegion="polite" style={styles.label}>{notifications.filter(item => !item.readAt).length} unread · {notifications.length} recent</Text>
+      </View>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Device alerts</Text>
+        <Text style={styles.subtitle}>Get important workspace updates on this device. You can change permission later in your device settings.</Text>
+        <Button label="Enable device notifications" icon="bell" disabled={busy} onPress={() => void run(async () => { await enablePush(); setNotice("Device notifications are enabled. You can disable them here at any time."); })} />
+        <Button label="Disable device notifications" icon="bell" disabled={busy} onPress={() => void run(async () => { await api.disablePush(); setNotice("Device notifications disabled."); })} secondary />
+      </View>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <Text accessibilityRole="header" style={styles.cardTitle}>Recent updates</Text>
+        <Button label="Refresh" icon="refresh-cw" onPress={() => void load("notifications")} disabled={busy} secondary />
+      </View>
+      {notifications.length === 0 ? <View style={styles.card}>
+        <IconTile name="inbox" />
+        <Text style={styles.cardTitle}>You’re all caught up</Text>
+        <Text style={styles.subtitle}>New workspace updates will appear here.</Text>
+      </View> : notifications.map(item => <View key={item.id} style={[styles.card, !item.readAt && { borderColor: "#9fcab0", backgroundColor: "#fbfefb" }]}>
+        <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}>
+          <IconTile name="bell" size={19} />
+          <View style={{ flex: 1, minWidth: 0, gap: 5 }}>
+            <Text style={styles.cardTitle}>{item.title}</Text>
+            <Text style={styles.subtitle}>{item.message}</Text>
+            <Text style={{ color: "#718078", fontSize: 12 }}>{new Date(item.createdAt).toLocaleString()}</Text>
+          </View>
+          {!item.readAt ? <Text style={{ color: "#14634e", fontSize: 12, fontWeight: "700" }}>NEW</Text> : null}
+        </View>
+        {!item.readAt ? <Button label="Mark as read" icon="check" disabled={busy} onPress={() => void run(async () => { await api.readNotification(item.id); setNotifications(await api.getNotifications()); })} secondary /> : null}
+      </View>)}
     </> : null}
-    {session.requiresAccountSetup || screen === "profile" || screen === "home" && session.role === "TENANT" && tenantTab === "account" ? <Button label="Sign out" onPress={logout} disabled={busy} secondary /> : null}
+    {session.requiresAccountSetup || screen === "profile" || screen === "home" && session.role === "TENANT" && tenantTab === "account" ? <Button label={loggingOut ? "Signing out…" : "Sign out"} onPress={logout} disabled={busy} secondary /> : null}
   </>;
 }

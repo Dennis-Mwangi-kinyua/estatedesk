@@ -16,8 +16,8 @@ const settings: { title: string; detail: string; icon: "user" | "lock" | "bell" 
   { title: "Help & guidance", detail: "Find answers and instructions", icon: "book-open", target: "help" },
 ];
 
-export function AccountPage({ session, busy, logout, open, refreshSession }: {
-  session: MobileSession; busy: boolean; logout: () => void;
+export function AccountPage({ session, busy, loggingOut, logout, open, refreshSession }: {
+  session: MobileSession; busy: boolean; loggingOut: boolean; logout: () => void;
   open: (screen: AccountTarget) => void;
   refreshSession: () => Promise<void>;
 }) {
@@ -103,7 +103,7 @@ export function AccountPage({ session, busy, logout, open, refreshSession }: {
 
     <View style={s.logout}>
       <View style={s.logoutCopy}><Text style={s.logoutTitle}>Sign out</Text><Text style={styles.subtitle}>End this session on this device.</Text></View>
-      <Button label="Sign out" icon="log-out" onPress={logout} disabled={busy} secondary />
+      <Button label={loggingOut ? "Signing out…" : "Sign out"} icon="log-out" onPress={logout} disabled={busy} secondary />
     </View>
   </View>;
 }

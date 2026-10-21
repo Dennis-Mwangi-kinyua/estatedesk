@@ -6,6 +6,10 @@ Production service availability and release verification: [mobile backend releas
 
 The tenant service directory now routes rewards, security, inspections and move-out entry points to React Native screens. It no longer offers the full web workspace or falls back to a web page when a native capability is unavailable. Organization and platform tools open native workflows or native record browsers. Full native parity across all roles remains unfinished.
 
+Native sign-in now includes password recovery on iOS and Android. Reset requests reuse the website's email/IP rate limits and return the same confirmation whether or not an account exists. Reset completion reuses the website's one-time token, expiry, password hashing, token invalidation, and security alert. Users can paste the emailed reset link directly into the native form; token values are not saved on the device.
+
+Landlords now have a dedicated native home with portfolio overview, owner statement and payout records, help, and security destinations. Landlord reads resolve the signed-in user's active profile and scope ledger entries to that profile. BnB listing records expose native pause, publish and archive actions backed by the existing audited organization action. Listing creation/editing, photo upload and booking management are not yet native.
+
 New native workflows include reward balances/catalog/requests/history; password changes and device-session revocation; paginated tenant inspections with checklist details and PDF sharing; move-out submission and withdrawal; typed lease signatures and declining a signature request; and confirmation of office-approved maintenance completion reports. Signing downloads the envelope's exact source PDF, checks its SHA-256 hash and records document access. The signing form requires opening the contract and accepting the envelope's consent text. Drawn/uploaded signatures are not yet available in the native signing form. Native inspection detail currently includes checklist and notes; evidence-photo presentation remains outstanding.
 
 Deploy `/api/mobile/security`, `/api/mobile/tenant/{rewards,inspections,lease-signing}`, `/api/mobile/tenant/lease-signing/[id]/document`, `/api/mobile/tenant/issues/confirm`, and the updated issues/move-outs endpoints alongside the app. These routes retain server-side role, ownership, organization, section and active-lease checks and reuse existing mutation logic. Signing and other mutations are never automatically retried. Older backends cannot serve the new screens. Device checks, signed-in API checks and visual validation on iOS/Android remain necessary; source checks do not establish full feature parity or store readiness.
@@ -119,6 +123,7 @@ All endpoints require the native request boundary and a live session. Mutations 
 | --- | --- |
 | `GET/POST /api/mobile/memberships` | List owned active memberships / switch using `membershipId` |
 | `POST /api/mobile/account/setup` | Reuse the web password/terms workflow |
+| `POST /api/mobile/account/recovery` | Anonymous, rate-limited reset-link request and one-time password reset using the website's token and security-alert workflow |
 | `GET/POST /api/mobile/tenant/issues` | Own reported issues / create for an active leased unit |
 | `GET/POST /api/mobile/tenant/payments` | Enabled M-Pesa/manual methods and instructions / submit payment |
 | `GET /api/mobile/tenant/payments/history` | Current tenant payment status; check before retrying an uncertain STK request |

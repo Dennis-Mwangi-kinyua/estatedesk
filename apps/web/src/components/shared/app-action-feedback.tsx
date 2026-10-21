@@ -21,7 +21,7 @@ type ToastState = {
 };
 
 const STORAGE_KEY = "estatedesk:last-action";
-const REFRESH_INTERVAL_MS = 45_000;
+const REFRESH_INTERVAL_MS = 90_000;
 const MIN_REFRESH_GAP_MS = 12_000;
 
 function normalizeText(value: string) {
@@ -41,7 +41,7 @@ function inferActionLabel(form: HTMLFormElement, submitter: HTMLElement | null) 
   if (lower.includes("approve") || lower.includes("verify")) return "Approving";
   if (lower.includes("send")) return "Sending";
   if (lower.includes("mark")) return "Updating";
-  if (lower.includes("logout") || lower.includes("log out")) return "Logging out";
+  if (lower.includes("logout") || lower.includes("log out") || lower.includes("sign out") || lower.includes("sign-out")) return "Signing out";
   if (lower.includes("save") || lower.includes("update")) return "Saving";
   if (lower.includes("create") || lower.includes("add")) return "Creating";
 
@@ -182,7 +182,9 @@ export function AppActionFeedback() {
       setToast({
         type: "pending",
         title: `${label}...`,
-        detail: "Please wait while EstateDesk updates the records.",
+        detail: label === "Signing out"
+          ? "Ending your session securely."
+          : "Please wait while EstateDesk updates the records.",
       });
     };
 

@@ -48,6 +48,8 @@ export default function LoginForm({
   );
 
   const [showPassword, setShowPassword] = useState(false);
+  const isRedirecting = state.success && Boolean(state.redirectTo?.startsWith("/") && !state.redirectTo.startsWith("//"));
+  const isBusy = isPending || isRedirecting;
   useEffect(() => {
     if (state.success && state.redirectTo?.startsWith("/") && !state.redirectTo.startsWith("//")) window.location.replace(state.redirectTo);
   }, [state.success, state.redirectTo]);
@@ -78,7 +80,7 @@ export default function LoginForm({
         }
       `}</style>
 
-      {isPending && typeof document !== "undefined"
+      {isBusy && typeof document !== "undefined"
         ? createPortal(
         <div className={`${styles.loadingOverlay} login-auth-overlay px-5`} role="status" aria-live="polite" aria-atomic="true">
           <div className={`${styles.loadingCard} login-auth-card w-full max-w-[340px] rounded-3xl border border-white/80 bg-white px-8 py-8 text-center shadow-[0_28px_90px_rgba(15,23,42,0.25)]`}>
@@ -90,8 +92,8 @@ export default function LoginForm({
               </div>
             </div>
             <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-teal-700">Secure sign-in</p>
-            <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">Verifying details</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-500">Please wait while we securely log you in.</p>
+            <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">{isRedirecting ? "Opening your workspace" : "Verifying details"}</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-500">{isRedirecting ? "You’re signed in. Your workspace is loading." : "Please wait while we securely log you in."}</p>
             <div aria-hidden="true" className="mt-6 h-1 overflow-hidden rounded-full bg-slate-100">
               <div className="login-auth-progress h-full w-1/3 rounded-full bg-gradient-to-r from-teal-300 to-teal-600" />
             </div>
@@ -118,7 +120,7 @@ export default function LoginForm({
                 type="text"
                 autoComplete="username"
                 placeholder="you@company.com or landlord01"
-                disabled={isPending}
+                disabled={isBusy}
                 aria-invalid={Boolean(state.fieldErrors?.email?.length)}
                 className={styles.input}
               />
@@ -157,7 +159,7 @@ export default function LoginForm({
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 placeholder="Enter your password"
-                disabled={isPending}
+                disabled={isBusy}
                 aria-invalid={Boolean(state.fieldErrors?.password?.length)}
                 className={styles.input}
               />
@@ -165,7 +167,7 @@ export default function LoginForm({
               <button
                 type="button"
                 onClick={togglePassword}
-                disabled={isPending}
+                disabled={isBusy}
                 className={styles.passwordToggle}
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 title={showPassword ? "Hide password" : "Show password"}
@@ -198,11 +200,11 @@ export default function LoginForm({
 
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isBusy}
             className={styles.submit}
           >
-            <span>{isPending ? "Verifying..." : "Log in"}</span>
-            {!isPending ? <ArrowRight className="h-4 w-4" /> : null}
+            <span>{isRedirecting ? "Opening workspace..." : isPending ? "Verifying..." : "Log in"}</span>
+            {!isBusy ? <ArrowRight className="h-4 w-4" /> : null}
           </button>
         </form>
 

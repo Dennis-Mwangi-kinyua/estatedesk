@@ -1,4 +1,5 @@
 import { ScheduledUpdateBanner } from "@/features/platform-updates/banner";
+import { Suspense } from "react";
 import { SiteExperience } from "@/components/shared/site-experience";
 import type { Metadata, Viewport } from "next";
 import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
@@ -261,7 +262,7 @@ export default async function RootLayout({
           <PwaExperienceLoader />
           <PwaInstallPrompt />
           <div id="main-content" tabIndex={-1} className="ed-mobile-first-root min-h-dvh w-full min-w-0">
-            <IncidentBanner />
+            <Suspense fallback={null}><IncidentBanner /></Suspense>
             {children}
           </div>
           <ScheduledUpdateBanner />

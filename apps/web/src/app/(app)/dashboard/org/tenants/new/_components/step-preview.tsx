@@ -1,11 +1,11 @@
 "use client";
 
 import { stepPanelClassName } from "../_lib/constants";
-import { formatStatus } from "../_lib/helpers";
+import { formatCurrency, formatStatus } from "../_lib/helpers";
 import type { PreviewData } from "../_lib/types";
 import { InfoCard, SectionTitle } from "./ui-primitives";
 
-export function StepPreview({ preview }: { preview: PreviewData | null }) {
+export function StepPreview({ preview, currencyCode }: { preview: PreviewData | null; currencyCode: string }) {
   return (
     <div className={stepPanelClassName}>
       <SectionTitle
@@ -14,6 +14,16 @@ export function StepPreview({ preview }: { preview: PreviewData | null }) {
       />
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
+        {!preview?.existingLease && preview && Number.isFinite(Number(preview.monthlyRent)) && Number.isFinite(Number(preview.deposit)) ? (
+          <InfoCard title="First rent and deposit bill">
+            <div className="space-y-2 text-sm">
+              <p>First month rent: {formatCurrency(Number(preview.monthlyRent), currencyCode)}</p>
+              <p>Security deposit: {formatCurrency(Number(preview.deposit), currencyCode)}</p>
+              <p className="font-semibold">Total first bill: {formatCurrency(Number(preview.monthlyRent) + Number(preview.deposit), currencyCode)}</p>
+              <p className="text-muted-foreground">Payment is recorded separately when money is received.</p>
+            </div>
+          </InfoCard>
+        ) : null}
         {preview?.existingLease ? <InfoCard title="Existing lease and previous arrears"><div className="space-y-2 text-sm"><p>Initial rent and deposit charges will not be recreated.</p>{preview.openingArrears?.map(entry => <p key={entry.period}>{entry.period}: {entry.amount}</p>)}<p className="font-semibold">Total previous arrears: {(preview.openingArrears ?? []).reduce((sum, entry) => sum + Math.round(Number(entry.amount) * 100), 0) / 100}</p></div></InfoCard> : null}
         <InfoCard title="Tenant profile">
           <div className="space-y-2 text-sm text-muted-foreground">
@@ -104,12 +114,12 @@ export function StepPreview({ preview }: { preview: PreviewData | null }) {
               {preview?.dueDay || "5"}
             </p>
             <p>
-              <span className="font-medium text-foreground">Rent override:</span>{" "}
-              {preview?.monthlyRent || "Use selected unit rent"}
+              <span className="font-medium text-foreground">Agreed monthly rent:</span>{" "}
+              {preview?.monthlyRent || "—"}
             </p>
             <p>
-              <span className="font-medium text-foreground">Deposit override:</span>{" "}
-              {preview?.deposit || "Use selected unit deposit"}
+              <span className="font-medium text-foreground">Agreed deposit:</span>{" "}
+              {preview?.deposit || "—"}
             </p>
           </div>
         </InfoCard>

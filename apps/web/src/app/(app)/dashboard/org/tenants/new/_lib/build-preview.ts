@@ -46,8 +46,8 @@ export function buildPreview(
     selectedUnitLabel: selectedUnit ? selectedUnit.label : "No unit assignment yet",
     leaseStartDate: leaseStartDate || "Use today’s date",
     dueDay: dueDay || "5",
-    monthlyRent: monthlyRent || "Use selected unit rent",
-    deposit: deposit || "Use selected unit deposit",
+    monthlyRent: selectedUnit ? monthlyRent : "No unit assigned",
+    deposit: selectedUnit ? deposit : "No unit assigned",
     username: username || buildUsernamePreview(fullName),
     password,
   };

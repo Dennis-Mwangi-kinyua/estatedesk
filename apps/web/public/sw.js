@@ -1,4 +1,4 @@
-const CACHE_VERSION = "estatedesk-pwa-v0.2.2";
+const CACHE_VERSION = "estatedesk-pwa-v0.2.4";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const OFFLINE_FALLBACKS = ["/offline", "/offline-shell.html"];
 const CARETAKER_OFFLINE_SYNC_TAG = "caretaker-offline-queue-sync";
@@ -39,13 +39,18 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((cacheNames) =>
-        Promise.all(
+      .then((cacheNames) => {
+        // Existing tabs can still request the previous build's hashed chunks.
+        const retained = cacheNames
+          .filter(name => name.startsWith("estatedesk-pwa-") && name.endsWith("-static") && name !== STATIC_CACHE)
+          .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))
+          .slice(0, 2);
+        return Promise.all(
           cacheNames
-            .filter((cacheName) => cacheName.startsWith("estatedesk-pwa-") && cacheName !== STATIC_CACHE)
+            .filter((cacheName) => cacheName.startsWith("estatedesk-pwa-") && cacheName !== STATIC_CACHE && !retained.includes(cacheName))
             .map((cacheName) => caches.delete(cacheName)),
-        ),
-      )
+        );
+      })
       .then(() => self.clients.claim()),
   );
 });
@@ -75,13 +80,20 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (
-    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/_next/static/")
+  ) {
+    // Build hashes change whenever code changes, so cached bundles stay valid.
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  if (
     url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/images/") ||
     url.pathname === "/manifest.webmanifest" ||
     url.pathname === "/offline-shell.html"
   ) {
-    event.respondWith(networkFirst(request));
+    event.respondWith(staleWhileRevalidate(request, event));
   }
 });
 
@@ -137,23 +149,27 @@ async function matchOfflineFallback() {
   });
 }
 
-async function networkFirst(request) {
-  try {
-    const response = await fetch(request);
-
-    if (response.ok) {
+async function fetchAndCache(request) {
+  const response = await fetch(request);
+  if (response.ok && !response.redirected && !/no-store|private/i.test(response.headers.get("Cache-Control") || "")) {
+    try {
       const cache = await caches.open(STATIC_CACHE);
-      cache.put(request, response.clone());
+      await cache.put(request, response.clone());
+    } catch {
+      // Storage quota or browser policy must not prevent asset delivery.
     }
-
-    return response;
-  } catch (error) {
-    const cachedResponse = await caches.match(request);
-
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    throw error;
   }
+  return response;
+}
+
+async function cacheFirst(request) {
+  return (await caches.match(request)) || fetchAndCache(request);
+}
+
+async function staleWhileRevalidate(request, event) {
+  const cache = await caches.open(STATIC_CACHE);
+  const cached = await cache.match(request);
+  const refresh = fetchAndCache(request);
+  event.waitUntil(refresh.then(() => undefined).catch(() => undefined));
+  return cached || refresh;
 }

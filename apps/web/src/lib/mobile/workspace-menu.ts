@@ -6,8 +6,9 @@ import { WORKSPACE_NAVIGATION } from "@/lib/navigation/workspace-navigation";
 import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 
 export function mobileWorkspaceAllowed(session: Pick<AppSession, "platformRole" | "activeOrgId" | "activeOrgRole">, kind: MobileWorkspaceKind) {
-  return kind === "platform" ? ["SUPER_ADMIN", "PLATFORM_ADMIN"].includes(session.platformRole)
-    : !!session.activeOrgId && ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"].includes(session.activeOrgRole ?? "");
+  if (kind === "platform") return ["SUPER_ADMIN", "PLATFORM_ADMIN"].includes(session.platformRole);
+  if (kind === "landlord") return !!session.activeOrgId && session.activeOrgRole === "LANDLORD";
+  return !!session.activeOrgId && ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"].includes(session.activeOrgRole ?? "");
 }
 
 const presentation: Record<string, [string, string]> = {
@@ -36,16 +37,24 @@ const presentation: Record<string, [string, string]> = {
 export function mobileWorkspaceLinks(session: AppSession, kind: MobileWorkspaceKind): MobileWorkspaceLink[] {
   if (!mobileWorkspaceAllowed(session, kind)) return [];
   const candidates = kind === "organization" ? [...SIDEBAR_LINKS.map(item => ({ title: item.label, path: item.href, description: "" })),
+    { title: "BnB bookings & guest access", path: "/dashboard/org/airbnb/bookings", description: "Manage stays, guest access and requests in the app." },
     { title: "Help & guides", path: "/dashboard/org/help", description: "Find guides for all organization workflows." },
     { title: "Workspace search", path: "/dashboard/org/search", description: "Search records across your organization." },
     { title: "Staff permissions", path: "/dashboard/org/staff/permissions", description: "Manage staff access and mandates." },
     { title: "API keys", path: "/api-keys", description: "Manage organization API credentials." },
-  ]
-    : [...[...adminNavItems, ...developerNavItems].map(item => ({ title: item.label, path: item.href, description: item.description ?? "" })),
+  ] : kind === "landlord" ? [
+    { title: "Overview", path: "/dashboard/landlord", description: "Review assigned properties, occupancy and rent collection." },
+    { title: "Assigned property detail", path: "/dashboard/landlord/property", description: "Open your assigned property portfolio and unit records." },
+    { title: "Assigned unit detail", path: "/dashboard/landlord/unit", description: "Review the tenancy and property details for an assigned unit." },
+    { title: "Owner statements", path: "/dashboard/landlord/statements", description: "Review income, expenses and distributions." },
+    { title: "Payouts", path: "/dashboard/landlord/payouts", description: "Review owner distributions recorded for your portfolio." },
+    { title: "Help & guides", path: "/dashboard/landlord/help", description: "Read landlord workflow guides." },
+    { title: "Account security", path: "/dashboard/security", description: "Manage your password and signed-in devices." },
+  ] : [...[...adminNavItems, ...developerNavItems].map(item => ({ title: item.label, path: item.href, description: item.description ?? "" })),
       { title: "Notification queue", path: "/platform/jobs/notifications", description: "Inspect queued and failed deliveries and retry failed notifications." },
       { title: "Provider reports", path: "/platform/service-providers/reports", description: "Review and resolve reported provider accounts." },
     ];
-  const navigation = kind === "organization" ? WORKSPACE_NAVIGATION.org : [...WORKSPACE_NAVIGATION["platform-admin"], ...WORKSPACE_NAVIGATION["platform-developer"]];
+  const navigation = kind === "organization" ? WORKSPACE_NAVIGATION.org : kind === "landlord" ? WORKSPACE_NAVIGATION.landlord : [...WORKSPACE_NAVIGATION["platform-admin"], ...WORKSPACE_NAVIGATION["platform-developer"]];
   return [...new Map(candidates.map(item => [item.path, item])).values()]
     .filter(item => canAccessWorkspacePath(session, item.path))
     .map(item => {
@@ -57,6 +66,6 @@ export function mobileWorkspaceLinks(session: AppSession, kind: MobileWorkspaceK
 
 /** Exact authorized menu entries only; arbitrary paths and open redirects fail. */
 export function mobileWorkspaceEntry(links: MobileWorkspaceLink[], value: string | null, kind: MobileWorkspaceKind) {
-  const home = kind === "platform" ? "/platform" : "/dashboard/org";
+  const home = kind === "platform" ? "/platform" : kind === "landlord" ? "/dashboard/landlord" : "/dashboard/org";
   return links.find(item => item.path === value)?.path ?? links.find(item => item.path === home)?.path ?? null;
 }

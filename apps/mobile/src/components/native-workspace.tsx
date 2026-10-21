@@ -51,7 +51,7 @@ export function NativeWorkspace({ target, open, onBack, onError, reviewPayments,
   return <View style={{ gap: 22 }} onLayout={grid.onLayout}>
     {detail ? <WorkspaceRecordPage record={detail} workspace={target.title} emoji={target.emoji} close={() => target.recordId ? onBack() : setExpanded(null)} open={link => { setExpanded(null); open({ ...link, kind: target.kind }); }} act={(actionId, recordId) => setAction({ actionId, recordId })}>{actionForm}</WorkspaceRecordPage> : actionForm}
     <View style={dashboardStyles.hero}>
-      <Text style={dashboardStyles.eyebrow}>{target.kind === "platform" ? "PLATFORM WORKSPACE" : "ORGANIZATION WORKSPACE"}</Text>
+      <Text style={dashboardStyles.eyebrow}>{target.kind === "platform" ? "PLATFORM WORKSPACE" : target.kind === "landlord" ? "LANDLORD WORKSPACE" : "ORGANIZATION WORKSPACE"}</Text>
       <IconTile badge={target.emoji} size={28} />
       <Text accessibilityRole="header" style={dashboardStyles.heroTitle}>{target.title}</Text>
       <Text style={dashboardStyles.heroBody}>{target.description}</Text>

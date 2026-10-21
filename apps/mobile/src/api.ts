@@ -1,5 +1,5 @@
 import { ApiError, readMobileResponse } from "./http-response";
-import { nativeWorkspacePageSchema, nativeLegalSchema } from "@estatedesk/contracts/mobile";
+import { nativeWorkspacePageSchema, nativeLegalSchema, nativeGuestStaySchema, nativeVacancyListSchema, nativeVacancyDetailSchema, nativeVacancyInquirySchema, type NativeVacancyInquiry } from "@estatedesk/contracts/mobile";
 import { nativeActionDefinitionSchema, nativeActionResultSchema, type NativeActionRequest } from "@estatedesk/contracts/mobile";
 export { ApiError } from "./http-response";
 import { mobileRewardsSchema, mobileSecuritySchema, mobileTenantInspectionsSchema, mobileLeaseSigningSchema, type MobileLeaseSigningInput, type MobileSecurityInput, type MobileMoveOutInput } from "@estatedesk/contracts/mobile";
@@ -28,6 +28,7 @@ const SUPPORT_KEY = "estatedesk.support";
 const VAULT_KEY = "estatedesk.vault";
 const PROFILE_KEY = "estatedesk.profile";
 const SESSION_KEY = "estatedesk.session";
+const GUEST_KEY = "estatedesk.guest-stay";
 const configuredUrl = process.env.EXPO_PUBLIC_API_URL;
 const reads = createRequestCoalescer();
 
@@ -44,20 +45,20 @@ function baseUrl() {
 }
 
 
-async function request(path: string, options: { method?: string; body?: unknown; form?: FormData; anonymous?: boolean } = {}) {
+async function request(path: string, options: { method?: string; body?: unknown; form?: FormData; anonymous?: boolean; guestToken?: string } = {}) {
   const origin = baseUrl();
   const sessionCookie = options.anonymous ? null : await SecureStore.getItemAsync(SESSION_KEY);
   const vaultCookie = sessionCookie && /^\/workspace\/(screen|action)(\?|$)/.test(path) ? await SecureStore.getItemAsync(VAULT_KEY) : null;
   const supportCookie = sessionCookie ? await SecureStore.getItemAsync(SUPPORT_KEY) : null;
   const cookie = [sessionCookie, vaultCookie, supportCookie].filter(Boolean).join("; ") || null;
   const send = () => sendRequest(origin, cookie, path, options);
-  if (!options.method || options.method === "GET") return reads.run(`${cookie ?? "anonymous"}\0${path}`, send);
+  if (!options.method || options.method === "GET") return reads.run(`${cookie ?? "anonymous"}:${options.guestToken ?? ""}\0${path}`, send);
   // Any mutation may change the organization, identity, or the records shown.
   reads.clear();
   return send().finally(() => reads.clear());
 }
 
-async function sendRequest(origin: string, cookie: string | null, path: string, options: { method?: string; body?: unknown; form?: FormData; anonymous?: boolean }) {
+async function sendRequest(origin: string, cookie: string | null, path: string, options: { method?: string; body?: unknown; form?: FormData; anonymous?: boolean; guestToken?: string }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20_000);
   try {
@@ -71,6 +72,7 @@ async function sendRequest(origin: string, cookie: string | null, path: string, 
         "X-EstateDesk-Client": "native",
         "X-EstateDesk-Capabilities": "2026-10-18",
         "X-EstateDesk-Signatures": "image-v1",
+        ...(options.guestToken ? { "X-EstateDesk-Guest-Token": options.guestToken } : {}),
         ...(cookie ? { Cookie: cookie } : {}),
       },
       body: options.form ?? (options.body ? JSON.stringify(options.body) : undefined),
@@ -97,6 +99,16 @@ export async function signIn(email: string, password: string) {
   await SecureStore.setItemAsync(SESSION_KEY, result.sessionCookie, {
     keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
   });
+}
+export async function requestPasswordReset(email: string) {
+  return request("/account/recovery", { method: "POST", body: { action: "request", email }, anonymous: true }) as Promise<{ ok: true; message: string }>;
+}
+export async function resetPassword(linkOrToken: string, password: string, confirmPassword: string) {
+  const token = linkOrToken.startsWith("http")
+    ? new URL(linkOrToken).searchParams.get("token") ?? ""
+    : linkOrToken;
+  if (!token) throw new Error("That reset link does not contain a valid token.");
+  return request("/account/recovery", { method: "POST", body: { action: "reset", token, password, confirmPassword }, anonymous: true }) as Promise<{ ok: true; message: string }>;
 }
 
 export async function hasSavedSession() {
@@ -126,6 +138,36 @@ export async function getNativeWorkspace(kind: MobileWorkspaceKind, path: string
 }
 export async function getLegal(kind: "terms" | "privacy") {
   return nativeLegalSchema.parse(await request(`/legal?kind=${kind}`));
+}
+export async function signInGuestStay(code: string) {
+  const result = await request("/guest/session", { method: "POST", body: { code: code.trim() }, anonymous: true }) as { ok: true; guestToken: string };
+  if (!/^[A-Za-z0-9_-]{43}$/.test(result.guestToken)) throw new Error("Invalid guest access response.");
+  await SecureStore.setItemAsync(GUEST_KEY, result.guestToken, { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY });
+  reads.clear();
+  return getGuestStay();
+}
+export async function getGuestStay() {
+  const guestToken = await SecureStore.getItemAsync(GUEST_KEY);
+  if (!guestToken) throw new Error("Enter your guest access code to continue.");
+  try { return nativeGuestStaySchema.parse(await request("/guest/session", { anonymous: true, guestToken })); }
+  catch (error) { if (error instanceof ApiError && error.status === 401) await SecureStore.deleteItemAsync(GUEST_KEY); throw error; }
+}
+export async function submitGuestStayRequest(message: string) {
+  const guestToken = await SecureStore.getItemAsync(GUEST_KEY);
+  if (!guestToken) throw new Error("Your guest access has expired. Enter your code again.");
+  return request("/guest/requests", { method: "POST", body: { message }, anonymous: true, guestToken }) as Promise<{ ok: true; message: string }>;
+}
+export async function signOutGuestStay() { reads.clear(); await SecureStore.deleteItemAsync(GUEST_KEY); }
+export async function getNativeVacancies(q = "", location = "", page = 1) {
+  const query = `q=${encodeURIComponent(q)}&location=${encodeURIComponent(location)}&page=${page}`;
+  return nativeVacancyListSchema.parse(await request(`/vacancies?${query}`, { anonymous: true }));
+}
+export async function getNativeVacancy(slug: string) {
+  return nativeVacancyDetailSchema.parse(await request(`/vacancies/${encodeURIComponent(slug)}`, { anonymous: true }));
+}
+export async function sendNativeVacancyInquiry(slug: string, input: NativeVacancyInquiry) {
+  const values = nativeVacancyInquirySchema.parse(input);
+  return request(`/vacancies/${encodeURIComponent(slug)}/inquiries`, { method: "POST", body: values, anonymous: true }) as Promise<{ ok: true; message: string }>;
 }
 export async function getHelp(q = "", page = 1) {
   return nativeWorkspacePageSchema.parse(await request(`/help?q=${encodeURIComponent(q)}&page=${page}`));

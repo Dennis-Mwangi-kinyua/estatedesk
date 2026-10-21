@@ -28,11 +28,17 @@ import { clearExpiredRateLimitBucketsAction, clearRateLimitScopeAction } from "@
 import { CREATE_ERROR_MESSAGES } from "@/app/(app)/platform/users/_lib/constants";
 import { cookies } from "next/headers";
 import { executeNativeInventoryAction } from "@/lib/mobile/native-inventory-actions";
+import { executeNativeStaffAction } from "@/lib/mobile/native-staff-actions";
+import { executeNativeTenantAction } from "@/lib/mobile/native-tenant-admin-actions";
+import { executeNativeAccountingAction } from "@/lib/mobile/native-accounting-actions";
+import { executeNativeBnbAction } from "@/lib/mobile/native-bnb-actions";
+import { executeNativeVacancyInquiryAction } from "@/lib/mobile/native-vacancy-inquiry-actions";
 import { getPlatformUnlockCookieName, getSessionCookieName, getSupportSessionCookieName } from "@/lib/auth/cookies";
 
 export async function GET(request: Request) {
   return nativeRoute(request, async session => {
     const input = nativeActionRequestSchema.parse(Object.fromEntries(new URL(request.url).searchParams));
+    if (input.kind === "landlord") return mobileJson({ error: "Landlord pages are read-only in this native workspace." }, 403);
     if (!mobileWorkspaceAllowed(session, input.kind) || !nativeWorkspaceEntry(mobileWorkspaceLinks(session, input.kind), input.path)) return mobileJson({ error: "This action is unavailable for your account." }, 403);
     const definition = await nativeActionDefinition(session, input.kind, input.path, input.actionId, input.recordId);
     if (definition && request.headers.get("x-estatedesk-signatures") !== "image-v1") {
@@ -46,6 +52,7 @@ export async function POST(request: Request) {
   return nativeRoute(request, async session => {
     if (!request.headers.get("content-type")?.startsWith("application/json")) return mobileJson({ error: "JSON required." }, 400);
     const input = nativeActionRequestSchema.parse(await readBoundedJson(request, 640000));
+    if (input.kind === "landlord") return mobileJson({ error: "Landlord pages are read-only in this native workspace." }, 403);
     if (!mobileWorkspaceAllowed(session, input.kind) || !nativeWorkspaceEntry(mobileWorkspaceLinks(session, input.kind), input.path)) return mobileJson({ error: "This action is unavailable for your account." }, 403);
     const definition = await nativeActionDefinition(session, input.kind, input.path, input.actionId, input.recordId);
     if (!definition) return mobileJson({ error: "This action is unavailable or the record has changed." }, 403);
@@ -53,8 +60,28 @@ export async function POST(request: Request) {
     try { form = nativeActionFormData(definition, input.values ?? {}); }
     catch (cause) { return mobileJson({ error: cause instanceof Error ? cause.message : "Check the form fields." }, 400); }
     try {
+      if (input.actionId.startsWith("accounting.")) {
+        const result = await executeNativeAccountingAction(input.kind, input.path, input.actionId, input.recordId, form);
+        return result && "error" in result ? mobileJson({ error: result.error }, 400) : result ? mobileJson(result) : mobileJson({ error: "This action is unavailable." }, 403);
+      }
+      if (input.actionId.startsWith("bnb.")) {
+        const result = await executeNativeBnbAction(session, input.path, input.actionId, input.recordId, form);
+        return "error" in result ? mobileJson({ error: result.error }, 400) : mobileJson(result);
+      }
+      if (input.actionId === "vacancy-inquiry.status") {
+        const result = await executeNativeVacancyInquiryAction(session, input.path, input.actionId, input.recordId, form);
+        return "error" in result ? mobileJson({ error: result.error }, 400) : mobileJson(result);
+      }
+      if (input.actionId.startsWith("tenant.")) {
+        const result = await executeNativeTenantAction(input.kind, input.path, input.actionId, input.recordId, form);
+        return result && "error" in result ? mobileJson({ error: result.error }, 400) : result ? mobileJson(result) : mobileJson({ error: "This action is unavailable." }, 403);
+      }
+      if (input.actionId.startsWith("staff.")) {
+        const result = await executeNativeStaffAction(input.kind, input.path, input.actionId, input.recordId, form);
+        return result && "error" in result ? mobileJson({ error: result.error }, 400) : result ? mobileJson(result) : mobileJson({ error: "This action is unavailable." }, 403);
+      }
       if (input.kind === "organization" && input.actionId.startsWith("resolution.")) return mobileJson(await executeNativeResolutionAction(session, input.path, input.actionId, input.recordId, form));
-      if (input.kind === "organization" && input.actionId === "unit.edit") {
+      if (input.kind === "organization" && (input.actionId === "unit.edit" || input.actionId.startsWith("inventory."))) {
         const result = await executeNativeInventoryAction(session, input.path, input.actionId, input.recordId, form);
         return result.error ? mobileJson({ error: result.error }, 400) : mobileJson({ ok: true, message: result.message ?? "Unit saved." });
       }
@@ -114,6 +141,13 @@ export async function POST(request: Request) {
       if (!isRedirectError(cause)) return mobileJson({ error: safeServerActionError("nativeWorkspaceAction", cause, "Unable to complete this action. Check the current state before retrying.") }, 400);
       const url = new URL(getURLFromRedirectError(cause) ?? "/", "https://estatedesk.invalid");
       if (url.origin !== "https://estatedesk.invalid") throw cause;
+      if (input.actionId.startsWith("accounting.account.") && url.pathname === "/dashboard/org/accounting/coa" && !url.searchParams.has("error")) {
+        return mobileJson({ ok: true, message: input.actionId.endsWith("create") ? "Accounting account created." : "Accounting account updated." });
+      }
+      if (input.actionId === "accounting.journal.create" && url.pathname === "/dashboard/org/accounting/journals" && !url.searchParams.has("error")) {
+        const draft = url.searchParams.get("message") === "Draft journal saved";
+        return mobileJson({ ok: true, message: draft ? "Journal saved as a draft." : "Journal posted to the ledger." });
+      }
       if (["support.enter", "support.extend", "support.leave"].includes(input.actionId) && (url.pathname === "/dashboard/org" || input.actionId === "support.leave" && url.pathname === "/platform/support-access") && !url.searchParams.has("error")) {
         const store = await cookies(); const sessionName = getSessionCookieName(); const supportName = getSupportSessionCookieName();
         const sessionValue = store.get(sessionName)?.value; const supportValue = store.get(supportName)?.value;
@@ -142,6 +176,10 @@ export async function POST(request: Request) {
       }
       if (input.actionId === "property.create" && url.pathname === "/dashboard/org/properties/new" && url.searchParams.has("error")) return mobileJson({ error: url.searchParams.get("error") }, 400);
       if (input.actionId === "property.create" && url.pathname === "/dashboard/org/properties" && url.searchParams.get("created") === "1") return mobileJson({ ok: true, message: "Property created successfully." });
+      if (input.actionId === "inventory.unit.delete" && url.pathname === "/dashboard/org/units" && !url.searchParams.has("error")) return mobileJson({ ok: true, message: "Unit deleted." });
+      if (input.actionId === "inventory.building.delete" && url.pathname === "/dashboard/org/buildings" && !url.searchParams.has("error")) return mobileJson({ ok: true, message: "Building deleted." });
+      if (input.actionId === "inventory.unit.create" && /^\/dashboard\/org\/units\/[^/]+$/.test(url.pathname)) return mobileJson({ ok: true, message: "Unit created." });
+      if (input.actionId === "inventory.unit.create" && url.pathname.endsWith("/units/new") && url.searchParams.has("error")) return mobileJson({ error: url.searchParams.get("error") ?? "Unable to create this unit." }, 400);
       throw cause;
     }
   });

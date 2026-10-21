@@ -10,7 +10,7 @@ export function openingArrearsPeriods(now = new Date()) {
 }
 
 export function parseOpeningArrears(form: FormData, options: { existingLease: boolean; unitId: string | null; leaseStartDate: Date; now?: Date }): OpeningArrearsEntry[] {
-  const allowed = openingArrearsPeriods(options.now);
+  const latestPeriod = openingArrearsPeriods(options.now)[0];
   const result: OpeningArrearsEntry[] = [];
   for (const [key, value] of form.entries()) {
     if (!key.startsWith("openingArrears:")) continue;
@@ -18,7 +18,9 @@ export function parseOpeningArrears(form: FormData, options: { existingLease: bo
     if (typeof value !== "string") throw new Error("Enter a valid previous balance.");
     const amount = value.trim();
     if (!amount) continue;
-    if (!allowed.includes(period)) throw new Error("Previous arrears must be within the last 12 completed months.");
+    if (!/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(period) || period.startsWith("0000") || period > latestPeriod) {
+      throw new Error("Previous arrears must be for a completed calendar month.");
+    }
     // Keep currency exact and reject negatives, exponents and excess decimals.
     if (!/^\d{1,9}(?:\.\d{1,2})?$/.test(amount)) throw new Error(`Enter a non-negative amount with up to two decimal places for ${period}.`);
     if (Number(amount) === 0) continue;
