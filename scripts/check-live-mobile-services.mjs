@@ -29,7 +29,9 @@ await Promise.all(Array.from({ length: 4 }, async () => {
         headers: { Accept: "application/json", "X-EstateDesk-Client": "native", Cookie: cookie },
       });
       const json = response.headers.get("content-type")?.includes("application/json");
-      if (response.status === 401 && json || response.status === 405) console.log(`AVAILABLE ${response.status} ${endpoint}`);
+      // Public read routes may return 200, while the deliberately fake vacancy
+      // slug should return a JSON 404. Accept these as routed responses too.
+      if (response.status === 401 && json || response.status === 405 || json && (response.status === 200 || response.status === 404)) console.log(`AVAILABLE ${response.status} ${endpoint}`);
       else {
         const result = `${response.status === 404 ? "MISSING" : "CHECK"} ${response.status} ${endpoint}`;
         failures.push(result); console.error(result);

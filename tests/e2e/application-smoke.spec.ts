@@ -26,10 +26,11 @@ test("liveness endpoint returns a bounded health response", async ({ request }) 
 
   expect([200, 503]).toContain(response.status());
   const body = await response.json();
-  expect(body).toMatchObject({
-    service: "estatedesk",
-    database: { checked: false },
-    ops: { checked: false },
-  });
+  expect(body.service).toBe("estatedesk");
   expect(["ok", "degraded"]).toContain(body.status);
+  expect(Number.isNaN(Date.parse(body.checkedAt))).toBe(false);
+  expect(body).not.toHaveProperty("database");
+  expect(body).not.toHaveProperty("ops");
+  expect(body).not.toHaveProperty("environment");
+  expect(body).not.toHaveProperty("uptimeSeconds");
 });

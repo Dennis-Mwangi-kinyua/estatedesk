@@ -63,6 +63,7 @@ type FeedRow = {
   type: string;
   channel: string;
   status: string;
+  providerResponse: unknown;
   readAt: Date | null;
   createdAt: Date;
   user: {
@@ -89,7 +90,7 @@ type FeedRow = {
 export function collapseNotificationFeedRows<T extends FeedRow>(
   rows: T[],
   limit = 18,
-): Array<T & { channels: string[] }> {
+): Array<T & { channels: string[]; deliveries: Array<{ channel: string; status: string; detail: string | null }> }> {
   const CHANNEL_RANK: Record<string, number> = {
     IN_APP: 0,
     WEB_PUSH: 1,
@@ -104,10 +105,19 @@ export function collapseNotificationFeedRows<T extends FeedRow>(
     SENT: 2,
   };
 
+  function deliveryDetail(value: unknown) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+    const response = value as Record<string, unknown>;
+    const error = response.error ?? response.reason ?? response.message;
+    if (typeof error !== "string") return null;
+    return error.replace(/bearer\s+[^\s,;]+/gi, "Bearer [redacted]").replace(/(token|password|secret|api[_-]?key)\s*[:=]\s*[^\s,;]+/gi, "$1=[redacted]").slice(0, 240);
+  }
+
   type Group = {
     primary: T;
     channels: Set<string>;
     statuses: string[];
+    deliveries: Map<string, { status: string; detail: string | null }>;
     readAt: Date | null;
   };
 
@@ -138,6 +148,7 @@ export function collapseNotificationFeedRows<T extends FeedRow>(
         primary: row,
         channels: new Set([row.channel]),
         statuses: [row.status],
+        deliveries: new Map([[row.channel, { status: row.status, detail: deliveryDetail(row.providerResponse) }]]),
         readAt: row.readAt,
       });
       order.push(key);
@@ -146,6 +157,7 @@ export function collapseNotificationFeedRows<T extends FeedRow>(
 
     existing.channels.add(row.channel);
     existing.statuses.push(row.status);
+    existing.deliveries.set(row.channel, { status: row.status, detail: deliveryDetail(row.providerResponse) });
 
     // Prefer IN_APP row as the mark-read / primary identity.
     const existingRank = CHANNEL_RANK[existing.primary.channel] ?? 99;
@@ -178,6 +190,7 @@ export function collapseNotificationFeedRows<T extends FeedRow>(
       ...group.primary,
       channel: channels[0] ?? group.primary.channel,
       channels,
+      deliveries: [...group.deliveries.entries()].map(([channel, delivery]) => ({ channel, ...delivery })),
       status,
       readAt: group.readAt,
     };

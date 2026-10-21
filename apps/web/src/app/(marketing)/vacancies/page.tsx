@@ -412,7 +412,12 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                 </label>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <details open={Boolean(filters.type || filters.minRent || filters.maxRent || filters.bedrooms != null || filters.sort !== "location")} className="rounded-lg border border-slate-200 px-3 dark:border-white/12">
+                <summary className="flex min-h-11 cursor-pointer flex-col items-start justify-center gap-0.5 text-sm font-semibold text-slate-800 dark:text-slate-100 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                  More filters
+                  <span className="text-xs font-normal text-slate-500 dark:text-slate-300">Type, rent, rooms and sort</span>
+                </summary>
+                <div className="grid gap-2 pb-3 sm:grid-cols-2 lg:grid-cols-4">
                 <select
                   name="type"
                   defaultValue={filters.type ?? ""}
@@ -457,9 +462,8 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                   <option value="3">3+ rooms</option>
                   <option value="4">4+ rooms</option>
                 </select>
-              </div>
-
-              <div className="grid grid-cols-[1fr_auto] gap-2">
+                </div>
+                <div className="pb-3">
                 <select
                   name="sort"
                   defaultValue={filters.sort}
@@ -471,12 +475,15 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                   <option value="rent_asc">Rent low to high</option>
                   <option value="rent_desc">Rent high to low</option>
                 </select>
+                </div>
+              </details>
+              <div className="grid gap-2">
                 <button
                   type="submit"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-[#e5e7eb] dark:focus-visible:ring-white dark:focus-visible:ring-offset-[#0b0f16] [&_*]:text-current"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-[#e5e7eb] dark:focus-visible:ring-white dark:focus-visible:ring-offset-[#0b0f16] [&_*]:text-current sm:w-auto sm:justify-self-end"
                 >
                   <Search className="h-4 w-4" />
-                  Search
+                  Search vacancies
                 </button>
               </div>
             </form>

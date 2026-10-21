@@ -15,7 +15,7 @@ export function TenantDetailsWorkspace({
 }) {
   const { tenant, canManage, hasActiveLease, isDeleted, isBlacklisted, isArchived, currentUnit, currentRent, currentDeposit, totalPayments } = data;
   return (
-    <div className="org-theme-content mx-auto w-full min-w-0 max-w-7xl px-0 pb-24 pt-2 sm:px-2">
+    <div className="org-theme-content ed-mobile-first mx-auto w-full min-w-0 max-w-7xl px-3 pb-24 pt-3 sm:px-6 sm:pt-4 lg:px-8">
       <div className="space-y-5">
         <TenantHeroCard
           fullName={tenant.fullName}

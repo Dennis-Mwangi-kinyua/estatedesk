@@ -13,6 +13,7 @@ const approvalQueueSelect = orgMeterReadingDetailSelect;
 export async function getOrgWaterBillsPageData(
   orgId: string,
   orgRole: AllowedRole,
+  userId: string,
   scope?: RecordScope,
 ) {
   const orgUnitFilter = {
@@ -63,6 +64,7 @@ export async function getOrgWaterBillsPageData(
 
   return {
     membership: {
+      userId,
       orgId,
       role: orgRole,
       org,

@@ -434,7 +434,6 @@ function OperationsPanel({
             <Link
               key={title}
               href={href}
-              aria-label="View vacant houses"
               className={cx(cardClassName, "block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-sky-300 dark:focus-visible:ring-offset-[#0d1117]")}
             >
               {content}

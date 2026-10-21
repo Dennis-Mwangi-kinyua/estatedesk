@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth/session";
-import { readPersonalNotification, readAllPersonalNotifications } from "@/lib/notifications/read";
+import { readPersonalNotification, readAllPersonalNotifications, unreadPersonalNotification } from "@/lib/notifications/read";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { PayloadTooLargeError, readBoundedJson } from "@/lib/security/bounded-json";
 
 const readTargetSchema = z.union([
   z.object({ all: z.literal(true) }).strict(),
-  z.object({ id: z.string().trim().min(1).max(200) }).strict(),
+  z.object({ id: z.string().trim().min(1).max(200), read: z.boolean().optional() }).strict(),
 ]);
 
 export async function POST(request: NextRequest) {
@@ -28,7 +28,11 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid notification target." }, { status: 400 });
   const body = parsed.data;
   try {
-    const actionUrl = "all" in body ? (await readAllPersonalNotifications(session), null) : await readPersonalNotification(session, body.id);
+    const actionUrl = "all" in body
+      ? (await readAllPersonalNotifications(session), null)
+      : body.read === false
+        ? (await unreadPersonalNotification(session, body.id), null)
+        : await readPersonalNotification(session, body.id);
     const portal = session.activeOrgRole === "TENANT" ? "tenant" : session.activeOrgRole === "CARETAKER" ? "caretaker" : "org";
     revalidatePath(`/dashboard/${portal}/notifications`);
     return NextResponse.json({ actionUrl });

@@ -119,16 +119,20 @@ export function NotificationFilterLink({
   filter,
   activeFilter,
   label,
+  search = "",
 }: {
   filter: NotificationFilter;
   activeFilter: NotificationFilter;
   label: string;
+  search?: string;
 }) {
   const active = filter === activeFilter;
+  const params = new URLSearchParams({ filter });
+  if (search) params.set("q", search);
 
   return (
     <Link data-workspace-action="true"
-      href={`/dashboard/org/notifications?filter=${filter}`}
+      href={`/dashboard/org/notifications?${params.toString()}`}
       aria-current={active ? "page" : undefined}
       className={cn(
         "inline-flex min-h-11 max-w-full shrink-0 items-center justify-center whitespace-nowrap rounded-full border px-4 text-sm font-medium transition",

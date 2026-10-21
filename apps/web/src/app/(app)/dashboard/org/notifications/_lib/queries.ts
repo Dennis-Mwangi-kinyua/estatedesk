@@ -150,17 +150,32 @@ function getNotificationWhereForFilter(
 
 export async function loadNotificationsPageData(
   filter: NotificationFilter,
+  searchInput = "",
+  pageInput = 0,
 ): Promise<PageData> {
   const membership = await getCurrentOrgContext();
+  const search = searchInput.trim().slice(0, 100);
+  const page = Number.isInteger(pageInput) ? Math.max(0, Math.min(pageInput, 100)) : 0;
+  const pageSize = 120;
+  const searchWhere: Prisma.NotificationWhereInput | undefined = search ? {
+    OR: [
+      { title: { contains: search, mode: "insensitive" } },
+      { message: { contains: search, mode: "insensitive" } },
+    ],
+  } : undefined;
+  const filteredWhere: Prisma.NotificationWhereInput = {
+    AND: [getNotificationWhereForFilter(filter, membership), ...(searchWhere ? [searchWhere] : [])],
+  };
   const inboxWhere = {
     orgId: membership.orgId,
     userId: membership.userId,
   };
   const [rawNotifications, totalNotifications, unreadCount, filteredCount] = await Promise.all([
     prisma.notification.findMany({
-      where: { ...getNotificationWhereForFilter(filter, membership), userId: membership.userId },
-      orderBy: { createdAt: "desc" },
-      take: 120,
+      where: { ...filteredWhere, userId: membership.userId },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      skip: page * pageSize,
+      take: pageSize,
       select: {
         id: true,
         title: true,
@@ -179,7 +194,7 @@ export async function loadNotificationsPageData(
     prisma.notification.count({ where: { ...inboxWhere, channel: "IN_APP", readAt: null } }),
     prisma.notification.count({
       where: {
-        ...getNotificationWhereForFilter(filter, membership),
+        ...filteredWhere,
         userId: membership.userId,
         channel: "IN_APP",
       },
@@ -195,5 +210,8 @@ export async function loadNotificationsPageData(
       unreadCount,
       filteredCount,
     },
+    search,
+    page,
+    hasMore: rawNotifications.length === pageSize,
   };
 }

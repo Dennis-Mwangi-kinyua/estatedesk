@@ -17,20 +17,27 @@ export async function readPersonalNotification(session: AppSession, id: string) 
   const scope = await notificationScopeForSession(session);
   const notification = await prisma.notification.findFirst({ where: { ...scope, id } });
   if (!notification) throw new Error("Notification not found.");
-  // Clear legacy copies of the same update as well as its in-app / push copies.
-  // Delivery status is deliberately untouched: viewing must never queue or send anything.
+  // Change only the selected row: similar notifications may represent separate
+  // events, even when their text and timestamps are close.
   await prisma.notification.updateMany({
-    where: {
-      ...scope, type: notification.type, title: notification.title, message: notification.message,
-      createdAt: { gte: new Date(notification.createdAt.getTime() - 600_000), lte: new Date(notification.createdAt.getTime() + 600_000) },
-      readAt: null,
-    }, data: { readAt: new Date() },
+    where: { ...scope, id, readAt: null },
+    data: { readAt: new Date() },
   });
   return resolveNotificationActionUrl({
     type: notification.type,
     title: notification.title,
     audience: session.activeOrgRole === "TENANT" ? "tenant" : session.activeOrgRole === "CARETAKER" ? "caretaker" : "org_staff",
     actionUrl: readNotificationActionUrl(notification.providerResponse),
+  });
+}
+
+export async function unreadPersonalNotification(session: AppSession, id: string) {
+  const scope = await notificationScopeForSession(session);
+  const notification = await prisma.notification.findFirst({ where: { ...scope, id } });
+  if (!notification) throw new Error("Notification not found.");
+  await prisma.notification.updateMany({
+    where: { ...scope, id },
+    data: { readAt: null },
   });
 }
 

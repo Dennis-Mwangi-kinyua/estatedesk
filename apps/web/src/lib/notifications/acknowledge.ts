@@ -1,6 +1,6 @@
 import { readNotificationActionUrl } from "../push/notification-links";
 
-type ReadTarget = { all: true } | { id: string };
+type ReadTarget = { all: true } | { id: string; read?: boolean };
 
 /** Shared browser request; announce success only after the server accepts it. */
 export async function acknowledgeNotification(target: ReadTarget): Promise<string | null> {

@@ -14,6 +14,7 @@ export default async function OrgWaterBillsPage() {
   const data = await getOrgWaterBillsPageData(
     session.activeOrgId!,
     session.activeOrgRole as "ADMIN" | "MANAGER" | "OFFICE" | "ACCOUNTANT",
+    session.userId,
     session.membershipScope,
   );
 

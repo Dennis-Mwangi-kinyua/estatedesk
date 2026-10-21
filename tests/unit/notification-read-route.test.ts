@@ -17,7 +17,7 @@ test("notification reads reject invalid requests before mutating records", async
           ? "export const revalidatePath = () => {};"
           : args.path.includes("auth/session")
             ? 'export const getUserSession = async () => ({ activeOrgRole: "TENANT" });'
-            : 'export const readPersonalNotification = async (_, id) => `/dashboard/tenant/issues/${id}`; export const readAllPersonalNotifications = async () => {};',
+            : 'export const readPersonalNotification = async (_, id) => `/dashboard/tenant/issues/${id}`; export const unreadPersonalNotification = async () => {}; export const readAllPersonalNotifications = async () => {};',
         loader: "js",
       }));
     } }],

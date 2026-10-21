@@ -23,7 +23,7 @@ export function NotificationsWorkspace({
   } = data;
 
   return (
-    <div className="org-theme-content notifications-page uniform-page-actions mx-auto w-full min-w-0 max-w-6xl space-y-6 px-0 pb-24 pt-2 sm:px-2">
+    <div className="ed-mobile-first org-theme-content notifications-page uniform-page-actions mx-auto w-full min-w-0 max-w-6xl space-y-5 px-3 pb-24 pt-3 sm:space-y-6 sm:px-6 sm:pt-4 lg:px-8">
       <DashboardAutoRefresh interval={60_000} />
       <header className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
@@ -37,7 +37,7 @@ export function NotificationsWorkspace({
           </div>
         </div>
         {unreadCount > 0 ? (
-          <NotificationReadButton all className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-muted/30 sm:w-auto">
+          <NotificationReadButton all className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-muted/30 sm:w-auto">
             Mark all as read
           </NotificationReadButton>
         ) : null}
@@ -50,6 +50,9 @@ export function NotificationsWorkspace({
         totalNotifications={totalNotifications}
         filteredCount={filteredCount}
         unreadCount={unreadCount}
+        search={data.search}
+        page={data.page}
+        hasMore={data.hasMore}
       />
     </div>
   );

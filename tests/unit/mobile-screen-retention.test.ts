@@ -69,7 +69,7 @@ test("iOS and Android retain the selected service when refresh availability chan
           'refreshControl={session?.role === "TENANT" && tenantHome.visible && !offline && !session.requiresAccountSetup ? $1 : undefined}',
         ),
       }));
-      builder.onResolve({ filter: /^(react-native|react-native-safe-area-context|expo-status-bar)$|^\.\/src\/(api|components\/(app-icon|workflows|app-error-boundary|offline-workspace|tenant-workspace|tenant-navigation))(\.tsx?)?$|^\.\/(app-icon|workflows|app-error-boundary|offline-workspace|tenant-workspace|tenant-navigation)(\.tsx?)?$/ }, args => ({ path: args.path, namespace: "native-test" }));
+      builder.onResolve({ filter: /^(react-native|react-native-safe-area-context|expo-status-bar)$|^\.\/src\/(api|components\/(app-icon|workflows|app-error-boundary|offline-workspace|tenant-workspace|tenant-navigation|native-guest-stay|native-vacancies|native-password-recovery))(\.tsx?)?$|^\.\/(app-icon|workflows|app-error-boundary|offline-workspace|tenant-workspace|tenant-navigation|native-guest-stay|native-vacancies|native-password-recovery)(\.tsx?)?$/ }, args => ({ path: args.path, namespace: "native-test" }));
       builder.onLoad({ filter: /.*/, namespace: "native-test" }, args => ({
         loader: "tsx", resolveDir: process.cwd(), contents:
           args.path === "react-native" ? native
@@ -84,6 +84,9 @@ test("iOS and Android retain the selected service when refresh availability chan
           : args.path.endsWith("app-error-boundary") ? `export const AppErrorBoundary=({children})=>children;`
           : args.path.endsWith("tenant-navigation") ? `export const TenantNavigation=()=>null;`
           : args.path.endsWith("tenant-workspace") ? `export const TenantWorkspace=()=>null;`
+          : args.path.endsWith("native-guest-stay") ? `export const NativeGuestStay=()=>null;`
+          : args.path.endsWith("native-vacancies") ? `export const NativeVacancies=()=>null;`
+          : args.path.endsWith("native-password-recovery") ? `export const NativePasswordRecovery=()=>null;`
           : `export const OfflineWorkspace=()=>null;`,
       }));
     } }],

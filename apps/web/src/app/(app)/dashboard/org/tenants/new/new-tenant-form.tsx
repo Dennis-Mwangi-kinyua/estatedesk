@@ -13,11 +13,12 @@ import { createTenantAction } from "@/features/tenants/actions/create-tenant-act
 import { FormActions } from "./_components/form-actions";
 import { NewTenantGuidance } from "./_components/new-tenant-guidance";
 import { NewTenantHeader } from "./_components/new-tenant-header";
+import { TenantRegistrationTypeChoice } from "./_components/tenant-registration-type-choice";
 import { StepAccountDetails } from "./_components/step-account-details";
-import { StepChip } from "./_components/step-chip";
 import { StepNextOfKin } from "./_components/step-next-of-kin";
 import { StepPreview } from "./_components/step-preview";
 import { StepTenantDetails } from "./_components/step-tenant-details";
+import { TenantStepProgress } from "./_components/tenant-step-progress";
 import { StepUnitLease } from "./_components/step-unit-lease";
 import { TenantSuccessView } from "./_components/tenant-success-view";
 import { ErrorNotice, panelShellClassName, WarningNotice } from "./_components/ui-primitives";
@@ -147,21 +148,7 @@ export function NewTenantForm({
 
       <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
         <section className={panelShellClassName}>
-          <div className="border-b border-border bg-muted/10 px-4 py-4 sm:px-6">
-            <div>
-              <ol aria-label="Tenant setup steps" className="grid grid-cols-5 gap-1 sm:gap-2">
-                {stepItems.map((item) => (
-                  <StepChip
-                    key={item.id}
-                    item={item}
-                    active={step === item.id}
-                    complete={step > item.id}
-                  />
-                ))}
-              </ol>
-            </div>
-            <div className="mt-3 h-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Tenant setup progress" aria-valuemin={1} aria-valuemax={5} aria-valuenow={step}><div className="h-full rounded-full bg-primary transition-all duration-300 motion-reduce:transition-none" style={{ width: `${step * 20}%` }} /></div>
-          </div>
+          <TenantStepProgress step={step} />
 
           <div className="px-4 py-5 sm:px-6 sm:py-6">
             <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-wider text-primary">Step {step} of 5</p><h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 scroll-mt-28 text-xl font-semibold tracking-tight outline-none">{stepItems[step - 1].title}</h2><p className="mt-1 text-sm text-muted-foreground">{stepItems[step - 1].description}</p></div>
@@ -191,17 +178,14 @@ export function NewTenantForm({
               {existingLease ? <input type="hidden" name="existingLease" value="on" /> : null}
 
               <section className={step === 1 ? "block" : "hidden"}>
-                <div className="mb-5 grid gap-3 sm:grid-cols-2" role="group" aria-label="Tenant registration type">
-                  {[
-                    { existing: false, title: "New tenant", description: "Start a fresh tenancy. The agreed rent and deposit form the first bill." },
-                    { existing: true, title: "Existing tenant", description: "Register a tenant already living here and enter unpaid bills from previous years." },
-                  ].map(option => (
-                    <button key={option.title} type="button" aria-pressed={existingLease === option.existing} disabled={isPending} onClick={() => { setExistingLease(option.existing); setStepError(null); }} className={`rounded-2xl border p-4 text-left ${existingLease === option.existing ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border bg-card"}`}>
-                      <span className="block font-semibold">{option.title}</span>
-                      <span className="mt-1 block text-sm text-muted-foreground">{option.description}</span>
-                    </button>
-                  ))}
-                </div>
+                <TenantRegistrationTypeChoice
+                  value={existingLease}
+                  disabled={isPending}
+                  onChange={(value) => {
+                    setExistingLease(value);
+                    setStepError(null);
+                  }}
+                />
                 <StepTenantDetails isPending={isPending} />
               </section>
 

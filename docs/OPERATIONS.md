@@ -69,10 +69,9 @@ Expected responses:
 
 ## GitHub Uptime Workflow
 
-- `.github/workflows/uptime.yml` provides manually triggered health checks. Its scheduled trigger is removed.
-- Set repository variable `HEALTHCHECK_ENABLED=true` to enable the workflow.
-- Set repository secret `HEALTHCHECK_URL` to the deployed origin, for example `https://estatedesk.co.ke`.
-- Keep external uptime monitoring as the primary alerting path if the GitHub Actions quota or outage behavior is not acceptable for production.
+- `.github/workflows/uptime.yml` runs every 15 minutes and can also be triggered manually. Set repository variable `HEALTHCHECK_ENABLED=false` to disable it; it runs by default otherwise.
+- Set repository variable `HEALTHCHECK_URL` to the deployed origin, for example `https://estatedesk.co.ke`. The workflow checks liveness and verifies that detailed health remains private.
+- GitHub Actions marks a failed run, but this workflow does not send a dedicated alert to an on-call channel. Configure an external uptime monitor with alert delivery and keep it as the primary production alert path.
 
 ## Scheduled Production Jobs
 

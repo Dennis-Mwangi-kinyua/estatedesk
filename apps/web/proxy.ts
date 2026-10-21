@@ -48,6 +48,7 @@ const PUBLIC_PREFIXES = [
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 30;
 const CLEANUP_INTERVAL_MS = 5 * 60_000;
+const MAX_RATE_LIMIT_ENTRIES = 10_000;
 const RATE_LIMITED_PATHS = new Set(["/dashboard/org/tenants"]);
 const API_BROWSER_DESTINATIONS = new Set(["document", "iframe"]);
 
@@ -77,11 +78,11 @@ function cleanupExpiredEntries(now: number) {
 function getClientIp(req: NextRequest): string {
   const forwardedFor = req.headers.get("x-forwarded-for");
   if (forwardedFor) {
-    return forwardedFor.split(",")[0]?.trim() || "unknown";
+    return forwardedFor.split(",")[0]?.trim().slice(0, 64) || "unknown";
   }
 
   const realIp = req.headers.get("x-real-ip");
-  if (realIp) return realIp.trim();
+  if (realIp) return realIp.trim().slice(0, 64);
 
   return "unknown";
 }
@@ -100,6 +101,12 @@ function checkRateLimit(key: string) {
   const existing = rateLimitStore.get(key);
 
   if (!existing || existing.resetAt <= now) {
+    // Keep this best-effort per-instance guard from growing without bound if
+    // clients send many distinct forwarding-header values.
+    if (rateLimitStore.size >= MAX_RATE_LIMIT_ENTRIES) {
+      const oldestKey = rateLimitStore.keys().next().value;
+      if (oldestKey) rateLimitStore.delete(oldestKey);
+    }
     const resetAt = now + WINDOW_MS;
 
     const entry: RateLimitEntry = {

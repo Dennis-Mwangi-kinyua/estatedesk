@@ -103,6 +103,7 @@ export type NotificationItem = {
   channel: string;
   /** All delivery channels for this logical event (deduped). */
   channels: string[];
+  deliveries: Array<{ channel: string; status: string; detail: string | null }>;
   status: string;
   readAt: Date | null;
   createdAt: Date;
@@ -156,6 +157,9 @@ export type PageData = {
     unreadCount: number;
     filteredCount: number;
   };
+  search: string;
+  page: number;
+  hasMore: boolean;
 };
 
 export type NotificationFilter =
@@ -170,5 +174,7 @@ export type NotificationFilter =
 export type PageProps = {
   searchParams?: Promise<{
     filter?: string;
+    q?: string;
+    page?: string;
   }>;
 };
