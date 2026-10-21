@@ -16,10 +16,6 @@ type RouteContext = {
   }>;
 };
 
-function isPlatformAdmin(platformRole: string) {
-  return platformRole === "SUPER_ADMIN" || platformRole === "PLATFORM_ADMIN";
-}
-
 function isOrgExportRole(role: string | null) {
   return ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"].includes(role ?? "");
 }
@@ -37,6 +33,7 @@ export async function GET(_request: Request, context: RouteContext) {
       requestedByUserId: true,
       status: true,
       expiresAt: true,
+      downloadedAt: true,
     },
   });
 
@@ -45,10 +42,9 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 
   const canAccess =
-    isPlatformAdmin(session.platformRole) ||
-    (session.activeOrgId === exportRequest.orgId &&
-      (exportRequest.requestedByUserId === session.userId ||
-        isOrgExportRole(session.activeOrgRole)));
+    session.activeOrgId === exportRequest.orgId &&
+    (exportRequest.requestedByUserId === session.userId ||
+      isOrgExportRole(session.activeOrgRole));
 
   if (!canAccess) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
@@ -60,6 +56,9 @@ export async function GET(_request: Request, context: RouteContext) {
 
   if (exportRequest.expiresAt && exportRequest.expiresAt <= new Date()) {
     return NextResponse.json({ error: "Export approval has expired." }, { status: 410 });
+  }
+  if (exportRequest.downloadedAt) {
+    return NextResponse.json({ error: "This approved export has already been downloaded." }, { status: 410 });
   }
 
   let exportZip: Awaited<ReturnType<typeof buildOrganizationCsvZip>>;
@@ -89,6 +88,32 @@ export async function GET(_request: Request, context: RouteContext) {
     );
   }
 
+  // Claim the single download after the archive is ready so a failed export build
+  // does not consume the organization's one-time download.
+  const downloadedAt = new Date();
+  const claim = await prisma.dataExportRequest.updateMany({
+    where: {
+      id: exportRequest.id,
+      status: "APPROVED",
+      downloadedAt: null,
+      OR: [{ expiresAt: null }, { expiresAt: { gt: downloadedAt } }],
+    },
+    data: { downloadedAt },
+  });
+  if (claim.count !== 1) {
+    const latest = await prisma.dataExportRequest.findUnique({
+      where: { id: exportRequest.id },
+      select: { status: true, expiresAt: true, downloadedAt: true },
+    });
+    if (!latest || latest.status !== "APPROVED") {
+      return NextResponse.json({ error: "Export request is no longer approved." }, { status: 409 });
+    }
+    if (latest.expiresAt && latest.expiresAt <= new Date()) {
+      return NextResponse.json({ error: "Export approval has expired." }, { status: 410 });
+    }
+    return NextResponse.json({ error: "This approved export has already been downloaded." }, { status: 410 });
+  }
+
   await writeAuditLog({
     orgId: exportRequest.orgId,
     actorUserId: session.userId,
@@ -99,6 +124,7 @@ export async function GET(_request: Request, context: RouteContext) {
       platformRole: session.platformRole,
       activeOrgRole: session.activeOrgRole,
       requestedByUserId: exportRequest.requestedByUserId,
+      downloadedAt: downloadedAt.toISOString(),
     },
   });
 

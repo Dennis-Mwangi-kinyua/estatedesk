@@ -400,6 +400,7 @@ model DataExportRequest {
   deliveryEmail     String?
   emailSentAt       DateTime?
   emailDeliveryError String?
+  downloadedAt      DateTime?
   reviewerNotes     String?
   requestedAt       DateTime                @default(now())
   reviewedAt        DateTime?

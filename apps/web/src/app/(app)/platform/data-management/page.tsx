@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
-import { encodePublicId } from "@/lib/public-id";
 import {
   approveDataExportRequestAction,
   rejectDataExportRequestAction,
@@ -104,7 +103,7 @@ export default async function DataManagementPage() {
 
       <Surface
         title="Data export requests"
-        description="Review organization CSV requests. Approving an in-app request enables a secure download; approving an email request sends the ZIP archive to its specified address."
+        description="Review organization CSV requests. Approval notifies organisation administrators and provides a secure download link that expires after seven days and works once. Email delivery sends that same one-time link."
       >
         <div className="divide-y divide-border lg:hidden">
           {exportRequests.map((request) => {
@@ -209,8 +208,8 @@ export default async function DataManagementPage() {
                 </div>
               ) : request.status === "APPROVED" ? (
                 <div className="grid gap-2">
-                  <a data-workspace-action="true" href={`/api/data-exports/${encodePublicId(request.id, "data-export")}/download`} className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted/50">Download ZIP</a>
-                  {request.deliveryMethod === "EMAIL" && !request.emailSentAt ? <form action={retryDataExportEmailAction}><input type="hidden" name="requestId" value={request.id} /><button data-workspace-action="true" className="min-h-11 w-full rounded-xl border border-border px-4 text-sm font-semibold" type="submit">{request.emailDeliveryError ? "Retry email delivery" : "Send ZIP by email"}</button>{request.emailDeliveryError ? <p className="text-xs text-amber-700">Email was not sent. The secure download is still available.</p> : null}</form> : null}
+                  {request.downloadedAt ? <p className="rounded-xl bg-emerald-50 p-3 text-xs font-medium text-emerald-800">Downloaded {formatDateTime(request.downloadedAt)}. The one-time link is used.</p> : <p className="rounded-xl border border-border p-3 text-xs text-muted-foreground">Approved. Waiting for the organisation to use its one-time download.</p>}
+                  {request.deliveryMethod === "EMAIL" && !request.emailSentAt && !request.downloadedAt ? <form action={retryDataExportEmailAction}><input type="hidden" name="requestId" value={request.id} /><button data-workspace-action="true" className="min-h-11 w-full rounded-xl border border-border px-4 text-sm font-semibold" type="submit">{request.emailDeliveryError ? "Retry link email" : "Send secure link by email"}</button>{request.emailDeliveryError ? <p className="text-xs text-amber-700">The secure link email was not sent.</p> : null}</form> : null}
                 </div>
               ) : null}
             </article>
@@ -263,7 +262,7 @@ export default async function DataManagementPage() {
                       <p className="mt-2 text-xs text-neutral-500">Note: {request.reviewerNotes}</p>
                     ) : null}
                   </td>
-                  <td className="px-4 py-3 text-neutral-600">{request.deliveryMethod === "EMAIL" ? <>{request.deliveryEmail ?? "Email missing"}<p className="mt-1 text-xs">{request.emailSentAt ? "Sent" : request.emailDeliveryError ? "Delivery failed" : request.status === "PENDING" ? "Sent after approval" : "Not sent"}</p></> : "Secure download"}</td>
+                  <td className="px-4 py-3 text-neutral-600">{request.deliveryMethod === "EMAIL" ? <>{request.deliveryEmail ?? "Email missing"}<p className="mt-1 text-xs">{request.emailSentAt ? "One-time link sent" : request.emailDeliveryError ? "Link email failed" : request.status === "PENDING" ? "Link sent after approval" : "Not sent"}</p></> : "Secure one-time download"}</td>
                   <td className="px-4 py-3 text-neutral-600">
                     {request.reviewedAt ? formatDateTime(request.reviewedAt) : "-"}
                     {request.reviewedBy ? (
@@ -297,7 +296,7 @@ export default async function DataManagementPage() {
                         </form>
                       </div>
                     ) : request.status === "APPROVED" ? (
-                      <div className="flex flex-col gap-2"><a href={`/api/data-exports/${encodePublicId(request.id, "data-export")}/download`} className="inline-flex h-9 items-center rounded-xl border border-neutral-200 px-3 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">Download ZIP</a>{request.deliveryMethod === "EMAIL" && !request.emailSentAt ? <form action={retryDataExportEmailAction}><input type="hidden" name="requestId" value={request.id} /><button data-workspace-action="true" className="h-9 rounded-xl border border-neutral-200 px-3 text-xs font-semibold" type="submit">{request.emailDeliveryError ? "Retry email" : "Send by email"}</button></form> : null}</div>
+                      <div className="flex flex-col gap-2">{request.downloadedAt ? <span className="text-xs text-emerald-700">Downloaded {formatDateTime(request.downloadedAt)} · link used</span> : <span className="text-xs text-neutral-500">Approved · awaiting organisation download</span>}{request.deliveryMethod === "EMAIL" && !request.emailSentAt && !request.downloadedAt ? <form action={retryDataExportEmailAction}><input type="hidden" name="requestId" value={request.id} /><button data-workspace-action="true" className="h-9 rounded-xl border border-neutral-200 px-3 text-xs font-semibold" type="submit">{request.emailDeliveryError ? "Retry link email" : "Send secure link"}</button></form> : null}</div>
                     ) : (
                       <span className="text-xs text-neutral-500">No action</span>
                     )}

@@ -23,11 +23,11 @@ export function DataExportSection({ data }: { data: SettingsPageData }) {
           Approved export delivery
           <select name="deliveryMethod" defaultValue="DOWNLOAD" className={fieldClassName}>
             <option value="DOWNLOAD">Download securely in EstateDesk</option>
-            <option value="EMAIL">Email the ZIP archive after approval</option>
+            <option value="EMAIL">Email a secure one-time download link after approval</option>
           </select>
         </label>
         <label className={labelClassName}>
-          Delivery email <span className="font-normal text-muted-foreground">(required for email delivery)</span>
+          Delivery email <span className="font-normal text-muted-foreground">(must belong to an authorised organisation user)</span>
           <input name="deliveryEmail" type="email" maxLength={254} autoComplete="email" placeholder="name@example.com" className={fieldClassName} />
         </label>
         <label className={labelClassName}>
@@ -93,9 +93,9 @@ export function DataExportSection({ data }: { data: SettingsPageData }) {
                 ) : null}
 
                 <p className="mt-2 text-xs text-slate-500">
-                  Delivery: {request.deliveryMethod === "EMAIL" ? `Email to ${request.deliveryEmail || "address not set"}` : "Secure download"}
-                  {request.emailSentAt ? " · Email sent" : ""}
-                  {request.emailDeliveryError ? " · Email delivery needs a retry; download remains available" : ""}
+                  Delivery: {request.deliveryMethod === "EMAIL" ? `One-time link to ${request.deliveryEmail || "address not set"}` : "Secure one-time download"}
+                  {request.emailSentAt ? " · Secure link emailed" : ""}
+                  {request.emailDeliveryError ? " · Link email needs a retry" : ""}
                 </p>
 
                 {request.reviewerNotes ? (
@@ -104,14 +104,16 @@ export function DataExportSection({ data }: { data: SettingsPageData }) {
                   </p>
                 ) : null}
 
-                {isApproved ? (
+                {isApproved && !request.downloadedAt ? (
                   <Link data-workspace-action="true"
                     href={`/api/data-exports/${encodePublicId(request.id, "data-export")}/download`}
                     className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
                     <Download className="h-4 w-4" />
-                    Download ZIP
+                    Download ZIP · one use
                   </Link>
+                ) : isApproved ? (
+                  <p className="mt-4 rounded-xl bg-emerald-50 p-3 text-xs font-medium text-emerald-800">Downloaded {request.downloadedAt}. This approval cannot be used again.</p>
                 ) : null}
               </div>
             );

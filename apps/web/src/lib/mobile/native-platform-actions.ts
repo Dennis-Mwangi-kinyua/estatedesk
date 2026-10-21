@@ -1,5 +1,4 @@
 import "server-only";
-import { GET as downloadApprovedExport } from "@/app/api/data-exports/[requestId]/download/route";
 import { GET as downloadOrganizationExport } from "@/app/api/platform/data-exports/[slug]/download/route";
 import { randomUUID } from "node:crypto";
 import type { AppSession } from "@/lib/auth/session";
@@ -46,7 +45,6 @@ const specs: Spec[] = [
   { id: "organization.delete", path: "/platform/organizations", title: "Permanently delete organization", record: true, destructive: true, run: permanentlyDeleteOrganizationAction, redirect: "/platform/organizations", successKey: "deleted" },
   { id: "expenditure.create", path: "/platform/expenditures", title: "Record expenditure", run: createPlatformExpenditureAction },
   { id: "export.organization", path: "/platform/data-management", title: "Download organization CSV archive" },
-  { id: "export.download", path: "/platform/data-management", title: "Download approved CSV archive", record: true },
   { id: "export.approve", path: "/platform/data-management", title: "Approve export request", record: true, run: approveDataExportRequestAction },
   { id: "export.reject", path: "/platform/data-management", title: "Reject export request", record: true, run: rejectDataExportRequestAction },
   { id: "billing.invoice", path: "/platform/billing", title: "Generate subscription invoice", record: true },
@@ -84,7 +82,7 @@ export function nativePlatformPageActions(path: string): NativeActionLink[] {
   return specs.filter(spec => spec.path === path && !spec.record).map(({ id, title, destructive }) => ({ id, title, destructive }));
 }
 export function nativePlatformRecordActions(path: string, status?: string): NativeActionLink[] {
-  return specs.filter(spec => specFor(path, spec.id) && spec.record && (spec.id !== "notification.retry" || status === "FAILED") && (!spec.id.startsWith("export.") || status === (spec.id === "export.download" ? "APPROVED" : "PENDING"))).map(({ id, title, destructive }) => ({ id, title, destructive }));
+  return specs.filter(spec => specFor(path, spec.id) && spec.record && (spec.id !== "notification.retry" || status === "FAILED") && (!spec.id.startsWith("export.") || status === "PENDING")).map(({ id, title, destructive }) => ({ id, title, destructive }));
 }
 async function organizations(includeDeleted = false) {
   const rows = await prisma.organization.findMany({ where: includeDeleted ? {} : { deletedAt: null }, orderBy: { name: "asc" }, select: { id: true, name: true, slug: true } });
@@ -174,15 +172,11 @@ export async function executeNativePlatformAction(session: AppSession, path: str
     return { ok: true, message: `Organization created.${account?.verificationSent ? " Verification email sent." : ""}`, ...(account ? { credentials: { fullName: account.fullName, username: account.username, password: String(form.get("adminPassword")), email: account.email, phone: account.phone, loginUrl: accountLoginUrl() } } : {}) };
   }
   if (id.startsWith("organization.") && record.slug) { form.set("orgId", record.id!); form.set("expectedSlug", record.slug); }
-  if (id === "export.download" || id === "export.organization") {
+  if (id === "export.organization") {
     const request = new Request("https://estatedesk.invalid");
-    let response: Response;
-    if (id === "export.download") response = await downloadApprovedExport(request, { params: Promise.resolve({ requestId: recordId! }) });
-    else {
-      const org = await prisma.organization.findUnique({ where: { id: String(form.get("orgId")) }, select: { slug: true } });
-      if (!org) throw new Error("Organization not found.");
-      response = await downloadOrganizationExport(request, { params: Promise.resolve({ slug: org.slug }) });
-    }
+    const org = await prisma.organization.findUnique({ where: { id: String(form.get("orgId")) }, select: { slug: true } });
+    if (!org) throw new Error("Organization not found.");
+    const response = await downloadOrganizationExport(request, { params: Promise.resolve({ slug: org.slug }) });
     if (!response.ok) { const error = await response.json().catch(() => null); throw new Error(error?.error ?? "Unable to prepare this data export."); }
     const content = Buffer.from(await response.arrayBuffer()).toString("base64");
     if (content.length > 36_000_000) throw new Error("This export exceeds the app's file limit. Use a smaller export.");

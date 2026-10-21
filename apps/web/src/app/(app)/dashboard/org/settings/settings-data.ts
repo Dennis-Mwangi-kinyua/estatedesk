@@ -29,6 +29,7 @@ export type DataExportRequestItem = {
   deliveryEmail: string;
   emailSentAt: string;
   emailDeliveryError: string;
+  downloadedAt: string;
   reviewerNotes: string;
   requestedAt: string;
   reviewedAt: string;
@@ -221,6 +222,7 @@ export async function getSettingsPageData(
       deliveryEmail: request.deliveryEmail ?? "",
       emailSentAt: request.emailSentAt ? formatDateTime(request.emailSentAt) : "",
       emailDeliveryError: request.emailDeliveryError ?? "",
+      downloadedAt: request.downloadedAt ? formatDateTime(request.downloadedAt) : "",
       reviewerNotes: request.reviewerNotes ?? "",
       requestedAt: formatDateTime(request.requestedAt),
       reviewedAt: formatDateTime(request.reviewedAt),
