@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { build } from "esbuild";
 import { chromium } from "playwright";
 import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
 import path from "node:path";
 const require = createRequire(import.meta.url);
 
@@ -45,7 +46,7 @@ for (const platform of ["android", "ios"]) test(`${platform}: native cards fit n
       assert.equal(await page.evaluate(() => (window as any).__screen), "security");
       await page.getByRole("button", { name: "Sign out", exact: true }).click();
       assert.equal(await page.evaluate(() => (window as any).__logout), true);
-      await page.screenshot({ path: `/private/tmp/estatedesk-${platform}-cards-account-${width}.png`, fullPage: true });
+      await page.screenshot({ path: path.join(tmpdir(), `estatedesk-${platform}-cards-account-${width}.png`), fullPage: true });
       await page.close();
     }
   } finally { await browser.close(); }
