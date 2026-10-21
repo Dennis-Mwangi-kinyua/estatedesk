@@ -73,7 +73,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <section aria-label="Sign in" className={styles.formCard}>
             <LoginForm returnTo={returnTo} loginAction={loginAction} />
           </section>
-          <p className={styles.caption}>For managers, landlords, tenants, and caretakers.<br />Use the account provided by your organisation or property manager.</p>
+          <p className={styles.caption}>For property teams, landlords, tenants, caretakers, and service providers.<br />Service providers sign in here with the email and password used to create their provider account.</p>
+          <p className={styles.caption}>New service provider? <Link href="/service-providers/register" className={styles.explore}>Create a provider account<ArrowRight aria-hidden="true" /></Link></p>
           <div className={styles.mobileSummary}>
             <p>Your property operations, connected.</p>
             <p>Tenancies & leases · Rent & water billing · Maintenance & inspections</p>

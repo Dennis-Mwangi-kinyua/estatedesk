@@ -5,10 +5,12 @@ Apply the committed Prisma migrations and regenerate the client before deploymen
 ## Provider marketplace
 
 - `/service-providers`: public directory with service and location filters.
-- `/service-providers/register`: create an account or add a provider profile to an existing signed-in account. IDs remain private.
+- `/service-providers/register`: create a username/password account or add a provider profile to an existing signed-in account. New profiles remain pending until the account email is verified and a platform administrator approves the application. Approval sends the provider a sign-in email. IDs remain private.
 - `/provider`: edit a profile, add portfolio projects, apply for jobs, accept offers and submit completion notes.
 - `/dashboard/org/service-providers`: authorised operations staff post jobs, review applications, hire, confirm completion, rate work and report hired providers.
-- `/platform/service-providers`: platform admins monitor registration totals, activity and reports; flag, suspend or remove profiles with reasons recorded in audit history.
+- `/platform/service-providers`: platform admins review pending applications, verify the applicant's email status, approve providers, and monitor activity and reports. Approval and later moderation decisions record reasons in audit history.
+
+Provider signup uses the shared `/login` page. Pending provider-only accounts cannot sign in to the provider portal; after approval, the same username or email and password route them to `/provider`. Apply the service-provider approval migration before deploying the application because new registrations use the `PENDING` provider status.
 
 Online means visible provider-portal activity in the previous five minutes with a valid user session. Availability for work is a separate provider setting. The marketplace does not process payments; scope, timing and payment terms are agreed directly. Ratings are unique per job and require the hiring organisation to confirm submitted work. Removal blocks provider access and removes portfolio content; underlying account identity, job and report history are retained, including any unrelated organisation memberships.
 

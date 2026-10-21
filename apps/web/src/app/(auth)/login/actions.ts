@@ -328,8 +328,16 @@ export async function loginAction(
       );
     }
 
-    const provider = !primaryMembership && !tenant ? await prisma.serviceProvider.findUnique({ where: { userId: user.id }, select: { status: true } }) : null;
+    const provider = !primaryMembership && !tenant ? await prisma.serviceProvider.findUnique({ where: { userId: user.id }, select: { status: true, user: { select: { emailVerified: true } } } }) : null;
     if (provider && ["SUSPENDED", "DELETED"].includes(provider.status)) redirect("/account-suspended");
+    if (provider?.status === "PENDING") {
+      return {
+        success: false,
+        error: provider.user.emailVerified
+          ? "Your email is verified. Your service provider application is awaiting platform approval. We’ll email you when it’s ready."
+          : "Verify your email from the link we sent before your service provider application can be reviewed.",
+      };
+    }
 
     if (!primaryMembership && !tenant && !provider) {
       // If the account isn't linked to any organization or tenant yet,
