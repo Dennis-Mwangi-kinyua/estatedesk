@@ -1,15 +1,18 @@
+import { useWorkspaceAccess } from "@/components/navigation/workspace-link";
+import { canDiscoverWorkspaceHref } from "@/lib/permissions/workspace-access";
 import { usePathname } from "next/navigation";
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
 import { DeferredLink } from "@/components/navigation/app-links";
 import { getTenantSidebarLinks, isTenantActivePath } from "./tenant-sidebar-links";
 
 export function TenantMobileNav({ hasActiveLease, onMenuClick, menuOpen = false }: { hasActiveLease: boolean; onMenuClick: () => void; menuOpen?: boolean }) {
+  const access = useWorkspaceAccess();
   const pathname = usePathname();
   const order = hasActiveLease
     ? ["/dashboard/tenant", "/dashboard/tenant/payments", "/dashboard/tenant/issues", "/dashboard/tenant/profile"]
     : ["/dashboard/tenant", "/dashboard/tenant/history", "/dashboard/tenant/profile"];
   const links = getTenantSidebarLinks(hasActiveLease)
-    .filter(item => order.includes(item.href))
+    .filter(item => order.includes(item.href) && (!access || canDiscoverWorkspaceHref(access, item.href)))
     .sort((a, b) => order.indexOf(a.href) - order.indexOf(b.href));
 
   return (

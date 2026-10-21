@@ -32,3 +32,8 @@ export function tenantCanAccessWorkspacePath(pathname: string) {
   return path === "/dashboard/tenant" || path.startsWith("/dashboard/tenant/") ||
     ["/dashboard", "/profile", "/change-password", "/access-denied", "/tenants/notifications", "/tenants/documents", "/tenants/bills", "/tenants/leases", "/tenants/payments"].includes(path);
 }
+
+/** Developer mode uses the existing platform operator roles; organization roles never grant audit access. */
+export function canViewAuditLogs(platformRole: string | null | undefined) {
+  return platformRole === "SUPER_ADMIN" || platformRole === "PLATFORM_ADMIN";
+}

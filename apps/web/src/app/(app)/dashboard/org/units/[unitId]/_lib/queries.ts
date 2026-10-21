@@ -1,17 +1,19 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getUnitSlug } from "@/lib/units/url";
+import { scopedUnitWhere, type RecordScope } from "@/lib/permissions/record-scope";
 
-export async function getUnitDetailsData(orgId: string, requestedUnitRef: string) {
+export async function getUnitDetailsData(orgId: string, requestedUnitRef: string, scope: RecordScope) {
+  const scopedUnit = scopedUnitWhere(orgId, scope);
   const directUnit = await prisma.unit.findFirst({
-    where: {
+    where: { AND: [scopedUnit, {
       id: requestedUnitRef,
       deletedAt: null,
       property: {
         orgId: orgId,
         deletedAt: null,
       },
-    },
+    }] },
     select: {
       id: true,
       houseNo: true,
@@ -32,13 +34,13 @@ export async function getUnitDetailsData(orgId: string, requestedUnitRef: string
 
   if (!resolvedUnitId) {
     const candidateUnits = await prisma.unit.findMany({
-      where: {
+      where: { AND: [scopedUnit, {
         deletedAt: null,
         property: {
           orgId: orgId,
           deletedAt: null,
         },
-      },
+      }] },
       select: {
         id: true,
         houseNo: true,
@@ -87,14 +89,14 @@ export async function getUnitDetailsData(orgId: string, requestedUnitRef: string
   const currencyCode = organization?.currencyCode ?? "KES";
 
   const unit = await prisma.unit.findFirst({
-    where: {
+    where: { AND: [scopedUnit, {
       id: resolvedUnitId,
       deletedAt: null,
       property: {
         orgId: orgId,
         deletedAt: null,
       },
-    },
+    }] },
     select: {
       id: true,
       houseNo: true,

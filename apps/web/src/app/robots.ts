@@ -37,6 +37,7 @@ const PRIVATE_ROUTE_PREFIXES = [
   "/sign-lease/",
   "/accept-invite/",
   "/verify-lease/",
+  "/verify-document/",
   "/share/",
   "/maintenance",
   "/offline",

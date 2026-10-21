@@ -4,6 +4,7 @@ import { TicketStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { decodePublicSlug } from "@/lib/public-id";
+import { scopedIssueWhere } from "@/lib/permissions/record-scope";
 import {
   HISTORY_PAGE_SIZE,
   ORG_ISSUE_ROLES,
@@ -79,6 +80,7 @@ export const getCurrentOrgContext = cache(async function getCurrentOrgContext() 
 async function loadStageBoardIssues(
   orgId: string,
   activeFilter: ReturnType<typeof normalizeIssueStatusFilter>,
+  issueScope: ReturnType<typeof scopedIssueWhere>,
 ): Promise<OrgIssue[]> {
   const issueQuery = {
     orderBy: [{ createdAt: "desc" as const }],
@@ -87,7 +89,7 @@ async function loadStageBoardIssues(
 
   if (activeFilter !== "all") {
     return prisma.issueTicket.findMany({
-      where: buildIssueFilterWhere(orgId, activeFilter),
+      where: buildIssueFilterWhere(orgId, activeFilter, issueScope),
       ...issueQuery,
       take: STAGE_BOARD_COLUMN_LIMIT * 4,
     });
@@ -96,22 +98,22 @@ async function loadStageBoardIssues(
   const [newIssues, progressIssues, resolvedIssues, cancelledIssues] =
     await Promise.all([
       prisma.issueTicket.findMany({
-        where: buildIssueFilterWhere(orgId, "new"),
+        where: buildIssueFilterWhere(orgId, "new", issueScope),
         ...issueQuery,
         take: STAGE_BOARD_COLUMN_LIMIT,
       }),
       prisma.issueTicket.findMany({
-        where: buildIssueFilterWhere(orgId, "progress"),
+        where: buildIssueFilterWhere(orgId, "progress", issueScope),
         ...issueQuery,
         take: STAGE_BOARD_COLUMN_LIMIT,
       }),
       prisma.issueTicket.findMany({
-        where: buildIssueFilterWhere(orgId, "resolved"),
+        where: buildIssueFilterWhere(orgId, "resolved", issueScope),
         ...issueQuery,
         take: STAGE_BOARD_COLUMN_LIMIT,
       }),
       prisma.issueTicket.findMany({
-        where: buildIssueFilterWhere(orgId, "cancelled"),
+        where: buildIssueFilterWhere(orgId, "cancelled", issueScope),
         ...issueQuery,
         take: STAGE_BOARD_COLUMN_LIMIT,
       }),
@@ -136,7 +138,8 @@ export async function getOrgIssuesPageData(
   const requestedPage = Number(resolvedSearchParams.page ?? "1");
   const canAssignCaretaker = canAssignCaretakerRole(membership.role);
   const activeFilter = normalizeIssueStatusFilter(resolvedSearchParams.status);
-  const filterWhere = buildIssueFilterWhere(membership.orgId, activeFilter);
+  const issueScope = scopedIssueWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId });
+  const filterWhere = buildIssueFilterWhere(membership.orgId, activeFilter, issueScope);
 
   const [
     totalFiltered,
@@ -150,32 +153,31 @@ export async function getOrgIssuesPageData(
     caretakers,
   ] = await Promise.all([
     prisma.issueTicket.count({ where: filterWhere }),
-    prisma.issueTicket.count({ where: { orgId: membership.orgId } }),
+    prisma.issueTicket.count({ where: issueScope }),
     prisma.issueTicket.count({
-      where: buildIssueFilterWhere(membership.orgId, "new"),
+      where: buildIssueFilterWhere(membership.orgId, "new", issueScope),
     }),
     prisma.issueTicket.count({
       where: {
-        orgId: membership.orgId,
+        AND: [issueScope, {
         status: TicketStatus.IN_PROGRESS,
+        }],
       },
     }),
     prisma.issueTicket.count({
-      where: buildIssueFilterWhere(membership.orgId, "resolved"),
+      where: buildIssueFilterWhere(membership.orgId, "resolved", issueScope),
     }),
     prisma.issueTicket.count({
       where: {
-        orgId: membership.orgId,
+        AND: [issueScope, {
         status: TicketStatus.CANCELLED,
+        }],
       },
     }),
-    loadStageBoardIssues(membership.orgId, activeFilter),
+    loadStageBoardIssues(membership.orgId, activeFilter, issueScope),
     selectedIssueId
       ? prisma.issueTicket.findFirst({
-          where: {
-            id: selectedIssueId,
-            orgId: membership.orgId,
-          },
+          where: { AND: [issueScope, { id: selectedIssueId }] },
           ...orgIssueArgs,
         })
       : Promise.resolve(null),
@@ -285,10 +287,7 @@ export async function getIssueDetailPageData(
 
   const [issue, caretakers] = await Promise.all([
     prisma.issueTicket.findFirst({
-      where: {
-        id: issueId,
-        orgId,
-      },
+      where: { AND: [scopedIssueWhere(orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }), { id: issueId }] },
       ...orgIssueArgs,
     }),
     loadCaretakerOptions(orgId),

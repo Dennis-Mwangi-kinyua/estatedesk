@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  canViewAuditLogs,
   hasOrgRole,
   hasPlatformRole,
   tenantPathRequiresActiveLease,
@@ -28,5 +29,17 @@ describe("permission access helpers", () => {
     assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/profile"), false);
     assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/payments"), true);
     assert.equal(tenantPathRequiresActiveLease("/dashboard/org/tenants"), false);
+  });
+});
+
+describe("audit log access", () => {
+  it("allows platform administrators and developer mode operators", () => {
+    assert.equal(canViewAuditLogs("SUPER_ADMIN"), true);
+    assert.equal(canViewAuditLogs("PLATFORM_ADMIN"), true);
+  });
+  it("denies every organization role and users without a platform operator role", () => {
+    for (const role of ["USER", "ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "SECURITY", "LANDLORD", "TENANT", "DEVELOPER", "", null, undefined]) {
+      assert.equal(canViewAuditLogs(role), false, `Audit access must be denied for ${role}`);
+    }
   });
 });

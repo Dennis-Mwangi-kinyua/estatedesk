@@ -6,6 +6,7 @@ import { TicketPriority, TicketStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { encodePublicId } from "@/lib/public-id";
+import { scopedIssueWhere } from "@/lib/permissions/record-scope";
 import { notifyInAppAndPush, notifyRecipients } from "@/lib/notifications/notify";
 import { getCurrentOrgContext } from "./_lib/queries";
 import {
@@ -66,10 +67,7 @@ export async function assignCaretakerAction(formData: FormData) {
   }
 
   const issue = await prisma.issueTicket.findFirst({
-    where: {
-      id: issueId,
-      orgId: membership.orgId,
-    },
+    where: { AND: [scopedIssueWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }), { id: issueId }] },
     select: {
       id: true,
       title: true,
@@ -192,10 +190,7 @@ export async function updateIssueStatusAction(formData: FormData) {
   const session = await requireUserSession();
 
   const issue = await prisma.issueTicket.findFirst({
-    where: {
-      id: issueId,
-      orgId: membership.orgId,
-    },
+    where: { AND: [scopedIssueWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }), { id: issueId }] },
     select: {
       id: true,
       title: true,
@@ -303,6 +298,7 @@ export async function approveIssueResolutionReportAction(formData: FormData) {
   const report = await prisma.issueResolutionReport.findFirst({
     where: {
       id: reportId,
+      issue: scopedIssueWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }),
       issueId,
       orgId: membership.orgId,
       status: "SUBMITTED",
@@ -399,6 +395,7 @@ export async function rejectIssueResolutionReportAction(formData: FormData) {
   const report = await prisma.issueResolutionReport.findFirst({
     where: {
       id: reportId,
+      issue: scopedIssueWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }),
       issueId,
       orgId: membership.orgId,
       status: "SUBMITTED",

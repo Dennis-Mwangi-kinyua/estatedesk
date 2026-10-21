@@ -34,6 +34,23 @@ test("only admins and managers can use Airbnb routes, including nested editing U
     }
   }
 });
+test("BnB listing scope only includes listings assigned to scoped properties", async () => {
+  const scope = await load<{
+    bnbListingScopeWhere: (orgId: string, recordScope: object) => Promise<Record<string, unknown>>;
+    canCreateUnlinkedBnb: (recordScope: { scopeType: string }) => boolean;
+  }>("apps/web/src/features/bnb/scope.ts", {
+    "@/lib/prisma": 'export const prisma = { property: { findMany: async ({where}) => { globalThis.bnbScopeFixture.where = where; return [{id: "property-a"}]; } } };',
+    "@/lib/permissions/record-scope": 'export function scopedPropertyWhere(orgId, scope) { return { orgId, scopeType: scope?.scopeType, scopeId: scope?.scopeId }; }',
+  });
+  const state = { where: null as unknown };
+  (globalThis as typeof globalThis & { bnbScopeFixture?: typeof state }).bnbScopeFixture = state;
+  assert.deepEqual(await scope.bnbListingScopeWhere("org", { scopeType: "ORG", scopeId: "ORG_SCOPE" }), { orgId: "org", deletedAt: null });
+  assert.deepEqual(await scope.bnbListingScopeWhere("org", { scopeType: "PROPERTY", scopeId: "property-a" }), { orgId: "org", deletedAt: null, propertyId: { in: ["property-a"] } });
+  assert.deepEqual(state.where, { orgId: "org", scopeType: "PROPERTY", scopeId: "property-a" });
+  assert.equal(scope.canCreateUnlinkedBnb({ scopeType: "ORG" }), true);
+  assert.equal(scope.canCreateUnlinkedBnb({ scopeType: "UNIT" }), false);
+  delete (globalThis as typeof globalThis & { bnbScopeFixture?: typeof state }).bnbScopeFixture;
+});
 async function load<T>(entry: string, mocks: Record<string, string>): Promise<T> {
   const bundle = await build({ entryPoints: [path.resolve(entry)], bundle: true, write: false, platform: "node", format: "cjs", packages: "external", tsconfig: "apps/web/tsconfig.json", plugins: [{ name: "bnb-fixture", setup(builder) {
     builder.onResolve({ filter: /^server-only$/ }, () => ({ path: "empty", namespace: "fixture" }));
@@ -48,9 +65,11 @@ test("server actions reject unauthorized roles, cross-org edits, forged photos, 
   const state = { role: "OFFICE", writes: 0, uploadCalls: 0, existing: null as null | { id: string; slug: string; images: { id: string }[] } };
   (globalThis as typeof globalThis & { bnbFixture?: typeof state }).bnbFixture = state;
   const actions = await load<{ saveBnbAction: (state: object, form: FormData) => Promise<{ error?: string }>; changeBnbStatusAction: (state: object, form: FormData) => Promise<object> }>("apps/web/src/features/bnb/actions.ts", {
-    "@/lib/permissions/guards": 'export async function requireOrgRole(roles) { if (!roles.includes(globalThis.bnbFixture.role)) throw Error("Forbidden"); return { activeOrgId: "org", userId: "host" }; }',
+    "@/lib/permissions/guards": 'export async function requireOrgRole(roles) { if (!roles.includes(globalThis.bnbFixture.role)) throw Error("Forbidden"); return { activeOrgId: "org", userId: "host", membershipScope: { scopeType: "ORG", scopeId: "ORG_SCOPE" } }; }',
     "@/lib/billing/subscription-access": 'export async function requireActiveSubscription() {}',
-    "@/lib/prisma": 'export const prisma = { bnbListing: {findFirst: async ({where}) => { if(where.orgId !== "org") throw Error("Unscoped"); return globalThis.bnbFixture.existing; }}, $transaction: async () => { globalThis.bnbFixture.writes++; throw Error("Unexpected write"); } };',
+    "@/lib/billing/access": 'export async function assertCanCreateUnit() {} export async function lockOrgQuota() {}',
+    "@/lib/permissions/record-scope": 'export function scopedPropertyWhere(orgId, scope) { return { orgId, id: scope?.scopeId }; }',
+    "@/lib/prisma": 'export const prisma = { bnbListing: {findFirst: async ({where}) => { if(!where.AND) throw Error("Unscoped"); return globalThis.bnbFixture.existing; }}, $transaction: async () => { globalThis.bnbFixture.writes++; throw Error("Unexpected write"); } };',
     "@/lib/uploads/image-payload": 'export async function saveImagePayloadAsset() { globalThis.bnbFixture.uploadCalls++; throw Error("Unexpected upload"); }',
     "@/lib/audit/security": 'export async function writeAuditLog() {}',
     "@/lib/errors/server-error-log": 'export function logServerError() {}',
@@ -86,8 +105,10 @@ test("successful posting scopes saved data to the active org and attaches upload
   const state = { saved: null as null | { orgId: string; status: string; slug: string; images: { connect: { id: string }[] } }, uploads: 0, audit: 0, refreshed: [] as string[] };
   (globalThis as typeof globalThis & { bnbSaveFixture?: typeof state }).bnbSaveFixture = state;
   const actions = await load<{ saveBnbAction: (state: object, form: FormData) => Promise<object> }>("apps/web/src/features/bnb/actions.ts", {
-    "@/lib/permissions/guards": 'export async function requireOrgRole(roles) { if (!roles.includes("MANAGER")) throw Error("Forbidden"); return { activeOrgId: "active-org", userId: "manager" }; }',
+    "@/lib/permissions/guards": 'export async function requireOrgRole(roles) { if (!roles.includes("MANAGER")) throw Error("Forbidden"); return { activeOrgId: "active-org", userId: "manager", membershipScope: { scopeType: "ORG", scopeId: "ORG_SCOPE" } }; }',
     "@/lib/billing/subscription-access": 'export async function requireActiveSubscription(orgId) { if (orgId !== "active-org") throw Error("Unscoped subscription"); }',
+    "@/lib/billing/access": 'export async function assertCanCreateUnit() {} export async function lockOrgQuota() {}',
+    "@/lib/permissions/record-scope": 'export function scopedPropertyWhere(orgId, scope) { return { orgId, id: scope?.scopeId }; }',
     "@/lib/prisma": 'export const prisma = { $transaction: async (fn) => fn({bnbListing: { create: async ({data}) => { globalThis.bnbSaveFixture.saved = data; return {...data, id: "new-listing"}; }}, asset: {count: async () => 1}}) };',
     "@/lib/uploads/image-payload": 'export async function saveImagePayloadAsset(input) { if(input.orgId !== "active-org" || input.submittedByUserId !== "manager") throw Error("Unscoped photo"); globalThis.bnbSaveFixture.uploads++; return "uploaded-photo"; }',
     "@/lib/audit/security": 'export async function writeAuditLog(input) { if(input.orgId !== "active-org") throw Error("Unscoped audit"); globalThis.bnbSaveFixture.audit++; }',

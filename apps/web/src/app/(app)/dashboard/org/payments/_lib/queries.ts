@@ -1,15 +1,18 @@
 import { getOrgLedger } from "@/lib/ledger";
 import { prisma } from "@/lib/prisma";
+import { scopedPaymentWhere, scopedUnitWhere, type RecordScope } from "@/lib/permissions/record-scope";
 
-export async function loadPaymentsPageData(orgId: string, q = "") {
+export async function loadPaymentsPageData(orgId: string, q = "", scope?: RecordScope) {
+  const unitScope = scopedUnitWhere(orgId, scope);
+  const paymentScope = scopedPaymentWhere(orgId, scope);
   const [ledger, organization, cashLeases] = await Promise.all([
-    getOrgLedger(orgId),
+    getOrgLedger(orgId, undefined, { unitScope, paymentScope }),
 
     prisma.organization.findUnique({
       where: { id: orgId },
       select: { name: true, currencyCode: true },
     }),
-    prisma.lease.findMany({ where: { orgId, deletedAt: null, status: { in: ["ACTIVE", "TERMINATED"] }, tenant: { deletedAt: null } }, orderBy: { tenant: { fullName: "asc" } }, select: { id: true, tenant: { select: { fullName: true } }, unit: { select: { houseNo: true, property: { select: { name: true } } } } } }),
+    prisma.lease.findMany({ where: { orgId, deletedAt: null, status: { in: ["ACTIVE", "TERMINATED"] }, unit: unitScope, tenant: { deletedAt: null } }, orderBy: { tenant: { fullName: "asc" } }, select: { id: true, tenant: { select: { fullName: true } }, unit: { select: { houseNo: true, property: { select: { name: true } } } } } }),
   ]);
   const periodParams = new URLSearchParams({ period: ledger.period });
   const [yearValue, monthValue] = ledger.period.split("-").map(Number);
@@ -24,7 +27,7 @@ export async function loadPaymentsPageData(orgId: string, q = "") {
     reconciliationQueue,
   ] = await Promise.all([
     prisma.payment.findMany({
-      where: {
+      where: { AND: [paymentScope, {
         orgId,
         verificationStatus: "PENDING",
         method: { not: "MPESA_STK" },
@@ -39,7 +42,7 @@ export async function loadPaymentsPageData(orgId: string, q = "") {
               ],
             }
           : {}),
-      },
+      }] },
       orderBy: { createdAt: "desc" },
       take: 75,
       select: {
@@ -62,32 +65,32 @@ export async function loadPaymentsPageData(orgId: string, q = "") {
       },
     }),
     prisma.payment.count({
-      where: {
+      where: { AND: [paymentScope, {
         orgId,
         verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
         gatewayStatus: "SUCCESS",
         reversedAt: null,
         reconciliationStatus: "UNRECONCILED",
-      },
+      }] },
     }),
     prisma.payment.count({
-      where: {
+      where: { AND: [paymentScope, {
         orgId,
         reconciliationStatus: "DISPUTED",
-      },
+      }] },
     }),
     prisma.payment.count({
-      where: {
+      where: { AND: [paymentScope, {
         orgId,
         reconciliationStatus: "RECONCILED",
         reconciledAt: {
           gte: periodStart,
           lt: periodEnd,
         },
-      },
+      }] },
     }),
     prisma.payment.findMany({
-      where: {
+      where: { AND: [paymentScope, {
         orgId,
         OR: [
           {
@@ -98,7 +101,7 @@ export async function loadPaymentsPageData(orgId: string, q = "") {
           },
           { reconciliationStatus: "DISPUTED" },
         ],
-      },
+      }] },
       orderBy: { createdAt: "desc" },
       take: 25,
       select: {

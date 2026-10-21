@@ -2,6 +2,7 @@ import { LeaseStatus } from "@prisma/client";
 import { getPagination } from "@/lib/db/pagination";
 import { prisma } from "@/lib/prisma";
 import { PAGE_SIZE } from "./types";
+import { scopedUnitWhere, type RecordScope } from "@/lib/permissions/record-scope";
 
 const leaseInclude = {
   org: {
@@ -91,10 +92,11 @@ const leaseInclude = {
   },
 } as const;
 
-export async function getOrgLeasesPageData(orgId: string, page = 1) {
+export async function getOrgLeasesPageData(orgId: string, page = 1, scope?: RecordScope) {
   const leaseWhere = {
     orgId,
     deletedAt: null,
+    unit: scopedUnitWhere(orgId, scope),
   };
 
   const { page: currentPage, skip, take } = getPagination({

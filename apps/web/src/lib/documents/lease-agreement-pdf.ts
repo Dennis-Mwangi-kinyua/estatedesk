@@ -9,10 +9,11 @@ Additional conditions: Add any property-specific conditions agreed by both parti
 export type LeaseAgreementData = {
   title: string; landlordName: string; organizationName: string; tenantName: string;
   premises: string; leaseId: string; startDate: string; endDate: string;
+  accentColor?: string; fontFamily?: "sans" | "serif"; footerText?: string;
   monthlyRent: string; deposit: string; dueDay: number; terms: string;
 };
 export async function generateLeaseAgreementPdf(data: LeaseAgreementData) {
-  const doc = await createProfessionalPdf({ title: "Lease agreement", documentTitle: data.title, serialNumber: data.leaseId, organizationName: data.organizationName, issuedAt: new Date(), footerText: "EstateDesk | Lease agreement | Signatures as agreed by the parties." });
+  const doc = await createProfessionalPdf({ title: "Lease agreement", documentTitle: data.title, serialNumber: data.leaseId, organizationName: data.organizationName, issuedAt: new Date(), accentColor: data.accentColor, fontFamily: data.fontFamily, footerText: data.footerText || "EstateDesk | Lease agreement | Signatures as agreed by the parties." });
   doc.paragraph(data.title, { size: 18, strong: true });
   doc.paragraph(`Prepared by ${data.organizationName}`);
   doc.section("1. Parties and premises");

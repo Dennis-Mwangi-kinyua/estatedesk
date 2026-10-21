@@ -16,7 +16,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
 
   const params = await searchParams;
   const q = params?.q?.trim() ?? "";
-  const data = await loadPaymentsPageData(session.activeOrgId, q);
+  const data = await loadPaymentsPageData(session.activeOrgId, q, session.membershipScope);
 
   return (
     <PaymentsWorkspace grantedPermissions={session.grantedPermissions} data={data} orgRole={session.activeOrgRole}

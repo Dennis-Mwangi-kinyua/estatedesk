@@ -1,3 +1,4 @@
+import { publicHealthSummary } from "@/lib/ops/public-health";
 import { NextResponse } from "next/server";
 import { getRuntimeEnvReport } from "@/lib/config/env";
 import { getUserSession } from "@/lib/auth/session";
@@ -111,21 +112,16 @@ export async function GET(request: Request) {
     }
   }
 
+  if (!deep) return jsonResponse(publicHealthSummary({ service: "estatedesk", status, checkedAt: new Date().toISOString() }), status === "ok" ? 200 : 503);
   return jsonResponse(
     {
       service: "estatedesk",
       status,
       checkedAt: new Date().toISOString(),
-      uptimeSeconds: Math.round(process.uptime()),
+      ...(deep ? { uptimeSeconds: Math.round(process.uptime()) } : {}),
       latencyMs: Date.now() - startedAt,
-      environment: {
-        ready: env.ready,
-        configured: env.configured,
-        total: env.total,
-        missingRequired: env.missingRequired,
-      },
-      database,
-      ops,
+      ...(deep ? { environment: { ready: env.ready, configured: env.configured, total: env.total, missingRequired: env.missingRequired } } : {}),
+      ...(deep ? { database, ops } : {}),
     },
     status === "ok" ? 200 : 503,
   );

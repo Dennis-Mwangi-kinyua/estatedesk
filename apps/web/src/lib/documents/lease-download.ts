@@ -1,3 +1,5 @@
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
+import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import {
@@ -33,9 +35,11 @@ export async function downloadLeaseAgreement(request: Request, leaseId: string, 
     notFound();
   }
 
+  if (session.mustChangePassword || session.requiresTermsAcceptance || !canAccessWorkspacePath(session, management ? "/dashboard/org/leases" : "/dashboard/tenant/lease")) notFound();
   const lease = await prisma.lease.findFirst({
     where: {
       id: leaseId,
+      ...(management ? { unit: scopedUnitWhere(session.activeOrgId, session.membershipScope) } : {}),
       deletedAt: null,
       orgId: session.activeOrgId,
       tenant: {
@@ -67,7 +71,16 @@ export async function downloadLeaseAgreement(request: Request, leaseId: string, 
     notFound();
   }
 
-  const asset = lease.contractDocument;
+  const requestedEnvelope = new URL(request.url).searchParams.get("envelopeId");
+  const signedEnvelope = await prisma.leaseSignatureEnvelope.findFirst({ where: {
+    leaseId: lease.id, orgId: session.activeOrgId, status: "COMPLETED",
+    ...(requestedEnvelope ? { id: requestedEnvelope } : { finalAssetId: lease.contractDocumentId }),
+  } });
+  if (requestedEnvelope && !signedEnvelope) notFound();
+  const asset = requestedEnvelope && signedEnvelope?.finalAssetId
+    ? await prisma.asset.findFirst({ where: { id: signedEnvelope.finalAssetId, orgId: session.activeOrgId, deletedAt: null } })
+    : lease.contractDocument;
+  if (!asset) notFound();
 
   if (!isPdfLeaseAsset(asset)) {
     return new Response("Only PDF lease contracts can be downloaded.", {
@@ -84,6 +97,17 @@ export async function downloadLeaseAgreement(request: Request, leaseId: string, 
   }
 
   const sourceContractHash = hashDocumentContent(contractBytes);
+  // Completed signatures bind to these exact bytes; adding a cover would change the registered fingerprint.
+  if (signedEnvelope?.finalDocumentHash) {
+    if (sourceContractHash !== signedEnvelope.finalDocumentHash) return new Response("Signed agreement integrity check failed.", { status: 409 });
+    const viewInline = new URL(request.url).searchParams.get("view") === "1";
+    await prisma.leaseSignatureEvent.create({ data: { envelopeId: signedEnvelope.id, actorUserId: session.userId,
+      eventType: "VIEWED", metadata: { action: "DOWNLOADED", viewInline, finalDocumentHash: signedEnvelope.finalDocumentHash } } });
+    return new Response(Buffer.from(contractBytes), { headers: {
+      "Content-Type": "application/pdf", "Content-Disposition": `${viewInline ? "inline" : "attachment"}; filename="${ensurePdfFilename(asset.fileName)}"`,
+      "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff", "X-Document-SHA256": sourceContractHash,
+    } });
+  }
   const fallbackName = `lease-${lease.unit.property.name}-${lease.unit.houseNo}.pdf`;
   const fileName = ensurePdfFilename(asset.fileName || fallbackName);
 

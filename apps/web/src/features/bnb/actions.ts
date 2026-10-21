@@ -6,10 +6,12 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { requireActiveSubscription } from "@/lib/billing/subscription-access";
+import { assertCanCreateUnit, lockOrgQuota } from "@/lib/billing/access";
 import { writeAuditLog } from "@/lib/audit/security";
 import { saveImagePayloadAsset } from "@/lib/uploads/image-payload";
 import { validateImageFile } from "@/lib/uploads/secure-image";
 import { logServerError } from "@/lib/errors/server-error-log";
+import { bnbListingScopeWhere, canCreateUnlinkedBnb } from "./scope";
 import { MAX_BNB_PHOTOS, MAX_BNB_PHOTO_BYTES, MAX_BNB_UPLOAD_BYTES, parseBnbForm, type BnbFormState } from "./validation";
 
 async function requireBnbEditor() {
@@ -29,11 +31,20 @@ export async function saveBnbAction(_state: BnbFormState, formData: FormData): P
   const parsed = parseBnbForm(formData);
   if (!parsed.success) return { error: "Please check the highlighted fields.", fieldErrors: parsed.error.flatten().fieldErrors };
   const id = String(formData.get("id") ?? "");
+  const listingScope = await bnbListingScopeWhere(orgId, session.membershipScope);
+  if (!id && !canCreateUnlinkedBnb(session.membershipScope)) return { error: "Creating an unlinked BnB listing requires organization-wide scope." };
   const existing = id ? await prisma.bnbListing.findFirst({
-    where: { id, orgId, deletedAt: null },
+    where: { AND: [listingScope, { id }] },
     include: { images: { where: { deletedAt: null }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] } },
   }) : null;
   if (id && !existing) return { error: "Listing not found in your organization." };
+  if (!existing) {
+    try {
+      await assertCanCreateUnit(orgId);
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Your plan's unit and BnB limit has been reached." };
+    }
+  }
   const retained = Array.from(new Set(formData.getAll("retainedImages").map(String)));
   if (retained.some((imageId) => !existing?.images.some((image) => image.id === imageId))) return { error: "One or more photos do not belong to this listing." };
   const files = formData.getAll("photos").filter((file): file is File => file instanceof File && file.size > 0);
@@ -58,6 +69,8 @@ export async function saveBnbAction(_state: BnbFormState, formData: FormData): P
       }));
     }
     saved = await prisma.$transaction(async (tx) => {
+      await lockOrgQuota(tx, orgId);
+      if (!existing) await assertCanCreateUnit(orgId, 1, tx);
       const data = { ...parsed.data, images: { connect: uploadedIds.map((imageId) => ({ id: imageId })) } };
       const listing = existing
         ? await tx.bnbListing.update({ where: { id: existing.id, orgId, deletedAt: null }, data })
@@ -73,6 +86,7 @@ export async function saveBnbAction(_state: BnbFormState, formData: FormData): P
     });
   } catch (error) {
     if (uploadedIds.length) await prisma.asset.updateMany({ where: { id: { in: uploadedIds }, orgId, bnbListingId: null }, data: { deletedAt: new Date() } }).catch(() => undefined);
+    if (error instanceof Error && error.message.includes("plan allows")) return { error: error.message };
     logServerError("saveBnbAction", error);
     return { error: "Could not save the listing. Check your photo storage configuration and try again." };
   }
@@ -85,11 +99,15 @@ export async function changeBnbStatusAction(_state: BnbFormState, formData: Form
   const session = await requireBnbEditor();
   const orgId = session.activeOrgId!;
   const id = String(formData.get("id") ?? "");
+  const listingScope = await bnbListingScopeWhere(orgId, session.membershipScope);
   const status = String(formData.get("status") ?? "");
   if (!["PUBLISHED", "PAUSED", "ARCHIVED"].includes(status)) return { error: "Invalid listing status." };
   let listing;
   try {
     listing = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "BnbListing" WHERE "id" = ${id} AND "orgId" = ${orgId} FOR UPDATE`;
+      const allowed = await tx.bnbListing.findFirst({ where: { AND: [listingScope, { id }] }, select: { id: true } });
+      if (!allowed) throw new Error("Listing not found in your assigned scope.");
       const saved = await tx.bnbListing.update({
         where: { id, orgId, deletedAt: null },
         data: status === "ARCHIVED" ? { status: "PAUSED", deletedAt: new Date() } : { status: status as "PUBLISHED" | "PAUSED" },

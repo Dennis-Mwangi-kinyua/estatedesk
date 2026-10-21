@@ -4,7 +4,7 @@ export const APP_PLANS = {
     badge: "Start",
     monthlyAmount: 0,
     propertiesLimit: 1,
-    unitsLimit: 10,
+    unitsLimit: 20,
     usersLimit: 2,
     description:
       "For small landlords testing structured property records before scaling operations.",
@@ -12,7 +12,7 @@ export const APP_PLANS = {
     href: "/register",
     included: [
       "1 property",
-      "Up to 10 units",
+      "Up to 20 units and BnB listings combined",
       "2 internal users",
       "Tenant profiles",
       "Unit occupancy tracking",
@@ -41,7 +41,7 @@ export const APP_PLANS = {
     href: "/register?plan=pro",
     included: [
       "Up to 5 properties",
-      "Up to 100 units",
+      "Up to 100 units and BnB listings combined",
       "Up to 8 internal users",
       "Everything in Free",
       "Rent and balance tracking",
@@ -72,7 +72,7 @@ export const APP_PLANS = {
     href: "/register?plan=plus",
     included: [
       "Up to 20 properties",
-      "Up to 500 units",
+      "Up to 500 units and BnB listings combined",
       "Up to 25 internal users",
       "Everything in Pro",
       "Caretaker assignments",
@@ -80,7 +80,6 @@ export const APP_PLANS = {
       "Tenant history after move-out",
       "Profile transfer workflow support",
       "Advanced operational reports",
-      "Audit visibility",
       "Data export requests",
       "Priority support",
     ],
@@ -99,7 +98,7 @@ export const APP_PLANS = {
     href: "/contact",
     included: [
       "Unlimited properties",
-      "Unlimited units",
+      "Unlimited units and BnB listings",
       "Unlimited internal users",
       "Everything in Plus",
       "Custom limits and billing terms",

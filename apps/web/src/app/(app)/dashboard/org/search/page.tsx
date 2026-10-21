@@ -3,6 +3,7 @@ import { requireManagementAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { buildIssueDetailHref } from "@/app/(app)/dashboard/org/issues/_lib/helpers";
 import { encodePublicId } from "@/lib/public-id";
+import { scopedPaymentWhere, scopedPropertyWhere, scopedUnitWhere } from "@/lib/permissions/record-scope";
 
 export default async function OrganisationSearch({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const session = await requireManagementAccess();
@@ -10,16 +11,19 @@ export default async function OrganisationSearch({ searchParams }: { searchParam
   const orgId = session.activeOrgId!;
   const text = { contains: q, mode: "insensitive" as const };
   const role = session.activeOrgRole;
+  const scope = session.membershipScope;
+  const unitScope = scopedUnitWhere(orgId, scope);
+  const propertyScope = scopedPropertyWhere(orgId, scope);
   const portfolioAccess = ["ADMIN", "MANAGER", "OFFICE"].includes(role ?? "");
   const [properties, units, tenants] = q.length < 2 || !portfolioAccess ? [[], [], []] : await Promise.all([
-    prisma.property.findMany({ where: { orgId, deletedAt: null, name: text }, select: { id: true, name: true }, take: 20, orderBy: { name: "asc" } }),
-    prisma.unit.findMany({ where: { deletedAt: null, property: { orgId, deletedAt: null }, houseNo: text }, select: { id: true, houseNo: true, property: { select: { name: true } } }, take: 20, orderBy: { houseNo: "asc" } }),
-    prisma.tenant.findMany({ where: { orgId, deletedAt: null, OR: [{ fullName: text }, { email: text }, { phone: text }] }, select: { id: true, slug: true, fullName: true }, take: 20, orderBy: { fullName: "asc" } }),
+    prisma.property.findMany({ where: { AND: [propertyScope, { name: text }] }, select: { id: true, name: true }, take: 20, orderBy: { name: "asc" } }),
+    prisma.unit.findMany({ where: { AND: [unitScope, { houseNo: text }] }, select: { id: true, houseNo: true, property: { select: { name: true } } }, take: 20, orderBy: { houseNo: "asc" } }),
+    prisma.tenant.findMany({ where: { orgId, deletedAt: null, leases: { some: { deletedAt: null, unit: unitScope } }, OR: [{ fullName: text }, { email: text }, { phone: text }] }, select: { id: true, slug: true, fullName: true }, take: 20, orderBy: { fullName: "asc" } }),
   ]);
   const [payments, issues, leases] = q.length < 2 ? [[], [], []] : await Promise.all([
-    prisma.payment.findMany({ where: { orgId, OR: [{ reference: text }, { externalReference: text }] }, select: { id: true, reference: true, externalReference: true }, take: 20, orderBy: { createdAt: "desc" } }),
-    portfolioAccess ? prisma.issueTicket.findMany({ where: { orgId, title: text }, select: { id: true, title: true }, take: 20, orderBy: { createdAt: "desc" } }) : Promise.resolve([]),
-    portfolioAccess ? prisma.lease.findMany({ where: { orgId, deletedAt: null, tenant: { deletedAt: null }, unit: { deletedAt: null }, OR: [{ tenant: { fullName: text } }, { unit: { houseNo: text } }] }, select: { id: true, tenant: { select: { fullName: true } }, unit: { select: { houseNo: true } } }, take: 20, orderBy: { createdAt: "desc" } }) : Promise.resolve([]),
+    prisma.payment.findMany({ where: { AND: [scopedPaymentWhere(orgId, scope), { OR: [{ reference: text }, { externalReference: text }] }] }, select: { id: true, reference: true, externalReference: true }, take: 20, orderBy: { createdAt: "desc" } }),
+    portfolioAccess ? prisma.issueTicket.findMany({ where: { orgId, title: text, unit: { is: unitScope } }, select: { id: true, title: true }, take: 20, orderBy: { createdAt: "desc" } }) : Promise.resolve([]),
+    portfolioAccess ? prisma.lease.findMany({ where: { orgId, deletedAt: null, tenant: { deletedAt: null }, unit: unitScope, OR: [{ tenant: { fullName: text } }, { unit: { houseNo: text } }] }, select: { id: true, tenant: { select: { fullName: true } }, unit: { select: { houseNo: true } } }, take: 20, orderBy: { createdAt: "desc" } }) : Promise.resolve([]),
   ]);
   const groups = [
     { title: "Payments", rows: payments.map(p => ({ label: p.reference || p.externalReference || p.id, href: `/dashboard/org/payments?q=${encodeURIComponent(p.reference || p.externalReference || p.id)}` })) },

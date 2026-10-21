@@ -117,7 +117,7 @@ export const pricingFaqItems: readonly FaqItem[] = [
   {
     question: "What is included in the Plus plan?",
     answer:
-      "The Plus plan is KES 6,500 per month and is designed for growing portfolios that need caretaker assignments, move-out notices, inspections, tenant history, operational reports, audit visibility, data export requests, and priority support.",
+      "The Plus plan is KES 6,500 per month and is designed for growing portfolios that need caretaker assignments, move-out notices, inspections, tenant history, operational reports, data export requests, and priority support.",
   },
   {
     question: "Who is the Plus plan best for?",

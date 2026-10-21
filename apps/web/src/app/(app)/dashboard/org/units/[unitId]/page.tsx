@@ -13,7 +13,7 @@ export default async function UnitDetailsPage({ params, searchParams }: UnitDeta
   ]);
   const requestedUnitRef = decodeURIComponent(unitId);
 
-  const data = await getUnitDetailsData(session.activeOrgId!, requestedUnitRef);
+  const data = await getUnitDetailsData(session.activeOrgId!, requestedUnitRef, session.membershipScope);
 
   return <UnitDetailsWorkspace data={data} orgRole={session.activeOrgRole} editProfile={query.edit === "1"} />;
 }

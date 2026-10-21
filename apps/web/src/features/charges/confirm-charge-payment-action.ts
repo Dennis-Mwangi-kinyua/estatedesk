@@ -1,6 +1,7 @@
 "use server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 import { requireOrgPermission } from "@/lib/permissions/guards";
 import { verifyPayment } from "@/app/(app)/dashboard/org/payments/_lib/verify-payment";
 import { revalidatePaymentSurfaces } from "@/app/(app)/dashboard/org/payments/_lib/payment-action-shared";
@@ -22,7 +23,7 @@ export async function confirmChargePaymentAction(form: FormData) {
     const paidAt = parseMoveOutDate(String(form.get("paidAt") ?? ""));
     if (nairobiDate(paidAt) > nairobiDate()) throw new Error("Payment date cannot be in the future.");
     const result = await prisma.$transaction(async tx => {
-      const charge = await tx.rentCharge.findFirst({ where: { id: chargeId, orgId, status: { not: "WAIVED" }, lease: { deletedAt: null, status: { in: ["ACTIVE", "TERMINATED"] } } }, include: { lease: { include: { tenant: true } } } });
+      const charge = await tx.rentCharge.findFirst({ where: { id: chargeId, orgId, status: { not: "WAIVED" }, lease: { unit: scopedUnitWhere(orgId, session.membershipScope), deletedAt: null, status: { in: ["ACTIVE", "TERMINATED"] } } }, include: { lease: { include: { tenant: true } } } });
       if (!charge) throw new Error("Charge not found in this organisation.");
       if (charge.balance.lte(0)) throw new Error("This charge is already paid. Open its receipt instead.");
       const expectedBalance = String(form.get("expectedBalance") ?? "");

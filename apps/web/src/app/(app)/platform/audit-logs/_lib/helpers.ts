@@ -1,3 +1,4 @@
+import { requirePlatformRole } from "@/lib/permissions/guards";
 import { Prisma, PlatformRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
@@ -10,6 +11,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("en-KE", {
   day: "2-digit",
   hour: "2-digit",
   minute: "2-digit",
+  timeZone: "Africa/Nairobi",
 });
 
 export function formatDateTime(value: Date | null | undefined) {
@@ -63,6 +65,8 @@ const auditLogSelect = {
   ip: true,
   userAgent: true,
   metadata: true,
+  beforeState: true,
+  afterState: true,
   actor: {
     select: {
       id: true,
@@ -124,6 +128,8 @@ export function buildAuditLogWhere(params: {
       { entityId: { contains: q, mode: "insensitive" } },
       { requestId: { contains: q, mode: "insensitive" } },
       { ip: { contains: q, mode: "insensitive" } },
+      { metadata: { path: ["pathname"], string_contains: q } },
+      { metadata: { path: ["requestPathname"], string_contains: q } },
       {
         actor: {
           is: {
@@ -161,6 +167,7 @@ export async function getAuditLogs(params: {
   q?: string;
   action?: string;
 }) {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
   const { page, pageSize, q, action } = params;
   const skip = (page - 1) * pageSize;
 

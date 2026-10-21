@@ -197,13 +197,15 @@ export async function importCsv({
   let created = 0;
 
   await prisma.$transaction(async (tx) => {
+    if (kind === "properties" || kind === "units") {
+      const { lockOrgQuota } = await import("@/lib/billing/access");
+      await lockOrgQuota(tx, orgId);
+    }
     if (kind === "properties") {
-      const { getOrgPlanUsage } = await import("@/lib/billing/access");
-      const usage = await getOrgPlanUsage(orgId);
+      const { getOrgPlanUsage, planLimitMessage } = await import("@/lib/billing/access");
+      const usage = await getOrgPlanUsage(orgId, tx);
       if (usage.properties + rows.length > usage.propertiesLimit) {
-        throw new Error(
-          `Plan limit: cannot import ${rows.length} properties on ${usage.plan} plan.`,
-        );
+        throw new Error(`${planLimitMessage("property", usage)} This import would add ${rows.length} properties.`);
       }
 
       for (const row of rows) {
@@ -224,12 +226,10 @@ export async function importCsv({
     }
 
     if (kind === "units") {
-      const { getOrgPlanUsage } = await import("@/lib/billing/access");
-      const usage = await getOrgPlanUsage(orgId);
+      const { getOrgPlanUsage, planLimitMessage } = await import("@/lib/billing/access");
+      const usage = await getOrgPlanUsage(orgId, tx);
       if (usage.units + rows.length > usage.unitsLimit) {
-        throw new Error(
-          `Plan limit: cannot import ${rows.length} units on ${usage.plan} plan.`,
-        );
+        throw new Error(`${planLimitMessage("unit", usage)} This import would add ${rows.length} units.`);
       }
 
       for (const row of rows) {

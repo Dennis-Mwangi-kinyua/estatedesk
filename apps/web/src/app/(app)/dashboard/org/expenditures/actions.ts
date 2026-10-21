@@ -5,6 +5,8 @@ import { ExpenditureCategory } from "@prisma/client";
 import { postJournalEntry } from "@/lib/accounting/engine";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
+import { scopedPropertyWhere, scopedUnitWhere } from "@/lib/permissions/record-scope";
+import { scopedExpenditureWhere } from "@/lib/permissions/expenditure-scope";
 
 const PATH = "/dashboard/org/expenditures";
 const DASHBOARD_PATH = "/dashboard/org";
@@ -54,6 +56,9 @@ export async function createOrganizationExpenditureAction(formData: FormData) {
   if (paid && !canPostDirectly(session.activeOrgRole)) {
     throw new Error("Only accounts staff can record paid expenditures to the ledger.");
   }
+  if (propertyId && !await prisma.property.findFirst({ where: { AND: [scopedPropertyWhere(orgId, session.membershipScope), { id: propertyId }] }, select: { id: true } })) throw new Error("Property is outside your assigned scope.");
+  if (tenantId && !await prisma.tenant.findFirst({ where: { id: tenantId, orgId, leases: { some: { deletedAt: null, unit: scopedUnitWhere(orgId, session.membershipScope) } } }, select: { id: true } })) throw new Error("Tenant is outside your assigned scope.");
+  if (session.membershipScope?.scopeType !== "ORG" && !tenantId && !propertyId) throw new Error("An organization-wide expenditure requires organization-wide scope.");
 
   const status = canPostDirectly(session.activeOrgRole)
     ? paid
@@ -69,7 +74,7 @@ export async function createOrganizationExpenditureAction(formData: FormData) {
 
     if (tenantId) {
       const tenant = await tx.tenant.findFirst({
-        where: { id: tenantId, orgId },
+      where: { id: tenantId, orgId, leases: { some: { deletedAt: null, unit: scopedUnitWhere(orgId, session.membershipScope) } } },
         select: { id: true },
       });
       if (!tenant) throw new Error("Tenant does not belong to this organization.");
@@ -140,13 +145,7 @@ export async function approveExpenditureAction(formData: FormData) {
   const orgId = session.activeOrgId!;
   const expenditureId = read(formData, "expenditureId");
 
-  const expenditure = await prisma.expenditure.findFirst({
-    where: {
-      id: expenditureId,
-      orgId,
-      status: "PENDING_APPROVAL",
-    },
-  });
+  const expenditure = await prisma.expenditure.findFirst({ where: { AND: [await scopedExpenditureWhere(orgId, session.membershipScope), { id: expenditureId, status: "PENDING_APPROVAL" }] } });
 
   if (!expenditure) {
     throw new Error("Pending expenditure not found.");
@@ -175,13 +174,7 @@ export async function rejectExpenditureAction(formData: FormData) {
     throw new Error("Provide a rejection reason.");
   }
 
-  const expenditure = await prisma.expenditure.findFirst({
-    where: {
-      id: expenditureId,
-      orgId,
-      status: "PENDING_APPROVAL",
-    },
-  });
+  const expenditure = await prisma.expenditure.findFirst({ where: { AND: [await scopedExpenditureWhere(orgId, session.membershipScope), { id: expenditureId, status: "PENDING_APPROVAL" }] } });
 
   if (!expenditure) {
     throw new Error("Pending expenditure not found.");
@@ -216,12 +209,7 @@ export async function payApprovedExpenditureAction(formData: FormData) {
 
   await prisma.$transaction(async (tx) => {
     const expenditure = await tx.expenditure.findFirst({
-      where: {
-        id: expenditureId,
-        orgId,
-        status: "APPROVED",
-        journalEntryId: null,
-      },
+      where: { AND: [await scopedExpenditureWhere(orgId, session.membershipScope), { id: expenditureId, status: "APPROVED", journalEntryId: null }] },
     });
 
     if (!expenditure) {

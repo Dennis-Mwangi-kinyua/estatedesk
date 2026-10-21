@@ -10,7 +10,6 @@ import { getLiveVacancyInquiryAlertsAction } from "@/features/dashboard/actions/
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { VacancyInquiryAlert } from "@/features/dashboard/components/vacancy-inquiry-alert";
 import type { VacancyInquiryAlert as VacancyInquiryAlertItem } from "@/features/dashboard/server/get-vacancy-inquiry-alerts";
-import { OrgDashboardActivity } from "./org-dashboard-activity";
 import { OrgDashboardHeader } from "./org-dashboard-header";
 import { OrgDashboardSnapshot } from "./org-dashboard-snapshot";
 import { OrgDashboardStats } from "./org-dashboard-stats";
@@ -140,7 +139,6 @@ export function OrgDashboardWorkspace({
       <OrgDashboardStats data={data} />
       <div className="min-w-0 space-y-5">
         <OrgDashboardSnapshot data={data} />
-        <OrgDashboardActivity data={data} />
       </div>
     </div>
   );

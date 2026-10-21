@@ -8,6 +8,7 @@ import {
   isEncodedPublicId,
 } from "@/lib/public-id";
 import { InspectionDetailsWorkspace } from "./_components/inspection-details-workspace";
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,7 @@ export default async function OrgInspectionDetailPage({ params }: PageProps) {
         lease: {
           orgId,
           deletedAt: null,
+          unit: scopedUnitWhere(orgId, session.membershipScope),
         },
       },
     },

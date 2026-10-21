@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { writeAuditLog } from "@/lib/audit/security";
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 
 const INQUIRIES_PATH = "/dashboard/org/vacancy-inquiries";
 
@@ -31,6 +32,7 @@ export async function updateVacancyInquiryStatusAction(formData: FormData) {
     where: {
       id: inquiryId,
       orgId: session.activeOrgId,
+      unit: scopedUnitWhere(session.activeOrgId, session.membershipScope),
     },
     select: {
       id: true,

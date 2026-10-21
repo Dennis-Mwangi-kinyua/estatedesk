@@ -95,7 +95,6 @@ export async function getOrgDashboardSummary(
     vacancyInquiries,
     approvedExpendituresAwaitingPayment,
     verifiedPaymentsForPosting,
-    recentActivityRows,
   ] = await retryTransientDatabaseOperation(
     () =>
       Promise.all([
@@ -351,21 +350,6 @@ export async function getOrgDashboardSummary(
       take: 500,
     }),
 
-    prisma.auditLog.findMany({
-      where: { orgId },
-      orderBy: { createdAt: "desc" },
-      take: 8,
-      select: {
-        id: true,
-        action: true,
-        entityType: true,
-        entityId: true,
-        createdAt: true,
-        actor: {
-          select: { fullName: true },
-        },
-      },
-    }),
       ]),
     { label: "org-dashboard-summary" },
   );
@@ -464,16 +448,7 @@ export async function getOrgDashboardSummary(
     (payment) => !postedPaymentIds.has(payment.id),
   ).length;
 
-  const recentActivity: OrgDashboardActivityItem[] = recentActivityRows.map(
-    (entry) => ({
-      id: entry.id,
-      action: entry.action,
-      entityType: entry.entityType,
-      entityId: entry.entityId,
-      actorName: entry.actor.fullName,
-      createdAt: entry.createdAt.toISOString(),
-    }),
-  );
+  const recentActivity: OrgDashboardActivityItem[] = [];
 
   return {
     totalProperties,
@@ -523,7 +498,7 @@ export async function getOrgDashboardSummary(
 export function getCachedOrgDashboardSummary(orgId: string) {
   return unstable_cache(
     () => getOrgDashboardSummary(orgId),
-    ["org-dashboard-summary", orgId],
+    ["org-dashboard-summary-no-audit-v2", orgId],
     {
       revalidate: 15,
       tags: [`org-dashboard-summary:${orgId}`],

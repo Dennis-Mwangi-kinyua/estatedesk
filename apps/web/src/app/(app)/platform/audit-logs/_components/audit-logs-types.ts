@@ -11,6 +11,8 @@ export type AuditLogItem = Prisma.AuditLogGetPayload<{
     ip: true;
     userAgent: true;
     metadata: true;
+    beforeState: true;
+    afterState: true;
     actor: {
       select: {
         id: true;

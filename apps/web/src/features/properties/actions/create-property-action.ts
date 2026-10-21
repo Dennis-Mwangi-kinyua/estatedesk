@@ -12,6 +12,7 @@ import {
   assertCanCreateUnit,
 } from "@/lib/billing/access";
 import { requireOrgPermission } from "@/lib/permissions/guards";
+import { canViewWholeProperty } from "@/lib/permissions/record-scope";
 import { accountLoginUrl } from "@/lib/notifications/account-login-url";
 import type { CreatedAccountLogin } from "@/lib/notifications/recipient-message";
 import { getAuthorizedOrgId } from "./_lib/authorization";
@@ -34,6 +35,9 @@ export type PropertyCreateHandover = { credentials?: CreatedAccountLogin };
 
 export async function createPropertyAction(formData: FormData): Promise<PropertyCreateHandover> {
   const session = await requireOrgPermission("properties.manage");
+  if (!canViewWholeProperty(session.membershipScope) || session.membershipScope?.scopeType !== "ORG") {
+    redirectWithError("Creating a property requires organization-wide scope.");
+  }
   const orgId = await getAuthorizedOrgId(session.userId, session.activeOrgId);
 
   const name = toRequiredString(formData.get("name"), "Property name");
@@ -138,6 +142,7 @@ export async function createPropertyAction(formData: FormData): Promise<Property
     }
   } catch (error) {
     if (isDuplicateIdentityError(error)) redirectWithError(DUPLICATE_ID_MESSAGE);
+    if (error instanceof Error && error.message.includes("plan allows")) redirectWithError(error.message);
     redirectWithError(
       error instanceof Error ? error.message : "Plan limit reached.",
     );

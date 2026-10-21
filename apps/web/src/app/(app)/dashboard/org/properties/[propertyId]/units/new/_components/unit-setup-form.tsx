@@ -50,6 +50,7 @@ export function UnitSetupForm({ children, propertyName, cancelHref }: { children
       return cloneElement(child, { hidden: Number(child.props["data-unit-step"]) !== step });
     })}
     {step === 4 && <div className="rounded-2xl border border-border p-4"><p className="mb-4 text-sm text-muted-foreground">Check the details before adding this rentable unit.</p><dl className="grid gap-4 sm:grid-cols-2">{summary.map(([label, value]) => <div key={label}><dt className="text-xs text-muted-foreground">{label}</dt><dd className="break-words font-medium">{value}</dd></div>)}</dl></div>}
+    {step === 4 && <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="createAnother" />Create another unit on this property after saving</label>}
     <div className="flex flex-wrap items-center gap-3 border-t border-border pt-5">{step > 1 && <button data-workspace-action="true" type="button" onClick={() => move(step - 1)} className="min-h-12 rounded-xl border border-border px-5">Back</button>}{step < 4 ? <button data-workspace-action="true" type="button" onClick={advance} className={button}>{step === 3 ? "Review unit" : "Continue"}</button> : <SubmitButton />}<Link href={cancelHref} className="ml-auto py-3 text-sm text-muted-foreground">Cancel</Link></div>
   </form>;
 }

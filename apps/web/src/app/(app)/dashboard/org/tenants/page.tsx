@@ -13,7 +13,7 @@ export default async function OrgTenantsPage({ searchParams }: TenantsPageProps)
     return <Notice tone="warning">No active organisation found for your account.</Notice>;
   }
 
-  const data = await loadTenantsPageData(session.activeOrgId, await searchParams);
+  const data = await loadTenantsPageData(session.activeOrgId, await searchParams, session.membershipScope);
 
   return <TenantsWorkspace data={data} orgRole={session.activeOrgRole} />;
 }

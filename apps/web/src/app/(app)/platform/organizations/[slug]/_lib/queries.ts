@@ -1,3 +1,4 @@
+import { requirePlatformRole } from "@/lib/permissions/guards";
 import { AGREEMENT_ENTITY } from "@/lib/service-agreements/contract";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -8,6 +9,7 @@ export async function getOrganizationDetailData(
   slugParam: { slug: string },
   searchParamsValue: { deleteError?: string; archiveError?: string } | undefined,
 ) {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
   return retryTransientDatabaseOperation(() => loadOrganizationDetailData(slugParam, searchParamsValue), { label: "platform-organisation-detail", attempts: 2 });
 }
 
@@ -95,7 +97,7 @@ async function loadOrganizationDetailData(
         orderBy: { createdAt: "desc" },
         take: 8,
         include: {
-          payerTenant: { select: { fullName: true } },
+          payerTenant: { select: { id: true, fullName: true } },
           payerUser: { select: { fullName: true } },
         },
       }),
@@ -106,6 +108,7 @@ async function loadOrganizationDetailData(
         include: {
           user: {
             select: {
+              tenant: { where: { orgId: org.id, deletedAt: null }, take: 1, select: { id: true } },
               fullName: true,
               email: true,
               status: true,

@@ -10,6 +10,7 @@ import { closeMoveOut } from "@/lib/move-outs/closeout";
 import { postWaterBillAccrual } from "@/lib/accounting/billing";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 import { safeServerActionError } from "@/lib/errors/server-error-log";
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 
 async function requireOrgReviewer() {
   const session = await requireUserSession();
@@ -32,6 +33,8 @@ async function requireOrgReviewer() {
     select: {
       orgId: true,
       role: true,
+      scopeType: true,
+      scopeId: true,
       org: {
         select: {
           id: true,
@@ -72,10 +75,7 @@ export async function approveMeterReading(formData: FormData) {
       id: readingId,
       status: "SUBMITTED",
       unit: {
-        property: {
-          orgId: membership.orgId,
-          deletedAt: null,
-        },
+        ...scopedUnitWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }),
       },
     },
     select: {
@@ -287,10 +287,7 @@ export async function rejectMeterReading(formData: FormData) {
       id: readingId,
       status: "SUBMITTED",
       unit: {
-        property: {
-          orgId: membership.orgId,
-          deletedAt: null,
-        },
+        ...scopedUnitWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }),
       },
     },
     select: {
@@ -330,6 +327,7 @@ export async function rejectMeterReading(formData: FormData) {
 
     await tx.waterBill.updateMany({
       where: {
+        orgId: membership.orgId,
         unitId: reading.unitId,
         period: reading.period,
         status: "PENDING_APPROVAL",
@@ -384,7 +382,7 @@ export async function confirmMoveOutAction(formData: FormData) {
   }
 
   try {
-    await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: membership.orgId, actorUserId: session.userId, form: formData }), { isolationLevel: "Serializable", timeout: 15000 });
+    await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: membership.orgId, actorUserId: session.userId, form: formData, unitScope: scopedUnitWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }) }), { isolationLevel: "Serializable", timeout: 15000 });
   } catch (error) {
     return {
       ok: false as const,

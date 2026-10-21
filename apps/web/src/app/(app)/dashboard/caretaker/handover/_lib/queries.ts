@@ -1,3 +1,5 @@
+import { requireUserSession } from "@/lib/auth/session";
+import { canViewAuditLogs } from "@/lib/permissions/access";
 import { TicketPriority, TicketStatus } from "@prisma/client";
 import {
   getCaretakerAllowedUnitIds,
@@ -17,6 +19,8 @@ export async function getCaretakerHandoverData({
   caretakerUserId: string;
   membershipScope: MembershipScope;
 }) {
+  const session = await requireUserSession();
+  const hasAuditAccess = canViewAuditLogs(session.platformRole);
   try {
     const allowedUnitIds = await retryTransientDatabaseOperation(
       () =>
@@ -31,7 +35,7 @@ export async function getCaretakerHandoverData({
     const [handovers, openIssues] = await retryTransientDatabaseOperation(
       () =>
         Promise.all([
-          prisma.auditLog.findMany({
+          hasAuditAccess ? prisma.auditLog.findMany({
             where: {
               orgId,
               action: "CARETAKER_SHIFT_HANDOVER",
@@ -48,7 +52,7 @@ export async function getCaretakerHandoverData({
                 },
               },
             },
-          }),
+          }) : Promise.resolve([]),
           allowedUnitIds.length === 0
             ? Promise.resolve([])
             : prisma.issueTicket.findMany({
@@ -95,6 +99,7 @@ export async function getCaretakerHandoverData({
 
     return {
       ok: true as const,
+      hasAuditAccess,
       handovers,
       openIssues,
       urgentCount,
@@ -103,6 +108,7 @@ export async function getCaretakerHandoverData({
   } catch {
     return {
       ok: false as const,
+      hasAuditAccess,
       errorMessage: HANDOVER_LOAD_ERROR_MESSAGE,
       handovers: [],
       openIssues: [],

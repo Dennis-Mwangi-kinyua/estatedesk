@@ -11,3 +11,9 @@ it("public links remain available and super-admin destinations stay undiscoverab
   assert.equal(canDiscoverWorkspaceHref(access,"/platform/organizations"),true);
   for(const href of ["/pricing","/contact","/login","#section","https://example.test"]){assert.equal(canDiscoverWorkspaceHref(access,href),true);}
 });
+
+it("hides blocked pages from navigation and timeline destinations even for organization administrators", () => {
+  const access = { platformRole: "USER" as const, activeOrgRole: "ADMIN" as const, activeOrgId: "org", orgRolePolicy: { blockedViews: ["payments", "leases"] as ("payments" | "leases")[], permissions: {} } };
+  for (const href of ["/dashboard/org/payments", "/dashboard/org/payments?tab=history", "/dashboard/org/leases/lease-one", "/platform/audit-logs"]) assert.equal(canDiscoverWorkspaceHref(access, href), false);
+  assert.equal(canDiscoverWorkspaceHref(access, "/dashboard/org/tenants"), true);
+});

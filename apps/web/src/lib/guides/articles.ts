@@ -637,7 +637,7 @@ const coreGuideArticles = [
         heading: "Scaling from one landlord to agency operations",
         paragraphs: [
           "A small landlord may begin with one or two buildings, while an agency may onboard an entire client portfolio with staff roles from day one. The same system should support both paths with clearer permissions and searchable history.",
-          "As teams scale, reporting, exports, audit visibility, and role-aware access become more important than basic record keeping alone.",
+          "As teams scale, reporting, exports, and role-aware access become more important than basic record keeping alone.",
         ],
       },
     ],

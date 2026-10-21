@@ -32,7 +32,7 @@ function under(path: string, prefix: string) {
 }
 
 export function canAccessWorkspacePath(
-  session: { platformRole: PlatformRole; activeOrgRole: OrgRole | null; activeOrgId: string | null; grantedPermissions?: readonly string[]; orgRolePolicy?: OrgRolePolicy; caretakerSections?: readonly string[]; caretakerUnitPaths?: readonly string[] },
+  session: { platformRole: PlatformRole; activeOrgRole: OrgRole | null; activeOrgId: string | null; membershipScope?: { scopeType: string; scopeId: string } | null; grantedPermissions?: readonly string[]; orgRolePolicy?: OrgRolePolicy; caretakerSections?: readonly string[]; caretakerUnitPaths?: readonly string[] },
   pathname: string,
 ) {
   let path: string;
@@ -51,6 +51,19 @@ export function canAccessWorkspacePath(
   if (under(path, "/platform")) return platform;
   if (path === "/api-keys") return platform || (Boolean(session.activeOrgId) && session.activeOrgRole === "ADMIN");
   if (!session.activeOrgId || !session.activeOrgRole) return false;
+  const scopedMember = !!session.membershipScope && session.membershipScope.scopeType !== "ORG";
+  if (scopedMember && under(path, "/dashboard/org")) {
+    const section = path.split("/")[3];
+    const organizationWideSections = new Set([
+      "accounting", "agreements", "community", "finance-requests", "help",
+      "identity-verification", "imports", "insights", "reports", "service-providers",
+      "staff", "support", "taxes",
+    ]);
+    if (organizationWideSections.has(section)) return false;
+    if (section === "airbnb" && path.endsWith("/new")) return false;
+    if (section === "properties" && path.split("/").length >= 5 && !["ORG", "PROPERTY"].includes(session.membershipScope!.scopeType)) return false;
+    if (path === "/dashboard/org/properties/new" && session.membershipScope!.scopeType !== "ORG") return false;
+  }
   const role = session.activeOrgRole;
   if (role === "SECURITY") return under(path, "/dashboard/gate") || under(path, "/dashboard/security");
   if (/^\/inspections\/[^/]+$/.test(path)) return role !== "TENANT";

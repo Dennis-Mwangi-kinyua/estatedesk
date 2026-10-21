@@ -1,6 +1,7 @@
 import { PropertyType } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { assertCanCreateProperty, assertCanCreateUnit, lockOrgQuota } from "@/lib/billing/access";
 import { formatHouseNo } from "./unit-plan-helpers";
 import type { ParsedUnitPlan } from "./parse-unit-plans";
 import { redirectWithError } from "./form-helpers";
@@ -33,6 +34,10 @@ export async function executeCreatePropertyTransaction(
   input: CreatePropertyInput,
 ) {
   await prisma.$transaction(async (tx) => {
+    await lockOrgQuota(tx, input.orgId);
+    await assertCanCreateProperty(input.orgId, 1, tx);
+    const plannedUnits = input.parsedUnitPlans.reduce((sum, plan) => sum + plan.quantity, 0);
+    if (plannedUnits > 0) await assertCanCreateUnit(input.orgId, plannedUnits, tx);
     let landlordProfileId: string | null = null;
 
     if (input.landlordMode === "existing" && input.existingLandlordProfileId) {

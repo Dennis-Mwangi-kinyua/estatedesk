@@ -1,5 +1,6 @@
 import { LeaseStatus, TicketStatus, UnitStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { scopedPropertyWhere, type RecordScope } from "@/lib/permissions/record-scope";
 
 export type PropertyUnitItem = {
   buildingName?: string | null;
@@ -59,14 +60,15 @@ export type PropertyDetails = {
 
 export async function getPropertyDetails(
   propertyId: string,
-  orgId: string
+  orgId: string,
+  scope?: RecordScope,
 ): Promise<PropertyDetails | null> {
   const property = await prisma.property.findFirst({
-    where: {
+    where: { AND: [scopedPropertyWhere(orgId, scope), {
       id: propertyId,
       orgId,
       deletedAt: null,
-    },
+    }] },
     include: {
       buildings: {
         select: {

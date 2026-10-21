@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { PropertyEditWorkspace } from "./_components/property-edit-workspace";
 import { decodePublicId } from "@/lib/public-id";
+import { canViewWholeProperty, scopedPropertyWhere } from "@/lib/permissions/record-scope";
 
 type EditPropertyPageProps = {
   params: Promise<{
@@ -14,14 +15,13 @@ export default async function EditPropertyPage({
   params,
 }: EditPropertyPageProps) {
   const session = await requireManagementAccess();
+  if (!canViewWholeProperty(session.membershipScope)) notFound();
   const { propertyId: rawPropertyId } = await params;
   const propertyId = decodePublicId(rawPropertyId, "property");
 
   const property = await prisma.property.findFirst({
     where: {
-      id: propertyId,
-      orgId: session.activeOrgId!,
-      deletedAt: null,
+      AND: [scopedPropertyWhere(session.activeOrgId!, session.membershipScope), { id: propertyId }],
     },
     select: {
       id: true,

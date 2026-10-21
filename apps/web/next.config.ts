@@ -251,6 +251,8 @@ const nextConfig: NextConfig = {
         "/api-keys",
         "/access-denied",
         "/sign-lease/:path*",
+        "/verify-document/:path*",
+        "/verify-lease/:path*",
         "/account-suspended",
         "/service-terminated",
         "/properties",

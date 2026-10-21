@@ -12,6 +12,7 @@ export function TenantSuccessView({ state }: { state: ActionState }) {
     <AccountCreatedShare credentials={{ ...credentials, fullName: credentials.tenantName, role: "TENANT" }} continueHref="/dashboard/org/tenants" continueLabel="Go to tenants">
       {state.allocationDraft && <RecipientMessageShare draft={state.allocationDraft} title="Share unit allocation" />}
     </AccountCreatedShare>
+    <section className="rounded-xl border bg-card p-4 text-sm"><h2 className="font-semibold">Next: tenancy agreement</h2><p className="mt-2">Share the login details and ask the tenant to sign in first. Then open their lease, prepare the agreement, and send it for signature. The tenant signs first; your organization countersigns before the completed PDF is available.</p></section>
     <Link href="/dashboard/org/tenants/new" className="inline-flex min-h-11 items-center rounded-xl border border-border px-4 py-3 text-sm font-medium text-foreground">Create another tenant</Link>
   </div>;
 }

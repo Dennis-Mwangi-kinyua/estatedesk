@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 import { decodePublicId, encodePublicId } from "@/lib/public-id";
 import PrintReportButton from "../PrintReportButton";
 
@@ -137,6 +138,7 @@ export default async function OrgInspectionPrintPage({ params }: PageProps) {
           lease: {
             orgId,
             deletedAt: null,
+            unit: scopedUnitWhere(orgId, session.membershipScope),
           },
         },
       },

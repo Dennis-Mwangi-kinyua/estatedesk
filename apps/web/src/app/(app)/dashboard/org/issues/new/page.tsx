@@ -2,6 +2,7 @@ import { requireOrgPermission } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { IssueNewWorkspace } from "../_components/issue-new-workspace";
 import { decodePublicId } from "@/lib/public-id";
+import { scopedPropertyWhere, scopedUnitWhere } from "@/lib/permissions/record-scope";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -47,14 +48,13 @@ export default async function NewOrgIssuePage({ searchParams }: PageProps) {
 
   const properties = await prisma.property.findMany({
     where: {
-      orgId,
-      deletedAt: null,
+      ...scopedPropertyWhere(orgId, session.membershipScope),
     },
     select: {
       id: true,
       name: true,
       units: {
-        where: { deletedAt: null },
+        where: scopedUnitWhere(orgId, session.membershipScope),
         select: {
           id: true,
           houseNo: true,

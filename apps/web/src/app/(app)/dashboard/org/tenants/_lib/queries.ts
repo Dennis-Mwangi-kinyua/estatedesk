@@ -2,10 +2,12 @@ import { getPagination } from "@/lib/db/pagination";
 import { prisma } from "@/lib/prisma";
 import { buildTenantWhere, normalizeSearch, normalizeStatus } from "./helpers";
 import type { TenantsPageProps } from "./types";
+import { scopedUnitWhere, type RecordScope } from "@/lib/permissions/record-scope";
 
 export async function loadTenantsPageData(
   orgId: string,
   searchParams?: Awaited<TenantsPageProps["searchParams"]>,
+  scope?: RecordScope,
 ) {
   const params = searchParams ?? {};
   const search = normalizeSearch(params.search);
@@ -15,7 +17,8 @@ export async function loadTenantsPageData(
     page: Number(params.page ?? 1),
     pageSize: Number(params.pageSize ?? 20),
   });
-  const where = buildTenantWhere({ orgId, search, status });
+  const unitScope = scopedUnitWhere(orgId, scope);
+  const where = { AND: [buildTenantWhere({ orgId, search, status }), { leases: { some: { deletedAt: null, unit: unitScope } } }] };
 
   const [
     organization,
@@ -55,6 +58,7 @@ export async function loadTenantsPageData(
           where: {
             deletedAt: null,
             status: "ACTIVE",
+            unit: unitScope,
           },
           orderBy: {
             createdAt: "desc",
@@ -101,21 +105,10 @@ export async function loadTenantsPageData(
       },
     }),
     prisma.tenant.count({ where }),
-    prisma.tenant.count({ where: { orgId, deletedAt: null, status: "ACTIVE" } }),
-    prisma.tenant.count({ where: { orgId, deletedAt: null, status: "INACTIVE" } }),
-    prisma.tenant.count({ where: { orgId, deletedAt: null, status: "BLACKLISTED" } }),
-    prisma.tenant.count({
-      where: {
-        orgId,
-        deletedAt: null,
-        leases: {
-          some: {
-            deletedAt: null,
-            status: "ACTIVE",
-          },
-        },
-      },
-    }),
+    prisma.tenant.count({ where: { AND: [where, { status: "ACTIVE" }] } }),
+    prisma.tenant.count({ where: { AND: [where, { status: "INACTIVE" }] } }),
+    prisma.tenant.count({ where: { AND: [where, { status: "BLACKLISTED" }] } }),
+    prisma.tenant.count({ where: { AND: [where, { leases: { some: { deletedAt: null, status: "ACTIVE", unit: unitScope } } }] } }),
   ]);
 
   return {

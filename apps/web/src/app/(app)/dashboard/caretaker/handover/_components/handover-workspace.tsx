@@ -34,7 +34,7 @@ export function HandoverWorkspace({
           openIssueCount={data.ok ? data.openIssues.length : 0}
           urgentCount={data.ok ? data.urgentCount : 0}
         />
-        <HandoverLog data={data} />
+        {data.hasAuditAccess ? <HandoverLog data={data} /> : null}
       </div>
 
     </div>

@@ -1,18 +1,19 @@
 import { notFound } from "next/navigation";
-import { requireUserSession } from "@/lib/auth/session";
+import { requireManagementAccess } from "@/lib/permissions/guards";
 import { decodePublicId } from "@/lib/public-id";
 import { prisma } from "@/lib/prisma";
+import { scopedBuildingWhere } from "@/lib/permissions/record-scope";
 
 type PageProps = {
   params: Promise<{ buildingId: string }>;
 };
 
 export default async function BuildingPage({ params }: PageProps) {
-  const session = await requireUserSession();
+  const session = await requireManagementAccess();
   const { buildingId: publicBuildingId } = await params;
   const buildingId = decodePublicId(publicBuildingId, "building");
   const building = await prisma.building.findFirst({
-    where: { id: buildingId, property: { orgId: session.activeOrgId ?? undefined, deletedAt: null } },
+    where: { AND: [scopedBuildingWhere(session.activeOrgId!, session.membershipScope), { id: buildingId }] },
     select: { name: true, property: { select: { name: true } } },
   });
   if (!building) notFound();

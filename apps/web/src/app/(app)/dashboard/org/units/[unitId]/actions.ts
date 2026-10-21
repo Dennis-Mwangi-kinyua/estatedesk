@@ -10,6 +10,7 @@ import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { ensureUnitPublicSlug } from "@/lib/public-vacancy-ensure-slug";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 import { uploadCloudflareImage, deleteCloudflareImage } from "@/lib/uploads/cloudflare-images";
 import { storage } from "@/lib/storage";
 import { validateImageFile, type ValidatedImage } from "@/lib/uploads/secure-image";
@@ -96,16 +97,16 @@ async function storeVacancyImage(input: {
   };
 }
 
-async function loadManagedUnit(unitId: string, orgId: string) {
+async function loadManagedUnit(unitId: string, orgId: string, membershipScope: Parameters<typeof scopedUnitWhere>[1]) {
   return prisma.unit.findFirst({
-    where: {
+    where: { AND: [scopedUnitWhere(orgId, membershipScope), {
       id: unitId,
       deletedAt: null,
       property: {
         orgId,
         deletedAt: null,
       },
-    },
+    }] },
     select: {
       id: true,
       houseNo: true,
@@ -127,7 +128,7 @@ export async function updateUnitVacancyMarketingAction(
 ) {
   const session = await requireManagementAccess();
 
-  const unit = await loadManagedUnit(unitId, session.activeOrgId!);
+  const unit = await loadManagedUnit(unitId, session.activeOrgId!, session.membershipScope);
 
   if (!unit) {
     uploadError(unitId, "Unit not found.");
@@ -183,7 +184,7 @@ export async function uploadUnitVacancyImagesAction(
 ) {
   const session = await requireManagementAccess();
 
-  const unit = await loadManagedUnit(unitId, session.activeOrgId!);
+  const unit = await loadManagedUnit(unitId, session.activeOrgId!, session.membershipScope);
 
   if (!unit) {
     uploadError(unitId, "Unit not found.");
@@ -262,7 +263,7 @@ export async function deleteUnitVacancyImageAction(
     uploadError(unitId, "Image not found.");
   }
 
-  const unit = await loadManagedUnit(unitId, session.activeOrgId!);
+  const unit = await loadManagedUnit(unitId, session.activeOrgId!, session.membershipScope);
   if (!unit) {
     uploadError(unitId, "Unit not found.");
   }
@@ -329,7 +330,7 @@ export async function setPrimaryUnitVacancyImageAction(
     uploadError(unitId, "Image not found.");
   }
 
-  const unit = await loadManagedUnit(unitId, session.activeOrgId!);
+  const unit = await loadManagedUnit(unitId, session.activeOrgId!, session.membershipScope);
   if (!unit) {
     uploadError(unitId, "Unit not found.");
   }

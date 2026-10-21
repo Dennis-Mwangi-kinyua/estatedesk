@@ -208,7 +208,7 @@ export default function PricingPage() {
                     <PlanLimit
                       label={formatLimit(plan.propertiesLimit, "properties")}
                     />
-                    <PlanLimit label={formatLimit(plan.unitsLimit, "units")} />
+                    <PlanLimit label={formatLimit(plan.unitsLimit, "units and BnB listings combined")} />
                     <PlanLimit
                       label={formatLimit(plan.usersLimit, "internal users")}
                     />

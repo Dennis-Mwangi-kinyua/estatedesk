@@ -135,7 +135,7 @@ export function TenantDetailsMainColumn({ data }: { data: TenantDetailsData }) {
         <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
           <SectionHeader
             title="Tenant history"
-            description="Chronological history built from onboarding, leases, payments, notices, and tenant action logs."
+            description="Chronological history of onboarding, leases, payments, and notices."
           />
 
           <div className="mt-5 space-y-4">
@@ -148,9 +148,7 @@ export function TenantDetailsMainColumn({ data }: { data: TenantDetailsData }) {
                 const toneClasses =
                   item.tone === "success"
                     ? "border-emerald-200 bg-emerald-50"
-                    : item.tone === "danger"
-                      ? "border-red-200 bg-red-50"
-                      : "border-border bg-muted/35";
+                    : "border-border bg-muted/35";
 
                 return (
                   <div key={item.id} className={`rounded-3xl border p-4 ${toneClasses}`}>

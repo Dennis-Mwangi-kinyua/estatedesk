@@ -16,6 +16,7 @@ export default async function LeasesPage({ searchParams }: LeasesPageProps) {
   const data = await getOrgLeasesPageData(
     session.activeOrgId,
     Number(resolvedSearchParams.page ?? "1"),
+    session.membershipScope,
   );
 
   return <LeasesWorkspace data={data} orgRole={session.activeOrgRole} />;

@@ -63,9 +63,9 @@ test("native record queries are bounded, scoped, and never serialize private col
   const compiled = { exports: {} as { nativeWorkspaceRecords: (...args: unknown[]) => Promise<{ records: unknown[]; notice?: string }> } };
   new Function("require", "module", "exports", bundle.outputFiles[0].text)(createRequire(import.meta.url), compiled, compiled.exports);
   const read = compiled.exports.nativeWorkspaceRecords;
-  const session = { activeOrgId: "org", userId: "user", activeOrgRole: "ADMIN", membershipScope: { scopeType: "UNIT", scopeId: "unit" } };
+  const session = { platformRole: "USER", activeOrgId: "org", userId: "user", activeOrgRole: "ADMIN", membershipScope: { scopeType: "UNIT", scopeId: "unit" } };
   try {
-    fixture.rows = [{ id: "tenant", fullName: "Example Tenant", phone: "fixture", email: null, status: "ACTIVE", type: "INDIVIDUAL", nationalId: "SECRET-ID", passwordHash: "SECRET-HASH" }];
+    fixture.rows = [{ id: "tenant", fullName: "Example Tenant", phone: "fixture", email: null, status: "ACTIVE", type: "INDIVIDUAL", nationalId: "SECRET-ID", passwordHash: "SECRET-HASH", leases: [] }];
     const result = await read(session, "organization", "/dashboard/org/tenants", "Example", 2);
     assert.equal(fixture.calls[0].model, "tenant");
     assert.equal(fixture.calls[0].args.skip, 25);
@@ -79,11 +79,16 @@ test("native record queries are bounded, scoped, and never serialize private col
     assert.equal(fixture.calls.length, 0);
     assert.deepEqual(denied.records, []);
     assert.match(denied.notice!, /scope/);
-    const vault = await read(session, "platform", "/platform/api-keys", "", 1);
+    const deniedAudit = await read(session, "platform", "/platform/audit-logs", "", 1);
+    assert.deepEqual(deniedAudit.records, []);
+    assert.match(deniedAudit.notice!, /Platform administrator/);
+    assert.equal(fixture.calls.length, 0);
+    const platformSession = { ...session, platformRole: "SUPER_ADMIN" };
+    const vault = await read(platformSession, "platform", "/platform/api-keys", "", 1);
     assert.match(vault.notice!, /locked/);
     assert.equal(fixture.calls.length, 0);
     fixture.rows = [{ id: "org", name: "Example Organization", status: "ACTIVE", email: "contact@example.test", phone: "fixture", slug: "example", address: "Nairobi", currencyCode: "KES", timezone: "Africa/Nairobi", createdAt: new Date("2026-10-01"), subscription: { plan: "FREE", status: "ACTIVE", currentPeriodEnd: new Date("2026-11-01") }, documentRecords: [{ id: "agreement-target" }], _count: { properties: 2, tenants: 8, memberships: 3 } }];
-    const organization = await read(session, "platform", "/platform/organizations", "", 1);
+    const organization = await read(platformSession, "platform", "/platform/organizations", "", 1);
     const fields = (organization.records[0] as { fields: { label: string; value: string }[] }).fields;
     assert.equal(fields.find(field => field.label === "Properties")?.value, "2");
     assert.equal(fields.find(field => field.label === "Plan")?.value, "FREE");

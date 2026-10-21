@@ -1,5 +1,6 @@
+import { leaseTenantReadiness, signerCanSign } from "@/lib/leases/signing-workflow";
 import type { Asset } from "@prisma/client";
-import { storage } from "@/lib/storage";
+import { encodePublicId } from "@/lib/public-id";
 import {
   buttonPrimaryClassName,
   buttonSecondaryClassName,
@@ -10,22 +11,17 @@ import {
   cancelSigningRequestAction,
   createSigningRequestAction,
   remindSignerAction,
+  resumeOrganizationSigningAction,
 } from "../actions";
 
 type SigningSigner = {
   id: string;
+  userId: string | null;
   signingOrder: number;
   role: string;
   name: string;
   status: string;
   signedAt: Date | null;
-};
-
-type SigningEvent = {
-  id: string;
-  eventType: string;
-  createdAt: Date;
-  ipAddress: string | null;
 };
 
 type SigningEnvelope = {
@@ -40,7 +36,6 @@ type SigningEnvelope = {
   sourceDocumentHash: string;
   finalDocumentHash: string | null;
   signers: SigningSigner[];
-  events: SigningEvent[];
 };
 
 export type LeaseSigningData = {
@@ -49,6 +44,7 @@ export type LeaseSigningData = {
     tenantId: string;
     tenant: {
       fullName: string;
+      user: { status: string; lastLoginAt: Date | null } | null;
     };
     unit: {
       houseNo: string;
@@ -74,18 +70,14 @@ export type LeaseSigningData = {
     displayName: string;
   }>;
   assetMap: Map<string, Asset>;
+  currentUserId: string;
+  query: { error?: string; sent?: string };
 };
-
-function getFinalAssetUrl(asset: Asset | null | undefined) {
-  if (!asset) return null;
-  return /^https?:\/\//.test(asset.key)
-    ? asset.key
-    : storage.getPublicUrl(asset.key);
-}
 
 export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
   const { lease, members, tenantUsers, landlords, assetMap } = data;
 
+  const readiness = leaseTenantReadiness(lease.tenant.user);
   return (
     <div className="org-theme-content mx-auto w-full max-w-7xl space-y-6 px-4 pb-24 pt-4 sm:px-6 lg:px-8">
       <header className="space-y-2">
@@ -96,6 +88,9 @@ export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
         <p className="text-muted-foreground">Tenant: {lease.tenant.fullName}</p>
       </header>
 
+      <section className={`${panelShellClassName} p-5`}><h2 className="font-semibold">Tenancy agreement workflow</h2><ol className="mt-3 grid gap-3 text-sm sm:grid-cols-4">{["1. Onboard tenant and share login details", "2. Tenant completes first login", "3. Send agreement; tenant reviews and signs", "4. Organization countersigns; both download the signed PDF with QR verification"].map(step => <li key={step} className="rounded-lg border p-3">{step}</li>)}</ol><p role="status" className="mt-3 text-sm">{readiness || "Tenant has logged in. Prepare the agreement, then send it for the tenant’s signature."}</p></section>
+      {data.query.error ? <p role="alert" className="rounded-xl border border-destructive p-4 text-sm">{data.query.error}</p> : null}
+      {data.query.sent === "1" ? <p role="status" className="rounded-xl border border-primary p-4 text-sm">Agreement sent to the tenant. We’ll notify the organization representative when it is ready to countersign.</p> : null}
       <form
         action={createSigningRequestAction}
         className={`${panelShellClassName} p-5`}
@@ -105,7 +100,7 @@ export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
 
         {!lease.contractDocument ? (
           <p className="mt-3 text-sm text-destructive">
-            Upload a PDF contract before requesting signatures.
+            Generate or upload a PDF agreement on the lease details page before sending it to the tenant.
           </p>
         ) : (
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -129,14 +124,7 @@ export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
               </select>
             </label>
 
-            <label className="text-sm text-foreground">
-              Signing order
-              <select name="signingOrder" className={`${fieldClassName} mt-1`}>
-                <option value="SEQUENTIAL">Required sequence</option>
-                <option value="PARALLEL">Any order</option>
-              </select>
-            </label>
-
+            <p className="text-sm text-muted-foreground">Signing order: tenant first, organization countersigns. Additional witnesses follow.</p>
             <label className="text-sm text-foreground sm:col-span-3">
               Message
               <input
@@ -204,9 +192,10 @@ export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
 
             <button data-workspace-action="true"
               type="submit"
+              disabled={!!readiness}
               className={`${buttonPrimaryClassName} sm:col-span-3 sm:w-fit`}
             >
-              Create request and sign
+              Send agreement to tenant
             </button>
           </div>
         )}
@@ -217,7 +206,7 @@ export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
           const finalAsset = envelope.finalAssetId
             ? assetMap.get(envelope.finalAssetId)
             : null;
-          const finalUrl = getFinalAssetUrl(finalAsset);
+          const finalUrl = finalAsset ? `/dashboard/org/leases/${encodePublicId(lease.id, "lease")}/download?envelopeId=${encodeURIComponent(envelope.id)}` : null;
 
           return (
             <article key={envelope.id} className={`${panelShellClassName} p-5`}>
@@ -240,6 +229,7 @@ export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
                 ) : null}
               </div>
 
+              {envelope.status === "COMPLETED" && envelope.finalDocumentHash ? <a href={`/verify-lease/${envelope.finalDocumentHash}`} className="mt-3 inline-block text-sm font-semibold text-primary underline">Verify signed agreement and signatures</a> : null}
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {envelope.signers
                   .sort((a, b) => a.signingOrder - b.signingOrder)
@@ -259,6 +249,7 @@ export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
                           : ""}
                       </p>
 
+                      {signer.userId === data.currentUserId && signer.role === "ORGANIZATION" && signerCanSign(signer, envelope.signers) && ["PENDING", "PARTIALLY_SIGNED"].includes(envelope.status) ? <form action={resumeOrganizationSigningAction} className="mt-3"><input type="hidden" name="signerId" value={signer.id} /><button className={buttonPrimaryClassName}>Review and countersign</button></form> : null}
                       {signer.status === "PENDING" &&
                       ["PENDING", "PARTIALLY_SIGNED"].includes(envelope.status) ? (
                         <form action={remindSignerAction} className="mt-2">
@@ -276,24 +267,6 @@ export function LeaseSigningWorkspace({ data }: { data: LeaseSigningData }) {
                     </div>
                   ))}
               </div>
-
-              <details className="mt-4">
-                <summary className="cursor-pointer text-sm font-bold text-foreground">
-                  Audit timeline ({envelope.events.length})
-                </summary>
-                <div className="mt-2 space-y-2">
-                  {envelope.events.map((event) => (
-                    <div
-                      key={event.id}
-                      className="rounded border border-border bg-muted/10 p-2 text-xs text-foreground"
-                    >
-                      <b>{event.eventType}</b> ·{" "}
-                      {event.createdAt.toLocaleString("en-KE")}
-                      {event.ipAddress ? ` · ${event.ipAddress}` : ""}
-                    </div>
-                  ))}
-                </div>
-              </details>
 
               <p className="mt-4 break-all text-xs text-muted-foreground">
                 Source SHA-256: {envelope.sourceDocumentHash}

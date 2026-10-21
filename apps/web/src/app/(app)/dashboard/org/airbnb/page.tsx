@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { bnbImages, bnbReservationDates } from "@/features/bnb/queries";
 import { bnbMoney, bnbPhotoUrl } from "@/features/bnb/validation";
 import { ListingControls } from "@/features/bnb/components/listing-controls";
+import { bnbListingScopeWhere } from "@/features/bnb/scope";
 
 export default async function AirbnbPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; saved?: string; page?: string }> }) {
   const session = await requireOrgRole(["ADMIN", "MANAGER"]);
@@ -18,7 +19,7 @@ export default async function AirbnbPage({ searchParams }: { searchParams: Promi
   const q = typeof params.q === "string" ? params.q.slice(0, 160) : "";
   const status = ["DRAFT", "PUBLISHED", "PAUSED"].includes(params.status ?? "") ? params.status as "DRAFT" | "PUBLISHED" | "PAUSED" : undefined;
   const requestedPage = Math.max(1, Math.min(10000, Math.floor(Number(params.page)) || 1));
-  const where = { orgId: session.activeOrgId!, deletedAt: null, ...(status ? { status } : {}), ...(q ? { OR: [{ title: { contains: q, mode: "insensitive" as const } }, { location: { contains: q, mode: "insensitive" as const } }] } : {}) };
+  const where = { AND: [await bnbListingScopeWhere(session.activeOrgId!, session.membershipScope), ...(status ? [{ status }] : []), ...(q ? [{ OR: [{ title: { contains: q, mode: "insensitive" as const } }, { location: { contains: q, mode: "insensitive" as const } }] }] : [])] };
   const total = await prisma.bnbListing.count({ where });
   const page = Math.min(requestedPage, Math.max(1, Math.ceil(total / 12)));
   const [listings, org] = await Promise.all([

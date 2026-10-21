@@ -1,15 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { toNumber } from "./helpers";
 import type { ChargesPageData } from "./types";
+import { scopedUnitWhere, type RecordScope } from "@/lib/permissions/record-scope";
 
-export async function getChargesPageData(orgId: string): Promise<ChargesPageData> {
+export async function getChargesPageData(orgId: string, scope?: RecordScope): Promise<ChargesPageData> {
   const [organization, charges] = await Promise.all([
     prisma.organization.findUnique({
       where: { id: orgId },
       select: { name: true },
     }),
     prisma.rentCharge.findMany({
-      where: { orgId },
+      where: { orgId, lease: { unit: scopedUnitWhere(orgId, scope) } },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,

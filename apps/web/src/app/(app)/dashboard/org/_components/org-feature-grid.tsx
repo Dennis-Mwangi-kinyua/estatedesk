@@ -1,15 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "@/components/navigation/workspace-link";
+import Link, { useWorkspaceAccess } from "@/components/navigation/workspace-link";
+import { canDiscoverWorkspaceHref } from "@/lib/permissions/workspace-access";
 import type { MobileWorkspaceLink } from "@estatedesk/contracts/mobile";
 
 export function OrgFeatureGrid({ features }: { features: MobileWorkspaceLink[] }) {
+  const access = useWorkspaceAccess();
   const [query, setQuery] = useState("");
   const cards = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return features.filter(feature => !needle || `${feature.title} ${feature.description} ${feature.group}`.toLowerCase().includes(needle));
-  }, [features, query]);
+    return features.filter(feature => (!access || canDiscoverWorkspaceHref(access, feature.path)) && (!needle || `${feature.title} ${feature.description} ${feature.group}`.toLowerCase().includes(needle)));
+  }, [features, query, access]);
   return <section aria-labelledby="org-features-heading" className="space-y-4">
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div><h2 id="org-features-heading" className="text-xl font-semibold tracking-tight sm:text-2xl">All EstateDesk features</h2><p className="mt-1 text-sm text-muted-foreground">Your organization tools, arranged in one grid.</p></div>

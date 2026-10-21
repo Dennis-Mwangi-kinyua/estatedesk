@@ -2,7 +2,7 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import QRCode from "qrcode";
 
 /** A4 document layout with measured text wrapping and automatic page continuation. */
-export async function createProfessionalPdf(input: { title: string; serialNumber: string; organizationName: string; issuedAt: Date; verificationUrl?: string; footerText?: string; pageLabel?: string; documentTitle?: string }) {
+export async function createProfessionalPdf(input: { title: string; serialNumber: string; organizationName: string; issuedAt: Date; verificationUrl?: string; footerText?: string; pageLabel?: string; documentTitle?: string; accentColor?: string; fontFamily?: "sans" | "serif" }) {
   const pdf = await PDFDocument.create();
   pdf.setTitle(input.documentTitle ?? `${input.title} ${input.serialNumber}`);
   pdf.setAuthor(input.organizationName);
@@ -10,9 +10,10 @@ export async function createProfessionalPdf(input: { title: string; serialNumber
   pdf.setProducer("EstateDesk Document Trust");
   pdf.setCreationDate(input.issuedAt);
   pdf.setModificationDate(input.issuedAt);
-  const regular = await pdf.embedFont(StandardFonts.Helvetica);
-  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
-  const ink = rgb(.09, .15, .23), muted = rgb(.31, .37, .45), accent = rgb(.04, .39, .32);
+  const regular = await pdf.embedFont(input.fontFamily === "serif" ? StandardFonts.TimesRoman : StandardFonts.Helvetica);
+  const bold = await pdf.embedFont(input.fontFamily === "serif" ? StandardFonts.TimesRomanBold : StandardFonts.HelveticaBold);
+  const color = /^#[0-9a-f]{6}$/i.test(input.accentColor ?? "") ? input.accentColor! : "#0a6452";
+  const ink = rgb(.09, .15, .23), muted = rgb(.31, .37, .45), accent = rgb(parseInt(color.slice(1, 3), 16) / 255, parseInt(color.slice(3, 5), 16) / 255, parseInt(color.slice(5, 7), 16) / 255);
   const border = rgb(.83, .88, .9), wash = rgb(.94, .97, .96);
   const width = 515.28, margin = 40;
   let page = pdf.addPage([595.28, 841.89]);

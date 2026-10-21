@@ -1,5 +1,7 @@
 "use client";
 
+import { useWorkspaceAccess } from "@/components/navigation/workspace-link";
+import { canDiscoverWorkspaceHref } from "@/lib/permissions/workspace-access";
 import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 
 
@@ -72,11 +74,13 @@ function LandlordNav({
     return () => window.removeEventListener("hashchange", updateHash);
   }, []);
 
-  const activeHref = activeNavigationHref(pathname, navItems, activeHash);
+  const access = useWorkspaceAccess();
+  const visibleItems = navItems.filter(item => !access || canDiscoverWorkspaceHref(access, item.href));
+  const activeHref = activeNavigationHref(pathname, visibleItems, activeHash);
 
   return (
     <nav className="space-y-2" aria-label="Landlord navigation">
-      <NavigationSections items={navItems} sections={WORKSPACE_NAVIGATION.landlord} renderItem={item => {
+      <NavigationSections items={visibleItems} sections={WORKSPACE_NAVIGATION.landlord} renderItem={item => {
         const active = activeHref === item.href;
 
         return (

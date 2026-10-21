@@ -14,6 +14,7 @@ import { parseInspectionDate } from "@/lib/move-outs/validation";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 import { createEstateDeskReference } from "@/lib/estatedesk-reference";
 import { safeServerActionError } from "@/lib/errors/server-error-log";
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 
 class ScheduleInspectionError extends Error {
   constructor(message: string) {
@@ -55,6 +56,7 @@ export async function scheduleInspectionAction(formData: FormData) {
         status: { in: ["SUBMITTED", "INSPECTION_SCHEDULED"] },
         lease: {
           orgId: session.activeOrgId!,
+          unit: scopedUnitWhere(session.activeOrgId!, session.membershipScope),
         },
       },
       select: {
@@ -159,7 +161,7 @@ export async function closeMoveOutAction(formData: FormData) {
   }
 
   try {
-    await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: session.activeOrgId!, actorUserId: session.userId, form: formData }), { isolationLevel: "Serializable", timeout: 15000 });
+  await prisma.$transaction((tx) => closeMoveOut(tx, { noticeId, orgId: session.activeOrgId!, actorUserId: session.userId, form: formData, unitScope: scopedUnitWhere(session.activeOrgId!, session.membershipScope) }), { isolationLevel: "Serializable", timeout: 15000 });
   } catch (error) {
     return {
       ok: false as const,
@@ -192,7 +194,7 @@ export async function recordMoveOutRefundAction(form: FormData) {
   const noticeId = String(form.get("noticeId") ?? "").trim();
   const reference = String(form.get("refundReference") ?? "").trim();
   if (!reference || reference.length > 200 || form.get("refundPaid") !== "on") throw new Error("Confirm payment and enter a refund reference (up to 200 characters).");
-  const eligible = await prisma.moveOutNotice.findFirst({ where: { id: noticeId, status: "CLOSED", lease: { orgId: session.activeOrgId! } }, include: { lease: true } });
+  const eligible = await prisma.moveOutNotice.findFirst({ where: { id: noticeId, status: "CLOSED", lease: { orgId: session.activeOrgId!, unit: scopedUnitWhere(session.activeOrgId!, session.membershipScope) } }, include: { lease: true } });
   if (!eligible) throw new Error("Move-out not found.");
   const proof = form.get("proof");
   if (!(proof instanceof File) || proof.size <= 0 || proof.size > 2 * 1024 * 1024) throw new Error("Attach refund payment proof (image, up to 2MB).");
@@ -211,7 +213,7 @@ export async function releaseMoveOutUnitAction(form: FormData) {
   const noticeId = String(form.get("noticeId") ?? "").trim();
   if (form.get("readyConfirmed") !== "on") throw new Error("Confirm repairs and cleaning are complete.");
   await prisma.$transaction(async tx => {
-    const notice = await tx.moveOutNotice.findFirst({ where: { id: String(form.get("noticeId") ?? ""), status: "CLOSED", lease: { orgId: session.activeOrgId! } }, include: { lease: true } });
+    const notice = await tx.moveOutNotice.findFirst({ where: { id: String(form.get("noticeId") ?? ""), status: "CLOSED", lease: { orgId: session.activeOrgId!, unit: scopedUnitWhere(session.activeOrgId!, session.membershipScope) } }, include: { lease: true } });
     if (!notice) throw new Error("Closed move-out not found.");
     if (await tx.lease.findFirst({ where: { unitId: notice.lease.unitId, status: { in: ["ACTIVE", "PENDING"] }, deletedAt: null } })) throw new Error("Unit has another active or pending lease.");
     const changed = await tx.unit.updateMany({ where: { id: notice.lease.unitId, status: "UNDER_MAINTENANCE" }, data: { status: "VACANT" } });

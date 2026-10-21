@@ -3,6 +3,7 @@ import { financialStatus } from "@/lib/move-outs/financial-status";
 import { getPagination } from "@/lib/db/pagination";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { prisma } from "@/lib/prisma";
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 import { PAGE_SIZE } from "./types";
 import type { SessionWithScope } from "./types";
 
@@ -74,6 +75,7 @@ export async function getMoveOutsPageData(
   const noticeWhere = {
     lease: {
       orgId,
+      unit: scopedUnitWhere(orgId, session.membershipScope),
     },
   };
 

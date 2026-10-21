@@ -45,8 +45,8 @@ export function BillingSection({ data }: { data: SettingsPageData }) {
                 : `${planMeta.propertiesLimit} properties`}
               {" · "}
               {planMeta.unitsLimit === Number.MAX_SAFE_INTEGER
-                ? "Unlimited units"
-                : `${planMeta.unitsLimit} units`}
+                ? "Unlimited units and BnB listings"
+                : `${planMeta.unitsLimit} units and BnB listings combined`}
               {" · "}
               {planMeta.usersLimit === Number.MAX_SAFE_INTEGER
                 ? "Unlimited staff"

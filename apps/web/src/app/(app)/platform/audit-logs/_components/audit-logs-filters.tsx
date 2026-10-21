@@ -32,7 +32,7 @@ export function FiltersCard({
             id="q"
             name="q"
             defaultValue={q}
-            placeholder="Actor, org, action, request ID, entity, IP, location..."
+            placeholder="Page, actor, org, action, request ID, entity, IP, location..."
             className={fieldClassName}
           />
         </div>

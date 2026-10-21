@@ -33,6 +33,8 @@ type OrgLedgerOptions = {
   tenantId?: string;
   recentPaymentsTake?: number;
   includeRecentPayments?: boolean;
+  unitScope?: Prisma.UnitWhereInput;
+  paymentScope?: Prisma.PaymentWhereInput;
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -578,6 +580,7 @@ export async function getOrgLedger(
         id: options.tenantId,
         orgId,
         deletedAt: null,
+        ...(options.unitScope ? { leases: { some: { deletedAt: null, unit: options.unitScope } } } : {}),
       },
       orderBy: {
         fullName: "asc",
@@ -587,6 +590,7 @@ export async function getOrgLedger(
           where: {
             status: { in: ["ACTIVE", "TERMINATED"] },
             deletedAt: null,
+            ...(options.unitScope ? { unit: options.unitScope } : {}),
           },
           select: {
             unit: {
@@ -621,6 +625,7 @@ export async function getOrgLedger(
           where: {
             period,
             status: { not: "CANCELLED" },
+            ...(options.unitScope ? { unit: options.unitScope } : {}),
           },
           select: {
             dueDate: true,
@@ -643,10 +648,7 @@ export async function getOrgLedger(
         },
         payments: {
           where: {
-            createdAt: {
-              gte: start,
-              lt: end,
-            },
+            ...(options.paymentScope ? { AND: [options.paymentScope, { createdAt: { gte: start, lt: end } }] } : { createdAt: { gte: start, lt: end } }),
           },
           select: {
             amount: true,
@@ -664,11 +666,7 @@ export async function getOrgLedger(
     includeRecentPayments
       ? prisma.payment.findMany({
           where: {
-            orgId,
-            createdAt: {
-              gte: start,
-              lt: end,
-            },
+            AND: [options.paymentScope ?? { orgId }, { createdAt: { gte: start, lt: end } }],
           },
           orderBy: {
             createdAt: "desc",

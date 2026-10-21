@@ -8,6 +8,7 @@ import { safeServerActionError } from "@/lib/errors/server-error-log";
 export async function backfillTenantChargesAction(tenantId: string) {
   try {
     const session = await requireOrgPermission("payments.verify");
+    if (session.membershipScope?.scopeType !== "ORG") throw new Error("Organization-wide access is required to backfill all tenant charges.");
     const tenant = await prisma.tenant.findFirstOrThrow({ where: { id: tenantId, orgId: session.activeOrgId!, deletedAt: null }, select: { slug: true } });
     const leases = await prisma.lease.findMany({ where: { tenantId, orgId: session.activeOrgId! }, select: { id: true } });
     const results = [];

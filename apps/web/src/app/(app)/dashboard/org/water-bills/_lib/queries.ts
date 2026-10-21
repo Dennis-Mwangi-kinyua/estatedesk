@@ -5,6 +5,7 @@ import type {
 } from "@/app/(app)/dashboard/org/notifications/_lib/types";
 
 import { orgMeterReadingDetailSelect } from "./reading-select";
+import { scopedUnitWhere, type RecordScope } from "@/lib/permissions/record-scope";
 
 /** List cards only need the shared detail shape (subset is fine). */
 const approvalQueueSelect = orgMeterReadingDetailSelect;
@@ -12,14 +13,10 @@ const approvalQueueSelect = orgMeterReadingDetailSelect;
 export async function getOrgWaterBillsPageData(
   orgId: string,
   orgRole: AllowedRole,
+  scope?: RecordScope,
 ) {
   const orgUnitFilter = {
-    unit: {
-      property: {
-        orgId,
-        deletedAt: null,
-      },
-    },
+    unit: scopedUnitWhere(orgId, scope),
   };
 
   const approvalQueueWhere = {

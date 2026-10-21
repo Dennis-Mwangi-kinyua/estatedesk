@@ -1,15 +1,24 @@
+import { requireUserSession } from "@/lib/auth/session";
+import { scopedUnitWhere, scopedPaymentWhere } from "@/lib/permissions/record-scope";
+import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ensureTenantSlug } from "@/lib/tenants/slug";
-import { formatCurrency, formatDate, formatStatus, getLeaseUnitLabel, getUnitLabel, toNumberValue } from "./helpers";
+import { formatCurrency, formatDate, formatStatus, getLeaseUnitLabel, toNumberValue } from "./helpers";
 
 export async function loadTenantDetailsData(orgId: string, tenantId: string, activeOrgRole?: string | null) {
   if (!tenantId?.trim()) notFound();
+  const session = await requireUserSession();
+  if (session.activeOrgId !== orgId || !canAccessWorkspacePath(session, "/dashboard/org/tenants") || session.mustChangePassword || session.requiresTermsAcceptance) notFound();
+  const unitScope = scopedUnitWhere(orgId, session.membershipScope);
+  const scopedLease = { orgId, unit: unitScope };
+  const restricted = session.membershipScope?.scopeType !== "ORG";
 
   const tenant = await prisma.tenant.findFirst({
     where: {
       OR: [{ id: tenantId }, { slug: tenantId }],
       orgId,
+      ...(restricted ? { leases: { some: scopedLease } } : {}),
     },
     select: {
       id: true,
@@ -47,9 +56,7 @@ export async function loadTenantDetailsData(orgId: string, tenantId: string, act
         },
       },
       leases: {
-        where: {
-          deletedAt: null,
-        },
+        where: { ...scopedLease, deletedAt: null },
         orderBy: {
           createdAt: "desc",
         },
@@ -92,53 +99,8 @@ export async function loadTenantDetailsData(orgId: string, tenantId: string, act
           },
         },
       },
-      actionLogs: {
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 20,
-        select: {
-          id: true,
-          action: true,
-          reason: true,
-          notes: true,
-          createdAt: true,
-          actor: {
-            select: {
-              fullName: true,
-              email: true,
-            },
-          },
-          lease: {
-            select: {
-              id: true,
-              unit: {
-                select: {
-                  houseNo: true,
-                  building: {
-                    select: { name: true },
-                  },
-                  property: {
-                    select: { name: true },
-                  },
-                },
-              },
-            },
-          },
-          unit: {
-            select: {
-              houseNo: true,
-              building: {
-                select: { name: true },
-              },
-              property: {
-                select: { name: true },
-              },
-            },
-          },
-        },
-      },
       payments: {
+        where: { AND: [scopedPaymentWhere(orgId, session.membershipScope), ...(canAccessWorkspacePath(session, "/dashboard/org/payments") ? [] : [{ id: { in: [] } }])] },
         orderBy: {
           createdAt: "desc",
         },
@@ -169,6 +131,7 @@ export async function loadTenantDetailsData(orgId: string, tenantId: string, act
         },
       },
       waterBills: {
+        where: { orgId, unit: unitScope },
         orderBy: {
           createdAt: "desc",
         },
@@ -194,6 +157,7 @@ export async function loadTenantDetailsData(orgId: string, tenantId: string, act
         },
       },
       moveOutNotices: {
+        where: { lease: scopedLease },
         orderBy: {
           createdAt: "desc",
         },
@@ -305,30 +269,10 @@ export async function loadTenantDetailsData(orgId: string, tenantId: string, act
       tag: formatStatus(notice.status),
       tone: "default" as const,
     })),
-    ...tenant.actionLogs.map((log) => ({
-      id: `action-${log.id}`,
-      kind: "Action",
-      title: formatStatus(log.action),
-      date: log.createdAt,
-      description:
-        log.reason ||
-        log.notes ||
-        (log.unit
-          ? `Related unit: ${getUnitLabel(log.unit)}`
-          : log.lease
-            ? `Related lease unit: ${getUnitLabel(log.lease.unit)}`
-            : `Recorded by ${log.actor.fullName}`),
-      tag: formatStatus(log.action),
-      tone:
-        String(log.action).toUpperCase().includes("BLACKLIST") ||
-        String(log.action).toUpperCase().includes("DELETED")
-          ? ("danger" as const)
-          : String(log.action).toUpperCase().includes("RESTORED") ||
-              String(log.action).toUpperCase() === "CREATED"
-            ? ("success" as const)
-            : ("default" as const),
-    })),
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  ].filter(item => {
+    const path = item.kind === "Lease" ? "/dashboard/org/leases" : item.kind === "Payment" ? "/dashboard/org/payments" : item.kind === "Move out" ? "/dashboard/org/move-outs" : "/dashboard/org/tenants";
+    return canAccessWorkspacePath(session, path);
+  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return {
     tenant,

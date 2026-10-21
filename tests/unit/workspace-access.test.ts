@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { it } from "node:test";
-import { canAccessWorkspacePath, ORG_WORKSPACE_ROLES } from "../../apps/web/src/lib/permissions/workspace-access";
+import { canAccessWorkspacePath, canDiscoverWorkspaceHref, ORG_WORKSPACE_ROLES } from "../../apps/web/src/lib/permissions/workspace-access";
 import type { OrgRole } from "@prisma/client";
 const roles: OrgRole[] = ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "TENANT", "LANDLORD"];
 const session = (role: OrgRole) => ({ platformRole: "USER" as const, activeOrgId: "org", activeOrgRole: role });
@@ -33,4 +33,18 @@ it("hides super-admin controls from platform admins and ordinary users", () => {
     assert.equal(canAccessWorkspacePath({ ...session("ADMIN"), platformRole }, "/platform/control"), platformRole === "SUPER_ADMIN");
     assert.equal(canAccessWorkspacePath({ ...session("ADMIN"), platformRole }, "/platform/control/settings"), platformRole === "SUPER_ADMIN");
   }
+});
+it("blocks organization-wide destinations for scoped members and hides those links", () => {
+  const scoped = { ...session("MANAGER"), membershipScope: { scopeType: "PROPERTY", scopeId: "property-a" } };
+  for (const path of ["/dashboard/org/accounting", "/dashboard/org/reports", "/dashboard/org/imports", "/dashboard/org/staff/permissions", "/dashboard/org/properties/new", "/dashboard/org/airbnb/new"]) {
+    assert.equal(canAccessWorkspacePath(scoped, path), false, path);
+    assert.equal(canDiscoverWorkspaceHref(scoped, path), false, path);
+  }
+  for (const path of ["/dashboard/org/units", "/dashboard/org/properties/property-a", "/dashboard/org/properties/property-a/units/new", "/dashboard/org/airbnb", "/dashboard/org/leases"]) {
+    assert.equal(canAccessWorkspacePath(scoped, path), true, path);
+    assert.equal(canDiscoverWorkspaceHref(scoped, path), true, path);
+  }
+  const unitScope = { ...session("MANAGER"), membershipScope: { scopeType: "UNIT", scopeId: "unit-a" } };
+  assert.equal(canAccessWorkspacePath(unitScope, "/dashboard/org/properties/property-a"), false);
+  assert.equal(canAccessWorkspacePath(unitScope, "/dashboard/org/properties/property-a/units/new"), false);
 });

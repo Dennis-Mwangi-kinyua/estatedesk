@@ -10,8 +10,8 @@ import { nairobiDate, parseCloseout } from "./validation";
 import { recordVacatedTenancy } from "@/lib/tenants/identity";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 
-export async function closeMoveOut(tx: Prisma.TransactionClient, input: { noticeId: string; orgId: string; actorUserId: string; form: FormData }) {
-  const notice = await tx.moveOutNotice.findFirst({ where: { id: input.noticeId, status: "INSPECTION_COMPLETED", lease: { orgId: input.orgId, deletedAt: null } }, include: { inspection: true, tenant: { select: { fullName: true } }, lease: true } });
+export async function closeMoveOut(tx: Prisma.TransactionClient, input: { noticeId: string; orgId: string; actorUserId: string; form: FormData; unitScope?: Prisma.UnitWhereInput }) {
+  const notice = await tx.moveOutNotice.findFirst({ where: { id: input.noticeId, status: "INSPECTION_COMPLETED", lease: { orgId: input.orgId, deletedAt: null, ...(input.unitScope ? { unit: input.unitScope } : {}) } }, include: { inspection: true, tenant: { select: { fullName: true } }, lease: true } });
   if (!notice || notice.inspection?.status !== "COMPLETED") throw new Error("A completed inspection is required before closing this move-out.");
   const balances = await loadMoveOutBalances(tx, notice.lease);
   if (!input.form.has("costItems") || moneyCents(input.form.get("expectedOutstandingBills"), "reviewed bill balance") !== balances.totalCents) throw new Error("Bill balances have changed. Refresh and review the final settlement again.");

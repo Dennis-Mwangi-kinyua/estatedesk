@@ -1,5 +1,6 @@
 import "server-only";
 
+import { auditPage } from "@/lib/audit/log-detail";
 import crypto from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { headers } from "next/headers";
@@ -33,6 +34,7 @@ export async function getRequestAuditMetadata() {
 
   return {
     ip,
+    pathname: auditPage({ entityType: "Route", entityId: "", metadata: { pathname: firstHeader(headerStore, ["x-estatedesk-pathname"]) } }),
     userAgent: headerStore.get("user-agent"),
     requestId:
       firstHeader(headerStore, ["x-request-id", "x-vercel-id", "cf-ray"]) ??
@@ -99,6 +101,7 @@ export async function writeAuditLog(input: {
 }) {
   try {
     const request = await getRequestAuditMetadata();
+    const page = auditPage({ entityType: input.entityType, entityId: input.entityId, metadata: input.metadata }) ?? request.pathname;
 
     if (!input.orgId) {
       const auditId = `audit_${crypto.randomUUID().replace(/-/g, "")}`;
@@ -126,7 +129,7 @@ export async function writeAuditLog(input: {
             ${input.action},
             ${input.entityType},
             ${input.entityId},
-            ${JSON.stringify({ ...(input.metadata ?? {}), geo: request.geo })}::jsonb,
+            ${JSON.stringify({ ...(input.metadata ?? {}), ...(page ? { pathname: page } : {}), ...(request.pathname ? { requestPathname: request.pathname } : {}), geo: request.geo })}::jsonb,
             ${input.beforeState ? JSON.stringify(input.beforeState) : null}::jsonb,
             ${input.afterState ? JSON.stringify(input.afterState) : null}::jsonb,
             ${request.ip},
@@ -151,6 +154,7 @@ export async function writeAuditLog(input: {
         requestId: request.requestId,
         metadata: {
           ...(input.metadata ?? {}),
+          ...(page ? { pathname: page } : {}), ...(request.pathname ? { requestPathname: request.pathname } : {}),
           geo: request.geo,
         },
         beforeState: input.beforeState ?? undefined,

@@ -15,6 +15,7 @@ export default async function VacancyInquiriesPage({
     session.activeOrgId!,
     Number(resolved.page ?? "1"),
     resolved.status,
+    session.membershipScope,
   );
 
   return (

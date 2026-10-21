@@ -17,7 +17,7 @@ export async function accessibleAgreement(id: string) {
   const document = await prisma.documentRecord.findFirst({ where: {
     id, entityType: AGREEMENT_ENTITY,
     ...(!platform ? { orgId: session.activeOrgId!, status: { in: ["ISSUED", "COMPLETED"] } } : {}),
-  }, include: { org: { select: { name: true, slug: true } }, events: { orderBy: { createdAt: "asc" } } } });
+  }, include: { org: { select: { name: true, slug: true } }, events: { where: platform ? {} : { id: { in: [] } }, orderBy: { createdAt: "asc" } } } });
   if (!document) return null;
   const data = agreementData(document.metadata);
   const reminderCooldownActive = data.lastReminder?.party === (data.organizationSignature ? "ESTATEDESK" : "ORGANIZATION")

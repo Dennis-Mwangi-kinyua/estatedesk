@@ -1,11 +1,13 @@
 "use server";
 
+import { encodePublicId } from "@/lib/public-id";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { UnitStatus, UnitType, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { assertCanCreateUnit } from "@/lib/billing/access";
+import { assertCanCreateUnit, lockOrgQuota } from "@/lib/billing/access";
 import { requireOrgPermission } from "@/lib/permissions/guards";
+import { scopedPropertyWhere } from "@/lib/permissions/record-scope";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 
 function readString(formData: FormData, key: string) {
@@ -53,7 +55,7 @@ export async function createUnitAction(formData: FormData) {
   }
 
   const property = await prisma.property.findFirst({
-    where: { id: propertyId, orgId, deletedAt: null },
+    where: { AND: [scopedPropertyWhere(orgId, session.membershipScope), { id: propertyId }] },
     select: { id: true, name: true },
   });
 
@@ -72,17 +74,10 @@ export async function createUnitAction(formData: FormData) {
   }
 
   try {
-    await assertCanCreateUnit(orgId);
-  } catch (error) {
-    redirect(
-      `/dashboard/org/properties/${propertyId}/units/new?error=${encodeURIComponent(
-        error instanceof Error ? error.message : "Unit plan limit reached.",
-      )}`,
-    );
-  }
-
-  try {
-    const unit = await prisma.unit.create({
+    const unit = await prisma.$transaction(async (tx) => {
+      await lockOrgQuota(tx, orgId);
+      await assertCanCreateUnit(orgId, 1, tx);
+      return tx.unit.create({
       data: {
         propertyId,
         buildingId,
@@ -103,24 +98,32 @@ export async function createUnitAction(formData: FormData) {
         isActive,
       },
       select: { id: true, houseNo: true },
+      });
     });
 
     revalidatePath("/dashboard/org/units");
-    revalidatePath(`/dashboard/org/properties/${propertyId}`);
+    revalidatePath(`/dashboard/org/properties/${encodePublicId(propertyId, "property")}`);
+    revalidatePath("/dashboard/org/properties");
     revalidatePublicVacancies({
       unitId: unit.id,
       propertyName: property.name,
       houseNo: unit.houseNo,
     });
 
-    redirect(`/dashboard/org/units/${unit.id}`);
+    if (formData.get("createAnother") === "on") {
+      redirect(`/dashboard/org/properties/${encodePublicId(propertyId, "property")}/units/new?created=1`);
+    }
+    redirect(`/dashboard/org/units/${encodePublicId(unit.id, "unit")}`);
   } catch (error) {
+    if (error instanceof Error && error.message.includes("plan allows")) {
+      redirect(`/dashboard/org/properties/${encodePublicId(propertyId, "property")}/units/new?error=${encodeURIComponent(error.message)}`);
+    }
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
       redirect(
-        `/dashboard/org/properties/${propertyId}/units/new?error=${encodeURIComponent(
+        `/dashboard/org/properties/${encodePublicId(propertyId, "property")}/units/new?error=${encodeURIComponent(
           "A unit with this house number already exists on the property.",
         )}`,
       );

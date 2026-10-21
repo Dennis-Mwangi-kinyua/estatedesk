@@ -1,3 +1,4 @@
+import { requirePlatformRole } from "@/lib/permissions/guards";
 import { getAuditLogs, getPageNumber, getPageSize } from "./_lib/helpers";
 import type { AuditLogsSearchParams } from "./_lib/types";
 import { AuditLogsWorkspace } from "./_components/audit-logs-workspace";
@@ -9,6 +10,7 @@ export default async function PlatformAuditLogsPage({
 }: {
   searchParams: AuditLogsSearchParams;
 }) {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
   const resolved = await searchParams;
 
   const page = getPageNumber(resolved.page);

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { requireOrgPermission } from "@/lib/permissions/guards";
 import { notifyInAppAndPush } from "@/lib/notifications/notify";
 import { prisma } from "@/lib/prisma";
+import { canViewWholeProperty, scopedPropertyWhere, scopedUnitWhere } from "@/lib/permissions/record-scope";
 
 const createOrgIssueSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -44,9 +45,7 @@ export async function createOrgIssueAction(formData: FormData) {
   if (parsed.propertyId) {
     const property = await prisma.property.findFirst({
       where: {
-        id: parsed.propertyId,
-        orgId,
-        deletedAt: null,
+        AND: [scopedPropertyWhere(orgId, session.membershipScope), { id: parsed.propertyId }],
       },
       select: { id: true },
     });
@@ -58,21 +57,16 @@ export async function createOrgIssueAction(formData: FormData) {
 
   if (parsed.unitId) {
     const unit = await prisma.unit.findFirst({
-      where: {
-        id: parsed.unitId,
-        deletedAt: null,
-        property: {
-          orgId,
-          deletedAt: null,
-        },
-        ...(parsed.propertyId ? { propertyId: parsed.propertyId } : {}),
-      },
+      where: { AND: [scopedUnitWhere(orgId, session.membershipScope), { id: parsed.unitId, ...(parsed.propertyId ? { propertyId: parsed.propertyId } : {}) }] },
       select: { id: true },
     });
 
     if (!unit) {
       redirect("/dashboard/org/issues/new?error=invalid_unit");
     }
+  }
+  if (parsed.propertyId && !parsed.unitId && !canViewWholeProperty(session.membershipScope)) {
+    redirect("/dashboard/org/issues/new?error=invalid_property");
   }
 
   const unitDetails = parsed.unitId
@@ -108,6 +102,8 @@ export async function createOrgIssueAction(formData: FormData) {
     where: {
       orgId,
       role: { in: ["ADMIN", "MANAGER", "OFFICE"] },
+      scopeType: "ORG",
+      scopeId: "ORG_SCOPE",
       userId: { not: session.userId },
       user: {
         deletedAt: null,

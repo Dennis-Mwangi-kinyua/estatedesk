@@ -1,3 +1,4 @@
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
@@ -7,8 +8,9 @@ import { decodePublicId } from "@/lib/public-id";
 export const dynamic = "force-dynamic";
 
 export default async function LeaseSigningPage({
-  params,
+  params, searchParams,
 }: {
+  searchParams: Promise<{ error?: string; sent?: string }>;
   params: Promise<{ leaseId: string }>;
 }) {
   const session = await requireOrgRole(["ADMIN", "MANAGER"]);
@@ -19,16 +21,16 @@ export default async function LeaseSigningPage({
     where: {
       id: leaseId,
       orgId: session.activeOrgId!,
+      unit: scopedUnitWhere(session.activeOrgId!, session.membershipScope),
       deletedAt: null,
     },
     include: {
-      tenant: true,
+      tenant: { include: { user: { select: { status: true, lastLoginAt: true } } } },
       unit: { include: { property: true } },
       contractDocument: true,
       signatureEnvelopes: {
         include: {
           signers: true,
-          events: { orderBy: { createdAt: "desc" }, take: 10 },
         },
         orderBy: { createdAt: "desc" },
       },
@@ -85,6 +87,8 @@ export default async function LeaseSigningPage({
         tenantUsers,
         landlords,
         assetMap,
+        currentUserId: session.userId,
+        query: await searchParams,
       }}
     />
   );

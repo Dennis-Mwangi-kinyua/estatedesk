@@ -1,12 +1,17 @@
+import { requireManagementAccess } from "@/lib/permissions/guards";
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { toNumber } from "./helpers";
 
 export async function loadLeaseDetailsData(orgId: string, leaseId: string) {
+  const session = await requireManagementAccess();
+  if (session.activeOrgId !== orgId) notFound();
   const lease = await prisma.lease.findFirst({
     where: {
       id: leaseId,
       orgId,
+      unit: scopedUnitWhere(orgId, session.membershipScope),
       deletedAt: null,
     },
     include: {

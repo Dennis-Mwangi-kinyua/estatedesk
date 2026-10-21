@@ -1,9 +1,23 @@
 import { getPagination } from "@/lib/db/pagination";
 import { prisma } from "@/lib/prisma";
 import { PAGE_SIZE } from "./types";
+import { scopedPropertyWhere, scopedUnitWhere, canViewWholeProperty, type RecordScope } from "@/lib/permissions/record-scope";
 
-export async function loadOrgExpendituresPageData(orgId: string, page = 1) {
-  const expenditureWhere = { orgId };
+export async function loadOrgExpendituresPageData(orgId: string, page = 1, scope?: RecordScope) {
+  const unitWhere = scopedUnitWhere(orgId, scope);
+  const [visibleProperties, visibleUnits] = await Promise.all([
+    canViewWholeProperty(scope) ? prisma.property.findMany({ where: scopedPropertyWhere(orgId, scope), select: { id: true } }) : Promise.resolve([]),
+    prisma.unit.findMany({ where: unitWhere, select: { id: true } }),
+  ]);
+  const propertyIds = visibleProperties.map(({ id }) => id);
+  const unitIds = visibleUnits.map(({ id }) => id);
+  const expenditureWhere = scope?.scopeType === "ORG"
+    ? { orgId }
+    : { orgId, OR: [
+        ...(propertyIds.length ? [{ propertyId: { in: propertyIds } }] : []),
+        ...(unitIds.length ? [{ unitId: { in: unitIds } }] : []),
+        { tenant: { leases: { some: { deletedAt: null, unit: unitWhere } } } },
+      ] };
 
   const { page: currentPage, skip, take } = getPagination({
     page,
@@ -27,12 +41,12 @@ export async function loadOrgExpendituresPageData(orgId: string, page = 1) {
       select: { currencyCode: true, name: true },
     }),
     prisma.tenant.findMany({
-      where: { orgId, deletedAt: null },
+      where: { orgId, deletedAt: null, leases: { some: { deletedAt: null, unit: unitWhere } } },
       select: { id: true, fullName: true },
       orderBy: { fullName: "asc" },
     }),
     prisma.property.findMany({
-      where: { orgId, deletedAt: null },
+      where: scopedPropertyWhere(orgId, scope),
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),

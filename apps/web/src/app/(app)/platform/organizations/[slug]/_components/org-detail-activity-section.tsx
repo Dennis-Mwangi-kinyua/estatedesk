@@ -1,3 +1,5 @@
+import { encodePublicId } from "@/lib/public-id";
+import Link from "@/components/navigation/workspace-link";
 import { OrgSurface } from "./org-detail-ui";
 import { Receipt, ChevronDown } from "lucide-react";
 import { UsersRound, Archive, Trash2 } from "@/components/shared/colored-icons";
@@ -31,6 +33,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
                       payment.payerName ??
                       payment.payerType}
                   </p>
+                  {payment.payerTenant ? <Link href={`/platform/organizations/${org.slug}/tenants/${encodePublicId(payment.payerTenant.id, "tenant")}?tab=payments`} className="text-xs font-semibold text-primary underline">View tenant payments</Link> : null}
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     {payment.targetType} • {payment.reference ?? payment.externalReference ?? "-"}
                   </p>
@@ -52,12 +55,13 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
         </OrgSurface>
 
         <OrgSurface id="organisation-members" title="Recent members" description="Workspace roles and recent sign-in activity.">
+          <div className="border-b border-border p-4"><Link href={`/platform/organizations/${org.slug}/tenants`} className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">View tenant directory and detailed records →</Link><p className="mt-2 text-xs text-muted-foreground">Profiles, leases, agreements, payments, charges, and individual logs.</p></div>
           <div className="divide-y divide-slate-100 dark:divide-white/10">
             {recentMembers.map((member) => (
               <div key={member.id} className="org-activity-row grid gap-3 p-4 transition hover:bg-muted/30 sm:grid-cols-[minmax(0,1fr)_auto] sm:p-5">
                 <div className="flex min-w-0 items-start gap-3"><span className="org-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><UsersRound aria-hidden="true" className="h-4 w-4" /></span><div className="min-w-0">
                   <p className="break-words font-medium leading-5 text-slate-950 dark:text-white">
-                    {member.user.fullName}
+                    {member.user.tenant[0] ? <Link className="text-primary underline" href={`/platform/organizations/${org.slug}/tenants/${encodePublicId(member.user.tenant[0].id, "tenant")}`}>{member.user.fullName}</Link> : member.user.fullName}
                   </p>
                   <p className="mt-1 break-words text-sm text-slate-500 dark:text-slate-400">
                     {member.user.email ?? "-"}

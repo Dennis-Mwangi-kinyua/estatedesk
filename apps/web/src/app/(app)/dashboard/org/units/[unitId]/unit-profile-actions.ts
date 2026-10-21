@@ -8,6 +8,7 @@ import { logServerError } from "@/lib/errors/server-error-log";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
 import { prisma } from "@/lib/prisma";
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 
 export type UnitProfileActionState = { error?: string; message?: string };
 
@@ -56,7 +57,7 @@ export async function updateUnitProfileAction(
   try {
     const changed = await prisma.$transaction(async tx => {
       const unit = await tx.unit.findFirst({
-        where: { id: unitId, deletedAt: null, property: { orgId, deletedAt: null } },
+        where: { AND: [scopedUnitWhere(orgId, session.membershipScope), { id: unitId, deletedAt: null, property: { orgId, deletedAt: null } }] },
         select: {
           id: true,
           propertyId: true,

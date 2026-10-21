@@ -13,6 +13,7 @@ export default async function OrgInspectionsPage({
   const data = await getOrgInspectionsPageData(
     session.activeOrgId!,
     Number(resolved.page ?? "1"),
+    session.membershipScope,
   );
 
   return (

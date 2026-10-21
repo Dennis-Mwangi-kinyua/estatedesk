@@ -1,3 +1,5 @@
+import { scopedPaymentWhere } from "@/lib/permissions/record-scope";
+import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { requireUserSession } from "@/lib/auth/session";
@@ -52,6 +54,12 @@ export async function GET(
     receipt.payment.payerUserId === session.userId;
 
   if (!sameOrganization || (!managementRole && !ownsReceipt)) notFound();
+  if (session.mustChangePassword || session.requiresTermsAcceptance) notFound();
+  if (managementRole) {
+    if (!canAccessWorkspacePath(session, "/dashboard/org/payments")) notFound();
+    const permitted = await prisma.payment.count({ where: { AND: [{ id: receipt.paymentId }, scopedPaymentWhere(receipt.payment.orgId, session.membershipScope)] } });
+    if (!permitted) notFound();
+  } else if (!canAccessWorkspacePath(session, "/dashboard/tenant/payments")) notFound();
   if (!["VERIFIED", "NOT_REQUIRED"].includes(receipt.payment.verificationStatus)) {
     return new Response("Receipt is not available until the payment is verified.", {
       status: 409,

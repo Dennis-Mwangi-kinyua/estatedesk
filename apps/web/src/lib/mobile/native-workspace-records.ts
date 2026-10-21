@@ -16,6 +16,7 @@ import { getIntegrationReadinessReport } from "@/lib/integrations";
 import { isPlatformApiKeysUnlocked } from "@/app/(app)/platform/api-keys/actions";
 import { nativeTenantRecordActions } from "./native-tenant-admin-actions";
 import { nativeBnbRecordActions } from "./native-bnb-actions";
+import { canViewAuditLogs } from "@/lib/permissions/access";
 import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
 
 type Value = string | number | boolean | Date | null | undefined | { toString(): string };
@@ -29,6 +30,7 @@ function card(id: string, title: string, status: string | undefined, fields: Rec
 }
 
 export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWorkspaceKind, path: string, q: string, page: number, recordId?: string): Promise<{ records: NativeWorkspaceRecord[]; notice?: string; searchable?: boolean }> {
+  if (kind === "platform" && !canViewAuditLogs(session.platformRole)) return { records: [], notice: "Platform administrator access is required.", searchable: false };
   const orgId = session.activeOrgId!;
   const unit = nativeUnitScope(orgId, session.membershipScope);
   const wide = nativeOrgWideAccess(session.membershipScope);

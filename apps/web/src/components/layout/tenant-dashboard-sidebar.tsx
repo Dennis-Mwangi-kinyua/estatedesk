@@ -1,3 +1,5 @@
+import { useWorkspaceAccess } from "@/components/navigation/workspace-link";
+import { canDiscoverWorkspaceHref } from "@/lib/permissions/workspace-access";
 import { SidebarSticker } from "@/components/shared/sidebar-sticker";
 
 import { useCallback, useMemo, useRef } from "react";
@@ -125,9 +127,10 @@ export function TenantDashboardSidebar({
 }: TenantDashboardSidebarProps) {
   const pathname = usePathname();
   const drawerRef = useRef<HTMLDivElement>(null);
+  const access = useWorkspaceAccess();
   const visibleLinks = useMemo(
-    () => getTenantSidebarLinks(hasActiveLease, hasVisitorAccess),
-    [hasActiveLease, hasVisitorAccess],
+    () => getTenantSidebarLinks(hasActiveLease, hasVisitorAccess).filter(item => !access || canDiscoverWorkspaceHref(access, item.href)),
+    [hasActiveLease, hasVisitorAccess, access],
   );
 
   const closeMobile = useCallback(() => {

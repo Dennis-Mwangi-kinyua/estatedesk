@@ -87,8 +87,9 @@ export function getIssueFilterLabel(filter: IssueStatusFilter) {
 export function buildIssueFilterWhere(
   orgId: string,
   filter: IssueStatusFilter,
+  scopeWhere?: Prisma.IssueTicketWhereInput,
 ): Prisma.IssueTicketWhereInput {
-  const base: Prisma.IssueTicketWhereInput = { orgId };
+  const base: Prisma.IssueTicketWhereInput = scopeWhere ? { AND: [{ orgId }, scopeWhere] } : { orgId };
 
   switch (filter) {
     case "new":

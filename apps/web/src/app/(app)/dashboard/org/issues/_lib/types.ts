@@ -33,6 +33,8 @@ export const orgMembershipArgs =
     select: {
       orgId: true,
       role: true,
+      scopeType: true,
+      scopeId: true,
       org: {
         select: {
           id: true,

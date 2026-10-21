@@ -1,3 +1,5 @@
+import { getUserSession } from "@/lib/auth/session";
+import { canReadVerifiedInvoice } from "@/lib/documents/invoice-access";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { generateInvoicePdf } from "@/lib/documents/invoice-pdf";
@@ -19,7 +21,13 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ code: string }> },
 ) {
+  const session = await getUserSession();
+  if (!session) return new Response("Sign in to download this document.", { status: 401, headers: { "Cache-Control": "private, no-store" } });
   const { code } = await params;
+  if (session.mustChangePassword || session.requiresTermsAcceptance) notFound();
+  const registered = await prisma.documentRecord.findUnique({ where: { verificationCode: code }, select: { orgId: true, entityId: true, entityType: true, documentType: true, metadata: true } });
+  if (!registered || registered.entityType !== "PeriodBill" || registered.documentType !== "INVOICE") notFound();
+  if (!await canReadVerifiedInvoice(session, registered)) notFound();
   const viewInline = new URL(request.url).searchParams.get("view") === "1";
 
   const context = await loadVerifiedPeriodInvoiceByCode(code);

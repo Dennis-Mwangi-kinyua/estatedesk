@@ -75,7 +75,7 @@ const PLANS: readonly Plan[] = APP_PLAN_ORDER.map((key) => {
     note: plan.badge,
     points: [
       formatPlanLimit(plan.propertiesLimit, "properties"),
-      formatPlanLimit(plan.unitsLimit, "units"),
+      formatPlanLimit(plan.unitsLimit, "units and BnB listings combined"),
     ],
     featured: key === "PRO",
   };

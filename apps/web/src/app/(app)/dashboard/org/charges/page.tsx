@@ -11,7 +11,7 @@ export default async function OrgChargesPage() {
     throw new Error("Missing active organization id in session");
   }
 
-  const data = await getChargesPageData(session.activeOrgId);
+  const data = await getChargesPageData(session.activeOrgId, session.membershipScope);
 
   return <ChargesWorkspace data={data} orgRole={session.activeOrgRole} />;
 }

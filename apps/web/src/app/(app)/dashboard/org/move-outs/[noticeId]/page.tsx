@@ -17,12 +17,13 @@ import { ArrearsReview } from "@/features/move-outs/components/arrears-review";
 import { MoveOutProgress } from "@/features/move-outs/components/progress";
 import { SettlementSummary } from "@/features/move-outs/components/settlement-summary";
 import { closeMoveOutAction } from "@/app/(app)/move-outs/_lib/actions";
+import { scopedUnitWhere } from "@/lib/permissions/record-scope";
 
 export const dynamic = "force-dynamic";
 export default async function HandoverPage({ params }: { params: Promise<{ noticeId: string }> }) {
   const session = await requireManagementAccess();
   const noticeId = decodePublicId((await params).noticeId, "move-out-notice");
-  const notice = await prisma.moveOutNotice.findFirst({ where: { id: noticeId, lease: { orgId: session.activeOrgId!, deletedAt: null } }, include: { tenant: true, inspection: { include: { inspector: { select: { fullName: true } } } }, lease: { include: { unit: { include: { property: true } } } } } });
+  const notice = await prisma.moveOutNotice.findFirst({ where: { id: noticeId, lease: { orgId: session.activeOrgId!, deletedAt: null, unit: scopedUnitWhere(session.activeOrgId!, session.membershipScope) } }, include: { tenant: true, inspection: { include: { inspector: { select: { fullName: true } } } }, lease: { include: { unit: { include: { property: true } } } } } });
   if (!notice) notFound();
   const org = await prisma.organization.findUniqueOrThrow({ where: { id: session.activeOrgId! }, select: { currencyCode: true } });
   const approval = await latestArrearsApproval(prisma, session.activeOrgId!, notice.id);

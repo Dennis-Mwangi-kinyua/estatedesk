@@ -1,11 +1,13 @@
 import { getPagination } from "@/lib/db/pagination";
 import { prisma } from "@/lib/prisma";
 import { INQUIRY_STATUSES, PAGE_SIZE, type InquiryStatus } from "./types";
+import { scopedUnitWhere, type RecordScope } from "@/lib/permissions/record-scope";
 
 export async function getVacancyInquiriesPageData(
   orgId: string,
   page = 1,
   statusFilter?: string,
+  scope?: RecordScope,
 ) {
   const status =
     statusFilter &&
@@ -15,6 +17,7 @@ export async function getVacancyInquiriesPageData(
 
   const inquiryWhere = {
     orgId,
+    unit: scopedUnitWhere(orgId, scope),
     ...(status ? { status } : {}),
   };
 

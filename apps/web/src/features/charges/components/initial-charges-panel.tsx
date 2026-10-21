@@ -1,3 +1,7 @@
+import { requireUserSession } from "@/lib/auth/session";
+import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
+import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
+import { scopedUnitWhere, scopedPaymentWhere } from "@/lib/permissions/record-scope";
 import Link from "next/link";
 import { BackfillChargesButton } from "./backfill-charges-button";
 import { prisma } from "@/lib/prisma";
@@ -6,7 +10,20 @@ import { ConfirmChargePaymentForm } from "./confirm-charge-payment-form";
 import { ReceiptText, WalletCards } from "@/components/shared/colored-icons";
 
 export async function InitialChargesPanel({ orgId, tenantId, canConfirm = false, canPay = false }: { orgId: string; tenantId: string; canConfirm?: boolean; canPay?: boolean }) {
-  const leases = await prisma.lease.findMany({ where: { orgId, tenantId, deletedAt: null, status: { in: ["ACTIVE", "TERMINATED"] } }, orderBy: { startDate: "desc" }, select: { id: true, startDate: true, monthlyRent: true, deposit: true, org: { select: { currencyCode: true } } } });
+  const session = await requireUserSession();
+  if (session.activeOrgId !== orgId) return null;
+  const isTenant = session.activeOrgRole === "TENANT";
+  if (isTenant) {
+    if (!canAccessWorkspacePath(session, "/dashboard/tenant/bills") || !await prisma.tenant.count({ where: { id: tenantId, orgId, userId: session.userId, deletedAt: null } })) return null;
+    canConfirm = false;
+  } else {
+    if (!canAccessWorkspacePath(session, "/dashboard/org/payments")) return null;
+    canPay = false;
+    canConfirm = canConfirm && session.membershipScope?.scopeType === "ORG" && memberHasOrgPermission(session, "payments.verify");
+  }
+  const unitScope = isTenant ? undefined : scopedUnitWhere(orgId, session.membershipScope);
+  const scope = isTenant ? undefined : session.membershipScope;
+  const leases = await prisma.lease.findMany({ where: { orgId, tenantId, ...(unitScope ? { unit: unitScope } : {}), deletedAt: null, status: { in: ["ACTIVE", "TERMINATED"] } }, orderBy: { startDate: "desc" }, select: { id: true, startDate: true, monthlyRent: true, deposit: true, org: { select: { currencyCode: true } } } });
   if (!leases.length) return null;
   const lease = leases[0];
   const charges = await prisma.rentCharge.findMany({
@@ -17,7 +34,7 @@ export async function InitialChargesPanel({ orgId, tenantId, canConfirm = false,
   const missing = leases.some(item => (["RENT", "DEPOSIT"] as const).some(type =>
     (type === "RENT" ? item.monthlyRent : item.deposit)?.gt(0) &&
     !charges.some(charge => charge.leaseId === item.id && charge.chargeType === type)));
-  const credit = await prisma.payment.aggregate({ where: { orgId, payerTenantId: tenantId, verificationStatus: "VERIFIED", gatewayStatus: "SUCCESS", reversedAt: null }, _sum: { unappliedAmount: true } });
+  const credit = await prisma.payment.aggregate({ where: { ...(scope ? scopedPaymentWhere(orgId, scope) : { orgId }), payerTenantId: tenantId, verificationStatus: "VERIFIED", gatewayStatus: "SUCCESS", reversedAt: null }, _sum: { unappliedAmount: true } });
   if (!charges.length && !canConfirm && !credit._sum.unappliedAmount?.gt(0)) return null;
   const money = (value: unknown) => new Intl.NumberFormat("en-KE", { style: "currency", currency: lease.org.currencyCode }).format(Number(value));
   return <section className="min-w-0 space-y-4 rounded-2xl border border-border bg-card p-4 sm:p-6" aria-label="First rent and deposit">

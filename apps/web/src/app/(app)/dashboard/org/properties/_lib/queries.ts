@@ -6,6 +6,7 @@ import { requireUserSession } from "@/lib/auth/session";
 import { PAGE_SIZE, PROPERTY_TYPES } from "./types";
 import { toPositiveInt } from "./helpers";
 import type { PropertiesSearchParams } from "./types";
+import { scopedPropertyWhere, scopedUnitWhere } from "@/lib/permissions/record-scope";
 
 export const getCurrentOrgContext = cache(async function getCurrentOrgContext() {
   const session = await requireUserSession();
@@ -28,6 +29,8 @@ export const getCurrentOrgContext = cache(async function getCurrentOrgContext() 
     select: {
       orgId: true,
       role: true,
+      scopeType: true,
+      scopeId: true,
       org: {
         select: {
           id: true,
@@ -62,6 +65,8 @@ export const getCurrentOrgContext = cache(async function getCurrentOrgContext() 
     select: {
       orgId: true,
       role: true,
+      scopeType: true,
+      scopeId: true,
       org: {
         select: {
           id: true,
@@ -101,8 +106,7 @@ export async function loadPropertiesPageData(
   const currentPage = toPositiveInt(params.page);
 
   const where: Prisma.PropertyWhereInput = {
-    orgId: membership.orgId,
-    deletedAt: null,
+    ...scopedPropertyWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }),
   };
 
   if (query) {
@@ -150,14 +154,12 @@ export async function loadPropertiesPageData(
   ] = await Promise.all([
     prisma.property.count({
       where: {
-        orgId: membership.orgId,
-        deletedAt: null,
+        ...scopedPropertyWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }),
       },
     }),
     prisma.property.count({
       where: {
-        orgId: membership.orgId,
-        deletedAt: null,
+        ...scopedPropertyWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }),
         isActive: true,
       },
     }),
@@ -165,18 +167,13 @@ export async function loadPropertiesPageData(
       where: {
         deletedAt: null,
         property: {
-          orgId: membership.orgId,
-          deletedAt: null,
+          ...scopedPropertyWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }),
         },
       },
     }),
     prisma.unit.count({
       where: {
-        deletedAt: null,
-        property: {
-          orgId: membership.orgId,
-          deletedAt: null,
-        },
+        ...scopedUnitWhere(membership.orgId, { scopeType: membership.scopeType, scopeId: membership.scopeId }),
       },
     }),
     prisma.property.count({ where }),

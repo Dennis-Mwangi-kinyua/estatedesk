@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { encodePublicId } from "@/lib/public-id";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { declineLease, signLease } from "@/lib/leases/signing";
@@ -16,7 +18,11 @@ export async function signLeaseAction(formData: FormData) {
   const signatureText = String(formData.get("signatureText") ?? "");
   const headerStore = await headers();
   const signature = await readElectronicSignature(formData);
-  await signLease({ token, userId: session.userId, signatureText, signatureMethod: signature.method, signatureImage: signature.bytes, consent: formData.get("consent") === "on", ...evidence(headerStore) });
+  const envelope = await signLease({ token, userId: session.userId, signatureText, signatureMethod: signature.method, signatureImage: signature.bytes, consent: formData.get("consent") === "on", ...evidence(headerStore) });
+  revalidatePath("/dashboard/tenant/lease");
+  revalidatePath("/dashboard/tenant/documents");
+  revalidatePath(`/dashboard/org/leases/${encodePublicId(envelope.leaseId, "lease")}`);
+  revalidatePath(`/dashboard/org/leases/${encodePublicId(envelope.leaseId, "lease")}/signing`);
   redirect(`/sign-lease/${encodeURIComponent(token)}?completed=1`);
 }
 

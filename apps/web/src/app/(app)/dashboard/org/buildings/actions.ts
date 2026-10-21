@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireManagementAccess } from "@/lib/permissions/guards";
+import { scopedBuildingWhere, scopedUnitWhere } from "@/lib/permissions/record-scope";
 
 export async function deleteBuildingAction(formData: FormData) {
   const buildingId = String(formData.get("buildingId") ?? "").trim();
@@ -15,14 +16,7 @@ export async function deleteBuildingAction(formData: FormData) {
   const session = await requireManagementAccess();
 
   const building = await prisma.building.findFirst({
-    where: {
-      id: buildingId,
-      deletedAt: null,
-      property: {
-        orgId: session.activeOrgId!,
-        deletedAt: null,
-      },
-    },
+    where: { AND: [scopedBuildingWhere(session.activeOrgId!, session.membershipScope), { id: buildingId }] },
     select: {
       id: true,
     },
@@ -38,14 +32,7 @@ export async function deleteBuildingAction(formData: FormData) {
       status: {
         in: ["ACTIVE", "PENDING"],
       },
-      unit: {
-        buildingId: building.id,
-        deletedAt: null,
-        property: {
-          orgId: session.activeOrgId!,
-          deletedAt: null,
-        },
-      },
+      unit: { AND: [scopedUnitWhere(session.activeOrgId!, session.membershipScope), { buildingId: building.id }] },
     },
   });
 
@@ -67,6 +54,7 @@ export async function deleteBuildingAction(formData: FormData) {
       where: {
         buildingId: building.id,
         deletedAt: null,
+        property: { orgId: session.activeOrgId!, deletedAt: null },
       },
       data: { deletedAt: now },
     });

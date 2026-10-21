@@ -29,7 +29,7 @@ export function AuditLogsWorkspace(props: AuditLogsWorkspaceProps) {
       <PageHeader
         eyebrow="Activity trail"
         title="Audit Logs"
-        description="Review recent platform and organization audit activity."
+        description="Expand an entry to inspect its page, request, actor, and before/after values, or download the full log."
       />
 
       <FiltersCard
