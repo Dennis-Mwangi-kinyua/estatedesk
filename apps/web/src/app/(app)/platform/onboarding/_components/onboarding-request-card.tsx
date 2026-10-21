@@ -5,15 +5,16 @@ import { useActionState, type ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import { Building2, CircleCheck as CheckCircle2, Mail, Phone, Trash2 } from "@/components/shared/colored-icons";
 import { deleteOnboardingRequestAction, quickUpdateOnboardingStatusAction, updateOnboardingRequestAction } from "../actions";
+import { isClosedOnboardingStatus, ONBOARDING_REQUEST_STATUSES } from "@/lib/platform/onboarding-status";
 
 export type OnboardingRequestCardData = {
   id: string; publicId: string; companyName: string; fullName: string; workEmail: string; phone: string | null;
   managedPropertyType: string; status: string; message: string | null; internalNotes: string | null;
   commissionRate?: string | null; createdAt: string; handledAt: string | null; handledBy: string | null; referral: string | null;
 };
-const statuses = ["NEW", "CONTACTED", "QUALIFIED", "CLOSED", "REJECTED"];
-const labels: Record<string, string> = { NEW: "New", CONTACTED: "Contacted", QUALIFIED: "Qualified", CLOSED: "Closed", REJECTED: "Rejected" };
-const nextSteps: Record<string, string> = { NEW: "Contact the applicant to understand their portfolio and requirements.", CONTACTED: "Confirm their requirements and qualify the request for setup.", QUALIFIED: "Create the organisation using the applicant’s details.", CLOSED: "This request is closed. Review the notes if further follow-up is needed.", REJECTED: "This request was rejected. Review the notes before reopening." };
+const statuses = ONBOARDING_REQUEST_STATUSES;
+const labels: Record<string, string> = { NEW: "New", CONTACTED: "Contacted", QUALIFIED: "Qualified", WON: "Won", DISQUALIFIED: "Disqualified", CLOSED: "Closed (legacy)", REJECTED: "Rejected (legacy)" };
+const nextSteps: Record<string, string> = { NEW: "Contact the applicant to understand their portfolio and requirements.", CONTACTED: "Confirm their requirements and qualify the request for setup.", QUALIFIED: "Create the organisation using the applicant’s details.", WON: "This applicant converted. Review notes and the created organisation.", DISQUALIFIED: "This request was disqualified. Review the notes before reopening.", CLOSED: "This request is closed. Review the notes if further follow-up is needed.", REJECTED: "This request was rejected. Review the notes before reopening." };
 const buttonClass = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold transition hover:bg-muted disabled:opacity-50";
 
 function ActionForm({ action, requestId, status, confirm, children, className = "", success = "Request updated." }: {
@@ -49,6 +50,7 @@ export function OnboardingRequestCard({ request }: { request: OnboardingRequestC
         {request.status === "NEW" && <ActionForm action={quickUpdateOnboardingStatusAction} requestId={request.id} status="CONTACTED"><button data-workspace-action="true" className={`${buttonClass} w-full border-primary/30 text-primary`}><CheckCircle2 className="h-4 w-4" />Mark contacted</button></ActionForm>}
         {request.status === "CONTACTED" && <ActionForm action={quickUpdateOnboardingStatusAction} requestId={request.id} status="QUALIFIED"><button data-workspace-action="true" className={`${buttonClass} w-full border-primary/30 text-primary`}><CheckCircle2 className="h-4 w-4" />Mark qualified</button></ActionForm>}
         {request.status === "QUALIFIED" && <Link data-workspace-action="true" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" href={`/platform/organizations/new?requestId=${encodeURIComponent(request.publicId)}`}><Building2 className="h-4 w-4" />Create organisation<ArrowRight className="h-4 w-4" /></Link>}
+        {!isClosedOnboardingStatus(request.status) && <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1"><ActionForm action={quickUpdateOnboardingStatusAction} requestId={request.id} status="WON"><button data-workspace-action="true" className={buttonClass}>Mark won</button></ActionForm><ActionForm action={quickUpdateOnboardingStatusAction} requestId={request.id} status="DISQUALIFIED"><button data-workspace-action="true" className={buttonClass}>Disqualify</button></ActionForm></div>}
       </div>
     </div>
     <details className="border-t border-border"><summary className="cursor-pointer px-4 py-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-primary sm:px-5">Manage status and team notes{request.internalNotes ? " · Notes saved" : ""}</summary><div className="grid gap-4 px-4 pb-4 sm:px-5 lg:grid-cols-[minmax(0,1fr)_auto]">

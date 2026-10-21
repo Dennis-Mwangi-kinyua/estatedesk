@@ -1,4 +1,5 @@
 import { platformActionCounts } from "@/lib/billing/action-queues";
+import { ONBOARDING_ALERT_STATUS } from "@/lib/platform/onboarding-status";
 import { prisma } from "@/lib/prisma";
 import { countOnlineUsers } from "@/lib/auth/presence";
 import { buildBars, addMonths, startOfMonth } from "./helpers";
@@ -41,6 +42,8 @@ export async function getPlatformDashboardData() {
     recentPayments,
     newOnboardingCount,
     recentOnboardingRequests,
+    pendingDataExportCount,
+    recentDataExportRequests,
     organizationSeries,
     revenueSeries,
     actionCounts,
@@ -205,16 +208,36 @@ export async function getPlatformDashboardData() {
     ),
 
     platformQuery("platform-new-onboarding-count", () =>
-      prisma.onboardingRequest.count({ where: { status: "NEW" } }),
+      prisma.onboardingRequest.count({ where: { status: ONBOARDING_ALERT_STATUS } }),
     ),
 
     platformQuery("platform-recent-onboarding", () =>
       prisma.onboardingRequest.findMany({
-        where: { status: "NEW" },
+        where: { status: ONBOARDING_ALERT_STATUS },
         orderBy: { createdAt: "desc" },
         take: 4,
         include: {
           marketer: { select: { fullName: true, referralCode: true } },
+        },
+      }),
+    ),
+
+    platformQuery("platform-pending-data-export-count", () =>
+      prisma.dataExportRequest.count({ where: { status: "PENDING" } }),
+    ),
+    platformQuery("platform-recent-data-exports", () =>
+      prisma.dataExportRequest.findMany({
+        where: { status: "PENDING" },
+        orderBy: { requestedAt: "desc" },
+        take: 3,
+        select: {
+          id: true,
+          reason: true,
+          deliveryMethod: true,
+          deliveryEmail: true,
+          requestedAt: true,
+          org: { select: { name: true, slug: true } },
+          requestedBy: { select: { fullName: true, email: true } },
         },
       }),
     ),
@@ -255,6 +278,8 @@ export async function getPlatformDashboardData() {
     recentPayments,
     newOnboardingCount,
     recentOnboardingRequests,
+    pendingDataExportCount,
+    recentDataExportRequests,
     organizationSeries,
     revenueSeries,
     organizationBars: buildBars(organizationSeries.map((item) => item.value)),

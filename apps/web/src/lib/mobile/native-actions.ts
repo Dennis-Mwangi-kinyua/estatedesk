@@ -21,6 +21,7 @@ import { nativeAccountingActionDefinition, nativeAccountingPageActions } from ".
 import { nativeBnbActionDefinition } from "./native-bnb-actions";
 import { nativeVacancyInquiryDefinition } from "./native-vacancy-inquiry-actions";
 import type { MobileWorkspaceKind } from "@estatedesk/contracts/mobile";
+import { ONBOARDING_REQUEST_STATUSES } from "@/lib/platform/onboarding-status";
 
 const text = (name: string, label: string, extra: Partial<NativeActionField> = {}): NativeActionField => ({ name, label, type: "text", ...extra });
 const options = (values: readonly string[]) => values.map(value => ({ value, label: value.replaceAll("_", " ") }));
@@ -176,7 +177,7 @@ export async function nativeActionDefinition(session: AppSession, kind: MobileWo
     if (!row) return null;
     const destructive = actionId === "onboarding.delete";
     return { id: actionId, title: destructive ? "Delete onboarding request" : "Update onboarding request", description: row.companyName, submitLabel: destructive ? "Delete request" : "Save request", destructive, confirmation: destructive ? `Permanently delete the onboarding request for ${row.companyName}?` : `Save the status and internal notes for ${row.companyName}?`, groups: destructive ? [] : [{ id: "request", title: "Status & follow-up", fields: [
-      text("status", "Status", { type: "select", required: true, defaultValue: row.status, options: options(["NEW", "CONTACTED", "QUALIFIED", "CLOSED", "REJECTED"]) }), text("internalNotes", "Internal notes", { type: "multiline", defaultValue: row.internalNotes ?? "" }),
+      text("status", "Status", { type: "select", required: true, defaultValue: row.status, options: options(ONBOARDING_REQUEST_STATUSES) }), text("internalNotes", "Internal notes", { type: "multiline", defaultValue: row.internalNotes ?? "" }),
     ] }] };
   }
   if (path === "/platform/messages") {

@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { isOnboardingAlertPending, ONBOARDING_REQUEST_STATUSES } from "@/lib/platform/onboarding-status";
 
 const PAGE_PATHS = ["/platform", "/platform/onboarding", "/platform/messages", "/platform/broadcasts"];
-const STATUSES = ["NEW", "CONTACTED", "QUALIFIED", "CLOSED", "REJECTED"] as const;
 
 function readString(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -24,7 +24,7 @@ export async function updateOnboardingRequestAction(formData: FormData) {
   const requestId = readString(formData, "requestId");
   const statusRaw = readString(formData, "status").toUpperCase();
   const internalNotes = readString(formData, "internalNotes");
-  const status = STATUSES.find((item) => item === statusRaw);
+  const status = ONBOARDING_REQUEST_STATUSES.find((item) => item === statusRaw);
 
   if (!requestId) {
     throw new Error("Missing onboarding request id.");
@@ -39,8 +39,8 @@ export async function updateOnboardingRequestAction(formData: FormData) {
     data: {
       status,
       internalNotes: internalNotes || null,
-      handledAt: status === "NEW" ? null : new Date(),
-      handledByUserId: status === "NEW" ? null : session.userId,
+      handledAt: isOnboardingAlertPending(status) ? null : new Date(),
+      handledByUserId: isOnboardingAlertPending(status) ? null : session.userId,
     },
   });
 
@@ -53,7 +53,7 @@ export async function quickUpdateOnboardingStatusAction(formData: FormData) {
   });
   const requestId = readString(formData, "requestId");
   const statusRaw = readString(formData, "status").toUpperCase();
-  const status = STATUSES.find((item) => item === statusRaw);
+  const status = ONBOARDING_REQUEST_STATUSES.find((item) => item === statusRaw);
 
   if (!requestId) {
     throw new Error("Missing onboarding request id.");
@@ -67,8 +67,8 @@ export async function quickUpdateOnboardingStatusAction(formData: FormData) {
     where: { id: requestId },
     data: {
       status,
-      handledAt: status === "NEW" ? null : new Date(),
-      handledByUserId: status === "NEW" ? null : session.userId,
+      handledAt: isOnboardingAlertPending(status) ? null : new Date(),
+      handledByUserId: isOnboardingAlertPending(status) ? null : session.userId,
     },
   });
 

@@ -229,7 +229,7 @@ export async function createOrganizationAction(
       () =>
         prisma.$transaction(async (tx) => {
           if (data.onboardingRequestId) {
-            const claimed = await tx.onboardingRequest.updateMany({ where: { id: data.onboardingRequestId, status: "QUALIFIED" }, data: { status: "CLOSED", handledAt: new Date(), handledByUserId: session.userId } });
+            const claimed = await tx.onboardingRequest.updateMany({ where: { id: data.onboardingRequestId, status: "QUALIFIED" }, data: { status: "WON", handledAt: new Date(), handledByUserId: session.userId } });
             if (claimed.count !== 1) throw new Error("ONBOARDING_REQUEST_UNAVAILABLE");
           }
           const org = await tx.organization.create({

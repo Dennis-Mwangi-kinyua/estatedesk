@@ -8,6 +8,7 @@ import { PlatformDashboardAlert } from "./platform-dashboard-alert";
 import { PlatformDashboardAside } from "./platform-dashboard-aside";
 import { PlatformDashboardMetrics } from "./platform-dashboard-metrics";
 import { PlatformDashboardRecent } from "./platform-dashboard-recent";
+import { PendingDataExportAlert } from "./pending-data-export-alert";
 
 export function PlatformDashboard({ data }: { data: PlatformDashboardData }) {
   const { newOnboardingCount, recentOnboardingRequests } = data;
@@ -34,6 +35,7 @@ export function PlatformDashboard({ data }: { data: PlatformDashboardData }) {
           newOnboardingCount={newOnboardingCount}
           recentOnboardingRequests={recentOnboardingRequests}
         />
+        <PendingDataExportAlert count={data.pendingDataExportCount} requests={data.recentDataExportRequests} />
 
         <PlatformActionAlerts counts={data.actionCounts ?? {overdue:0,upgrades:0,countersignatures:0}} />
         <PlatformDashboardMetrics data={data} />

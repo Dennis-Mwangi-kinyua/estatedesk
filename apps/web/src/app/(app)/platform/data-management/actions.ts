@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { writeAuditLog } from "@/lib/audit/security";
+import { sendApprovedDataExportEmail } from "@/lib/data-export/send-approved-data-export-email";
 
 const DATA_MANAGEMENT_PATH = "/platform/data-management";
 
@@ -47,8 +48,27 @@ export async function approveDataExportRequestAction(formData: FormData) {
       requestedByUserId: true,
       status: true,
       expiresAt: true,
+      deliveryMethod: true,
+      deliveryEmail: true,
+      org: { select: { name: true } },
     },
   });
+
+  let emailSentAt: Date | null = null;
+  let emailDeliveryError: string | null = null;
+  if (exportRequest.deliveryMethod === "EMAIL" && exportRequest.deliveryEmail) {
+    try {
+      await sendApprovedDataExportEmail({ orgId: exportRequest.orgId, orgName: exportRequest.org.name, to: exportRequest.deliveryEmail });
+      emailSentAt = new Date();
+    } catch (error) {
+      emailDeliveryError = error instanceof Error ? error.message.slice(0, 500) : "Email delivery failed.";
+      console.error("[data-export-delivery] Approved export email failed", { requestId: exportRequest.id });
+    }
+    await prisma.dataExportRequest.update({
+      where: { id: exportRequest.id },
+      data: { emailSentAt, emailDeliveryError },
+    });
+  }
 
   await writeAuditLog({
     orgId: exportRequest.orgId,
@@ -60,9 +80,43 @@ export async function approveDataExportRequestAction(formData: FormData) {
       requestedByUserId: exportRequest.requestedByUserId,
       expiresAt: exportRequest.expiresAt?.toISOString() ?? null,
       reviewerNotesProvided: Boolean(reviewerNotes),
+      deliveryMethod: exportRequest.deliveryMethod,
+      emailDeliverySucceeded: exportRequest.deliveryMethod !== "EMAIL" || emailSentAt !== null,
     },
   });
 
+  revalidatePath(DATA_MANAGEMENT_PATH);
+  revalidatePath("/dashboard/org/settings");
+}
+
+export async function retryDataExportEmailAction(formData: FormData) {
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], { redirectTo: "/dashboard" });
+  const requestId = readString(formData, "requestId");
+  if (!requestId) throw new Error("Missing export request id.");
+
+  const exportRequest = await prisma.dataExportRequest.findFirst({
+    where: { id: requestId, status: "APPROVED", deliveryMethod: "EMAIL", emailSentAt: null },
+    select: { id: true, orgId: true, deliveryEmail: true, org: { select: { name: true } } },
+  });
+  if (!exportRequest?.deliveryEmail) throw new Error("This approved request has no pending email delivery.");
+
+  try {
+    await sendApprovedDataExportEmail({ orgId: exportRequest.orgId, orgName: exportRequest.org.name, to: exportRequest.deliveryEmail });
+    await prisma.dataExportRequest.update({ where: { id: exportRequest.id }, data: { emailSentAt: new Date(), emailDeliveryError: null } });
+  } catch (error) {
+    const message = error instanceof Error ? error.message.slice(0, 500) : "Email delivery failed.";
+    await prisma.dataExportRequest.update({ where: { id: exportRequest.id }, data: { emailDeliveryError: message } });
+    throw new Error("Email delivery failed. The approved archive is still available to download.");
+  }
+
+  await writeAuditLog({
+    orgId: exportRequest.orgId,
+    actorUserId: session.userId,
+    action: "DATA_EXPORT_EMAIL_RETRIED",
+    entityType: "DataExportRequest",
+    entityId: exportRequest.id,
+    metadata: { deliveryMethod: "EMAIL" },
+  });
   revalidatePath(DATA_MANAGEMENT_PATH);
   revalidatePath("/dashboard/org/settings");
 }

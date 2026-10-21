@@ -12,6 +12,8 @@ import { requireOrgPermission } from "@/lib/permissions/guards";
 import { requireUserSession } from "@/lib/auth/session";
 import { createInvitation } from "@/lib/invitations/create-invitation";
 import { writeAuditLog } from "@/lib/audit/security";
+import { emailPlatformAdminsAboutDataExport } from "@/lib/platform/data-export-alert";
+import { isDataExportDeliveryMethod, validateDataExportDelivery, validateDataExportReason } from "@/lib/platform/data-export-policy";
 import {
   emptyBankAccountDetails,
   type OrgBankAccountDetails,
@@ -566,6 +568,14 @@ export async function requestDataExportAction(formData: FormData) {
   const { orgId } = await ensureSettingsWriteAccess();
   const session = await requireUserSession();
   const reason = readOptionalString(formData, "reason");
+  const deliveryMethod = readString(formData, "deliveryMethod").toUpperCase();
+  const deliveryEmail = readOptionalString(formData, "deliveryEmail");
+
+  const reasonError = validateDataExportReason(reason);
+  if (!reason || reasonError) throw new Error(reasonError ?? "A detailed request reason is required.");
+  const deliveryError = validateDataExportDelivery(deliveryMethod, deliveryEmail);
+  if (deliveryError) throw new Error(deliveryError);
+  if (!isDataExportDeliveryMethod(deliveryMethod)) throw new Error("Invalid export delivery method.");
 
   const existingPendingRequest = await prisma.dataExportRequest.findFirst({
     where: {
@@ -586,9 +596,26 @@ export async function requestDataExportAction(formData: FormData) {
       orgId,
       requestedByUserId: session.userId,
       reason,
+      deliveryMethod,
+      deliveryEmail: deliveryMethod === "EMAIL" ? deliveryEmail : null,
       status: "PENDING",
     },
   });
+
+  let adminEmailDelivery = { recipientCount: 0, deliveredCount: 0, failedCount: 0 };
+  try {
+    adminEmailDelivery = await emailPlatformAdminsAboutDataExport({
+      organizationName: (await prisma.organization.findUnique({ where: { id: orgId }, select: { name: true } }))?.name ?? "Organization",
+      requesterName: session.fullName,
+      requesterEmail: session.email,
+      reason,
+      deliveryMethod,
+      deliveryEmail,
+      requestedAt: exportRequest.requestedAt,
+    });
+  } catch (error) {
+    console.error("[data-export-alert] Could not notify platform admins", error);
+  }
 
   await writeAuditLog({
     orgId,
@@ -598,6 +625,11 @@ export async function requestDataExportAction(formData: FormData) {
     entityId: exportRequest.id,
     metadata: {
       reasonProvided: Boolean(reason),
+      adminEmailRecipients: adminEmailDelivery.recipientCount,
+      adminEmailDelivered: adminEmailDelivery.deliveredCount,
+      adminEmailFailed: adminEmailDelivery.failedCount,
+      deliveryMethod,
+      deliveryEmailProvided: Boolean(deliveryMethod === "EMAIL" && deliveryEmail),
     },
   });
 

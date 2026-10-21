@@ -396,6 +396,10 @@ model DataExportRequest {
   reviewedByUserId  String?
   status            DataExportRequestStatus @default(PENDING)
   reason            String?
+  deliveryMethod    String                  @default("DOWNLOAD")
+  deliveryEmail     String?
+  emailSentAt       DateTime?
+  emailDeliveryError String?
   reviewerNotes     String?
   requestedAt       DateTime                @default(now())
   reviewedAt        DateTime?

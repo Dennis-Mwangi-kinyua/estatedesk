@@ -20,14 +20,29 @@ export function DataExportSection({ data }: { data: SettingsPageData }) {
     >
       <form action={requestDataExportAction} className="space-y-3">
         <label className={labelClassName}>
-          Request reason
+          Approved export delivery
+          <select name="deliveryMethod" defaultValue="DOWNLOAD" className={fieldClassName}>
+            <option value="DOWNLOAD">Download securely in EstateDesk</option>
+            <option value="EMAIL">Email the ZIP archive after approval</option>
+          </select>
+        </label>
+        <label className={labelClassName}>
+          Delivery email <span className="font-normal text-muted-foreground">(required for email delivery)</span>
+          <input name="deliveryEmail" type="email" maxLength={254} autoComplete="email" placeholder="name@example.com" className={fieldClassName} />
+        </label>
+        <label className={labelClassName}>
+          Detailed request reason
           <textarea
             name="reason"
             rows={3}
-            placeholder="Audit, migration, compliance review..."
+            required
+            minLength={50}
+            maxLength={1200}
+            placeholder="Explain which records you need, why you need them, and how the export will be used. Please provide at least 50 characters."
             className={`${fieldClassName} resize-none`}
           />
         </label>
+        <p className="text-xs leading-5 text-muted-foreground">Include the business purpose, requested data, and any relevant migration or compliance deadline.</p>
 
         <button data-workspace-action="true" type="submit" className={`w-full gap-2 ${buttonPrimaryClassName}`}>
           <FileArchive className="h-4 w-4" />
@@ -76,6 +91,12 @@ export function DataExportSection({ data }: { data: SettingsPageData }) {
                     {request.reason}
                   </p>
                 ) : null}
+
+                <p className="mt-2 text-xs text-slate-500">
+                  Delivery: {request.deliveryMethod === "EMAIL" ? `Email to ${request.deliveryEmail || "address not set"}` : "Secure download"}
+                  {request.emailSentAt ? " · Email sent" : ""}
+                  {request.emailDeliveryError ? " · Email delivery needs a retry; download remains available" : ""}
+                </p>
 
                 {request.reviewerNotes ? (
                   <p className="mt-2 text-xs leading-5 text-slate-500">
