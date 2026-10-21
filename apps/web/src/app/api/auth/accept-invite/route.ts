@@ -267,7 +267,6 @@ export async function POST(request: Request) {
     await sendAccountCredentials({
       fullName: result.user.fullName,
       username: result.user.email ?? invitation.email,
-      password: temporaryPassword,
       email: result.user.email ?? invitation.email,
       role: invitation.role,
       loginUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/login`,

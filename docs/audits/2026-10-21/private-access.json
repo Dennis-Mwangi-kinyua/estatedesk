@@ -1,0 +1,330 @@
+{
+  "checkedAt": "2026-10-21T19:00:53.213Z",
+  "base": "http://127.0.0.1:3107",
+  "scope": "Anonymous and invalid-signature sessions only. Does not establish role or organization isolation; use authenticated and integration tests too.",
+  "results": [
+    {
+      "identity": "anonymous",
+      "path": "/dashboard/org",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/dashboard/tenant",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/dashboard/landlord",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/dashboard/caretaker/today",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/dashboard/gate",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/platform",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/provider",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/profile",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/print/owner-statements",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/print/issues/example",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/print/inspections/example",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/health?deep=1",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/mobile/session",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/mobile/workspace",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/mobile/tenant/documents",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/org/reports/export?type=rent-roll",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/org/reports/reconciliation",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/org/subscription-invoices/example",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/platform/data-exports/example/download",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/platform/subscription-invoices/example",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/data-exports/example/download",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/payments/example/proof",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/receipts/example",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/service-agreements/example",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/move-outs/example/report",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "anonymous",
+      "path": "/api/move-outs/example/refund-proof",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/dashboard/org",
+      "status": 200,
+      "streamedRedirect": "/login",
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/dashboard/tenant",
+      "status": 200,
+      "streamedRedirect": "/login",
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/dashboard/landlord",
+      "status": 200,
+      "streamedRedirect": "/login",
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/dashboard/caretaker/today",
+      "status": 200,
+      "streamedRedirect": "/login",
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/dashboard/gate",
+      "status": 200,
+      "streamedRedirect": "/login",
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/platform",
+      "status": 200,
+      "streamedRedirect": "/login",
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/provider",
+      "status": 200,
+      "streamedRedirect": "/login",
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/profile",
+      "status": 200,
+      "streamedRedirect": "/login",
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/print/owner-statements",
+      "status": 200,
+      "streamedRedirect": "/login",
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/print/issues/example",
+      "status": 200,
+      "streamedRedirect": "/login",
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/print/inspections/example",
+      "status": 200,
+      "streamedRedirect": "/login",
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/health?deep=1",
+      "status": 401,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/mobile/session",
+      "status": 403,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/mobile/workspace",
+      "status": 403,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/mobile/tenant/documents",
+      "status": 403,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/org/reports/export?type=rent-roll",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/org/reports/reconciliation",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/org/subscription-invoices/example",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/platform/data-exports/example/download",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/platform/subscription-invoices/example",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/data-exports/example/download",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/payments/example/proof",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/receipts/example",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/service-agreements/example",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/move-outs/example/report",
+      "status": 307,
+      "errors": []
+    },
+    {
+      "identity": "forged",
+      "path": "/api/move-outs/example/refund-proof",
+      "status": 307,
+      "errors": []
+    }
+  ]
+}

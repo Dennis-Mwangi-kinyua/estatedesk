@@ -3,11 +3,12 @@ import { test } from "node:test";
 import { accountHandoverText, accountShareUrl } from "../../apps/web/src/app/(app)/platform/organizations/new/_lib/account-handover";
 import { validateAccountStep } from "../../apps/web/src/app/(app)/platform/organizations/new/_lib/form-validation";
 
-const account = { organizationName: "Example & Partners", slug: "example", accountType: "LANDLORD", fullName: "Jane", username: "jane", email: "jane@example.test", phone: null, plan: "FREE" };
-test("handover omits a password unless explicitly included", () => {
+const account = { organizationName: "Example & Partners", slug: "example", accountType: "LANDLORD", fullName: "Jane", username: "jane", email: "jane@example.test", phone: null, plan: "FREE", setupUrl: "https://example.test/reset-password?token=setup-token" };
+test("handover shares an expiring setup link without a password", () => {
   const text = accountHandoverText(account, "https://example.test/login");
   assert.ok(!text.includes("Temporary password:"));
-  assert.ok(accountHandoverText(account, "https://example.test/login", "secret123").includes("Temporary password: secret123"));
+  assert.ok(text.includes(account.setupUrl));
+  assert.ok(text.includes("expires in one hour"));
 });
 test("sharing drafts encode message content and normalize phone numbers", () => {
   const text = "Hello & welcome\nEmail: jane@example.test";

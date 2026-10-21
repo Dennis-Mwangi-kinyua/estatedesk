@@ -56,9 +56,8 @@ export function PaymentsPendingSection({
         <div className="grid min-w-0 gap-4 p-4 sm:p-6 xl:grid-cols-2">
           {pendingPayments.map(payment => {
             const raw = payment.callbackRaw;
-            const proofUrl = raw && typeof raw === "object" && !Array.isArray(raw)
-              && typeof raw.proofImageUrl === "string" && (raw.proofImageUrl.startsWith("https://imagedelivery.net/") || raw.proofImageUrl.startsWith("/uploads/payment-proof/"))
-              ? raw.proofImageUrl : null;
+            const proofUrl = raw && typeof raw === "object" && !Array.isArray(raw) && typeof raw.proofAssetId === "string"
+              ? `/api/payments/${payment.id}/proof` : null;
             const message = getTransactionMessage(raw);
             const payer = payment.payerTenant?.fullName ?? payment.payerUser?.fullName ?? payment.payerName ?? payment.payerType;
             return <article key={payment.id} aria-label={`Review payment from ${payer}`} className="min-w-0 space-y-5 rounded-2xl border border-border bg-background p-4 sm:p-5">

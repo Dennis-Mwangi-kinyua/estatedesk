@@ -47,12 +47,12 @@ export const landingDepthByPath: Record<string, ContentDepthSections> = {
       sharedWorkflowScenarios[5],
       {
         title: "Agency reporting to an overseas owner",
-        body: "A UAE agency records tenant, maintenance, and rent activity online so the owner abroad can review progress without waiting for informal summaries.",
+        body: "A Kenyan agency records tenant, maintenance and rent activity so a Dubai-based owner can review the shared records.",
       },
       sharedWorkflowScenarios[2],
       {
         title: "Multi-region portfolio visibility",
-        body: "A team managing rentals in Dubai and East Africa uses one operational model for tenants, leases, issues, vacancies, and reports across regions.",
+        body: "A team evaluating properties across countries checks currency, payment and reporting requirements separately before piloting a shared operating process.",
       },
     ],
     problems: [
@@ -76,7 +76,7 @@ export const landingDepthByPath: Record<string, ContentDepthSections> = {
       sharedTopicGuides[4],
     ],
     editorial: [
-      "Dubai and UAE property pages need to speak to remote visibility, agency-managed portfolios, and international owners who still need trustworthy records. EstateDesk explains how web-based rental operations help those teams review tenants, maintenance, vacancies, and reports from anywhere.",
+      "A Dubai-based owner of Kenyan rentals needs a dependable relationship with the local team: reconciled rent records, documented property work and a regular statement review. For properties operating in the UAE itself, confirm local requirements separately before rollout.",
       sharedEditorialDepth[2],
     ],
   },

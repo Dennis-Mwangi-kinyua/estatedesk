@@ -22,6 +22,7 @@ function isOrgExportRole(role: string | null) {
 
 export async function GET(_request: Request, context: RouteContext) {
   const session = await requireUserSession();
+  if (!session.activeOrgId || session.mustChangePassword || session.requiresTermsAcceptance || session.membershipScope?.scopeType !== "ORG" || !isOrgExportRole(session.activeOrgRole)) return NextResponse.json({ error: "Organization-wide export access is required." }, { status: 403 });
   const { requestId: publicRequestId } = await context.params;
   const requestId = decodePublicId(publicRequestId, "data-export");
 

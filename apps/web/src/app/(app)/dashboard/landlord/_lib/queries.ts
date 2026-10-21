@@ -18,10 +18,16 @@ async function fetchLandlordProfile(orgId: string, userId: string) {
     select: {
       id: true,
       displayName: true,
+      org: { select: { currencyCode: true } },
       assignments: {
         where: {
+          orgId,
           active: true,
           endedAt: null,
+          OR: [
+            { property: { orgId, deletedAt: null, isActive: true } },
+            { unit: { deletedAt: null, isActive: true, property: { orgId, deletedAt: null, isActive: true } } },
+          ],
         },
         select: {
           property: {

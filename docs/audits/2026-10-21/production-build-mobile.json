@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-21T19:01:16.384Z",
+  "base": "http://127.0.0.1:3107",
+  "method": "Single cold browser sample per route; mobile viewport; 4x CPU slowdown; 150ms latency; 1.6Mbps download. Three-second observation after DOM readiness. CLS is a page-load sample, not session-window field CLS; INP is not measured. Results depend on runner geography.",
+  "results": [
+    {
+      "path": "/",
+      "status": 200,
+      "lcpMs": 1332,
+      "cls": 0,
+      "ttfbMs": 18.5,
+      "domContentLoadedMs": 834.7999999523163,
+      "transferredBytes": 353418,
+      "horizontalOverflow": false
+    },
+    {
+      "path": "/login",
+      "status": 200,
+      "lcpMs": 884,
+      "cls": 0,
+      "ttfbMs": 8.899999976158142,
+      "domContentLoadedMs": 872.3999999761581,
+      "transferredBytes": 391232,
+      "horizontalOverflow": false
+    },
+    {
+      "path": "/services",
+      "status": 200,
+      "lcpMs": 956,
+      "cls": 0,
+      "ttfbMs": 7.800000071525574,
+      "domContentLoadedMs": 951.3000000715256,
+      "transferredBytes": 351513,
+      "horizontalOverflow": false
+    }
+  ]
+}

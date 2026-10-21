@@ -32,6 +32,8 @@ export function GuideArticlePage({ guide }: { guide: GuideArticle }) {
         "@type": "Article",
         "@id": `${absoluteUrl(path)}#article`,
         headline: guide.title,
+        image: absoluteUrl("/opengraph-image"),
+        inLanguage: "en-KE",
         description: guide.summary,
         datePublished: guide.publishedAt,
         dateModified: guide.publishedAt,

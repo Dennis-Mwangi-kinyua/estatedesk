@@ -4,7 +4,7 @@ export const SITE_NAME = "EstateDesk";
 export const SITE_TAGLINE =
   "Kenya-built property management software for rent, water, M-Pesa, KRA eTIMS-ready receipts, caretakers, and vacant houses.";
 export const SITE_DESCRIPTION =
-  "Manage rentals, rent, water bills, accounting, visitor QR passes, community notices and BnB stays. Find and hire local service providers, verify unique IDs and retain tenant history with EstateDesk.";
+  "Property management software in Kenya for landlords and agents. Track rent, M-Pesa payments, tenants, water bills and accounting with EstateDesk.";
 export const DEFAULT_SITE_URL = "https://estatedesk.co.ke";
 
 /** Product differentiators for SEO landings and structured data. */
@@ -94,7 +94,17 @@ export function getSiteUrl() {
     process.env.APP_URL ||
     DEFAULT_SITE_URL;
 
-  return raw.replace(/\/$/, "").replace("https://www.estatedesk.co.ke", DEFAULT_SITE_URL);
+  try {
+    const url = new URL(raw.trim());
+    if (!["https:", "http:"].includes(url.protocol)) return DEFAULT_SITE_URL;
+    if (["estatedesk.co.ke", "www.estatedesk.co.ke"].includes(url.hostname)) {
+      return DEFAULT_SITE_URL;
+    }
+    // Site configuration is an origin; paths and queries must not leak into canonicals.
+    return url.origin;
+  } catch {
+    return DEFAULT_SITE_URL;
+  }
 }
 
 export function absoluteUrl(path = "/") {
@@ -126,7 +136,7 @@ export function publicPageMetadata({
     creator: SITE_NAME,
     category: "Property management software",
     description,
-    keywords: [...SEO_KEYWORDS, ...keywords],
+    keywords: [...new Set([...SEO_KEYWORDS, ...keywords])],
     alternates: {
       canonical: url,
       languages: {

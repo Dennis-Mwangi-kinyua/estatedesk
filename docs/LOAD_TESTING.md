@@ -8,6 +8,16 @@ This guide is for proving authenticated capacity before promising traffic target
 
 Treat public cached traffic and logged-in application traffic separately. Passing a public-page CDN test does not prove dashboard capacity.
 
+## Safety and interpretation
+
+The harness only accepts GET/HEAD routes on the configured origin. Requests have a 15-second timeout, adjustable with `LOAD_REQUEST_TIMEOUT_MS`. Redirects are not followed. Use `LOAD_OUTPUT=/tmp/load-report.json` to save a report without session cookies.
+
+Report p95/p99 latency together with achieved RPM, errors and `schedulingDelay`. A growing scheduling delay means workers cannot sustain the offered arrival rate; it is not proof of capacity even if individual request latency looks acceptable. Concurrency is in-flight requests, not a count of logged-in people.
+
+Run against disposable local or dedicated staging environments first. Public CDN results do not establish authenticated database capacity. Increase traffic in steps and stop on unexpected errors, pool exhaustion or sustained latency above the agreed target.
+
+Budget database connections across instances: maximum active instances × per-instance pool size, plus workers and administrative reserve, must fit the provider's connection budget. Raising `PRISMA_POOL_MAX` blindly can exhaust the database when the application scales out.
+
 ## Setup
 
 Start with a production-like environment:
@@ -18,7 +28,7 @@ Start with a production-like environment:
 - logging and metrics enabled
 - a test account in the role being exercised
 
-Log in with the test account in a browser and copy the `estatedesk_session` cookie value.
+Log in with a test account and use `LOAD_COOKIE_HEADER` with its exact cookie name and value. Production uses `__Host-estatedesk_session`; development uses `estatedesk_session`. Keep session cookies out of reports and version control.
 
 Run a smoke test for an organization admin:
 
@@ -157,3 +167,13 @@ During every run, watch:
 - 5xx responses
 
 If Postgres is the bottleneck, prioritize connection pooling, Redis/edge rate limiting, and short-lived caching for dashboard counts before scaling app instances.
+
+## Repeat the local security and capacity review
+
+Apply migrations to an explicitly disposable local `TEST_DATABASE_URL`, seed with `scripts/qa/seed-role-workspaces.ts`, and start a production build configured to use that same database. Set `ROLE_WORKSPACE_FIXTURE` to the resulting private fixture file.
+
+Run `tests/e2e/authenticated-workspaces.spec.ts` against the local server first; it stores fictional session state in mode-0600 files under `/tmp`. Then run `node scripts/qa/run-capacity-smoke.mjs`. It refuses non-local targets and checks warmed public, admin and tenant routes, including an admin ramp only when earlier profiles pass. The report contains no credentials.
+
+Run `AUDIT_BASE_URL=http://127.0.0.1:3107 npm run audit:private` for anonymous and forged-cookie denial checks. A Next.js loading shell can return HTTP 200 followed by an explicit login/denial meta redirect; the audit recognizes only those precise framework redirects. API denials and private cache/crawl headers are checked separately. Role and organization boundaries still require the browser and database integration suites.
+
+These short, small-dataset samples establish reproducibility, not a production user-count limit. A release capacity decision needs representative staging data, realistic mixed reads/writes and think times, sustained peak testing, and pool/CPU/memory monitoring. Follow the production provider's database and instance limits; preserve backup/restore evidence before migration.

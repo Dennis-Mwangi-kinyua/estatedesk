@@ -97,7 +97,7 @@ function semanticLabel(label: string) {
     "identity-verification": "identity verification", "service-providers": "service providers", history: "tenancy history",
     community: "community", visitors: "visitors", gate: "gate access",
     tenant: "home", org: "home", platform: "home", caretaker: "home", landlord: "home",
-    dashboard: "home", organizations: "organizations", properties: "properties", buildings: "buildings",
+    dashboard: "home", organizations: "organizations", properties: "properties", landlords: "landlord owner", buildings: "buildings",
     units: "units", tenants: "tenants", staff: "staff", users: "users", admins: "admins",
     payments: "payments", accounting: "accounting", requests: "requests", invoices: "invoices",
     expenditures: "expenditures", finance: "finance", payouts: "payouts", taxes: "taxes",

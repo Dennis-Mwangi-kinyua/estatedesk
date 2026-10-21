@@ -28,3 +28,16 @@ test("detailed health and private APIs do not disclose data to anonymous visitor
     expect(response.headers()["cache-control"]).toContain("no-store");
   }
 });
+
+
+test("forged signed-cookie shapes reach login without exposing a protected workspace", async ({ page, context }) => {
+  const value = `v1.${"a".repeat(64)}.${"b".repeat(32)}`;
+  // Raw headers exercise forged signatures even on HTTP localhost, where
+  // Chromium refuses creating a Secure __Host- cookie through addCookies.
+  await context.setExtraHTTPHeaders({ cookie: `__Host-estatedesk_session=${value}; estatedesk_session=${value}` });
+  for (const path of ["/dashboard/org", "/platform", "/provider", "/print/owner-statements"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/login(?:\?|$)/);
+    await expect(page.getByLabel("Email or username")).toBeVisible();
+  }
+});

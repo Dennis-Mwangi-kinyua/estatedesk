@@ -1,4 +1,5 @@
 "use server";
+import { createAccountSetupUrl } from "@/lib/auth/account-setup";
 
 import crypto from "node:crypto";
 import { sendVerificationEmail } from "@/lib/notifications/email";
@@ -81,7 +82,7 @@ const createOrganizationSchema = z
 
 export type CreateOrganizationState = {
   success: boolean;
-  createdAccount?: { organizationName: string; slug: string; accountType: string; fullName: string; username: string; email: string; phone: string | null; plan: string; verificationSent?: boolean };
+  createdAccount?: { organizationName: string; slug: string; accountType: string; fullName: string; username: string; email: string; phone: string | null; plan: string; verificationSent?: boolean; setupUrl?: string };
   error?: string;
   fieldErrors?: Record<string, string[] | undefined>;
 };
@@ -224,6 +225,7 @@ export async function createOrganizationAction(
 
     const passwordHash = await bcrypt.hash(data.adminPassword, 12);
 
+    let setupUrl = "";
     const token = crypto.randomBytes(32).toString("hex");
     await retryTransientDatabaseOperation(
       () =>
@@ -262,6 +264,7 @@ export async function createOrganizationAction(
             },
           });
 
+          setupUrl = await createAccountSetupUrl(tx, adminUser.id, adminEmail);
           await tx.membership.create({
             data: {
               orgId: org.id,
@@ -334,7 +337,7 @@ export async function createOrganizationAction(
     revalidatePath("/platform/onboarding");
     return {
       success: true,
-      createdAccount: { organizationName: data.organizationName, slug, accountType: data.accountType, fullName: data.adminFullName, username: data.adminUsername, email: adminEmail, phone: adminPhone, plan: data.plan, verificationSent },
+      createdAccount: { organizationName: data.organizationName, slug, accountType: data.accountType, fullName: data.adminFullName, username: data.adminUsername, email: adminEmail, phone: adminPhone, plan: data.plan, verificationSent, setupUrl },
     };
   } catch (error) {
     if (isRedirectError(error)) {

@@ -1,7 +1,7 @@
 import { safeApiErrorResponse } from "@/lib/errors/server-error-log";
 import { csvResponse } from "@/lib/csv";
 import { DataExportTooLargeError } from "@/lib/data-export/limits";
-import { requireManagementAccess } from "@/lib/permissions/guards";
+import { requireOrgPermission } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import {
   buildOrgReportCsv,
@@ -21,7 +21,8 @@ function isExportKind(value: string | null): value is OrgReportExportKind {
 }
 
 export async function GET(request: Request) {
-  const session = await requireManagementAccess();
+  const session = await requireOrgPermission("reports.export");
+  if (session.membershipScope?.scopeType !== "ORG") return Response.json({ error: "Organization-wide export access is required." }, { status: 403 });
   const url = new URL(request.url);
   const kind = url.searchParams.get("type");
   const period = url.searchParams.get("period") ?? undefined;

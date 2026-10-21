@@ -15,6 +15,7 @@ export const ORG_WORKSPACE_ROLES: Record<string, readonly OrgRole[]> = {
   community: OPERATIONS,
   insights: MANAGEMENT, profile: MANAGEMENT, help: MANAGEMENT, search: MANAGEMENT,
   security: MANAGEMENT, support: MANAGEMENT,
+  landlords: ["ADMIN", "MANAGER"],
   properties: OPERATIONS, buildings: OPERATIONS, units: OPERATIONS,
   tenants: OPERATIONS, leases: OPERATIONS, "vacancy-inquiries": OPERATIONS,
   "finance-requests": OPERATIONS, "move-outs": MANAGEMENT,
@@ -57,7 +58,7 @@ export function canAccessWorkspacePath(
     const organizationWideSections = new Set([
       "accounting", "agreements", "community", "finance-requests", "help",
       "identity-verification", "imports", "insights", "reports", "service-providers",
-      "staff", "support", "taxes",
+      "staff", "support", "taxes", "landlords",
     ]);
     if (organizationWideSections.has(section)) return false;
     if (section === "airbnb" && path.endsWith("/new")) return false;

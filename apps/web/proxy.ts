@@ -17,6 +17,7 @@ const PROTECTED_PREFIXES = [
   "/change-password",
   "/dashboard",
   "/profile",
+  "/print",
   "/platform",
   "/staff",
   "/properties",
@@ -171,6 +172,7 @@ function isProtectedPath(pathname: string) {
 function shouldNoIndex(pathname: string) {
   return (
     isProtectedPath(pathname) ||
+    /^\/(forgot-password|reset-password|verify-email|accept-invite)(\/|$)/.test(pathname) ||
     pathname.startsWith("/guest-stay") ||
     pathname.startsWith("/change-password") ||
     pathname.startsWith("/access-denied") ||
@@ -221,6 +223,7 @@ function isBrowserApiNavigation(req: NextRequest) {
   if (/^\/api\/move-outs\/[^/]+\/(report|refund-proof)\/?$/.test(req.nextUrl.pathname)) return false;
 
   if (/^\/api\/service-agreements\/[^/]+\/?$/.test(req.nextUrl.pathname)) return false;
+  if (/^\/api\/payments\/[^/]+\/proof\/?$/.test(req.nextUrl.pathname)) return false;
   if (/^\/api\/receipts\/[^/]+\/?$/.test(req.nextUrl.pathname)) return false;
   if (/^\/api\/org\/subscription-invoices\/[^/]+\/?$/.test(req.nextUrl.pathname)) return false;
 

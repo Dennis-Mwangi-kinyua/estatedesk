@@ -35,6 +35,7 @@ export type StrongestProperty = {
 } | undefined;
 
 export type LandlordDashboardData = {
+  currencyCode?: string;
   displayName: string;
   currentPeriod: string;
   properties: LandlordProperty[];

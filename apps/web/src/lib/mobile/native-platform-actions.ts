@@ -169,7 +169,7 @@ export async function executeNativePlatformAction(session: AppSession, path: str
     const result = await createOrganizationAction({ success: false }, form);
     if (!result.success) throw new Error([result.error, ...Object.values(result.fieldErrors ?? {}).flat()].filter(Boolean).join("\n") || "Check the organization fields.");
     const account = result.createdAccount;
-    return { ok: true, message: `Organization created.${account?.verificationSent ? " Verification email sent." : ""}`, ...(account ? { credentials: { fullName: account.fullName, username: account.username, password: String(form.get("adminPassword")), email: account.email, phone: account.phone, loginUrl: accountLoginUrl() } } : {}) };
+    return { ok: true, message: `Organization created.${account?.verificationSent ? " Verification email sent." : ""}`, ...(account ? { credentials: { fullName: account.fullName, username: account.username, setupUrl: account.setupUrl!, email: account.email, phone: account.phone, loginUrl: accountLoginUrl() } } : {}) };
   }
   if (id.startsWith("organization.") && record.slug) { form.set("orgId", record.id!); form.set("expectedSlug", record.slug); }
   if (id === "export.organization") {

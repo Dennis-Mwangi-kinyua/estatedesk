@@ -11,6 +11,7 @@ export type PublicSiteIndexItem = {
 };
 
 export const publicSiteIndexItems: readonly PublicSiteIndexItem[] = [
+  { title: "Middle East property teams", path: "/property-management-software-middle-east", description: "Evaluate rental operations and remote oversight for Middle East owners and teams.", priority: "0.8", changefreq: "monthly", lastmod: "2026-10-21" },
   { title: "Data Processing Agreement", path: "/data-processing-agreement", description: "Unsigned organization-specific DPA template for Afrisilicon Technology Limited, trading as EstateDesk.", priority: "0.5", changefreq: "monthly" },
   { path: "/service-providers", title: "Service providers", description: "Find plumbers, electricians and maintenance professionals by location, compare portfolios and hire for property jobs.", priority: "0.8", changefreq: "daily" },
   { title: "Property teams in Africa", path: "/property-management-software-africa", description: "Evaluate EstateDesk for African property teams, including connectivity and market-specific requirements.", priority: "0.8", changefreq: "monthly" },
@@ -140,30 +141,6 @@ export const publicSiteIndexItems: readonly PublicSiteIndexItem[] = [
     description:
       "Create an EstateDesk account or request workspace access for property management, billing, maintenance, and team onboarding.",
     priority: "0.7",
-    changefreq: "monthly",
-  },
-  {
-    title: "Forgot Password",
-    path: "/forgot-password",
-    description:
-      "Request a secure password reset link for your EstateDesk account.",
-    priority: "0.4",
-    changefreq: "monthly",
-  },
-  {
-    title: "Reset Password",
-    path: "/reset-password",
-    description:
-      "Set a new password for your EstateDesk account using a secure reset link.",
-    priority: "0.4",
-    changefreq: "monthly",
-  },
-  {
-    title: "Verify Email",
-    path: "/verify-email",
-    description:
-      "Confirm your EstateDesk account email address and complete account verification.",
-    priority: "0.4",
     changefreq: "monthly",
   },
   {

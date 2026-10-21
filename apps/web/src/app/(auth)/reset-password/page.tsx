@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { resetPasswordAction } from "@/app/(auth)/reset-password/actions";
-import { publicPageMetadata } from "@/lib/seo";
+import { noIndexPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = publicPageMetadata({
+export const metadata: Metadata = noIndexPageMetadata({
   title: "Reset Password",
   description:
     "Set a new password for your EstateDesk account using a secure reset link.",
@@ -41,7 +41,7 @@ function getFeedback(status?: string) {
       return {
         tone: "error" as const,
         title: "Weak password",
-        message: "Your password must be at least 8 characters long.",
+        message: "Your password must be at least 8 characters and no more than 72 bytes long.",
       };
     case "missing_token":
       return {

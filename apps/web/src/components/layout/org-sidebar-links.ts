@@ -18,6 +18,7 @@ type SidebarLink = {
 };
 
 export const SIDEBAR_LINKS: readonly SidebarLink[] = [
+  { label: "Landlords", href: "/dashboard/org/landlords", icon: workspaceIconFor("/dashboard/org/properties"), roles: ["ADMIN", "MANAGER"] },
   { label: "Identity verification", href: "/dashboard/org/identity-verification", icon: workspaceIconFor("/dashboard/org/security"), roles: ["ADMIN", "MANAGER", "OFFICE"] },
   { label: "Service providers", href: "/dashboard/org/service-providers", icon: workspaceIconFor("/dashboard/org/issues"), roles: ["ADMIN", "MANAGER", "OFFICE"] },
   { label: "Community board", href: "/dashboard/org/community", icon: workspaceIconFor("/dashboard/org/community"), roles: ["ADMIN", "MANAGER", "OFFICE"] },

@@ -29,13 +29,14 @@ async function load(name: string, fixture: Fixture): Promise<Module> {
   new Function("require", "module", "exports", bundle.outputFiles[0].text)(createRequire(import.meta.url), compiled, compiled.exports);
   return compiled.exports;
 }
-const session = { userId: "operator", fullName: "Example Operator", email: "operator@example.test", platformRole: "PLATFORM_ADMIN", activeOrgId: "org", activeOrgRole: "ADMIN", membershipScope: null };
+const session = { userId: "operator", fullName: "Example Operator", email: "operator@example.test", platformRole: "PLATFORM_ADMIN", activeOrgId: "org", activeOrgRole: "ADMIN", membershipScope: { scopeType: "ORG", scopeId: "ORG_SCOPE" } };
 
 test("native identity requests, review and linking retain role, organization and state boundaries", async () => {
   const fixture: Fixture = { rows: { identityVerificationRequest: { fullName: "Applicant", requestedRole: "CARETAKER", status: "APPROVED" } }, calls: [] };
   const mod = await load("native-identity-actions", fixture);
   const define = mod.nativeIdentityActionDefinition;
   assert.equal(await define({ ...session, platformRole: "USER" }, "platform", "/platform/identity-verification", "identity.review", "request"), null);
+  assert.equal(await define({ ...session, membershipScope: null }, "organization", "/dashboard/org/identity-verification", "identity.request"), null);
   const scoped = { ...session, membershipScope: { scopeType: "UNIT", scopeId: "unit" } };
   assert.deepEqual(mod.nativeIdentityPageActions(scoped, "organization", "/dashboard/org/identity-verification"), []);
   const request = await define({ ...session, activeOrgRole: "OFFICE" }, "organization", "/dashboard/org/identity-verification", "identity.request") as NativeActionDefinition;

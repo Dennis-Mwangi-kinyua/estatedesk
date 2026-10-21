@@ -131,8 +131,8 @@ export function LandlordDashboardShell({
 
   return (
     <div data-workspace="landlord" className="app-mobile-canvas ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden">
-      <aside className="ed-shell-panel fixed inset-y-0 left-0 z-[100] hidden w-72 flex-col border-r p-4 lg:flex">
-        <HoverPrefetchLink href="/dashboard/landlord" className="flex items-center gap-3">
+      <aside className="ed-shell-panel fixed inset-y-0 left-0 z-[100] hidden w-72 flex-col border-r lg:flex">
+        <HoverPrefetchLink href="/dashboard/landlord" className="flex h-[65px] shrink-0 items-center gap-3 border-b border-border px-5">
           <div className="ed-brand-mark flex h-10 w-10 items-center justify-center rounded-lg shadow-sm">
             <Building2 className="h-5 w-5" />
           </div>
@@ -144,7 +144,7 @@ export function LandlordDashboardShell({
           </div>
         </HoverPrefetchLink>
 
-        <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-3">
+        <div className="mx-4 mt-4 rounded-lg border border-border bg-muted/30 p-3">
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
             Signed in as
           </p>
@@ -153,15 +153,15 @@ export function LandlordDashboardShell({
           </p>
         </div>
 
-        <div className="mt-6 min-h-0 flex-1 overflow-y-auto">
+        <div className="mt-4 min-h-0 flex-1 overflow-y-auto px-3">
           <LandlordNav />
         </div>
 
-        <div className="shrink-0 border-t border-border pb-2 pt-3">
+        <div className="mx-4 shrink-0 border-t border-border pb-2 pt-3">
           <InAppHelpNav workspace="landlord" compact />
         </div>
 
-        <form data-logout-form action={logoutAction} className="shrink-0">
+        <form data-logout-form action={logoutAction} className="shrink-0 px-4 pb-4">
           <button data-action-kind="destructive" data-workspace-action="true"
             type="submit"
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"

@@ -13,7 +13,7 @@ export function CaretakerDashboardSidebar() {
     <aside className="hidden xl:block xl:w-72 xl:shrink-0 2xl:w-80">
       <div className="ed-shell-panel sticky top-0 h-dvh border-r">
         <div className="flex h-full flex-col">
-          <div className="shrink-0 border-b border-border px-5 py-5">
+          <div className="flex h-[69px] shrink-0 items-center border-b border-border px-5">
             <HoverPrefetchLink href="/dashboard/caretaker/today" className="block">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 EstateDesk

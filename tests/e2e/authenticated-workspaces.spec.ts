@@ -50,7 +50,12 @@ for (const role of ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "TE
     await chmod(statePath, 0o600);
     if (["TENANT", "CARETAKER", "SECURITY", "PROVIDER"].includes(role)) {
       const forbidden = await page.request.get("/dashboard/org/tenants", { maxRedirects: 0 });
-      expect([302, 303, 307, 308, 401, 403, 404]).toContain(forbidden.status());
+      if (forbidden.status() === 200) {
+        // A flushed loading shell carries the server guard's denial as a meta redirect.
+        expect(await forbidden.text()).toMatch(/<meta id="__next-page-redirect" http-equiv="refresh" content="[^;]+;url=\/(?:access-denied|dashboard\/(?:tenant|caretaker|gate))/);
+      } else {
+        expect([302, 303, 307, 308, 401, 403, 404]).toContain(forbidden.status());
+      }
     }
   });
 }

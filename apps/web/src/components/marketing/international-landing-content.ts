@@ -79,3 +79,43 @@ export const globalLandingContent: SeoLandingPageContent = {
   ctaBody: "Discuss your property locations and reporting needs with our team, then pilot the full workflow with your local manager.",
   serviceType: "Remote property oversight software",
 };
+
+export const middleEastLandingContent: SeoLandingPageContent = {
+  path: "/property-management-software-middle-east",
+  eyebrow: "Property teams and owners in the Middle East",
+  title: "Property management software for Middle East owners and teams",
+  summary: "Evaluate EstateDesk for rental records, owner reporting and remote property oversight. Connect Middle East-based owners with Kenyan teams and assess local portfolio requirements.",
+  intro: [
+    "A landlord based in Dubai, Riyadh or Doha may own rentals in Kenya, manage local property, or do both. The owner's location does not determine which payment integrations or reporting rules the property needs. Start with the country where each property operates.",
+    "EstateDesk is built around Kenyan rental operations. Owners in the Middle East can review the records shared by their Kenyan managing team. Teams evaluating properties elsewhere should first confirm currency, collection methods, lease processes, language and reporting requirements with EstateDesk.",
+  ],
+  audienceTitle: "Choose the right operating model",
+  audiences: [
+    { title: "Middle East-based owners of Kenyan rentals", body: "Work with a Kenyan manager to maintain tenant records, reconcile collections, record maintenance and prepare owner statements while you review information remotely." },
+    { title: "Agencies reporting to overseas clients", body: "Agree which records owners can access, how often statements are prepared and who handles daily property work." },
+    { title: "Teams evaluating a local portfolio", body: "Pilot a property using its actual currency and collection process before deciding whether EstateDesk meets your requirements." },
+  ],
+  featureTitle: "Connect ownership with daily operations",
+  features: [
+    { title: "Tenancy records", body: "Keep units, tenants, leases and occupancy history together so discussions refer to the same tenancy." },
+    { title: "Rent and owner reporting", body: "Review recorded charges, verified payments and outstanding balances. Agree a reconciliation process before relying on statements." },
+    { title: "Maintenance visibility", body: "Track recorded issues and inspection findings with the local team, alongside the people responsible for property work." },
+    { title: "Assigned access", body: "Give owners, managers and field staff appropriate access rather than sharing a single login." },
+  ],
+  benefitsTitle: "What to confirm before a regional rollout",
+  benefits: ["Property country, billing currency and settlement requirements.", "Supported banks and payment providers, including any manual reconciliation steps.", "Lease documents, statutory reporting and any required local system integrations.", "English or Arabic requirements, device usability, onboarding and support expectations."],
+  howItWorksTitle: "Assess a complete operating cycle",
+  howItWorks: [
+    { title: "Define the portfolio", body: "Separate Kenyan properties owned from abroad from properties operating in a Middle Eastern country." },
+    { title: "Check the requirements", body: "Share sample bills, statements, payment methods and language needs with the team. Confirm each requirement before migration." },
+    { title: "Pilot and reconcile", body: "Run one tenancy, bill, payment record, maintenance issue and owner statement. Expand after the local team and owner agree the results." },
+  ],
+  faq: [
+    { question: "Can I oversee Kenyan rentals while living in the Middle East?", answer: "EstateDesk supports online landlord access to the records your managing organisation shares. Your Kenyan team still needs to maintain records, reconcile payments and handle physical property work." },
+    { question: "Are UAE, Saudi Arabian and Qatari integrations included?", answer: "Do not assume country-specific payments, tenancy registration or tax integrations are included. Ask EstateDesk to confirm your exact requirements before subscribing or migrating a local portfolio." },
+    { question: "Is an Arabic application available?", answer: "These public pages are in English. Confirm Arabic application, document and support requirements with the team before rollout." },
+  ],
+  ctaTitle: "Discuss your property country and owner reporting needs",
+  ctaBody: "Tell us where the properties operate, where the owners are based and how collections work. We can assess a pilot around your actual requirements.",
+  serviceType: "Property management software evaluation for Middle East teams",
+};

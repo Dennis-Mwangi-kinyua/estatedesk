@@ -1,5 +1,6 @@
 "use server";
 
+import { redeemPasswordLink } from "@/lib/auth/redeem-password-link";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
@@ -7,7 +8,7 @@ import { hashOpaqueToken, legacyHashOpaqueToken } from "@/lib/crypto/tokens";
 import { sendSecurityAlert } from "@/lib/security/alerts";
 
 function isStrongEnough(password: string) {
-  return password.length >= 8;
+  return password.length >= 8 && Buffer.byteLength(password, "utf8") <= 72;
 }
 
 export async function resetPasswordAction(formData: FormData) {
@@ -17,10 +18,10 @@ export async function resetPasswordAction(formData: FormData) {
 
   const token = typeof tokenValue === "string" ? tokenValue.trim() : "";
   const password =
-    typeof passwordValue === "string" ? passwordValue.trim() : "";
+    typeof passwordValue === "string" ? passwordValue : "";
   const confirmPassword =
     typeof confirmPasswordValue === "string"
-      ? confirmPasswordValue.trim()
+      ? confirmPasswordValue
       : "";
 
   if (!token) {
@@ -63,8 +64,9 @@ export async function resetPasswordAction(formData: FormData) {
 
   const user = await prisma.user.findFirst({
     where: {
-      email: resetToken.email,
+      ...(resetToken.userId ? { id: resetToken.userId } : { email: resetToken.email }),
       deletedAt: null,
+      status: "ACTIVE",
     },
     select: {
       id: true,
@@ -77,29 +79,10 @@ export async function resetPasswordAction(formData: FormData) {
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: user.id },
-      data: {
-        passwordHash,
-      },
-    }),
-    prisma.passwordResetToken.update({
-      where: { token: resetToken.token },
-      data: {
-        usedAt: new Date(),
-      },
-    }),
-    prisma.passwordResetToken.deleteMany({
-      where: {
-        email: resetToken.email,
-        usedAt: null,
-        token: {
-          not: resetToken.token,
-        },
-      },
-    }),
-  ]);
+  const redeemed = await prisma.$transaction(tx => redeemPasswordLink(tx, {
+    tokenId: resetToken.id, userId: user.id, email: resetToken.email, passwordHash,
+  }));
+  if (!redeemed) redirect("/reset-password?status=invalid");
 
   await sendSecurityAlert({
     event: "PASSWORD_RESET_COMPLETED",

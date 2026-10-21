@@ -148,8 +148,9 @@ export async function createPropertyAction(formData: FormData): Promise<Property
     );
   }
 
+  let setupUrl: string | undefined;
   try {
-    await executeCreatePropertyTransaction({
+    setupUrl = await executeCreatePropertyTransaction({
       orgId,
       sessionUserId: session.userId,
       name,
@@ -192,7 +193,7 @@ export async function createPropertyAction(formData: FormData): Promise<Property
   revalidatePath("/dashboard/org/units");
 
   if (landlordMode === "new") {
-    return { credentials: { fullName: landlordFullName!, username: landlordUsername!, password: landlordPassword!, email: landlordEmail, phone: landlordPhone, role: "LANDLORD", loginUrl: accountLoginUrl() } };
+    return { credentials: { fullName: landlordFullName!, username: landlordUsername!, setupUrl: setupUrl!, email: landlordEmail, phone: landlordPhone, role: "LANDLORD", loginUrl: accountLoginUrl() } };
   }
 
   redirect("/dashboard/org/properties?created=1");

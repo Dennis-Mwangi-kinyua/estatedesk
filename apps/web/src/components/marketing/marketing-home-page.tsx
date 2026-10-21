@@ -46,6 +46,7 @@ const homepageFeatures = [
 
 const homepageFaqItems = marketingFaqItems.slice(0, 8);
 const seoHubLinks = [
+  ["Middle East property owners and teams", "/property-management-software-middle-east"],
   ["Property teams in Africa", "/property-management-software-africa"],
   ["Remote and diaspora landlords", "/remote-property-management-software"],
   ["Property management software Kenya", "/property-management-software-kenya"],
@@ -101,29 +102,6 @@ export default function MarketingHomePage() {
           { "@type": "SiteNavigationElement", position: 5, name: "Pricing", url: absoluteUrl("/pricing") },
           { "@type": "SiteNavigationElement", position: 6, name: "Help", url: absoluteUrl("/contact") },
         ],
-      },
-      {
-        "@type": "SoftwareApplication",
-        "@id": `${absoluteUrl("/")}#software`,
-        name: "EstateDesk",
-        applicationCategory: "BusinessApplication",
-        operatingSystem: "Web",
-        url: absoluteUrl("/"),
-        description:
-          "Property management software for Kenya covering tenants, leases, rent, water bills, caretakers, inspections, maintenance issues, and team access.",
-        areaServed: {
-          "@type": "Country",
-          name: "Kenya",
-        },
-        offers: {
-          "@type": "Offer",
-          category: "SaaS subscription",
-          priceCurrency: "KES",
-          url: absoluteUrl("/pricing"),
-        },
-        publisher: {
-          "@id": `${absoluteUrl("/")}#organization`,
-        },
       },
       faqJsonLd(homepageFaqItems),
     ],
@@ -291,7 +269,7 @@ function HomepageSeoContent() {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl">
-                Browse EstateDesk by search intent
+                Explore property management tools and rental listings
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-7 text-neutral-600">
                 Fast paths for landlords, property managers, tenants, and local rental searches.

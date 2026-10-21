@@ -1,6 +1,8 @@
 import type { GuideArticle } from "@/lib/guides/types";
 import { workspacePrivateGuides } from "@/lib/guides/workspace-private";
 
+import { regionalGuideArticles } from "./regional-articles";
+
 const coreGuideArticles = [
   {
     slug: "rent-tracking-workflow",
@@ -1033,5 +1035,6 @@ const coreGuideArticles = [
 /** Public SEO guides + platform-private + role workspace-private help. */
 export const guideArticles = [
   ...coreGuideArticles,
+  ...regionalGuideArticles,
   ...workspacePrivateGuides,
 ] as GuideArticle[];

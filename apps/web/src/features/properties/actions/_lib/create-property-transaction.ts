@@ -1,3 +1,4 @@
+import { createAccountSetupUrl } from "@/lib/auth/account-setup";
 import { PropertyType } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
@@ -33,11 +34,12 @@ type CreatePropertyInput = {
 export async function executeCreatePropertyTransaction(
   input: CreatePropertyInput,
 ) {
-  await prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
     await lockOrgQuota(tx, input.orgId);
     await assertCanCreateProperty(input.orgId, 1, tx);
     const plannedUnits = input.parsedUnitPlans.reduce((sum, plan) => sum + plan.quantity, 0);
     if (plannedUnits > 0) await assertCanCreateUnit(input.orgId, plannedUnits, tx);
+    let setupUrl: string | undefined;
     let landlordProfileId: string | null = null;
 
     if (input.landlordMode === "existing" && input.existingLandlordProfileId) {
@@ -78,6 +80,7 @@ export async function executeCreatePropertyTransaction(
         },
       });
 
+      setupUrl = await createAccountSetupUrl(tx, user.id, input.landlordEmail);
       const profile = await tx.landlordProfile.create({
         data: {
           orgId: input.orgId,
@@ -194,5 +197,6 @@ export async function executeCreatePropertyTransaction(
         });
       }
     }
+    return setupUrl;
   });
 }

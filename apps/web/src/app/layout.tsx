@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   category: "Property management software",
   title: {
     default:
-      "EstateDesk | Best Property Management Software in Kenya (M-Pesa, KRA eTIMS)",
+      "Property Management Software in Kenya | EstateDesk",
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title:
-      "EstateDesk | Best Property Management Software in Kenya (M-Pesa, KRA eTIMS)",
+      "Property Management Software in Kenya | EstateDesk",
     description: SITE_DESCRIPTION,
     url: "/",
     siteName: SITE_NAME,
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title:
-      "EstateDesk | Best Property Management Software in Kenya (M-Pesa, KRA eTIMS)",
+      "Property Management Software in Kenya | EstateDesk",
     description: SITE_DESCRIPTION,
     images: ["/opengraph-image"],
   },
@@ -129,16 +129,15 @@ const structuredData = [
     "@type": "Organization",
     "@id": `${siteUrl}/#organization`,
     name: SITE_NAME,
-    legalName: SITE_NAME,
+    legalName: "Afrisilicon Technology Limited",
     url: siteUrl,
     logo: {
       "@type": "ImageObject",
-      url: `${siteUrl}/images/og-vacancy.svg`,
-      width: 1200,
-      height: 630,
+      url: `${siteUrl}/icons/icon-512.png`,
+      width: 512,
+      height: 512,
     },
-    image: `${siteUrl}/images/og-vacancy.svg`,
-    areaServed: ["KE", "UG", "TZ", "RW", "AE"],
+    image: `${siteUrl}/icons/icon-512.png`,
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
@@ -194,19 +193,18 @@ const structuredData = [
       ...SITE_DIFFERENTIATORS,
     ],
     keywords: SEO_KEYWORDS.join(", "),
-    areaServed: [
-      { "@type": "Country", name: "Kenya" },
-      { "@type": "Country", name: "Uganda" },
-      { "@type": "Country", name: "Tanzania" },
-      { "@type": "Country", name: "Rwanda" },
-      { "@type": "Country", name: "United Arab Emirates" },
-    ],
-    offers: Object.values(APP_PLANS).map((plan) => ({
+    offers: Object.entries(APP_PLANS).filter(([key]) => key !== "ENTERPRISE").map(([, plan]) => ({
       "@type": "Offer",
       name: `${SITE_NAME} ${plan.name}`,
       category: "SaaS",
       price: plan.monthlyAmount,
       priceCurrency: "KES",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: plan.monthlyAmount,
+        priceCurrency: "KES",
+        unitText: "MONTH",
+      },
       url: `${siteUrl}${plan.href}`,
       availability: "https://schema.org/InStock",
     })),

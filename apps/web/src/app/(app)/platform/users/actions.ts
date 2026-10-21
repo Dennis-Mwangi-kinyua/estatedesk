@@ -1,4 +1,5 @@
 "use server";
+import { createAccountSetupUrl } from "@/lib/auth/account-setup";
 
 import { hash } from "bcryptjs";
 import {
@@ -84,6 +85,7 @@ export async function createPlatformUserAction(formData: FormData): Promise<Crea
 
   const passwordHash = await hash(password, 12);
   const verifiedAt = new Date();
+  let setupUrl = "";
   let createdUserId: string | null = null;
 
   await prisma.$transaction(async (tx) => {
@@ -105,6 +107,7 @@ export async function createPlatformUserAction(formData: FormData): Promise<Crea
       select: { id: true },
     });
     createdUserId = user.id;
+    setupUrl = await createAccountSetupUrl(tx, user.id, email);
 
     if (selectedPermissions.length > 0) {
       await tx.platformPermission.createMany({
@@ -151,5 +154,5 @@ export async function createPlatformUserAction(formData: FormData): Promise<Crea
   }
 
   revalidatePath("/platform/users");
-  return { credentials: { fullName, username, password, email, phone, role: platformRole, loginUrl: accountLoginUrl() } };
+  return { credentials: { fullName, username, setupUrl, email, phone, role: platformRole, loginUrl: accountLoginUrl() } };
 }

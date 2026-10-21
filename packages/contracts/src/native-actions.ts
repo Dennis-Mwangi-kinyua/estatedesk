@@ -21,7 +21,7 @@ export const nativeActionRequestSchema = z.object({
 });
 export const nativeActionResultSchema = z.object({
   ok: z.literal(true), message: z.string(),
-  credentials: z.object({ fullName: z.string(), username: z.string(), password: z.string(), email: z.string().nullable().optional(), phone: z.string().nullable().optional(), loginUrl: z.string() }).optional(),
+  credentials: z.object({ fullName: z.string(), username: z.string(), setupUrl: z.string(), email: z.string().nullable().optional(), phone: z.string().nullable().optional(), loginUrl: z.string() }).optional(),
   document: z.object({ filename: z.string(), content: z.string().max(36_000_000) }).optional(),
   file: z.object({ filename: z.string(), content: z.string().max(36_000_000), mimeType: z.literal("application/zip") }).optional(),
   vaultCookie: z.string().max(8192).optional(),

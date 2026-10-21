@@ -8,6 +8,7 @@ import { safeServerActionError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
 import { requireCurrentOrgId } from "@/lib/auth/org";
+import { createAccountSetupUrl } from "@/lib/auth/account-setup";
 import { accountLoginUrl } from "@/lib/notifications/account-login-url";
 import type { CreatedAccountLogin } from "@/lib/notifications/recipient-message";
 
@@ -113,6 +114,7 @@ export async function createCaretakerAction(
     return { error: "Selected building does not belong to the chosen property." };
   }
 
+  let setupUrl = "";
   try {
     await prisma.$transaction(async (tx) => {
       const passwordHash = await hash(password, 12);
@@ -133,6 +135,7 @@ export async function createCaretakerAction(
         },
       });
 
+      setupUrl = await createAccountSetupUrl(tx, user.id, email);
       const membership = await tx.membership.create({
         data: {
           orgId,
@@ -202,5 +205,5 @@ export async function createCaretakerAction(
   revalidatePath("/staff");
   revalidatePath("/staff/caretaker");
 
-  return { error: null, credentials: { fullName, username, password, email, phone, role: "CARETAKER", loginUrl: accountLoginUrl() } };
+  return { error: null, credentials: { fullName, username, setupUrl, email, phone, role: "CARETAKER", loginUrl: accountLoginUrl() } };
 }

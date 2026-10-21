@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-21",
+  "productionBuild": "passed, including TypeScript and 873 generated pages",
+  "webDependencyAudit": "zero known vulnerabilities",
+  "integrationTests": {
+    "passed": 27,
+    "failed": 0,
+    "skipped": 0
+  },
+  "browserChecks": {
+    "roleAndAccountGatesPassed": 11,
+    "securityAndSeoRecheckPassed": 4
+  },
+  "privateAccessChecks": 52,
+  "publicEndpointChecks": 17,
+  "scope": "Current source, local production build and disposable synthetic PostgreSQL data; no deployment or production capacity claim.",
+  "unitTests": {
+    "passed": 612,
+    "failed": 0,
+    "skipped": 0
+  }
+}

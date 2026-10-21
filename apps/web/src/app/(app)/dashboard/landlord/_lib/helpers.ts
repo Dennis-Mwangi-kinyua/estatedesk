@@ -1,4 +1,4 @@
-export function formatCurrency(value: unknown) {
+export function formatCurrency(value: unknown, currency = "KES") {
   const amount =
     typeof value === "object" &&
     value !== null &&
@@ -9,7 +9,7 @@ export function formatCurrency(value: unknown) {
 
   return new Intl.NumberFormat("en-KE", {
     style: "currency",
-    currency: "KES",
+    currency,
     maximumFractionDigits: 0,
   }).format(amount);
 }

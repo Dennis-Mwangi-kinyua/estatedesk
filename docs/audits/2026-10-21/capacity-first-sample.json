@@ -1,0 +1,172 @@
+{
+  "checkedAt": "2026-10-21T19:03:33.928Z",
+  "method": "Warm local production build, synthetic small dataset, sequential public/admin/tenant profiles, request concurrency capped at 8, or 16 for the admin ramp. Public 1200RPM; admin 600 then 1800RPM if earlier checks pass; tenant 600RPM; 15 seconds per profile. Not a concurrent-user limit, sustained soak test or production SLA.",
+  "results": [
+    {
+      "profile": "public",
+      "passed": true,
+      "requestedRpm": 1200,
+      "achievedRpm": 1203,
+      "completed": 300,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 15,
+      "schedulingDelay": {
+        "p95": "3ms",
+        "max": "24ms"
+      },
+      "latency": {
+        "min": "6ms",
+        "p50": "12ms",
+        "p95": "60ms",
+        "p99": "89ms",
+        "max": "124ms"
+      },
+      "statuses": {
+        "200": 300
+      },
+      "redirects": {},
+      "routes": {
+        "/services": {
+          "requests": 93,
+          "failures": 0,
+          "averageLatencyMs": 18
+        },
+        "/": {
+          "requests": 113,
+          "failures": 0,
+          "averageLatencyMs": 18
+        },
+        "/pricing": {
+          "requests": 94,
+          "failures": 0,
+          "averageLatencyMs": 12
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    },
+    {
+      "profile": "ADMIN",
+      "passed": true,
+      "requestedRpm": 600,
+      "achievedRpm": 603,
+      "completed": 150,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 14.9,
+      "schedulingDelay": {
+        "p95": "476ms",
+        "max": "646ms"
+      },
+      "latency": {
+        "min": "17ms",
+        "p50": "171ms",
+        "p95": "1129ms",
+        "p99": "1270ms",
+        "max": "1283ms"
+      },
+      "statuses": {
+        "200": 150
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org/units": {
+          "requests": 62,
+          "failures": 0,
+          "averageLatencyMs": 402
+        },
+        "/dashboard/org/properties": {
+          "requests": 45,
+          "failures": 0,
+          "averageLatencyMs": 351
+        },
+        "/dashboard/org": {
+          "requests": 43,
+          "failures": 0,
+          "averageLatencyMs": 270
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    },
+    {
+      "profile": "ADMIN1800",
+      "passed": true,
+      "requestedRpm": 1800,
+      "achievedRpm": 1802,
+      "completed": 450,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 15,
+      "schedulingDelay": {
+        "p95": "1ms",
+        "max": "2ms"
+      },
+      "latency": {
+        "min": "14ms",
+        "p50": "17ms",
+        "p95": "20ms",
+        "p99": "26ms",
+        "max": "59ms"
+      },
+      "statuses": {
+        "200": 450
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org": {
+          "requests": 149,
+          "failures": 0,
+          "averageLatencyMs": 18
+        },
+        "/dashboard/org/properties": {
+          "requests": 167,
+          "failures": 0,
+          "averageLatencyMs": 18
+        },
+        "/dashboard/org/units": {
+          "requests": 134,
+          "failures": 0,
+          "averageLatencyMs": 17
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    },
+    {
+      "profile": "TENANT",
+      "passed": true,
+      "requestedRpm": 600,
+      "achievedRpm": 603,
+      "completed": 150,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 14.9,
+      "schedulingDelay": {
+        "p95": "2ms",
+        "max": "10ms"
+      },
+      "latency": {
+        "min": "19ms",
+        "p50": "24ms",
+        "p95": "30ms",
+        "p99": "44ms",
+        "max": "50ms"
+      },
+      "statuses": {
+        "200": 150
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/tenant": {
+          "requests": 150,
+          "failures": 0,
+          "averageLatencyMs": 25
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    }
+  ]
+}

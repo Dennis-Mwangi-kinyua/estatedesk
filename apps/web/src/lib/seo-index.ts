@@ -5,7 +5,16 @@ export type SeoIndexItem = {
   keywords: string[];
 };
 
+export const regionalMarketLinks = [
+  { title: "Property management in Kenya", href: "/property-management-software-kenya" },
+  { title: "Property teams in Africa", href: "/property-management-software-africa" },
+  { title: "Dubai and UAE property teams", href: "/property-management-software-dubai" },
+  { title: "Middle East owners and teams", href: "/property-management-software-middle-east" },
+  { title: "Remote and diaspora landlords", href: "/remote-property-management-software" },
+] as const;
+
 export const marketCoverageItems = [
+  { title: "Middle East owners and teams", href: "/property-management-software-middle-east", description: "Oversee Kenyan rentals from the Middle East or evaluate local property workflows, currencies and integration requirements.", keywords: ["property management software Middle East", "Kenyan property management from UAE"] },
   { title: "Property teams in Africa", href: "/property-management-software-africa", description: "Evaluate connected property operations for African teams, with country-specific requirements and a practical pilot process.", keywords: ["property management software Africa", "African property teams"] },
   { title: "Remote and diaspora landlords", href: "/remote-property-management-software", description: "Connect owners abroad with local tenancy, collection, maintenance, and reporting records.", keywords: ["remote property management", "diaspora landlord software"] },
   {

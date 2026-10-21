@@ -21,11 +21,10 @@ const commonAudiences = [
 
 export const kenyaLandingContent: SeoLandingPageContent = {
   path: "/property-management-software-kenya",
-  eyebrow: "Best property management software Kenya",
-  title: "Best Property Management Software in Kenya — M-Pesa, Water Billing & KRA eTIMS",
-  serviceType: "Best property management software Kenya",
-  summary:
-    "EstateDesk is Kenya’s full-stack property management software: M-Pesa rent collection, water billing, offline caretaker metering, double-entry accounting, KRA eTIMS/eRITS-ready receipts, WhatsApp ops, public vacancies, and role-based staff access—built to beat spreadsheet and generic global PMS tools that ignore Kenyan operations.",
+  eyebrow: "Property management software Kenya",
+  title: "Property Management Software in Kenya for Rent, M-Pesa and Water Billing",
+  serviceType: "Property management software Kenya",
+  summary: "EstateDesk helps Kenyan landlords and agencies manage tenants, rent, M-Pesa payment records, water billing, caretaker work and accounting in one online workspace.",
   intro: [
     "EstateDesk is property management software designed specifically for how Kenyan rental businesses actually run. A Nairobi agency, a Kiambu landlord, a Mombasa caretaker, or a diaspora owner managing units remotely all face the same problem: rent lives in M-Pesa, water readings live in notebooks, vacancies live on WhatsApp status, and tax-ready paperwork is assembled late. EstateDesk unifies tenants, leases, combined rent+utility bills, payments, accounting, tax-ready receipts, vacancies, maintenance, and staff roles in one secure system.",
     "Unlike generic global property software that assumes foreign banking and no field caretakers, EstateDesk prioritises Kenya-first workflows: M-Pesa and multi-bank collection, period bills that clear service charges, garbage, security, and water before rent, offline meter readings that sync when connectivity returns, bilingual caretaker tools, and KRA eTIMS/eRITS-shaped receipts with seller PIN and control-unit fields ready for certified submission.",
@@ -56,7 +55,7 @@ export const kenyaLandingContent: SeoLandingPageContent = {
       body: "General ledger, cash position, trial balance, AR/AP aging, books health, budgets, and owner distributions—not just a payment spreadsheet.",
     },
     {
-      title: "Vacancy SEO that ranks & converts",
+      title: "Public rental vacancy listings",
       body: "Public location/category vacancy pages help tenants find units on Google while managers run operations in the same product—no separate marketing stack required.",
     },
   ],
@@ -125,7 +124,7 @@ export const dubaiLandingContent: SeoLandingPageContent = {
   intro: [
     "Dubai and UAE property owners often need a dependable way to manage rental records across teams, locations, and time zones. Some landlords live abroad and coordinate with a local manager. Some agencies manage units on behalf of clients. Some owners have property in the UAE while also managing rentals in Kenya or East Africa. EstateDesk supports this kind of remote visibility by keeping the core rental operation online and searchable.",
     "The system is designed for the universal work that property teams repeat every month: storing tenant and lease records, tracking rent, following maintenance requests, monitoring vacant units, documenting inspections, assigning staff, and reviewing reports. For Dubai landlords or diaspora owners, EstateDesk helps reduce dependence on scattered chat updates because the operational record can be reviewed inside one workspace.",
-    "EstateDesk is not limited to one local format of property management. It is a flexible web-based platform for the records and workflows that matter in rental operations. Larger teams can use Custom rollout support to align terminology, staff roles, reporting expectations, and operational procedures with their market and organization.",
+    "For properties operating in the UAE, confirm billing currency, local payment providers, tenancy registration, reporting and language requirements before migration. Remote access to Kenyan property records does not imply support for UAE-specific integrations.",
   ],
   audienceTitle: "Who uses EstateDesk for Dubai and UAE rental work?",
   audiences: [
@@ -186,6 +185,8 @@ export const dubaiLandingContent: SeoLandingPageContent = {
     },
   ],
   faq: [
+    { question: "Are UAE payment and tenancy registration integrations included?", answer: "Confirm your required billing currency, banks, tenancy registration and reporting integrations with EstateDesk before rollout. Kenyan payment and tax integrations do not establish UAE compliance." },
+    { question: "Can a Dubai-based landlord oversee properties in Kenya?", answer: "Yes. An owner can use the access assigned by their Kenyan managing organisation to review shared property records. The local team remains responsible for accurate records, reconciliation and property work." },
     {
       question: "Does EstateDesk support Dubai landlords?",
       answer:

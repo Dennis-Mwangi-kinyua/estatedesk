@@ -49,12 +49,11 @@ function PlatformShellInner({
     >
       <div className="flex h-dvh overflow-hidden">
         <aside aria-label="Platform sidebar" className="platform-sidebar ed-shell-panel fixed bottom-0 left-0 top-0 z-40 hidden w-[280px] border-r lg:flex lg:flex-col">
-          <div className="shrink-0 border-b border-border px-5 py-5">
+          <div className="flex h-[76px] shrink-0 items-center border-b border-border px-5">
             <PlatformBrand mode={mode} />
-
-            <div className="mt-4">
-              <PlatformModeToggle variant="sidebar" />
-            </div>
+          </div>
+          <div className="px-4 pt-4">
+            <PlatformModeToggle variant="sidebar" />
           </div>
 
           <label className="mx-3 mt-3"><span className="sr-only">Find an admin tool</span><input type="search" placeholder="Find a tool…" value={navQuery} onChange={(event) => setNavQuery(event.target.value)} className="w-full rounded-xl border border-border bg-muted/40 px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-primary" /></label>

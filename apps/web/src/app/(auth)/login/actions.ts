@@ -16,6 +16,7 @@ import {
   isTransientDatabaseError,
   retryTransientDatabaseOperation,
 } from "@/lib/db/retry";
+import { trustedLoginIp, loginRateLimits, accountLoginRateLimit } from "@/lib/auth/login-policy";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendSecurityAlert } from "@/lib/security/alerts";
 import { isLoginTimingEnabled } from "@/lib/dev/background-refresh";
@@ -33,8 +34,9 @@ const loginSchema = z.object({
     .string()
     .trim()
     .min(1, "Email or username is required")
+    .max(254)
     .transform((value) => value.toLowerCase()),
-  password: z.string().min(1, "Password is required"),
+  password: z.string().min(1, "Password is required").max(1024),
 });
 
 export type LoginActionState = {
@@ -97,10 +99,8 @@ async function getLoginRateLimitError({
 }): Promise<LoginActionState | null> {
   try {
     const limiter = await withTimeout(
-      Promise.all([
-        checkRateLimit({ key: `login-ip:${ipAddress}`, limit: 30, windowMs: 60_000 }),
-        checkRateLimit({ key: `login:${ipAddress}:${identifier}`, limit: 8, windowMs: 60_000 }),
-      ]).then(results => results.find(result => !result.allowed) ?? results[0]),
+      Promise.all(loginRateLimits(identifier, ipAddress).map(checkRateLimit))
+        .then(results => results.find(result => !result.allowed) ?? results[0]),
       LOGIN_RATE_LIMIT_TIMEOUT_MS,
       "login rate limit check",
     );
@@ -136,11 +136,6 @@ function makeLabel(prefix: string, requestId: string) {
   return `${prefix}-${requestId}`;
 }
 
-function getClientIp(headerStore: Awaited<ReturnType<typeof headers>>) {
-  const forwardedFor = headerStore.get("x-forwarded-for");
-  if (forwardedFor) return forwardedFor.split(",")[0]?.trim() ?? "unknown";
-  return headerStore.get("x-real-ip") ?? "unknown";
-}
 
 async function timed<T>(label: string, fn: () => Promise<T>): Promise<T> {
   if (!isLoginTimingEnabled()) {
@@ -175,7 +170,7 @@ export async function loginAction(
 
   const { email: identifier, password } = parsed.data;
   const headerStore = await headers();
-  const ipAddress = getClientIp(headerStore);
+  const ipAddress = trustedLoginIp(headerStore);
   const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   const totalLabel = makeLabel("loginAction-total", requestId);
@@ -216,6 +211,11 @@ export async function loginAction(
         );
       },
     );
+
+    if (user) {
+      const accountLimit = await withTimeout(checkRateLimit(accountLoginRateLimit(user.id)), LOGIN_RATE_LIMIT_TIMEOUT_MS, "account login rate limit");
+      if (!accountLimit.allowed) return { success: false, error: "Too many sign-in attempts. Please try again later." };
+    }
 
     const passwordMatches = await timed(
       makeLabel("login-bcrypt-compare", requestId),

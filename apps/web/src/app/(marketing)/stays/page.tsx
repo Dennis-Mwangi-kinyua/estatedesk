@@ -1,5 +1,6 @@
 import { stayAvailability } from "@/features/bnb/availability";
 import type { Metadata } from "next";
+import { publicPageMetadata, noIndexPageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
@@ -12,7 +13,19 @@ import { PublicAccessFooter } from "@/components/marketing/public-access-footer"
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "BnB & short stays", description: "Discover furnished BnBs and short stays. Browse photos, compare nightly rates, and contact hosts directly on EstateDesk.", alternates: { canonical: "/stays" } };
+type StaySearchParams = { q?: string; guests?: string; maxPrice?: string; page?: string };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<StaySearchParams> }): Promise<Metadata> {
+  const params = await searchParams;
+  const filtered = Boolean(params.q || params.guests || params.maxPrice);
+  const page = Number(params.page);
+  const paginated = Number.isSafeInteger(page) && page > 1;
+  const createMetadata = filtered ? noIndexPageMetadata : publicPageMetadata;
+  return createMetadata({
+    title: `BnB & Short Stays in Kenya${paginated ? ` – Page ${page}` : ""}`,
+    description: "Discover furnished BnBs and short stays. Browse photos, compare nightly rates, and contact hosts directly on EstateDesk.",
+    path: paginated && !filtered ? `/stays?page=${page}` : "/stays",
+  });
+}
 export default async function StaysPage({ searchParams }: { searchParams: Promise<{ q?: string; guests?: string; maxPrice?: string; page?: string }> }) {
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.slice(0, 160) : "";

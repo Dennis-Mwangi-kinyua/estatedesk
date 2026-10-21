@@ -37,6 +37,7 @@ export async function saveImagePayloadAsset({
   purpose: string;
   metadata?: Record<string, string | undefined>;
 }) {
+  if (purpose === "payment_proof") throw new Error("Payment evidence requires private storage.");
   const image = validateImageBytes(Buffer.from(payload.base64, "base64"), {
     maxBytes: 5 * 1024 * 1024,
   });

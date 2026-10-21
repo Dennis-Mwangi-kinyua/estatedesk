@@ -4,9 +4,9 @@ import {
   resendVerificationEmailAction,
   verifyEmailAction,
 } from "@/app/(auth)/verify-email/actions";
-import { publicPageMetadata } from "@/lib/seo";
+import { noIndexPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = publicPageMetadata({
+export const metadata: Metadata = noIndexPageMetadata({
   title: "Verify Email",
   description:
     "Confirm your EstateDesk account email address and complete account verification.",

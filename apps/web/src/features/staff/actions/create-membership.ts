@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentOrgId } from "@/lib/auth/org";
 import { assertCanCreateStaffUser } from "@/lib/billing/access";
 import { requireOrgPermission } from "@/lib/permissions/guards";
+import { createAccountSetupUrl } from "@/lib/auth/account-setup";
 import { accountLoginUrl } from "@/lib/notifications/account-login-url";
 import type { CreatedAccountLogin } from "@/lib/notifications/recipient-message";
 import { isSupportedCurrency } from "@/lib/currencies";
@@ -275,6 +276,7 @@ export async function createMembership(
   const passwordHash = await hash(password, 12);
   const verifiedAt = new Date();
 
+  let setupUrl = "";
   try {
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -294,6 +296,7 @@ export async function createMembership(
         },
       });
 
+      setupUrl = await createAccountSetupUrl(tx, user.id, email);
       const membership = await tx.membership.create({
         data: {
           userId: user.id,
@@ -355,7 +358,7 @@ export async function createMembership(
   revalidatePath("/staff");
   revalidatePath(`/staff/${role.toLowerCase()}`);
 
-  return { ok: true, credentials: { fullName, username, password, email, phone, role: role, loginUrl: accountLoginUrl() } };
+  return { ok: true, credentials: { fullName, username, setupUrl, email, phone, role: role, loginUrl: accountLoginUrl() } };
 }
 
 async function resolveCaretakerAssignmentTarget({

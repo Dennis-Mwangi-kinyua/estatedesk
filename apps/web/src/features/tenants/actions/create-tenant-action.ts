@@ -177,7 +177,7 @@ export async function createTenantAction(
       credentials: {
         tenantName: result.tenantName,
         username: result.username,
-        password,
+        setupUrl: result.setupUrl,
         email,
         phone,
         loginUrl,

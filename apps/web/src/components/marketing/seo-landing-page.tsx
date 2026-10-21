@@ -6,6 +6,7 @@ import { PublicAccessFooter } from "@/components/marketing/public-access-footer"
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { type FaqItem, faqJsonLd } from "@/components/marketing/seo-faq";
 import { getLandingContentDepth } from "@/lib/content-depth/landing-depth";
+import { regionalMarketLinks } from "@/lib/seo-index";
 import { absoluteUrl } from "@/lib/seo";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
@@ -75,13 +76,6 @@ export function SeoLandingPage({ content }: { content: SeoLandingPageContent }) 
           name: "EstateDesk",
           url: absoluteUrl("/"),
         },
-        areaServed: [
-          { "@type": "Country", name: "Kenya" },
-          { "@type": "Country", name: "Uganda" },
-          { "@type": "Country", name: "Tanzania" },
-          { "@type": "Country", name: "Rwanda" },
-          { "@type": "Country", name: "United Arab Emirates" },
-        ],
         description: content.summary,
       },
       faqJsonLd(content.faq),
@@ -210,6 +204,18 @@ export function SeoLandingPage({ content }: { content: SeoLandingPageContent }) 
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl space-y-4 px-4 py-10 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-semibold">Explore EstateDesk by market</h2>
+        <p className="text-muted-foreground">Choose the operating market for your property or explore remote owner oversight.</p>
+        <nav aria-label="Property management markets" className="flex flex-wrap gap-4">
+          {regionalMarketLinks.filter((item) => item.href !== content.path).map((item) => (
+            <Link key={item.href} href={item.href} className="font-medium text-primary underline underline-offset-4">{item.title}</Link>
+          ))}
+          <Link href="/guides/manage-kenyan-rentals-from-uae" className="font-medium text-primary underline underline-offset-4">Guide to overseeing Kenyan rentals from the UAE</Link>
+          <Link href="/pricing" className="font-medium text-primary underline underline-offset-4">Compare plans and pricing</Link>
+        </nav>
       </section>
 
       {contentDepth ? <ContentDepthStack {...contentDepth} /> : null}

@@ -2320,6 +2320,7 @@ model Invitation {
 
 /// Password reset token with expiry and usage tracking.
 model PasswordResetToken {
+  userId    String?
   id        String    @id @default(cuid())
   email     String
   token     String    @unique
@@ -2327,6 +2328,7 @@ model PasswordResetToken {
   usedAt    DateTime?
   createdAt DateTime  @default(now())
 
+  @@index([userId])
   @@index([email])
   @@index([token])
   @@index([expiresAt])

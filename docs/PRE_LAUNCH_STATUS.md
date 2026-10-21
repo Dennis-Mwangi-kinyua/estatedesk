@@ -24,7 +24,7 @@ Current engineering evidence: [17 October review](audits/2026-10-17/README.md). 
 | Plan integrity | Complete | Org cannot self-assign paid plans; upgrade queue on `/platform/billing`; import limits |
 | Production readiness UI | Complete | `/platform/system-health` readiness + `npm run production:check` |
 | Go-live runbook | Complete | `docs/PRODUCTION_GO_LIVE.md` |
-| DB migrations | Disposable database validated; production status unverified | 78 migrations apply locally, including native push |
+| DB migrations | Production database up to date (verified 21 October 2026) | `prisma migrate status`: all 81 repository migrations applied; no pending migrations |
 | In-app help links | Complete | Role-scoped protected routes at `/dashboard/{org,tenant,caretaker,landlord}/help` and `/platform/help` |
 | Theme coherence | Complete | Shared `ed-dashboard-shell` primitives and tenant/org surface migration |
 | Accessibility QA | In progress | Automated baseline in `tests/unit/accessibility-baseline.test.ts`; manual matrix in `docs/ACCESSIBILITY_QA.md` |

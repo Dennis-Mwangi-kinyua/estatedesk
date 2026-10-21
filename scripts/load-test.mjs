@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { setTimeout as sleep } from "node:timers/promises";
 import { performance } from "node:perf_hooks";
 
@@ -145,6 +145,8 @@ Useful:
   LOAD_COOKIE_HEADER="estatedesk_session=...; other=value"
   LOAD_ROUTE_PRESET=org-admin|platform-admin
   LOAD_ROUTES_FILE=scripts/load-test-routes.example.json
+  LOAD_REQUEST_TIMEOUT_MS=15000
+  LOAD_OUTPUT=/tmp/load-report.json
   LOAD_FAIL_ON_ERROR_RATE=1
   LOAD_FAIL_ON_P95_MS=1500
   LOAD_ABORT_AFTER_REQUESTS=250
@@ -176,8 +178,20 @@ async function main() {
   const failOnErrorRate = readOptionalPositiveNumber("LOAD_FAIL_ON_ERROR_RATE");
   const failOnP95Ms = readOptionalPositiveNumber("LOAD_FAIL_ON_P95_MS");
   const abortAfterRequests = Math.floor(readNumber("LOAD_ABORT_AFTER_REQUESTS", 250));
+  const requestTimeoutMs = readNumber("LOAD_REQUEST_TIMEOUT_MS", 15_000);
   const origin = new URL(baseUrl);
+  if (!["http:", "https:"].includes(origin.protocol) || origin.username || origin.password) {
+    throw new Error("LOAD_BASE_URL must be an HTTP(S) URL without credentials.");
+  }
   const routes = await readRoutes();
+  for (const route of routes) {
+    const target = new URL(route.path, origin);
+    if (!route.path.startsWith("/") || route.path.startsWith("//") || target.origin !== origin.origin) {
+      throw new Error("Load routes must be paths on LOAD_BASE_URL; refusing to send credentials to another origin.");
+    }
+    if (!["GET", "HEAD"].includes(route.method)) throw new Error("Load tests only support read-only GET/HEAD requests.");
+  }
+  if (!totalRequests || !concurrency) throw new Error("Load configuration must schedule at least one request with one worker.");
   const routePreset = process.env.LOAD_ROUTES_FILE
     ? "custom"
     : (process.env.LOAD_ROUTE_PRESET ?? "org-admin");
@@ -186,6 +200,7 @@ async function main() {
   const userAgent = process.env.LOAD_USER_AGENT ?? "EstateDeskLoadTest/1.0";
 
   const latencies = [];
+  const scheduleDelays = [];
   const statuses = new Map();
   const redirects = new Map();
   const routeStats = new Map();
@@ -226,6 +241,7 @@ async function main() {
       const waitMs = startedAt + scheduledAt - performance.now();
       if (waitMs > 0) await sleep(waitMs);
 
+      scheduleDelays.push(Math.max(0, performance.now() - startedAt - scheduledAt));
       const route = pickRoute();
       const url = new URL(route.path, origin);
       const started = performance.now();
@@ -244,6 +260,7 @@ async function main() {
           method: route.method,
           headers,
           redirect: "manual",
+          signal: AbortSignal.timeout(requestTimeoutMs),
         });
 
         status = response.status;
@@ -253,8 +270,10 @@ async function main() {
           const redirectKey = `${route.path} -> ${target.pathname}${target.search}`;
           redirects.set(redirectKey, (redirects.get(redirectKey) ?? 0) + 1);
         }
-        await response.arrayBuffer();
-        ok = route.expectedStatus.includes(status);
+        const body = await response.text();
+        const streamedRedirect = /<meta id="__next-page-redirect"[^>]*http-equiv="refresh"/.test(body);
+        ok = route.expectedStatus.includes(status) && !streamedRedirect;
+        if (streamedRedirect) errors.push({ path: route.path, message: "Streamed framework redirect; expected page content was not served." });
       } catch (error) {
         errors.push({
           path: route.path,
@@ -304,6 +323,7 @@ async function main() {
 
   const elapsedSeconds = (performance.now() - startedAt) / 1000;
   latencies.sort((a, b) => a - b);
+  scheduleDelays.sort((a, b) => a - b);
 
   const summary = {
     requestedRpm: rpm,
@@ -312,6 +332,11 @@ async function main() {
     failed,
     errorRatePercent: completed > 0 ? Number(((failed / completed) * 100).toFixed(2)) : 0,
     elapsedSeconds: Number(elapsedSeconds.toFixed(1)),
+    // Late workers indicate the offered rate exceeds available concurrency.
+    schedulingDelay: {
+      p95: formatMs(percentile(scheduleDelays, 95)),
+      max: formatMs(scheduleDelays.at(-1) ?? 0),
+    },
     latency: {
       min: formatMs(latencies[0] ?? 0),
       p50: formatMs(percentile(latencies, 50)),
@@ -337,7 +362,9 @@ async function main() {
     sampleErrors: errors.slice(0, 10),
   };
 
-  console.log(JSON.stringify({ event: "load-test-summary", summary }, null, 2));
+  const report = { event: "load-test-summary", summary };
+  if (process.env.LOAD_OUTPUT) await writeFile(process.env.LOAD_OUTPUT, JSON.stringify(report, null, 2));
+  console.log(JSON.stringify(report, null, 2));
 
   const p95 = percentile(latencies, 95);
 

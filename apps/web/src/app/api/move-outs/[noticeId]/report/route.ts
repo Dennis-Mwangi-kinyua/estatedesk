@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { createMoveOutReportPdf } from "@/lib/documents/move-out-report-pdf";
 import { prisma } from "@/lib/prisma";
 import { requireUserSession } from "@/lib/auth/session";
-import { requireManagementAccess } from "@/lib/permissions/guards";
+import { moveOutDocumentWhere } from "@/lib/move-outs/document-access";
 import { loadMoveOutBalances } from "@/lib/move-outs/balances";
 import { depositHeldCents, finalBillingIssues } from "@/lib/move-outs/readiness";
 import { financialStatus } from "@/lib/move-outs/financial-status";
@@ -59,8 +59,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ not
   const session = await requireUserSession();
   const { noticeId: publicNoticeId } = await params;
   const noticeId = decodePublicId(publicNoticeId, "move-out-notice");
-  const notice = await prisma.moveOutNotice.findUnique({
-    where: { id: noticeId },
+  const where = moveOutDocumentWhere(session, noticeId);
+  if (!where) return new NextResponse("Not found", { status: 404 });
+  const notice = await prisma.moveOutNotice.findFirst({
+    where,
     include: {
       tenant: true,
       inspection: { include: { inspector: { select: { fullName: true } } } },
@@ -68,10 +70,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ not
     },
   });
   if (!notice) return new NextResponse("Not found", { status: 404 });
-  if (notice.tenant.userId !== session.userId) {
-    const manager = await requireManagementAccess();
-    if (manager.activeOrgId !== notice.lease.orgId) return new NextResponse("Not found", { status: 404 });
-  }
+
   const balances = await loadMoveOutBalances(prisma, notice.lease);
   const closed = notice.status === "CLOSED";
   const settlement = notice.closeout && typeof notice.closeout === "object" && !Array.isArray(notice.closeout) ? notice.closeout : {};

@@ -1,3 +1,4 @@
+import { createAccountSetupUrl } from "@/lib/auth/account-setup";
 import { hash } from "bcryptjs";
 import { Prisma, TenantStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -231,6 +232,7 @@ export async function executeCreateTenantTransaction(
     }
 
     return {
+      setupUrl: await createAccountSetupUrl(tx, user.id, input.email),
       allocation,
       tenantName: tenant.fullName,
       username: user.username ?? username,

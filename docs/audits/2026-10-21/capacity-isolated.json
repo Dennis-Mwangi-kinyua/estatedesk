@@ -1,0 +1,172 @@
+{
+  "checkedAt": "2026-10-21T19:05:33.671Z",
+  "method": "Warm local production build, synthetic small dataset, sequential public/admin/tenant profiles, request concurrency capped at 8, or 16 for the admin ramp. Public 1200RPM; admin 600 then 1800RPM if earlier checks pass; tenant 600RPM; 15 seconds per profile. Not a concurrent-user limit, sustained soak test or production SLA.",
+  "results": [
+    {
+      "profile": "public",
+      "passed": true,
+      "requestedRpm": 1200,
+      "achievedRpm": 1203,
+      "completed": 300,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 15,
+      "schedulingDelay": {
+        "p95": "1ms",
+        "max": "2ms"
+      },
+      "latency": {
+        "min": "6ms",
+        "p50": "12ms",
+        "p95": "15ms",
+        "p99": "20ms",
+        "max": "39ms"
+      },
+      "statuses": {
+        "200": 300
+      },
+      "redirects": {},
+      "routes": {
+        "/": {
+          "requests": 102,
+          "failures": 0,
+          "averageLatencyMs": 14
+        },
+        "/pricing": {
+          "requests": 108,
+          "failures": 0,
+          "averageLatencyMs": 10
+        },
+        "/services": {
+          "requests": 90,
+          "failures": 0,
+          "averageLatencyMs": 12
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    },
+    {
+      "profile": "ADMIN",
+      "passed": true,
+      "requestedRpm": 600,
+      "achievedRpm": 603,
+      "completed": 150,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 14.9,
+      "schedulingDelay": {
+        "p95": "1ms",
+        "max": "1ms"
+      },
+      "latency": {
+        "min": "17ms",
+        "p50": "25ms",
+        "p95": "31ms",
+        "p99": "46ms",
+        "max": "60ms"
+      },
+      "statuses": {
+        "200": 150
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org": {
+          "requests": 44,
+          "failures": 0,
+          "averageLatencyMs": 26
+        },
+        "/dashboard/org/units": {
+          "requests": 59,
+          "failures": 0,
+          "averageLatencyMs": 25
+        },
+        "/dashboard/org/properties": {
+          "requests": 47,
+          "failures": 0,
+          "averageLatencyMs": 25
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    },
+    {
+      "profile": "ADMIN1800",
+      "passed": true,
+      "requestedRpm": 1800,
+      "achievedRpm": 1802,
+      "completed": 450,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 15,
+      "schedulingDelay": {
+        "p95": "1ms",
+        "max": "4ms"
+      },
+      "latency": {
+        "min": "14ms",
+        "p50": "17ms",
+        "p95": "20ms",
+        "p99": "27ms",
+        "max": "84ms"
+      },
+      "statuses": {
+        "200": 450
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org/units": {
+          "requests": 163,
+          "failures": 0,
+          "averageLatencyMs": 17
+        },
+        "/dashboard/org/properties": {
+          "requests": 137,
+          "failures": 0,
+          "averageLatencyMs": 18
+        },
+        "/dashboard/org": {
+          "requests": 150,
+          "failures": 0,
+          "averageLatencyMs": 18
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    },
+    {
+      "profile": "TENANT",
+      "passed": true,
+      "requestedRpm": 600,
+      "achievedRpm": 603,
+      "completed": 150,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 14.9,
+      "schedulingDelay": {
+        "p95": "2ms",
+        "max": "2ms"
+      },
+      "latency": {
+        "min": "20ms",
+        "p50": "25ms",
+        "p95": "31ms",
+        "p99": "36ms",
+        "max": "52ms"
+      },
+      "statuses": {
+        "200": 150
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/tenant": {
+          "requests": 150,
+          "failures": 0,
+          "averageLatencyMs": 26
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    }
+  ]
+}

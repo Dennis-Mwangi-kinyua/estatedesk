@@ -6,7 +6,7 @@ import { publicPageMetadata } from "@/lib/seo";
 export const metadata: Metadata = publicPageMetadata({
   title: "Property Management Software for Dubai and UAE",
   description:
-    "EstateDesk supports Dubai, UAE, diaspora, and remote property teams with online tenant records, rent tracking, maintenance, inspections, vacancies, reports, and staff access.",
+    "Oversee Kenyan rentals from Dubai with EstateDesk, or evaluate tenant records, rent tracking and reporting for a UAE portfolio. Confirm local integrations.",
   path: dubaiLandingContent.path,
   keywords: [
     "property management software Dubai",

@@ -211,6 +211,7 @@ const nextConfig: NextConfig = {
         "/property-management-software-kenya",
         "/property-management-software-dubai",
         "/property-management-software-africa",
+        "/property-management-software-middle-east",
         "/remote-property-management-software",
         "/privacy",
         "/terms",

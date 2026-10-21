@@ -6,7 +6,8 @@ import { readString, revalidatePaymentSurfaces } from "./payment-action-shared";
 import { verifyPayment } from "./verify-payment";
 import { normalizeTransactionReference, isUniqueConstraintError } from "@/lib/payments/transaction-reference";
 import { parseMoveOutDate, nairobiDate } from "@/lib/move-outs/validation";
-import { saveImagePayloadAsset } from "@/lib/uploads/image-payload";
+import { createPaymentProofAsset } from "@/lib/payments/proof";
+import { validateImageFile } from "@/lib/uploads/secure-image";
 import { notifyRecipients } from "@/lib/notifications/notify";
 
 export async function recordCashPaymentAction(form: FormData) {
@@ -27,17 +28,15 @@ export async function recordCashPaymentAction(form: FormData) {
   if (!lease) throw new Error("Tenant lease not found in this organisation.");
   const key = `CASH:${orgId}:${receiptReference}`;
   if (await prisma.payment.findUnique({ where: { transactionReferenceKey: key }, select: { id: true } })) throw new Error("This cash receipt has already been recorded. Review the existing payment instead.");
-  let proofAssetId: string | null = null;
   const proof = form.get("proof");
-  if (proof instanceof File && proof.size > 0) {
-    if (proof.size > 2 * 1024 * 1024) throw new Error("Use a receipt photo under 2MB.");
-    proofAssetId = await saveImagePayloadAsset({ payload: { base64: Buffer.from(await proof.arrayBuffer()).toString("base64"), fileName: proof.name, mimeType: proof.type, size: proof.size }, uploadDir: "payment-proof", filePrefix: "cash", orgId, unitId: lease.unitId, submittedByUserId: session.userId, purpose: "payment_proof" });
-  }
-  const proofAsset = proofAssetId ? await prisma.asset.findUnique({ where: { id: proofAssetId }, select: { key: true } }) : null;
+  const proofImage = proof instanceof File && proof.size > 0 ? await validateImageFile(proof, { maxBytes: 2 * 1024 * 1024 }) : null;
   const canVerify = memberHasOrgPermission(session, "payments.verify");
   try {
     await prisma.$transaction(async tx => {
-      const payment = await tx.payment.create({ data: { orgId, payerTenantId: lease.tenant.id, payerUserId: lease.tenant.userId, payerName: lease.tenant.fullName, method: "CASH", amount: rawAmount, externalReference: receiptReference, transactionReferenceKey: key, reference: receiptReference, targetType: "COMBINED", gatewayStatus: "PENDING", verificationStatus: "PENDING", paidAt, notes: evidence, callbackRaw: { source: "staff_cash_entry", combined: true, leaseId, period, transactionMessage: evidence, proofAssetId, proofImageUrl: proofAsset?.key ?? null, recordedByUserId: session.userId } } });
+      const payment = await tx.payment.create({ data: { orgId, payerTenantId: lease.tenant.id, payerUserId: lease.tenant.userId, payerName: lease.tenant.fullName, method: "CASH", amount: rawAmount, externalReference: receiptReference, transactionReferenceKey: key, reference: receiptReference, targetType: "COMBINED", gatewayStatus: "PENDING", verificationStatus: "PENDING", paidAt, notes: evidence, callbackRaw: { source: "staff_cash_entry", combined: true, leaseId, period, transactionMessage: evidence,  recordedByUserId: session.userId } } });
+      const proofAsset = proofImage && proof instanceof File ? await createPaymentProofAsset(tx, { image: proofImage, fileName: proof.name, orgId, unitId: lease.unitId, userId: session.userId, paymentId: payment.id }) : null;
+      const proofAssetId = proofAsset?.id ?? null;
+      if (proofAsset) await tx.payment.update({ where: { id: payment.id }, data: { callbackRaw: { ...(payment.callbackRaw as import("@prisma/client").Prisma.JsonObject), proofAssetId, proofImageUrl: proofAsset.key } } });
       await tx.auditLog.create({ data: { orgId, actorUserId: session.userId, action: "CASH_PAYMENT_RECORDED", entityType: "Payment", entityId: payment.id, metadata: { receiptReference, amount: rawAmount, evidence, proofAssetId } } });
       if (canVerify) {
         await verifyPayment(tx, session, payment.id, evidence);

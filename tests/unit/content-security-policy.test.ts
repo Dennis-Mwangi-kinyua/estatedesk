@@ -32,3 +32,14 @@ test("signed callbacks and public endpoints reach their own request authenticati
   }
   assert.equal(proxy(new NextRequest("https://example.test/api/private-data")).status, 401);
 });
+
+test("printouts and account recovery use private crawl and cache headers", () => {
+  for (const path of ["/print/owner-statements", "/forgot-password", "/reset-password?token=example", "/verify-email"]) {
+    const response = proxy(new NextRequest(`https://example.test${path}`));
+    assert.match(response.headers.get("cache-control")!, /no-store/);
+    assert.match(response.headers.get("x-robots-tag")!, /noindex/);
+  }
+  for (const path of ["/login", "/register"]) {
+    assert.equal(proxy(new NextRequest(`https://example.test${path}`)).headers.get("x-robots-tag"), null);
+  }
+});

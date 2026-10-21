@@ -1,3 +1,4 @@
+import { PayloadTooLargeError, readBoundedText } from "@/lib/security/bounded-json";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import {
@@ -125,7 +126,7 @@ export async function POST(request: Request) {
     if (Number.isFinite(contentLength) && contentLength > 1_000_000) {
       return Response.json({ ok: false, error: "Webhook payload is too large" }, { status: 413 });
     }
-    const rawBody = await request.text();
+    const rawBody = await readBoundedText(request, 1_000_000);
     if (Buffer.byteLength(rawBody, "utf8") > 1_000_000) {
       return Response.json({ ok: false, error: "Webhook payload is too large" }, { status: 413 });
     }
@@ -183,6 +184,7 @@ export async function POST(request: Request) {
 
     return Response.json({ ok: true, handled });
   } catch (error) {
+    if (error instanceof PayloadTooLargeError) return Response.json({ error: "Webhook payload is too large" }, { status: 413 });
     logServerError("whatsapp-webhook", error);
     return Response.json({ ok: false }, { status: 500 });
   }

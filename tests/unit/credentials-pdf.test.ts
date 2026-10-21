@@ -6,11 +6,11 @@ import { createCredentialsPdf } from "../../apps/web/src/app/(app)/platform/orga
 const account = {
   organizationName: "Example agency", slug: "example-agency", accountType: "PROPERTY_MANAGER",
   fullName: "Jane Example", username: "jane.example", email: "jane@example.test",
-  phone: null, plan: "FREE",
+  phone: null, plan: "FREE", setupUrl: "https://example.test/reset-password?token=setup-token",
 };
 
 test("creates a readable credentials PDF for an agency", async () => {
-  const bytes = await createCredentialsPdf(account, "Example-Temporary-Password", "https://example.test/login");
+  const bytes = await createCredentialsPdf(account, "https://example.test/login");
   assert.equal(new TextDecoder().decode(bytes.slice(0, 5)), "%PDF-");
   const pdf = await PDFDocument.load(bytes);
   assert.ok(pdf.getPageCount() >= 1);
@@ -18,7 +18,7 @@ test("creates a readable credentials PDF for an agency", async () => {
 });
 
 test("supports landlord details, Unicode, and long values without overflowing a page", async () => {
-  const bytes = await createCredentialsPdf({ ...account, accountType: "LANDLORD", organizationName: "Jane’s portfolio 🏠".repeat(30), fullName: "José Example", phone: "+254700000000" }, "unicode-🔐-password", "https://example.test/login");
+  const bytes = await createCredentialsPdf({ ...account, accountType: "LANDLORD", organizationName: "Jane’s portfolio 🏠".repeat(30), fullName: "José Example", phone: "+254700000000" }, "https://example.test/login");
   const pdf = await PDFDocument.load(bytes);
   assert.ok(pdf.getPageCount() > 1);
 });

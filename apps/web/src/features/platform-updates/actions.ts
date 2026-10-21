@@ -1,8 +1,9 @@
 "use server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { writePlatformAuditLog } from "@/lib/audit/security";
+import { UPDATE_NOTICE_CACHE_TAG } from "./service";
 import { UPDATE_NOTICE_ID, parseUpdateWindow } from "./policy";
 
 export type UpdateNoticeActionState = { error?: string; message?: string };
@@ -16,6 +17,7 @@ export async function publishUpdateNotice(_state: UpdateNoticeActionState, form:
   const data = { message, ...window, publishedByUserId: session.userId };
   await prisma.platformUpdateNotice.upsert({ where: { id: UPDATE_NOTICE_ID }, create: { id: UPDATE_NOTICE_ID, ...data }, update: data });
   await writePlatformAuditLog({ actorUserId: session.userId, action: "PLATFORM_UPDATE_NOTICE_PUBLISHED", entityType: "PlatformUpdateNotice", entityId: UPDATE_NOTICE_ID, afterState: { message, startsAt: window.startsAt.toISOString(), endsAt: window.endsAt.toISOString() } });
+  updateTag(UPDATE_NOTICE_CACHE_TAG);
   revalidatePath("/platform");
   return { message: "Update notice published. Users will see it within one minute." };
 }
@@ -26,6 +28,7 @@ export async function withdrawUpdateNotice(...args: [UpdateNoticeActionState, Fo
   void args;
   await prisma.platformUpdateNotice.deleteMany({ where: { id: UPDATE_NOTICE_ID } });
   await writePlatformAuditLog({ actorUserId: session.userId, action: "PLATFORM_UPDATE_NOTICE_WITHDRAWN", entityType: "PlatformUpdateNotice", entityId: UPDATE_NOTICE_ID });
+  updateTag(UPDATE_NOTICE_CACHE_TAG);
   revalidatePath("/platform");
   return { message: "Update notice withdrawn." };
 }

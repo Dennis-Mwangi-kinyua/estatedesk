@@ -142,7 +142,7 @@ export function TenantDashboardSidebar({
   return (
     <>
       <aside className="ed-shell-panel fixed inset-y-0 left-0 z-30 hidden w-72 flex-col border-r lg:flex">
-        <div className="border-b border-slate-200 px-5 py-5 dark:border-white/10">
+        <div className="flex h-[65px] shrink-0 items-center border-b border-border px-5">
           <TenantSidebarBrand organizationName={organizationName} />
         </div>
 

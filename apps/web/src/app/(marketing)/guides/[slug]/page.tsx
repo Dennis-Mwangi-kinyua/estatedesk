@@ -29,13 +29,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
 
-  return publicPageMetadata({
+  const metadata = publicPageMetadata({
     title: guide.title,
     description: guide.summary,
     path: getGuidePath(guide.slug),
     keywords: guide.keywords,
     type: "article",
   });
+  return {
+    ...metadata,
+    openGraph: {
+      ...metadata.openGraph,
+      type: "article",
+      publishedTime: guide.publishedAt,
+      modifiedTime: guide.publishedAt,
+      authors: ["EstateDesk"],
+      section: guide.category,
+      tags: guide.keywords,
+    },
+  };
 }
 
 export default async function GuideArticleRoute({ params }: PageProps) {

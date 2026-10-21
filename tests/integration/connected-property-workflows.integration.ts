@@ -20,9 +20,12 @@ async function fixture() {
 const future = (days: number) => new Date(Date.now() + days * 86400000).toISOString();
 test("concurrent overlapping bookings allow only one writer; other organizations cannot extend", { skip: !databaseUrl }, async () => {
   const f = await fixture();
-  const { saveReservation } = await import("../../apps/web/src/features/bnb/reservation-service");
+  const { saveReservation: saveScopedReservation } = await import("../../apps/web/src/features/bnb/reservation-service");
+  const saveReservation = (...args: Parameters<typeof saveScopedReservation>) => saveScopedReservation(args[0], args[1], args[2], args[3], { scopeType: "ORG", scopeId: "ORG_SCOPE" });
   try {
     const input = { guestName: "Guest", guestPhone: "", checkIn: future(1), checkOut: future(3) };
+    await assert.rejects(saveScopedReservation(f.org.id, f.listing.id, input), /Listing not found/);
+    await assert.rejects(saveScopedReservation(f.org.id, f.listing.id, input, undefined, { scopeType: "PROPERTY", scopeId: "unassigned-property" }), /Listing not found/);
     const results = await Promise.allSettled([saveReservation(f.org.id, f.listing.id, input), saveReservation(f.org.id, f.listing.id, input)]);
     assert.equal(results.filter(r => r.status === "fulfilled").length, 1);
     assert.equal(await f.prisma.bnbReservation.count({ where: { listingId: f.listing.id } }), 1);
@@ -32,7 +35,8 @@ test("concurrent overlapping bookings allow only one writer; other organizations
 });
 test("an extension cannot overwrite the next booking; a valid extension updates availability", { skip: !databaseUrl }, async () => {
   const f = await fixture();
-  const { saveReservation } = await import("../../apps/web/src/features/bnb/reservation-service");
+  const { saveReservation: saveScopedReservation } = await import("../../apps/web/src/features/bnb/reservation-service");
+  const saveReservation = (...args: Parameters<typeof saveScopedReservation>) => saveScopedReservation(args[0], args[1], args[2], args[3], { scopeType: "ORG", scopeId: "ORG_SCOPE" });
   try {
     const first = { guestName: "First guest", guestPhone: "", checkIn: future(1), checkOut: future(3) };
     const saved = await saveReservation(f.org.id, f.listing.id, first);

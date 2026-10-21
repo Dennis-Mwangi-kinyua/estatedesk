@@ -1,10 +1,10 @@
 export class PayloadTooLargeError extends Error {}
 
 /** Enforce the actual streamed byte count, including requests without Content-Length. */
-export async function readBoundedJson(request: Request, maxBytes: number): Promise<unknown> {
+export async function readBoundedText(request: Request, maxBytes: number): Promise<string> {
   const declared = Number(request.headers.get("content-length"));
   if (Number.isFinite(declared) && declared > maxBytes) throw new PayloadTooLargeError("Payload too large.");
-  if (!request.body) throw new SyntaxError("Missing JSON payload.");
+  if (!request.body) return "";
   const reader = request.body.getReader();
   const decoder = new TextDecoder();
   let bytes = 0;
@@ -20,6 +20,10 @@ export async function readBoundedJson(request: Request, maxBytes: number): Promi
       }
       text += decoder.decode(value, { stream: true });
     }
-    return JSON.parse(text + decoder.decode());
+    return text + decoder.decode();
   } finally { reader.releaseLock(); }
+}
+
+export async function readBoundedJson(request: Request, maxBytes: number): Promise<unknown> {
+  return JSON.parse(await readBoundedText(request, maxBytes));
 }

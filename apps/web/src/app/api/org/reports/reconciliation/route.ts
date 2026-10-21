@@ -1,7 +1,7 @@
 import { safeApiErrorResponse } from "@/lib/errors/server-error-log";
 import { csvResponse } from "@/lib/csv";
 import { DataExportTooLargeError } from "@/lib/data-export/limits";
-import { requireOrgRole } from "@/lib/permissions/guards";
+import { requireOrgPermission } from "@/lib/permissions/guards";
 import {
   buildPaymentReconciliationCsv,
   parseReconciliationStatus,
@@ -10,7 +10,8 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const session = await requireOrgRole(["ADMIN", "MANAGER", "ACCOUNTANT"]);
+  const session = await requireOrgPermission("reports.export");
+  if (session.membershipScope?.scopeType !== "ORG") return Response.json({ error: "Organization-wide export access is required." }, { status: 403 });
 
   if (!session.activeOrgId) {
     return Response.json({ error: "Missing active organization." }, { status: 400 });

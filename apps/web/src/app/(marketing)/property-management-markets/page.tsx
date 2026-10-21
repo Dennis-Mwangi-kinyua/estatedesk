@@ -14,7 +14,7 @@ import { serializeJsonForHtml } from "@/lib/security/safe-json";
 export const metadata: Metadata = publicPageMetadata({
   title: "Property Management Software Markets and Use Cases",
   description:
-    "Explore EstateDesk property management software pages for Kenya, East Africa, Dubai, UAE, landlords, rent tracking, water billing, vacancies, services, and pricing.",
+    "Explore EstateDesk property management software pages for Kenya, Africa, Dubai, the Middle East, landlords, rent tracking, water billing, vacancies, services, and pricing.",
   path: "/property-management-markets",
   keywords: marketCoverageKeywords,
 });
@@ -88,7 +88,7 @@ export default function PropertyManagementMarketsPage() {
             </h1>
             <p className="mt-4 text-base leading-8 text-neutral-600 dark:text-[#d1d5db] sm:text-lg">
               Use this index to find the most relevant EstateDesk page for your
-              portfolio: Kenya, East Africa, Dubai, UAE, landlord operations,
+              portfolio: Kenya, Africa, Dubai, Middle East owners, landlord operations,
               rent tracking, water billing, vacancies, services, and pricing.
             </p>
           </div>
@@ -136,7 +136,7 @@ export default function PropertyManagementMarketsPage() {
           <IndexFact
             icon={<Globe2 className="h-4 w-4" />}
             title="Regional coverage"
-            body="Kenya, East Africa, Dubai, UAE, diaspora, and remote rental operations."
+            body="Kenyan rental operations, African market evaluation, and remote oversight for Middle East and diaspora owners."
           />
           <IndexFact
             icon={<Building2 className="h-4 w-4" />}
@@ -145,8 +145,8 @@ export default function PropertyManagementMarketsPage() {
           />
           <IndexFact
             icon={<ShieldCheck className="h-4 w-4" />}
-            title="Crawler-safe"
-            body="Human-readable public pages, canonical URLs, sitemap inclusion, and structured data."
+            title="Plan your rollout"
+            body="Confirm your property country, currency, payment providers and reporting needs before a pilot."
           />
         </div>
       </section>

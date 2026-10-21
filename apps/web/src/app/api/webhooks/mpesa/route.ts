@@ -1,3 +1,4 @@
+import { PayloadTooLargeError, readBoundedJson } from "@/lib/security/bounded-json";
 import { getMpesaConfigs } from "@/lib/mpesa/config";
 import { getMpesaConfigForCallback } from "@/lib/mpesa/callback-config";
 import { logServerError } from "@/lib/errors/server-error-log";
@@ -50,7 +51,10 @@ export async function POST(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const payload = (await request.json().catch(() => null)) as {
+  let payloadInput: unknown;
+  try { payloadInput = await readBoundedJson(request, 1_000_000); }
+  catch (error) { return Response.json({ error: "Invalid callback payload" }, { status: error instanceof PayloadTooLargeError ? 413 : 400 }); }
+  const payload = payloadInput as {
     Body?: {
       stkCallback?: {
         MerchantRequestID?: string;

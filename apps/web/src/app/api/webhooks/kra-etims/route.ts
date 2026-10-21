@@ -1,3 +1,4 @@
+import { PayloadTooLargeError, readBoundedText } from "@/lib/security/bounded-json";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import { verifyEtimsWebhookSignature } from "@/lib/tax/etims-client";
@@ -8,7 +9,7 @@ import { verifyEtimsWebhookSignature } from "@/lib/tax/etims-client";
  */
 export async function POST(request: Request) {
   try {
-    const raw = await request.text();
+    const raw = await readBoundedText(request, 1_000_000);
     const signature =
       request.headers.get("x-kra-signature") ||
       request.headers.get("x-etims-signature") ||
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
     await recordEvent(200, "eTIMS webhook received", body);
     return Response.json({ ok: true });
   } catch (error) {
+    if (error instanceof PayloadTooLargeError) return Response.json({ error: "Webhook payload is too large" }, { status: 413 });
     logServerError("kra-etims-webhook", error);
     return Response.json({ ok: false }, { status: 500 });
   }

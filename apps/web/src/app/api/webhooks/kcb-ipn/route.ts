@@ -1,3 +1,4 @@
+import { PayloadTooLargeError, readBoundedText } from "@/lib/security/bounded-json";
 import { Prisma } from "@prisma/client";
 import { logServerError } from "@/lib/errors/server-error-log";
 import {
@@ -60,7 +61,11 @@ export async function POST(request: Request) {
     });
   }
 
-  const rawBody = await request.text();
+  let rawBody: string;
+  try { rawBody = await readBoundedText(request, 1_000_000); }
+  catch (error) {
+    return Response.json(kcbIpnAck("UNKNOWN", error instanceof PayloadTooLargeError ? 413 : 400, "Invalid webhook payload"), { status: error instanceof PayloadTooLargeError ? 413 : 400 });
+  }
   const url = new URL(request.url);
   const signatureHeader =
     request.headers.get("signature") ??

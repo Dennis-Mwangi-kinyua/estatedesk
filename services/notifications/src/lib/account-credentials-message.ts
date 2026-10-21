@@ -1,7 +1,9 @@
 export type AccountCredentialsMessageInput = {
   fullName: string;
   username: string;
+  /** Ignored for backward compatibility. Passwords must never be shared. */
   password?: string;
+  setupUrl?: string;
   organizationName?: string;
   email?: string | null;
   role?: string;
@@ -21,10 +23,9 @@ export function buildAccountCredentialsMessage(
     input.loginUrl ? `Login: ${input.loginUrl}` : null,
     `Username: ${input.username}`,
     input.email ? `Email: ${input.email}` : null,
-    input.password ? `Temporary password: ${input.password}` : "Your temporary password will be shared separately.",
+    input.setupUrl ? `Set your password: ${input.setupUrl}` : "Sign in with your existing password, or use Forgot password to recover access.",
     "",
-    "To get started, open the login link and sign in with your username and temporary password.",
-    "You will be asked to choose a new password on your first sign-in.",
+    input.setupUrl ? "This setup link expires in one hour and can be used once. Choose your own password before signing in." : null,
     "Keep your login details private. If you need help, contact the administrator who created your account.",
     "",
     "Kind regards,",

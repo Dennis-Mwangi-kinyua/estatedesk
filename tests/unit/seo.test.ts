@@ -45,6 +45,19 @@ describe("seo helpers", () => {
     assert.equal(absoluteUrl("pricing"), `${DEFAULT_SITE_URL}/pricing`);
   });
 
+  it("keeps canonical origins free of paths, queries and invalid schemes", () => {
+    for (const raw of ["http://www.estatedesk.co.ke/path?tracking=1", "https://estatedesk.co.ke/path"]) {
+      process.env.NEXT_PUBLIC_APP_URL = raw;
+      assert.equal(getSiteUrl(), DEFAULT_SITE_URL);
+    }
+    process.env.NEXT_PUBLIC_APP_URL = " https://preview.example/path?tracking=1 ";
+    assert.equal(absoluteUrl("/pricing"), "https://preview.example/pricing");
+    for (const raw of ["not a URL", "javascript:alert(1)"]) {
+      process.env.NEXT_PUBLIC_APP_URL = raw;
+      assert.equal(getSiteUrl(), DEFAULT_SITE_URL);
+    }
+  });
+
   it("creates indexable public page metadata with canonical and social data", () => {
     process.env.NEXT_PUBLIC_APP_URL = "https://app.example";
 
@@ -108,7 +121,7 @@ describe("seo helpers", () => {
     assert.equal(authPageMetadata.robots.googleBot.follow, true);
   });
 
-  it("indexes every public no-login page in the manifest, including auth entry points", () => {
+  it("indexes discovery and sign-in pages while excluding token and recovery utilities", () => {
     const publicPaths = publicSiteIndexItems.map((item) => item.path);
 
     assert.ok(publicPaths.includes("/property-management-markets"));
@@ -118,9 +131,9 @@ describe("seo helpers", () => {
     assert.ok(publicPaths.includes("/terms"));
     assert.ok(publicPaths.includes("/login"));
     assert.ok(publicPaths.includes("/register"));
-    assert.ok(publicPaths.includes("/forgot-password"));
-    assert.ok(publicPaths.includes("/reset-password"));
-    assert.ok(publicPaths.includes("/verify-email"));
+    assert.ok(!publicPaths.includes("/forgot-password"));
+    assert.ok(!publicPaths.includes("/reset-password"));
+    assert.ok(!publicPaths.includes("/verify-email"));
     assert.ok(!publicPaths.some((path) => path.startsWith("/accept-invite")));
     assert.ok(!publicPaths.some((path) => path.startsWith("/dashboard")));
   });

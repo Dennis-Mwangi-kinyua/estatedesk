@@ -6,6 +6,7 @@ import type {
 } from "@/app/(app)/dashboard/landlord/_lib/types";
 
 export type LandlordProfileForBuild = {
+  org?: { currencyCode: string };
   displayName: string;
   assignments: Array<{
     property: {
@@ -59,7 +60,7 @@ export function buildPropertiesFromProfile(
   const propertyMap = new Map<string, LandlordProperty>();
 
   for (const assignment of profile.assignments) {
-    if (assignment.property) {
+    if (assignment.property && !assignment.unit) {
       propertyMap.set(assignment.property.id, {
         id: assignment.property.id,
         name: assignment.property.name,
@@ -225,6 +226,7 @@ export function buildDashboardData(
         : "Needs attention";
 
   return {
+    currencyCode: profile.org?.currencyCode ?? "KES",
     displayName: profile.displayName,
     currentPeriod,
     properties,

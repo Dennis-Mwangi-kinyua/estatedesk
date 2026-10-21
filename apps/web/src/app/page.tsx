@@ -5,9 +5,9 @@ import { publicPageMetadata } from "@/lib/seo";
 export const revalidate = 60;
 
 export const metadata: Metadata = publicPageMetadata({
-  title: "Property Management Software for Kenya, East Africa and Dubai",
+  title: "Property Management Software in Kenya | EstateDesk",
   description:
-    "EstateDesk is property management software for landlords and property managers in Kenya, East Africa, Dubai, and global rental markets to manage tenants, leases, rent, water bills, caretakers, inspections, maintenance, reports, and vacant houses online.",
+    "Manage rentals in Kenya with EstateDesk. Track rent, M-Pesa payments, tenants, water bills and accounting. Compare plans and start free.",
   path: "/",
   keywords: [
     "property management software in Kenya",

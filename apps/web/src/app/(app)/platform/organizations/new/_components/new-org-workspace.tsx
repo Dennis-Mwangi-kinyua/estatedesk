@@ -40,10 +40,9 @@ export function NewOrganizationWorkspace({
     if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); heading.scrollIntoView({ block: "nearest" }); }
   }, [form.step]);
   useEffect(() => { if (form.state.error && !form.pending) { errorRef.current?.focus(); errorRef.current?.scrollIntoView({ block: "nearest" }); } }, [form.state.error, form.pending]);
-  const [submittedPassword, setSubmittedPassword] = useState("");
 
   if (form.state.success && form.state.createdAccount) {
-    return <AccountCreated account={form.state.createdAccount} temporaryPassword={submittedPassword} />;
+    return <AccountCreated account={form.state.createdAccount} />;
   }
 
   return (
@@ -114,7 +113,6 @@ export function NewOrganizationWorkspace({
             event.preventDefault();
           } else {
             form.captureSubmission();
-            setSubmittedPassword(form.adminPassword);
           }
         }}
       >

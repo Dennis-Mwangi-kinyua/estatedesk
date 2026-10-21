@@ -8,7 +8,7 @@ export function nativeUnitScope(orgId: string, scope: Scope): Prisma.UnitWhereIn
     ...(scope?.scopeType === "PROPERTY" ? { propertyId: scope.scopeId }
       : scope?.scopeType === "BUILDING" ? { buildingId: scope.scopeId }
       : scope?.scopeType === "UNIT" ? { id: scope.scopeId }
-      : scope && scope.scopeType !== "ORG" ? { id: { in: [] } } : {}),
+      : scope?.scopeType !== "ORG" ? { id: { in: [] } } : {}),
   };
 }
 
@@ -18,5 +18,5 @@ export function nativeWorkspaceEntry<T extends { path: string }>(links: T[], pat
 }
 
 export function nativeOrgWideAccess(scope: Scope) {
-  return !scope || scope.scopeType === "ORG";
+  return scope?.scopeType === "ORG";
 }

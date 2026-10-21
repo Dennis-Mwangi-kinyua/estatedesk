@@ -6,7 +6,7 @@ export type CreateTenantActionState = {
   credentials?: {
     tenantName: string;
     username: string;
-    password: string;
+    setupUrl: string;
     email: string | null;
     phone: string;
     loginUrl: string;

@@ -25,7 +25,7 @@ export function CaretakerDashboardHeader({
   return (
     <>
       <header className="ed-shell-panel sticky top-0 z-40 shrink-0 border-b shadow-sm">
-        <div className="flex h-auto min-h-[72px] flex-col gap-3 px-3 py-3 sm:min-h-[68px] sm:flex-row sm:items-center sm:justify-between sm:px-6 xl:px-8">
+        <div className="flex h-auto min-h-[72px] flex-col gap-3 px-3 py-3 sm:min-h-[68px] xl:h-[68px] xl:py-0 sm:flex-row sm:items-center sm:justify-between sm:px-6 xl:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button data-workspace-action="true"
               ref={menuButtonRef}

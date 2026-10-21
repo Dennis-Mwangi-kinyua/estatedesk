@@ -7,11 +7,15 @@ export function ScheduledUpdateBanner() {
   const [notice, setNotice] = useState<UpdateNotice | null>(null);
   useEffect(() => {
     const controller = new AbortController();
+    let refreshing = false;
     const refresh = async () => {
+      if (refreshing || document.visibilityState !== "visible") return;
+      refreshing = true;
       try {
         const response = await fetch("/api/platform/update-notice", { cache: "no-store", signal: controller.signal });
         if (response.ok) setNotice(await response.json());
       } catch { /* Keep the last successfully fetched notice during network interruptions. */ }
+      finally { refreshing = false; }
     };
     void refresh();
     const timer = setInterval(() => { if (document.visibilityState === "visible") void refresh(); }, 60000);

@@ -40,6 +40,15 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWo
   const section = path === "/api-keys" ? "api-keys" : path.replace(kind === "platform" ? /^\/platform\/?/ : kind === "landlord" ? /^\/dashboard\/landlord\/?/ : /^\/dashboard\/org\/?/, "");
   const restricted = { records: [], notice: "This view requires organization-wide access. Your assigned property, building or unit scope remains in effect." };
   if (recordId && section !== "agreements" && section !== "airbnb/bookings" && !(kind === "landlord" && ["property", "unit"].includes(section))) return { records: [], notice: "This record destination is unavailable." };
+  if (section === "landlords" && (kind === "platform" || kind === "organization")) {
+    if (kind === "organization" && (!wide || !["ADMIN", "MANAGER"].includes(session.activeOrgRole ?? ""))) return restricted;
+    const rows = await prisma.landlordProfile.findMany({
+      where: { ...(kind === "organization" ? { orgId } : {}), deletedAt: null, ...(q ? { OR: [{ displayName: contains }, { user: { username: contains } }, { org: { name: contains } }] } : {}) },
+      ...limit, orderBy: newest,
+      select: { id: true, displayName: true, email: true, phone: true, isActive: true, user: { select: { username: true, status: true } }, org: { select: { name: true } }, _count: { select: { assignments: { where: { active: true, endedAt: null } } } } },
+    });
+    return { records: rows.map(row => card(row.id, row.displayName, row.isActive ? row.user.status : "INACTIVE", { Organization: row.org.name, Username: row.user.username, Email: row.email, Phone: row.phone, Assignments: row._count.assignments })), notice: "Use the web landlord directory to create accounts or change property assignments." };
+  }
   if (section === "help" || section === "developer/docs") {
     const workspace = kind === "platform" ? "platform" : kind === "landlord" ? "landlord" : "org";
     const articles = guideArticles.filter(article => canAccessGuideSlug(article.slug, workspace, session.activeOrgRole) && (!q || `${article.title} ${article.summary}`.toLowerCase().includes(q.toLowerCase())));
@@ -53,7 +62,7 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWo
       select: {
         id: true, displayName: true,
         assignments: {
-          where: { active: true, endedAt: null },
+          where: { orgId, active: true, endedAt: null, OR: [{ property: { orgId, deletedAt: null, isActive: true } }, { unit: { deletedAt: null, isActive: true, property: { orgId, deletedAt: null, isActive: true } } }] },
           select: {
             property: { select: {
               id: true, name: true, location: true, address: true,
@@ -77,7 +86,7 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWo
       const property = assignment.property ?? assignment.unit?.property;
       if (!property) continue;
       const entry = properties.get(property.id) ?? { name: property.name, location: property.location, address: property.address, units: new Map() };
-      if (assignment.property) for (const unit of assignment.property.units) { const lease = unit.leases[0]; entry.units.set(unit.id, { houseNo: unit.houseNo, status: unit.status, rent: Number(unit.rentAmount), tenant: lease?.tenant.fullName ?? null, leaseStart: lease?.startDate ?? null, leaseEnd: lease?.endDate ?? null, leaseRent: lease ? Number(lease.monthlyRent) : null }); }
+      if (assignment.property && !assignment.unit) for (const unit of assignment.property.units) { const lease = unit.leases[0]; entry.units.set(unit.id, { houseNo: unit.houseNo, status: unit.status, rent: Number(unit.rentAmount), tenant: lease?.tenant.fullName ?? null, leaseStart: lease?.startDate ?? null, leaseEnd: lease?.endDate ?? null, leaseRent: lease ? Number(lease.monthlyRent) : null }); }
       if (assignment.unit) { const unit = assignment.unit, lease = unit.leases[0]; entry.units.set(unit.id, { houseNo: unit.houseNo, status: unit.status, rent: Number(unit.rentAmount), tenant: lease?.tenant.fullName ?? null, leaseStart: lease?.startDate ?? null, leaseEnd: lease?.endDate ?? null, leaseRent: lease ? Number(lease.monthlyRent) : null }); }
       properties.set(property.id, entry);
     }

@@ -105,6 +105,14 @@ export async function getProductionReadinessReport() {
   });
 
   checks.push({
+    id: "trusted-login-ip",
+    label: "Trusted login client IP header",
+    status: envConfigured("TRUSTED_CLIENT_IP_HEADER") ? "pass" : "warn",
+    detail: "Configure only a header overwritten by the trusted ingress proxy. Without it, login IP limits use a shared bucket. Verify direct origin access is blocked.",
+    blocking: false,
+  });
+
+  checks.push({
     id: "security-alerts",
     label: "Security alert webhook",
     status:

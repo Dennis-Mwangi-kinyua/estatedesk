@@ -8,14 +8,14 @@ const caretaker = (paths: string[]) => paths.map(path => `/dashboard/caretaker${
 const platform = (paths: string[]) => paths.map(path => `/platform${path ? `/${path}` : ""}`);
 
 const platformAccount: NavigationSection[] = [
-  { label: "Access & security", hrefs: platform(["users", "admins", "permissions", "identity-verification", "agreements", "security", "audit-logs", "support-access"]) },
+  { label: "Access & security", hrefs: platform(["users", "admins", "landlords", "permissions", "identity-verification", "agreements", "security", "audit-logs", "support-access"]) },
   { label: "Settings & help", hrefs: platform(["settings", "help"]) },
 ];
 
 export const WORKSPACE_NAVIGATION: Record<NavigationWorkspace, readonly NavigationSection[]> = {
   org: [
     { label: "Workspace", hrefs: org(["", "insights"]) },
-    { label: "Portfolio & occupancy", hrefs: org(["properties", "buildings", "units", "airbnb", "tenants", "leases", "vacancy-inquiries", "verify-tenant", "identity-verification"]) },
+    { label: "Portfolio & occupancy", hrefs: org(["properties", "landlords", "buildings", "units", "airbnb", "tenants", "leases", "vacancy-inquiries", "verify-tenant", "identity-verification"]) },
     { label: "Finance", hrefs: org(["payments", "charges", "water-bills", "accounting", "accounting/requests", "finance-requests", "expenditures", "taxes", "reports"]) },
     { label: "Operations", hrefs: [...org(["issues", "issues/resolution-reports", "inspections", "move-outs", "service-providers"]), "/dashboard/gate"] },
     { label: "Communication", hrefs: org(["notifications", "community"]) },

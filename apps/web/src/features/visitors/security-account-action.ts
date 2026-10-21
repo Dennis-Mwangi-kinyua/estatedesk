@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { assertCanCreateStaffUser } from "@/lib/billing/access";
+import { createAccountSetupUrl } from "@/lib/auth/account-setup";
 import { accountLoginUrl } from "@/lib/notifications/account-login-url";
 import type { CreatedAccountLogin } from "@/lib/notifications/recipient-message";
 
@@ -24,9 +25,11 @@ export async function createSecurityAccount(_state: SecurityAccountState, form: 
   catch (error) { return { error: error instanceof Error ? error.message : "Staff account limit reached." }; }
   const password = randomBytes(18).toString("base64url");
   const passwordHash = await hash(password, 12);
+  let setupUrl = "";
   try {
     await prisma.$transaction(async tx => {
       const user = await tx.user.create({ data: { fullName, username, passwordHash, mustChangePassword: true, createdByUserId: session.userId } });
+      setupUrl = await createAccountSetupUrl(tx, user.id);
       const membership = await tx.membership.create({ data: { orgId, userId: user.id, role: "SECURITY", scopeType: "PROPERTY", scopeId: property.id } });
       await tx.gateAssignment.create({ data: { orgId, userId: user.id, propertyId: property.id } });
       await tx.auditLog.create({ data: { orgId, actorUserId: session.userId, action: "SECURITY_ACCOUNT_CREATED", entityType: "Membership", entityId: membership.id, metadata: { propertyId: property.id, username } } });
@@ -39,5 +42,5 @@ export async function createSecurityAccount(_state: SecurityAccountState, form: 
   revalidatePath("/dashboard/gate");
   revalidatePath("/dashboard/tenant", "layout");
   revalidatePath("/staff");
-  return { credentials: { fullName, username, password, role: "Security", loginUrl: accountLoginUrl() } };
+  return { credentials: { fullName, username, setupUrl, role: "Security", loginUrl: accountLoginUrl() } };
 }

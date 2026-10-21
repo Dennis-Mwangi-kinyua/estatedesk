@@ -63,7 +63,7 @@ body.estate-glass-system {
     box-shadow: inset 0 1px 0 var(--system-glass-border), 0 4px 12px rgb(44 71 121 / 5%);
   }
   body.estate-glass-system :is(aside, .system-glass-sidebar) { border-color: var(--system-glass-border); }
-  body.estate-glass-system aside.ed-shell-panel { border-radius: 0 1.75rem 1.75rem 0; }
+  body.estate-glass-system :is(aside, header, footer).ed-shell-panel { border-radius: 0; }
   body.estate-glass-system nav a[aria-current="page"] {
     border-radius: 1rem;
     box-shadow: inset 0 1px 0 var(--system-glass-border), 0 4px 14px rgb(44 71 121 / 6%);

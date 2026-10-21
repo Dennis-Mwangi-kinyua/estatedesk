@@ -10,6 +10,7 @@ const sampleInput = {
   fullName: "Jane Wanjiku",
   username: "janewanjiku",
   password: "TempPass42",
+  setupUrl: "https://app.estatedesk.com/reset-password?token=setup-token",
   role: "TENANT",
   loginUrl: "https://app.estatedesk.com/login",
 };
@@ -20,7 +21,9 @@ describe("account credentials share helpers", () => {
 
     assert.match(message, /Jane Wanjiku/);
     assert.match(message, /Username: janewanjiku/);
-    assert.match(message, /Temporary password: TempPass42/);
+    assert.ok(!message.includes("TempPass42"));
+    assert.match(message, /Set your password: https:\/\/app.estatedesk.com\/reset-password/);
+    assert.match(message, /expires in one hour/);
     assert.match(message, /Login: https:\/\/app\.estatedesk\.com\/login/);
   });
 
@@ -40,7 +43,8 @@ describe("account credentials share helpers", () => {
     const href = buildAccountCredentialsWhatsAppHref(sampleInput, "0712345678");
 
     assert.ok(href.startsWith("https://wa.me/254712345678?text="));
-    assert.match(decodeURIComponent(href), /Temporary password: TempPass42/);
+    assert.ok(!decodeURIComponent(href).includes("TempPass42"));
+    assert.match(decodeURIComponent(href), /Set your password:/);
   });
 
   it("falls back to generic share links when contact details are missing", () => {
