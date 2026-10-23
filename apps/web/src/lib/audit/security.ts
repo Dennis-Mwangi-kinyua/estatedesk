@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { prisma } from "@/lib/prisma";
 import type { AppSession } from "@/lib/auth/session";
+import { deniedAccessAction } from "./denied-access-action";
 
 function firstHeader(headersList: Headers, names: string[]) {
   for (const name of names) {
@@ -63,13 +64,14 @@ export async function auditDeniedAccess(input: {
   if (!input.session.activeOrgId) return;
 
   try {
+    const action = deniedAccessAction(await headers());
     const request = await getRequestAuditMetadata();
 
     await prisma.auditLog.create({
       data: {
         orgId: input.session.activeOrgId,
         actorUserId: input.session.userId,
-        action: "ACCESS_DENIED",
+        action,
         entityType: input.entityType ?? "Route",
         entityId: input.entityId ?? "unknown",
         ip: request.ip,
@@ -80,6 +82,7 @@ export async function auditDeniedAccess(input: {
           required: input.required ?? [],
           activeOrgRole: input.session.activeOrgRole,
           platformRole: input.session.platformRole,
+          ...(request.pathname ? { pathname: request.pathname } : {}),
           geo: request.geo,
         },
       },
