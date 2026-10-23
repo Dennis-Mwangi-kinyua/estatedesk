@@ -1,5 +1,5 @@
 import { expect, test } from "playwright/test";
-import { build, type Plugin } from "esbuild";
+import { build, type Plugin } from "./build-fixture";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { installWorkspaceStyles } from "./workspace-styles";

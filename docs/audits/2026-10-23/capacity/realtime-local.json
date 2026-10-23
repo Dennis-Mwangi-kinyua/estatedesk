@@ -1,0 +1,11 @@
+{
+  "environment": "Isolated local application and database, not deployed capacity evidence",
+  "requested": 1000,
+  "ready": 1000,
+  "peakSimultaneousStreams": 1000,
+  "failed": 0,
+  "expectedRecipients": 50,
+  "delivered": 50,
+  "foreignEvents": 0,
+  "passed": true
+}

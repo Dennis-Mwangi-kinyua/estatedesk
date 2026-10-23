@@ -51,3 +51,27 @@ test("load harness fails streamed login redirects and terminates stalled request
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("load harness stops a sustained slow stage before creating the full backlog", async () => {
+  const { createServer } = await import("node:http");
+  const { execFile } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const { readFile } = await import("node:fs/promises");
+  const server = createServer((_, response) => { setTimeout(() => response.end("ok"), 30); });
+  await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
+  const directory = await mkdtemp(join(tmpdir(), "load-backlog-"));
+  try {
+    const port = (server.address() as { port: number }).port;
+    const routes = join(directory, "routes.json");
+    const output = join(directory, "report.json");
+    await writeFile(routes, JSON.stringify([{ path: "/", expectedStatus: [200] }]));
+    await assert.rejects(promisify(execFile)(process.execPath, ["scripts/load-test.mjs"], { env: { ...process.env, LOAD_BASE_URL: `http://127.0.0.1:${port}`, LOAD_ROUTES_FILE: routes, LOAD_OUTPUT: output, LOAD_PROFILE: "smoke", LOAD_RPM: "60000", LOAD_DURATION_SECONDS: "1", LOAD_CONCURRENCY: "2", LOAD_FAIL_ON_P95_MS: "5", LOAD_ABORT_AFTER_REQUESTS: "50", LOAD_SESSIONS_FILE: "" }, timeout: 10000 }));
+    const report = JSON.parse(await readFile(output, "utf8"));
+    assert.match(report.summary.abortReason, /recent request p95/);
+    assert.ok(report.summary.completed >= 50 && report.summary.completed < 1000);
+  } finally {
+    server.closeAllConnections();
+    await new Promise<void>(resolve => server.close(() => resolve()));
+    await rm(directory, { recursive: true, force: true });
+  }
+});

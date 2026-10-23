@@ -1,4 +1,5 @@
 import { vacancyCosts } from "@/lib/vacancy-costs";
+import { vacancyRecordDate } from "@/lib/vacancy-record-date";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
@@ -251,6 +252,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
     const rentLabel = formatCurrency(listing.rentAmount);
     const shareTitle = `${listing.property.name} Unit ${listing.houseNo} is vacant`;
     const shareText = `${shareTitle} in ${place}. Rent: ${rentLabel}. View details on EstateDesk.`;
+    const recordDate = vacancyRecordDate(listing.updatedAt);
 
     return {
       id: listing.id,
@@ -273,7 +275,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
         : "Baths not listed",
       rentLabel,
       initialCostLabel: `${vacancyCosts(listing).complete ? "Estimated initial cost" : "Known costs from"} ${formatCurrency(vacancyCosts(listing).knownTotal)}`,
-      updatedLabel: `Record updated ${listing.updatedAt.toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi", month: "short", day: "numeric", year: "numeric" })}`,
+      updatedLabel: recordDate ? `Record updated ${recordDate}` : "Record update date unavailable",
       serviceChargeLabel: listing.serviceCharge != null
         ? `Service charge ${formatCurrency(listing.serviceCharge)}`
         : "Service charge: confirm with manager",

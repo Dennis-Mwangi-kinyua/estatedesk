@@ -1,6 +1,6 @@
 import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 import {expect, test} from "playwright/test";
-import {build} from "esbuild";
+import {build} from "./build-fixture";
 import path from "node:path";
 test("payments provide organisation links and readable responsive themes", async ({page}, testInfo) => {
   const errors: string[] = [];

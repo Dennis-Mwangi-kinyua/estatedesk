@@ -1,4 +1,5 @@
 import { VacancyCostSummary } from "@/components/marketing/vacancy-cost-summary";
+import { vacancyRecordDate } from "@/lib/vacancy-record-date";
 import { rentalLandingRobots } from "@/lib/seo/rental-landing-metadata";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -540,6 +541,7 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
   const boundInquiryAction = sendVacancyInquiryAction.bind(null, publicSlug);
   const propertyNotes = unit.property?.notes?.trim() || null;
   const unitNotes = unit.notes?.trim() || null;
+  const recordDate = vacancyRecordDate(unit.updatedAt);
   const relatedListingCards = relatedVacancies.map((listing) => {
     const relatedPlace =
       listing.property.location ?? listing.property.address ?? listing.property.name;
@@ -676,7 +678,7 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
             />
             <VacancyDetailHighlights highlights={highlights} />
             <VacancyCostSummary costs={{ rentAmount: unit.rentAmount, depositAmount: unit.depositAmount, serviceCharge: unit.serviceCharge, garbageFee: unit.garbageFee, securityFee: unit.securityFee, viewingFeeRequired: unit.viewingFeeRequired, viewingFeeAmount: unit.viewingFeeAmount }} currency={DEFAULT_CURRENCY} />
-            <p className="text-sm text-muted-foreground">Listing record updated {unit.updatedAt.toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi", year: "numeric", month: "short", day: "numeric" })}. Confirm current availability with the managing office.</p>
+            <p className="text-sm text-muted-foreground">{recordDate ? `Listing record updated ${recordDate}.` : "Listing record update date unavailable."} Confirm current availability with the managing office.</p>
             {isUsefulAddress(unit.property?.address) || propertyNotes || unitNotes ? (
               <VacancyDetailDescription
                 address={isUsefulAddress(unit.property?.address) ? unit.property?.address : null}

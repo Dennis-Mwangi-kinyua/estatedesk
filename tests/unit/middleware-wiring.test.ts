@@ -5,12 +5,25 @@ import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { proxy } from "../../apps/web/proxy";
 import { getSessionCookieName } from "../../apps/web/src/lib/auth/cookie-policy";
+import { createSessionCookieValue } from "../../apps/web/src/lib/auth/cookies";
+import { randomBytes } from "node:crypto";
 import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
 import { config as proxyConfig } from "../../apps/web/src/proxy";
 
 const ROOT = join(import.meta.dirname, "..", "..");
 
 describe("middleware wiring", () => {
+  it("gives signed-in users separate page budgets behind a shared IP", () => {
+    const tokens = [randomBytes(32).toString("hex"), randomBytes(32).toString("hex")];
+    const request = (token: string) => new NextRequest("https://example.test/dashboard/org/tenants", { headers: { "x-forwarded-for": "192.0.2.178", cookie: `${getSessionCookieName()}=${createSessionCookieValue(token)}` } });
+    for (let i = 0; i < 30; i++) for (const token of tokens) assert.equal(proxy(request(token)).status, 200);
+    for (const token of tokens) assert.equal(proxy(request(token)).status, 429);
+  });
+  it("does not let invented session signatures bypass the IP page budget", () => {
+    const request = () => new NextRequest("https://example.test/dashboard/org/tenants", { headers: { "x-forwarded-for": "192.0.2.179", cookie: `${getSessionCookieName()}=v1.${randomBytes(32).toString("hex")}.${"b".repeat(32)}` } });
+    for (let i = 0; i < 30; i++) assert.equal(proxy(request()).status, 200);
+    assert.equal(proxy(request()).status, 429);
+  });
   it("runs security checks for protected URLs containing dots and encoded dots", () => {
     for (const path of ["/api/receipts/invoice.pdf", "/dashboard/org/acme.co", "/platform/users/person%2Ename", "/api/private.json"]) {
       assert.equal(unstable_doesMiddlewareMatch({ config: proxyConfig, url: `https://example.test${path}` }), true, path);

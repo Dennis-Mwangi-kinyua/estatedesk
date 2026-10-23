@@ -1,0 +1,105 @@
+{
+  "checkedAt": "2026-10-23T20:02:34.752Z",
+  "environment": "Live database reached from the local test client, five database connections maximum.",
+  "limitations": "Read-only SQL over existing organization records; no authenticated HTTP sessions, browser rendering, write workflows, or 1,000 distinct users. RPM counts SQL workload operations, not website requests.",
+  "readOnlyVerified": true,
+  "results": [
+    {
+      "offeredOperationsPerMinute": 60,
+      "passed": true,
+      "maxPoolWaiting": 0,
+      "poolErrors": 0,
+      "requestedRpm": 60,
+      "suppliedSessions": 1,
+      "exercisedSessions": 1,
+      "achievedRpm": 62,
+      "completed": 30,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 29.2,
+      "schedulingDelay": {
+        "p95": "1ms",
+        "max": "1ms"
+      },
+      "latency": {
+        "min": "212ms",
+        "p50": "216ms",
+        "p95": "266ms",
+        "p99": "286ms",
+        "max": "286ms"
+      },
+      "statuses": {
+        "200": 30
+      },
+      "redirects": {},
+      "routes": {
+        "/units": {
+          "requests": 11,
+          "failures": 0,
+          "averageLatencyMs": 234
+        },
+        "/summary": {
+          "requests": 12,
+          "failures": 0,
+          "averageLatencyMs": 222
+        },
+        "/leases": {
+          "requests": 7,
+          "failures": 0,
+          "averageLatencyMs": 223
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    },
+    {
+      "offeredOperationsPerMinute": 300,
+      "passed": false,
+      "maxPoolWaiting": 0,
+      "poolErrors": 0,
+      "requestedRpm": 300,
+      "suppliedSessions": 1,
+      "exercisedSessions": 1,
+      "achievedRpm": 300,
+      "completed": 65,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 13,
+      "schedulingDelay": {
+        "p95": "1ms",
+        "max": "1ms"
+      },
+      "latency": {
+        "min": "210ms",
+        "p50": "214ms",
+        "p95": "1535ms",
+        "p99": "2033ms",
+        "max": "2033ms"
+      },
+      "statuses": {
+        "200": 65
+      },
+      "redirects": {},
+      "routes": {
+        "/units": {
+          "requests": 29,
+          "failures": 0,
+          "averageLatencyMs": 329
+        },
+        "/leases": {
+          "requests": 20,
+          "failures": 0,
+          "averageLatencyMs": 355
+        },
+        "/summary": {
+          "requests": 16,
+          "failures": 0,
+          "averageLatencyMs": 225
+        }
+      },
+      "abortReason": "recent request p95 1605ms exceeded 1500ms",
+      "sampleErrors": []
+    }
+  ],
+  "exercisedOrganizations": 4
+}

@@ -1,6 +1,6 @@
 import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 import { expect, test } from "playwright/test";
-import { build } from "esbuild";
+import { build } from "./build-fixture";
 import path from "node:path";
 
 test("onboarding cards expose contact and setup actions, save errors, and confirm deletion", async ({ page }) => {

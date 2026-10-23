@@ -1,5 +1,5 @@
 import { test, expect } from "playwright/test";
-import { build } from "esbuild";
+import { build } from "./build-fixture";
 import path from "node:path";
 
 test("login keeps progress visible while the authenticated document loads", async ({ page }) => {

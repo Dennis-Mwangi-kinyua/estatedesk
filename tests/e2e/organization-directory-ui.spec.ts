@@ -1,5 +1,5 @@
 import { test, expect } from "playwright/test";
-import { build } from "esbuild";
+import { build } from "./build-fixture";
 import path from "node:path";
 import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 test("organization directory has 16 linked cards in four desktop rows and adapts to mobile", async ({page}, testInfo) => {

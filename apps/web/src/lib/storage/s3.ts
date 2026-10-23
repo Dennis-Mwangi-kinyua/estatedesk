@@ -1,3 +1,5 @@
+import "server-only";
+import { ASSET_READ_TIMEOUT_MS, collectAssetBytes } from "./read-limits";
 import {
   DeleteObjectCommand,
   GetObjectCommand,
@@ -29,9 +31,13 @@ function getS3Client() {
 export class S3StorageProvider implements StorageProvider {
   async downloadFile(key: string): Promise<Uint8Array> {
     const { client, config } = getS3Client();
-    const response = await client.send(new GetObjectCommand({ Bucket: config.bucket, Key: key }));
+    const response = await client.send(new GetObjectCommand({ Bucket: config.bucket, Key: key }), { abortSignal: AbortSignal.timeout(ASSET_READ_TIMEOUT_MS) });
     if (!response.Body) throw new Error("Stored document is empty.");
-    return response.Body.transformToByteArray();
+    try {
+      return await collectAssetBytes(response.Body as AsyncIterable<Uint8Array>, response.ContentLength);
+    } finally {
+      if ("destroy" in response.Body && typeof response.Body.destroy === "function") response.Body.destroy();
+    }
   }
 
   async uploadFile(input: UploadFileInput): Promise<UploadedFileResult> {
@@ -67,12 +73,16 @@ export class S3StorageProvider implements StorageProvider {
 
   getPublicUrl(key: string): string {
     const config = getStorageConfig();
+    const encodedKey = key.split("/").map(encodeURIComponent).join("/");
 
     if (config.publicBaseUrl) {
-      return `${config.publicBaseUrl.replace(/\/$/, "")}/${key}`;
+      return `${config.publicBaseUrl.replace(/\/+$/, "")}/${encodedKey}`;
     }
 
-    return `https://${config.bucket}.s3.${config.region}.amazonaws.com/${key}`;
+    if (config.endpoint) {
+      return `${config.endpoint.replace(/\/+$/, "")}/${encodeURIComponent(config.bucket)}/${encodedKey}`;
+    }
+    return `https://${config.bucket}.s3.${config.region}.amazonaws.com/${encodedKey}`;
   }
 }
 

@@ -1,8 +1,7 @@
 import { PlatformActionAlerts } from "./platform-action-alerts";
 import { PlatformDashboardHeading } from "./platform-dashboard-heading";
 
-import { PlatformSticker as VisualSticker } from "./platform-sticker";
-import Link from "@/components/navigation/workspace-link";
+import { PlatformAppLauncher } from "./platform-app-launcher";
 import type { PlatformDashboardData } from "../_lib/queries";
 import { PlatformDashboardAlert } from "./platform-dashboard-alert";
 import { PlatformDashboardAside } from "./platform-dashboard-aside";
@@ -20,16 +19,7 @@ export function PlatformDashboard({ data }: { data: PlatformDashboardData }) {
           <div className="flex items-start justify-between gap-4">
             <PlatformDashboardHeading />
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
-            {[
-              { label: "Add organization", href: "/platform/organizations/new" },
-              { label: "Organizations", href: "/platform/organizations" },
-              { label: "View payments", href: "/platform/payments" },
-              { label: "Search platform", href: "/platform/search" },
-              { label: "Billing center", href: "/platform/billing" },
-              { label: "Developer portal", href: "/platform/developer" },
-            ].map((action) => <Link key={action.href} href={action.href} data-workspace-action="true" className="platform-glass-shortcut flex min-h-14 items-center gap-2 rounded-2xl border border-slate-200/80 bg-white/80 px-3 py-3 text-sm font-semibold shadow-sm transition hover:border-sky-300 hover:bg-sky-50 focus-visible:outline-2 focus-visible:outline-sky-500 motion-safe:active:scale-[0.98] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"><VisualSticker label={action.href} size="xs" /><span>{action.label}</span></Link>)}
-          </div>
+          <PlatformAppLauncher />
         </section>
         <PlatformDashboardAlert
           newOnboardingCount={newOnboardingCount}

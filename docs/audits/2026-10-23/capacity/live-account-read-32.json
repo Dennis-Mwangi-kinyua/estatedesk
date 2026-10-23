@@ -1,0 +1,56 @@
+{
+  "checkedAt": "2026-10-23T20:07:36.861Z",
+  "origin": "https://estatedesk.co.ke",
+  "method": "One designated account, sequential 30-second GET-only stages, at most 32 in-flight requests; abort on 1% errors or p95 above 1.5 seconds. No customer business records are created or changed by this runner. Normal page handlers may maintain session presence and rate-limit records.",
+  "limitations": "Single-account throughput only; does not verify 1,000 distinct users, password verification, browser assets or write workflows.",
+  "testSessionRemoved": true,
+  "results": [
+    {
+      "offeredRpm": 2000,
+      "passed": false,
+      "requestedRpm": 2000,
+      "suppliedSessions": 1,
+      "exercisedSessions": 1,
+      "achievedRpm": 1347,
+      "completed": 81,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 3.6,
+      "schedulingDelay": {
+        "p95": "217ms",
+        "max": "247ms"
+      },
+      "latency": {
+        "min": "357ms",
+        "p50": "877ms",
+        "p95": "1763ms",
+        "p99": "2444ms",
+        "max": "2444ms"
+      },
+      "statuses": {
+        "200": 81
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org/payments": {
+          "requests": 34,
+          "failures": 0,
+          "averageLatencyMs": 991
+        },
+        "/dashboard/org/units": {
+          "requests": 24,
+          "failures": 0,
+          "averageLatencyMs": 958
+        },
+        "/dashboard/org/properties": {
+          "requests": 23,
+          "failures": 0,
+          "averageLatencyMs": 1048
+        }
+      },
+      "abortReason": "recent request p95 1609ms exceeded 1500ms",
+      "sampleErrors": []
+    }
+  ],
+  "role": "ADMIN"
+}

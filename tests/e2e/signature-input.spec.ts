@@ -1,5 +1,5 @@
 import { expect, test } from "playwright/test";
-import { build } from "esbuild";
+import { build } from "./build-fixture";
 import path from "node:path";
 
 test("signature pad supports drawing, clearing, switching methods, and touch", async ({ page, isMobile }) => {

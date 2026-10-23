@@ -1,6 +1,6 @@
 import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 import { expect, test } from "playwright/test";
-import { build } from "esbuild";
+import { build } from "./build-fixture";
 import path from "node:path";
 
 test("modern messages inbox supports reading, replies, status actions, and mobile navigation", async ({ page }, testInfo) => {

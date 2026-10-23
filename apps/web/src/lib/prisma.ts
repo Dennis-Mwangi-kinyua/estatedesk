@@ -74,10 +74,10 @@ function getPrismaClient() {
 
   const client = createPrismaClient();
 
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = client;
-    globalForPrisma.prismaSchemaVersion = PRISMA_SCHEMA_VERSION;
-  }
+  // Server bundles in one warm process must share a pool in production too.
+  // Otherwise loading another bundle can multiply connections per instance.
+  globalForPrisma.prisma = client;
+  globalForPrisma.prismaSchemaVersion = PRISMA_SCHEMA_VERSION;
 
   return client;
 }

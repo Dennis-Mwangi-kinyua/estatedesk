@@ -1,0 +1,134 @@
+{
+  "environment": "Local production-build processes and isolated local PostgreSQL; not deployed-hosting capacity evidence.",
+  "instanceCount": 4,
+  "requestsPerUserPerMinute": 2,
+  "durationSecondsPerStage": 600,
+  "results": [
+    {
+      "users": 50,
+      "passed": true,
+      "requestedRpm": 300,
+      "suppliedSessions": 50,
+      "exercisedSessions": 50,
+      "achievedRpm": 304,
+      "completed": 50,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 9.9,
+      "schedulingDelay": {
+        "p95": "1ms",
+        "max": "2ms"
+      },
+      "latency": {
+        "min": "25ms",
+        "p50": "44ms",
+        "p95": "267ms",
+        "p99": "470ms",
+        "max": "470ms"
+      },
+      "statuses": {
+        "200": 50
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org/tenants": {
+          "requests": 8,
+          "failures": 0,
+          "averageLatencyMs": 105
+        },
+        "/dashboard/org/units": {
+          "requests": 10,
+          "failures": 0,
+          "averageLatencyMs": 63
+        },
+        "/dashboard/org/payments": {
+          "requests": 11,
+          "failures": 0,
+          "averageLatencyMs": 85
+        },
+        "/dashboard/org": {
+          "requests": 19,
+          "failures": 0,
+          "averageLatencyMs": 47
+        },
+        "/dashboard/org/issues": {
+          "requests": 2,
+          "failures": 0,
+          "averageLatencyMs": 70
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": [],
+      "monitoringErrors": 0,
+      "processMetrics": {
+        "maxConnections": 21,
+        "maxActiveQueries": 0,
+        "minRssKiB": 1498080,
+        "maxRssKiB": 1611040
+      }
+    },
+    {
+      "users": 1000,
+      "passed": false,
+      "requestedRpm": 2000,
+      "suppliedSessions": 1000,
+      "exercisedSessions": 1000,
+      "achievedRpm": 1796,
+      "completed": 1949,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 65.1,
+      "schedulingDelay": {
+        "p95": "2ms",
+        "max": "1200ms"
+      },
+      "latency": {
+        "min": "17ms",
+        "p50": "26ms",
+        "p95": "4114ms",
+        "p99": "7285ms",
+        "max": "8805ms"
+      },
+      "statuses": {
+        "200": 1949
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org": {
+          "requests": 574,
+          "failures": 0,
+          "averageLatencyMs": 350
+        },
+        "/dashboard/org/tenants": {
+          "requests": 394,
+          "failures": 0,
+          "averageLatencyMs": 510
+        },
+        "/dashboard/org/payments": {
+          "requests": 399,
+          "failures": 0,
+          "averageLatencyMs": 617
+        },
+        "/dashboard/org/units": {
+          "requests": 383,
+          "failures": 0,
+          "averageLatencyMs": 277
+        },
+        "/dashboard/org/issues": {
+          "requests": 199,
+          "failures": 0,
+          "averageLatencyMs": 528
+        }
+      },
+      "abortReason": "recent request p95 3196ms exceeded 1500ms",
+      "sampleErrors": [],
+      "monitoringErrors": 0,
+      "processMetrics": {
+        "maxConnections": 26,
+        "maxActiveQueries": 1,
+        "minRssKiB": 1164688,
+        "maxRssKiB": 2385088
+      }
+    }
+  ]
+}

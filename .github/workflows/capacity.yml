@@ -1,0 +1,82 @@
+name: Authenticated capacity
+
+on:
+  workflow_dispatch:
+    inputs:
+      stages:
+        description: Distinct signed-in users per stage
+        type: choice
+        options: ["1000", "1000,2000", "1000,2000,5000"]
+        default: "1000"
+      duration:
+        description: Seconds per stage (600 for a ten-minute soak)
+        type: choice
+        options: ["60", "600"]
+        default: "600"
+      instances:
+        description: Local app processes on the runner
+        type: choice
+        options: ["1", "2", "4"]
+        default: "2"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: capacity-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  capacity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: capacity_test
+          POSTGRES_PASSWORD: isolated-ci-only
+          POSTGRES_DB: estatedesk_capacity_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U capacity_test -d estatedesk_capacity_test"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      TEST_DATABASE_URL: postgresql://capacity_test:isolated-ci-only@127.0.0.1:5432/estatedesk_capacity_test
+      DATABASE_URL: postgresql://capacity_test:isolated-ci-only@127.0.0.1:5432/estatedesk_capacity_test
+      DIRECT_URL: postgresql://capacity_test:isolated-ci-only@127.0.0.1:5432/estatedesk_capacity_test
+      AUTH_SECRET: capacity-ci-only-fictional-data-signing-key
+      TSX_TSCONFIG_PATH: apps/web/tsconfig.json
+      LOAD_SESSIONS_FILE: ${{ runner.temp }}/capacity-sessions.json
+      CAPACITY_REPORT: ${{ runner.temp }}/capacity-summary.json
+      CAPACITY_USERS: "5000"
+      CAPACITY_STAGES: ${{ inputs.stages }}
+      CAPACITY_DURATION_SECONDS: ${{ inputs.duration }}
+      CAPACITY_INSTANCES: ${{ inputs.instances }}
+      CAPACITY_SERVICE_SCOPE: all
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - name: Build isolated production server
+        env:
+          ESTATEDESK_BUILD_WITHOUT_DATABASE: "true"
+        run: npm run build
+      - name: Seed fictional users and signed sessions
+        env:
+          NODE_ENV: production
+        run: node --conditions=react-server --import tsx scripts/qa/seed-capacity.ts
+      - name: Exercise authenticated capacity and record process/database metrics
+        run: node scripts/qa/run-capacity.mjs
+      - name: Retain sanitized capacity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: authenticated-capacity-summary
+          path: ${{ runner.temp }}/capacity-summary.json
+          if-no-files-found: warn
+          retention-days: 14

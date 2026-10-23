@@ -448,23 +448,42 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       return null;
     }
 
-    const user = await retryTransientDatabaseOperation(
-      () =>
-        prisma.user.findUnique({
-          where: { id: dbSession.userId },
-          select: {
-            id: true,
-            email: true,
-            fullName: true,
-            platformRole: true,
-            mustChangePassword: true,
-            termsAcceptedAt: true,
-            status: true,
-            deletedAt: true,
-          },
-        }),
-      { label: "getUserSession-find-user" },
-    );
+    const [user, activeMembership] = await Promise.all([
+      retryTransientDatabaseOperation(
+        () =>
+          prisma.user.findUnique({
+            where: { id: dbSession.userId },
+            select: {
+              id: true,
+              email: true,
+              fullName: true,
+              platformRole: true,
+              mustChangePassword: true,
+              termsAcceptedAt: true,
+              status: true,
+              deletedAt: true,
+            },
+          }),
+        { label: "getUserSession-find-user" },
+      ),
+      dbSession.activeMembershipId
+        ? retryTransientDatabaseOperation(
+            () => prisma.membership.findFirst({
+              where: {
+                id: dbSession.activeMembershipId!,
+                userId: dbSession.userId,
+                deactivatedAt: null,
+                employmentEndedAt: null,
+              },
+              select: {
+                orgId: true, grantedPermissions: true, role: true,
+                scopeType: true, scopeId: true,
+              },
+            }),
+            { label: "getUserSession-find-membership" },
+          )
+        : Promise.resolve(null),
+    ]);
 
     if (!user) return null;
 
@@ -530,35 +549,16 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       }
     }
 
-    const activeMembershipId = dbSession.activeMembershipId;
-    const activeMembership = activeMembershipId
-      ? await retryTransientDatabaseOperation(
-          () =>
-            prisma.membership.findFirst({
-              where: {
-                id: activeMembershipId,
-                userId: user.id,
-                deactivatedAt: null,
-                employmentEndedAt: null,
-              },
-              select: {
-                orgId: true,
-                grantedPermissions: true,
-                role: true,
-                scopeType: true,
-                scopeId: true,
-              },
-            }),
-          { label: "getUserSession-find-membership" },
-        )
-      : null;
-
-    const settings = activeMembership ? await prisma.organizationSettings.findUnique({
-      where: { orgId: activeMembership.orgId }, select: { roleAccess: true },
-    }) : null;
-    const subscription = activeMembership ? await prisma.subscription.findUnique({
-      where: { orgId: activeMembership.orgId }, select: { plan: true, metadata: true },
-    }) : null;
+    // These reads are independent. Keep permission data fresh for every request
+    // while avoiding an extra sequential database round trip on every service.
+    const [settings, subscription] = activeMembership ? await Promise.all([
+      prisma.organizationSettings.findUnique({
+        where: { orgId: activeMembership.orgId }, select: { roleAccess: true },
+      }),
+      prisma.subscription.findUnique({
+        where: { orgId: activeMembership.orgId }, select: { plan: true, metadata: true },
+      }),
+    ]) : [null, null];
     const orgRolePolicy = activeMembership
       ? applyOrganizationPlanAccess(readOrgRolePolicies(settings?.roleAccess)[activeMembership.role], subscription?.plan ?? "FREE", subscription?.metadata)
       : undefined;

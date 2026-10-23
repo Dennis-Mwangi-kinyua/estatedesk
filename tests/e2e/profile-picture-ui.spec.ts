@@ -1,6 +1,6 @@
 import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 import { expect, test } from "playwright/test";
-import { build } from "esbuild";
+import { build } from "./build-fixture";
 import path from "node:path";
 test("profile pictures appear after login and uploads preview and validate before saving", async ({ page }) => {
   page.on("pageerror", error => console.error("Profile fixture error:", error.message));

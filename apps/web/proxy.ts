@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "node:crypto";
+import { parseSessionCookieValue } from "./src/lib/auth/cookies";
 import { contentSecurityPolicy } from "./src/lib/security/content-security-policy";
 import { isTenantPortalRequest } from "./src/lib/mobile/portal-policy";
 import {
@@ -92,7 +94,14 @@ function getClientIp(req: NextRequest): string {
 function getRateLimitKey(req: NextRequest): string {
   const ip = getClientIp(req);
   const pathname = req.nextUrl.pathname;
-
+  const cookie = req.cookies.get(getSessionCookieName())?.value;
+  // Users behind the same office/NAT must not consume one shared page budget.
+  // Only signed cookies qualify; arbitrary client values retain the IP guard.
+  const token = cookie?.startsWith("v1.") ? parseSessionCookieValue(cookie) : null;
+  if (token) {
+    const session = createHash("sha256").update(token).digest("hex");
+    return `tenants-page:session:${session}:${pathname}`;
+  }
   return `tenants-page:${ip}:${pathname}`;
 }
 

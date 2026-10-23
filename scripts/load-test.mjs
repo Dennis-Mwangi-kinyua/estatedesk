@@ -3,6 +3,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { setTimeout as sleep } from "node:timers/promises";
 import { performance } from "node:perf_hooks";
+import { parseLoadSessions } from "./lib/load-sessions.mjs";
 
 const ORG_ADMIN_ROUTES = [
   { path: "/dashboard/org", method: "GET", weight: 24, expectedStatus: [200] },
@@ -43,6 +44,7 @@ const PROFILES = {
   stage1000: { rpm: 1000, durationSeconds: 300, concurrency: 40 },
   stage2500: { rpm: 2500, durationSeconds: 600, concurrency: 100 },
   stage5000: { rpm: 5000, durationSeconds: 900, concurrency: 180 },
+  users1000: { rpm: 6000, durationSeconds: 600, concurrency: 100 },
 };
 
 function readNumber(name, fallback) {
@@ -137,7 +139,8 @@ Required:
   LOAD_BASE_URL=https://your-domain.example
 
 Useful:
-  LOAD_PROFILE=smoke|baseline|stage1000|stage2500|stage5000
+  LOAD_PROFILE=smoke|baseline|stage1000|stage2500|stage5000|users1000
+  LOAD_SESSIONS_FILE=/private/path/sessions.json
   LOAD_RPM=5000
   LOAD_DURATION_SECONDS=900
   LOAD_CONCURRENCY=180
@@ -149,6 +152,9 @@ Useful:
   LOAD_OUTPUT=/tmp/load-report.json
   LOAD_FAIL_ON_ERROR_RATE=1
   LOAD_FAIL_ON_P95_MS=1500
+  LOAD_FAIL_ON_SCHEDULING_P95_MS=1000
+  LOAD_FAIL_ON_ROUTE_P95_MS=1500
+  LOAD_MIN_REQUESTS_PER_ROUTE=10
   LOAD_ABORT_AFTER_REQUESTS=250
 `);
 }
@@ -167,7 +173,14 @@ async function main() {
 
   const profileName = process.env.LOAD_PROFILE ?? "smoke";
   const profile = PROFILES[profileName] ?? PROFILES.smoke;
-  const rpm = readNumber("LOAD_RPM", profile.rpm);
+  const cookieHeader = buildCookieHeader();
+  const sessions = process.env.LOAD_SESSIONS_FILE
+    ? parseLoadSessions(JSON.parse(await readFile(process.env.LOAD_SESSIONS_FILE, "utf8")))
+    : [{ cookieHeader }];
+  if (profileName === "users1000" && sessions.length < 1000) {
+    throw new Error("users1000 requires at least 1,000 distinct test-user sessions in LOAD_SESSIONS_FILE.");
+  }
+  const rpm = readNumber("LOAD_RPM", profileName === "users1000" ? sessions.length * 6 : profile.rpm);
   const durationSeconds = readNumber("LOAD_DURATION_SECONDS", profile.durationSeconds);
   const concurrency = Math.min(
     Math.floor(readNumber("LOAD_CONCURRENCY", profile.concurrency)),
@@ -175,8 +188,11 @@ async function main() {
   );
   const requestIntervalMs = 60_000 / rpm;
   const totalRequests = Math.floor((rpm * durationSeconds) / 60);
-  const failOnErrorRate = readOptionalPositiveNumber("LOAD_FAIL_ON_ERROR_RATE");
-  const failOnP95Ms = readOptionalPositiveNumber("LOAD_FAIL_ON_P95_MS");
+  const failOnErrorRate = readOptionalPositiveNumber("LOAD_FAIL_ON_ERROR_RATE") || (profileName === "users1000" ? 1 : 0);
+  const failOnP95Ms = readOptionalPositiveNumber("LOAD_FAIL_ON_P95_MS") || (profileName === "users1000" ? 1500 : 0);
+  const failOnRouteP95Ms = readOptionalPositiveNumber("LOAD_FAIL_ON_ROUTE_P95_MS");
+  const minRequestsPerRoute = readOptionalPositiveNumber("LOAD_MIN_REQUESTS_PER_ROUTE");
+  const failOnSchedulingP95Ms = readOptionalPositiveNumber("LOAD_FAIL_ON_SCHEDULING_P95_MS") || (profileName === "users1000" ? 1000 : 0);
   const abortAfterRequests = Math.floor(readNumber("LOAD_ABORT_AFTER_REQUESTS", 250));
   const requestTimeoutMs = readNumber("LOAD_REQUEST_TIMEOUT_MS", 15_000);
   const origin = new URL(baseUrl);
@@ -196,7 +212,10 @@ async function main() {
     ? "custom"
     : (process.env.LOAD_ROUTE_PRESET ?? "org-admin");
   const pickRoute = createPicker(routes);
-  const cookieHeader = buildCookieHeader();
+  if (process.env.LOAD_SESSIONS_FILE && totalRequests < sessions.length) {
+    throw new Error("Schedule at least one request per supplied session.");
+  }
+  const exercisedSessions = new Set();
   const userAgent = process.env.LOAD_USER_AGENT ?? "EstateDeskLoadTest/1.0";
 
   const latencies = [];
@@ -221,6 +240,7 @@ async function main() {
         durationSeconds,
         concurrency,
         totalRequests,
+        suppliedSessions: sessions.length,
         routes: routes.map(({ path, weight }) => ({ path, weight })),
       },
       null,
@@ -228,7 +248,7 @@ async function main() {
     ),
   );
 
-  async function worker(workerId) {
+  async function worker() {
     while (true) {
       if (abortReason) return;
 
@@ -243,6 +263,9 @@ async function main() {
 
       scheduleDelays.push(Math.max(0, performance.now() - startedAt - scheduledAt));
       const route = pickRoute();
+      const sessionIndex = requestNumber % sessions.length;
+      const session = sessions[sessionIndex];
+      exercisedSessions.add(sessionIndex);
       const url = new URL(route.path, origin);
       const started = performance.now();
       let status = 0;
@@ -251,10 +274,10 @@ async function main() {
       try {
         const headers = {
           accept: "text/html,application/json;q=0.9,*/*;q=0.8",
-          "user-agent": `${userAgent} worker/${workerId}`,
+          "user-agent": `${userAgent} session/${sessionIndex + 1}`,
         };
 
-        if (cookieHeader) headers.cookie = cookieHeader;
+        if (session.cookieHeader) headers.cookie = session.cookieHeader;
 
         const response = await fetch(url, {
           method: route.method,
@@ -272,7 +295,8 @@ async function main() {
         }
         const body = await response.text();
         const streamedRedirect = /<meta id="__next-page-redirect"[^>]*http-equiv="refresh"/.test(body);
-        ok = route.expectedStatus.includes(status) && !streamedRedirect;
+        ok = route.expectedStatus.includes(status) && !streamedRedirect
+          && (profileName !== "users1000" || status < 400);
         if (streamedRedirect) errors.push({ path: route.path, message: "Streamed framework redirect; expected page content was not served." });
       } catch (error) {
         errors.push({
@@ -290,10 +314,12 @@ async function main() {
         count: 0,
         failed: 0,
         totalLatency: 0,
+        latencies: [],
       };
       existing.count += 1;
       existing.failed += ok ? 0 : 1;
       existing.totalLatency += latency;
+      existing.latencies.push(latency);
       routeStats.set(route.path, existing);
 
       if (!ok) failed += 1;
@@ -308,6 +334,16 @@ async function main() {
           `error rate ${((failed / completed) * 100).toFixed(2)}% exceeded ${failOnErrorRate}% after ${completed} requests`;
       }
 
+      if (!abortReason && completed >= abortAfterRequests && completed % 50 === 0) {
+        const recentLatency = percentile(latencies.slice(-250).sort((a, b) => a - b), 95);
+        const recentDelay = percentile(scheduleDelays.slice(-250).sort((a, b) => a - b), 95);
+        if (failOnP95Ms > 0 && recentLatency > failOnP95Ms) {
+          abortReason = `recent request p95 ${Math.round(recentLatency)}ms exceeded ${failOnP95Ms}ms`;
+        } else if (failOnSchedulingP95Ms > 0 && recentDelay > failOnSchedulingP95Ms) {
+          abortReason = `recent scheduling p95 ${Math.round(recentDelay)}ms exceeded ${failOnSchedulingP95Ms}ms`;
+        }
+      }
+
       if (completed % Math.max(1, Math.floor(rpm / 2)) === 0) {
         process.stdout.write(
           `progress ${completed}/${totalRequests} requests, failures ${failed}\n`,
@@ -318,15 +354,27 @@ async function main() {
 
   const startedAt = performance.now();
   await Promise.all(
-    Array.from({ length: concurrency }, (_, index) => worker(index + 1)),
+    Array.from({ length: concurrency }, () => worker()),
   );
 
   const elapsedSeconds = (performance.now() - startedAt) / 1000;
   latencies.sort((a, b) => a - b);
   scheduleDelays.sort((a, b) => a - b);
+  for (const stats of routeStats.values()) stats.latencies.sort((a, b) => a - b);
+  const routeLatencyFailures = failOnRouteP95Ms > 0
+    ? [...routeStats.entries()].filter(([, stats]) => percentile(stats.latencies, 95) > failOnRouteP95Ms).map(([path]) => path)
+    : [];
+  const routeCoverageFailures = minRequestsPerRoute > 0
+    ? routes.filter(route => (routeStats.get(route.path)?.count ?? 0) < minRequestsPerRoute).map(route => route.path)
+    : [];
+  const routeErrorFailures = failOnRouteP95Ms > 0 && failOnErrorRate > 0
+    ? [...routeStats.entries()].filter(([, stats]) => stats.failed / stats.count * 100 > failOnErrorRate).map(([path]) => path)
+    : [];
 
   const summary = {
     requestedRpm: rpm,
+    suppliedSessions: sessions.length,
+    exercisedSessions: exercisedSessions.size,
     achievedRpm: Math.round((completed / elapsedSeconds) * 60),
     completed,
     failed,
@@ -354,11 +402,17 @@ async function main() {
         {
           requests: stats.count,
           failures: stats.failed,
+          errorRatePercent: Number((stats.failed / stats.count * 100).toFixed(2)),
           averageLatencyMs: Math.round(stats.totalLatency / stats.count),
+          p95LatencyMs: Math.round(percentile(stats.latencies, 95)),
+          p99LatencyMs: Math.round(percentile(stats.latencies, 99)),
         },
       ]),
     ),
     abortReason: abortReason || null,
+    routeLatencyFailures,
+    routeCoverageFailures,
+    routeErrorFailures,
     sampleErrors: errors.slice(0, 10),
   };
 
@@ -370,8 +424,12 @@ async function main() {
 
   if (
     abortReason ||
+    routeLatencyFailures.length > 0 ||
+    routeCoverageFailures.length > 0 ||
+    routeErrorFailures.length > 0 ||
     (failOnErrorRate > 0 && summary.errorRatePercent > failOnErrorRate) ||
-    (failOnP95Ms > 0 && p95 > failOnP95Ms)
+    (failOnP95Ms > 0 && p95 > failOnP95Ms) ||
+    (failOnSchedulingP95Ms > 0 && percentile(scheduleDelays, 95) > failOnSchedulingP95Ms)
   ) {
     process.exitCode = 1;
   }

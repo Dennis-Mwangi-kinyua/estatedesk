@@ -1,6 +1,6 @@
 import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";
 import { expect, test } from "playwright/test";
-import { build } from "esbuild";
+import { build } from "./build-fixture";
 import path from "node:path";
 
 test("shared presentation keeps table labels, controls and dynamic rows usable", async ({page,isMobile},testInfo) => {

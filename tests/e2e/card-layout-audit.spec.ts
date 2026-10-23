@@ -1,5 +1,5 @@
 import { expect, test } from "playwright/test";
-import { build } from "esbuild";
+import { build } from "./build-fixture";
 import path from "node:path";
 import { readFileSync } from "node:fs";
 import { installWorkspaceStyles, setFixtureContent } from "./workspace-styles";

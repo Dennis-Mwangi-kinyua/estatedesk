@@ -1,0 +1,194 @@
+{
+  "checkedAt": "2026-10-23T20:05:22.182Z",
+  "origin": "https://estatedesk.co.ke",
+  "method": "One designated account, sequential 30-second GET-only stages, at most 16 in-flight requests; abort on 1% errors or p95 above 1.5 seconds. No customer business records are created or changed by this runner. Normal page handlers may maintain session presence and rate-limit records.",
+  "limitations": "Single-account throughput only; does not verify 1,000 distinct users, password verification, browser assets or write workflows.",
+  "testSessionRemoved": true,
+  "results": [
+    {
+      "offeredRpm": 60,
+      "passed": true,
+      "requestedRpm": 60,
+      "suppliedSessions": 1,
+      "exercisedSessions": 1,
+      "achievedRpm": 61,
+      "completed": 30,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 29.4,
+      "schedulingDelay": {
+        "p95": "2ms",
+        "max": "2ms"
+      },
+      "latency": {
+        "min": "350ms",
+        "p50": "469ms",
+        "p95": "717ms",
+        "p99": "755ms",
+        "max": "755ms"
+      },
+      "statuses": {
+        "200": 30
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org/units": {
+          "requests": 14,
+          "failures": 0,
+          "averageLatencyMs": 463
+        },
+        "/dashboard/org/properties": {
+          "requests": 9,
+          "failures": 0,
+          "averageLatencyMs": 519
+        },
+        "/dashboard/org/payments": {
+          "requests": 7,
+          "failures": 0,
+          "averageLatencyMs": 485
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    },
+    {
+      "offeredRpm": 300,
+      "passed": true,
+      "requestedRpm": 300,
+      "suppliedSessions": 1,
+      "exercisedSessions": 1,
+      "achievedRpm": 297,
+      "completed": 150,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 30.3,
+      "schedulingDelay": {
+        "p95": "2ms",
+        "max": "23ms"
+      },
+      "latency": {
+        "min": "320ms",
+        "p50": "536ms",
+        "p95": "1123ms",
+        "p99": "1592ms",
+        "max": "1800ms"
+      },
+      "statuses": {
+        "200": 150
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org/units": {
+          "requests": 63,
+          "failures": 0,
+          "averageLatencyMs": 625
+        },
+        "/dashboard/org/properties": {
+          "requests": 36,
+          "failures": 0,
+          "averageLatencyMs": 679
+        },
+        "/dashboard/org/payments": {
+          "requests": 51,
+          "failures": 0,
+          "averageLatencyMs": 657
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    },
+    {
+      "offeredRpm": 1000,
+      "passed": true,
+      "requestedRpm": 1000,
+      "suppliedSessions": 1,
+      "exercisedSessions": 1,
+      "achievedRpm": 964,
+      "completed": 500,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 31.1,
+      "schedulingDelay": {
+        "p95": "177ms",
+        "max": "465ms"
+      },
+      "latency": {
+        "min": "325ms",
+        "p50": "571ms",
+        "p95": "1316ms",
+        "p99": "1937ms",
+        "max": "2225ms"
+      },
+      "statuses": {
+        "200": 500
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org/properties": {
+          "requests": 181,
+          "failures": 0,
+          "averageLatencyMs": 695
+        },
+        "/dashboard/org/units": {
+          "requests": 159,
+          "failures": 0,
+          "averageLatencyMs": 698
+        },
+        "/dashboard/org/payments": {
+          "requests": 160,
+          "failures": 0,
+          "averageLatencyMs": 735
+        }
+      },
+      "abortReason": null,
+      "sampleErrors": []
+    },
+    {
+      "offeredRpm": 2000,
+      "passed": false,
+      "requestedRpm": 2000,
+      "suppliedSessions": 1,
+      "exercisedSessions": 1,
+      "achievedRpm": 1296,
+      "completed": 115,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 5.3,
+      "schedulingDelay": {
+        "p95": "1058ms",
+        "max": "1113ms"
+      },
+      "latency": {
+        "min": "342ms",
+        "p50": "516ms",
+        "p95": "1077ms",
+        "p99": "1229ms",
+        "max": "1253ms"
+      },
+      "statuses": {
+        "200": 115
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org/units": {
+          "requests": 47,
+          "failures": 0,
+          "averageLatencyMs": 659
+        },
+        "/dashboard/org/properties": {
+          "requests": 29,
+          "failures": 0,
+          "averageLatencyMs": 627
+        },
+        "/dashboard/org/payments": {
+          "requests": 39,
+          "failures": 0,
+          "averageLatencyMs": 640
+        }
+      },
+      "abortReason": "recent scheduling p95 1058ms exceeded 1000ms",
+      "sampleErrors": []
+    }
+  ],
+  "role": "ADMIN"
+}

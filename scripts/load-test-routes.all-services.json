@@ -1,0 +1,20 @@
+[
+  { "path": "/dashboard/org", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/properties", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/units", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/tenants", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/leases", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/payments", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/charges", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/accounting", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/issues", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/agreements", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/water-bills", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/taxes", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/inspections", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/move-outs", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/airbnb", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/community", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/service-providers", "weight": 1, "expectedStatus": [200] },
+  { "path": "/dashboard/org/reports", "weight": 1, "expectedStatus": [200] }
+]
