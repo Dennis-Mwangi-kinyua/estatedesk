@@ -1,11 +1,11 @@
+import { publicPrimaryAction, publicSecondaryAction } from "@/components/marketing/public-action";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
 import { Check, Layers3, FileBarChart2, X } from "lucide-react";
 import { Building2, WalletCards as CreditCard, ShieldCheck, ClipboardList, Droplets, WalletCards } from "@/components/shared/colored-icons";
-import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
+import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
-import { siteContentDepth } from "@/lib/content-depth/site-topics";
 import { APP_PLAN_ORDER, APP_PLANS } from "@/lib/billing/plans";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 
@@ -61,8 +61,8 @@ const highlights = [
   },
   {
     icon: CreditCard,
-    title: "Structured plan lifecycle",
-    text: "Plan status, billing periods, trials, cancellations, and upgrades align with the subscription model.",
+    title: "Plans that grow with you",
+    text: "Compare the limits and features above, then discuss the right plan for your portfolio with our team.",
   },
   {
     icon: Layers3,
@@ -107,7 +107,7 @@ export default function PricingPage() {
           name: `${plan.name} plan`,
           url: absoluteUrl(plan.href),
           priceCurrency: "KES",
-          price: plan.key === "ENTERPRISE" ? "0" : String(plan.monthlyAmount),
+          ...(plan.key === "ENTERPRISE" ? {} : { price: String(plan.monthlyAmount) }),
           category: plan.key === "ENTERPRISE" ? "Custom SaaS plan" : "SaaS subscription",
           availability: "https://schema.org/InStock",
         })),
@@ -190,13 +190,9 @@ export default function PricingPage() {
                 <Link
                   href={plan.href}
                   data-conversion-event="pricing_plan_cta_click"
-                  className={`mt-6 inline-flex min-h-[50px] w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium transition ${
-                    plan.featured
-                      ? "bg-[#0b1720] text-white hover:bg-[#10202c]"
-                      : "border border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50"
-                  }`}
+                  className={`mt-6 w-full ${plan.featured ? publicPrimaryAction : publicSecondaryAction}`}
                 >
-                  {plan.cta}
+                  {plan.key === "ENTERPRISE" ? "Contact sales" : `Request ${plan.name} access`}
                 </Link>
 
                 <div className="mt-6 border-t border-neutral-100 pt-5">
@@ -217,7 +213,7 @@ export default function PricingPage() {
 
                 <div className="mt-6 border-t border-neutral-100 pt-5">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
-                    What this tier enjoys
+                    What’s included
                   </p>
 
                   <div className="mt-4 space-y-3">
@@ -258,12 +254,12 @@ export default function PricingPage() {
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-sm font-semibold text-neutral-950">
-                  Billing model alignment
+                  Before you request access
                 </p>
                 <p className="mt-1 text-sm leading-6 text-neutral-600">
-                  Plans map directly to the platform subscription layer, which
-                  supports billing periods, plan changes, cancellation windows,
-                  and organization-level plan ownership.
+                  Prices are per organization workspace, per month, in Kenyan shillings.
+                  Your request is reviewed before workspace access is arranged.
+                  Confirm payment provider charges, applicable taxes and any guided setup costs with the team before activation.
                 </p>
               </div>
 
@@ -280,10 +276,10 @@ export default function PricingPage() {
         <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-500">
-              Why these plans fit the product
+              Choose your coverage
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-neutral-950">
-              Pricing that reflects how EstateDesk is structured
+              Find the tools your team needs
             </h2>
           </div>
 
@@ -313,14 +309,14 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <ContentDepthStack
-        {...siteContentDepth}
-        editorialTitle="How pricing fits real property operations"
-        editorial={[
-          ...siteContentDepth.editorial ?? [],
-          "EstateDesk pricing pages are intentionally connected to workflow depth. Free works for small landlords establishing property and tenant records. Pro and Plus support growing rent, water billing, issue, inspection, and reporting needs. Custom and Enterprise plans exist for larger organizations that need rollout guidance, governance, and operational alignment across teams in Kenya, East Africa, Dubai, and remote landlord markets.",
-        ]}
-      />
+      <section aria-labelledby="billing-questions" className="mx-auto max-w-4xl px-5 py-12 sm:px-6">
+        <h2 id="billing-questions" className="text-2xl font-semibold">Billing and onboarding questions</h2>
+        <div className="mt-6 space-y-3">
+          <details className="rounded-xl border border-border bg-card p-5"><summary className="cursor-pointer font-semibold">What happens after I choose a plan?</summary><p className="mt-3 text-sm leading-7 text-muted-foreground">Submit an access request. Our team reviews your portfolio needs and contacts you to agree your workspace setup and sign-in details.</p></details>
+          <details className="rounded-xl border border-border bg-card p-5"><summary className="cursor-pointer font-semibold">Are payment and setup costs included?</summary><p className="mt-3 text-sm leading-7 text-muted-foreground">The listed amounts are workspace subscription prices. Confirm any payment provider fees, taxes, migration or guided onboarding costs with sales for your setup.</p></details>
+          <details className="rounded-xl border border-border bg-card p-5"><summary className="cursor-pointer font-semibold">How do changes, cancellation and refunds work?</summary><p className="mt-3 text-sm leading-7 text-muted-foreground">Review the <Link href="/terms" className="font-semibold underline">terms of service</Link> and confirm the billing, renewal, cancellation and refund terms for your plan with the team before activation.</p></details>
+        </div>
+      </section>
 
       <section className="border-t border-neutral-200 bg-[#f8fafc] py-12 sm:py-14 lg:py-16">
         <div className="mx-auto max-w-4xl px-5 text-center sm:px-6 lg:px-8">
@@ -336,21 +332,22 @@ export default function PricingPage() {
             <Link
               href="/register"
               data-conversion-event="pricing_registration_cta_click"
-              className="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-[#0b1720] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#10202c]"
+              className={publicPrimaryAction}
             >
-              Create account
+              Request access
             </Link>
 
             <Link
               href="/contact"
               data-conversion-event="pricing_contact_cta_click"
-              className="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-neutral-200 bg-white px-6 py-3 text-sm font-medium text-neutral-900 transition hover:bg-neutral-50"
+              className={publicSecondaryAction}
             >
               Contact sales
             </Link>
           </div>
         </div>
       </section>
+      <PublicAccessFooter />
     </main>
   );
 }

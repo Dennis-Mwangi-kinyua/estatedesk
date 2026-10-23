@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { getPagination } from "@/lib/db/pagination";
 import { buildWhere, parseRole, parseStatus } from "./helpers";
+import { getUserOrganizationGroups, userOrganizationWhere, UNASSIGNED_USERS } from "@/lib/platform/user-organization-groups";
+import { getOnlineSince } from "@/lib/auth/presence";
 
 export async function getPlatformUsersPageData(searchParams: {
   page?: string;
@@ -9,6 +11,8 @@ export async function getPlatformUsersPageData(searchParams: {
   q?: string;
   role?: string;
   status?: string;
+  organization?: string;
+  online?: string;
 }) {
   const params = searchParams;
   const q = (params.q ?? "").trim();
@@ -18,9 +22,15 @@ export async function getPlatformUsersPageData(searchParams: {
     page: Number(params.page ?? 1),
     pageSize: Number(params.pageSize ?? 24),
   });
-  const where = buildWhere({ q, role, status });
+  const organization = params.organization?.slice(0, 200) || undefined;
+  const online = params.online === "1";
+  const now = new Date();
+  const presenceWhere = online ? { status: "ACTIVE" as const, sessions: { some: { expiresAt: { gt: now }, lastSeenAt: { gte: getOnlineSince(now) } } } } : {};
+  const where = { AND: [buildWhere({ q, role, status }), presenceWhere, userOrganizationWhere(organization)] };
+  const directory = organization ? { groups: [], total: 0 } : await getUserOrganizationGroups({ AND: [buildWhere({ q: "", role, status }), presenceWhere] }, q, page, pageSize);
+  const organizationName = organization === UNASSIGNED_USERS ? "No organization" : organization ? (await prisma.organization.findFirst({ where: { id: organization, deletedAt: null }, select: { name: true } }))?.name ?? "Organization unavailable" : null;
 
-  const users = await retryTransientDatabaseOperation(
+  const users = organization ? await retryTransientDatabaseOperation(
     () =>
       prisma.user.findMany({
         where,
@@ -68,7 +78,7 @@ export async function getPlatformUsersPageData(searchParams: {
         },
       }),
     { label: "platform-users-findMany", attempts: 3, delayMs: 400 },
-  );
+  ) : [];
 
   const totalFiltered = await retryTransientDatabaseOperation(
     () => prisma.user.count({ where }),
@@ -107,5 +117,10 @@ export async function getPlatformUsersPageData(searchParams: {
     q,
     role,
     status,
+    organization,
+    online,
+    organizationName,
+    organizationGroups: directory.groups,
+    totalGroups: directory.total,
   };
 }

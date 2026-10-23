@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { ActionForm, Field, TextField, panelClass, inputClass } from "@/features/providers/forms";

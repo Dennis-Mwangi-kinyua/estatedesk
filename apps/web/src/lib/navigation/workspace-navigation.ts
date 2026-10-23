@@ -42,7 +42,7 @@ export const WORKSPACE_NAVIGATION: Record<NavigationWorkspace, readonly Navigati
   ],
   "platform-admin": [
     { label: "Workspace", hrefs: platform(["", "search"]) },
-    { label: "Customers & onboarding", hrefs: platform(["organizations", "onboarding", "service-providers"]) },
+    { label: "Customers & onboarding", hrefs: platform(["review-queue", "organizations", "onboarding", "service-providers"]) },
     { label: "Finance", hrefs: platform(["payments", "payment-ops", "expenditures", "billing", "subscriptions", "reports"]) },
     { label: "Communication", hrefs: platform(["messages", "broadcasts", "marketing"]) },
     ...platformAccount,
@@ -50,7 +50,7 @@ export const WORKSPACE_NAVIGATION: Record<NavigationWorkspace, readonly Navigati
   "platform-developer": [
     { label: "Engineering", hrefs: platform(["developer", "system-health", "jobs", "developer/docs"]) },
     { label: "Integrations & data", hrefs: platform(["api-explorer", "api-keys", "rate-limits", "feature-flags", "data-management", "backups"]) },
-    { label: "Site administration", hrefs: platform(["control", "organizations", "service-providers", "billing", "subscriptions", "broadcasts"]) },
+    { label: "Site administration", hrefs: platform(["review-queue", "control", "organizations", "service-providers", "billing", "subscriptions", "broadcasts"]) },
     ...platformAccount,
   ],
 };

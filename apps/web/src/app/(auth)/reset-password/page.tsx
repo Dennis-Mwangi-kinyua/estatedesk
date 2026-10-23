@@ -155,7 +155,7 @@ export default async function ResetPasswordPage({
         <div className="mt-6 text-center">
           <Link
             href="/login"
-            className="text-sm text-gray-700 underline hover:text-black"
+            className="inline-flex min-h-11 items-center text-sm text-gray-700 underline hover:text-black"
           >
             Back to Login
           </Link>

@@ -37,7 +37,7 @@ test("native tools retain web role, blocked section and super-admin restrictions
 });
 
 test("native record queries are bounded, scoped, and never serialize private columns", async () => {
-  const fixture = { calls: [] as { model: string; args: Record<string, unknown> }[], rows: [] as unknown[] };
+  const fixture = { calls: [] as { model: string; args: Record<string, unknown> }[], rows: [] as unknown[], groupRows: {} as Record<string, unknown[]>, groupCalls: [] as { model: string; args: Record<string, unknown> }[] };
   const globalFixture = globalThis as typeof globalThis & { __nativeWorkspaceTest?: typeof fixture };
   globalFixture.__nativeWorkspaceTest = fixture;
   const bundle = await build({ entryPoints: ["apps/web/src/lib/mobile/native-workspace-records.ts"], bundle: true, write: false, platform: "node", format: "cjs", packages: "external", tsconfig: "apps/web/tsconfig.json",
@@ -46,7 +46,7 @@ test("native record queries are bounded, scoped, and never serialize private col
         "server-only": "",
         "@/lib/prisma": `export const prisma = new Proxy({}, {get(_,model){return {
           findMany:async args=>{const f=globalThis.__nativeWorkspaceTest;f.calls.push({model,args});return f.rows;},
-          findUnique:async()=>null, count:async()=>0, groupBy:async()=>[]
+          findUnique:async()=>null, count:async()=>0, groupBy:async args=>{const f=globalThis.__nativeWorkspaceTest;f.groupCalls.push({model,args});return f.groupRows[model]??[];}
         }}});`,
         "@/lib/ops/production-readiness": "export const getProductionReadinessReport=async()=>({checks:[]});",
         "@/features/identity/service": "export const identityOwners=async()=>[];",
@@ -84,9 +84,51 @@ test("native record queries are bounded, scoped, and never serialize private col
     assert.match(deniedAudit.notice!, /Platform administrator/);
     assert.equal(fixture.calls.length, 0);
     const platformSession = { ...session, platformRole: "SUPER_ADMIN" };
+    fixture.groupRows = {
+      organization: [{ status: "ACTIVE", _count: { _all: 7 } }, { status: "SUSPENDED", _count: { _all: 2 } }],
+      subscription: [{ status: "ACTIVE", _count: { _all: 4 } }, { status: "PAST_DUE", _count: { _all: 1 } }],
+      issueTicket: [{ status: "OPEN", _count: { _all: 3 } }, { status: "IN_PROGRESS", _count: { _all: 2 } }],
+      notification: [{ status: "QUEUED", _count: { _all: 5 } }, { status: "FAILED", _count: { _all: 2 } }],
+    };
+    fixture.rows = [
+      { amount: 100, gatewayStatus: "SUCCESS", verificationStatus: "VERIFIED", reversedAt: null, org: { currencyCode: "KES" } },
+      { amount: 25, gatewayStatus: "SUCCESS", verificationStatus: "NOT_REQUIRED", reversedAt: null, org: { currencyCode: "USD" } },
+      { amount: 900, gatewayStatus: "FAILED", verificationStatus: "VERIFIED", reversedAt: null, org: { currencyCode: "KES" } },
+      { amount: 800, gatewayStatus: "SUCCESS", verificationStatus: "PENDING", reversedAt: null, org: { currencyCode: "KES" } },
+      { amount: 700, gatewayStatus: "SUCCESS", verificationStatus: "REVERSED", reversedAt: new Date(), org: { currencyCode: "KES" } },
+    ];
+    const reports = await read(platformSession, "platform", "/platform/reports", "", 1);
+    const reportField = (id: string, label: string) => (reports.records as { id: string; fields: { label: string; value: string }[] }[]).find(r => r.id === id)?.fields.find(f => f.label === label)?.value;
+    assert.equal(reports.records.length, 5);
+    assert.equal(reportField("organizations", "Total"), "9");
+    assert.equal(reportField("subscriptions", "Past due"), "1");
+    assert.equal(reportField("issues", "Needs attention"), "5");
+    assert.equal(reportField("notifications", "Failed"), "2");
+    assert.equal(reportField("payment-volume", "Verified successful"), "2");
+    assert.match(reportField("payment-volume", "Verified volume · KES")!, /100[.]00/);
+    assert.match(reportField("payment-volume", "Verified volume · USD")!, /25[.]00/);
+    assert.match(reports.notice!, /sample/);
+    fixture.rows = []; fixture.groupRows = {}; fixture.calls.length = 0;
     const vault = await read(platformSession, "platform", "/platform/api-keys", "", 1);
     assert.match(vault.notice!, /locked/);
     assert.equal(fixture.calls.length, 0);
+    fixture.rows = [{ id: "person-1", fullName: "Example User", status: "ACTIVE", platformRole: "USER", memberships: [], _count: { memberships: 0 }, identityClaims: [{ number: "12345678" }] }];
+    const identity = await read(platformSession, "platform", "/platform/users", "ignored-search", 8, "person-1", "org-a");
+    const identityFields = (identity.records[0] as { fields: { label: string; value: string }[] }).fields;
+    assert.equal(identityFields.find(field => field.label === "User ID")?.value, "person-1");
+    assert.equal(identityFields.find(field => field.label === "National ID")?.value, "12345678");
+    const identityQuery = fixture.calls.at(-1)!.args;
+    assert.equal((identityQuery.where as { id: string }).id, "person-1");
+    assert.match(JSON.stringify(identityQuery.where), /"orgId":"org-a"/);
+    assert.equal(identityQuery.take, 1);
+    assert.equal(identityQuery.skip, 0);
+    assert.ok(!JSON.stringify(identityQuery.where).includes("ignored-search"));
+    assert.ok(!(identityQuery.select as Record<string, unknown>).passwordHash);
+    const deniedIdentity = await read(session, "platform", "/platform/users", "", 1, "person-1", "org-a");
+    assert.deepEqual(deniedIdentity.records, []);
+    const listing = await read(platformSession, "platform", "/platform/users", "", 1, undefined, "org-a");
+    assert.equal((fixture.calls.at(-1)!.args.select as Record<string, unknown>).identityClaims, false);
+    assert.ok(!JSON.stringify(listing).includes("12345678"));
     fixture.rows = [{ id: "org", name: "Example Organization", status: "ACTIVE", email: "contact@example.test", phone: "fixture", slug: "example", address: "Nairobi", currencyCode: "KES", timezone: "Africa/Nairobi", createdAt: new Date("2026-10-01"), subscription: { plan: "FREE", status: "ACTIVE", currentPeriodEnd: new Date("2026-11-01") }, documentRecords: [{ id: "agreement-target" }], _count: { properties: 2, tenants: 8, memberships: 3 } }];
     const organization = await read(platformSession, "platform", "/platform/organizations", "", 1);
     const fields = (organization.records[0] as { fields: { label: string; value: string }[] }).fields;
@@ -109,7 +151,7 @@ test("native record queries are bounded, scoped, and never serialize private col
     assert.equal(organizationSelect.passwordHash, undefined);
     fixture.rows = [];
     for (const path of ["/platform/users", "/platform/admins"]) {
-      await read({ ...session, platformRole: "SUPER_ADMIN" }, "platform", path, "", 1);
+      await read({ ...session, platformRole: "SUPER_ADMIN" }, "platform", path, "", 1, undefined, path === "/platform/users" ? "org" : undefined);
       const query = fixture.calls.at(-1)!;
       assert.equal(query.model, "user");
       // Prisma requires one field per orderBy entry, including the pagination tie-breaker.
@@ -140,6 +182,10 @@ test("native record queries are bounded, scoped, and never serialize private col
     };
     const client = new PrismaClient({ adapter });
     try {
+      for (const { model, args } of fixture.groupCalls) {
+        const delegate = client[model as keyof typeof client] as unknown as { groupBy: (args: Record<string, unknown>) => Promise<unknown> };
+        await assert.doesNotReject(() => delegate.groupBy(args), `${model} report aggregate must pass Prisma validation`);
+      }
       for (const { model, args } of fixture.calls) {
         const delegate = client[model as keyof typeof client] as unknown as { findMany: (args: Record<string, unknown>) => Promise<unknown> };
         await assert.doesNotReject(() => delegate.findMany(args), `${model} query must pass Prisma validation`);

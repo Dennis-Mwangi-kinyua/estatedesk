@@ -20,6 +20,8 @@ export type VacancyListingCard = {
   roomsLabel: string;
   bathsLabel: string;
   rentLabel: string;
+  initialCostLabel?: string;
+  updatedLabel?: string;
   serviceChargeLabel: string;
   depositLabel?: string | null;
   viewingLabel: string;
@@ -42,116 +44,36 @@ export function VacancyListingGrid({
   searchParams = {},
 }: VacancyListingGridProps) {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+    <div className="space-y-8">
+      <div className="vacancy-listing-grid grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {listings.map((listing) => (
-          <article
-            key={listing.id}
-            className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_14px_38px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_20px_48px_rgba(15,23,42,0.12)] dark:border-white/15 dark:bg-slate-900 dark:shadow-none dark:hover:border-white/30"
-          >
-            <Link href={listing.href} className="block">
-              <div className="relative aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
-                {listing.hasImage && listing.imageSrc ? (
-                  <Image
-                    src={listing.imageSrc}
-                    alt={listing.imageAlt}
-                    fill
-                    sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover transition duration-300 group-hover:scale-[1.03]"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-slate-100 dark:bg-slate-800">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
-                      No images
-                    </span>
-                  </div>
-                )}
-                <div className="absolute bottom-2 left-2 z-10 rounded-full bg-slate-950 px-2.5 py-1 text-[11px] font-semibold text-white shadow-md">
-                  {listing.viewingLabel}
-                </div>
-              </div>
+          <article key={listing.id} className="vacancy-listing-card group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground">
+            <Link href={listing.href} aria-label={`View ${listing.propertyName}, unit ${listing.houseNo}`} className="relative block aspect-[16/10] overflow-hidden bg-muted focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-primary">
+              {listing.hasImage && listing.imageSrc ? <Image src={listing.imageSrc} alt={listing.imageAlt} fill sizes="(min-width: 1280px) 400px, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-[1.03]" /> : <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground"><Building2 className="h-10 w-10" aria-hidden="true" /><span className="text-sm">Photos not provided</span></div>}
+              <span className="absolute left-4 top-4 max-w-[calc(100%-2rem)] rounded-lg border border-white/20 bg-slate-950/85 px-3 py-1.5 text-xs font-medium text-white">{listing.typeLabel}</span>
             </Link>
-
-            <div className="flex flex-1 flex-col gap-3 p-3">
-              <div className="min-w-0">
-                <p className="ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600 dark:text-slate-300">
-                  {listing.managerName}
-                </p>
-                <h2 className="mt-1 ed-full-name whitespace-normal break-words [overflow-wrap:anywhere] min-h-[2.5rem] text-sm font-semibold leading-5 text-slate-950 dark:text-white">
-                  {listing.propertyName} · Unit {listing.houseNo}
-                </h2>
+            <div className="flex flex-1 flex-col gap-4 p-5">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1"><p className="text-2xl font-semibold tracking-tight">{listing.rentLabel}</p><span className="text-sm text-muted-foreground">/ month</span></div>
+              <div>
+                <h2 className="break-words text-lg font-semibold leading-6"><Link href={listing.href} className="rounded focus-visible:outline-2 focus-visible:outline-primary hover:underline">{listing.propertyName}</Link></h2>
+                <p className="mt-1 text-sm text-muted-foreground">Unit {listing.houseNo}</p>
+                <p className="mt-2 flex items-start gap-1.5 text-sm text-muted-foreground"><MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" /><span className="break-words">{listing.place}</span></p>
               </div>
-
-              <div className="flex min-w-0 items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-200">
-                <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-500" />
-                <span className="truncate">{listing.place}</span>
-              </div>
-
-              <p className="line-clamp-2 min-h-[2.5rem] text-xs leading-5 text-slate-700 dark:text-slate-200">
-                {listing.description}
-              </p>
-
-              <div className="grid grid-cols-3 gap-1.5 text-[11px] font-medium text-slate-700 dark:text-slate-200">
-                <span className="inline-flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-1.5 py-2 text-center dark:border-white/10 dark:bg-slate-950">
-                  <BedDouble className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
-                  <span className="max-w-full truncate">{listing.roomsLabel}</span>
-                </span>
-                <span className="inline-flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-1.5 py-2 text-center dark:border-white/10 dark:bg-slate-950">
-                  <Bath className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
-                  <span className="max-w-full truncate">{listing.bathsLabel}</span>
-                </span>
-                <span className="inline-flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-1.5 py-2 text-center dark:border-white/10 dark:bg-slate-950">
-                  <Building2 className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
-                  <span className="max-w-full truncate">{listing.typeLabel}</span>
-                </span>
-              </div>
-
-              <div className="mt-auto border-t border-slate-100 pt-3 dark:border-white/10">
-                <p className="text-base font-semibold tracking-tight text-slate-950 dark:text-white">
-                  {listing.rentLabel}
-                </p>
-                <p className="mt-0.5 truncate text-[11px] text-slate-600 dark:text-slate-300">
-                  {listing.serviceChargeLabel}
-                  {listing.depositLabel ? ` · ${listing.depositLabel}` : ""}
-                </p>
-
-                <div className="mt-3 grid grid-cols-[2.5rem_1fr] gap-2">
-                  <a data-workspace-action="true"
-                    href={listing.callHref}
-                    className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/15 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-white/10"
-                    aria-label="Call landlord or agent"
-                  >
-                    <Phone className="h-4 w-4" />
-                  </a>
-                  <Link data-workspace-action="true"
-                    href={listing.href}
-                    className="inline-flex min-h-10 items-center justify-center rounded-lg bg-slate-950 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
-                  >
-                    View details
-                  </Link>
-                </div>
-
-                <div className="mt-3 border-t border-slate-100 pt-3 dark:border-white/10">
-                  <VacancyShareActions
-                    url={listing.shareUrl}
-                    title={listing.shareTitle}
-                    text={listing.shareText}
-                    compact
-                  />
-                </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-2 border-y border-border py-3 text-sm"><span className="inline-flex items-center gap-1.5"><BedDouble className="h-4 w-4 text-muted-foreground" aria-hidden="true" />{listing.roomsLabel}</span><span className="inline-flex items-center gap-1.5"><Bath className="h-4 w-4 text-muted-foreground" aria-hidden="true" />{listing.bathsLabel}</span></div>
+              <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">{listing.description}</p>
+              <dl className="space-y-1.5 text-sm text-muted-foreground"><div><dt className="sr-only">Service charge</dt><dd>{listing.serviceChargeLabel}</dd></div>{listing.depositLabel ? <div><dt className="sr-only">Deposit</dt><dd>{listing.depositLabel}</dd></div> : null}<div><dt className="sr-only">Viewing</dt><dd>{listing.viewingLabel}</dd></div></dl>
+              <div className="mt-auto space-y-4 pt-1">
+                {listing.initialCostLabel ? <p className="rounded-lg bg-muted px-3 py-2 text-sm font-medium">{listing.initialCostLabel}<span className="mt-1 block text-xs font-normal text-muted-foreground">Confirm all fees before paying.</span></p> : null}
+                {listing.updatedLabel ? <p className="text-xs text-muted-foreground">{listing.updatedLabel}</p> : null}
+                <p className="text-xs leading-5 text-muted-foreground">Listed by <span className="font-medium text-foreground">{listing.managerName}</span></p>
+                <div className="grid grid-cols-[1fr_auto] gap-2"><Link data-workspace-action="true" href={listing.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">View property</Link><a data-workspace-action="true" href={listing.callHref} aria-label={`Contact the manager about ${listing.propertyName}, unit ${listing.houseNo}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold"><Phone className="h-4 w-4" aria-hidden="true" /><span>Contact</span></a></div>
+                <details className="border-t border-border pt-1"><summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-muted-foreground">Share this property</summary><div className="pb-1"><VacancyShareActions url={listing.shareUrl} title={listing.shareTitle} text={listing.shareText} compact /></div></details>
               </div>
             </div>
           </article>
         ))}
       </div>
-
-      <VacancyPaginationNav
-        ariaLabel="Vacancy pagination"
-        basePath="/vacancies"
-        pagination={pagination}
-        searchParams={searchParams}
-        itemLabel="vacancies"
-      />
+      <VacancyPaginationNav ariaLabel="Vacancy pagination" basePath="/vacancies" pagination={pagination} searchParams={searchParams} itemLabel="vacancies" />
     </div>
   );
 }

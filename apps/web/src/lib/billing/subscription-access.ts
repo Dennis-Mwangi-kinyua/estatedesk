@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { APP_PLANS } from "@/lib/billing/plans";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
-const GRACE_DAYS = 7;
+export const SUBSCRIPTION_GRACE_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export type SubscriptionAccessState =
@@ -98,12 +98,12 @@ export async function getSubscriptionAccessState(
         plan,
         amountDue,
         trialEndsAt: subscription.trialEndsAt,
-        graceEndsAt: addDays(subscription.trialEndsAt, GRACE_DAYS),
+        graceEndsAt: addDays(subscription.trialEndsAt, SUBSCRIPTION_GRACE_DAYS),
         daysLeft: Math.ceil((subscription.trialEndsAt.getTime() - now.getTime()) / DAY_MS),
       };
     }
 
-    const graceEndsAt = addDays(subscription.trialEndsAt, GRACE_DAYS);
+    const graceEndsAt = addDays(subscription.trialEndsAt, SUBSCRIPTION_GRACE_DAYS);
 
     if (graceEndsAt > now) {
       return {
@@ -126,7 +126,7 @@ export async function getSubscriptionAccessState(
     amountDue,
     trialEndsAt: subscription.trialEndsAt,
     graceEndsAt: subscription.trialEndsAt
-      ? addDays(subscription.trialEndsAt, GRACE_DAYS)
+      ? addDays(subscription.trialEndsAt, SUBSCRIPTION_GRACE_DAYS)
       : subscription.currentPeriodEnd,
     daysLeft: 0,
   };

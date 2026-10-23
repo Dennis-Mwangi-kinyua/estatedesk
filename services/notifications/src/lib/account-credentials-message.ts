@@ -1,8 +1,9 @@
 export type AccountCredentialsMessageInput = {
   fullName: string;
   username: string;
-  /** Ignored for backward compatibility. Passwords must never be shared. */
+  /** One-time temporary password, shown only in the account handover draft. */
   password?: string;
+  temporaryPassword?: string;
   setupUrl?: string;
   organizationName?: string;
   email?: string | null;
@@ -23,9 +24,9 @@ export function buildAccountCredentialsMessage(
     input.loginUrl ? `Login: ${input.loginUrl}` : null,
     `Username: ${input.username}`,
     input.email ? `Email: ${input.email}` : null,
-    input.setupUrl ? `Set your password: ${input.setupUrl}` : "Sign in with your existing password, or use Forgot password to recover access.",
+    input.setupUrl ? `Set your password: ${input.setupUrl}` : input.temporaryPassword ? `Temporary password: ${input.temporaryPassword}` : "Sign in with your existing password, or use Forgot password to recover access.",
     "",
-    input.setupUrl ? "This setup link expires in one hour and can be used once. Choose your own password before signing in." : null,
+    input.setupUrl ? "This setup link expires in one hour and can be used once. Choose your own password before signing in." : input.temporaryPassword ? "This temporary password is unique to your account. You must change it immediately after your first sign-in." : null,
     "Keep your login details private. If you need help, contact the administrator who created your account.",
     "",
     "Kind regards,",

@@ -202,11 +202,8 @@ export async function importCsv({
       await lockOrgQuota(tx, orgId);
     }
     if (kind === "properties") {
-      const { getOrgPlanUsage, planLimitMessage } = await import("@/lib/billing/access");
-      const usage = await getOrgPlanUsage(orgId, tx);
-      if (usage.properties + rows.length > usage.propertiesLimit) {
-        throw new Error(`${planLimitMessage("property", usage)} This import would add ${rows.length} properties.`);
-      }
+      const { assertCanCreateProperty } = await import("@/lib/billing/access");
+      await assertCanCreateProperty(orgId, rows.length, tx);
 
       for (const row of rows) {
         await tx.property.create({
@@ -226,11 +223,8 @@ export async function importCsv({
     }
 
     if (kind === "units") {
-      const { getOrgPlanUsage, planLimitMessage } = await import("@/lib/billing/access");
-      const usage = await getOrgPlanUsage(orgId, tx);
-      if (usage.units + rows.length > usage.unitsLimit) {
-        throw new Error(`${planLimitMessage("unit", usage)} This import would add ${rows.length} units.`);
-      }
+      const { assertCanCreateUnit } = await import("@/lib/billing/access");
+      await assertCanCreateUnit(orgId, rows.length, tx);
 
       for (const row of rows) {
         const property = await tx.property.findFirst({

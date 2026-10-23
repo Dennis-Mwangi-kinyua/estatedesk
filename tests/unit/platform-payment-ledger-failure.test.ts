@@ -13,7 +13,7 @@ test("payment ledger failure offers recovery without exposing errors or fabricat
     jsx: "automatic", tsconfig: "apps/web/tsconfig.json",
     plugins: [{ name: "payment-ledger-fixture", setup(builder) {
       builder.onResolve({ filter: /^@\/lib\/(ledger|permissions\/guards)$/ }, args => ({ path: args.path, namespace: "fixture" }));
-      builder.onResolve({ filter: /^next\/link$/ }, () => ({ path: "next-link", namespace: "fixture" }));
+      builder.onResolve({ filter: /^(next\/link|@\/components\/navigation\/workspace-link)$/ }, () => ({ path: "next-link", namespace: "fixture" }));
       builder.onLoad({ filter: /.*/, namespace: "fixture" }, args => {
         const mocks: Record<string, string> = {
           "@/lib/ledger": 'export const getPlatformPaymentLedger = async () => {const error = new Error("private database detail"); error.code = "P2024"; throw error;}; export const formatLedgerCurrency = String; export const formatLedgerDate = String;',

@@ -23,6 +23,7 @@ import { isSecurityGatePathname } from "@/lib/auth/security-gate";
 import { prisma } from "@/lib/prisma";
 import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 import { readOrgRolePolicies, rolePolicyBlocksPath, type OrgRolePolicy } from "@/lib/permissions/org-role-policy";
+import { applyOrganizationPlanAccess } from "@/lib/billing/organization-plan-policy";
 
 export type { OrgRole, PlatformRole, ScopeType };
 
@@ -155,6 +156,7 @@ function setSessionCookie(
   cookieStore: Awaited<ReturnType<typeof cookies>>,
   token: string,
   maxAge = getSessionMaxAgeSeconds(),
+  required = false,
 ) {
   try {
     cookieStore.set(
@@ -162,7 +164,8 @@ function setSessionCookie(
       createSessionCookieValue(token),
       getSessionCookieOptions(maxAge),
     );
-  } catch {
+  } catch (error) {
+    if (required) throw error;
     // Intentionally ignored — renewal/upgrade can complete on the next
     // mutable request (action/route) without breaking page render.
   }
@@ -418,7 +421,7 @@ export async function setUserSession({
     });
   });
 
-  setSessionCookie(cookieStore, token);
+  setSessionCookie(cookieStore, token, getSessionMaxAgeSeconds(), true);
 }
 
 export const getUserSession = cache(async function getUserSession(): Promise<AppSession | null> {
@@ -553,8 +556,11 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
     const settings = activeMembership ? await prisma.organizationSettings.findUnique({
       where: { orgId: activeMembership.orgId }, select: { roleAccess: true },
     }) : null;
+    const subscription = activeMembership ? await prisma.subscription.findUnique({
+      where: { orgId: activeMembership.orgId }, select: { plan: true, metadata: true },
+    }) : null;
     const orgRolePolicy = activeMembership
-      ? readOrgRolePolicies(settings?.roleAccess)[activeMembership.role]
+      ? applyOrganizationPlanAccess(readOrgRolePolicies(settings?.roleAccess)[activeMembership.role], subscription?.plan ?? "FREE", subscription?.metadata)
       : undefined;
     // API handlers that read sessions directly must honor blocked sections too.
     if (pathname.startsWith("/api/") && rolePolicyBlocksPath(orgRolePolicy, pathname)) return null;
@@ -788,7 +794,7 @@ export async function requireUserSession(): Promise<AppSession> {
   // enforce the workspace boundary before callers can read or mutate data.
   const hasResourceGuard = pathname?.startsWith("/api/") || pathname === "/api" || pathname?.startsWith("/sign-lease/") || pathname?.startsWith("/print/");
   if (pathname && !hasResourceGuard && !canAccessWorkspacePath(session, pathname)) {
-    redirect("/access-denied");
+    redirect("/dashboard");
   }
 
   return session;

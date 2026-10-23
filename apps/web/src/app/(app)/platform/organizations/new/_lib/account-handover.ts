@@ -3,11 +3,11 @@ import type { CreateOrganizationState } from "../actions";
 type Account = NonNullable<CreateOrganizationState["createdAccount"]>;
 
 export function accountHandoverText(account: Account, loginUrl: string) {
-  return buildAccountCredentialsMessage({ fullName: account.fullName, username: account.username, setupUrl: account.setupUrl, email: account.email, role: account.accountType === "LANDLORD" ? "LANDLORD" : "Organization administrator", organizationName: account.organizationName, loginUrl });
+  return buildAccountCredentialsMessage({ fullName: account.fullName, username: account.username, temporaryPassword: account.temporaryPassword, setupUrl: account.setupUrl, email: account.email, role: account.accountType === "LANDLORD" ? "LANDLORD" : "Organization administrator", organizationName: account.organizationName, loginUrl });
 }
 
 export function accountShareUrl(channel: "whatsapp" | "sms" | "email", text: string, email: string, phone: string) {
-  if (channel === "email") return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent("Your EstateDesk account")}&body=${encodeURIComponent(text)}`;
+  if (channel === "email") return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent("Activate your EstateDesk account")}&body=${encodeURIComponent(text)}`;
   if (channel === "sms") return `sms:${phone.replace(/[^+\d]/g, "")}?body=${encodeURIComponent(text)}`;
   return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
 }

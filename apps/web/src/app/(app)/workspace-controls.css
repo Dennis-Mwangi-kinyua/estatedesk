@@ -8,8 +8,8 @@
   --workspace-action-height: 2.75rem;
 }
 .dark :is(.estate-workspace, body[data-workspace-theme="true"]) {
-  --workspace-action-primary: #a1c6ff;
-  --workspace-action-primary-ink: #122440;
+  --workspace-action-primary: #285ed4;
+  --workspace-action-primary-ink: #ffffff;
   --workspace-action-danger: #ffb4ba;
   --workspace-action-danger-ink: #4b111a;
 }

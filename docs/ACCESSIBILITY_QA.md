@@ -4,6 +4,8 @@ Status: **AUTOMATED BASELINE COMPLETE — MANUAL AUTHENTICATED QA STILL REQUIRED
 
 Last updated: 2026-07-04
 
+Public mobile browser verification recorded on 2026-10-22: [29-route responsive audit](audits/2026-10-22/mobile/README.md). Layout and sampled menu keyboard checks passed after isolated homepage retries; intermittent homepage readiness, tablet form text and tap-area candidates remain open. This does not replace real-device, screen-reader, contrast or authenticated sign-off below.
+
 Use this checklist to record evidence before sign-off. Test at **360px**, **390px**, **768px**, and **desktop**. For every workflow record browser, role, viewport, result, screenshot, defect, and retest evidence.
 
 ## Automated baseline (CI)

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { lockOrgQuota } from "@/lib/billing/access";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { writePlatformAuditLog } from "@/lib/audit/security";
 import { sendTransactionalEmail } from "@/lib/notifications/email";
@@ -86,11 +87,18 @@ export async function organizationBillingAction(
     } else if (operation === "cancel") {
       if (formData.get("confirmed") !== "on") return { error: "Confirm cancellation to continue." };
       if (subscription.status === "CANCELLED") return { error: "This subscription is already cancelled." };
-      await prisma.subscription.update({ where: { id: subscription.id }, data: { status: "CANCELLED", cancelledAt: now, cancelAt: now } });
+      await prisma.$transaction(async tx => {
+        await lockOrgQuota(tx, orgId);
+        await tx.subscription.update({ where: { id: subscription.id, orgId }, data: { status: "CANCELLED", cancelledAt: now, cancelAt: now } });
+      });
       success = "Subscription cancelled.";
     } else {
       if (formData.get("confirmed") !== "on") return { error: "Confirm payment before renewing the subscription." };
-      await prisma.subscription.update({ where: { id: subscription.id }, data: { status: "ACTIVE", ...renewedSubscriptionPeriod(subscription.currentPeriodEnd, now), cancelledAt: null, cancelAt: null, trialEndsAt: null } });
+      await prisma.$transaction(async tx => {
+        await lockOrgQuota(tx, orgId);
+        const current = await tx.subscription.findUniqueOrThrow({ where: { id: subscription.id }, select: { currentPeriodEnd: true } });
+        await tx.subscription.update({ where: { id: subscription.id, orgId }, data: { status: "ACTIVE", ...renewedSubscriptionPeriod(current.currentPeriodEnd, now), cancelledAt: null, cancelAt: null, trialEndsAt: null } });
+      });
       success = "Subscription renewed for 30 days.";
     }
     await writePlatformAuditLog({ actorUserId: session.userId, action: `PLATFORM_SUBSCRIPTION_${operation.toUpperCase()}`, entityType: "Subscription", entityId: subscription.id, metadata: { orgId, slug: subscription.org.slug } });

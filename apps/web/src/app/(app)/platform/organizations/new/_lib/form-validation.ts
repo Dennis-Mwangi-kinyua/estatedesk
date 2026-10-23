@@ -9,8 +9,7 @@ export const accountFieldLabels: Record<string, string> = {
   organizationName: "Workspace name", organizationSlug: "Workspace address", organizationEmail: "Workspace email",
   organizationPhone: "Workspace phone", organizationAddress: "Address", currencyCode: "Currency", timezone: "Timezone",
   dataRetentionDays: "Data retention", plan: "Plan", accountType: "Account type", adminFullName: "Owner name",
-  adminUsername: "Username", adminEmail: "Login email", adminPhone: "Owner phone", adminPassword: "Temporary password",
-  adminPasswordConfirm: "Confirm password",
+  adminUsername: "Username", adminEmail: "Login email", adminPhone: "Owner phone",
 };
 
 export function validateAccountStep(step: number, values: Record<string, string>): Record<string, string[]> {
@@ -29,10 +28,8 @@ export function validateAccountStep(step: number, values: Record<string, string>
   } else {
     require("adminPhone", isValidPhone(values.adminPhone || ""), "Use international format, for example +254700000000.");
     require("adminFullName", values.adminFullName.trim().length >= 2, "Enter the account owner’s full name.");
-    require("adminUsername", /^[a-z0-9._-]{3,30}$/.test(values.adminUsername.trim()), "Use 3–30 lowercase letters, numbers, dots, underscores, or hyphens.");
     require("adminEmail", email.test(values.adminEmail.trim()), "Enter a valid login email.");
-    require("adminPassword", values.adminPassword.length >= 8, "Use at least 8 characters or generate a secure password.");
-    require("adminPasswordConfirm", Boolean(values.adminPasswordConfirm) && values.adminPassword === values.adminPasswordConfirm, "Both passwords must match.");
+    require("adminUsername", values.adminUsername.trim().toLowerCase() === values.adminEmail.trim().toLowerCase() && email.test(values.adminUsername.trim()), "Username must match the valid login email.");
   }
   return errors;
 }

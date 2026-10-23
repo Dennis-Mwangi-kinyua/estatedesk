@@ -1,0 +1,11 @@
+
+Running 4 tests using 1 worker
+
+(node:57191) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [mobile-chromium] › tests/e2e/public-mobile-navigation.spec.ts:3:5 › public navigation works before JavaScript loads (939ms)
+  ✓  2 [mobile-chromium] › tests/e2e/public-mobile-navigation.spec.ts:18:5 › hydrated public menu traps focus, closes and restores focus (2.1s)
+  ✓  3 [mobile-chromium] › tests/e2e/public-mobile-navigation.spec.ts:38:5 › public tablet fields keep readable text and minimum height (8.8s)
+  ✓  4 [mobile-chromium] › tests/e2e/public-mobile-navigation.spec.ts:54:5 › shared public actions fit mobile layouts in both themes (22.7s)
+
+  4 passed (35.8s)

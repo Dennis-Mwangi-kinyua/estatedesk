@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 
 import { inputClassName, stepPanelClassName, textareaClassName } from "../_lib/constants";
 import { FieldLabel, SectionTitle } from "./ui-primitives";

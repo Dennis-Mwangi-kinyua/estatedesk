@@ -10,14 +10,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { notifyRecipients } from "@/lib/notifications/notify";
 import { checkRateLimit } from "@/lib/rate-limit";
-
-function requiredText(value: FormDataEntryValue | null, field: string) {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error(`${field} is required.`);
-  }
-
-  return value.trim();
-}
+import { vacancyInquiryInputSchema } from "@/lib/vacancy-inquiry-input";
 
 function optionalText(value: FormDataEntryValue | null) {
   if (typeof value !== "string") return null;
@@ -54,13 +47,9 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
     );
   }
 
-  const fullName = requiredText(formData.get("fullName"), "Name");
-  const phone = requiredText(formData.get("phone"), "Phone");
-  const email = optionalText(formData.get("email"));
-  const message = requiredText(formData.get("message"), "Message");
-  const preferredLocation = optionalText(formData.get("preferredLocation"));
-  const budget = optionalText(formData.get("budget"));
-  const referralSource = optionalText(formData.get("referralSource"));
+  const parsed = vacancyInquiryInputSchema.safeParse(Object.fromEntries(["fullName", "phone", "email", "message", "preferredLocation", "budget", "referralSource"].map(key => [key, String(formData.get(key) ?? "")])));
+  if (!parsed.success) redirect(`/vacancies/${encodeURIComponent(publicSlug)}?error=${encodeURIComponent("Check your name, phone, email, budget and message, then try again.")}#enquire`);
+  const { fullName, phone, email, message, preferredLocation, budget, referralSource } = parsed.data;
   const unitId = await resolveVacancyUnitIdFromSlug(publicSlug);
 
   if (!unitId) {
@@ -76,9 +65,11 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
       deletedAt: null,
       status: "VACANT",
       isPubliclyListed: true,
+      leases: { none: { status: "ACTIVE" } },
       property: {
         isActive: true,
         deletedAt: null,
+        org: { status: "ACTIVE", deletedAt: null },
       },
     },
     select: {
@@ -129,6 +120,10 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
     .join("\n");
 
   await prisma.$transaction(async (tx) => {
+    // Serialize with unit status/lease writes and check live eligibility again.
+    await tx.$queryRaw`SELECT id FROM "Unit" WHERE id = ${unit.id} FOR UPDATE`;
+    const available = await tx.unit.findFirst({ where: { id: unit.id, isActive: true, deletedAt: null, status: "VACANT", isPubliclyListed: true, leases: { none: { status: "ACTIVE" } }, property: { isActive: true, deletedAt: null, org: { status: "ACTIVE", deletedAt: null } } }, select: { id: true } });
+    if (!available) redirect(`/vacancies/${canonicalSlug}?error=${encodeURIComponent("This vacancy is no longer available.")}#enquire`);
     await tx.vacancyInquiry.create({
       data: {
         orgId: unit.property.orgId,

@@ -63,6 +63,8 @@ export function VacancyGalleryLightbox({
     };
   }, [open, close, prev, next]);
 
+  if (images.length === 0) return <div className="flex aspect-[16/9] items-center justify-center rounded-2xl border border-border bg-muted p-6 text-center text-muted-foreground"><div><p className="font-medium">Photos not provided</p><p className="mt-2 text-sm">Contact the managing office for photos or arrange a viewing.</p></div></div>;
+
   return (
     <div className="space-y-3">
       <button data-workspace-action="true"

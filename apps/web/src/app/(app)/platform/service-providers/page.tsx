@@ -6,7 +6,7 @@ import { ONLINE_WINDOW_MS, providerIsOnline } from "@/features/providers/policy"
 
 export const dynamic = "force-dynamic";
 
-type ProviderStatus = "PENDING" | "ACTIVE" | "FLAGGED" | "SUSPENDED" | "DELETED";
+type ProviderStatus = "PENDING" | "CHANGES_REQUESTED" | "REJECTED" | "ACTIVE" | "FLAGGED" | "SUSPENDED" | "DELETED";
 
 function ModerationFields({
   providerId,
@@ -24,17 +24,31 @@ function ModerationFields({
       <label className="block text-sm">
         Action
         <select name="status" defaultValue={initialStatus} className={inputClass}>
-          <option value="PENDING">Keep pending approval</option>
-          <option value="FLAGGED">Flag and hide pending review</option>
-          <option value="SUSPENDED">Suspend provider access</option>
-          <option value="ACTIVE">Approve / activate provider</option>
-          <option value="DELETED">Remove profile permanently</option>
+          {initialStatus === "PENDING" ? <>
+            <option value="PENDING">Keep pending</option>
+            <option value="CHANGES_REQUESTED">Request corrections</option>
+            <option value="REJECTED">Decline application</option>
+            <option value="ACTIVE">Approve provider</option>
+          </> : initialStatus === "CHANGES_REQUESTED" ? <>
+            <option value="CHANGES_REQUESTED">Keep changes requested</option>
+            <option value="REJECTED">Decline application</option>
+            <option value="ACTIVE">Approve provider</option>
+          </> : initialStatus === "REJECTED" ? <>
+            <option value="REJECTED">Keep declined</option>
+            <option value="DELETED">Remove profile</option>
+          </> : <>
+            <option value={initialStatus}>{initialStatus.replaceAll("_", " ")}</option>
+            {initialStatus === "FLAGGED" ? <option value="ACTIVE">Clear flag and restore</option> : null}
+            {initialStatus !== "ACTIVE" && initialStatus !== "FLAGGED" ? <option value="ACTIVE">Approve / restore provider</option> : null}
+            {initialStatus === "ACTIVE" ? <option value="FLAGGED">Flag and hide from directory</option> : null}
+            {initialStatus !== "SUSPENDED" ? <option value="SUSPENDED">Suspend provider access</option> : null}
+            <option value="DELETED">Remove profile</option>
+          </>}
         </select>
       </label>
-      <TextField name="reason" label="Review reason (saved to audit history)" maxLength={2000} />
+      <TextField name="reason" label={initialStatus === "PENDING" || initialStatus === "CHANGES_REQUESTED" ? "Feedback / decision reason (shared with applicant)" : "Moderation reason (saved to audit history)"} maxLength={2000} />
       <p className="text-xs text-muted-foreground">
-        New providers must verify their email before approval. Approving sends
-        their username and sign-in instructions by email. Removal deletes the
+        Applicants must verify their email before approval. Corrections and decisions are emailed to the applicant. Removal deletes the
         public profile and portfolio while retaining job, review, and report
         records for accountability.
       </p>
@@ -45,16 +59,17 @@ function ModerationFields({
 export default async function Page({ searchParams }: { searchParams: Promise<{ status?: string; q?: string }> }) {
   await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
   const filters = await searchParams;
-  const status = ["PENDING", "ACTIVE", "FLAGGED", "SUSPENDED", "DELETED"].find(
+  const status = ["PENDING", "CHANGES_REQUESTED", "REJECTED", "ACTIVE", "FLAGGED", "SUSPENDED", "DELETED"].find(
     (value) => value === filters.status,
   ) as ProviderStatus | undefined;
   const q = typeof filters.q === "string" ? filters.q.trim().slice(0, 120) : "";
   const now = new Date();
   const onlineWindowStart = new Date(now.getTime() - ONLINE_WINDOW_MS);
 
-  const [total, pending, active, flagged, suspended, removed, online, reports, providers] = await Promise.all([
+  const [total, pending, corrections, active, flagged, suspended, removed, online, reports, providers] = await Promise.all([
     prisma.serviceProvider.count(),
     prisma.serviceProvider.count({ where: { status: "PENDING" } }),
+    prisma.serviceProvider.count({ where: { status: "CHANGES_REQUESTED" } }),
     prisma.serviceProvider.count({ where: { status: "ACTIVE" } }),
     prisma.serviceProvider.count({ where: { status: "FLAGGED" } }),
     prisma.serviceProvider.count({ where: { status: "SUSPENDED" } }),
@@ -87,6 +102,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
           OR: [
             { businessName: { contains: q, mode: "insensitive" } },
             { location: { contains: q, mode: "insensitive" } },
+            { user: { fullName: { contains: q, mode: "insensitive" } } },
+            { user: { email: { contains: q, mode: "insensitive" } } },
+            { user: { username: { contains: q, mode: "insensitive" } } },
           ],
         } : {}),
       },
@@ -105,6 +123,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
             },
           },
         },
+        portfolio: { orderBy: { createdAt: "desc" }, take: 5 },
         _count: { select: { jobs: true, reports: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -115,6 +134,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
   const stats = [
     ["Registered", total],
     ["Awaiting review", pending],
+    ["Corrections requested", corrections],
     ["Active", active],
     ["Online now", online],
     ["Flagged", flagged],
@@ -132,7 +152,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 2xl:grid-cols-7">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 2xl:grid-cols-8">
         {stats.map(([label, count]) => (
           <div key={label} className={panelClass}>
             <p className="text-sm text-muted-foreground">{label}</p>
@@ -150,7 +170,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
         <h2 className="mb-4 text-2xl font-bold">Reports awaiting review</h2>
         <div className="space-y-4">
           {reports.map((report) => (
-            <article key={report.id} className={panelClass}>
+            <article id={`report-${report.id}`} key={report.id} className={panelClass}>
               <h3 className="text-xl font-semibold">{report.provider.businessName}</h3>
               <p className="text-sm text-primary">
                 Reported by {report.org.name} · {report.job.title} · {report.provider.status}
@@ -164,7 +184,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
                       <ModerationFields
                         providerId={report.providerId}
                         reportId={report.id}
-                        initialStatus={report.provider.status === "PENDING" ? "ACTIVE" : "FLAGGED"}
+                        initialStatus={report.provider.status}
                       />
                     </ActionForm>
                   </div>
@@ -190,13 +210,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
         <form className={`${panelClass} mb-4 flex flex-wrap items-end gap-3`}>
           <label className="text-sm">
             Name or location
-            <input name="q" defaultValue={q} className={inputClass} maxLength={120} />
+            <input name="q" defaultValue={q} className={inputClass} maxLength={120} placeholder="Business, owner, email, username, or location" />
           </label>
           <label className="text-sm">
             Status
             <select name="status" defaultValue={status ?? ""} className={inputClass}>
               <option value="">All statuses</option>
-              {["PENDING", "ACTIVE", "FLAGGED", "SUSPENDED", "DELETED"].map((value) => (
+              {["PENDING", "CHANGES_REQUESTED", "REJECTED", "ACTIVE", "FLAGGED", "SUSPENDED", "DELETED"].map((value) => (
                 <option key={value}>{value}</option>
               ))}
             </select>
@@ -206,7 +226,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
 
         <div className="grid items-start gap-4 lg:grid-cols-2">
           {providers.map((provider) => (
-            <article key={provider.id} className={panelClass}>
+            <article id={`provider-${provider.id}`} key={provider.id} className={panelClass}>
               <h3 className="text-xl font-bold">{provider.businessName}</h3>
               <p className="mt-2 text-sm text-primary">
                 {provider.category} · {provider.location} · {provider.status}
@@ -218,6 +238,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
               <p className="mt-2 text-sm text-muted-foreground">
                 {provider.status === "PENDING"
                   ? "Awaiting provider review"
+                  : provider.status === "CHANGES_REQUESTED"
+                    ? "Waiting for applicant corrections"
+                    : provider.status === "REJECTED"
+                      ? "Application declined"
                   : ["ACTIVE", "FLAGGED"].includes(provider.status)
                     && provider.user.status === "ACTIVE"
                     && !provider.user.deletedAt
@@ -227,14 +251,32 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
                     : "Offline"}
                 {" · "}{provider._count.jobs} jobs · {provider._count.reports} reports
               </p>
+              {provider.status === "PENDING" || provider.status === "CHANGES_REQUESTED" ? (
+                <details className="mt-4 rounded-xl border border-border p-4">
+                  <summary className="cursor-pointer font-semibold">Review full application</summary>
+                  <div className="mt-4 space-y-4 text-sm">
+                    <div><h4 className="font-semibold">Provider statement</h4><p className="mt-1 whitespace-pre-line text-muted-foreground">{provider.bio}</p></div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <p><span className="font-medium">Portfolio URL:</span> {provider.portfolioUrl ? <a className="text-primary underline" href={provider.portfolioUrl} rel="noopener noreferrer nofollow" target="_blank">Open portfolio ↗</a> : "Not provided"}</p>
+                      <p><span className="font-medium">National ID:</span> {provider.nationalId ? `Submitted · ending ${provider.nationalId.slice(-4)}` : "Not provided"}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">Portfolio projects</h4>
+                      {provider.portfolio.length ? <ul className="mt-2 space-y-2">{provider.portfolio.map(project => <li key={project.id} className="rounded-lg bg-muted/50 p-3"><span className="font-medium">{project.title}</span> · {project.location}<p className="mt-1 text-muted-foreground">{project.description}</p>{project.imageUrl ? <a href={project.imageUrl} rel="noopener noreferrer nofollow" target="_blank" className="mt-1 inline-block text-primary underline">View project image ↗</a> : null}</li>)}</ul> : <p className="mt-2 text-muted-foreground">No portfolio projects submitted yet.</p>}
+                    </div>
+                    {provider.reviewFeedback ? <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3"><span className="font-semibold">Previous feedback:</span> {provider.reviewFeedback}</p> : null}
+                    <p className="text-xs text-muted-foreground">ID numbers are masked here. EstateDesk has not independently verified identity or trade licences.</p>
+                  </div>
+                </details>
+              ) : null}
               {provider.status !== "DELETED" ? (
                 <details className="mt-4">
                   <summary className="cursor-pointer text-sm font-semibold text-destructive">
-                    {provider.status === "PENDING" ? "Review application" : "Manage provider account"}
+                    {["PENDING", "CHANGES_REQUESTED"].includes(provider.status) ? "Review application" : "Manage provider account"}
                   </summary>
                   <div className="mt-3">
                     <ActionForm action={moderateProvider} label="Save review" danger>
-                      <ModerationFields providerId={provider.id} initialStatus={provider.status === "PENDING" ? "ACTIVE" : "FLAGGED"} />
+                      <ModerationFields providerId={provider.id} initialStatus={provider.status} />
                     </ActionForm>
                   </div>
                 </details>

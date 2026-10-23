@@ -38,7 +38,7 @@ test("load harness fails streamed login redirects and terminates stalled request
       const file = join(directory, "routes.json");
       const output = join(directory, "report.json");
       await writeFile(file, JSON.stringify([{ path: route, expectedStatus: [200] }]));
-      await assert.rejects(run(process.execPath, ["scripts/load-test.mjs"], { env: { ...process.env, LOAD_BASE_URL: `http://127.0.0.1:${address.port}`, LOAD_ROUTES_FILE: file, LOAD_RPM: "600", LOAD_DURATION_SECONDS: "0.1", LOAD_CONCURRENCY: "1", LOAD_REQUEST_TIMEOUT_MS: "100", LOAD_FAIL_ON_ERROR_RATE: "1", LOAD_OUTPUT: output, LOAD_COOKIE_HEADER: "", LOAD_SESSION_COOKIE: "" }, timeout: 5000 }));
+      await assert.rejects(run(process.execPath, ["scripts/load-test.mjs"], { env: { ...process.env, LOAD_BASE_URL: `http://127.0.0.1:${address.port}`, LOAD_ROUTES_FILE: file, LOAD_RPM: "600", LOAD_DURATION_SECONDS: "0.1", LOAD_CONCURRENCY: "1", LOAD_REQUEST_TIMEOUT_MS: route === "/redirect" ? "2000" : "100", LOAD_FAIL_ON_ERROR_RATE: "1", LOAD_OUTPUT: output, LOAD_COOKIE_HEADER: "", LOAD_SESSION_COOKIE: "" }, timeout: 5000 }));
       const report = JSON.parse(await readFile(output, "utf8"));
       assert.equal(report.summary.failed, 1);
       assert.equal(report.summary.completed, 1);

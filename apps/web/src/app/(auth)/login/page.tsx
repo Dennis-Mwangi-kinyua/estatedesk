@@ -40,7 +40,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <aside aria-labelledby="login-workflow-title" className={styles.services}>
         <div className={styles.overview}>
           <p className={styles.eyebrow}>Property management, connected</p>
-          <h2 id="login-workflow-title">Your property operations.<br /><span>Working together.</span></h2>
+          <h2 id="login-workflow-title">Your property operations. <span>Working together.</span></h2>
           <p className={styles.description}>From the first lease to the monthly owner statement, manage the work behind every property in one connected workspace.</p>
           <div className={styles.serviceGrid}>
             {services.map(({ icon: Icon, title, description, tone }) => (

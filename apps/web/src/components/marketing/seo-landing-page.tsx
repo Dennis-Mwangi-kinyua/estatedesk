@@ -1,3 +1,4 @@
+import { publicPrimaryAction, publicSecondaryAction } from "@/components/marketing/public-action";
 import Link from "@/components/navigation/workspace-link";
 import { ArrowRight, Layers3, ListChecks } from "lucide-react";
 import { CircleCheck as CheckCircle2, CircleHelp as HelpCircle } from "@/components/shared/colored-icons";
@@ -211,10 +212,10 @@ export function SeoLandingPage({ content }: { content: SeoLandingPageContent }) 
         <p className="text-muted-foreground">Choose the operating market for your property or explore remote owner oversight.</p>
         <nav aria-label="Property management markets" className="flex flex-wrap gap-4">
           {regionalMarketLinks.filter((item) => item.href !== content.path).map((item) => (
-            <Link key={item.href} href={item.href} className="font-medium text-primary underline underline-offset-4">{item.title}</Link>
+            <Link key={item.href} href={item.href} className="inline-flex min-h-11 items-center font-medium text-primary underline underline-offset-4">{item.title}</Link>
           ))}
-          <Link href="/guides/manage-kenyan-rentals-from-uae" className="font-medium text-primary underline underline-offset-4">Guide to overseeing Kenyan rentals from the UAE</Link>
-          <Link href="/pricing" className="font-medium text-primary underline underline-offset-4">Compare plans and pricing</Link>
+          <Link href="/guides/manage-kenyan-rentals-from-uae" className="inline-flex min-h-11 items-center font-medium text-primary underline underline-offset-4">Guide to overseeing Kenyan rentals from the UAE</Link>
+          <Link href="/pricing" className="inline-flex min-h-11 items-center font-medium text-primary underline underline-offset-4">Compare plans and pricing</Link>
         </nav>
       </section>
 
@@ -261,14 +262,14 @@ export function SeoLandingPage({ content }: { content: SeoLandingPageContent }) 
           <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             <Link data-workspace-action="true"
               href="/register"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-black dark:bg-white dark:text-[#10141a] dark:hover:bg-[#e5e7eb]"
+              className={publicPrimaryAction}
             >
-              Start with EstateDesk
+              Request access
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link data-workspace-action="true"
               href="/contact"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 text-sm font-semibold text-neutral-800 transition hover:border-neutral-400 dark:border-white/16 dark:bg-white/[0.08] dark:text-[#f8fafc] dark:hover:bg-white/[0.14]"
+              className={publicSecondaryAction}
             >
               Talk to the team
             </Link>

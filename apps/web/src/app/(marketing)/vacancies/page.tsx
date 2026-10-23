@@ -1,8 +1,8 @@
+import { vacancyCosts } from "@/lib/vacancy-costs";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { House as Home, Search, Building2 } from "@/components/shared/colored-icons";
-import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
@@ -10,7 +10,6 @@ import {
   VacancyListingGrid,
   type VacancyListingCard,
 } from "@/components/marketing/vacancy-listing-grid";
-import { vacancyContentDepth } from "@/lib/content-depth/marketing-depth";
 import { publicVacancyImageUrl } from "@/lib/public-vacancy-image";
 import {
   getVacancyListingsCountCached,
@@ -268,17 +267,19 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
       houseNo: listing.houseNo,
       place,
       typeLabel: unitLabel(listing.type, listing.bedrooms),
-      roomsLabel: rooms ? `${rooms} room${rooms === 1 ? "" : "s"}` : "Rooms",
+      roomsLabel: rooms ? `${rooms} room${rooms === 1 ? "" : "s"}` : "Rooms not listed",
       bathsLabel: listing.bathrooms
         ? `${listing.bathrooms} bath${listing.bathrooms === 1 ? "" : "s"}`
-        : "Not listed",
+        : "Baths not listed",
       rentLabel,
-      serviceChargeLabel: listing.serviceCharge
+      initialCostLabel: `${vacancyCosts(listing).complete ? "Estimated initial cost" : "Known costs from"} ${formatCurrency(vacancyCosts(listing).knownTotal)}`,
+      updatedLabel: `Record updated ${listing.updatedAt.toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi", month: "short", day: "numeric", year: "numeric" })}`,
+      serviceChargeLabel: listing.serviceCharge != null
         ? `Service charge ${formatCurrency(listing.serviceCharge)}`
-        : "No service charge",
-      depositLabel: listing.depositAmount
+        : "Service charge: confirm with manager",
+      depositLabel: listing.depositAmount != null
         ? `Deposit ${formatCurrency(listing.depositAmount)}`
-        : null,
+        : "Deposit: confirm with manager",
       viewingLabel: listing.viewingFeeRequired
         ? listing.viewingFeeAmount
           ? `Viewing ${formatCurrency(listing.viewingFeeAmount)}`
@@ -361,15 +362,15 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
       <PublicAccessHeader active="vacancies" loginHref={loginHref} />
 
       <section className="border-b border-slate-200 bg-white/85 dark:border-white/10 dark:bg-slate-900/80">
-        <div className="mx-auto max-w-screen-2xl px-4 py-7 sm:px-6 lg:px-8 2xl:max-w-none">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+          <div className="space-y-7">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm dark:border-cyan-200/50 dark:bg-cyan-200/15 dark:text-cyan-50">
                 <Building2 className="h-4 w-4" />
-                Published vacant units
+                Find your next place
               </p>
               <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
-                Vacant houses and apartments
+                Find your next home or business space
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-[#d1d5db]">
                 Find available units with clear pricing, location details, and direct access to the managing office.
@@ -379,7 +380,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
             <form
               action="/vacancies"
               method="get"
-              className="grid w-full gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur dark:border-white/12 dark:bg-[#0f1319] lg:min-w-[42rem] lg:max-w-3xl"
+              className="vacancy-search grid w-full gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5" aria-label="Search available properties"
             >
               <div className="grid gap-2 sm:grid-cols-[1fr_0.85fr]">
                 <label className="relative">
@@ -387,7 +388,8 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                   <input
                     name="q"
                     defaultValue={filters.query}
-                    placeholder="Search by house, property, manager..."
+                    aria-label="Search properties or managers"
+                    placeholder="Property, unit or manager"
                     className="min-h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/12 dark:bg-[#171b22] dark:text-[#f8fafc] dark:placeholder:text-[#9ca3af] dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
                   />
                 </label>
@@ -412,7 +414,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                 </label>
               </div>
 
-              <details open={Boolean(filters.type || filters.minRent || filters.maxRent || filters.bedrooms != null || filters.sort !== "location")} className="rounded-lg border border-slate-200 px-3 dark:border-white/12">
+              <details open={Boolean(filters.type || filters.minRent != null || filters.maxRent != null || filters.bedrooms != null || filters.sort !== "location")} className="rounded-lg border border-slate-200 px-3 dark:border-white/12">
                 <summary className="flex min-h-11 cursor-pointer flex-col items-start justify-center gap-0.5 text-sm font-semibold text-slate-800 dark:text-slate-100 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                   More filters
                   <span className="text-xs font-normal text-slate-500 dark:text-slate-300">Type, rent, rooms and sort</span>
@@ -477,7 +479,8 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                 </select>
                 </div>
               </details>
-              <div className="grid gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground">Browse listings. Contact the managing office directly.</p>
                 <button
                   type="submit"
                   className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-[#e5e7eb] dark:focus-visible:ring-white dark:focus-visible:ring-offset-[#0b0f16] [&_*]:text-current sm:w-auto sm:justify-self-end"
@@ -491,9 +494,9 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
         </div>
       </section>
 
-      <section className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8 2xl:max-w-none">
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-[#d1d5db]">
+          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-[#d1d5db]" aria-live="polite">
             <Home className="h-4 w-4" />
             <span>
               {pagination.total === 0
@@ -512,6 +515,12 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
             </Link>
           ) : null}
         </div>
+
+        {filters.hasFilters ? <div aria-label="Active search filters" className="mb-6 flex flex-wrap gap-2">{Object.entries(filters.filterParams).filter(([, value]) => value !== undefined).map(([key, value]) => {
+          const labels: Record<string, string> = { q: "Search", location: "Area", type: "Type", minRent: "Min rent", maxRent: "Max rent", bedrooms: "Min rooms", sort: "Sort" };
+          const display = key === "type" ? UNIT_TYPE_OPTIONS.find(option => option.value === value)?.label ?? value : key === "sort" ? ({ newest: "Newest", rent_asc: "Lowest rent", rent_desc: "Highest rent" } as Record<string, string>)[value!] ?? value : value;
+          return <Link key={key} href={buildVacancyPageHref("/vacancies", 1, { ...filters.filterParams, [key]: undefined })} aria-label={`Remove ${labels[key]} filter: ${display}`} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm"><span>{labels[key]}: {display}</span><span aria-hidden="true">×</span></Link>;
+        })}</div> : null}
 
         {databaseUnavailable ? (
           <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-700 shadow-sm dark:border-white/12 dark:bg-[#111827] dark:text-[#d1d5db]">
@@ -553,19 +562,20 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
           />
         )}
 
-        <section className="mt-8 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/12 dark:bg-[#111827]">
+        <details className="mt-10 rounded-2xl border border-border bg-card p-5">
+          <summary className="min-h-11 cursor-pointer text-base font-semibold">Explore rentals by area and property type</summary>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-950 dark:text-white">
                 Popular rental searches
               </h2>
               <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-[#d1d5db]">
-                Browse high-intent local searches for vacant homes, rooms, shops, and apartments.
+                Find homes, rooms, shops and apartments in the areas you’re considering.
               </p>
             </div>
             <Link
               href="/property-management-software-kenya"
-              className="text-sm font-semibold text-slate-700 hover:text-slate-950 dark:text-[#d1d5db] dark:hover:text-white"
+              className="inline-flex min-h-11 items-center text-sm font-semibold text-slate-700 hover:text-slate-950 dark:text-[#d1d5db] dark:hover:text-white"
             >
               Property management software Kenya
             </Link>
@@ -582,10 +592,9 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
               </Link>
             ))}
           </div>
-        </section>
+        </details>
       </section>
 
-      <ContentDepthStack {...vacancyContentDepth} />
       <PublicAccessFooter />
     </main>
   );

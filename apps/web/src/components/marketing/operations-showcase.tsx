@@ -256,7 +256,7 @@ const SHOWCASE_COPY = {
     panelTitle: "A structured workspace for billing, inspections, tenants, staff, and records.",
     status: "Live",
     helperText: "Built for daily property operations.",
-    primaryCta: { href: "/register", label: "Create account" },
+    primaryCta: { href: "/register", label: "Request access" },
     secondaryCta: { href: "/login", label: "Sign in" },
     workspaceTitle: "Workspace overview",
     workspaceSubtitle: "Essential modules at a glance",
@@ -662,7 +662,7 @@ export default function OperationsShowcase({
           </header>
         ) : null}
 
-        <main
+        <div
           className={cx(
             "flex min-h-0 flex-col gap-4 lg:gap-5",
             !compact && "lg:grid lg:flex-1 lg:grid-rows-[auto_minmax(0,1fr)_auto]",
@@ -686,7 +686,7 @@ export default function OperationsShowcase({
           </div>
 
           {!compact && !isRental ? <PlansSection /> : null}
-        </main>
+        </div>
       </div>
       </section>
       {standalone && showFooter ? <PublicAccessFooter /> : null}

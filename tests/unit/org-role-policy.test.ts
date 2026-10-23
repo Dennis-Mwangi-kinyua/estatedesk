@@ -4,6 +4,20 @@ import { memberHasOrgPermission } from "../../apps/web/src/lib/permissions/role-
 import { readOrgRolePolicies, rolePolicyBlocksPath, orgRolePolicySchema, ORGANIZATION_ROLES } from "../../apps/web/src/lib/permissions/org-role-policy";
 import { canAccessWorkspacePath, canDiscoverWorkspaceHref } from "../../apps/web/src/lib/permissions/workspace-access";
 
+test("tenant aliases and caretaker navigation retain organization view restrictions", () => {
+  const orgRolePolicy = orgRolePolicySchema.parse({ blockedViews: ["leases", "move-outs", "rewards", "issues"] });
+  const tenant = { activeOrgRole: "TENANT" as const, activeOrgId: "org", platformRole: "USER" as const, orgRolePolicy };
+  for (const path of ["/dashboard/tenant/lease", "/dashboard/tenant/history", "/dashboard/tenant/notices", "/dashboard/tenant/rewards"]) {
+    assert.equal(canDiscoverWorkspaceHref(tenant, path), false, path);
+    assert.equal(canAccessWorkspacePath(tenant, path), false, path);
+  }
+  const caretaker = { ...tenant, activeOrgRole: "CARETAKER" as const, caretakerSections: ["", "issues", "profile"] };
+  assert.equal(canDiscoverWorkspaceHref(caretaker, "/dashboard/caretaker/issues"), false);
+  assert.equal(canDiscoverWorkspaceHref(caretaker, "/dashboard/caretaker/inspections"), false);
+  assert.equal(canDiscoverWorkspaceHref(caretaker, "/dashboard/caretaker/profile"), true);
+  assert.equal(canDiscoverWorkspaceHref(caretaker, "/dashboard/caretaker"), true);
+});
+
 test("role denies override administrator defaults and individually delegated mandates", () => {
   const orgRolePolicy = orgRolePolicySchema.parse({ permissions: { "payments.verify": "deny" } });
   for (const activeOrgRole of ["ADMIN", "MANAGER", "ACCOUNTANT"] as const) {

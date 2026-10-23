@@ -10,6 +10,8 @@ import { subscriptionDisplayAmount } from "@/lib/billing/subscription-summary";
 import { parseUpgradeRequest } from "@/lib/billing/upgrade-request-policy";
 import { Badge, PageHeader, Surface, formatCurrency, formatDateTime, toneForStatus } from "../../_components/control-plane";
 import { OrgBillingActions } from "../../organizations/[slug]/_components/org-billing-actions";
+import { OrganizationPlanForm } from "./plan-form";
+import { readOrganizationPlanPolicy } from "@/lib/billing/organization-plan-policy";
 export const dynamic = "force-dynamic";
 
 export default async function OrganizationBillingPage({params}:{params:Promise<{orgId:string}>}) {
@@ -27,6 +29,7 @@ export default async function OrganizationBillingPage({params}:{params:Promise<{
   return <div className="engineering-workspace mx-auto w-full min-w-0 max-w-6xl space-y-6">
     <PageHeader eyebrow="Platform / Organization billing" title={org.name} description="Manage this organization’s subscription, renewal dates, invoices, and billing history." action={<Link href="/platform/billing" className="inline-flex min-h-11 items-center rounded-xl border px-4 py-2 text-sm font-semibold">All organization billing</Link>} />
     {subscription ? <>
+      <Surface title="Organization plan and access" description="Set capacity for this organization on any plan, and select the sections available to its Custom account."><OrganizationPlanForm orgId={org.id} plan={subscription.plan} policy={readOrganizationPlanPolicy(subscription.metadata)} revision={subscription.updatedAt.toISOString()} /></Surface>
       <div className="grid items-start gap-5 lg:grid-cols-2">
         <Surface title="Subscription overview" description="The current plan and billing contact for this organization."><div className="space-y-5 p-5"><div className="flex flex-wrap gap-2"><Badge>{APP_PLANS[subscription.plan].name}</Badge><Badge tone={toneForStatus(subscription.status)}>{subscription.status.replaceAll("_"," ")}</Badge></div><dl className="grid gap-4 text-sm sm:grid-cols-2">{[["Monthly subscription",amount === null ? "Confirm custom pricing" : amount === 0 ? "Free" : formatCurrency(amount)],["Billing email",subscription.billingEmail ?? org.email ?? "Not provided"],["Period starts",formatDateTime(subscription.currentPeriodStart)],["Period ends",formatDateTime(subscription.currentPeriodEnd)],["Trial ends",formatDateTime(subscription.trialEndsAt)],["Cancelled at",formatDateTime(subscription.cancelledAt)]].map(([label,value])=><div key={label}><dt className="text-xs text-muted-foreground">{label}</dt><dd className="mt-1 break-words font-medium">{value}</dd></div>)}</dl><Link href={`/platform/organizations/${org.slug}`} className="inline-flex min-h-11 items-center text-sm font-semibold text-primary">Open organization profile →</Link></div></Surface>
         <Surface title="Billing actions" description="Confirm payment before renewing. Invoice generation and subscription cancellation use their existing confirmation steps."><div className="p-5"><OrgBillingActions orgId={org.id} cancelled={subscription.status === "CANCELLED"} /></div></Surface>

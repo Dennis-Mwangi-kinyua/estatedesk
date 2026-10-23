@@ -139,13 +139,6 @@ export function NewOrganizationWorkspace({
         <input type="hidden" name="adminUsername" value={form.adminUsername} />
         <input type="hidden" name="adminEmail" value={form.adminEmail} />
         <input type="hidden" name="adminPhone" value={form.adminPhone} />
-        <input type="hidden" name="adminPassword" value={form.adminPassword} />
-        <input
-          type="hidden"
-          name="adminPasswordConfirm"
-          value={form.adminPasswordConfirm}
-        />
-
         <fieldset disabled={(form.pending || form.checking)} className="min-w-0"><legend className="sr-only">Account setup — step {form.step}</legend><div ref={contentRef}>
         {form.step === 1 ? <NewOrgStepOrganization {...form} /> : null}
         {form.step === 2 ? <NewOrgStepAdmin {...form} /> : null}

@@ -18,6 +18,8 @@ import { nativeTenantRecordActions } from "./native-tenant-admin-actions";
 import { nativeBnbRecordActions } from "./native-bnb-actions";
 import { canViewAuditLogs } from "@/lib/permissions/access";
 import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
+import { getUserOrganizationGroups, userOrganizationWhere } from "@/lib/platform/user-organization-groups";
+import { getReviewQueue, waitingAge } from "@/lib/workflow/review-queue";
 
 type Value = string | number | boolean | Date | null | undefined | { toString(): string };
 function display(value: Value): string {
@@ -29,7 +31,7 @@ function card(id: string, title: string, status: string | undefined, fields: Rec
   return { id, title, status, subtitle, fields: Object.entries(fields).map(([label, value]) => ({ label, value: display(value) })) };
 }
 
-export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWorkspaceKind, path: string, q: string, page: number, recordId?: string): Promise<{ records: NativeWorkspaceRecord[]; notice?: string; searchable?: boolean }> {
+export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWorkspaceKind, path: string, q: string, page: number, recordId?: string, organization?: string): Promise<{ records: NativeWorkspaceRecord[]; notice?: string; searchable?: boolean }> {
   if (kind === "platform" && !canViewAuditLogs(session.platformRole)) return { records: [], notice: "Platform administrator access is required.", searchable: false };
   const orgId = session.activeOrgId!;
   const unit = nativeUnitScope(orgId, session.membershipScope);
@@ -39,7 +41,15 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWo
   const contains = { contains: q, mode: "insensitive" as const };
   const section = path === "/api-keys" ? "api-keys" : path.replace(kind === "platform" ? /^\/platform\/?/ : kind === "landlord" ? /^\/dashboard\/landlord\/?/ : /^\/dashboard\/org\/?/, "");
   const restricted = { records: [], notice: "This view requires organization-wide access. Your assigned property, building or unit scope remains in effect." };
-  if (recordId && section !== "agreements" && section !== "airbnb/bookings" && !(kind === "landlord" && ["property", "unit"].includes(section))) return { records: [], notice: "This record destination is unavailable." };
+  if (kind === "platform" && section === "review-queue") {
+    const groups = await getReviewQueue(session, "platform");
+    return { searchable: false, records: groups.map(group => ({ ...card(group.id, group.title, group.total ? "PENDING" : "CLEAR", {
+      Waiting: group.total, Responsible: group.owner, "Next action": group.nextAction,
+      "Oldest waiting": group.items[0] ? waitingAge(group.items[0].since) : "Nothing waiting",
+      ...Object.fromEntries(group.items.map((item, index) => [`${index + 1}. ${item.title}`, `${item.detail} · ${waitingAge(item.since)} · ${item.status}`])),
+    }), links: [{ title: "Open queue", path: group.nativePath, emoji: "📋", description: group.nextAction }] })), notice: "Counts cover the whole queue. Each detail shows the oldest 25 items and the responsible team." };
+  }
+  if (recordId && !(kind === "platform" && ["users", "admins"].includes(section)) && section !== "agreements" && section !== "airbnb/bookings" && !(kind === "landlord" && ["property", "unit"].includes(section))) return { records: [], notice: "This record destination is unavailable." };
   if (section === "landlords" && (kind === "platform" || kind === "organization")) {
     if (kind === "organization" && (!wide || !["ADMIN", "MANAGER"].includes(session.activeOrgRole ?? ""))) return restricted;
     const rows = await prisma.landlordProfile.findMany({
@@ -393,25 +403,38 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWo
         return { records: records.slice(limit.skip, limit.skip + limit.take), notice: "Up to 10 matches per resource type. Refine your search for more specific results." };
       }
       case "reports": {
-        const [organizations, subscriptions, issues, queued, payments] = await Promise.all([
-          prisma.organization.count({ where: { deletedAt: null } }), prisma.subscription.count({ where: { status: "ACTIVE" } }),
-          prisma.issueTicket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }), prisma.notification.count({ where: { status: "QUEUED" } }),
-          prisma.payment.findMany({ take: 500, orderBy: newest, select: { amount: true, org: { select: { currencyCode: true } } } }),
+        const [organizationStates, subscriptionStates, issueStates, notificationStates, payments] = await Promise.all([
+          prisma.organization.groupBy({ by: ["status"], where: { deletedAt: null }, _count: { _all: true } }),
+          prisma.subscription.groupBy({ by: ["status"], where: { org: { deletedAt: null } }, _count: { _all: true } }),
+          prisma.issueTicket.groupBy({ by: ["status"], where: { org: { deletedAt: null }, status: { in: ["OPEN", "IN_PROGRESS"] } }, _count: { _all: true } }),
+          prisma.notification.groupBy({ by: ["status"], where: { org: { deletedAt: null }, status: { in: ["QUEUED", "FAILED"] } }, _count: { _all: true } }),
+          prisma.payment.findMany({ where: { org: { deletedAt: null } }, take: 500, orderBy: newest, select: { amount: true, gatewayStatus: true, verificationStatus: true, reversedAt: true, createdAt: true, org: { select: { currencyCode: true } } } }),
         ]);
+        const count = (rows: { status: string; _count: { _all: number } }[], status: string) => rows.find(row => row.status === status)?._count._all ?? 0;
+        const verified = payments.filter(payment => payment.gatewayStatus === "SUCCESS" && !payment.reversedAt && ["VERIFIED", "NOT_REQUIRED"].includes(payment.verificationStatus));
         const volume = new Map<string, number>();
-        for (const payment of payments) volume.set(payment.org.currencyCode, (volume.get(payment.org.currencyCode) ?? 0) + Number(payment.amount));
-        const records = [card("organizations", "Organizations", undefined, { Count: organizations }), card("subscriptions", "Active subscriptions", undefined, { Count: subscriptions }),
-          card("issues", "Open maintenance", undefined, { Count: issues }), card("notifications", "Queued notifications", undefined, { Count: queued }),
-          card("payment-volume", "Recent payment volume", undefined, { "Payments sampled": payments.length, ...Object.fromEntries([...volume].map(([currency, amount]) => [currency, amount.toFixed(2)])) }, "Latest 500 payment records, separated by currency.")];
-        return { records: records.slice(limit.skip, limit.skip + limit.take), searchable: false };
+        for (const payment of verified) volume.set(payment.org.currencyCode, (volume.get(payment.org.currencyCode) ?? 0) + Number(payment.amount));
+        const updated = new Date().toLocaleString("en-KE", { timeZone: "Africa/Nairobi", dateStyle: "medium", timeStyle: "short" });
+        const records = [
+          card("organizations", "Organizations", undefined, { Total: organizationStates.reduce((sum, row) => sum + row._count._all, 0), Active: count(organizationStates, "ACTIVE"), Suspended: count(organizationStates, "SUSPENDED"), Disabled: count(organizationStates, "DISABLED"), Updated: updated }, "All organizations that have not been deleted."),
+          card("subscriptions", "Subscription health", undefined, { Active: count(subscriptionStates, "ACTIVE"), Trialing: count(subscriptionStates, "TRIALING"), "Past due": count(subscriptionStates, "PAST_DUE"), Cancelled: count(subscriptionStates, "CANCELLED"), Expired: count(subscriptionStates, "EXPIRED"), Updated: updated }, "Current subscription statuses across organizations."),
+          card("payment-volume", "Recent payment activity", undefined, { "Payments sampled": payments.length, "Verified successful": verified.length, "Failed payments": payments.filter(payment => payment.gatewayStatus === "FAILED").length, ...Object.fromEntries([...volume].sort(([a], [b]) => a.localeCompare(b)).map(([currency, amount]) => [`Verified volume · ${currency}`, new Intl.NumberFormat("en-KE", { style: "currency", currency }).format(amount)])), ...(volume.size ? {} : { "Verified volume": "No verified successful payments in this sample" }), Updated: updated }, "Latest 500 payments, not an all-time total. Amounts include verified successful payments only, exclude reversals, and stay separate by currency."),
+          card("issues", "Maintenance workload", undefined, { "Needs attention": count(issueStates, "OPEN") + count(issueStates, "IN_PROGRESS"), Open: count(issueStates, "OPEN"), "In progress": count(issueStates, "IN_PROGRESS"), Updated: updated }, "Current open and in-progress maintenance tickets."),
+          card("notifications", "Notification delivery", undefined, { Queued: count(notificationStates, "QUEUED"), Failed: count(notificationStates, "FAILED"), Updated: updated }, "Current delivery backlog and failed notifications across channels."),
+        ];
+        return { records: records.slice(limit.skip, limit.skip + limit.take), searchable: false, notice: "Current platform snapshot. Payment activity is a sample of the latest 500 payments; it is not total platform revenue. Times use Africa/Nairobi." };
       }
       case "users": case "admins": {
-        const rows = await prisma.user.findMany({ where: { deletedAt: null, ...(section === "admins" ? { platformRole: { in: ["SUPER_ADMIN", "PLATFORM_ADMIN"] as ("SUPER_ADMIN" | "PLATFORM_ADMIN")[] } } : {}), ...(q ? { fullName: contains } : {}) }, ...limit, orderBy: newest,
-          select: { id: true, fullName: true, username: true, email: true, phone: true, status: true, platformRole: true, lastLoginAt: true, twoFactorEnabled: true, createdAt: true,
+        if (section === "users" && !organization && !recordId) {
+          const result = await getUserOrganizationGroups({ deletedAt: null }, q, page, 25, true);
+          return { records: result.groups.map(group => ({ ...card(group.id, group.name, undefined, { Users: group.count }, group.slug || "Accounts without an active organization"), organizationGroup: group.id })), notice: "Choose an organization to view its users. People with multiple organizations appear in each group." };
+        }
+        const rows = await prisma.user.findMany({ where: { deletedAt: null, ...(recordId ? { id: recordId } : {}), ...(section === "users" ? userOrganizationWhere(organization) : {}), ...(section === "admins" ? { platformRole: { in: ["SUPER_ADMIN", "PLATFORM_ADMIN"] as ("SUPER_ADMIN" | "PLATFORM_ADMIN")[] } } : {}), ...(!recordId && q ? { OR: [{ fullName: contains }, { email: contains }, { username: contains }, { phone: contains }] } : {}) }, skip: recordId ? 0 : limit.skip, take: recordId ? 1 : limit.take, orderBy: newest,
+          select: { identityClaims: recordId ? { select: { number: true }, orderBy: { createdAt: "asc" } } : false, id: true, fullName: true, username: true, email: true, phone: true, status: true, platformRole: true, lastLoginAt: true, twoFactorEnabled: true, createdAt: true,
             emailVerified: true, phoneVerified: true, mustChangePassword: true,
             memberships: { where: { deactivatedAt: null, org: { deletedAt: null } }, take: 10, orderBy: { createdAt: "desc" }, select: { role: true, scopeType: true, org: { select: { name: true } } } },
             _count: { select: { memberships: { where: { deactivatedAt: null, org: { deletedAt: null } } } } } } });
-        return { records: rows.map(row => card(row.id, row.fullName, row.status, { Email: row.email, Phone: row.phone, Username: row.username, Role: row.platformRole,
+        return { records: rows.map(row => card(row.id, row.fullName, row.status, { "User ID": row.id, ...(recordId ? { "National ID": row.identityClaims?.map(claim => claim.number).join(", ") || "Not recorded" } : {}), Email: row.email, Phone: row.phone, Username: row.username, Role: row.platformRole,
           "Two-factor enabled": row.twoFactorEnabled, "Email verified": !!row.emailVerified, "Phone verified": !!row.phoneVerified, "Password change required": row.mustChangePassword,
           "Active memberships": row._count.memberships, ...Object.fromEntries(row.memberships.map((membership, index) => [`Workspace ${index + 1}`, `${membership.org.name} · ${membership.role} · ${membership.scopeType}`])),
           "Last login": row.lastLoginAt, Registered: row.createdAt })) };

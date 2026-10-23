@@ -7,9 +7,9 @@ import { RegisterStatusToast } from "./register-status-toast";
 import { publicPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = publicPageMetadata({
-  title: "Sign Up - EstateDesk Dashboard",
+  title: "Request Access - EstateDesk",
   description:
-    "Create an EstateDesk account or request workspace access for property management, tenant records, billing, maintenance, reports, and team onboarding.",
+    "Request EstateDesk workspace access for property management, tenant records, billing, maintenance, reports, and team onboarding.",
   path: "/register",
 });
 
@@ -168,7 +168,7 @@ export default async function RegisterPage({
             </span>
           </Link>
 
-          <nav aria-label="Sign up navigation" className="flex items-center justify-end gap-1 sm:gap-2">
+          <nav aria-label="Access request navigation" className="flex items-center justify-end gap-1 sm:gap-2">
             <Link
               href="/vacancies"
               className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-neutral-200 bg-white px-1.5 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 sm:px-3 sm:text-sm"
@@ -280,7 +280,7 @@ export default async function RegisterPage({
 
             <p className="mt-4 text-center text-sm text-neutral-500">
               Already have an account?{" "}
-              <Link href="/login" className="font-semibold text-neutral-950">
+              <Link href="/login" className="inline-flex min-h-11 items-center font-semibold text-neutral-950">
                 Sign in
               </Link>
             </p>

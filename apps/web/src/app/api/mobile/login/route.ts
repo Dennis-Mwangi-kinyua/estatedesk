@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       if (!isRedirectError(error)) throw error;
       // Only a freshly issued session proves this login succeeded. Account
       // suspension/onboarding redirects must never return an old session.
-      const value = store.get(name)?.value;
+      const value = (await cookies()).get(name)?.value;
       if (!value || value === previous) {
         return mobileJson({ error: "Sign-in could not be completed. Please check your account on the website." }, 403);
       }

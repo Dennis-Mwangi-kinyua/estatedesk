@@ -7,7 +7,6 @@ import { useTheme } from "@/components/theme/theme-provider";
 const subscribe = () => () => {};
 const getClientSnapshot = () => true;
 const getServerSnapshot = () => false;
-const label = "Change color theme";
 
 function ThemeToggleButton({
   className,
@@ -24,6 +23,7 @@ function ThemeToggleButton({
   );
   const isDark = isHydrated && resolvedTheme === "dark";
   const Icon = isDark ? Sun : Moon;
+  const label = `Switch to ${isDark ? "light" : "dark"} mode`;
 
   return (
     <button data-workspace-action="true"

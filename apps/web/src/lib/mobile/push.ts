@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { personalNotificationScope } from "@/lib/notifications/recipient-scope";
 import { readOrgRolePolicies } from "@/lib/permissions/org-role-policy";
+import { applyOrganizationPlanAccess } from "@/lib/billing/organization-plan-policy";
 import { getPlatformControl } from "@/lib/platform/control";
 
 async function expoRequest(path: string, body: unknown) {
@@ -23,7 +24,7 @@ export async function dispatchNativePush() {
   const deadline = Date.now() + 20_000;
   const devices = await prisma.nativePushDevice.findMany({
     where: { session: { expiresAt: { gt: new Date() }, user: { status: "ACTIVE", deletedAt: null, mustChangePassword: false, termsAcceptedAt: { not: null } } } },
-    include: { session: { include: { activeMembership: { include: { org: { select: { status: true, deletedAt: true, settings: { select: { roleAccess: true } } } } } } } } }, orderBy: { updatedAt: "asc" }, take: 100,
+    include: { session: { include: { activeMembership: { include: { org: { select: { status: true, deletedAt: true, settings: { select: { roleAccess: true } }, subscription: { select: { plan: true, metadata: true } } } } } } } } }, orderBy: { updatedAt: "asc" }, take: 100,
   });
   deviceLoop: for (const device of devices) {
     if (Date.now() >= deadline) break;
@@ -31,7 +32,7 @@ export async function dispatchNativePush() {
     await prisma.nativePushDevice.updateMany({ where: { id: device.id }, data: { updatedAt: new Date() } });
     const membership = device.session.activeMembership;
     if (!membership || membership.orgId !== device.orgId || membership.deactivatedAt || membership.employmentEndedAt || membership.org.status !== "ACTIVE" || membership.org.deletedAt) continue;
-    const policy = readOrgRolePolicies(membership.org.settings?.roleAccess)[membership.role];
+    const policy = applyOrganizationPlanAccess(readOrgRolePolicies(membership.org.settings?.roleAccess)[membership.role], membership.org.subscription?.plan ?? "FREE", membership.org.subscription?.metadata);
     if (policy?.blockedViews.includes("notifications")) continue;
     const tenant = membership.role === "TENANT" ? await prisma.tenant.findFirst({ where: { orgId: device.orgId, userId: device.session.userId, deletedAt: null }, select: { id: true } }) : null;
     if (membership.role === "TENANT" && !tenant) continue;

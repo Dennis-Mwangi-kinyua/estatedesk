@@ -2,6 +2,7 @@ import { ProductUpdatesBanner } from "@/features/updates/banner";
 import { cookies } from "next/headers";
 import { ReactNode } from "react";
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { prisma } from "@/lib/prisma";
 import { PlatformShell } from "./_components/platform-shell";
 import {
   parsePlatformModeCookie,
@@ -19,6 +20,7 @@ export default async function PlatformLayout({
   });
 
   const cookieStore = await cookies();
+  const pendingProviderCount = await prisma.serviceProvider.count({ where: { status: "PENDING" } });
   const initialPreferredMode: PlatformMode =
     parsePlatformModeCookie(cookieStore.get(PLATFORM_MODE_COOKIE_NAME)?.value) ??
     "admin";
@@ -27,6 +29,7 @@ export default async function PlatformLayout({
     <PlatformShell
       fullName={session.fullName}
       isSuperAdmin={session.platformRole === "SUPER_ADMIN"}
+      pendingProviderCount={pendingProviderCount}
       initialPreferredMode={initialPreferredMode}
     >
       <ProductUpdatesBanner userId={session.userId} audience={session.platformRole as "PLATFORM_ADMIN" | "SUPER_ADMIN"} />

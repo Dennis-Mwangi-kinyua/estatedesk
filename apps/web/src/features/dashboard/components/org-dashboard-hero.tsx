@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { LayoutGrid } from "lucide-react";
 import type { OrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { SectionCard, DASHBOARD_QUICK_LINKS } from "./org-dashboard-shared";

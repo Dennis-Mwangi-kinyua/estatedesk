@@ -28,6 +28,14 @@ export function PlatformNavigation({ items, mode, query, onNavigate, mobile = fa
       className={`platform-sidebar-link group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${active ? mode === "developer" ? "bg-teal-600 text-white dark:bg-teal-500" : "ed-nav-item-active bg-primary text-primary-foreground" : "ed-nav-item text-muted-foreground hover:bg-muted/70 hover:text-foreground"}`}>
       <SidebarSticker href={item.href} />
       <span className="min-w-0 flex-1">{item.label}</span>
+      {item.badgeCount ? (
+        <span
+          aria-label={`${item.badgeCount} provider applications awaiting review`}
+          className="inline-flex min-w-5 shrink-0 items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white shadow-sm ring-2 ring-background"
+        >
+          {item.badgeCount > 99 ? "99+" : item.badgeCount}
+        </span>
+      ) : null}
       {item.superAdminOnly ? <span aria-label="Super admin only" className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${active ? "bg-white/20 text-white" : "bg-amber-500/15 text-amber-800 dark:text-amber-200"}`}>SA</span> : null}
     </HoverPrefetchLink>;
   }} />;

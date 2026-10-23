@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { requireTenantAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { panelClass } from "@/features/providers/forms";

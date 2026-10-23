@@ -12,6 +12,7 @@ export function mobileWorkspaceAllowed(session: Pick<AppSession, "platformRole" 
 }
 
 const presentation: Record<string, [string, string]> = {
+  "review-queue": ["📋", "Pending decisions, waiting times, responsible teams and next actions."],
   insights: ["💡", "Review portfolio trends and insights."], profile: ["👤", "Review your profile and contact details."], airbnb: ["🛎️", "Manage short-stay accommodation."],
   "identity-verification": ["🪪", "Review identity verification requests."], "service-providers": ["🧰", "Manage service providers and registrations."],
   "finance-requests": ["💰", "Review finance requests and approvals."], "vacancy-inquiries": ["📨", "Follow up on vacancy inquiries."], "verify-tenant": ["🔎", "Review tenant verification records."],

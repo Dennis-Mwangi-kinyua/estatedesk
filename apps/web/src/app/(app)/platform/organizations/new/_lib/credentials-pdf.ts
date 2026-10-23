@@ -43,12 +43,22 @@ export async function createCredentialsPdf(account: Account, loginUrl: string) {
         ["Workspace role", "Administrator"],
       ];
       for (const [label, value] of details) { write(label, bold, 10); write(value); }
-      write("Set your password (single use, expires in one hour)", bold, 10);
-      write(account.setupUrl ?? "Request a password link from your administrator.");
+      if (account.temporaryPassword) {
+        write("Temporary password (change immediately after first sign-in)", bold, 10);
+        write(account.temporaryPassword);
+      } else {
+        write("Set your password (single use, expires in one hour)", bold, 10);
+        write(account.setupUrl ?? "Request a password link from your administrator.");
+      }
       y -= 10;
       write("Getting started", bold, 14);
-      write("1. Open the setup link and choose your own password. Verify your email.");
-      write("2. Sign in with your username or email, then complete any required terms acceptance.");
+      if (account.temporaryPassword) {
+        write("1. Verify your login email.");
+        write("2. Sign in with the temporary password and choose a new password when prompted.");
+      } else {
+        write("1. Open the setup link and choose your own password. Verify your email.");
+        write("2. Sign in with your username or email, then complete any required terms acceptance.");
+      }
       write("3. Open your workspace and add your first property, units, and team members.");
       write("Keep this document private. Delete it after setting your password. Escaped characters (\\uXXXX) represent Unicode characters in the original details.", regular, 9);
       return pdf.save();

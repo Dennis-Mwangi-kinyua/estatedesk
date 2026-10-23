@@ -49,7 +49,7 @@ export function PlatformDashboardMetrics({
           />
           <MetricCard
             label="Online now"
-            href="/platform/users"
+            href="/platform/users?online=1"
             value={formatNumber(onlineUsers)}
             meta={`${formatNumber(totalUsers)} total users`}
             metaTone="text-emerald-600 dark:text-emerald-300"

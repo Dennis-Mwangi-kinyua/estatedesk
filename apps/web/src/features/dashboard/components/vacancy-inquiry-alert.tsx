@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { ExternalLink, X } from "lucide-react";
 import { BellRing, Phone } from "@/components/shared/colored-icons";

@@ -1,18 +1,17 @@
+import { publicPrimaryAction } from "@/components/marketing/public-action";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { Building2, CircleCheck as CheckCircle2, ClipboardList, Landmark, Mail, ShieldCheck, UsersRound } from "@/components/shared/colored-icons";
-import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
-import { sharedTopicGuides } from "@/lib/content-depth/site-topics";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { ReferralCodeField } from "@/components/marketing/referral-code-field";
 import { publicPageMetadata } from "@/lib/seo";
 import { contactSalesAction } from "./actions";
 
 export const metadata: Metadata = publicPageMetadata({
-  title: "Help - EstateDesk Dashboard",
+  title: "Contact & Support",
   description:
     "Get EstateDesk help for onboarding, property management workflows, tenant records, billing, caretaker operations, reports, and rollout support.",
   path: "/contact",
@@ -111,7 +110,7 @@ function StatusMessage({ message }: { message: RequestMessage | null }) {
       : "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-300/30 dark:bg-amber-300/12 dark:text-amber-100";
 
   return (
-    <div className={`mb-4 rounded-2xl border px-4 py-3 ${classes}`}>
+    <div role={message.tone === "success" ? "status" : "alert"} className={`mb-4 rounded-2xl border px-4 py-3 ${classes}`}>
       <p className="text-sm font-semibold">{message.title}</p>
       <p className="mt-1 text-sm leading-6">{message.text}</p>
     </div>
@@ -138,18 +137,26 @@ export default async function ContactPage({
           <div className="min-w-0">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200/80 bg-white/82 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur-2xl dark:border-white/14 dark:bg-white/[0.10] dark:text-[#f3f4f6]">
               <Landmark className="h-3.5 w-3.5" />
-              Enterprise property operations
+              Contact & support
             </div>
 
             <h1 className="mt-5 max-w-3xl text-[clamp(2.15rem,10vw,4.75rem)] font-semibold leading-[0.98] tracking-tight text-slate-950 dark:text-white">
-              Talk to sales about EstateDesk for your team.
+              Let’s find the right next step.
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 dark:text-[#d1d5db] sm:text-lg">
-              Share the shape of your portfolio and the sales team will help
-              map the right plan, onboarding path, and support model.
+              Planning a rollout? Use the sales form below. If you already use EstateDesk or have a listing enquiry, choose the relevant route here.
             </p>
 
+            <nav aria-label="Choose a contact route" className="mt-6 grid gap-3">
+              {[
+                { title: "Existing customer", text: "Sign in to use the help and support available in your workspace.", href: "/login" },
+                { title: "Cannot sign in?", text: "Reset your password to recover access to your account.", href: "/forgot-password" },
+                { title: "Rental or short-stay enquiry", text: "Open the listing and use its enquiry form or host contact details.", href: "/vacancies" },
+                { title: "General product questions", text: "Read answers about plans, features and onboarding.", href: "/faq" },
+              ].map((route) => <Link key={route.href} href={route.href} className="rounded-xl border border-border bg-card p-4 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><span className="font-semibold">{route.title}</span><span className="mt-1 block text-sm leading-6 text-muted-foreground">{route.text}</span></Link>)}
+              <Link href="/stays" className="inline-flex min-h-11 items-center text-sm font-semibold underline">Browse short-stay listings</Link>
+            </nav>
             <div className="mt-6 grid gap-2.5 rounded-[1.5rem] border border-slate-200/80 bg-white/78 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.07)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.08] dark:shadow-none sm:p-4">
               {fitPoints.map((item) => (
                 <div
@@ -201,7 +208,7 @@ export default async function ContactPage({
                   Contact sales
                 </h2>
                 <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-[#d1d5db]">
-                  Send your details and the EstateDesk team will follow up.
+                  Send your details and the EstateDesk team will follow up using the contact information you provide.
                 </p>
               </div>
             </div>
@@ -312,11 +319,12 @@ export default async function ContactPage({
 
               <button
                 type="submit"
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-[#e5e7eb]"
+                className={`${publicPrimaryAction} w-full`}
               >
                 Send sales request
                 <ArrowRight className="h-4 w-4" />
               </button>
+              <p className="text-xs leading-6 text-muted-foreground">We use these details to respond to your request. Read our <Link href="/privacy" className="font-semibold underline">privacy policy</Link>.</p>
             </form>
 
             <div className="mt-4 grid gap-2 rounded-2xl border border-slate-200/80 bg-white/78 p-3 text-sm text-slate-600 dark:border-white/14 dark:bg-white/[0.08] dark:text-[#e5e7eb]">
@@ -326,28 +334,19 @@ export default async function ContactPage({
               </div>
               <div className="flex items-center gap-2">
                 <UsersRound className="h-4 w-4 text-slate-950 dark:text-[#f8fafc]" />
-                <span>Already ready to start? Create an account instead.</span>
+                <span>For standard workspace onboarding, submit an access request.</span>
               </div>
             </div>
 
             <p className="mt-4 text-center text-sm text-slate-500 dark:text-[#d1d5db]">
-              Prefer self-service?{" "}
-              <Link href="/register" className="font-semibold text-slate-950 dark:text-[#f8fafc]">
-                Request onboarding
+              Ready to request workspace access?{" "}
+              <Link href="/register" className="inline-flex min-h-11 items-center font-semibold text-slate-950 dark:text-[#f8fafc]">
+                Request access
               </Link>
             </p>
           </div>
         </div>
       </section>
-      <ContentDepthStack
-        guides={sharedTopicGuides}
-        guidesTitle="Read more before your rollout conversation"
-        editorial={[
-          "Contact pages are more useful when they connect to substantive product context. EstateDesk public guides explain how rent tracking, water billing, caretaker workflows, vacancy publishing, and regional property management fit together before a team starts onboarding or requests enterprise support.",
-        ]}
-        editorialTitle="Prepare for a better onboarding conversation"
-      />
-
       <PublicAccessFooter />
     </main>
   );

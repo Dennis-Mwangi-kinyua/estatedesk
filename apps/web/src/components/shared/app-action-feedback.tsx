@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Loader2, X, XCircle } from "lucide-react";
 import { CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
@@ -9,10 +9,6 @@ import {
   formatQueryFeedback,
   getQueryMessageType,
 } from "@/lib/action-feedback";
-import {
-  getPollingIntervalMs,
-  isBackgroundRefreshEnabled,
-} from "@/lib/dev/background-refresh";
 
 type ToastState = {
   type: "pending" | "success" | "error";
@@ -21,8 +17,6 @@ type ToastState = {
 };
 
 const STORAGE_KEY = "estatedesk:last-action";
-const REFRESH_INTERVAL_MS = 90_000;
-const MIN_REFRESH_GAP_MS = 12_000;
 
 function normalizeText(value: string) {
   return value.replace(/\s+/g, " ").trim();
@@ -79,7 +73,6 @@ export function AppActionFeedback() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const lastRefreshAt = useRef(0);
   const [toast, setToast] = useState<ToastState | null>(null);
   const locationKey = useMemo(
     () => `${pathname}?${searchParams.toString()}`,
@@ -122,8 +115,6 @@ export function AppActionFeedback() {
     }
     return messageType === "error";
   }, [searchParams, messageType]);
-  const refreshEnabled =
-    pathname !== "/change-password" && isBackgroundRefreshEnabled();
 
   useEffect(() => {
     const stored = getStoredAction();
@@ -168,6 +159,7 @@ export function AppActionFeedback() {
     const onSubmit = (event: SubmitEvent) => {
       const form = event.target;
       if (!(form instanceof HTMLFormElement)) return;
+      if (form.hasAttribute("data-logout-form")) return;
       if (!isServerActionForm(form)) return;
 
       const submitter =
@@ -191,44 +183,6 @@ export function AppActionFeedback() {
     document.addEventListener("submit", onSubmit, true);
     return () => document.removeEventListener("submit", onSubmit, true);
   }, [locationKey]);
-
-  useEffect(() => {
-    if (!refreshEnabled) return;
-
-    const refresh = (force = false) => {
-      if (document.visibilityState !== "visible") return;
-
-      const now = Date.now();
-      if (!force && now - lastRefreshAt.current < MIN_REFRESH_GAP_MS) return;
-
-      lastRefreshAt.current = now;
-      router.refresh();
-    };
-
-    const intervalRefresh = () => refresh(true);
-    const passiveRefresh = () => refresh();
-
-    const refreshIntervalMs = getPollingIntervalMs(REFRESH_INTERVAL_MS);
-    if (refreshIntervalMs <= 0) {
-      window.addEventListener("focus", passiveRefresh);
-      document.addEventListener("visibilitychange", passiveRefresh);
-
-      return () => {
-        window.removeEventListener("focus", passiveRefresh);
-        document.removeEventListener("visibilitychange", passiveRefresh);
-      };
-    }
-
-    const interval = window.setInterval(intervalRefresh, refreshIntervalMs);
-    window.addEventListener("focus", passiveRefresh);
-    document.addEventListener("visibilitychange", passiveRefresh);
-
-    return () => {
-      window.clearInterval(interval);
-      window.removeEventListener("focus", passiveRefresh);
-      document.removeEventListener("visibilitychange", passiveRefresh);
-    };
-  }, [refreshEnabled, router]);
 
   useEffect(() => {
     if (!toast || toast.type === "pending") return;

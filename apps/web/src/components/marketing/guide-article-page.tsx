@@ -91,7 +91,7 @@ export function GuideArticlePage({ guide }: { guide: GuideArticle }) {
         <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
           <Link
             href={getGuideHubPath()}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-600 transition hover:text-neutral-950 dark:text-[#d1d5db] dark:hover:text-[#f8fafc]"
+            className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-neutral-600 transition hover:text-neutral-950 dark:text-[#d1d5db] dark:hover:text-[#f8fafc]"
           >
             <ArrowRight className="h-4 w-4 rotate-180" />
             Back to guides

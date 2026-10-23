@@ -8,10 +8,10 @@ import { StatusBadge } from "./screen-layout";
 import { DashboardSection, dashboardStyles as d } from "./dashboard-ui";
 
 /** A separate native detail surface with iOS and Android back support. */
-export function WorkspaceRecordPage({ record, workspace, emoji, close, act, open, children }: {
+export function WorkspaceRecordPage({ record, workspace, emoji, close, act, open, children, detailContent }: {
   record: NativeWorkspaceRecord; workspace: string; emoji: string; close: () => void;
   open: (link: NonNullable<NativeWorkspaceRecord["links"]>[number]) => void;
-  act: (actionId: string, recordId: string) => void; children?: ReactNode;
+  act: (actionId: string, recordId: string) => void; children?: ReactNode; detailContent?: ReactNode;
 }) {
   const recent = recentField(record.fields);
   return <Modal animationType="slide" presentationStyle="fullScreen" onRequestClose={close}>
@@ -45,6 +45,7 @@ export function WorkspaceRecordPage({ record, workspace, emoji, close, act, open
             <IconTile name={actionIcon(action.id, action.destructive)} size={20} /><View style={s.actionCopy}><Text style={s.actionTitle}>{action.title}</Text><Text style={s.actionDescription}>{action.destructive ? "Review this protected action before applying it." : "Open the native form to review and update this record."}</Text><Text style={[s.nativeLabel, action.destructive && { color: "#a63c44" }]}>Manage in app</Text></View><AppIcon name="chevron-right" size={20} color={action.destructive ? "#a63c44" : undefined} />
           </Pressable>)}</View>
         </DashboardSection> : null}
+        {detailContent}
       </ScrollView>
       {children}
     </SafeAreaView>

@@ -39,7 +39,9 @@
     "mobile:ios": "npm run ios -w @estatedesk/mobile",
     "mobile:typecheck": "npm run typecheck -w @estatedesk/mobile",
     "mobile:deployment:check": "node scripts/check-mobile-deployment.mjs",
-    "mobile:services:check": "node scripts/check-live-mobile-services.mjs"
+    "mobile:services:check": "node scripts/check-live-mobile-services.mjs",
+    "mobile:bundle": "node scripts/build-release.mjs mobile",
+    "release:check": "node scripts/check-workflow-release.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1018.0",

@@ -1,0 +1,43 @@
+▶ accessibility baseline
+  ✔ respects reduced-motion preferences globally (1.848709ms)
+  ✔ exposes a skip link and main landmark target (2.525083ms)
+  ✔ keeps login fields labeled and password toggle announced (0.438708ms)
+  ✔ uses focus-visible styles on shared buttons (0.289208ms)
+  ✔ documents the manual accessibility QA matrix (0.602083ms)
+✔ accessibility baseline (7.555625ms)
+▶ public rental SEO helpers
+  ✔ maps known locations to location landing pages (0.894666ms)
+  ✔ falls back to filtered vacancy search for unknown places (0.241875ms)
+✔ public rental SEO helpers (2.183125ms)
+▶ robots crawl policy
+  ✔ blocks authenticated workspaces, API, and print routes (4.435333ms)
+  ✔ allows public discovery entry points (0.386958ms)
+  ✔ applies private-route disallow rules to major LLM crawlers (0.299958ms)
+✔ robots crawl policy (6.347708ms)
+▶ seo helpers
+  ✔ normalizes site URLs and prefers the public app URL (1.016125ms)
+  ✔ keeps canonical origins free of paths, queries and invalid schemes (0.310167ms)
+  ✔ creates indexable public page metadata with canonical and social data (1.123709ms)
+  ✔ creates noindex metadata for utility pages without blocking link discovery (0.3125ms)
+  ✔ indexes auth layout pages that do not require a session (0.266459ms)
+  ✔ indexes discovery and sign-in pages while excluding token and recovery utilities (0.310375ms)
+✔ seo helpers (4.634375ms)
+▶ sitemap utilities
+  ✔ escapes XML-sensitive characters (1.025208ms)
+  ✔ builds URL entries with sitemap metadata (0.35475ms)
+  ✔ wraps urlsets and sitemap indexes (0.24925ms)
+  ✔ formats dates and gzips XML content (2.114584ms)
+  ✔ lists every public sitemap shard in the sitemap index (25.389084ms)
+  ✔ emits every public manifest page in the static sitemap (2.906ms)
+  ✔ keeps marketing pages covered by the public indexing manifest (2.076667ms)
+  ✔ builds location-only vacancy landing paths from the Kenya town index (0.64975ms)
+  ✔ keeps legacy sitemap routes as compatibility aliases (0.206625ms)
+✔ sitemap utilities (36.983375ms)
+ℹ tests 25
+ℹ suites 5
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 843.061334

@@ -13,6 +13,7 @@ export const ORG_VIEW_LABELS = {
   "move-outs": "Move-outs", "finance-requests": "Finance requests", imports: "Imports",
   "vacancy-inquiries": "Vacancy inquiries", "identity-verification": "Identity verification",
   "service-providers": "Service providers", security: "Security", support: "Support", help: "Help",
+  rewards: "Rewards", landlords: "Landlords",
 } as const;
 export type OrgView = keyof typeof ORG_VIEW_LABELS;
 const views = Object.keys(ORG_VIEW_LABELS) as [OrgView, ...OrgView[]];
@@ -54,6 +55,7 @@ export function orgViewForPath(pathname: string): OrgView | null {
     "service-agreements": "agreements", "meter-readings": "meters", readings: "meters",
     "water-readings": "meters", "water-meters": "meters", "visitor-passes": "visitors",
     "lease-agreements": "leases", expenditures: "accounting", "verify-tenant": "identity-verification",
+    lease: "leases", history: "leases", notices: "move-outs", broadcasts: "notifications",
   };
   return aliases[section] ?? (section in ORG_VIEW_LABELS ? section as OrgView : null);
 }

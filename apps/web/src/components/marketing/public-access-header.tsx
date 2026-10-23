@@ -1,17 +1,14 @@
 "use client";
 
+import { publicPrimaryAction } from "@/components/marketing/public-action";
 import Link from "@/components/navigation/workspace-link";
 import { VisualSticker } from "@/components/shared/visual-sticker";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowRight, Menu, MessageCircleQuestion, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, ChevronDown, Menu, MessageCircleQuestion, X } from "lucide-react";
 import { BookOpen, Building2, BedDouble, House as Home, LogIn, Mail, Search, UserRoundPlus as UserPlus, WalletCards } from "@/components/shared/colored-icons";
 import { usePathname } from "next/navigation";
 import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
-
-const subscribeHydration = () => () => {};
-const clientHydration = () => true;
-const serverHydration = () => false;
 
 type PublicAccessHeaderProps = {
   active?: "home" | "vacancies" | "stays" | "services" | "providers" | "pricing" | "contact" | "faq" | "guides";
@@ -21,14 +18,20 @@ type PublicAccessHeaderProps = {
 };
 
 const publicLinks = [
-  { href: "/service-providers", label: "Providers", key: "providers", icon: Search },
-  { href: "/vacancies", label: "Vacancies", key: "vacancies", icon: Home },
-  { href: "/stays", label: "BnB stays", key: "stays", icon: BedDouble },
-  { href: "/services", label: "Services", key: "services", icon: Search },
+  { href: "/service-providers", label: "Service providers", key: "providers", icon: Search },
+  { href: "/vacancies", label: "Long-term rentals", key: "vacancies", icon: Home },
+  { href: "/stays", label: "Short stays", key: "stays", icon: BedDouble },
+  { href: "/services", label: "Product overview", key: "services", icon: Search },
   { href: "/pricing", label: "Pricing", key: "pricing", icon: WalletCards },
   { href: "/guides", label: "Guides", key: "guides", icon: BookOpen },
   { href: "/faq", label: "FAQ", key: "faq", icon: MessageCircleQuestion },
   { href: "/contact", label: "Contact", key: "contact", icon: Mail },
+] as const;
+
+const navigationGroups = [
+  { label: "Product", keys: ["services", "pricing"] },
+  { label: "Find a property", keys: ["vacancies", "stays"] },
+  { label: "Resources", keys: ["guides", "faq", "contact"] },
 ] as const;
 
 export function PublicAccessHeader({
@@ -39,11 +42,14 @@ export function PublicAccessHeader({
 }: PublicAccessHeaderProps) {
   const pathname = usePathname();
   const currentPage = publicLinks.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))?.key ?? active;
-  const hydrated = useSyncExternalStore(subscribeHydration, clientHydration, serverHydration);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
-  useNavigationDialog(isMenuOpen, panelRef, closeMenu);
+  const menuRef = useRef<HTMLDetailsElement>(null);
+  const closeMenu = useCallback(() => {
+    if (menuRef.current) menuRef.current.open = false;
+    setIsMenuOpen(false);
+  }, []);
+  useNavigationDialog(isMenuOpen, panelRef, closeMenu, 1280);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const visibleLinks = showPricing
     ? publicLinks
@@ -59,7 +65,7 @@ export function PublicAccessHeader({
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setIsMenuOpen(false);
+        closeMenu();
       }
     }
 
@@ -69,7 +75,7 @@ export function PublicAccessHeader({
       document.documentElement.classList.remove("public-mobile-menu-open");
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, closeMenu]);
 
   return (
     <>
@@ -80,7 +86,7 @@ export function PublicAccessHeader({
             <Link
               href="/"
               aria-label="Go to EstateDesk home"
-              className="inline-flex min-h-10 min-w-0 items-center gap-2.5 rounded-lg pr-2 text-sm font-bold uppercase tracking-[0.14em] text-slate-950 transition hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:text-[#f8fafc] dark:hover:text-[#e5e7eb] dark:focus-visible:ring-white"
+              className="inline-flex min-h-11 min-w-0 items-center gap-2.5 rounded-lg pr-2 text-sm font-bold uppercase tracking-[0.14em] text-slate-950 transition hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:text-[#f8fafc] dark:hover:text-[#e5e7eb] dark:focus-visible:ring-white"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 shadow-sm dark:border-emerald-400/30 dark:bg-emerald-400/10">
                 <Building2 className="h-5 w-5 text-emerald-700 dark:text-emerald-300" />
@@ -90,117 +96,123 @@ export function PublicAccessHeader({
 
             <div ref={mobileMenuRef} className="relative flex items-center gap-2 xl:hidden">
               <HeaderThemeToggle className="h-11 w-11" />
-              <button data-workspace-action="true"
-                type="button"
-                disabled={!hydrated}
-                aria-expanded={isMenuOpen}
-                aria-controls="public-access-mobile-menu"
-                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                onClick={() => setIsMenuOpen((current) => !current)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:border-white/18 dark:bg-white/[0.10] dark:text-white dark:hover:border-white/28 dark:hover:bg-white/[0.16] dark:focus-visible:ring-white"
-              >
-                <Menu className={`h-5 w-5 ${isMenuOpen ? "hidden" : "block"}`} />
-                <X className={`h-5 w-5 ${isMenuOpen ? "block" : "hidden"}`} />
-              </button>
-              {isMenuOpen ? (
-                <button data-workspace-action="true" type="button" aria-label="Close menu overlay" onClick={closeMenu} className="fixed inset-x-0 bottom-0 top-16 z-[105] bg-white/68 backdrop-blur-2xl dark:bg-[#05080d]/82" />
-              ) : null}
-              <div
-                ref={panelRef}
-                role="dialog"
-                aria-modal={isMenuOpen ? true : undefined}
-                aria-label="Site navigation"
-                tabIndex={-1}
-                id="public-access-mobile-menu"
-                hidden={!isMenuOpen}
-                className="fixed right-3 top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto z-[110] w-[min(21rem,calc(100vw-1.5rem))] rounded-xl border border-slate-200 bg-white p-3 shadow-[0_24px_70px_rgba(15,23,42,0.22)] dark:border-white/20 dark:bg-[#111821] dark:shadow-[0_24px_70px_rgba(0,0,0,0.52)]"
-              >
-                <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/16 dark:bg-[#18202a]">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
-                      Menu
-                    </p>
-                    <p className="mt-0.5 truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
-                      EstateDesk public pages
-                    </p>
+              <details ref={menuRef} className="public-mobile-navigation group/mobile-menu" onToggle={(event) => setIsMenuOpen(event.currentTarget.open)}>
+                <summary
+                  role="button"
+                  aria-controls="public-access-mobile-menu"
+                  aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                  className="inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm transition [&::-webkit-details-marker]:hidden hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:border-white/18 dark:bg-white/[0.10] dark:text-white dark:hover:border-white/28 dark:hover:bg-white/[0.16] dark:focus-visible:ring-white"
+                >
+                  <Menu className="h-5 w-5 group-open/mobile-menu:hidden" />
+                  <X className="hidden h-5 w-5 group-open/mobile-menu:block" />
+                </summary>
+                {isMenuOpen ? (
+                  <button data-workspace-action="true" type="button" aria-label="Close menu overlay" onClick={closeMenu} className="fixed inset-x-0 bottom-0 top-16 z-[105] bg-white/68 backdrop-blur-2xl dark:bg-[#05080d]/82" />
+                ) : null}
+                <div
+                  ref={panelRef}
+                  role="dialog"
+                  aria-modal={isMenuOpen ? true : undefined}
+                  aria-label="Site navigation"
+                  tabIndex={-1}
+                  id="public-access-mobile-menu"
+                  className="fixed right-3 top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto z-[110] w-[min(21rem,calc(100vw-1.5rem))] rounded-xl border border-slate-200 bg-white p-3 shadow-[0_24px_70px_rgba(15,23,42,0.22)] dark:border-white/20 dark:bg-[#111821] dark:shadow-[0_24px_70px_rgba(0,0,0,0.52)]"
+                >
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/16 dark:bg-[#18202a]">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
+                        Menu
+                      </p>
+                      <p className="mt-0.5 truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
+                        Explore EstateDesk
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {isMenuOpen ? <button type="button" aria-label="Close navigation" onClick={closeMenu} className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-border hover:bg-muted"><X aria-hidden="true" className="h-5 w-5" /></button> : null}
+                    </div>
                   </div>
-                  <HeaderThemeToggle className="h-9 w-9 rounded-lg" />
+
+                  <nav aria-label="Public navigation" className="mt-3 grid gap-1.5">
+                    <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
+                      Explore
+                    </p>
+                    {[...navigationGroups, { label: "Local services", keys: ["providers"] }].map((group) => (
+                      <div key={group.label} className="grid gap-1.5">
+                        <p className="mt-2 px-1 text-xs font-semibold text-muted-foreground">{group.label}</p>
+                        {visibleLinks.filter((item) => (group.keys as readonly string[]).includes(item.key)).map((item) => {
+                      const isActive = currentPage === item.key;
+
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          aria-current={isActive ? "page" : undefined}
+                          onClick={closeMenu}
+                          className={`inline-flex min-h-11 items-center justify-between gap-3 rounded-lg border px-3 text-sm font-semibold transition ${
+                            isActive
+                              ? "border-slate-300 bg-slate-950 text-white dark:border-emerald-300/45 dark:bg-emerald-400/18 dark:text-emerald-50"
+                              : "border-slate-200 bg-white text-slate-950 hover:border-slate-300 hover:bg-slate-50 dark:border-white/18 dark:bg-[#18202a] dark:text-slate-50 dark:hover:border-white/30 dark:hover:bg-[#202a36]"
+                          }`}
+                        >
+                          <span className="inline-flex min-w-0 items-center gap-3">
+                            <VisualSticker label={item.key} size="xs" />
+                            <span className="truncate text-current">{item.label}</span>
+                          </span>
+                          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-current opacity-60" />
+                        </Link>
+                      );
+                    })}
+                      </div>
+                    ))}
+                  </nav>
+
+                  <div className="mt-3 grid gap-2 border-t border-slate-200 pt-3 dark:border-white/10">
+                    <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
+                      Account
+                    </p>
+                    <Link
+                      href={loginHref}
+                      onClick={closeMenu}
+                      className={`inline-flex min-h-11 text-sm ${signInClassName}`}
+                    >
+                      <LogIn className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{loginLabel}</span>
+                    </Link>
+                    <Link data-workspace-action="true"
+                      href="/register"
+                      onClick={closeMenu}
+                      className={publicPrimaryAction}
+                    >
+                      <UserPlus className="h-4 w-4 shrink-0" />
+                      <span className="truncate">Request access</span>
+                    </Link>
+                  </div>
                 </div>
-
-                <nav aria-label="Public navigation" className="mt-3 grid gap-1.5">
-                  <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
-                    Explore
-                  </p>
-                  {visibleLinks.map((item) => {
-                    const isActive = currentPage === item.key;
-
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        aria-current={isActive ? "page" : undefined}
-                        onClick={() => setIsMenuOpen(false)}
-                        className={`inline-flex min-h-11 items-center justify-between gap-3 rounded-lg border px-3 text-sm font-semibold transition ${
-                          isActive
-                            ? "border-slate-300 bg-slate-950 text-white dark:border-emerald-300/45 dark:bg-emerald-400/18 dark:text-emerald-50"
-                            : "border-slate-200 bg-white text-slate-950 hover:border-slate-300 hover:bg-slate-50 dark:border-white/18 dark:bg-[#18202a] dark:text-slate-50 dark:hover:border-white/30 dark:hover:bg-[#202a36]"
-                        }`}
-                      >
-                        <span className="inline-flex min-w-0 items-center gap-3">
-                          <VisualSticker label={item.key} size="xs" />
-                          <span className="truncate text-current">{item.label}</span>
-                        </span>
-                        <ArrowRight className="h-3.5 w-3.5 shrink-0 text-current opacity-60" />
-                      </Link>
-                    );
-                  })}
-                </nav>
-
-                <div className="mt-3 grid gap-2 border-t border-slate-200 pt-3 dark:border-white/10">
-                  <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
-                    Account
-                  </p>
-                  <Link
-                    href={loginHref}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`inline-flex min-h-11 text-sm ${signInClassName}`}
-                  >
-                    <LogIn className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{loginLabel}</span>
-                  </Link>
-                  <Link data-workspace-action="true"
-                    href="/register"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:bg-emerald-400 dark:text-[#07130f] dark:hover:bg-emerald-300 [&_*]:text-current"
-                  >
-                    <UserPlus className="h-4 w-4 shrink-0" />
-                    <span className="truncate">Create account</span>
-                  </Link>
-                </div>
-              </div>
+              </details>
             </div>
           </div>
 
           <nav aria-label="Public navigation" className="hidden xl:flex xl:w-auto xl:flex-1 xl:items-center xl:justify-end xl:gap-2">
             <div className="flex items-center gap-2">
-              {visibleLinks.map((item) => {
-                const isActive = currentPage === item.key;
-
-                return (
-                  <Link data-workspace-action="true"
-                    key={item.href}
-                    href={item.href}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`public-access-nav-link inline-flex shrink-0 min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition ${
-                      isActive
-                        ? "public-access-nav-link-active border-slate-300 bg-white text-slate-950 shadow-sm dark:border-white/20 dark:bg-white dark:text-[#0b0f16]"
-                        : "border-transparent bg-transparent text-slate-950 hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:border-white/25 dark:hover:bg-white/[0.14] dark:hover:text-white"
-                    }`}
-                  >
-                    <span className="max-w-full truncate text-current">{item.label}</span>
-                  </Link>
-                );
-              })}
+              {navigationGroups.map((group) => (
+                <details key={group.label} name="public-navigation" className="group relative"
+                  onKeyDown={(event) => { if (event.key === "Escape") { event.currentTarget.removeAttribute("open"); event.currentTarget.querySelector("summary")?.focus(); } }}
+                  onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) event.currentTarget.removeAttribute("open"); }}>
+                  <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1 rounded-lg px-3 text-sm font-semibold hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+                    {group.label}<ChevronDown aria-hidden="true" className="h-4 w-4 transition group-open:rotate-180" />
+                  </summary>
+                  <div className="absolute left-0 top-full z-10 w-56 rounded-xl border border-border bg-background p-2 text-foreground shadow-xl">
+                    {visibleLinks.filter((item) => (group.keys as readonly string[]).includes(item.key)).map((item) => (
+                      <Link key={item.href} href={item.href} aria-current={currentPage === item.key ? "page" : undefined}
+                        onClick={(event) => event.currentTarget.closest("details")?.removeAttribute("open")}
+                        className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[current=page]:bg-muted">
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </details>
+              ))}
+              <Link href="/service-providers" aria-current={currentPage === "providers" ? "page" : undefined} className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Service providers</Link>
             </div>
 
             <span className="mx-1 hidden h-6 w-px bg-slate-200 dark:bg-white/10 md:inline-block" />
@@ -209,17 +221,17 @@ export function PublicAccessHeader({
               <HeaderThemeToggle />
               <Link
                 href={loginHref}
-                className={`inline-flex min-h-10 min-w-0 text-sm ${signInClassName}`}
+                className={`inline-flex min-h-11 min-w-0 text-sm ${signInClassName}`}
               >
                 <LogIn className="h-4 w-4 shrink-0" />
                 <span className="truncate">{loginLabel}</span>
               </Link>
               <Link data-workspace-action="true"
                 href="/register"
-                className="inline-flex min-h-10 min-w-0 items-center justify-center gap-2 rounded-lg bg-slate-950 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:bg-white dark:text-[#0b0f16] dark:hover:bg-[#e5e7eb] dark:focus-visible:ring-white [&_*]:text-current"
+                className={publicPrimaryAction}
               >
                 <UserPlus className="h-4 w-4 shrink-0" />
-                <span className="truncate">Create account</span>
+                <span className="truncate">Request access</span>
               </Link>
             </div>
           </nav>

@@ -3,8 +3,10 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { APP_PLANS, type AppPlan } from "@/lib/billing/plans";
 import type { Prisma } from "@prisma/client";
+import { SUBSCRIPTION_GRACE_DAYS } from "@/lib/billing/subscription-access";
+import { organizationPlanLimits } from "./organization-plan-policy";
 
-const PLAN_ACTIVE_STATUSES = new Set(["ACTIVE", "TRIALING"]);
+const PLAN_ACTIVE_STATUSES = new Set(["ACTIVE"]);
 type BillingReadClient = Pick<Prisma.TransactionClient, "subscription" | "property" | "unit" | "bnbListing" | "membership">;
 
 /** Serialize quota checks and writes for one organization across all creation paths. */
@@ -22,31 +24,51 @@ export type PlanUsage = {
   usersLimit: number;
 };
 
-export async function getOrgPlan(orgId: string, client: BillingReadClient = prisma): Promise<AppPlan> {
+async function getOrgPlanConfiguration(orgId: string, client: BillingReadClient) {
   const subscription = await client.subscription.findUnique({
     where: { orgId },
     select: {
       plan: true,
       status: true,
+      trialEndsAt: true,
+      metadata: true,
     },
   });
 
-  if (!subscription) return "FREE";
+  if (!subscription) return { plan: "FREE" as AppPlan, metadata: undefined };
 
-  if (!PLAN_ACTIVE_STATUSES.has(subscription.status)) {
-    return "FREE";
+  const trialStillValid = subscription.status === "TRIALING" && subscription.trialEndsAt !== null &&
+    subscription.trialEndsAt.getTime() + SUBSCRIPTION_GRACE_DAYS * 24 * 60 * 60 * 1000 > Date.now();
+  if (!PLAN_ACTIVE_STATUSES.has(subscription.status) && !trialStillValid) {
+    return { plan: "FREE" as AppPlan, metadata: undefined };
   }
 
   if (!subscription.plan || !(subscription.plan in APP_PLANS)) {
-    return "FREE";
+    return { plan: "FREE" as AppPlan, metadata: undefined };
   }
 
-  return subscription.plan as AppPlan;
+  return { plan: subscription.plan as AppPlan, metadata: subscription.metadata };
+}
+
+export async function getOrgPlan(orgId: string, client: BillingReadClient = prisma): Promise<AppPlan> {
+  return (await getOrgPlanConfiguration(orgId, client)).plan;
+}
+
+async function assertSubscriptionCanWrite(orgId: string, client: BillingReadClient) {
+  const subscription = await client.subscription.findUnique({
+    where: { orgId },
+    select: { status: true, trialEndsAt: true },
+  });
+  const trialStillValid = subscription?.status === "TRIALING" && subscription.trialEndsAt !== null &&
+    subscription.trialEndsAt.getTime() + SUBSCRIPTION_GRACE_DAYS * 24 * 60 * 60 * 1000 > Date.now();
+  if (!subscription || (subscription.status !== "ACTIVE" && !trialStillValid)) {
+    throw new Error("Your subscription is inactive. Renew or update your plan in Organization Settings → Billing before adding properties or units.");
+  }
 }
 
 export async function getOrgPlanUsage(orgId: string, client: BillingReadClient = prisma): Promise<PlanUsage> {
-  const [plan, properties, physicalUnits, bnbListings, staffUsers] = await Promise.all([
-    getOrgPlan(orgId, client),
+  const [configuration, properties, physicalUnits, bnbListings, staffUsers] = await Promise.all([
+    getOrgPlanConfiguration(orgId, client),
     client.property.count({
       where: { orgId, deletedAt: null },
     }),
@@ -70,7 +92,8 @@ export async function getOrgPlanUsage(orgId: string, client: BillingReadClient =
     }),
   ]);
 
-  const limits = APP_PLANS[plan];
+  const { plan, metadata } = configuration;
+  const limits = organizationPlanLimits(plan, metadata);
   // A managed short-stay listing consumes the same portfolio capacity as a unit.
   const units = physicalUnits + bnbListings;
 
@@ -133,6 +156,7 @@ export function planLimitMessage(
 }
 
 export async function assertCanCreateProperty(orgId: string, additional = 1, client: BillingReadClient = prisma) {
+  await assertSubscriptionCanWrite(orgId, client);
   const usage = await getOrgPlanUsage(orgId, client);
   if (usage.properties + additional > usage.propertiesLimit) {
     throw new Error(planLimitMessage("property", usage));
@@ -141,6 +165,7 @@ export async function assertCanCreateProperty(orgId: string, additional = 1, cli
 }
 
 export async function assertCanCreateUnit(orgId: string, additional = 1, client: BillingReadClient = prisma) {
+  await assertSubscriptionCanWrite(orgId, client);
   const usage = await getOrgPlanUsage(orgId, client);
   if (usage.units + additional > usage.unitsLimit) {
     throw new Error(planLimitMessage("unit", usage));

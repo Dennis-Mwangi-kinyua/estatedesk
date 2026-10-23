@@ -144,7 +144,7 @@ export default function LoginForm({
 
               <Link
                 href="/forgot-password"
-                className="text-xs font-semibold text-slate-950 underline-offset-4 transition hover:underline sm:text-sm"
+                className="inline-flex min-h-11 items-center text-xs font-semibold text-slate-950 underline-offset-4 transition hover:underline sm:text-sm"
               >
                 Forgot password?
               </Link>
@@ -214,7 +214,7 @@ export default function LoginForm({
               Need an account?
               <Link
                 href="/register"
-                className="ml-1.5 font-semibold text-slate-950 underline-offset-4 transition hover:underline"
+                className="ml-1.5 inline-flex min-h-11 items-center font-semibold text-slate-950 underline-offset-4 transition hover:underline"
               >
                 Create one
               </Link>

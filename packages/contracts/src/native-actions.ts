@@ -12,6 +12,7 @@ export const nativeActionDefinitionSchema = z.object({
   groups: z.array(z.object({ id: z.string(), title: z.string(), description: z.string().optional(), repeat: z.boolean().optional(), fields: z.array(nativeActionFieldSchema) })),
 });
 export const nativeActionRequestSchema = z.object({
+  submissionId: z.string().uuid().optional(),
   kind: z.enum(["organization", "platform", "landlord"]), path: z.string().min(1).max(200), actionId: z.string().min(1).max(100), recordId: z.string().min(1).max(2000).optional(),
   values: z.record(z.string().max(100), z.union([z.string().max(350200), z.array(z.string().max(10000)).max(200)])).optional(),
 }).superRefine((input, context) => {
@@ -21,7 +22,7 @@ export const nativeActionRequestSchema = z.object({
 });
 export const nativeActionResultSchema = z.object({
   ok: z.literal(true), message: z.string(),
-  credentials: z.object({ fullName: z.string(), username: z.string(), setupUrl: z.string(), email: z.string().nullable().optional(), phone: z.string().nullable().optional(), loginUrl: z.string() }).optional(),
+  credentials: z.object({ fullName: z.string(), username: z.string(), setupUrl: z.string().optional(), temporaryPassword: z.string().optional(), email: z.string().nullable().optional(), phone: z.string().nullable().optional(), loginUrl: z.string() }).optional(),
   document: z.object({ filename: z.string(), content: z.string().max(36_000_000) }).optional(),
   file: z.object({ filename: z.string(), content: z.string().max(36_000_000), mimeType: z.literal("application/zip") }).optional(),
   vaultCookie: z.string().max(8192).optional(),

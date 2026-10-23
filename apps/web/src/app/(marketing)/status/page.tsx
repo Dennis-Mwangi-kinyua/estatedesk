@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Activity, CircleCheck as CheckCircle2 } from "@/components/shared/colored-icons";
+import { Activity } from "@/components/shared/colored-icons";
 import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { sharedTopicGuides } from "@/lib/content-depth/site-topics";
@@ -31,9 +31,8 @@ export default function StatusPage() {
             EstateDesk system status
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600 dark:text-slate-300">
-            EstateDesk exposes production health endpoints for uptime monitors and
-            deployment checks. Use this page as the public pointer for availability
-            and incident communication.
+            Find availability information and support for interruptions to your
+            EstateDesk workspace. This page does not display live monitoring results.
           </p>
         </div>
       </section>
@@ -53,7 +52,7 @@ export default function StatusPage() {
               title: "Incident updates",
               body: externalStatusUrl
                 ? "A dedicated external status page can be used for public incident updates."
-                : "Configure NEXT_PUBLIC_STATUS_PAGE_URL when a dedicated external status page is available.",
+                : "For help with an interruption, contact the EstateDesk support team.",
             },
           ].map((item) => (
             <div
@@ -61,7 +60,7 @@ export default function StatusPage() {
               className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.04]"
             >
               <div className="flex items-start gap-3">
-                <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-emerald-700 dark:text-emerald-300" />
+                <Activity aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
                 <div>
                   <h2 className="text-lg font-semibold">{item.title}</h2>
                   <p className="mt-1 text-sm leading-7 text-slate-600 dark:text-slate-300">
@@ -72,6 +71,7 @@ export default function StatusPage() {
             </div>
           ))}
 
+          <Link href="/contact" className="inline-flex min-h-12 items-center gap-2 rounded-lg border border-border px-4 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">Contact support<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
           {externalStatusUrl ? (
             <Link
               href={externalStatusUrl}

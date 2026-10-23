@@ -26,7 +26,7 @@ export default async function CaretakerLayout({
   if (pathname && !caretakerCanAccessPath(pathname, scope.sections)) redirect("/dashboard/caretaker");
 
   return (
-    <WorkspaceAccessProvider access={{ platformRole: session.platformRole, activeOrgRole: session.activeOrgRole, activeOrgId: session.activeOrgId, grantedPermissions: session.grantedPermissions, caretakerSections: scope.sections, caretakerUnitPaths: scope.unitIds.map(getCaretakerUnitHref) }}>
+    <WorkspaceAccessProvider access={{ userId: session.userId, platformRole: session.platformRole, activeOrgRole: session.activeOrgRole, activeOrgId: session.activeOrgId, grantedPermissions: session.grantedPermissions, orgRolePolicy: session.orgRolePolicy, membershipScope: session.membershipScope, caretakerSections: scope.sections, caretakerUnitPaths: scope.unitIds.map(getCaretakerUnitHref) }}>
     <CaretakerDashboardShell fullName={session.fullName}>
       <SubscriptionWarning access={access} />
       <UnreadNotificationAlertsPanel

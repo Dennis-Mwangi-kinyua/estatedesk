@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { BillingPlan, OrganizationStatus, SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { lockOrgQuota } from "@/lib/billing/access";
 import { writePlatformAuditLog } from "@/lib/audit/security";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { sendSecurityAlert } from "@/lib/security/alerts";
@@ -273,56 +274,32 @@ export async function overrideSubscriptionAction(formData: FormData) {
 
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
-    select: { id: true, slug: true, name: true, subscription: true },
+    select: { id: true, slug: true, name: true },
   });
   if (!org) redirect(`${PAGE}?error=org-missing`);
 
   const now = new Date();
   const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-  const existingMeta =
-    org.subscription?.metadata &&
-    typeof org.subscription.metadata === "object" &&
-    !Array.isArray(org.subscription.metadata)
-      ? (org.subscription.metadata as Record<string, unknown>)
+  const sub = await prisma.$transaction(async tx => {
+    await lockOrgQuota(tx, org.id);
+    const current = await tx.subscription.findUnique({ where: { orgId: org.id }, select: { metadata: true } });
+    const existingMeta = current?.metadata && typeof current.metadata === "object" && !Array.isArray(current.metadata)
+      ? current.metadata as Record<string, unknown>
       : {};
-
-  // Clear pending upgrade requests when platform forces a plan.
-  const nextMeta = {
-    ...existingMeta,
-    amountDue: 0,
-    upgradeRequest:
-      existingMeta.upgradeRequest &&
-      typeof existingMeta.upgradeRequest === "object" &&
-      !Array.isArray(existingMeta.upgradeRequest)
-        ? {
-            ...(existingMeta.upgradeRequest as Record<string, unknown>),
-            status: "APPLIED",
-            appliedAt: now.toISOString(),
-            appliedByUserId: session.userId,
-            resolutionNotes: "Applied via Website Control subscription override",
-          }
+    // Clear pending upgrade requests when platform forces a plan.
+    const nextMeta = {
+      ...existingMeta,
+      amountDue: 0,
+      upgradeRequest: existingMeta.upgradeRequest && typeof existingMeta.upgradeRequest === "object" && !Array.isArray(existingMeta.upgradeRequest)
+        ? { ...(existingMeta.upgradeRequest as Record<string, unknown>), status: "APPLIED", appliedAt: now.toISOString(), appliedByUserId: session.userId, resolutionNotes: "Applied via Website Control subscription override" }
         : existingMeta.upgradeRequest,
-  };
-
-  const sub = await prisma.subscription.upsert({
-    where: { orgId: org.id },
-    create: {
-      orgId: org.id,
-      plan,
-      status,
-      currentPeriodStart: now,
-      currentPeriodEnd: periodEnd,
-      metadata: nextMeta as object,
-    },
-    update: {
-      plan,
-      status,
-      currentPeriodStart: now,
-      currentPeriodEnd: periodEnd,
-      cancelledAt: status === "CANCELLED" ? now : null,
-      metadata: nextMeta as object,
-    },
+    };
+    return tx.subscription.upsert({
+      where: { orgId: org.id },
+      create: { orgId: org.id, plan, status, currentPeriodStart: now, currentPeriodEnd: periodEnd, metadata: nextMeta as object },
+      update: { plan, status, currentPeriodStart: now, currentPeriodEnd: periodEnd, cancelledAt: status === "CANCELLED" ? now : null, metadata: nextMeta as object },
+    });
   });
 
   await writePlatformAuditLog({

@@ -18,7 +18,8 @@ test("native community, expenses and profile preserve tenant ownership", async (
     expect(login.status()).toBe(200);
     const headers = { ...base, Cookie: (await login.json()).sessionCookie };
     for (const section of ["community", "expenditures", "profile"]) {
-      expect((await request.get(`/api/mobile/tenant/${section}`, { headers: base })).status()).toBe(401);
+      // Playwright retains Set-Cookie from login; native fetch uses credentials: omit.
+      expect((await request.get(`/api/mobile/tenant/${section}`, { headers: { ...base, Cookie: "" } })).status()).toBe(401);
       expect((await request.get(`/api/mobile/tenant/${section}`, { headers: { ...headers, Origin: "https://external.test" } })).status()).toBe(403);
     }
     const notice = await db.communityNotice.create({ data: { orgId: fixture.orgId, propertyId: lease.unit.propertyId, title: tag, message: "Fictional notice", publishedByUserId: fixture.accounts.MANAGER.id } });

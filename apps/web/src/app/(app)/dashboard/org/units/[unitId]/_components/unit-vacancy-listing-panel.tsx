@@ -38,6 +38,16 @@ export function UnitVacancyListingPanel({
       : null;
   const publicUrl = publicHref ? `${APP_URL}${publicHref}` : null;
 
+  const missingDetails = [
+    !unit.images.length ? "Add clear property photos" : null,
+    unit.bedrooms == null && unit.roomCount == null ? "Add the number of rooms" : null,
+    unit.bathrooms == null ? "Add bathroom details" : null,
+    unit.depositAmount == null ? "Confirm the deposit (enter 0 if none)" : null,
+    unit.serviceCharge == null ? "Confirm the service charge (enter 0 if none)" : null,
+    !unit.property.location && !unit.property.address ? "Add a location or address" : null,
+    unit.viewingFeeRequired && unit.viewingFeeAmount == null ? "Add the viewing fee amount" : null,
+  ].filter(Boolean);
+
   return (
     <section className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
       <div className="mb-5">
@@ -49,6 +59,7 @@ export function UnitVacancyListingPanel({
         <InAppGuideHint topic="vacancies" workspace="org" orgRole={orgRole} />
       </div>
 
+      {missingDetails.length ? <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"><h4 className="font-semibold">Improve this listing</h4><p className="mt-1">Complete these details so visitors can make an informed enquiry.</p><ul className="mt-2 list-disc space-y-1 pl-5">{missingDetails.map(item => <li key={item}>{item}</li>)}</ul></div> : null}
       {publicUrl ? (
         <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
           <p className="font-semibold">Public listing is live</p>

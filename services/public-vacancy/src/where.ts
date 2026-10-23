@@ -6,6 +6,7 @@ export const publicListedVacancyWhere = {
   deletedAt: null,
   status: "VACANT" as const,
   isPubliclyListed: true,
+  leases: { none: { status: "ACTIVE" } },
   property: {
     is: {
       isActive: true,

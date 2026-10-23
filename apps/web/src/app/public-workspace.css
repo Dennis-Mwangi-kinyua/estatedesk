@@ -28,3 +28,71 @@ body.estate-glass-system:has(.modern-public-header) :is(a, button):focus-visible
   body:has(.modern-public-header) article { transition: border-color .15s, box-shadow .15s; }
   body:has(.modern-public-header) article:has(a):hover { border-color: var(--primary); }
 }
+
+/* Solid, consistent public actions in both themes. */
+body.estate-glass-system .public-action {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .75rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: .75rem;
+  font-size: .875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  white-space: normal;
+  background-image: none;
+  transition: background-color .15s, border-color .15s, box-shadow .15s;
+}
+body.estate-glass-system .public-action-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+body.estate-glass-system .public-action-primary:hover {
+  background-color: color-mix(in srgb, var(--primary) 90%, var(--background));
+}
+body.estate-glass-system .public-action-secondary {
+  border-color: var(--border);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+body.estate-glass-system .public-action-secondary:hover { background-color: var(--muted); }
+body.estate-glass-system .public-action:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+body.estate-glass-system .public-action:active { box-shadow: inset 0 0 0 2px var(--border); }
+body.estate-glass-system .public-action:is(:disabled, [aria-disabled="true"]) {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.public-mobile-navigation:not([open]) > :not(summary) { display: none; }
+@media (max-width: 1279px) {
+  html:has(.public-mobile-navigation[open]) { overflow: hidden; }
+  html:has(.public-mobile-navigation[open]) main:not(:has(.modern-public-header)),
+  html:has(.public-mobile-navigation[open]) main > section,
+  html:has(.public-mobile-navigation[open]) body > footer {
+    filter: blur(10px);
+    pointer-events: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.estate-glass-system .public-action { transition: none; }
+}
+
+/* Rental cards keep a readable width rather than inheriting compact metric grids. */
+body.estate-glass-system .vacancy-listing-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+}
+@media (min-width: 640px) {
+  body.estate-glass-system .vacancy-listing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1280px) {
+  body.estate-glass-system .vacancy-listing-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+body.estate-glass-system .vacancy-listing-card { min-width: 0; }
+body.estate-glass-system .vacancy-listing-card dd { overflow-wrap: anywhere; }

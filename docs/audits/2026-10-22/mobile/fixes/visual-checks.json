@@ -1,0 +1,238 @@
+[
+  {
+    "path": "/",
+    "dark": false,
+    "overflow": false,
+    "buttons": [
+      {
+        "text": "Request access",
+        "color": "rgb(255, 255, 255)",
+        "background": "rgb(15, 118, 110)",
+        "height": 48
+      },
+      {
+        "text": "Explore the product",
+        "color": "rgb(36, 38, 43)",
+        "background": "rgb(242, 243, 247)",
+        "height": 48
+      },
+      {
+        "text": "Request access",
+        "color": "rgb(255, 255, 255)",
+        "background": "rgb(15, 118, 110)",
+        "height": 48
+      },
+      {
+        "text": "Discuss your portfolio",
+        "color": "rgb(36, 38, 43)",
+        "background": "rgb(242, 243, 247)",
+        "height": 48
+      }
+    ]
+  },
+  {
+    "path": "/",
+    "dark": true,
+    "overflow": false,
+    "buttons": [
+      {
+        "text": "Request access",
+        "color": "rgb(4, 47, 46)",
+        "background": "rgb(94, 234, 212)",
+        "height": 48
+      },
+      {
+        "text": "Explore the product",
+        "color": "rgb(240, 241, 245)",
+        "background": "rgb(20, 21, 25)",
+        "height": 48
+      },
+      {
+        "text": "Request access",
+        "color": "rgb(4, 47, 46)",
+        "background": "rgb(94, 234, 212)",
+        "height": 48
+      },
+      {
+        "text": "Discuss your portfolio",
+        "color": "rgb(240, 241, 245)",
+        "background": "rgb(20, 21, 25)",
+        "height": 48
+      }
+    ]
+  },
+  {
+    "path": "/pricing",
+    "dark": false,
+    "overflow": false,
+    "buttons": [
+      {
+        "text": "Request Free access",
+        "color": "rgb(36, 38, 43)",
+        "background": "rgb(242, 243, 247)",
+        "height": 48
+      },
+      {
+        "text": "Request Pro access",
+        "color": "rgb(255, 255, 255)",
+        "background": "rgb(15, 118, 110)",
+        "height": 48
+      },
+      {
+        "text": "Request Plus access",
+        "color": "rgb(36, 38, 43)",
+        "background": "rgb(242, 243, 247)",
+        "height": 48
+      },
+      {
+        "text": "Contact sales",
+        "color": "rgb(36, 38, 43)",
+        "background": "rgb(242, 243, 247)",
+        "height": 48
+      },
+      {
+        "text": "Request access",
+        "color": "rgb(255, 255, 255)",
+        "background": "rgb(15, 118, 110)",
+        "height": 48
+      },
+      {
+        "text": "Contact sales",
+        "color": "rgb(36, 38, 43)",
+        "background": "rgb(242, 243, 247)",
+        "height": 48
+      }
+    ]
+  },
+  {
+    "path": "/pricing",
+    "dark": true,
+    "overflow": false,
+    "buttons": [
+      {
+        "text": "Request Free access",
+        "color": "rgb(240, 241, 245)",
+        "background": "rgb(20, 21, 25)",
+        "height": 48
+      },
+      {
+        "text": "Request Pro access",
+        "color": "rgb(4, 47, 46)",
+        "background": "rgb(94, 234, 212)",
+        "height": 48
+      },
+      {
+        "text": "Request Plus access",
+        "color": "rgb(240, 241, 245)",
+        "background": "rgb(20, 21, 25)",
+        "height": 48
+      },
+      {
+        "text": "Contact sales",
+        "color": "rgb(240, 241, 245)",
+        "background": "rgb(20, 21, 25)",
+        "height": 48
+      },
+      {
+        "text": "Request access",
+        "color": "rgb(4, 47, 46)",
+        "background": "rgb(94, 234, 212)",
+        "height": 48
+      },
+      {
+        "text": "Contact sales",
+        "color": "rgb(240, 241, 245)",
+        "background": "rgb(20, 21, 25)",
+        "height": 48
+      }
+    ]
+  },
+  {
+    "path": "/contact",
+    "dark": false,
+    "overflow": false,
+    "buttons": [
+      {
+        "text": "Send sales request",
+        "color": "rgb(255, 255, 255)",
+        "background": "rgb(15, 118, 110)",
+        "height": 48
+      }
+    ]
+  },
+  {
+    "path": "/contact",
+    "dark": true,
+    "overflow": false,
+    "buttons": [
+      {
+        "text": "Send sales request",
+        "color": "rgb(255, 255, 255)",
+        "background": "rgb(15, 118, 110)",
+        "height": 48
+      }
+    ]
+  },
+  {
+    "path": "/property-management-software-middle-east",
+    "dark": false,
+    "overflow": false,
+    "buttons": [
+      {
+        "text": "Request access",
+        "color": "rgb(255, 255, 255)",
+        "background": "rgb(15, 118, 110)",
+        "height": 48
+      },
+      {
+        "text": "Talk to the team",
+        "color": "rgb(36, 38, 43)",
+        "background": "rgb(242, 243, 247)",
+        "height": 48
+      }
+    ]
+  },
+  {
+    "path": "/property-management-software-middle-east",
+    "dark": true,
+    "overflow": false,
+    "buttons": [
+      {
+        "text": "Request access",
+        "color": "rgb(4, 47, 46)",
+        "background": "rgb(94, 234, 212)",
+        "height": 48
+      },
+      {
+        "text": "Talk to the team",
+        "color": "rgb(240, 241, 245)",
+        "background": "rgb(20, 21, 25)",
+        "height": 48
+      }
+    ]
+  },
+  {
+    "path": "/service-providers",
+    "dark": false,
+    "overflow": false,
+    "buttons": []
+  },
+  {
+    "path": "/service-providers",
+    "dark": true,
+    "overflow": false,
+    "buttons": []
+  },
+  {
+    "path": "/status",
+    "dark": false,
+    "overflow": false,
+    "buttons": []
+  },
+  {
+    "path": "/status",
+    "dark": true,
+    "overflow": false,
+    "buttons": []
+  }
+]

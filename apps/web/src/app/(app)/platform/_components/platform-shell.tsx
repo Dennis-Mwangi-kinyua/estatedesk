@@ -26,16 +26,22 @@ function PlatformShellInner({
   children,
   fullName,
   isSuperAdmin,
+  pendingProviderCount,
 }: {
   children: ReactNode;
   fullName: string;
   isSuperAdmin: boolean;
+  pendingProviderCount: number;
 }) {
   const [navQuery, setNavQuery] = useState("");
   const { mode } = usePlatformMode();
   const navItems = useMemo(
-    () => getNavItemsForMode(mode, { isSuperAdmin }),
-    [mode, isSuperAdmin],
+    () => getNavItemsForMode(mode, { isSuperAdmin }).map((item) =>
+      item.href === "/platform/service-providers"
+        ? { ...item, badgeCount: pendingProviderCount }
+        : item,
+    ),
+    [mode, isSuperAdmin, pendingProviderCount],
   );
   const meta = modeMeta[mode];
   const isDeveloper = mode === "developer";
@@ -182,16 +188,18 @@ export function PlatformShell({
   children,
   fullName,
   isSuperAdmin,
+  pendingProviderCount,
   initialPreferredMode = "admin",
 }: {
   children: ReactNode;
   fullName: string;
   isSuperAdmin: boolean;
+  pendingProviderCount: number;
   initialPreferredMode?: PlatformMode;
 }) {
   return (
     <PlatformModeProvider initialPreferredMode={initialPreferredMode}>
-      <PlatformShellInner fullName={fullName} isSuperAdmin={isSuperAdmin}>
+      <PlatformShellInner fullName={fullName} isSuperAdmin={isSuperAdmin} pendingProviderCount={pendingProviderCount}>
         {children}
       </PlatformShellInner>
     </PlatformModeProvider>

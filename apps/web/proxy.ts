@@ -36,6 +36,7 @@ const PROTECTED_PREFIXES = [
 
 const PUBLIC_PREFIXES = [
   "/login",
+  "/logout",
   "/register",
   "/forgot-password",
   "/reset-password",
@@ -146,7 +147,13 @@ function checkRateLimit(key: string) {
 }
 
 const PUBLIC_API_PATHS = new Set([
+  // Logout revokes the supplied cookie even when it is expired or no longer valid.
+  "/api/auth/logout",
   "/api/mobile/login",
+  "/api/mobile/capabilities",
+  "/api/mobile/account/recovery",
+  // Guest routes authenticate with a stay token in their handlers, not a user cookie.
+  "/api/mobile/guest/session", "/api/mobile/guest/requests", "/api/mobile/vacancies",
   "/api/platform/update-notice", "/api/health", "/api/cron/tenant-credit", "/api/cron/notifications", "/api/cron/retention",
   "/api/webhooks/mpesa", "/api/webhooks/kcb-ipn", "/api/webhooks/kra-etims", "/api/webhooks/whatsapp",
   "/api/monitoring/web-vitals", "/api/monitoring/client-errors", "/api/indexnow/key",
@@ -156,7 +163,9 @@ const PUBLIC_API_PATHS = new Set([
 function isPublicPath(pathname: string) {
   if (pathname.startsWith("/api/")) {
     const normalized = pathname.replace(/\/$/, "");
-    return PUBLIC_API_PATHS.has(normalized) || /^\/api\/(og\/vacancy|marketing\/referrals)\/[^/]+\/?$/.test(pathname);
+    return PUBLIC_API_PATHS.has(normalized)
+      || /^\/api\/(og\/vacancy|marketing\/referrals)\/[^/]+\/?$/.test(pathname)
+      || /^\/api\/mobile\/vacancies\/[^/]+(?:\/inquiries)?\/?$/.test(pathname);
   }
   return PUBLIC_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
@@ -275,6 +284,8 @@ function applyTenantRateLimit(req: NextRequest, response: NextResponse) {
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const sessionCookieValue = req.cookies.get(getSessionCookieName())?.value;
+  // This is an optimistic routing check only. Handlers must verify the signed
+  // token, live session, account setup, role and resource scope on the server.
   const hasSession = hasValidSessionCookieShape(sessionCookieValue);
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-estatedesk-pathname", pathname);
@@ -289,7 +300,7 @@ export function proxy(req: NextRequest) {
   }
   const secureResponse = (response: NextResponse, path: string) => applySecurityHeaders(response, path, csp);
 
-  if (pathname.startsWith("/api") && !pathname.startsWith("/api/marketing/referrals/") && isBrowserApiNavigation(req)) {
+  if ((pathname === "/api" || pathname.startsWith("/api/")) && !/^\/api\/marketing\/referrals\/[^/]+\/?$/.test(pathname) && isBrowserApiNavigation(req)) {
     const url = req.nextUrl.clone();
     url.pathname = "/are-you-lost";
     url.searchParams.set("from", pathname);
@@ -304,7 +315,7 @@ export function proxy(req: NextRequest) {
   }
 
   if (isProtectedPath(pathname) && !hasSession) {
-    if (pathname.startsWith("/api")) {
+    if (pathname === "/api" || pathname.startsWith("/api/")) {
       return secureResponse(
         NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
         pathname,
@@ -330,5 +341,5 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  matcher: ["/((?!_next/static/|_next/image(?:/|$)|favicon\\.ico$).*)"],
 };

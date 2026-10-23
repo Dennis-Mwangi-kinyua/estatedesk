@@ -5,10 +5,43 @@ import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { proxy } from "../../apps/web/proxy";
 import { getSessionCookieName } from "../../apps/web/src/lib/auth/cookie-policy";
+import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
+import { config as proxyConfig } from "../../apps/web/src/proxy";
 
 const ROOT = join(import.meta.dirname, "..", "..");
 
 describe("middleware wiring", () => {
+  it("runs security checks for protected URLs containing dots and encoded dots", () => {
+    for (const path of ["/api/receipts/invoice.pdf", "/dashboard/org/acme.co", "/platform/users/person%2Ename", "/api/private.json"]) {
+      assert.equal(unstable_doesMiddlewareMatch({ config: proxyConfig, url: `https://example.test${path}` }), true, path);
+      const response = proxy(new NextRequest(`https://example.test${path}`));
+      assert.equal(response.status, path.startsWith("/api/") ? 401 : 307, path);
+      assert.equal(response.headers.get("cache-control")?.includes("no-store"), true);
+    }
+    for (const path of ["/_next/static/chunks/app.js", "/_next/image?url=test", "/favicon.ico"]) {
+      assert.equal(unstable_doesMiddlewareMatch({ config: proxyConfig, url: `https://example.test${path}` }), false, path);
+    }
+  });
+  it("allows only the intended anonymous mobile routes through to handler checks", () => {
+    for (const path of ["/account/recovery", "/account/recovery/", "/guest/session", "/guest/requests", "/vacancies", "/vacancies/house.one", "/vacancies/house/inquiries"]) {
+      const response = proxy(new NextRequest(`https://example.test/api/mobile${path}`, { method: "POST" }));
+      assert.equal(response.status, 200, path);
+    }
+    for (const path of ["/account/recovery/admin", "/guest/session/admin", "/vacancies/house/private", "/tenant/profile", "/workspace/action", "/security"]) {
+      assert.equal(proxy(new NextRequest(`https://example.test/api/mobile${path}`, { method: "POST" })).status, 401, path);
+    }
+  });
+  it("uses exact API segment and referral boundaries for browser navigation", () => {
+    assert.equal(proxy(new NextRequest("https://example.test/api-keys", { headers: { accept: "text/html" } })).headers.get("location")?.includes("/login?"), true);
+    const response = proxy(new NextRequest("https://example.test/api/marketing/referrals/code/private", { headers: { accept: "text/html" } }));
+    assert.equal(new URL(response.headers.get("location")!).pathname, "/are-you-lost");
+  });
+  it("overwrites client-supplied internal path and CSP headers", () => {
+    const response = proxy(new NextRequest("https://example.test/login", { headers: { "x-estatedesk-pathname": "/change-password", "x-nonce": "attacker", "content-security-policy": "script-src *" } }));
+    assert.equal(response.headers.get("x-middleware-request-x-estatedesk-pathname"), "/login");
+    assert.notEqual(response.headers.get("x-middleware-request-x-nonce"), "attacker");
+    assert.equal(response.headers.get("content-security-policy")?.includes("script-src *"), false);
+  });
   it("allows subscription invoice viewing and downloading while requiring authentication", () => {
     const cookie = `${getSessionCookieName()}=v1.${"a".repeat(64)}.${"b".repeat(32)}`;
     for (const suffix of ["", "?download=1"]) {

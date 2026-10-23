@@ -32,8 +32,8 @@ export function getOnlineSessionWhere(now = new Date()) {
 export async function countOnlineUsers(now = new Date()) {
   return retryTransientDatabaseOperation(
     () =>
-      prisma.userSession.count({
-        where: getOnlineSessionWhere(now),
+      prisma.user.count({
+        where: { status: "ACTIVE", deletedAt: null, sessions: { some: { expiresAt: { gt: now }, lastSeenAt: { gte: getOnlineSince(now) } } } },
       }),
     { label: "count-online-users" },
   );

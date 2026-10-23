@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { Building2, CalendarDays, House as Home, ShieldCheck } from "@/components/shared/colored-icons";
 import { StatCard, SurfaceCard, TenantWorkspace } from "@/components/theme/ed-dashboard-shell";
 import type { TenantDashboardHistoryRecord } from "../_lib/types";

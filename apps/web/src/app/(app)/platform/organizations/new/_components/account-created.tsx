@@ -77,17 +77,17 @@ export function AccountCreated({ account }: { account: Account }) {
   return (
     <section className="system-glass-card space-y-5 rounded-3xl border p-5 sm:p-8">
       <span aria-hidden="true" className="inline-grid h-16 w-16 place-items-center rounded-2xl bg-emerald-500/10 text-4xl"><WorkspaceIcon label="success" className="inline-block h-5 w-5 shrink-0 align-middle" /></span>
-      <div role="status"><h1 className="text-2xl font-semibold">Account created</h1><p className="mt-2 text-sm text-muted-foreground">{account.organizationName} is ready. Share the setup link privately with the account owner.</p></div>
+      <div role="status"><h1 className="text-2xl font-semibold">Account created</h1><p className="mt-2 text-sm text-muted-foreground">{account.organizationName} is ready. Share the temporary login details privately with the account owner.</p></div>
       <p role="status" className="text-sm">{account.verificationSent ? "A verification email was sent to the owner. Verify the email before signing in." : "Email verification is required. Request a verification email using the link below."} Phone remains unverified.</p>
       <div className="flex flex-wrap gap-3 text-sm"><Link className="underline" href={`/verify-email?email=${encodeURIComponent(account.email)}`}>Resend verification email</Link><Link className="underline" href="/forgot-password">Request a new password link</Link><Link className="underline" href={`/platform/organizations/${account.slug}`}>Open organisation</Link></div>
-      <ol className="list-inside list-decimal text-sm text-muted-foreground"><li>Verify email and choose a password using the setup link.</li><li>Add a property and its units.</li><li>Add staff, tenants, and leases.</li><li>Configure billing and payment collection in Settings.</li></ol>
+      <ol className="list-inside list-decimal text-sm text-muted-foreground"><li>Verify the login email.</li><li>Sign in with the temporary password and choose a new password when prompted.</li><li>Add a property and its units.</li><li>Add staff, tenants, and leases.</li><li>Configure billing and payment collection in Settings.</li></ol>
       <dl className="grid gap-3 text-sm sm:grid-cols-2">
         <div><dt className="text-muted-foreground">Account owner</dt><dd className="break-words font-medium">{account.fullName}</dd></div>
         <div><dt className="text-muted-foreground">Username</dt><dd className="break-all font-medium">{account.username}</dd></div>
         <div><dt className="text-muted-foreground">Login email</dt><dd className="break-all font-medium">{account.email}</dd></div>
         <div><dt className="text-muted-foreground">Workspace</dt><dd className="break-all font-medium">{account.slug}</dd></div>
       </dl>
-      <p className="text-sm text-muted-foreground">The PDF contains a setup link that expires in one hour and can be used once. Share it privately with the account owner.</p>
+      <p className="text-sm text-muted-foreground">The temporary password is shown only on this screen and in the credentials PDF. Share it privately; the owner must change it at first sign-in.</p>
       {error && <p role="alert" className="text-sm text-red-600 dark:text-red-300">{error}</p>}
       <div className="flex flex-col gap-3 sm:flex-row">
         <button data-workspace-action="true" type="button" disabled={downloading} onClick={downloadCredentials} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-semibold text-primary-foreground disabled:opacity-50"><Download className="h-4 w-4" />{downloading ? "Preparing PDF…" : downloaded ? "Download PDF again" : "Download credentials PDF"}</button>
@@ -95,13 +95,13 @@ export function AccountCreated({ account }: { account: Account }) {
       </div>
       <section className="space-y-4 rounded-2xl border border-border p-4 sm:p-5" aria-labelledby="handover-title">
         <h2 id="handover-title" className="text-lg font-semibold"><span aria-hidden="true"><WorkspaceIcon label="staff" className="inline-block h-5 w-5 shrink-0 align-middle" /> </span>Share the account handover</h2>
-        <p className="text-sm text-muted-foreground">Prepare a message for the account owner. WhatsApp, SMS, and email open a draft for you to review and send. Download the PDF to attach it, or use your device’s file sharing.</p>
+        <p className="text-sm text-muted-foreground">Share the temporary login details with the account owner. The email opens addressed to the login email shown below; review it and send it from your email app. The owner must change the unique temporary password after first sign-in.</p>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="space-y-1 text-sm"><span>Recipient phone (international format)</span><input type="tel" value={recipientPhone} onChange={(event) => setRecipientPhone(event.target.value)} placeholder="+254700000000" className="min-h-11 w-full border px-3" /></label>
           <label className="space-y-1 text-sm"><span>Recipient email</span><input type="email" value={recipientEmail} onChange={(event) => setRecipientEmail(event.target.value)} className="min-h-11 w-full border px-3" /></label>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {([{channel: "whatsapp", label: "WhatsApp"}, {channel: "sms", label: "SMS"}, {channel: "email", label: "Email"}] as const).map((item) => <button data-workspace-action="true" key={item.channel} type="button" onClick={() => openShare(item.channel)} disabled={downloading || (item.channel === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail))} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-semibold disabled:opacity-50"><span aria-hidden="true"><WorkspaceIcon label={item.label} /></span>{item.label}</button>)}
+          {([{channel: "whatsapp", label: "WhatsApp"}, {channel: "sms", label: "SMS"}, {channel: "email", label: "Share activation"}] as const).map((item) => <button data-workspace-action="true" key={item.channel} type="button" onClick={() => openShare(item.channel)} disabled={downloading || (item.channel === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail))} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-semibold disabled:opacity-50"><span aria-hidden="true"><WorkspaceIcon label={item.channel === "email" ? "Email" : item.label} /></span>{item.label}</button>)}
           <button data-workspace-action="true" type="button" onClick={copySummary} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-semibold"><Copy className="h-4 w-4" />Copy summary</button>
           <button data-workspace-action="true" type="button" disabled={downloading} onClick={sharePdf} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-semibold disabled:opacity-50"><Share2 className="h-4 w-4" />Share PDF</button>
         </div>

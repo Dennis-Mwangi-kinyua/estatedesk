@@ -45,6 +45,8 @@ const listingSelect = {
   rentAmount: true,
   depositAmount: true,
   serviceCharge: true,
+  garbageFee: true,
+  securityFee: true,
   viewingFeeRequired: true,
   viewingFeeAmount: true,
   notes: true,

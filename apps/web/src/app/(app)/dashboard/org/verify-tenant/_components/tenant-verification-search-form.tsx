@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";

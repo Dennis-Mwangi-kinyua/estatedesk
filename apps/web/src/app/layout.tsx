@@ -1,3 +1,4 @@
+import { LogoutFeedback } from "@/components/shared/logout-feedback";
 import { ScheduledUpdateBanner } from "@/features/platform-updates/banner";
 import { Suspense } from "react";
 import { SiteExperience } from "@/components/shared/site-experience";
@@ -13,7 +14,6 @@ import { ServiceWorkerUpdatePrompt } from "@/components/pwa/service-worker-updat
 import { SkipToMain } from "@/components/layout/skip-to-main";
 import { IncidentBanner } from "@/components/marketing/incident-banner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { APP_PLANS } from "@/lib/billing/plans";
 import {
   SEO_KEYWORDS,
@@ -255,6 +255,7 @@ export default async function RootLayout({
           <WebVitalsReporter />
           <MobileSwipeBack />
           <SiteExperience />
+          <LogoutFeedback />
           <ServiceWorkerRegistration />
           <ServiceWorkerUpdatePrompt />
           <PwaExperienceLoader />
@@ -264,7 +265,6 @@ export default async function RootLayout({
             {children}
           </div>
           <ScheduledUpdateBanner />
-          <ThemeToggle />
         </ThemeProvider>
       </body>
     </html>

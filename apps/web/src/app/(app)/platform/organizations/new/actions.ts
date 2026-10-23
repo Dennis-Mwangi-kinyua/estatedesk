@@ -1,5 +1,4 @@
 "use server";
-import { createAccountSetupUrl } from "@/lib/auth/account-setup";
 
 import crypto from "node:crypto";
 import { sendVerificationEmail } from "@/lib/notifications/email";
@@ -58,31 +57,20 @@ const createOrganizationSchema = z
       .trim()
       .toLowerCase()
       .min(3, "Master username must be at least 3 characters")
-      .max(30, "Master username must be 30 characters or fewer")
-      .regex(
-        /^[a-z0-9._-]+$/,
-        "Use only letters, numbers, dots, underscores, and hyphens",
-      ),
+      .max(254, "Master username must be 254 characters or fewer")
+      .email("Username must be the account owner’s email address"),
     adminEmail: z.string().trim().email("Enter a valid admin email"),
     adminPhone: z.string().trim().refine(isValidPhone, "Use international phone format").optional(),
-    adminPassword: z
-      .string()
-      .min(8, "Password must be at least 8 characters"),
-    adminPasswordConfirm: z.string().min(1, "Please confirm the password"),
   })
   .superRefine((data, ctx) => {
-    if (data.adminPassword !== data.adminPasswordConfirm) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["adminPasswordConfirm"],
-        message: "Passwords do not match",
-      });
+    if (data.adminUsername !== data.adminEmail.trim().toLowerCase()) {
+      ctx.addIssue({ code: "custom", path: ["adminUsername"], message: "Username must match the login email." });
     }
   });
 
 export type CreateOrganizationState = {
   success: boolean;
-  createdAccount?: { organizationName: string; slug: string; accountType: string; fullName: string; username: string; email: string; phone: string | null; plan: string; verificationSent?: boolean; setupUrl?: string };
+  createdAccount?: { organizationName: string; slug: string; accountType: string; fullName: string; username: string; email: string; phone: string | null; plan: string; verificationSent?: boolean; temporaryPassword?: string; setupUrl?: string };
   error?: string;
   fieldErrors?: Record<string, string[] | undefined>;
 };
@@ -135,8 +123,6 @@ export async function createOrganizationAction(
       adminUsername: formData.get("adminUsername"),
       adminEmail: formData.get("adminEmail"),
       adminPhone: formData.get("adminPhone"),
-      adminPassword: formData.get("adminPassword"),
-      adminPasswordConfirm: formData.get("adminPasswordConfirm"),
     });
 
     if (!parsed.success) {
@@ -223,9 +209,9 @@ export async function createOrganizationAction(
       };
     }
 
-    const passwordHash = await bcrypt.hash(data.adminPassword, 12);
+    const temporaryPassword = crypto.randomBytes(18).toString("hex");
+    const passwordHash = await bcrypt.hash(temporaryPassword, 12);
 
-    let setupUrl = "";
     const token = crypto.randomBytes(32).toString("hex");
     await retryTransientDatabaseOperation(
       () =>
@@ -264,7 +250,6 @@ export async function createOrganizationAction(
             },
           });
 
-          setupUrl = await createAccountSetupUrl(tx, adminUser.id, adminEmail);
           await tx.membership.create({
             data: {
               orgId: org.id,
@@ -337,7 +322,7 @@ export async function createOrganizationAction(
     revalidatePath("/platform/onboarding");
     return {
       success: true,
-      createdAccount: { organizationName: data.organizationName, slug, accountType: data.accountType, fullName: data.adminFullName, username: data.adminUsername, email: adminEmail, phone: adminPhone, plan: data.plan, verificationSent, setupUrl },
+      createdAccount: { organizationName: data.organizationName, slug, accountType: data.accountType, fullName: data.adminFullName, username: data.adminUsername, email: adminEmail, phone: adminPhone, plan: data.plan, verificationSent, temporaryPassword },
     };
   } catch (error) {
     if (isRedirectError(error)) {
@@ -366,7 +351,7 @@ export async function createOrganizationAction(
 
 export async function checkOrganizationAvailability(values: Record<string, string>): Promise<Record<string, string[]>> {
   await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], { redirectTo: "/login" });
-  const parsed = z.object({ organizationName: z.string().trim().max(200), organizationSlug: z.string().trim().max(200), adminUsername: z.string().trim().toLowerCase().max(30), adminEmail: z.string().trim().toLowerCase().max(254), adminPhone: z.string().trim().max(40) }).safeParse(values);
+  const parsed = z.object({ organizationName: z.string().trim().max(200), organizationSlug: z.string().trim().max(200), adminUsername: z.string().trim().toLowerCase().max(254), adminEmail: z.string().trim().toLowerCase().max(254), adminPhone: z.string().trim().max(40) }).safeParse(values);
   if (!parsed.success) return { organizationName: ["Check the length and format of the account details."] };
   values = parsed.data;
   const slug = slugify(values.organizationSlug || values.organizationName || "");

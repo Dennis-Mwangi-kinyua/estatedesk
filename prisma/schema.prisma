@@ -3164,10 +3164,21 @@ model CommunityNoticeRecipient {
 
 enum ProviderStatus {
   PENDING
+  CHANGES_REQUESTED
+  REJECTED
   ACTIVE
   FLAGGED
   SUSPENDED
   DELETED
+}
+
+enum JobApplicationStatus {
+  PENDING
+  REVIEWING
+  SELECTED
+  DECLINED
+  WITHDRAWN
+  CANCELLED
 }
 
 enum ServiceJobStatus {
@@ -3179,8 +3190,24 @@ enum ServiceJobStatus {
   CANCELLED
 }
 
+enum ProviderJobPaymentMethod {
+  MPESA
+  BANK_TRANSFER
+  CASH
+  OTHER
+}
+
+enum ProviderJobPaymentStatus {
+  RECORDED
+  CONFIRMED
+  DISPUTED
+  VOIDED
+}
+
 model ServiceProvider {
   nationalId String?
+  reviewFeedback String?
+  reviewedAt DateTime?
   id String @id @default(cuid())
   userId String @unique
   user User @relation(fields: [userId], references: [id], onDelete: Restrict)
@@ -3232,11 +3259,34 @@ model ServiceJob {
   updatedAt DateTime @updatedAt
   completedAt DateTime?
   applications JobApplication[]
+  paymentTracking Boolean @default(false)
+  agreedAmount Decimal? @db.Decimal(12, 2)
+  payments ProviderJobPayment[]
   review ProviderReview?
   reports ProviderReport[]
   @@index([orgId, status])
   @@index([providerId, status])
   @@index([status, category, location])
+}
+
+/// A payment entry reported by an organisation for a provider job. EstateDesk records
+/// the report and provider response; money moves directly between the two parties.
+model ProviderJobPayment {
+  id String @id @default(cuid())
+  jobId String
+  job ServiceJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  amount Decimal @db.Decimal(12, 2)
+  method ProviderJobPaymentMethod
+  reference String?
+  note String?
+  status ProviderJobPaymentStatus @default(RECORDED)
+  reportedByUserId String
+  providerResponseNote String?
+  resolutionNote String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  confirmedAt DateTime?
+  @@index([jobId, status, createdAt])
 }
 
 model JobApplication {
@@ -3246,8 +3296,12 @@ model JobApplication {
   providerId String
   provider ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Restrict)
   message String
+  status JobApplicationStatus @default(PENDING)
+  reviewNote String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   @@unique([jobId, providerId])
+  @@index([providerId, status, updatedAt])
 }
 
 model ProviderReview {
@@ -3337,4 +3391,18 @@ model PlatformUpdateNotice {
   publishedByUserId String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+/// Durable submission receipts. No passwords, signatures or credentials are stored.
+model WorkflowSubmission {
+  id          String   @id
+  actorUserId String
+  scope       String
+  fingerprint String
+  status      String
+  resourceId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([actorUserId, createdAt])
 }

@@ -19,42 +19,45 @@ export default async function Page() {
       <PublicAccessHeader />
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
         <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-          <section className="space-y-5 lg:sticky lg:top-8">
+          <section className="space-y-6 lg:sticky lg:top-8">
             <div className="space-y-3">
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-                EstateDesk service providers
-              </p>
+              <p className="inline-flex rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-primary">EstateDesk marketplace</p>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Create your provider account
               </h1>
               <p className="text-muted-foreground">
-                Build a public business profile, showcase completed work, and
-                receive job opportunities from property organisations.
+                Put your work in front of property organisations. Build a credible business profile, show examples of completed work, and respond to relevant job opportunities.
               </p>
             </div>
 
-            <ol className="space-y-3 rounded-2xl border border-border bg-card p-5 text-sm">
-              <li><span className="font-semibold">1. Create your login</span><p className="mt-1 text-muted-foreground">Choose a username and password, then verify your email address.</p></li>
-              <li><span className="font-semibold">2. Submit your provider profile</span><p className="mt-1 text-muted-foreground">Share your services, area served, and portfolio details for review.</p></li>
-              <li><span className="font-semibold">3. Wait for approval</span><p className="mt-1 text-muted-foreground">We’ll email you when your account is approved and ready to sign in.</p></li>
+            <ol className="space-y-0 overflow-hidden rounded-2xl border border-border bg-card text-sm">
+              <li className="flex gap-4 border-b border-border p-4"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 font-bold text-primary">1</span><div><span className="font-semibold">Create your login</span><p className="mt-1 text-muted-foreground">Use your own username and password, then verify your email.</p></div></li>
+              <li className="flex gap-4 border-b border-border p-4"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 font-bold text-primary">2</span><div><span className="font-semibold">Build your business profile</span><p className="mt-1 text-muted-foreground">Describe your services, coverage area, and relevant experience. Add project examples to build trust.</p></div></li>
+              <li className="flex gap-4 p-4"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 font-bold text-primary">3</span><div><span className="font-semibold">Complete platform review</span><p className="mt-1 text-muted-foreground">The EstateDesk team reviews your application and emails you when a decision is made.</p></div></li>
             </ol>
 
-            <p className="text-sm text-muted-foreground">
+            <div className="rounded-2xl border border-border bg-muted/40 p-4 text-sm">
+              <p className="font-semibold">You’ll use the regular EstateDesk login</p>
+              <p className="mt-1 text-muted-foreground">
               After approval, sign in through the regular EstateDesk login with
               your username or email and the password you create here. You do
               not need a tenant or organisation role.
-            </p>
+              </p>
+            </div>
           </section>
 
-          <section className={panelClass}>
-            <h2 className="text-xl font-semibold">
-              {session ? "Complete your provider profile" : "Account and business details"}
-            </h2>
-            <p className="mt-1 mb-5 text-sm text-muted-foreground">
+          <section className={`${panelClass} sm:p-7`}>
+            <div className="mb-6 border-b border-border pb-5">
+              <p className="text-sm font-semibold uppercase tracking-wide text-primary">Application form</p>
+              <h2 className="mt-1 text-2xl font-bold">
+                {session ? "Complete your provider profile" : "Account and business details"}
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
               {session
                 ? `This profile will be linked to your signed-in account (${session.fullName}).`
                 : "Your email and password are private. Your business profile and portfolio are public."}
-            </p>
+              </p>
+            </div>
 
             <ActionForm
               action={registerProvider}
@@ -80,13 +83,18 @@ export default async function Page() {
                 </>
               ) : null}
 
-              <Field name="nationalId" label="National ID number (private)" maxLength={40} />
-              <ProfileFields />
+              <div className="space-y-3 rounded-xl border border-border p-4">
+                <div><h3 className="font-semibold">Identity details</h3><p className="mt-1 text-xs leading-5 text-muted-foreground">Your National ID is private and not shown on your public profile. EstateDesk uses it to reduce duplicate provider accounts; ID numbers are masked in review screens.</p></div>
+                <Field name="nationalId" label="National ID number" maxLength={40} />
+              </div>
+              <div className="space-y-3 rounded-xl border border-border p-4">
+                <div><h3 className="font-semibold">Public business profile</h3><p className="mt-1 text-xs text-muted-foreground">Organisations can see these details after your profile is approved.</p></div>
+                <ProfileFields />
+              </div>
               <label className="flex items-start gap-2 text-sm">
                 <input type="checkbox" name="acceptedTerms" required className="mt-1" />
                 <span>
-                  I accept the <Link href="/terms" className="underline">terms of use</Link> and understand
-                  that my business profile and portfolio are public.
+                  I accept the <Link href="/terms" className="underline">terms of use</Link> and understand that my business profile and portfolio are public after approval. My login credentials and National ID are private.
                 </span>
               </label>
             </ActionForm>

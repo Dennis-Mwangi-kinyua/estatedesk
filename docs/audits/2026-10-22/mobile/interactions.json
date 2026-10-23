@@ -1,0 +1,554 @@
+[
+  {
+    "path": "/",
+    "width": 360,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": []
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  },
+  {
+    "path": "/service-providers/register",
+    "width": 360,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": [
+        {
+          "name": "fullName",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "username",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "email",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "password",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "nationalId",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "businessName",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "category",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "location",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "bio",
+          "fontSize": "16px",
+          "height": 90.53125
+        },
+        {
+          "name": "portfolioUrl",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "acceptedTerms",
+          "fontSize": "14px",
+          "height": 13
+        }
+      ]
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  },
+  {
+    "path": "/vacancies",
+    "width": 360,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": [
+        {
+          "name": "q",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "location",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "type",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "minRent",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "maxRent",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "bedrooms",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "sort",
+          "fontSize": "16px",
+          "height": 44
+        }
+      ]
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  },
+  {
+    "path": "/contact",
+    "width": 360,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": [
+        {
+          "name": "fullName",
+          "fontSize": "16px",
+          "height": 48
+        },
+        {
+          "name": "companyName",
+          "fontSize": "16px",
+          "height": 48
+        },
+        {
+          "name": "workEmail",
+          "fontSize": "16px",
+          "height": 48
+        },
+        {
+          "name": "phone",
+          "fontSize": "16px",
+          "height": 48
+        },
+        {
+          "name": "referralCode",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "managedPropertyType",
+          "fontSize": "16px",
+          "height": 48
+        },
+        {
+          "name": "message",
+          "fontSize": "16px",
+          "height": 117.375
+        }
+      ]
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  },
+  {
+    "path": "/",
+    "width": 390,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": []
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  },
+  {
+    "path": "/service-providers/register",
+    "width": 390,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": [
+        {
+          "name": "fullName",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "username",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "email",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "password",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "nationalId",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "businessName",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "category",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "location",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "bio",
+          "fontSize": "16px",
+          "height": 90.53125
+        },
+        {
+          "name": "portfolioUrl",
+          "fontSize": "16px",
+          "height": 44.84375
+        },
+        {
+          "name": "acceptedTerms",
+          "fontSize": "14px",
+          "height": 13
+        }
+      ]
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  },
+  {
+    "path": "/vacancies",
+    "width": 390,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": [
+        {
+          "name": "q",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "location",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "type",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "minRent",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "maxRent",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "bedrooms",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "sort",
+          "fontSize": "16px",
+          "height": 44
+        }
+      ]
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  },
+  {
+    "path": "/contact",
+    "width": 390,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": [
+        {
+          "name": "fullName",
+          "fontSize": "16px",
+          "height": 48
+        },
+        {
+          "name": "companyName",
+          "fontSize": "16px",
+          "height": 48
+        },
+        {
+          "name": "workEmail",
+          "fontSize": "16px",
+          "height": 48
+        },
+        {
+          "name": "phone",
+          "fontSize": "16px",
+          "height": 48
+        },
+        {
+          "name": "referralCode",
+          "fontSize": "16px",
+          "height": 44
+        },
+        {
+          "name": "managedPropertyType",
+          "fontSize": "16px",
+          "height": 48
+        },
+        {
+          "name": "message",
+          "fontSize": "16px",
+          "height": 117.375
+        }
+      ]
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  },
+  {
+    "path": "/",
+    "width": 768,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": []
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  },
+  {
+    "path": "/service-providers/register",
+    "width": 768,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": [
+        {
+          "name": "fullName",
+          "fontSize": "14px",
+          "height": 42
+        },
+        {
+          "name": "username",
+          "fontSize": "14px",
+          "height": 42
+        },
+        {
+          "name": "email",
+          "fontSize": "14px",
+          "height": 42
+        },
+        {
+          "name": "password",
+          "fontSize": "14px",
+          "height": 42
+        },
+        {
+          "name": "nationalId",
+          "fontSize": "14px",
+          "height": 42
+        },
+        {
+          "name": "businessName",
+          "fontSize": "14px",
+          "height": 42
+        },
+        {
+          "name": "category",
+          "fontSize": "14px",
+          "height": 41
+        },
+        {
+          "name": "location",
+          "fontSize": "14px",
+          "height": 42
+        },
+        {
+          "name": "bio",
+          "fontSize": "14px",
+          "height": 82
+        },
+        {
+          "name": "portfolioUrl",
+          "fontSize": "14px",
+          "height": 42
+        },
+        {
+          "name": "acceptedTerms",
+          "fontSize": "14px",
+          "height": 13
+        }
+      ]
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  },
+  {
+    "path": "/vacancies",
+    "width": 768,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": [
+        {
+          "name": "q",
+          "fontSize": "14px",
+          "height": 44
+        },
+        {
+          "name": "location",
+          "fontSize": "14px",
+          "height": 44
+        },
+        {
+          "name": "type",
+          "fontSize": "14px",
+          "height": 44
+        },
+        {
+          "name": "minRent",
+          "fontSize": "14px",
+          "height": 44
+        },
+        {
+          "name": "maxRent",
+          "fontSize": "14px",
+          "height": 44
+        },
+        {
+          "name": "bedrooms",
+          "fontSize": "14px",
+          "height": 44
+        },
+        {
+          "name": "sort",
+          "fontSize": "14px",
+          "height": 44
+        }
+      ]
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  },
+  {
+    "path": "/contact",
+    "width": 768,
+    "status": 200,
+    "layout": {
+      "overflow": false,
+      "inputs": [
+        {
+          "name": "fullName",
+          "fontSize": "14px",
+          "height": 48
+        },
+        {
+          "name": "companyName",
+          "fontSize": "14px",
+          "height": 48
+        },
+        {
+          "name": "workEmail",
+          "fontSize": "14px",
+          "height": 48
+        },
+        {
+          "name": "phone",
+          "fontSize": "14px",
+          "height": 48
+        },
+        {
+          "name": "referralCode",
+          "fontSize": "14px",
+          "height": 44
+        },
+        {
+          "name": "managedPropertyType",
+          "fontSize": "14px",
+          "height": 48
+        },
+        {
+          "name": "message",
+          "fontSize": "14px",
+          "height": 106
+        }
+      ]
+    },
+    "initialFocus": true,
+    "focusTrapped": true,
+    "escapeCloses": true,
+    "focusRestored": true,
+    "text200Overflow": false
+  }
+]

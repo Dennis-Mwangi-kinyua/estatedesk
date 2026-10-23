@@ -1,0 +1,1820 @@
+{
+  "base": "https://estatedesk.co.ke",
+  "checkedAt": "2026-10-22T18:04:26.594Z",
+  "method": "Chromium touch emulation; 360/390/768 x 844; default theme; read-only; 24px target candidates require spacing/inline exception review; inputs below 16px are iOS zoom risk candidates. No real iOS, screen reader, contrast certification, or authenticated coverage.",
+  "results": [
+    {
+      "path": "/",
+      "width": 390,
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Open menu', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" aria-expanded=\"false\" aria-label=\"Open menu\" data-workspace-action=\"true\" aria-controls=\"public-access-mobile-menu\" class=\"inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:border-white/18 dark:bg-white/[0.10] dark:text-white dark:hover:borde…>…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    46 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n"
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Open menu', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" aria-expanded=\"false\" aria-label=\"Open menu\" data-workspace-action=\"true\" aria-controls=\"public-access-mobile-menu\" class=\"inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:border-white/18 dark:bg-white/[0.10] dark:text-white dark:hover:borde…>…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    45 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n"
+    },
+    {
+      "path": "/",
+      "width": 360,
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Open menu', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" aria-expanded=\"false\" aria-label=\"Open menu\" data-workspace-action=\"true\" aria-controls=\"public-access-mobile-menu\" class=\"inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 dark:border-white/18 dark:bg-white/[0.10] dark:text-white dark:hover:borde…>…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    45 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n"
+    },
+    {
+      "path": "/login",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Welcome back",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Forgot password?",
+          "width": 106,
+          "height": 16
+        },
+        {
+          "label": "Create one",
+          "width": 65,
+          "height": 15
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/register",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "A controlled operating system for serious property teams.",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "accountType",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "label": "accountType",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "label": "Sign in",
+          "width": 46,
+          "height": 17
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "absent",
+      "errors": []
+    },
+    {
+      "path": "/login",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Welcome back",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Forgot password?",
+          "width": 106,
+          "height": 16
+        },
+        {
+          "label": "Create one",
+          "width": 65,
+          "height": 15
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/register",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "A controlled operating system for serious property teams.",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "accountType",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "label": "accountType",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "label": "Sign in",
+          "width": 46,
+          "height": 17
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "absent",
+      "errors": []
+    },
+    {
+      "path": "/forgot-password",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Forgot Password",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Back to Login",
+          "width": 88,
+          "height": 17
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "absent",
+      "errors": []
+    },
+    {
+      "path": "/login",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Welcome back",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Forgot password?",
+          "width": 106,
+          "height": 17
+        },
+        {
+          "label": "Create one",
+          "width": 65,
+          "height": 15
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/forgot-password",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Forgot Password",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Back to Login",
+          "width": 88,
+          "height": 17
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "absent",
+      "errors": []
+    },
+    {
+      "path": "/register",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "A controlled operating system for serious property teams.",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "accountType",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "label": "accountType",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "label": "Sign in",
+          "width": 46,
+          "height": 17
+        }
+      ],
+      "smallTextInputs": [
+        "fullName",
+        "companyName",
+        "workEmail",
+        "phone",
+        "referralCode",
+        "Residential properties\nCommercial properties\nMixed-use properties\nWarehouses / godowns\nMultiple prop",
+        "message"
+      ],
+      "unnamedControls": [],
+      "menu": "absent",
+      "errors": []
+    },
+    {
+      "path": "/contact",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Talk to sales about EstateDesk for your team.",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Request onboarding",
+          "width": 136,
+          "height": 17
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/forgot-password",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Forgot Password",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Back to Login",
+          "width": 88,
+          "height": 17
+        }
+      ],
+      "smallTextInputs": [
+        "email"
+      ],
+      "unnamedControls": [],
+      "menu": "absent",
+      "errors": []
+    },
+    {
+      "path": "/contact",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Talk to sales about EstateDesk for your team.",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Request onboarding",
+          "width": 136,
+          "height": 17
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/data-processing",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Data Processing and Retention",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/contact",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Talk to sales about EstateDesk for your team.",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Request onboarding",
+          "width": 136,
+          "height": 17
+        }
+      ],
+      "smallTextInputs": [
+        "fullName",
+        "companyName",
+        "workEmail",
+        "phone",
+        "referralCode",
+        "Residential properties\nCommercial properties\nMixed-use properties\nWarehouses / godowns\nMultiple prop",
+        "message"
+      ],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/data-processing-agreement",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk Data Processing Agreement",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/data-processing",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Data Processing and Retention",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/data-processing",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Data Processing and Retention",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/faq",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk property management software FAQ for Kenya, East Africa and Dubai",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/data-processing-agreement",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk Data Processing Agreement",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/data-processing-agreement",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk Data Processing Agreement",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/guides",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property management guides for real rental workflows",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/faq",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk property management software FAQ for Kenya, East Africa and Dubai",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/faq",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk property management software FAQ for Kenya, East Africa and Dubai",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/guides",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property management guides for real rental workflows",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/landlord-software",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Landlord Software for Rent, Tenants, Vacancies, and Maintenance",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/guides",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property management guides for real rental workflows",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/pricing",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Clear tiers for property operations teams",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/landlord-software",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Landlord Software for Rent, Tenants, Vacancies, and Maintenance",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/landlord-software",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Landlord Software for Rent, Tenants, Vacancies, and Maintenance",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/pricing",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Clear tiers for property operations teams",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/privacy",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Privacy Policy",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-markets",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property management software pages by market and workflow",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/pricing",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Clear tiers for property operations teams",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/privacy",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Privacy Policy",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-africa",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "A shared workspace for property teams in Africa",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/privacy",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Privacy Policy",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-markets",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property management software pages by market and workflow",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-dubai",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property Management Software for Dubai, UAE, and Remote Landlords",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-markets",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property management software pages by market and workflow",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-africa",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "A shared workspace for property teams in Africa",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-kenya",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property Management Software in Kenya for Rent, M-Pesa and Water Billing",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-dubai",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property Management Software for Dubai, UAE, and Remote Landlords",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-middle-east",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property management software for Middle East owners and teams",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-kenya",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property Management Software in Kenya for Rent, M-Pesa and Water Billing",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/remote-property-management-software",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Stay connected to your properties from abroad",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/rent-tracking-software",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Rent Tracking Software for Landlords and Property Managers",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-middle-east",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property management software for Middle East owners and teams",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/security",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Security Overview",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/remote-property-management-software",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Stay connected to your properties from abroad",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/service-providers",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Skilled people for your property.",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "wertyuio",
+          "width": 72,
+          "height": 21
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-africa",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "A shared workspace for property teams in Africa",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-dubai",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property Management Software for Dubai, UAE, and Remote Landlords",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/services",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "One workspace for rental and short-stay operations",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/rent-tracking-software",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Rent Tracking Software for Landlords and Property Managers",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-kenya",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property Management Software in Kenya for Rent, M-Pesa and Water Billing",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/status",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk system status",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/security",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Security Overview",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/property-management-software-middle-east",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Property management software for Middle East owners and teams",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/service-providers",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Skilled people for your property.",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "wertyuio",
+          "width": 72,
+          "height": 21
+        }
+      ],
+      "smallTextInputs": [
+        "All services\nPlumbing\nElectrical\nCleaning\nPainting\nCarpentry\nSecurity\nLandscaping\nGeneral maintenanc",
+        "location"
+      ],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/stays",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Find your next stay",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/remote-property-management-software",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Stay connected to your properties from abroad",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/terms",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk Terms of Service",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/rent-tracking-software",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Rent Tracking Software for Landlords and Property Managers",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/services",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "One workspace for rental and short-stay operations",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/vacancies",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Vacant houses and apartments",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Property management software Kenya",
+          "width": 300,
+          "height": 20
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/security",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Security Overview",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/status",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk system status",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/water-billing-software",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Water Billing Software for Rental Properties",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/service-providers",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Skilled people for your property.",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "wertyuio",
+          "width": 72,
+          "height": 21
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/stays",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Find your next stay",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [
+        "q",
+        "guests",
+        "maxPrice"
+      ],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/guides/manage-kenyan-rentals-from-uae",
+      "width": 360,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "How to oversee Kenyan rental properties from the UAE and Middle East",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Back to guides",
+          "width": 125,
+          "height": 20
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/services",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "One workspace for rental and short-stay operations",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/terms",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk Terms of Service",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/status",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk system status",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/stays",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Find your next stay",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/vacancies",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Vacant houses and apartments",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [
+        "q",
+        "Filter vacancies by town",
+        "Filter by unit type",
+        "Minimum rent",
+        "Maximum rent",
+        "Minimum bedrooms or rooms",
+        "Sort vacancies"
+      ],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/terms",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "EstateDesk Terms of Service",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/water-billing-software",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Water Billing Software for Rental Properties",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/vacancies",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Vacant houses and apartments",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Property management software Kenya",
+          "width": 326,
+          "height": 20
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/guides/manage-kenyan-rentals-from-uae",
+      "width": 768,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "How to oversee Kenyan rental properties from the UAE and Middle East",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Back to guides",
+          "width": 125,
+          "height": 20
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/water-billing-software",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "Water Billing Software for Rental Properties",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    },
+    {
+      "path": "/guides/manage-kenyan-rentals-from-uae",
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "viewport": "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover",
+      "h1": "How to oversee Kenyan rental properties from the UAE and Middle East",
+      "offscreenControls": [],
+      "smallTargets": [
+        {
+          "label": "Skip to main content",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "label": "Back to guides",
+          "width": 125,
+          "height": 20
+        }
+      ],
+      "smallTextInputs": [],
+      "unnamedControls": [],
+      "menu": "pass",
+      "errors": []
+    }
+  ]
+}

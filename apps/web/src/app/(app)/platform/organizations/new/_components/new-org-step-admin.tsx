@@ -1,8 +1,7 @@
 "use client";
 
 import { WorkspaceIcon } from "@/components/shared/workspace-icon";
-import { useState } from "react";
-import { Lock, User2 } from "lucide-react";
+import { User2 } from "lucide-react";
 import { Mail, Phone } from "@/components/shared/colored-icons";
 import {
   iconBubbleClass,
@@ -21,15 +20,10 @@ type Props = Pick<
   | "adminFullName"
   | "setAdminFullName"
   | "adminUsername"
-  | "setAdminUsername"
   | "adminEmail"
   | "setAdminEmail"
   | "adminPhone"
   | "setAdminPhone"
-  | "adminPassword"
-  | "setAdminPassword"
-  | "adminPasswordConfirm"
-  | "setAdminPasswordConfirm"
 >;
 
 export function NewOrgStepAdmin(props: Props) {
@@ -38,26 +32,11 @@ export function NewOrgStepAdmin(props: Props) {
     adminFullName,
     setAdminFullName,
     adminUsername,
-    setAdminUsername,
     adminEmail,
     setAdminEmail,
     adminPhone,
     setAdminPhone,
-    adminPassword,
-    setAdminPassword,
-    adminPasswordConfirm,
-    setAdminPasswordConfirm,
   } = props;
-
-  const [showPassword, setShowPassword] = useState(false);
-
-  function generatePassword() {
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-    const bytes = crypto.getRandomValues(new Uint8Array(24));
-    const password = Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join("");
-    setAdminPassword(password);
-    setAdminPasswordConfirm(password);
-  }
 
   return (
     <section className={panelClass}>
@@ -67,8 +46,8 @@ export function NewOrgStepAdmin(props: Props) {
         </div>
         <h2 className={stepTitleClass}>Account owner login</h2>
         <p className={stepDescriptionClass}>
-          Set up the owner’s administrator login. They will change their temporary
-          password on first sign-in. Download their credentials PDF after creation.
+          Set up the owner’s administrator login. EstateDesk will generate a unique
+          temporary password, which they must change on first sign-in.
         </p>
       </div>
 
@@ -96,15 +75,13 @@ export function NewOrgStepAdmin(props: Props) {
             <User2 className={iconClass} />
             <input
               value={adminUsername}
-              onChange={(e) =>
-                setAdminUsername(
-                  e.target.value.toLowerCase().replace(/\s+/g, ""),
-                )
-              }
-              placeholder="greenview-admin"
+              readOnly
+              aria-readonly="true"
+              placeholder="Set when login email is entered"
               className={iconFieldClass}
             />
           </div>
+          <p className="mt-1 text-xs text-muted-foreground">The login username defaults to the account owner’s email address.</p>
         </Field>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -139,45 +116,6 @@ export function NewOrgStepAdmin(props: Props) {
           </Field>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/30 p-3">
-          <button data-workspace-action="true" type="button" onClick={generatePassword} className="min-h-11 rounded-xl border border-border px-4 py-2 text-sm font-semibold">Generate secure password</button>
-          <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={showPassword} onChange={(event) => setShowPassword(event.target.checked)} />Show passwords</label>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field name="adminPassword" label="Temporary password"
-            required
-            error={state.fieldErrors?.adminPassword?.[0]}
-          >
-            <div className="relative">
-              <Lock className={iconClass} />
-              <input
-                type={showPassword ? "text" : "password"}
-                autoComplete="new-password"
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-                placeholder="At least 8 characters"
-                className={iconFieldClass}
-              />
-            </div>
-          </Field>
-
-          <Field name="adminPasswordConfirm" label="Confirm password"
-            required
-            error={state.fieldErrors?.adminPasswordConfirm?.[0]}
-          >
-            <div className="relative">
-              <Lock className={iconClass} />
-              <input
-                type={showPassword ? "text" : "password"}
-                autoComplete="new-password"
-                value={adminPasswordConfirm}
-                onChange={(e) => setAdminPasswordConfirm(e.target.value)}
-                placeholder="Repeat password"
-                className={iconFieldClass}
-              />
-            </div>
-          </Field>
-        </div>
       </div>
     </section>
   );

@@ -1,5 +1,5 @@
 export type RecipientMessageDraft = { fullName: string; email?: string | null; phone?: string | null; subject: string; message: string };
-export type CreatedAccountLogin = { fullName: string; username: string; setupUrl: string; email?: string | null; phone?: string | null; role: string; loginUrl: string };
+export type CreatedAccountLogin = { fullName: string; username: string; setupUrl?: string; temporaryPassword?: string; email?: string | null; phone?: string | null; role: string; loginUrl: string };
 
 export function recipientEmailHref(draft: RecipientMessageDraft) {
   const recipient = encodeURIComponent(draft.email?.trim() ?? "").replace(/%40/g, "@");

@@ -24,18 +24,3 @@ WHERE payment."id" = ranked."id"
 
 CREATE UNIQUE INDEX "Payment_transactionReferenceKey_key"
 ON "Payment"("transactionReferenceKey");
-
-ALTER TYPE "VerificationStatus" ADD VALUE IF NOT EXISTS 'REVERSED';
-
-ALTER TABLE "Payment"
-  ADD COLUMN "reversedAt" TIMESTAMP(3),
-  ADD COLUMN "reversedByUserId" TEXT,
-  ADD COLUMN "reversalReason" TEXT;
-
-ALTER TABLE "Payment"
-  ADD CONSTRAINT "Payment_reversedByUserId_fkey"
-  FOREIGN KEY ("reversedByUserId") REFERENCES "User"("id")
-  ON DELETE SET NULL ON UPDATE CASCADE;
-
-CREATE INDEX "Payment_reversedByUserId_reversedAt_idx"
-ON "Payment"("reversedByUserId", "reversedAt");

@@ -1,1 +1,1 @@
-export type UsersSearchParams = Promise<{ page?: string; pageSize?: string; q?: string; role?: string; status?: string; created?: string; createError?: string; archived?: string }>;
+export type UsersSearchParams = Promise<{ page?: string; pageSize?: string; q?: string; role?: string; status?: string; organization?: string; online?: string; created?: string; createError?: string; archived?: string }>;

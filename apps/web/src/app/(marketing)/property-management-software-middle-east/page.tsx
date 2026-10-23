@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { middleEastLandingContent } from "@/components/marketing/international-landing-content";
 import { SeoLandingPage } from "@/components/marketing/seo-landing-page";
 import { publicPageMetadata } from "@/lib/seo";
 
-export const metadata = publicPageMetadata({
+export const metadata: Metadata = publicPageMetadata({
   title: "Property Management Software for Middle East Teams",
   description: "Evaluate rental records and owner reporting with EstateDesk. For Middle East-based owners of Kenyan rentals and teams assessing local property workflows.",
   path: middleEastLandingContent.path,

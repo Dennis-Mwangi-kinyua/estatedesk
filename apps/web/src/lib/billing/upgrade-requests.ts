@@ -3,6 +3,7 @@ import "server-only";
 import { BillingPlan, Prisma, type SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { APP_PLANS } from "@/lib/billing/plans";
+import { lockOrgQuota } from "@/lib/billing/access";
 import { parseUpgradeRequest, type UpgradeRequestRecord } from "@/lib/billing/upgrade-request-policy";
 
 export {
@@ -92,11 +93,11 @@ export async function applyUpgradeRequest(input: {
   notes?: string | null;
   status?: SubscriptionStatus;
 }) {
-  const subscription = await prisma.subscription.findUnique({
+  return prisma.$transaction(async tx => {
+  await lockOrgQuota(tx, input.orgId);
+  const subscription = await tx.subscription.findUnique({
     where: { orgId: input.orgId },
-    include: {
-      org: { select: { id: true, name: true, slug: true } },
-    },
+    include: { org: { select: { id: true, name: true, slug: true } } },
   });
 
   if (!subscription?.org) {
@@ -135,7 +136,7 @@ export async function applyUpgradeRequest(input: {
     lastPaymentReference: input.paymentReference ?? null,
   };
 
-  const updated = await prisma.subscription.update({
+  const updated = await tx.subscription.update({
     where: { orgId: input.orgId },
     data: {
       plan,
@@ -169,6 +170,7 @@ export async function applyUpgradeRequest(input: {
     toPlan: plan,
     request: appliedRequest,
   };
+  });
 }
 
 export async function rejectUpgradeRequest(input: {
@@ -176,11 +178,11 @@ export async function rejectUpgradeRequest(input: {
   actorUserId: string;
   notes?: string | null;
 }) {
-  const subscription = await prisma.subscription.findUnique({
+  return prisma.$transaction(async tx => {
+  await lockOrgQuota(tx, input.orgId);
+  const subscription = await tx.subscription.findUnique({
     where: { orgId: input.orgId },
-    include: {
-      org: { select: { id: true, name: true, slug: true } },
-    },
+    include: { org: { select: { id: true, name: true, slug: true } } },
   });
 
   if (!subscription?.org) {
@@ -201,7 +203,7 @@ export async function rejectUpgradeRequest(input: {
     resolutionNotes: input.notes ?? null,
   };
 
-  await prisma.subscription.update({
+  await tx.subscription.update({
     where: { orgId: input.orgId },
     data: {
       metadata: {
@@ -216,4 +218,5 @@ export async function rejectUpgradeRequest(input: {
     request: rejected,
     fromPlan: subscription.plan,
   };
+  });
 }

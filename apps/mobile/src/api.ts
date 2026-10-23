@@ -1,4 +1,6 @@
 import { ApiError, readMobileResponse } from "./http-response";
+import { reportExportSchema, type ReportFilters } from "@estatedesk/contracts/mobile";
+import { WORKFLOW_PROTOCOL_VERSION } from "@estatedesk/contracts/mobile";
 import { nativeWorkspacePageSchema, nativeLegalSchema, nativeGuestStaySchema, nativeVacancyListSchema, nativeVacancyDetailSchema, nativeVacancyInquirySchema, type NativeVacancyInquiry } from "@estatedesk/contracts/mobile";
 import { nativeActionDefinitionSchema, nativeActionResultSchema, type NativeActionRequest } from "@estatedesk/contracts/mobile";
 export { ApiError } from "./http-response";
@@ -132,9 +134,10 @@ export async function getBills() { return mobileBillsSchema.parse(await request(
 export async function getWorkspaceDashboard(kind: MobileWorkspaceKind, section = "summary") {
   return mobileWorkspaceDashboardSchema.parse(await request(`/workspace?kind=${kind}&section=${section}`));
 }
-export async function getNativeWorkspace(kind: MobileWorkspaceKind, path: string, q = "", page = 1, recordId?: string) {
-  const query = `kind=${kind}&path=${encodeURIComponent(path)}&q=${encodeURIComponent(q)}&page=${page}${recordId ? `&recordId=${encodeURIComponent(recordId)}` : ""}`;
-  return nativeWorkspacePageSchema.parse(await request(`/workspace/screen?${query}`));
+export async function getNativeWorkspace(kind: MobileWorkspaceKind, path: string, q = "", page = 1, recordId?: string, organization?: string, reportFilters?: ReportFilters) {
+  const reportQuery = reportFilters ? `&${new URLSearchParams(Object.entries(reportFilters).filter(([, value]) => value !== undefined).map(([key, value]) => [key, String(value)]))}` : "";
+  const query = `kind=${kind}&path=${encodeURIComponent(path)}&q=${encodeURIComponent(q)}&page=${page}${recordId ? `&recordId=${encodeURIComponent(recordId)}` : ""}${organization ? `&organization=${encodeURIComponent(organization)}` : ""}`;
+  return nativeWorkspacePageSchema.parse(await request(`/workspace/screen?${query}${reportQuery}`));
 }
 export async function getLegal(kind: "terms" | "privacy") {
   return nativeLegalSchema.parse(await request(`/legal?kind=${kind}`));
@@ -172,11 +175,17 @@ export async function sendNativeVacancyInquiry(slug: string, input: NativeVacanc
 export async function getHelp(q = "", page = 1) {
   return nativeWorkspacePageSchema.parse(await request(`/help?q=${encodeURIComponent(q)}&page=${page}`));
 }
+async function ensureWorkflowBackend() {
+  const capabilities = await request("/capabilities") as { workflowVersion?: number };
+  if (capabilities.workflowVersion !== WORKFLOW_PROTOCOL_VERSION) throw new ApiError("The app and server need matching updates before you can submit this workflow.", 426);
+}
 export async function getNativeAction(input: Omit<NativeActionRequest, "values">) {
+  await ensureWorkflowBackend();
   const query = Object.entries(input).filter(([, value]) => value !== undefined).map(([key, value]) => `${key}=${encodeURIComponent(value!)}`).join("&");
   return nativeActionDefinitionSchema.parse(await request(`/workspace/action?${query}`));
 }
 export async function submitNativeAction(input: NativeActionRequest) {
+  await ensureWorkflowBackend();
   const result = nativeActionResultSchema.parse(await request("/workspace/action", { method: "POST", body: input }));
   if (result.contextChanged) {
     reads.clear(); await clearDrafts(); await clearDocumentCache(); await SecureStore.deleteItemAsync(PROFILE_KEY);
@@ -310,3 +319,16 @@ export async function getInspectionPhoto(inspectionId: string, assetId: string) 
   return result.dataUri;
 }
 export async function updateProfile(body: MobileProfileInput) { return request("/tenant/profile", { method: "POST", body }); }
+
+export async function exportPlatformReport(filters: ReportFilters, format: "pdf" | "csv") {
+  const query = new URLSearchParams(Object.entries({ ...filters, format }).filter(([, value]) => value !== undefined).map(([key, value]) => [key, String(value)]));
+  const file = reportExportSchema.parse(await request(`/workspace/reports/export?${query}`));
+  if (file.mimeType === "application/pdf") return shareActionDocument(file);
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(file.content)) throw new Error("Invalid CSV export.");
+  const bytes = Uint8Array.from(atob(file.content), character => character.charCodeAt(0));
+  const name = file.filename.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/^\.+/, "") || "report.csv";
+  documentsDirectory().create({ intermediates: true, idempotent: true });
+  const output = new File(documentsDirectory(), name); output.write(bytes);
+  if (!await Sharing.isAvailableAsync()) throw new Error("Sharing is unavailable on this device.");
+  await Sharing.shareAsync(output.uri, { mimeType: "text/csv", UTI: "public.comma-separated-values-text" });
+}

@@ -29,6 +29,11 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
     q,
     role,
     status,
+    organization,
+    online,
+    organizationName,
+    organizationGroups,
+    totalGroups,
   } = props.data;
   const params = props.flash;
 
@@ -36,10 +41,12 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
     <div className="platform-users-workspace min-w-0 max-w-full space-y-4 overflow-x-clip">
       <PageHeader
         eyebrow="Identity directory"
-        title="Platform users"
-        description="Find people, review account status, and check workspace access."
+        title="User accounts"
+        description="Choose an organization to find its users and review account access. People with multiple organizations appear in each group."
         action={<Link href="/platform/users/new" data-workspace-action="true" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"><Plus aria-hidden="true" className="h-4 w-4" />Add platform user</Link>}
       />
+
+      {online ? <p className="rounded-xl border border-border p-3 text-sm">Showing accounts active in the last five minutes. <Link href="/platform/users" className="font-semibold text-primary">Show all accounts</Link></p> : null}
 
       {params.created ? (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
@@ -73,17 +80,20 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
 
         <Surface
           className="xl:col-start-2 xl:row-start-1"
-          title="User directory"
-          description={`${formatNumber(totalFiltered)} matching ${totalFiltered === 1 ? "account" : "accounts"}`}
+          title={organizationName ?? "Users by organization"}
+          description={organization ? `${formatNumber(totalFiltered)} matching accounts` : `${formatNumber(totalGroups)} organization groups · Select a card to open its users`}
         >
+          {organization ? <Link href="/platform/users" className="inline-flex min-h-11 items-center px-4 py-3 text-sm font-semibold text-primary">← All organizations</Link> : null}
           <form aria-label="Filter platform users" className="ed-keep-cols grid grid-cols-2 gap-3 border-b border-neutral-200 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_160px_160px_auto]">
+            {online ? <input type="hidden" name="online" value="1" /> : null}
+            {organization ? <input type="hidden" name="organization" value={organization} /> : null}
             <div className="relative col-span-2 min-w-0 lg:col-span-1">
               <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
               <input
                 name="q"
                 defaultValue={q}
                 aria-label="Search platform users"
-                placeholder="Search people…"
+                placeholder={organization ? "Search people…" : "Search organizations or people…"}
                 className="min-h-11 w-full min-w-0 rounded-xl border border-border bg-muted/50 py-2.5 pl-10 pr-3 text-base text-foreground outline-none placeholder:text-muted-foreground"
               />
             </div>
@@ -121,7 +131,16 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
             </button>
           </form>
 
-          {users.length === 0 ? (
+          {!organization ? <div className="platform-user-grid grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 min-[1600px]:grid-cols-3 sm:p-4">
+            {organizationGroups.map(group => <Link key={group.id} href={`/platform/users?${new URLSearchParams({ organization: group.id, ...(role ? { role } : {}), ...(status ? { status } : {}), ...(online ? { online: "1" } : {}) })}`} className="flex min-w-0 flex-col gap-3 rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40 hover:bg-muted/40 focus-visible:outline-2 focus-visible:outline-primary">
+              <span className="text-xs font-semibold uppercase tracking-wide text-primary">{group.slug ? "Organization" : "Unassigned accounts"}</span>
+              <h3 className="break-words text-base font-semibold text-foreground">{group.name}</h3>
+              {group.slug ? <p className="break-all text-xs text-muted-foreground">{group.slug}</p> : null}
+              <p className="text-2xl font-semibold text-foreground">{formatNumber(group.count)} <span className="text-sm font-normal text-muted-foreground">{group.count === 1 ? "user" : "users"}</span></p>
+              <span className="mt-auto text-sm font-semibold text-primary">View users →</span>
+            </Link>)}
+            {!organizationGroups.length ? <p className="p-4 text-sm text-muted-foreground">No organizations or users match these filters.</p> : null}
+          </div> : users.length === 0 ? (
             <div className="px-4 py-10 text-center text-sm text-neutral-500">
               No users match the current filters.
             </div>
@@ -134,9 +153,9 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
           <PaginationControls
             page={page}
             pageSize={pageSize}
-            total={totalFiltered}
+            total={organization ? totalFiltered : totalGroups}
             basePath="/platform/users"
-            query={{ q, role, status }}
+            query={{ q, role, status, organization, online: online ? "1" : undefined }}
           />
         </Surface>
         <aside className="space-y-4 xl:col-start-1 xl:row-start-1 xl:sticky xl:top-4">

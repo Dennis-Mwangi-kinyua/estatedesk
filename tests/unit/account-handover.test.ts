@@ -18,6 +18,7 @@ test("sharing drafts encode message content and normalize phone numbers", () => 
 });
 test("step validation explains missing or invalid owner details", () => {
   const errors = validateAccountStep(2, { adminFullName: "", adminUsername: "bad user", adminEmail: "invalid", adminPassword: "short", adminPasswordConfirm: "different" });
-  assert.equal(Object.keys(errors).length, 5);
-  assert.deepEqual(validateAccountStep(2, { adminFullName: "Jane Example", adminUsername: "jane.example", adminEmail: "jane@example.test", adminPassword: "valid-password", adminPasswordConfirm: "valid-password" }), {});
+  assert.deepEqual(Object.keys(errors).sort(), ["adminEmail", "adminFullName", "adminUsername"]);
+  assert.deepEqual(validateAccountStep(2, { adminFullName: "Jane Example", adminUsername: "jane@example.test", adminEmail: "jane@example.test" }), {});
+  assert.ok(validateAccountStep(2, { adminFullName: "Jane Example", adminUsername: "jane.example", adminEmail: "jane@example.test" }).adminUsername);
 });

@@ -13,7 +13,7 @@ test("developer tools remain available when notification metrics fail", async ()
     jsx: "automatic", tsconfig: "apps/web/tsconfig.json",
     plugins: [{ name: "developer-metric-fixture", setup(builder) {
       builder.onResolve({ filter: /^@\/lib\/(prisma|permissions\/guards|integrations|db\/retry)$/ }, args => ({ path: args.path, namespace: "fixture" }));
-      builder.onResolve({ filter: /^next\/link$/ }, () => ({ path: "next-link", namespace: "fixture" }));
+      builder.onResolve({ filter: /^(next\/link|@\/components\/navigation\/workspace-link)$/ }, () => ({ path: "next-link", namespace: "fixture" }));
       builder.onLoad({ filter: /.*/, namespace: "fixture" }, args => {
         const mocks: Record<string, string> = {
           "@/lib/prisma": `const count = async () => 4; const failure = async () => { const error = new Error("simulated database outage"); error.code = "P2024"; throw error; }; export const prisma = { apiKey: { count }, notification: { groupBy: failure, count: failure }, payment: { count }, auditLog: { findFirst: async () => null }, dataExportRequest: { count }, cronJobRun: { count } };`,

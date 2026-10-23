@@ -8,7 +8,7 @@ import "./workspace.css";
 import "./workspace-controls.css";
 import { ReactNode } from "react";
 import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { auditSensitivePageView } from "@/lib/audit/sensitive-pages";
 import { isSecurityGatePathname } from "@/lib/auth/security-gate";
 import { requireAuthenticated } from "@/lib/permissions/guards";
@@ -19,6 +19,7 @@ import { isDevDebugLoggingEnabled } from "@/lib/dev/background-refresh";
 import { PwaAppBadgeSync } from "@/components/pwa/pwa-app-badge-sync";
 import { SensitiveDataWatermark } from "@/components/security/sensitive-data-watermark";
 import { AppActionFeedback } from "@/components/shared/app-action-feedback";
+import { WorkspaceLiveUpdates } from "@/components/realtime/workspace-live-updates";
 import { DestructiveActionGuard } from "@/components/shared/destructive-action-guard";
 import { tenantCanAccessWorkspacePath } from "@/lib/permissions/access";
 
@@ -39,7 +40,7 @@ export default async function AppLayout({
   }
 
   if (pathname && (pathname.startsWith("/platform") || pathname.startsWith("/dashboard/")) && !canAccessWorkspacePath(session, pathname)) {
-    notFound();
+    redirect("/dashboard");
   }
 
   // Only force password change / terms acceptance for non-platform users.
@@ -93,7 +94,7 @@ export default async function AppLayout({
   ]);
   const orgLabel = organization?.name ?? orgLabelFallback;
   return (
-    <WorkspaceAccessProvider access={{ orgRolePolicy: session.orgRolePolicy, grantedPermissions: session.grantedPermissions, platformRole: session.platformRole, activeOrgRole: session.activeOrgRole, activeOrgId: session.activeOrgId, membershipScope: session.membershipScope }}>
+    <WorkspaceAccessProvider access={{ userId: session.userId, orgRolePolicy: session.orgRolePolicy, grantedPermissions: session.grantedPermissions, platformRole: session.platformRole, activeOrgRole: session.activeOrgRole, activeOrgId: session.activeOrgId, membershipScope: session.membershipScope }}>
     <ProfilePictureProvider url={user?.profileImageUrl ?? null}>
     <div className="estate-workspace app-mobile-canvas app-sensitive-surface ed-mobile-surface relative min-h-dvh w-full min-w-0 overflow-x-hidden">
       <WorkspaceThemeScope />
@@ -101,6 +102,7 @@ export default async function AppLayout({
       {children}
       {isSecurityGateRoute ? null : <PwaAppBadgeSync />}
       {isSecurityGateRoute ? null : <AppActionFeedback />}
+      {isSecurityGateRoute ? null : <WorkspaceLiveUpdates key={`${session.userId}:${session.activeOrgId}:${session.platformRole}:${session.activeOrgRole}`} />}
       {isSecurityGateRoute ? null : <DestructiveActionGuard />}
     </div>
     </ProfilePictureProvider>

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { ArrowRight, CircleAlert } from "lucide-react";
 import { BellRing as Bell, Building2, House as Home, UsersRound as Users, Wallet } from "@/components/shared/colored-icons";
 import type { ComponentType, ReactNode } from "react";

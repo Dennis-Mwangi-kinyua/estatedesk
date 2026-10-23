@@ -2,9 +2,9 @@
 
 This matrix tracks documentation and operational evidence that must be complete before commercial launch. It prevents polished templates from being mistaken for finished work.
 
-Last reviewed: 2026-10-17
+Last reviewed: 2026-10-22
 
-Current engineering evidence: [17 October review](audits/2026-10-17/README.md). External approvals and deployed-account state remain unverified unless linked below.
+Current engineering evidence: [22 October gap review](audits/2026-10-22/README.md), [21 October SEO review](audits/2026-10-21/README.md), and [17 October review](audits/2026-10-17/README.md). External approvals and deployed-account state remain unverified unless linked below.
 
 ## Summary
 
@@ -19,12 +19,13 @@ Current engineering evidence: [17 October review](audits/2026-10-17/README.md). 
 | API reference | Complete | `docs/API.md` |
 | Operations runbook | Complete | `docs/OPERATIONS.md`, `docs/production-deploy-checklist.md` |
 | Sitemap documentation | Complete | `SITEMAPS.md`, `docs/SEO_INDEXING.md` |
-| QA evidence | Current review recorded | `docs/audits/2026-10-17/README.md`; older July QA is historical |
+| QA evidence | Current review recorded | `docs/audits/2026-10-22/README.md`: 641 tests and local realtime transaction integration passed; manual authenticated/device QA remains pending |
 | Payment product rules | Complete (live prod E2E pending) | Combined bills + gateway/manual settlement; verify/manage permission split |
 | Plan integrity | Complete | Org cannot self-assign paid plans; upgrade queue on `/platform/billing`; import limits |
 | Production readiness UI | Complete | `/platform/system-health` readiness + `npm run production:check` |
+| Workspace live updates | Deployed; signed-in smoke test pending | `docs/REALTIME.md`; 69 table triggers installed, direct listener connection configured, anonymous route rejection verified |
 | Go-live runbook | Complete | `docs/PRODUCTION_GO_LIVE.md` |
-| DB migrations | Production database up to date (verified 21 October 2026) | `prisma migrate status`: all 81 repository migrations applied; no pending migrations |
+| DB migrations | Production up to date (22 October 2026) | All 87 migrations applied; realtime migration recovered with base-table filtering and reverified after a validated private backup |
 | In-app help links | Complete | Role-scoped protected routes at `/dashboard/{org,tenant,caretaker,landlord}/help` and `/platform/help` |
 | Theme coherence | Complete | Shared `ed-dashboard-shell` primitives and tenant/org surface migration |
 | Accessibility QA | In progress | Automated baseline in `tests/unit/accessibility-baseline.test.ts`; manual matrix in `docs/ACCESSIBILITY_QA.md` |

@@ -1,3 +1,4 @@
+import { VacancyCostSummary } from "@/components/marketing/vacancy-cost-summary";
 import { rentalLandingRobots } from "@/lib/seo/rental-landing-metadata";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -82,6 +83,7 @@ async function getVacancyUnit(slug: string) {
       prisma.unit.findFirst({
         where: {
           id: unitId,
+          leases: { none: { status: "ACTIVE" } },
           isActive: true,
           deletedAt: null,
           status: "VACANT",
@@ -209,6 +211,7 @@ async function getRelatedVacancyUnits(input: {
       prisma.unit.findMany({
         where: {
           id: { not: input.currentUnitId },
+          leases: { none: { status: "ACTIVE" } },
           isActive: true,
           deletedAt: null,
           status: "VACANT",
@@ -473,10 +476,10 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
   const detailBasePath = `/vacancies/${publicSlug}`;
   const roomLabel = unit.roomCount ?? unit.bedrooms;
   const rentLabel = formatCurrency(unit.rentAmount);
-  const serviceChargeLabel = unit.serviceCharge
+  const serviceChargeLabel = unit.serviceCharge != null
     ? formatCurrency(unit.serviceCharge)
-    : "No service charge";
-  const depositLabel = unit.depositAmount ? formatCurrency(unit.depositAmount) : null;
+    : "Confirm with manager";
+  const depositLabel = unit.depositAmount != null ? formatCurrency(unit.depositAmount) : "Confirm with manager";
   const viewingLabel = unit.viewingFeeRequired
     ? unit.viewingFeeAmount
       ? formatCurrency(unit.viewingFeeAmount)
@@ -651,7 +654,16 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
       <PublicAccessHeader active="vacancies" />
       <VacancyDetailBreadcrumb place={place} houseNo={unit.houseNo} locationHref={locationHref} />
 
-      <article className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8">
+      <article className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+        <VacancyDetailOverview
+          managerName={unit.property?.org.name ?? "Property manager"}
+          propertyName={unit.property?.name ?? "Property"}
+          houseNo={unit.houseNo}
+          place={place}
+          description={description}
+        />
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 lg:hidden"><p className="font-semibold">{rentLabel}<span className="ml-1 text-sm font-normal text-muted-foreground">/ month</span></p><a data-workspace-action="true" href="#enquire" className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground">Contact &amp; viewing</a></div>
+
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
           <section className="space-y-6">
             <VacancyDetailGallery
@@ -662,14 +674,9 @@ export default async function VacancyDetail({ params, searchParams }: Props) {
               imageUrl={publicVacancyImageUrl}
               hasPhotos={hasPhotos}
             />
-            <VacancyDetailOverview
-              managerName={unit.property?.org.name ?? "Property manager"}
-              propertyName={unit.property?.name ?? "Property"}
-              houseNo={unit.houseNo}
-              place={place}
-              description={description}
-            />
             <VacancyDetailHighlights highlights={highlights} />
+            <VacancyCostSummary costs={{ rentAmount: unit.rentAmount, depositAmount: unit.depositAmount, serviceCharge: unit.serviceCharge, garbageFee: unit.garbageFee, securityFee: unit.securityFee, viewingFeeRequired: unit.viewingFeeRequired, viewingFeeAmount: unit.viewingFeeAmount }} currency={DEFAULT_CURRENCY} />
+            <p className="text-sm text-muted-foreground">Listing record updated {unit.updatedAt.toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi", year: "numeric", month: "short", day: "numeric" })}. Confirm current availability with the managing office.</p>
             {isUsefulAddress(unit.property?.address) || propertyNotes || unitNotes ? (
               <VacancyDetailDescription
                 address={isUsefulAddress(unit.property?.address) ? unit.property?.address : null}

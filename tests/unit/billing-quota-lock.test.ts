@@ -22,7 +22,9 @@ async function loadAccess<T>(source: string): Promise<T> {
           contents: args.path === "@/lib/prisma"
             ? "export const prisma = {};"
             : args.path === "@/lib/billing/plans"
-              ? 'export const APP_PLANS = { FREE: { propertiesLimit: 1, unitsLimit: 20, usersLimit: 2 }, PRO: { propertiesLimit: 5, unitsLimit: 100, usersLimit: 8 }, PLUS: { propertiesLimit: 20, unitsLimit: 500, usersLimit: 25 }, ENTERPRISE: { propertiesLimit: Number.MAX_SAFE_INTEGER, unitsLimit: Number.MAX_SAFE_INTEGER, usersLimit: Number.MAX_SAFE_INTEGER } };'
+              ? 'export const APP_PLANS = { FREE: { propertiesLimit: 1, unitsLimit: 5, usersLimit: 2 }, PRO: { propertiesLimit: 3, unitsLimit: 20, usersLimit: 8 }, PLUS: { propertiesLimit: 5, unitsLimit: 100, usersLimit: 25 }, ENTERPRISE: { propertiesLimit: Number.MAX_SAFE_INTEGER, unitsLimit: Number.MAX_SAFE_INTEGER, usersLimit: Number.MAX_SAFE_INTEGER } };'
+              : args.path === "@/lib/billing/subscription-access"
+                ? "export const SUBSCRIPTION_GRACE_DAYS = 7;"
               : "",
           loader: "js",
         }));
@@ -44,11 +46,11 @@ function quotaClient(state: { units: number; bnbs: number }) {
   };
 }
 
-test("unit quotas include BnB listings and reject the 21st Free-plan item", async () => {
+test("unit quotas include BnB listings and reject the sixth Free-plan item", async () => {
   const access = await loadAccess<{
     assertCanCreateUnit(orgId: string, additional: number, client: object): Promise<unknown>;
   }>("apps/web/src/lib/billing/access.ts");
-  const client = quotaClient({ units: 18, bnbs: 2 });
+  const client = quotaClient({ units: 3, bnbs: 2 });
   await access.assertCanCreateUnit("org", 0, client);
   await assert.rejects(access.assertCanCreateUnit("org", 1, client), /Upgrade to Pro/);
 });
@@ -58,7 +60,7 @@ test("organization quota row lock prevents concurrent creates crossing the unit 
     assertCanCreateUnit(orgId: string, additional: number, client: object): Promise<unknown>;
     lockOrgQuota(tx: object, orgId: string): Promise<void>;
   }>("apps/web/src/lib/billing/access.ts");
-  const state = { units: 19, bnbs: 0 };
+  const state = { units: 4, bnbs: 0 };
   const client = quotaClient(state);
   let lockTail = Promise.resolve();
 
@@ -84,6 +86,6 @@ test("organization quota row lock prevents concurrent creates crossing the unit 
 
   const results = await Promise.allSettled([createOne(), createOne()]);
   assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
-  assert.equal(state.units, 20);
+  assert.equal(state.units, 5);
   assert.match(String((results.find((result) => result.status === "rejected") as PromiseRejectedResult).reason), /Upgrade to Pro/);
 });

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "WATCHPACK_POLLING=true next dev --webpack",
-    "build": "prisma generate --schema ../../prisma/schema.prisma && next build --webpack",
+    "build": "node ../../scripts/build-release.mjs web",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

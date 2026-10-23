@@ -160,6 +160,14 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/logout",
+        headers: [
+          { key: "Clear-Site-Data", value: '"cache"' },
+          { key: "Cache-Control", value: "no-store" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
+      {
         source: "/:path*",
         headers: SECURITY_HEADERS,
       },

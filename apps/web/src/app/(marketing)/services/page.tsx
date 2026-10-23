@@ -1,3 +1,4 @@
+import { publicPrimaryAction, publicSecondaryAction } from "@/components/marketing/public-action";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Layers3 } from "lucide-react";
@@ -60,7 +61,7 @@ export default function ServicesPage() {
         dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
       />
       <OperationsShowcase standalone showFooter={false} />
-      <section id="community-operations" className="mx-auto max-w-6xl space-y-4 px-4 py-10 sm:px-6"><h1 className="text-3xl font-semibold">One workspace for rental and short-stay operations</h1><p className="max-w-3xl text-lg text-muted-foreground">Connect properties, tenants, rent, water billing, maintenance, accounting, gate visitor passes, official apartment notices, and BnB guest services.</p><Link href="/register" className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 py-2 font-semibold text-primary-foreground">Create your organisation</Link></section>
+      <section id="community-operations" className="mx-auto max-w-6xl space-y-4 px-4 py-10 sm:px-6"><h1 className="text-3xl font-semibold">One workspace for rental and short-stay operations</h1><p className="max-w-3xl text-lg text-muted-foreground">Connect properties, tenants, rent, water billing, maintenance, accounting, gate visitor passes, official apartment notices, and BnB guest services.</p><Link href="/register" className={publicPrimaryAction}>Request workspace access</Link></section>
       <ServicesSeoContent />
       <ContentDepthStack {...siteContentDepth} />
       <section className="mx-auto max-w-6xl space-y-4 px-4 py-10"><h2 className="text-3xl font-bold">Local services and lasting tenancy records</h2><p className="text-lg text-muted-foreground">Organisations can post property jobs, compare nearby service providers’ portfolios, hire and rate completed work. Provider accounts are monitored by the platform, with organisation reporting and moderation. Duplicate IDs require platform authentication to link the existing account. Retained tenants can view their own past records and be reinstated into an available unit.</p><Link href="/service-providers" className="inline-flex rounded-xl bg-primary px-5 py-3 font-semibold text-primary-foreground">Explore service providers</Link></section>
@@ -125,9 +126,9 @@ function ServicesSeoContent() {
               <Layers3 className="h-3.5 w-3.5" />
               EstateDesk services
             </div>
-            <h1 className="mt-4 text-3xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-4xl">
-              Services for organized property management
-            </h1>
+            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-4xl">
+              Tools for organized property management
+            </h2>
             <div className="mt-4 grid gap-4 text-base leading-8 text-neutral-600">
               <p>
                 EstateDesk provides property management software and operational
@@ -200,14 +201,14 @@ function ServicesSeoContent() {
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/register"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-100"
+              className={publicSecondaryAction}
             >
-              Start free
+              Request access
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/contact"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/20 px-5 text-sm font-semibold text-white transition hover:bg-white/10"
+              className={publicSecondaryAction}
             >
               Talk to sales
             </Link>

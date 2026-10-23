@@ -30,11 +30,9 @@ export function useNewOrgForm(createOrganizationAction: CreateOrganizationAction
   const [accountType, setAccountType] = useState("PROPERTY_MANAGER");
 
   const [adminFullName, setAdminFullName] = useState(initialValues?.adminFullName ?? "");
-  const [adminUsername, setAdminUsername] = useState("");
   const [adminEmail, setAdminEmail] = useState(initialValues?.adminEmail ?? "");
+  const adminUsername = adminEmail.trim().toLowerCase();
   const [adminPhone, setAdminPhone] = useState(initialValues?.adminPhone ?? "");
-  const [adminPassword, setAdminPassword] = useState("");
-  const [adminPasswordConfirm, setAdminPasswordConfirm] = useState("");
 
   const generatedSlug = useMemo(() => {
     const base = organizationSlug || organizationName;
@@ -47,7 +45,7 @@ export function useNewOrgForm(createOrganizationAction: CreateOrganizationAction
       .replace(/-{2,}/g, "-");
   }, [organizationName, organizationSlug]);
 
-  const values = useMemo(() => ({ organizationName, organizationSlug, organizationPhone, adminPhone, organizationEmail, timezone, dataRetentionDays, plan, accountType, adminFullName, adminUsername, adminEmail, adminPassword, adminPasswordConfirm }), [organizationName, organizationSlug, organizationPhone, adminPhone, organizationEmail, timezone, dataRetentionDays, plan, accountType, adminFullName, adminUsername, adminEmail, adminPassword, adminPasswordConfirm]);
+  const values = useMemo(() => ({ organizationName, organizationSlug, organizationPhone, adminPhone, organizationEmail, timezone, dataRetentionDays, plan, accountType, adminFullName, adminUsername, adminEmail }), [organizationName, organizationSlug, organizationPhone, adminPhone, organizationEmail, timezone, dataRetentionDays, plan, accountType, adminFullName, adminUsername, adminEmail]);
   const [availabilitySnapshot, setAvailabilitySnapshot] = useState("");
   const [availabilityErrors, setAvailabilityErrors] = useState<Record<string, string[]>>({});
   const [checking, setChecking] = useState(false);
@@ -57,7 +55,7 @@ export function useNewOrgForm(createOrganizationAction: CreateOrganizationAction
   const valuesRef = useRef(values);
   useEffect(() => { valuesRef.current = values; }, [values]);
   const [serverSnapshot, setServerSnapshot] = useState("");
-  const setters: Record<string, (value: string) => void> = { organizationName: setOrganizationName, organizationSlug: setOrganizationSlug, organizationEmail: setOrganizationEmail, organizationPhone: setOrganizationPhone, organizationAddress: setOrganizationAddress, currencyCode: setCurrencyCode, timezone: setTimezone, dataRetentionDays: setDataRetentionDays, plan: setPlan, accountType: setAccountType, adminFullName: setAdminFullName, adminUsername: setAdminUsername, adminEmail: setAdminEmail, adminPhone: setAdminPhone };
+  const setters: Record<string, (value: string) => void> = { organizationName: setOrganizationName, organizationSlug: setOrganizationSlug, organizationEmail: setOrganizationEmail, organizationPhone: setOrganizationPhone, organizationAddress: setOrganizationAddress, currencyCode: setCurrencyCode, timezone: setTimezone, dataRetentionDays: setDataRetentionDays, plan: setPlan, accountType: setAccountType, adminFullName: setAdminFullName, adminEmail: setAdminEmail, adminPhone: setAdminPhone };
   useEffect(() => {
     const restoreTimer = window.setTimeout(() => {
     try { const draft = JSON.parse(sessionStorage.getItem(draftKey) || "null"); if (draft) { for (const [key, value] of Object.entries(draft)) if (typeof value === "string") setters[key]?.(value); setRestored(true); } } catch { /* storage unavailable */ }
@@ -68,7 +66,7 @@ export function useNewOrgForm(createOrganizationAction: CreateOrganizationAction
   }, [draftKey]);
   useEffect(() => {
     if (!draftReady) return;
-    try { if (state.success) sessionStorage.removeItem(draftKey); else if (values.organizationName || values.adminFullName) sessionStorage.setItem(draftKey, JSON.stringify({ ...values, adminPassword: undefined, adminPasswordConfirm: undefined, organizationAddress, currencyCode })); } catch { /* storage unavailable */ }
+    try { if (state.success) sessionStorage.removeItem(draftKey); else if (values.organizationName || values.adminFullName) sessionStorage.setItem(draftKey, JSON.stringify({ ...values, organizationAddress, currencyCode })); } catch { /* storage unavailable */ }
   }, [draftReady, draftKey, state.success, values, organizationAddress, currencyCode]);
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => { if (!state.success && (organizationName || adminFullName)) { event.preventDefault(); event.returnValue = ""; } };
@@ -131,15 +129,10 @@ export function useNewOrgForm(createOrganizationAction: CreateOrganizationAction
     adminFullName,
     setAdminFullName,
     adminUsername,
-    setAdminUsername,
     adminEmail,
     setAdminEmail,
     adminPhone,
     setAdminPhone,
-    adminPassword,
-    setAdminPassword,
-    adminPasswordConfirm,
-    setAdminPasswordConfirm,
     generatedSlug,
     canGoStep2,
     canGoStep3,

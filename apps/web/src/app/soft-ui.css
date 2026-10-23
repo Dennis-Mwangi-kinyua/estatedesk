@@ -15,7 +15,7 @@ body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surfa
   --foreground: #24262b;
   --card: #fff;
   --card-foreground: #24262b;
-  --primary: #0f766e;
+  --primary: #285ed4;
   --primary-foreground: #fff;
   --secondary: #f0fdfa;
   --secondary-foreground: #115e59;
@@ -23,7 +23,7 @@ body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surfa
   --muted-foreground: #515864;
   --border: #e7e9ef;
   --input: #e0e3eb;
-  --ring: #0f766e;
+  --ring: #285ed4;
   --workspace-sky: #f0fdfa;
   --workspace-mint: #f1f7f5;
   --workspace-peach: #faf5ef;
@@ -43,15 +43,15 @@ body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surfa
   --foreground: #f0f1f5;
   --card: #202227;
   --card-foreground: #f0f1f5;
-  --primary: #5eead4;
-  --primary-foreground: #042f2e;
+  --primary: #285ed4;
+  --primary-foreground: #fff;
   --secondary: #134e4a;
   --secondary-foreground: #ccfbf1;
   --muted: #27292f;
   --muted-foreground: #c1c7d0;
   --border: #33363e;
   --input: #3b3e47;
-  --ring: #5eead4;
+  --ring: #85a9ff;
   --workspace-sky: #102f35;
   --workspace-mint: #25342f;
   --workspace-peach: #363029;
@@ -156,7 +156,7 @@ body.estate-glass-system .workspace-identity__avatar { background: var(--muted);
   body.estate-glass-system :is(.workspace-color-icon, .platform-color-icon) { transition: none; }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1279px) {
   body.estate-glass-system :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]):not([type="color"]), select, textarea) {
     font-size: 1rem;
     min-height: 2.75rem;
@@ -255,4 +255,70 @@ body.estate-glass-system :is([data-profile-avatar], [data-profile-photo], [data-
 /* Secondary copy stays readable on light cards and the shared canvas. */
 .light body.estate-glass-system :where(.text-slate-300, .text-slate-400, .text-slate-500, .text-gray-300, .text-gray-400, .text-gray-500, .text-neutral-300, .text-neutral-400, .text-neutral-500, .text-zinc-300, .text-zinc-400, .text-zinc-500, .text-stone-300, .text-stone-400, .text-stone-500) {
   color: var(--system-glass-muted);
+}
+
+/* Logout stays solid red above workspace button overrides, including dark mode. */
+body.estate-glass-system [data-logout-form] button {
+  --workspace-action-danger: #dc2626;
+  --workspace-action-danger-ink: #fff;
+  --workspace-action-primary: #dc2626;
+  --workspace-action-primary-ink: #fff;
+  background: #dc2626 !important;
+  background-image: none !important;
+  border-color: #dc2626 !important;
+  color: #fff !important;
+  opacity: 1;
+}
+body.estate-glass-system [data-logout-form] button:hover {
+  --workspace-action-danger: #b91c1c;
+  --workspace-action-primary: #b91c1c;
+  background: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+body.estate-glass-system [data-logout-form] button svg * { stroke: currentColor !important; }
+
+/* Keep trial/payment notices readable despite workspace surface/text overrides. */
+body.estate-glass-system .subscription-warning {
+  background: #fffbeb !important;
+  border-color: #fcd34d !important;
+  color: #78350f !important;
+}
+body.estate-glass-system .subscription-warning :is(p, span) { color: inherit !important; }
+html.dark body.estate-glass-system .subscription-warning {
+  background: #451a03 !important;
+  border-color: #b45309 !important;
+  color: #fef3c7 !important;
+}
+
+/* One blue action palette in Light and Dark; logout keeps its red exception. */
+body.estate-glass-system {
+  --primary: #285ed4;
+  --primary-foreground: #fff;
+  --ring: #85a9ff;
+}
+body.estate-glass-system :is(button, summary[role="button"], .public-action, a[data-workspace-action="true"], a[data-page-button="true"]):not([class*="inset-0"]):not([class*="inset-x-0"]):not([aria-label*="overlay"]):not([role="switch"]):not(.workspace-navigation-backdrop):not([data-logout-form] *) {
+  background-color: #285ed4 !important;
+  background-image: none !important;
+  border-color: #285ed4 !important;
+  color: #fff !important;
+  border-radius: .75rem;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+body.estate-glass-system :is(button, summary[role="button"], .public-action, a[data-workspace-action="true"], a[data-page-button="true"]):not([class*="inset-0"]):not([class*="inset-x-0"]):not([aria-label*="overlay"]):not([role="switch"]):not(.workspace-navigation-backdrop):not([data-logout-form] *):hover {
+  background-color: #204fb7 !important;
+  border-color: #204fb7 !important;
+}
+body.estate-glass-system [data-logout-form] button,
+body.estate-glass-system [data-logout-form] button:not([role="switch"]) {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #fff !important;
+}
+body.estate-glass-system [data-logout-form] button:hover,
+body.estate-glass-system [data-logout-form] button:not([role="switch"]):hover {
+  background-color: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.estate-glass-system :is(button, .public-action) { transition: none; }
 }

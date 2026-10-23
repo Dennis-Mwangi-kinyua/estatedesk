@@ -44,6 +44,8 @@ export type PlatformNavItem = {
   superAdminOnly?: boolean;
   /** Shown in both Administration and Developer navs. */
   dualMode?: boolean;
+  /** Optional pending-work count rendered as a red navigation badge. */
+  badgeCount?: number;
 };
 
 /**
@@ -51,6 +53,7 @@ export type PlatformNavItem = {
  * Keeps developer operators able to run the business plane without mode-switching.
  */
 export const siteOpsNavItems: readonly PlatformNavItem[] = [
+  { href: "/platform/review-queue", label: "Review queue", icon: "ShieldCheck", description: "Pending reviews, responsible teams and next actions", dualMode: true },
   { href: "/platform/landlords", label: "Landlords", icon: "Users", description: "Landlord accounts and property assignments by organization", dualMode: true },
   { href: "/platform/agreements", label: "Service agreements", icon: "BookOpen", description: "Organization service agreements, DPA signing and delivery", dualMode: true },
   { href: "/platform/identity-verification", label: "ID verification", icon: "ShieldCheck", description: "Authenticate duplicate ID registrations and approve existing-account links", dualMode: true },

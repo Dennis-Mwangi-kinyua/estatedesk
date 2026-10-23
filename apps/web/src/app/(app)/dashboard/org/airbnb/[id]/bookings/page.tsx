@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";

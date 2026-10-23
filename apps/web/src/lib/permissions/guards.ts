@@ -26,7 +26,7 @@ type GuardOptions = {
   redirectTo?: string;
 };
 
-function deny(redirectTo = "/access-denied"): never {
+function deny(redirectTo = "/dashboard"): never {
   redirect(redirectTo);
 }
 
@@ -48,7 +48,7 @@ export async function requirePlatformRole(
       entityType: "Platform",
       entityId: "platform",
     });
-    deny(options?.redirectTo ?? "/access-denied");
+    deny(options?.redirectTo ?? "/dashboard");
   }
 
   return session;
@@ -132,7 +132,7 @@ export async function requireOrgRole(
       entityType: "Organization",
       entityId: session.activeOrgId ?? "unknown",
     });
-    deny(options?.redirectTo ?? "/access-denied");
+    deny(options?.redirectTo ?? "/dashboard");
   }
 
   return session;
@@ -152,7 +152,7 @@ export async function requireOrgPermission(
       entityType: "Organization",
       entityId: session.activeOrgId ?? "unknown",
     });
-    deny(options?.redirectTo ?? "/access-denied");
+    deny(options?.redirectTo ?? "/dashboard");
   }
 
   return session;

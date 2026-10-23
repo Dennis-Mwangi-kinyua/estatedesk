@@ -1,3 +1,4 @@
+import { guardedSubmission, submissionIdentity } from "@/lib/workflow/submissions";
 import { executeNativeResolutionAction } from "@/lib/mobile/native-resolution-actions";
 import { nativeActionRequestSchema, nativeActionDefinitionSchema, nativeActionFormData } from "@estatedesk/contracts/mobile";
 import { executeNativeOperatorAction } from "@/lib/mobile/native-operator-actions";
@@ -59,9 +60,11 @@ export async function POST(request: Request) {
     let form: FormData;
     try { form = nativeActionFormData(definition, input.values ?? {}); }
     catch (cause) { return mobileJson({ error: cause instanceof Error ? cause.message : "Check the form fields." }, 400); }
+    const kind = input.kind;
+    const execute = async () => {
     try {
       if (input.actionId.startsWith("accounting.")) {
-        const result = await executeNativeAccountingAction(input.kind, input.path, input.actionId, input.recordId, form);
+        const result = await executeNativeAccountingAction(kind, input.path, input.actionId, input.recordId, form);
         return result && "error" in result ? mobileJson({ error: result.error }, 400) : result ? mobileJson(result) : mobileJson({ error: "This action is unavailable." }, 403);
       }
       if (input.actionId.startsWith("bnb.")) {
@@ -73,25 +76,25 @@ export async function POST(request: Request) {
         return "error" in result ? mobileJson({ error: result.error }, 400) : mobileJson(result);
       }
       if (input.actionId.startsWith("tenant.")) {
-        const result = await executeNativeTenantAction(input.kind, input.path, input.actionId, input.recordId, form);
+        const result = await executeNativeTenantAction(kind, input.path, input.actionId, input.recordId, form);
         return result && "error" in result ? mobileJson({ error: result.error }, 400) : result ? mobileJson(result) : mobileJson({ error: "This action is unavailable." }, 403);
       }
       if (input.actionId.startsWith("staff.")) {
-        const result = await executeNativeStaffAction(input.kind, input.path, input.actionId, input.recordId, form);
+        const result = await executeNativeStaffAction(kind, input.path, input.actionId, input.recordId, form);
         return result && "error" in result ? mobileJson({ error: result.error }, 400) : result ? mobileJson(result) : mobileJson({ error: "This action is unavailable." }, 403);
       }
-      if (input.kind === "organization" && input.actionId.startsWith("resolution.")) return mobileJson(await executeNativeResolutionAction(session, input.path, input.actionId, input.recordId, form));
-      if (input.kind === "organization" && (input.actionId === "unit.edit" || input.actionId.startsWith("inventory."))) {
+      if (kind === "organization" && input.actionId.startsWith("resolution.")) return mobileJson(await executeNativeResolutionAction(session, input.path, input.actionId, input.recordId, form));
+      if (kind === "organization" && (input.actionId === "unit.edit" || input.actionId.startsWith("inventory."))) {
         const result = await executeNativeInventoryAction(session, input.path, input.actionId, input.recordId, form);
         return result.error ? mobileJson({ error: result.error }, 400) : mobileJson({ ok: true, message: result.message ?? "Unit saved." });
       }
-      if (input.kind === "platform" && (input.actionId.startsWith("provider.") || input.actionId.startsWith("attribution.") || input.actionId.startsWith("organization.access."))) return mobileJson(await executeNativeOperatorAction(input.path, input.actionId, input.recordId, form));
-      if (input.actionId.startsWith("agreement.")) return mobileJson(await executeNativeAgreementAction(input.kind, input.actionId, input.recordId, form));
+      if (kind === "platform" && (input.actionId.startsWith("provider.") || input.actionId.startsWith("attribution.") || input.actionId.startsWith("organization.access."))) return mobileJson(await executeNativeOperatorAction(input.path, input.actionId, input.recordId, form));
+      if (input.actionId.startsWith("agreement.")) return mobileJson(await executeNativeAgreementAction(kind, input.actionId, input.recordId, form));
       if (input.actionId.startsWith("identity.")) {
-        const result = await executeNativeIdentityAction(input.kind, input.actionId, input.recordId, form);
+        const result = await executeNativeIdentityAction(kind, input.actionId, input.recordId, form);
         return result.error ? mobileJson({ error: result.error }, 400) : mobileJson({ ok: true, message: result.message ?? "Identity verification updated." });
       }
-      if (input.kind === "platform") { const additional = await executeNativePlatformAction(session, input.path, input.actionId, input.recordId, form); if (additional) return mobileJson(additional); }
+      if (kind === "platform") { const additional = await executeNativePlatformAction(session, input.path, input.actionId, input.recordId, form); if (additional) return mobileJson(additional); }
       if (input.actionId === "tenant.create") {
         const result = await createTenantAction({ status: "idle" }, form);
         if (result.status !== "success") return mobileJson({ error: result.message ?? "Unable to create tenant." }, 400);
@@ -159,14 +162,14 @@ export async function POST(request: Request) {
         if (!value) return mobileJson({ error: "The vault could not be unlocked." }, 403);
         return mobileJson({ ok: true, message: "API key vault unlocked for this account.", vaultCookie: `${name}=${value}` });
       }
-      if (input.kind === "platform" && input.actionId.startsWith("organization.access.") && input.recordId) {
+      if (kind === "platform" && input.actionId.startsWith("organization.access.") && input.recordId) {
         const organization = await prisma.organization.findFirst({ where: { id: input.recordId, deletedAt: null }, select: { slug: true } });
         if (organization && url.pathname === `/platform/organizations/${encodeURIComponent(organization.slug)}/access`) {
           if (url.searchParams.get("saved") === "1") return mobileJson({ ok: true, message: "Organization role access saved." });
           if (url.searchParams.has("error")) return mobileJson({ error: "Access rules changed or could not be saved. Reload the role settings before trying again." }, 400);
         }
       }
-      const additional = input.kind === "platform" && nativePlatformRedirectResult(input.path, input.actionId, url);
+      const additional = kind === "platform" && nativePlatformRedirectResult(input.path, input.actionId, url);
       if (additional) return mobileJson(additional, "error" in additional ? 400 : 200);
       if (input.actionId === "user.create" && url.pathname === "/platform/users/new" && url.searchParams.has("createError")) return mobileJson({ error: CREATE_ERROR_MESSAGES[url.searchParams.get("createError") as keyof typeof CREATE_ERROR_MESSAGES] ?? "Check the account fields." }, 400);
       if (input.actionId.startsWith("backup.") && url.pathname === "/platform/backups") {
@@ -182,5 +185,10 @@ export async function POST(request: Request) {
       if (input.actionId === "inventory.unit.create" && url.pathname.endsWith("/units/new") && url.searchParams.has("error")) return mobileJson({ error: url.searchParams.get("error") ?? "Unable to create this unit." }, 400);
       throw cause;
     }
+    };
+    const guarded = /^(job\.|notification\.retry|accounting\.|identity\.|provider\.)/.test(input.actionId);
+    return guarded && input.submissionId
+      ? guardedSubmission(prisma, submissionIdentity(session.userId, `${session.activeOrgId ?? "platform"}:${input.path}:${input.actionId}:${input.recordId ?? ""}`, input.submissionId, input.values), execute)
+      : execute();
   });
 }

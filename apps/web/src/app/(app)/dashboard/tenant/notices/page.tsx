@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/navigation/workspace-link";
 import { PageShell, SurfaceCard } from "@/components/theme/ed-dashboard-shell";
 import { redirect } from "next/navigation";
 import { requireTenantAccess } from "@/lib/permissions/guards";

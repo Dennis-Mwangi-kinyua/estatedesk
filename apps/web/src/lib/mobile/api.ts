@@ -3,6 +3,7 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { getUserSession, type AppSession } from "@/lib/auth/session";
 import { requireOrgMembership } from "@/lib/permissions/guards";
 import type { MobileSession } from "@estatedesk/contracts/mobile";
+import { WORKFLOW_PROTOCOL_VERSION } from "@estatedesk/contracts/mobile";
 import { prisma } from "@/lib/prisma";
 import { rolePolicyBlocksPath } from "@/lib/permissions/org-role-policy";
 import { getTenantVisitorAccess } from "@/features/visitors/availability";
@@ -12,7 +13,7 @@ export { isNativeRequest } from "./request-policy";
 export function mobileJson(body: unknown, status = 200) {
   return Response.json(body, {
     status,
-    headers: { "Cache-Control": "no-store", Vary: "Cookie, X-EstateDesk-Capabilities" },
+    headers: { "Cache-Control": "no-store", Vary: "Cookie, X-EstateDesk-Capabilities", "X-EstateDesk-Workflow-Version": String(WORKFLOW_PROTOCOL_VERSION) },
   });
 }
 

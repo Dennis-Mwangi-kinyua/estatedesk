@@ -11,7 +11,7 @@ export function SubscriptionWarning({
   if (access.status !== "grace") return null;
 
   return (
-    <div className="mb-4 rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-sm">
+    <div role="status" className="subscription-warning mb-4 rounded-[24px] border px-4 py-3 text-sm shadow-sm">
       <p className="font-semibold">Trial expired. Payment is due.</p>
       <p className="mt-1 leading-6">
         Your organization is in a {access.daysLeft}-day grace period. Pay{" "}

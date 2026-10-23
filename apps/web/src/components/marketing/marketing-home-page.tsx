@@ -1,65 +1,38 @@
+import { publicPrimaryAction, publicSecondaryAction } from "@/components/marketing/public-action";
 import Link from "@/components/navigation/workspace-link";
-import { VisualSticker } from "@/components/shared/visual-sticker";
-import { ArrowRight, Layers3 } from "lucide-react";
-import { CircleCheck as CheckCircle2, CircleHelp as HelpCircle, UsersRound as Users } from "@/components/shared/colored-icons";
-import { ContentDepthStack } from "@/components/marketing/content-depth-sections";
-import OperationsShowcase from "@/components/marketing/operations-showcase";
-import { siteContentDepth } from "@/lib/content-depth/site-topics";
+import { ArrowRight, Building2, ClipboardList, Droplets, ShieldCheck, WalletCards, Wrench } from "lucide-react";
+import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
-import { faqJsonLd, marketingFaqItems } from "@/components/marketing/seo-faq";
+import { faqJsonLd } from "@/components/marketing/seo-faq";
 import { absoluteUrl } from "@/lib/seo";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
-const homepageAudiences = [
-  {
-    title: "Property managers",
-    body: "EstateDesk helps property managers coordinate buildings, units, tenants, rent balances, water bills, caretakers, maintenance issues, inspections, vacancies, reports, and staff access from one online workspace.",
-  },
-  {
-    title: "Landlords",
-    body: "Landlords use EstateDesk to see what is happening in their rental portfolio without waiting for scattered updates. They can review occupancy, tenant records, balances, issues, vacant units, and property activity online.",
-  },
-  {
-    title: "Real estate agencies",
-    body: "Agencies use EstateDesk to create a repeatable property management process for clients, staff, caretakers, accountants, and tenants while keeping records searchable and easier to report.",
-  },
-  {
-    title: "Tenants",
-    body: "Tenants benefit from clearer records, public vacancy discovery, maintenance request workflows, notices, billing visibility, and better communication with the managing office.",
-  },
+const homepageFaqItems = [
+  { question: "Who is EstateDesk for?", answer: "EstateDesk helps landlords, property managers and agencies organize rental records and coordinate office staff, caretakers and tenant workflows." },
+  { question: "How do I get workspace access?", answer: "Submit an access request with your portfolio and contact details. Our team reviews it and contacts you to arrange your workspace and sign-in details." },
+  { question: "Is there a Free plan?", answer: "Yes. The Free plan covers one property, up to five units and BnB listings combined, and two internal users. Compare the pricing page for included features and paid plans." },
+  { question: "Do I need an account to browse listings?", answer: "No. You can browse public rentals, short stays and service provider profiles without signing in. Use the contact or enquiry options on the relevant listing." },
 ];
-
-const homepageFeatures = [
-  "Visitor QR passes with property-assigned gate verification and single-use admission.",
-  "BnB availability, booking extensions, and temporary guest access that expires at checkout.",
-  "Official apartment notice boards delivered to current tenants and linked short-stay guests.",
-  "Tenant profiles, leases, occupancy, move-out history, and tribunal-ready communication packs.",
-  "M-Pesa and multi-bank rent collection with combined bills that clear utilities before rent.",
-  "Water billing, offline caretaker metering, IndexedDB queues, and background sync.",
-  "KRA eTIMS/eRITS-ready receipts with seller PIN, control unit, and live submit when configured.",
-  "Double-entry accounting: cash position, AR/AP aging, books health, budgets, owner distributions.",
-  "Public vacancy SEO pages for houses, apartments, bedsitters, shops, and offices.",
-  "WhatsApp Business intents for balance, bill, pay, and receipt links.",
-  "Role-aware access for admins, managers, accountants, caretakers, staff, and tenants.",
-  "PWA install, free Web Push alerts, and mobile-first dashboards for field and office teams.",
+const features = [
+  { icon: Building2, title: "Keep your portfolio organized", body: "Connect properties, units, tenants and leases so your team can find the records it needs." },
+  { icon: WalletCards, title: "Know where rent stands", body: "Review charges, payment records and outstanding balances in one place." },
+  { icon: Droplets, title: "Keep water billing on track", body: "Bring meter readings and water charges into your property workflow." },
+  { icon: Wrench, title: "Follow repairs through", body: "Record maintenance requests, assign work and keep track of progress." },
+  { icon: ClipboardList, title: "Coordinate the whole team", body: "Give office staff and caretakers a shared view of assigned work, inspections and notices." },
+  { icon: ShieldCheck, title: "Control access to records", body: "Use roles and permissions to give each team member appropriate access." },
 ];
-
-const homepageFaqItems = marketingFaqItems.slice(0, 8);
-const seoHubLinks = [
-  ["Middle East property owners and teams", "/property-management-software-middle-east"],
-  ["Property teams in Africa", "/property-management-software-africa"],
-  ["Remote and diaspora landlords", "/remote-property-management-software"],
-  ["Property management software Kenya", "/property-management-software-kenya"],
-  ["Property management software Dubai", "/property-management-software-dubai"],
-  ["Landlord software", "/landlord-software"],
-  ["Rent tracking software", "/rent-tracking-software"],
-  ["Water billing software", "/water-billing-software"],
-  ["Vacant houses", "/vacancies"],
-  ["Bedsitters in Nairobi", "/vacancies/nairobi/bedsitters"],
-  ["Apartments in Ruaka", "/vacancies/ruaka/apartments"],
-  ["Shops in Thika", "/vacancies/thika/shops"],
-  ["Single rooms in Rongai", "/vacancies/rongai/single-rooms"],
+const steps = [
+  ["Request access", "Tell us whether you manage your own properties or work for an agency, and share your portfolio needs."],
+  ["Agree your setup", "The EstateDesk team reviews your request and contacts you about your workspace, plan and onboarding."],
+  ["Bring your team together", "Set up your properties, tenant records and staff access, then start managing daily work."],
 ];
+const discoveryLinks = [
+  ["Find a rental", "Browse available long-term rentals and enquire with the managing team.", "/vacancies"],
+  ["Find a short stay", "Explore short-stay listings and contact the host about availability.", "/stays"],
+  ["Find a service provider", "Browse local providers and view their services and profiles.", "/service-providers"],
+];
+const button = publicPrimaryAction;
+const secondaryButton = publicSecondaryAction;
 
 export default function MarketingHomePage() {
   const jsonLd = {
@@ -97,8 +70,8 @@ export default function MarketingHomePage() {
         itemListElement: [
           { "@type": "SiteNavigationElement", position: 1, name: "Login", url: absoluteUrl("/login") },
           { "@type": "SiteNavigationElement", position: 2, name: "Vacancies", url: absoluteUrl("/vacancies") },
-          { "@type": "SiteNavigationElement", position: 3, name: "EstateDesk System", url: absoluteUrl("/services") },
-          { "@type": "SiteNavigationElement", position: 4, name: "Sign Up", url: absoluteUrl("/register") },
+          { "@type": "SiteNavigationElement", position: 3, name: "Product overview", url: absoluteUrl("/services") },
+          { "@type": "SiteNavigationElement", position: 4, name: "Request access", url: absoluteUrl("/register") },
           { "@type": "SiteNavigationElement", position: 5, name: "Pricing", url: absoluteUrl("/pricing") },
           { "@type": "SiteNavigationElement", position: 6, name: "Help", url: absoluteUrl("/contact") },
         ],
@@ -108,282 +81,61 @@ export default function MarketingHomePage() {
   };
 
   return (
-    <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
-      />
-      <OperationsShowcase
-        standalone
-        publicHeaderActive="home"
-        showFooter={false}
-        variant="rentals"
-      />
-      <section className="mx-auto max-w-6xl space-y-5 px-4 py-10 sm:px-6"><h1 className="text-3xl font-semibold">Property management software for Kenyan rental teams</h1><p className="max-w-3xl text-lg text-muted-foreground">Manage long-term rentals and short stays together. Welcome visitors with verified QR passes, send official community notices and give BnB guests temporary access. Hire local service providers, verify registered IDs through the platform and keep tenant records available after move-out.</p><div className="flex flex-wrap gap-3"><Link href="/services#community-operations" className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 py-2 font-semibold text-primary-foreground">Explore property operations</Link><Link href="/stays" className="inline-flex min-h-11 items-center rounded-xl border bg-card px-5 py-2 font-semibold">Find a BnB stay</Link><Link href="/service-providers" className="inline-flex min-h-11 items-center rounded-xl border bg-card px-5 py-2 font-semibold">Find & hire service providers</Link></div></section>
-      <HomepageSeoContent />
-      <PublicAccessFooter />
-    </main>
-  );
-}
-
-function HomepageSeoContent() {
-  return (
-    <>
-      <section className="border-y border-neutral-200 bg-[#f7f9fc] py-8 sm:py-10 lg:py-12 dark:border-white/10 dark:bg-[#0d1117]">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <nav
-            aria-label="Breadcrumb"
-            className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-500 dark:text-slate-300"
-          >
-            <Link href="/" className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-neutral-700 transition hover:border-neutral-300 dark:border-white/12 dark:bg-white/[0.07] dark:text-slate-100">
-              Home
-            </Link>
-            <ArrowRight className="h-3.5 w-3.5 shrink-0" />
-            <span className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 dark:border-white/12 dark:bg-white/[0.07]">
-              Property management software
-            </span>
-            <ArrowRight className="h-3.5 w-3.5 shrink-0" />
-            <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-emerald-700 dark:border-emerald-300/25 dark:bg-emerald-400/10 dark:text-emerald-200">
-              EstateDesk overview
-            </span>
-          </nav>
-
-          <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.45fr)] lg:items-start">
-            <div className="min-w-0">
-              <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-600 dark:border-white/12 dark:bg-white/[0.07] dark:text-slate-200">
-                <Layers3 className="h-3.5 w-3.5" />
-                Property management software
+    <div className="ed-theme-page ed-mobile-surface min-h-dvh bg-background text-foreground">
+      <PublicAccessHeader active="home" />
+      <main>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }} />
+        <section className="border-b border-border bg-muted/30">
+          <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.3fr_1fr] lg:items-center">
+            <div>
+              <p className="text-sm font-semibold text-primary">For Kenyan landlords and property managers</p>
+              <h1 className="mt-4 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">Your properties, rent and team. One workspace.</h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">Keep tenant records, track rent and water bills, and follow up on repairs with EstateDesk. Give your office and field teams a clear view of daily property work.</p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/register" className={button}>Request access<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+                <Link href="/services" className={secondaryButton}>Explore the product</Link>
               </div>
-              <h2 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl dark:text-slate-50">
-                Manage your properties from one workspace
-              </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-600 sm:text-base dark:text-slate-300">
-                EstateDesk is Kenya-built property management software: M-Pesa rent
-                collection, water billing, offline caretaker metering, double-entry
-                accounting, KRA eTIMS-ready receipts, WhatsApp ops, public vacancy SEO,
-                and role-based staff access. It replaces spreadsheets, notebooks, and
-                disconnected tools with records your office and field teams can share.
-              </p>
-
-              <div className="mt-5 grid gap-3 md:grid-cols-3">
-                {[
-                  [
-                    "Kenya-first payments & tax",
-                    "M-Pesa, multi-bank rails, service-before-rent allocation, and KRA eTIMS/eRITS-ready receipts on verified payments.",
-                  ],
-                  [
-                    "Field + office in one system",
-                    "Offline meter queues, SLAs, inspections, unit QR, accounting, and vacancies—not three disconnected apps.",
-                  ],
-                  [
-                    "Publish available rentals",
-                    "Publish available units with rent and viewing details, and manage enquiries alongside your property records.",
-                  ],
-                ].map(([title, body]) => (
-                  <article
-                    key={title}
-                    className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-white/12 dark:bg-[#121821]"
-                  >
-                    <h3 className="text-sm font-semibold text-neutral-950 dark:text-slate-50">{title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-slate-300">{body}</p>
-                  </article>
-                ))}
-              </div>
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">Access requests are reviewed by our team. We will contact you to arrange your workspace and sign-in details.</p>
+              <Link href="/pricing" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4">Compare Free, Pro, Plus and Custom plans</Link>
             </div>
-
-            <aside className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-white/12 dark:bg-[#121821]">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500 dark:text-slate-300">
-                Quick paths
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {[
-                  ["Kenya software", "/property-management-software-kenya"],
-                  ["Landlord software", "/landlord-software"],
-                  ["Rent tracking", "/rent-tracking-software"],
-                  ["Water billing", "/water-billing-software"],
-                  ["Full FAQ", "/faq"],
-                ].map(([label, href]) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className="inline-flex min-h-10 min-w-0 items-center gap-2 rounded-lg border border-neutral-200 bg-[#fbfcfe] px-3 text-sm font-semibold text-neutral-800 transition hover:border-neutral-300 hover:bg-white dark:border-white/12 dark:bg-white/[0.07] dark:text-slate-100 dark:hover:border-white/24 dark:hover:bg-white/[0.12]"
-                  >
-                    <span className="truncate">{label}</span>
-                    <ArrowRight className="h-3.5 w-3.5 shrink-0" />
-                  </Link>
+            <aside className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8" aria-label="A typical property workflow">
+              <p className="text-sm font-semibold text-primary">How daily work connects</p>
+              <h2 className="mt-3 text-2xl font-semibold">From a tenant record to a clear next step</h2>
+              <ol className="mt-6 space-y-5">
+                {[ ["Property & tenant", "Find the unit, tenant and lease details together."], ["Billing & payments", "Review charges, recorded payments and the balance."], ["Team follow-up", "Track an issue, arrange an inspection or send a notice."] ].map(([title, body], index) => (
+                  <li key={title} className="flex gap-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">{index + 1}</span><div><h3 className="font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{body}</p></div></li>
                 ))}
-              </div>
+              </ol>
+              <Link href="/guides" className="mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-semibold underline underline-offset-4">Read the workflow guides<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
             </aside>
           </div>
-        </div>
-      </section>
-
-      <section className="bg-white py-10 sm:py-12 lg:py-14">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-600">
-            <Users className="h-3.5 w-3.5" />
-            Who uses EstateDesk?
+        </section>
+        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20" aria-labelledby="features-title">
+          <h2 id="features-title" className="text-3xl font-semibold tracking-tight">Less time chasing records. More time managing properties.</h2>
+          <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">Start with the tools your portfolio needs. Available features and limits depend on your plan.</p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{features.map(({ icon: Icon, title, body }) => <article key={title} className="rounded-2xl border border-border bg-card p-6"><Icon aria-hidden="true" className="h-6 w-6 text-primary" /><h3 className="mt-4 text-lg font-semibold">{title}</h3><p className="mt-2 text-sm leading-7 text-muted-foreground">{body}</p></article>)}</div>
+        </section>
+        <section className="border-y border-border bg-muted/30" aria-labelledby="setup-title">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+            <h2 id="setup-title" className="text-3xl font-semibold tracking-tight">A clear path to getting started</h2>
+            <ol className="mt-8 grid gap-6 md:grid-cols-3">{steps.map(([title, body], index) => <li key={title}><p className="text-sm font-semibold text-primary">Step {index + 1}</p><h3 className="mt-2 text-xl font-semibold">{title}</h3><p className="mt-3 text-sm leading-7 text-muted-foreground">{body}</p></li>)}</ol>
+            <div className="mt-8 flex flex-wrap gap-3"><Link href="/register" className={button}>Request access</Link><Link href="/contact#contact-sales" className={secondaryButton}>Discuss your portfolio</Link></div>
           </div>
-          <h2 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl">
-            Built for the people involved in rental management
-          </h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            {homepageAudiences.map((audience) => (
-              <article key={audience.title} className="rounded-2xl border border-neutral-200 bg-[#fbfcfe] p-5">
-                <h3 className="flex items-center gap-3 text-base font-semibold text-neutral-950"><VisualSticker label={audience.title} />{audience.title}</h3>
-                <p className="mt-2 text-sm leading-7 text-neutral-600">{audience.body}</p>
-              </article>
-            ))}
+        </section>
+        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6" aria-labelledby="discovery-title">
+          <h2 id="discovery-title" className="text-3xl font-semibold tracking-tight">Looking for a place or a local professional?</h2>
+          <p className="mt-4 text-muted-foreground">You can browse public listings without signing in.</p>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">{discoveryLinks.map(([title, body, href]) => <article key={href} className="rounded-2xl border border-border bg-card p-6"><h3 className="text-xl font-semibold">{title}</h3><p className="mt-3 text-sm leading-7 text-muted-foreground">{body}</p><Link href={href} className="mt-4 inline-flex min-h-11 items-center gap-2 font-semibold underline underline-offset-4">Browse listings<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></article>)}</div>
+        </section>
+        <section className="border-t border-border bg-muted/30" aria-labelledby="questions-title">
+          <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
+            <h2 id="questions-title" className="text-3xl font-semibold tracking-tight">Before you get started</h2>
+            <div className="mt-8 space-y-3">{homepageFaqItems.map((item) => <details key={item.question} className="rounded-xl border border-border bg-card p-5"><summary className="cursor-pointer font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{item.question}</summary><p className="mt-3 text-sm leading-7 text-muted-foreground">{item.answer}</p></details>)}</div>
+            <div className="mt-6 flex flex-wrap gap-5">{[["More questions", "/faq"], ["Security", "/security"], ["Privacy", "/privacy"]].map(([label, href]) => <Link key={href} href={href} className="inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4">{label}</Link>)}</div>
           </div>
-        </div>
-      </section>
-
-      <section className="ed-theme-band-inverse border-y border-white/10 py-10 sm:py-12 lg:py-14">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:px-8">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#d1d5db]">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Features and benefits
-            </div>
-            <h2 className="mt-4 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
-              Key features that make property work easier to manage
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-[#d1d5db]">
-              EstateDesk brings the most important rental operations into one workflow so
-              teams can act faster, search records more easily, and reduce manual follow-up.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {homepageFeatures.map((feature) => (
-              <div key={feature} className="flex gap-3 rounded-2xl border border-white/14 bg-white/[0.08] p-4">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-                <p className="text-sm leading-7 text-[#e5e7eb]">{feature}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-neutral-200 bg-[#f7f9fc] py-10 sm:py-12 lg:py-14">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl">
-                Explore property management tools and rental listings
-              </h2>
-              <p className="mt-2 max-w-3xl text-sm leading-7 text-neutral-600">
-                Fast paths for landlords, property managers, tenants, and local rental searches.
-              </p>
-            </div>
-            <Link href="/faq" className="text-sm font-semibold text-neutral-700 hover:text-neutral-950">
-              Full FAQ
-            </Link>
-          </div>
-
-          <div className="mt-5 flex flex-wrap gap-2">
-            {seoHubLinks.map(([label, href]) => (
-              <Link
-                key={href}
-                href={href}
-                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 text-sm font-semibold text-neutral-800 transition hover:border-neutral-300 hover:bg-[#fbfcfe]"
-              >
-                {label}
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white py-10 sm:py-12 lg:py-14">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:px-8">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl">
-              How EstateDesk works
-            </h2>
-            <div className="mt-5 grid gap-4 text-base leading-8 text-neutral-600">
-              <p>
-                First, the team creates the property structure: properties, buildings,
-                units, rent amounts, and occupancy details. Then tenant profiles and lease
-                records are connected to the correct units. From there, the office can
-                manage rent tracking, water billing, maintenance requests, move-outs,
-                inspections, vacancies, reports, and staff access inside the same system.
-              </p>
-              <p>
-                The benefit is simple: daily property decisions become easier because the
-                team can search and act from the same source of truth. A manager can see
-                unpaid rent and open issues. A caretaker can follow assigned work. A tenant
-                can discover available vacancies or submit requests through the right
-                channel. A landlord can review performance without waiting for manual
-                summaries. EstateDesk helps rental teams move from scattered records to a
-                clearer, more accountable operating rhythm.
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-neutral-200 bg-[#f7f9fc] p-5">
-            <h3 className="text-lg font-semibold text-neutral-950">Ready to organize your portfolio?</h3>
-            <p className="mt-2 text-sm leading-7 text-neutral-600">
-              Start with the Free plan, compare Pro and Plus pricing, or speak with the
-              team about a Custom rollout for a larger property management operation.
-            </p>
-            <div className="mt-5 grid gap-3">
-              <Link data-workspace-action="true"
-                href="/register"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-black dark:bg-white dark:text-[#10141a] dark:hover:bg-[#e5e7eb]"
-              >
-                Start free
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link data-workspace-action="true"
-                href="/pricing"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 text-sm font-semibold text-neutral-800 transition hover:border-neutral-400"
-              >
-                View pricing
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <ContentDepthStack {...siteContentDepth} />
-
-      <section className="border-t border-neutral-200 bg-[#f7f9fc] py-10 sm:py-12 lg:py-14">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-600">
-            <HelpCircle className="h-3.5 w-3.5" />
-            Short FAQ
-          </div>
-          <h2 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl">
-            Common questions about EstateDesk
-          </h2>
-          <div className="mt-7 grid gap-3">
-            {homepageFaqItems.map((item) => (
-              <details key={item.question} className="group rounded-2xl border border-neutral-200 bg-white p-5">
-                <summary className="cursor-pointer list-none text-base font-semibold text-neutral-950">
-                  <span className="inline-flex w-full items-start justify-between gap-4">
-                    <span>{item.question}</span>
-                    <span className="shrink-0 rounded-full border border-neutral-200 bg-neutral-50 px-2 py-0.5 text-xs text-neutral-500 group-open:hidden">
-                      Open
-                    </span>
-                    <span className="hidden shrink-0 rounded-full border border-neutral-200 bg-neutral-50 px-2 py-0.5 text-xs text-neutral-500 group-open:inline-flex">
-                      Close
-                    </span>
-                  </span>
-                </summary>
-                <p className="mt-3 text-sm leading-7 text-neutral-600">{item.answer}</p>
-              </details>
-            ))}
-          </div>
-          <Link data-workspace-action="true"
-            href="/faq"
-            className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-black dark:bg-white dark:text-[#10141a] dark:hover:bg-[#e5e7eb]"
-          >
-            Read the full FAQ
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
-    </>
+        </section>
+      </main>
+      <PublicAccessFooter />
+    </div>
   );
 }

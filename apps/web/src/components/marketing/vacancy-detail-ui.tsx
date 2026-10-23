@@ -91,7 +91,7 @@ export function VacancyDetailBreadcrumb({
       aria-label="Breadcrumb"
       className="border-b border-slate-200/80 bg-white/80 dark:border-white/10 dark:bg-slate-900/70"
     >
-      <ol className="mx-auto flex max-w-screen-2xl flex-wrap items-center gap-1.5 px-4 py-3 text-sm text-slate-600 dark:text-slate-300 sm:px-6 lg:px-8">
+      <ol className="mx-auto flex max-w-7xl flex-wrap items-center gap-1.5 px-4 py-3 text-sm text-slate-600 dark:text-slate-300 sm:px-6 lg:px-8">
         <li>
           <Link href="/vacancies" className="font-semibold transition hover:text-slate-950 dark:hover:text-white">
             Vacancies
@@ -152,7 +152,7 @@ export function VacancyDetailOverview({
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-900 sm:p-6">
       <p className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-900 dark:border-cyan-200/40 dark:bg-cyan-200/10 dark:text-cyan-50">
-        <ShieldCheck className="h-3.5 w-3.5" />
+        <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
         Listed by {managerName}
       </p>
       <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
@@ -233,7 +233,7 @@ function VacancyInquiryForm({
       {sent ? (
         <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-100">
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-          Enquiry sent successfully. Expect a call or message soon.
+          Your enquiry was saved for the managing office. They will contact you using the details provided. This does not reserve the unit or confirm a viewing time.
         </div>
       ) : null}
 
@@ -332,7 +332,7 @@ export function VacancyDetailSidebar({
   inquiry,
 }: VacancyDetailSidebarProps) {
   return (
-    <aside id="enquire" className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+    <aside id="enquire" className="scroll-mt-24 space-y-4 lg:self-start">
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
           Monthly rent
@@ -408,7 +408,7 @@ export function VacancyDetailRelated({ listings, pagination, basePath }: Vacancy
       id="more-vacant-units"
       className="border-t border-slate-200 bg-white/70 py-8 dark:border-white/10 dark:bg-slate-900/40 sm:py-10"
     >
-      <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
           <div className="max-w-2xl">
             <h2 className="text-xl font-semibold text-slate-950 dark:text-white sm:text-2xl">
