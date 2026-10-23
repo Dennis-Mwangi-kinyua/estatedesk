@@ -21,7 +21,7 @@
     "@estatedesk/notifications": "file:../../services/notifications",
     "@estatedesk/public-vacancy": "file:../../services/public-vacancy",
     "@estatedesk/service-client": "file:../../packages/service-client",
-    "next": "^16.2.6",
+    "next": "^16.4.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   }
