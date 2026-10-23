@@ -21,7 +21,7 @@ export const publicListedVacancyWhere = {
   },
 } satisfies Prisma.UnitWhereInput;
 
-export type VacancyListSort = "location" | "rent_asc" | "rent_desc" | "newest";
+export type VacancyListSort = "random" | "location" | "rent_asc" | "rent_desc" | "newest";
 
 export type VacancyListQuery = {
   query?: string;
@@ -151,20 +151,22 @@ export function buildVacancyListWhere(params: VacancyListQuery): Prisma.UnitWher
 }
 
 export function vacancyListOrderBy(
-  sort: VacancyListSort = "location",
+  sort: VacancyListSort = "random",
 ): Prisma.UnitOrderByWithRelationInput[] {
+  if (sort === "random") return [{ publicListingRank: "asc" }, { id: "asc" }];
   if (sort === "rent_asc") {
-    return [{ rentAmount: "asc" }, { property: { name: "asc" } }];
+    return [{ rentAmount: "asc" }, { property: { name: "asc" } }, { id: "asc" }];
   }
   if (sort === "rent_desc") {
-    return [{ rentAmount: "desc" }, { property: { name: "asc" } }];
+    return [{ rentAmount: "desc" }, { property: { name: "asc" } }, { id: "asc" }];
   }
   if (sort === "newest") {
-    return [{ updatedAt: "desc" }, { property: { name: "asc" } }];
+    return [{ updatedAt: "desc" }, { property: { name: "asc" } }, { id: "asc" }];
   }
   return [
     { property: { location: "asc" } },
     { property: { name: "asc" } },
     { houseNo: "asc" },
+    { id: "asc" },
   ];
 }

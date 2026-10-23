@@ -3,7 +3,7 @@ import { vacancyRecordDate } from "@/lib/vacancy-record-date";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
-import { House as Home, Search, Building2 } from "@/components/shared/colored-icons";
+import { House as Home, Search } from "@/components/shared/colored-icons";
 import { PublicAccessFooter } from "@/components/marketing/public-access-footer";
 import { PublicAccessHeader } from "@/components/marketing/public-access-header";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
@@ -36,6 +36,7 @@ import {
   parsePositiveInt,
 } from "@/lib/vacancy-pagination";
 import { telHref } from "@/lib/vacancy-contact";
+import { PropertyBrowseHeading } from "@/components/marketing/property-browse-heading";
 
 export const revalidate = 300;
 
@@ -66,10 +67,10 @@ const UNIT_TYPE_OPTIONS = [
 ] as const;
 
 function parseSort(value: string | undefined): VacancyListSort {
-  if (value === "rent_desc" || value === "rent_asc" || value === "newest") {
+  if (value === "rent_desc" || value === "rent_asc" || value === "newest" || value === "location") {
     return value;
   }
-  return "location";
+  return "random";
 }
 
 function parseFilters(
@@ -96,14 +97,14 @@ function parseFilters(
     filterParams: {
       q: query || undefined,
       location: location || undefined,
-      sort: sort === "location" ? undefined : sort,
+      sort: sort === "random" ? undefined : sort,
       type: type || undefined,
       minRent: minRent != null ? String(minRent) : undefined,
       maxRent: maxRent != null ? String(maxRent) : undefined,
       bedrooms: bedrooms != null ? String(bedrooms) : undefined,
     },
     hasFilters: Boolean(
-      query || location || type || minRent != null || maxRent != null || bedrooms != null || sort !== "location",
+      query || location || type || minRent != null || maxRent != null || bedrooms != null || sort !== "random",
     ),
   };
 }
@@ -366,18 +367,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
       <section className="border-b border-slate-200 bg-white/85 dark:border-white/10 dark:bg-slate-900/80">
         <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
           <div className="space-y-7">
-            <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm dark:border-cyan-200/50 dark:bg-cyan-200/15 dark:text-cyan-50">
-                <Building2 className="h-4 w-4" />
-                Find your next place
-              </p>
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
-                Find your next home or business space
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-[#d1d5db]">
-                Find available units with clear pricing, location details, and direct access to the managing office.
-              </p>
-            </div>
+            <PropertyBrowseHeading kind="rentals" />
 
             <form
               action="/vacancies"
@@ -416,7 +406,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                 </label>
               </div>
 
-              <details open={Boolean(filters.type || filters.minRent != null || filters.maxRent != null || filters.bedrooms != null || filters.sort !== "location")} className="rounded-lg border border-slate-200 px-3 dark:border-white/12">
+              <details open={Boolean(filters.type || filters.minRent != null || filters.maxRent != null || filters.bedrooms != null || filters.sort !== "random")} className="rounded-lg border border-slate-200 px-3 dark:border-white/12">
                 <summary className="flex min-h-11 cursor-pointer flex-col items-start justify-center gap-0.5 text-sm font-semibold text-slate-800 dark:text-slate-100 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                   More filters
                   <span className="text-xs font-normal text-slate-500 dark:text-slate-300">Type, rent, rooms and sort</span>
@@ -474,6 +464,7 @@ export default async function VacanciesPage({ searchParams }: PageProps) {
                   aria-label="Sort vacancies"
                   className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100 dark:border-white/12 dark:bg-[#171b22] dark:text-[#f8fafc] dark:focus:border-sky-500 dark:focus:ring-sky-500/20"
                 >
+                  <option value="random">Discover · mixed listings</option>
                   <option value="location">Location</option>
                   <option value="newest">Newest updates</option>
                   <option value="rent_asc">Rent low to high</option>

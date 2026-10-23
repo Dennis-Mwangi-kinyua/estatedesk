@@ -4,7 +4,8 @@ export const BNB_TYPES = ["APARTMENT", "STUDIO", "HOUSE", "VILLA", "COTTAGE", "P
 export const BNB_AMENITIES = ["Wi-Fi", "Kitchen", "Free parking", "Swimming pool", "Air conditioning", "TV", "Washing machine", "Workspace", "Balcony", "Security", "Hot water", "Pet friendly"] as const;
 export const MAX_BNB_PHOTOS = 8;
 export const MAX_BNB_PHOTO_BYTES = 2 * 1024 * 1024;
-export const MAX_BNB_UPLOAD_BYTES = 6 * 1024 * 1024;
+// Leave room for form fields and multipart overhead below Vercel's 4.5 MB cap.
+export const MAX_BNB_UPLOAD_BYTES = 4 * 1024 * 1024;
 const money = z.coerce.number().finite().min(0).max(9999999999.99).refine((n) => Math.abs(n * 100 - Math.round(n * 100)) < 0.0001, "Use at most two decimal places.");
 const optionalText = (max: number) => z.string().trim().max(max).transform((v) => v || null);
 const coordinate = (min: number, max: number) => z.preprocess(

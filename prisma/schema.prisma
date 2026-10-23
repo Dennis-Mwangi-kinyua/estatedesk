@@ -793,6 +793,8 @@ model Unit {
   isPubliclyListed     Boolean                  @default(true)
   /// Stable unique public path segment, e.g. sunrise-apartments-unit-a01 or …-a01-x7k2m9
   publicSlug           String?                  @unique
+  /// Random position assigned once so public browsing stays stable across pages.
+  publicListingRank    Float                    @default(dbgenerated("random()"))
   isActive             Boolean                  @default(true)
   deletedAt            DateTime?
   createdAt            DateTime                 @default(now())
@@ -820,6 +822,7 @@ model Unit {
   @@index([isActive])
   @@index([deletedAt])
   @@index([isPubliclyListed, status, isActive, deletedAt])
+  @@index([isPubliclyListed, status, publicListingRank, id])
   @@index([propertyId, isActive, deletedAt, status])
   @@index([propertyId, type, bedrooms, status])
   @@index([propertyId, houseNo])

@@ -25,7 +25,7 @@ export default async function StayPage({ params }: { params: Promise<{ slug: str
   if (!listing) notFound();
   const currency = listing.org.currencyCode;
   const availability = stayAvailability(listing.availableFrom, listing.reservations);
-  return <><PublicAccessHeader active="stays" /><main id="main-content" className="mx-auto max-w-7xl space-y-7 px-4 py-8 sm:px-6 lg:px-8">
+  return <><PublicAccessHeader active="stays" /><main id="main-content" className="mx-auto max-w-7xl space-y-7 px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:py-8">
     <Link href="/stays" className="inline-flex min-h-11 items-center text-sm font-medium underline">← All stays</Link>
     <header className="space-y-3"><p className="text-sm font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">{listing.propertyType.toLowerCase().replaceAll("_", " ")} · BnB stay</p><h1 className="text-3xl font-bold sm:text-4xl">{listing.title}</h1><p className="flex items-center gap-2 text-muted-foreground"><MapPin className="h-4 w-4" />{listing.location}</p></header>
     <div className="grid items-start gap-8 lg:grid-cols-[2fr_1fr]">
@@ -48,5 +48,5 @@ export default async function StayPage({ params }: { params: Promise<{ slug: str
         <p className="text-sm leading-relaxed text-muted-foreground">Contact the host to confirm dates, availability, and the total cost of your stay.</p>
       </aside>
     </div>
-  </main><PublicAccessFooter /></>;
+  </main><div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-border bg-background/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 shadow-lg backdrop-blur lg:hidden"><p className="min-w-0 text-lg font-semibold">{bnbMoney(Number(listing.nightlyRate), currency)}<span className="ml-1 text-xs font-normal text-muted-foreground">/ night</span></p><Button asChild className="min-h-12 shrink-0 rounded-xl px-5"><a href={`tel:${listing.contactPhone.replace(/[\s()-]/g, "")}`}><Phone aria-hidden="true" className="h-4 w-4" />Call host</a></Button></div><PublicAccessFooter /></>;
 }

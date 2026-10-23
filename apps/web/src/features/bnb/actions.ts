@@ -51,7 +51,7 @@ export async function saveBnbAction(_state: BnbFormState, formData: FormData): P
   const photoCount = retained.length + files.length;
   if (photoCount > MAX_BNB_PHOTOS) return { error: `Choose at most ${MAX_BNB_PHOTOS} photos.` };
   if (parsed.data.status === "PUBLISHED" && photoCount === 0) return { error: "Add at least one photo before publishing." };
-  if (files.reduce((sum, file) => sum + file.size, 0) > MAX_BNB_UPLOAD_BYTES) return { error: "New photos must total less than 6 MB. Choose smaller images." };
+  if (files.reduce((sum, file) => sum + file.size, 0) > MAX_BNB_UPLOAD_BYTES) return { error: "New photos must total at most 4 MB. Upload additional photos after saving." };
   const validated = [];
   try {
     // Validate the entire batch before uploading any files.

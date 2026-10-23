@@ -52,8 +52,8 @@ test("public stays load without login and unpublished URLs return 404", async ({
   test.setTimeout(90000);
   const response = await page.goto("/stays");
   expect(response?.status()).toBe(200);
-  await expect(page.getByRole("heading", { name: "Find your next stay" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "BnB stays", exact: true }).first()).toHaveAttribute("href", "/stays");
+  await expect(page.getByRole("heading", { name: "Find a stay that feels like you." })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Property search", exact: true }).getByRole("link", { name: "Short stays", exact: true })).toHaveAttribute("href", "/stays");
   // Check the server response directly; development hot reloads can interrupt
   // browser navigation while the missing-listing route compiles for the first time.
   const unavailable = await page.request.get("/stays/not-a-published-bnb-listing");

@@ -55,11 +55,11 @@ export function BnbForm({ listing, contactName, currency }: { listing?: InitialL
         </div>
       </section>
       <section className="rounded-2xl border bg-card p-5 sm:p-7 space-y-5">
-        <h2 className="text-xl font-semibold">Photos</h2><p className="text-sm text-muted-foreground">Up to 8 JPEG, PNG, or WebP photos. Maximum 2 MB each and 6 MB per upload. At least one photo is required to publish. The first photo is the cover.</p>
+        <h2 className="text-xl font-semibold">Photos</h2><p className="text-sm text-muted-foreground">Up to 8 JPEG, PNG, or WebP photos. Maximum 2 MB each and 4 MB per upload. Save, then add more photos if needed. At least one photo is required to publish. The first photo is the cover.</p>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">{listing?.images.map((image, index) => <label key={image.id} className="space-y-2 text-sm"><Image src={image.url} alt={`Existing photo ${index + 1}`} width={320} height={240} className="aspect-[4/3] w-full rounded-xl object-cover" /><span className="flex items-center gap-2"><input type="checkbox" name="retainedImages" value={image.id} checked={retained.includes(image.id)} onChange={(event) => setRetained((current) => event.target.checked ? [...current, image.id] : current.filter((id) => id !== image.id))} />Keep photo {index + 1}</span></label>)}</div>
         <label className="block space-y-2 text-sm font-medium" htmlFor="photos"><span>Add photos</span><Input id="photos" name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => {
           const next = Array.from(event.target.files ?? []);
-          const invalid = next.length + retained.length > MAX_BNB_PHOTOS ? "Keep at most 8 photos in total." : next.some((file) => file.size > MAX_BNB_PHOTO_BYTES) ? "Each photo must be smaller than 2 MB." : next.reduce((sum, file) => sum + file.size, 0) > MAX_BNB_UPLOAD_BYTES ? "New photos must total less than 6 MB." : "";
+          const invalid = next.length + retained.length > MAX_BNB_PHOTOS ? "Keep at most 8 photos in total." : next.some((file) => file.size > MAX_BNB_PHOTO_BYTES) ? "Each photo must be smaller than 2 MB." : next.reduce((sum, file) => sum + file.size, 0) > MAX_BNB_UPLOAD_BYTES ? "New photos must total at most 4 MB. Save and add more photos afterward." : "";
           setPhotoError(invalid);
           if (invalid) { event.target.value = ""; setPreviews([]); } else setPreviews(next.map((file) => URL.createObjectURL(file)));
         }} /></label>
@@ -86,7 +86,7 @@ export function BnbForm({ listing, contactName, currency }: { listing?: InitialL
         <label className="block space-y-2 text-sm font-medium" htmlFor="status"><span>Listing status</span><select id="status" name="status" defaultValue={listing?.status ?? "DRAFT"} className="h-12 w-full rounded-xl border border-input bg-background px-3"><option value="DRAFT">Draft — only visible in your workspace</option><option value="PUBLISHED">Published — visible on EstateDesk</option><option value="PAUSED">Paused — hidden from guests</option></select></label>
       </section>
       {state.error && <p role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950 dark:text-red-200">{state.error}</p>}
-      <div className="flex flex-wrap gap-3"><Button type="submit">{pending ? "Saving listing…" : listing ? "Save changes" : "Save listing"}</Button><Button asChild variant="outline"><Link href="/dashboard/org/airbnb">Cancel</Link></Button></div>
+      <div className="sticky bottom-0 z-10 flex flex-wrap gap-3 rounded-2xl border border-border bg-background/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-sm backdrop-blur"><Button type="submit" className="min-h-12 flex-1 sm:flex-none">{pending ? "Saving listing…" : listing ? "Save changes" : "Save listing"}</Button><Button asChild variant="outline" className="min-h-12"><Link href="/dashboard/org/airbnb">Cancel</Link></Button></div>
     </fieldset>
   </form>;
 }

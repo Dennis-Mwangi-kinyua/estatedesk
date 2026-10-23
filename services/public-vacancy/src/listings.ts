@@ -99,7 +99,7 @@ async function queryVacancyListingsPage(params: VacancyListQuery & {
   const page = normalizePage(params.page);
   const pageSize = normalizePageSize(params.pageSize);
   const where = buildVacancyListWhere(params);
-  const orderBy = vacancyListOrderBy(params.sort ?? "location");
+  const orderBy = vacancyListOrderBy(params.sort ?? "random");
 
   return retryTransientDatabaseOperation(
     async () => {
@@ -167,10 +167,10 @@ export function getVacancyListingsPageCached(
   }
 
   const cacheKey = [
-    "public-vacancy-listings-page",
+    "public-vacancy-listings-page-v2",
     params.query ?? "",
     params.location ?? "",
-    params.sort ?? "location",
+    params.sort ?? "random",
     params.type ?? "",
     String(params.minRent ?? ""),
     String(params.maxRent ?? ""),
