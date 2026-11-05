@@ -21,6 +21,17 @@ export const publicListedVacancyWhere = {
   },
 } satisfies Prisma.UnitWhereInput;
 
+/** Missing flags preserve existing listings; explicit platform overrides win. */
+export function publicVacancyFeatureWhere(globalFeatures: Record<string, boolean>): Prisma.UnitWhereInput {
+  if (globalFeatures.vacantHouses === false) return { id: { in: [] } };
+  if (globalFeatures.vacantHouses === true) return {};
+  return {
+    property: { is: { org: { is: {
+      NOT: { settings: { is: { features: { path: ["vacantHouses"], equals: false } } } },
+    } } } },
+  };
+}
+
 export type VacancyListSort = "random" | "location" | "rent_asc" | "rent_desc" | "newest";
 
 export type VacancyListQuery = {
@@ -71,7 +82,7 @@ export function normalizeUnitTypeFilter(
   return upper as UnitType;
 }
 
-export function buildVacancyListWhere(params: VacancyListQuery): Prisma.UnitWhereInput {
+export function buildVacancyListWhere(params: VacancyListQuery, eligibility: Prisma.UnitWhereInput = publicListedVacancyWhere): Prisma.UnitWhereInput {
   const query = params.query?.trim() ?? "";
   const location = params.location?.trim() ?? "";
   const queryUnitTypes = query ? unitTypesForSearch(query) : [];
@@ -90,7 +101,7 @@ export function buildVacancyListWhere(params: VacancyListQuery): Prisma.UnitWher
       : undefined;
 
   return {
-    ...publicListedVacancyWhere,
+    ...eligibility,
     ...(typeFilter ? { type: typeFilter } : {}),
     ...(bedrooms
       ? {
@@ -108,6 +119,7 @@ export function buildVacancyListWhere(params: VacancyListQuery): Prisma.UnitWher
     ...(query
       ? {
           AND: [
+            eligibility,
             {
               OR: [
                 { houseNo: { contains: query, mode: "insensitive" } },

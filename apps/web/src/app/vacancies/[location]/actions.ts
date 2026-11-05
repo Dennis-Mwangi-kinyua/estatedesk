@@ -1,5 +1,6 @@
 "use server";
 
+import { getPublicListedVacancyWhere } from "@estatedesk/public-vacancy/where-server";
 import { NotificationChannel, NotificationType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { revalidatePublicVacancies } from "@/lib/public-vacancy-cache";
@@ -61,6 +62,7 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
   const unit = await prisma.unit.findFirst({
     where: {
       id: unitId,
+      AND: [await getPublicListedVacancyWhere()],
       isActive: true,
       deletedAt: null,
       status: "VACANT",
@@ -122,7 +124,7 @@ export async function sendVacancyInquiryAction(publicSlug: string, formData: For
   await prisma.$transaction(async (tx) => {
     // Serialize with unit status/lease writes and check live eligibility again.
     await tx.$queryRaw`SELECT id FROM "Unit" WHERE id = ${unit.id} FOR UPDATE`;
-    const available = await tx.unit.findFirst({ where: { id: unit.id, isActive: true, deletedAt: null, status: "VACANT", isPubliclyListed: true, leases: { none: { status: "ACTIVE" } }, property: { isActive: true, deletedAt: null, org: { status: "ACTIVE", deletedAt: null } } }, select: { id: true } });
+    const available = await tx.unit.findFirst({ where: { AND: [await getPublicListedVacancyWhere()], id: unit.id, isActive: true, deletedAt: null, status: "VACANT", isPubliclyListed: true, leases: { none: { status: "ACTIVE" } }, property: { isActive: true, deletedAt: null, org: { status: "ACTIVE", deletedAt: null } } }, select: { id: true } });
     if (!available) redirect(`/vacancies/${canonicalSlug}?error=${encodeURIComponent("This vacancy is no longer available.")}#enquire`);
     await tx.vacancyInquiry.create({
       data: {

@@ -111,12 +111,12 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
       </section>
 
       <section className="grid items-start gap-4 lg:grid-cols-2">
-        <OrgSurface title="Feature flags" description="Features enabled for this organisation.">
+        <OrgSurface title="Feature flags" description="Feature settings configured for this organisation. Manage effective access in Feature flags.">
           <div className="p-4">
             {featureKeys.length ? (
               <div className="flex flex-wrap gap-2">
                 {featureKeys.map((key) => (
-                  <Badge key={key}>{key}</Badge>
+                  <Badge key={key}>{key}: {org.settings?.features && typeof org.settings.features === "object" && !Array.isArray(org.settings.features) && (org.settings.features as Record<string, unknown>)[key] === false ? "Off" : "On"}</Badge>
                 ))}
               </div>
             ) : (

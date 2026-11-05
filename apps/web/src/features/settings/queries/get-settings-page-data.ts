@@ -121,7 +121,8 @@ export async function getSettingsPageData(
     },
   });
 
-  const { resolveOrgFeatures, getFeatureFlag } = await import("@/lib/org/features");
+  const { getFeatureFlag } = await import("@/lib/org/features");
+  const { resolveOrgFeatures } = await import("@/lib/org/features-server");
   const features = await resolveOrgFeatures(org.settings?.features);
   const notificationDefaults = org.settings?.notificationDefaults;
 

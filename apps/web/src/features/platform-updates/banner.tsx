@@ -2,25 +2,36 @@
 import { useEffect, useState } from "react";
 import { CalendarClock } from "lucide-react";
 import { formatUpdateTime, type UpdateNotice } from "./policy";
+import { getPollingIntervalMs } from "@/lib/dev/background-refresh";
 
 export function ScheduledUpdateBanner() {
   const [notice, setNotice] = useState<UpdateNotice | null>(null);
   useEffect(() => {
     const controller = new AbortController();
+    const intervalMs = getPollingIntervalMs(60000);
     let refreshing = false;
+    let retryAfter = 0;
     const refresh = async () => {
-      if (refreshing || document.visibilityState !== "visible") return;
+      if (refreshing || Date.now() < retryAfter || document.visibilityState !== "visible") return;
       refreshing = true;
       try {
         const response = await fetch("/api/platform/update-notice", { cache: "no-store", signal: controller.signal });
-        if (response.ok) setNotice(await response.json());
-      } catch { /* Keep the last successfully fetched notice during network interruptions. */ }
+        if (response.ok) {
+          setNotice(await response.json());
+        } else {
+          const seconds = Number(response.headers.get("Retry-After"));
+          retryAfter = Date.now() + Math.min(900, Math.max(60, Number.isFinite(seconds) ? seconds : 60)) * 1000;
+        }
+      } catch {
+        // Keep the last notice and avoid retries on every visibility change.
+        retryAfter = Date.now() + 60000;
+      }
       finally { refreshing = false; }
     };
     void refresh();
-    const timer = setInterval(() => { if (document.visibilityState === "visible") void refresh(); }, 60000);
+    const timer = intervalMs > 0 ? setInterval(() => { void refresh(); }, intervalMs) : undefined;
     const visible = () => { if (document.visibilityState === "visible") void refresh(); };
-    document.addEventListener("visibilitychange", visible);
+    if (intervalMs > 0) document.addEventListener("visibilitychange", visible);
     return () => { controller.abort(); clearInterval(timer); document.removeEventListener("visibilitychange", visible); };
   }, []);
   useEffect(() => {

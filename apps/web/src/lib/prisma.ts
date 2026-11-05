@@ -36,7 +36,9 @@ function createPrismaClient() {
   );
   const idleTimeoutMillis = readPositiveInt(
     process.env.PRISMA_IDLE_TIMEOUT_MS,
-    20_000,
+    // Keep the connection alive between minute-based status/banner polls.
+    // A 20s idle lifetime forced a fresh TCP/TLS connection on every poll.
+    90_000,
   );
   const queryTimeout = readPositiveInt(process.env.PRISMA_QUERY_TIMEOUT_MS, 45_000);
 

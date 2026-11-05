@@ -529,7 +529,7 @@ export default async function WebsiteControlCenterPage({
               <li key={key} className="flex min-w-0 flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <p className="min-w-0 break-all text-sm font-semibold leading-5 text-foreground">
-                    {{ taxes: "Tax management", waterBilling: "Water billing", inspections: "Inspections", tenantPortal: "Tenant portal", whatsappNotifications: "WhatsApp notifications", kraIntegration: "KRA integration", mpesaPayments: "M-Pesa payments" }[key]}
+                    {{ vacantHouses: "Public vacant houses", taxes: "Tax management", waterBilling: "Water billing", inspections: "Inspections", tenantPortal: "Tenant portal", whatsappNotifications: "WhatsApp notifications", kraIntegration: "KRA integration", mpesaPayments: "M-Pesa payments" }[key]}
                   </p>
                   <Badge
                     tone={

@@ -3,17 +3,42 @@ import assert from "node:assert/strict";
 import { build } from "esbuild";
 import { chromium } from "playwright";
 
+test("development does not open realtime streams when background refresh is disabled", async () => {
+  const bundle = await build({ stdin: { contents: `import React from 'react';import{createRoot}from'react-dom/client';import{WorkspaceLiveUpdates}from'./apps/web/src/components/realtime/workspace-live-updates';createRoot(document.getElementById('root')).render(<WorkspaceLiveUpdates/>);`, resolveDir: process.cwd(), loader: "tsx" }, bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", tsconfig: "apps/web/tsconfig.json", define: { "process.env": "{}", "process.env.NODE_ENV": '"development"', "process.env.NEXT_PUBLIC_DEV_BACKGROUND_REFRESH": '"false"' }, plugins: [{ name: "navigation", setup(builder) {
+    builder.onResolve({ filter: /^next\/navigation$/ }, () => ({ path: "navigation", namespace: "fixture" }));
+    builder.onLoad({ filter: /.*/, namespace: "fixture" }, () => ({ contents: "const router={refresh(){throw Error('Unexpected background read')}};export const useRouter=()=>router;export const usePathname=()=>'/platform';", loader: "js" }));
+  } }] });
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on("pageerror", error => errors.push(error.message));
+    await page.clock.install();
+    await page.setContent('<div id="root"></div>');
+    await page.addScriptTag({ content: "window.streams=[];window.EventSource=class{constructor(url){window.streams.push(url)}};" });
+    await page.addScriptTag({ content: bundle.outputFiles[0].text });
+    await page.clock.runFor(100);
+    await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+    await page.clock.fastForward(180000);
+    assert.equal(await page.evaluate("window.streams.length"), 0);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
 test("live workspace coalesces changes, defers typing, reconnects visible tabs and disposes on logout", async () => {
-  const bundle = await build({ stdin: { contents: `import React from 'react';import{createRoot}from'react-dom/client';import{WorkspaceLiveUpdates}from'./apps/web/src/components/realtime/workspace-live-updates';const root=createRoot(document.getElementById('root'));root.render(<WorkspaceLiveUpdates/>);window.unmount=()=>root.unmount();`, resolveDir: process.cwd(), loader: "tsx" }, bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", define: { "process.env.NODE_ENV": '"test"' }, plugins: [{ name: "live-client", setup(builder) {
+  const bundle = await build({ stdin: { contents: `import React from 'react';import{createRoot}from'react-dom/client';import{WorkspaceLiveUpdates}from'./apps/web/src/components/realtime/workspace-live-updates';const root=createRoot(document.getElementById('root'));root.render(<WorkspaceLiveUpdates/>);window.unmount=()=>root.unmount();`, resolveDir: process.cwd(), loader: "tsx" }, bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", define: { "process.env": "{}", "process.env.NODE_ENV": '"test"', "process.env.NEXT_PUBLIC_DEV_BACKGROUND_REFRESH": '"true"' }, plugins: [{ name: "live-client", setup(builder) {
     builder.onResolve({ filter: /^next\/navigation$/ }, () => ({ path: "navigation", namespace: "fixture" }));
     builder.onLoad({ filter: /.*/, namespace: "fixture" }, () => ({ contents: `const router={refresh(){window.refreshes++}};export const useRouter=()=>router;export const usePathname=()=>'/dashboard/org';` }));
   } }] });
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on("pageerror", error => errors.push(error.message));
     await page.setContent('<div id="root"></div><input aria-label="Draft"/>');
     await page.addScriptTag({ content: `window.refreshes=0;window.streams=[];window.visible=true;Object.defineProperty(document,'visibilityState',{get:()=>window.visible?'visible':'hidden'});window.EventSource=class{constructor(url){this.url=url;this.events={};window.streams.push(this)}addEventListener(name,fn){this.events[name]=fn}close(){this.closed=true}emit(name){this.events[name]?.()}};` });
     await page.addScriptTag({ content: bundle.outputFiles[0].text });
+    assert.deepEqual(errors, []);
     await page.waitForFunction("window.streams.length===1");
     await page.evaluate("window.streams[0].emit('ready')");
     await page.waitForFunction("window.refreshes===1");
@@ -30,5 +55,6 @@ test("live workspace coalesces changes, defers typing, reconnects visible tabs a
     await page.waitForFunction("window.streams.length===2");
     await page.evaluate("window.unmount()");
     assert.equal(await page.evaluate("window.streams[1].closed"), true);
+    assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

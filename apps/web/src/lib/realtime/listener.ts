@@ -1,5 +1,6 @@
 import "server-only";
 import { Client } from "pg";
+import { normalizeDatabaseUrlSslMode } from "@/lib/config/env";
 
 type Subscriber = { change: (scope: string) => void; disconnected: () => void };
 
@@ -32,7 +33,7 @@ class LiveListener {
       // Transaction poolers cannot retain LISTEN session state.
       const connectionString = process.env.REALTIME_DATABASE_URL || process.env.DIRECT_URL;
       if (!connectionString) throw new Error("Realtime direct connection is not configured");
-      const client = new Client({ connectionString, connectionTimeoutMillis: 8000, query_timeout: 8000, keepAlive: true });
+      const client = new Client({ connectionString: normalizeDatabaseUrlSslMode(connectionString), connectionTimeoutMillis: 8000, query_timeout: 8000, keepAlive: true });
       this.client = client;
       const disconnect = () => {
         if (this.client !== client) return;

@@ -14,14 +14,14 @@ import {
   resolveVacancyUnitIdFromSlugIndex,
   type VacancySlugIndexEntry,
 } from "./slug-index";
-import { publicListedVacancyWhere } from "./where";
+import { getPublicListedVacancyWhere } from "./where-server";
 import { prisma } from "@/lib/prisma";
 
 async function resolveVacancyUnitIdFromRawDatabaseId(id: string) {
   const unit = await prisma.unit.findFirst({
     where: {
       id,
-      ...publicListedVacancyWhere,
+      ...await getPublicListedVacancyWhere(),
     },
     select: { id: true },
   });
@@ -33,7 +33,7 @@ async function resolveVacancyUnitIdFromStoredSlug(slug: string) {
   const unit = await prisma.unit.findFirst({
     where: {
       publicSlug: slug,
-      ...publicListedVacancyWhere,
+      ...await getPublicListedVacancyWhere(),
     },
     select: { id: true },
   });
@@ -43,9 +43,9 @@ async function resolveVacancyUnitIdFromStoredSlug(slug: string) {
 
 async function queryVacancySlugIndex(): Promise<VacancySlugIndexEntry[]> {
   const units = await retryTransientDatabaseOperation(
-    () =>
+    async () =>
       prisma.unit.findMany({
-        where: publicListedVacancyWhere,
+        where: await getPublicListedVacancyWhere(),
         select: {
           id: true,
           houseNo: true,

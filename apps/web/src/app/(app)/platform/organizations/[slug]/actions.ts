@@ -1,5 +1,6 @@
 "use server";
 
+import { expirePublicVacancies } from "@/lib/public-vacancy-cache";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -23,6 +24,14 @@ function redirectWithArchiveError(slug: string, message: string): never {
 }
 
 export async function archiveOrganizationAction(formData: FormData) {
+  return changeOrganizationStatus(formData, "DISABLED");
+}
+
+export async function reactivateOrganizationAction(formData: FormData) {
+  return changeOrganizationStatus(formData, "ACTIVE");
+}
+
+async function changeOrganizationStatus(formData: FormData, status: "ACTIVE" | "DISABLED") {
   await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/dashboard",
   });
@@ -44,32 +53,39 @@ export async function archiveOrganizationAction(formData: FormData) {
     redirect("/platform/organizations");
   }
 
-  if (confirmation !== org.slug) {
-    redirectWithArchiveError(org.slug, `Type ${org.slug} to archive this organization.`);
+  if (expectedSlug !== org.slug || confirmation !== org.slug) {
+    redirectWithArchiveError(org.slug, `Type ${org.slug} to ${status === "ACTIVE" ? "reactivate" : "deactivate"} this organization.`);
   }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.organization.update({
-      where: { id: org.id },
-      data: { status: "DISABLED" },
-    });
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.organization.update({
+        where: { id: org.id },
+        data: { status },
+      });
 
-    await tx.userSession.updateMany({
-      where: {
-        activeMembership: {
-          orgId: org.id,
+      if (status !== "ACTIVE") await tx.userSession.updateMany({
+        where: {
+          activeMembership: {
+            orgId: org.id,
+          },
         },
-      },
-      data: {
-        activeMembershipId: null,
-      },
+        data: {
+          activeMembershipId: null,
+        },
+      });
     });
-  });
+  } catch (error) {
+    console.error("Organization status change failed", { orgId: org.id, error });
+    redirectWithArchiveError(org.slug, "Unable to change organization status. Please retry.");
+  }
 
+  expirePublicVacancies();
+  revalidatePath("/dashboard", "layout");
   revalidatePath("/platform");
   revalidatePath("/platform/organizations");
   revalidatePath(`/platform/organizations/${org.slug}`);
-  redirect(`/platform/organizations?archived=${encodeURIComponent(org.slug)}`);
+  redirect(`/platform/organizations/${encodeURIComponent(org.slug)}`);
 }
 
 export async function permanentlyDeleteOrganizationAction(formData: FormData) {
@@ -94,27 +110,37 @@ export async function permanentlyDeleteOrganizationAction(formData: FormData) {
     redirect("/platform/organizations");
   }
 
-  if (confirmation !== org.slug) {
+  if (expectedSlug !== org.slug || confirmation !== org.slug) {
     redirectWithDeleteError(org.slug, `Type ${org.slug} to permanently delete this organization.`);
   }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.userSession.updateMany({
-      where: {
-        activeMembership: {
-          orgId: org.id,
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.userSession.updateMany({
+        where: {
+          activeMembership: {
+            orgId: org.id,
+          },
         },
-      },
-      data: {
-        activeMembershipId: null,
-      },
-    });
+        data: {
+          activeMembershipId: null,
+        },
+      });
 
-    await tx.organization.delete({
-      where: { id: org.id },
+      await tx.organization.delete({
+        where: { id: org.id },
+      });
     });
-  });
+  } catch (error) {
+    console.error("Permanent organization deletion failed", { orgId: org.id, error });
+    const code = error && typeof error === "object" && "code" in error ? error.code : null;
+    redirectWithDeleteError(org.slug, code === "P2003"
+      ? "Deletion was blocked by a linked record. No organization data was deleted. Review the server log for the affected relation."
+      : "Unable to delete this organization. No organization data was deleted. Please retry.");
+  }
 
+  expirePublicVacancies();
+  revalidatePath("/dashboard", "layout");
   revalidatePath("/platform");
   revalidatePath("/platform/organizations");
   revalidatePath("/platform/data-management");

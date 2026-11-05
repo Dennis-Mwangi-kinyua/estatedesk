@@ -15,5 +15,5 @@ export default async function UnitDetailsPage({ params, searchParams }: UnitDeta
 
   const data = await getUnitDetailsData(session.activeOrgId!, requestedUnitRef, session.membershipScope);
 
-  return <UnitDetailsWorkspace data={data} orgRole={session.activeOrgRole} editProfile={query.edit === "1"} />;
+  return <UnitDetailsWorkspace data={data} vacantHousesEnabled={session.orgFeatures?.vacantHouses !== false} orgRole={session.activeOrgRole} editProfile={query.edit === "1"} />;
 }

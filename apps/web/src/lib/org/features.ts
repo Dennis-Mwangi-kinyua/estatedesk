@@ -1,3 +1,5 @@
+import type { OrgRolePolicy, OrgView } from "../permissions/org-role-policy";
+
 export type OrgFeatureMap = Record<string, boolean>;
 
 export function parseFeatureMap(value: unknown): OrgFeatureMap {
@@ -10,16 +12,6 @@ export function parseFeatureMap(value: unknown): OrgFeatureMap {
     result[key] = Boolean(item);
   }
   return result;
-}
-
-/**
- * Merge organization feature flags with platform-wide global overrides.
- * Global force ON/OFF wins over org settings.
- */
-export async function resolveOrgFeatures(orgFeatures: unknown): Promise<OrgFeatureMap> {
-  const { getPlatformControl } = await import("@/lib/platform/control");
-  const control = await getPlatformControl();
-  return applyGlobalFeatureOverrides(orgFeatures, control.globalFeatures);
 }
 
 export function getFeatureFlag(
@@ -41,4 +33,26 @@ export function applyGlobalFeatureOverrides(
     merged[key] = Boolean(value);
   }
   return merged;
+}
+
+export function applyFeatureAccess(policy: OrgRolePolicy | undefined, features: OrgFeatureMap): OrgRolePolicy {
+  const blocked = new Set<OrgView>(policy?.blockedViews ?? []);
+  const featureViews: Record<string, OrgView[]> = {
+    taxes: ["taxes"], waterBilling: ["water-bills", "meters"],
+    inspections: ["inspections"], vacantHouses: ["vacancy-inquiries"],
+  };
+  for (const [key, views] of Object.entries(featureViews)) {
+    if (features[key] === false) for (const view of views) blocked.add(view);
+  }
+  return { permissions: policy?.permissions ?? {}, blockedViews: [...blocked] };
+}
+
+export function featureBlocksPath(features: OrgFeatureMap | undefined, pathname: string): boolean {
+  if (!features) return false;
+  const path = new URL(pathname, "https://estatedesk.invalid").pathname;
+  return features.tenantPortal === false && (
+    path === "/dashboard/tenant" || path.startsWith("/dashboard/tenant/") ||
+    path === "/api/mobile/tenant" || path.startsWith("/api/mobile/tenant/") ||
+    path === "/api/tenant" || path.startsWith("/api/tenant/")
+  );
 }

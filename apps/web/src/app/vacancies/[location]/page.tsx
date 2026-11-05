@@ -1,3 +1,4 @@
+import { getPublicListedVacancyWhere } from "@estatedesk/public-vacancy/where-server";
 import { VacancyCostSummary } from "@/components/marketing/vacancy-cost-summary";
 import { vacancyRecordDate } from "@/lib/vacancy-record-date";
 import { rentalLandingRobots } from "@/lib/seo/rental-landing-metadata";
@@ -80,10 +81,11 @@ async function getVacancyUnit(slug: string) {
   if (!unitId) return null;
 
   const unit = await retryTransientDatabaseOperation(
-    () =>
+    async () =>
       prisma.unit.findFirst({
         where: {
           id: unitId,
+          AND: [await getPublicListedVacancyWhere()],
           leases: { none: { status: "ACTIVE" } },
           isActive: true,
           deletedAt: null,
@@ -208,10 +210,11 @@ async function getRelatedVacancyUnits(input: {
   const location = input.location?.trim() || "";
 
   return retryTransientDatabaseOperation(
-    () =>
+    async () =>
       prisma.unit.findMany({
         where: {
           id: { not: input.currentUnitId },
+          AND: [await getPublicListedVacancyWhere()],
           leases: { none: { status: "ACTIVE" } },
           isActive: true,
           deletedAt: null,

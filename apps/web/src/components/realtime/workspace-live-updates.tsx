@@ -2,6 +2,7 @@
 
 import { useEffect, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { isBackgroundRefreshEnabled } from "@/lib/dev/background-refresh";
 
 /** One stream for the workspace; full records still use existing authorized reads. */
 export function WorkspaceLiveUpdates() {
@@ -11,6 +12,7 @@ export function WorkspaceLiveUpdates() {
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
+    if (process.env.NODE_ENV === "development" && !isBackgroundRefreshEnabled()) return;
     let source: EventSource | null = null;
     let disposed = false;
     let connected = false;

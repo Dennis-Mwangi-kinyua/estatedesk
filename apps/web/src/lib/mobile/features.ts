@@ -1,9 +1,10 @@
+import { featureBlocksPath, type OrgFeatureMap } from "@/lib/org/features";
 import type { OrgRole } from "@prisma/client";
 import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
 import type { MobileFeature } from "@estatedesk/contracts/mobile";
 import { rolePolicyBlocksPath, type OrgRolePolicy } from "@/lib/permissions/org-role-policy";
 
-export function mobileFeatures(session: { activeOrgId: string | null; activeOrgRole: string | null; orgRolePolicy?: OrgRolePolicy; grantedPermissions?: string[] }): MobileFeature[] {
+export function mobileFeatures(session: { orgFeatures?: OrgFeatureMap; activeOrgId: string | null; activeOrgRole: string | null; orgRolePolicy?: OrgRolePolicy; grantedPermissions?: string[] }): MobileFeature[] {
   if (!session.activeOrgId) return [];
   const candidates: { feature: MobileFeature; roles: string[]; path: string }[] = [
     { feature: "leases", roles: ["TENANT"], path: "/api/mobile/tenant/leases" },
@@ -16,7 +17,7 @@ export function mobileFeatures(session: { activeOrgId: string | null; activeOrgR
     { feature: "gate", roles: ["ADMIN", "MANAGER", "OFFICE", "CARETAKER", "SECURITY"], path: "/api/mobile/gate/visitors" },
   ];
   if (memberHasOrgPermission({ ...session, activeOrgRole: session.activeOrgRole as OrgRole | null }, "payments.verify")) candidates.push({ feature: "payment-review", roles: [session.activeOrgRole!], path: "/api/mobile/org/payments" });
-  return candidates.filter(item => item.roles.includes(session.activeOrgRole ?? "") && !rolePolicyBlocksPath(session.orgRolePolicy, item.path)).map(item => item.feature);
+  return candidates.filter(item => item.roles.includes(session.activeOrgRole ?? "") && !rolePolicyBlocksPath(session.orgRolePolicy, item.path) && !featureBlocksPath(session.orgFeatures, item.path)).map(item => item.feature);
 }
 
 /** Older installed apps validate a closed feature enum; advertise only what they understand. */

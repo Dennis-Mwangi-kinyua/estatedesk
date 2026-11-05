@@ -10,6 +10,7 @@ body.estate-glass-system {
   --muted-foreground: var(--system-glass-muted);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
+body.estate-glass-system,
 body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surface) {
   --background: #f2f3f7;
   --foreground: #24262b;
@@ -38,6 +39,7 @@ body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surfa
   --system-glass-muted: #c1c7d0;
   --muted-foreground: var(--system-glass-muted);
 }
+.dark body.estate-glass-system,
 .dark body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surface) {
   --background: #141519;
   --foreground: #f0f1f5;
@@ -307,6 +309,13 @@ body.estate-glass-system :is(button, summary[role="button"], .public-action, a[d
 body.estate-glass-system :is(button, summary[role="button"], .public-action, a[data-workspace-action="true"], a[data-page-button="true"]):not([class*="inset-0"]):not([class*="inset-x-0"]):not([aria-label*="overlay"]):not([role="switch"]):not(.workspace-navigation-backdrop):not([data-logout-form] *):hover {
   background-color: #204fb7 !important;
   border-color: #204fb7 !important;
+}
+/* Action labels and icons must follow the blue control's white foreground.
+   Keep this in utilities alongside the legacy important text mappings. */
+@layer utilities {
+  body.estate-glass-system :is(button, .public-action, a[data-workspace-action="true"], a[data-page-button="true"]) :is(span, svg) {
+    color: inherit !important;
+  }
 }
 body.estate-glass-system [data-logout-form] button,
 body.estate-glass-system [data-logout-form] button:not([role="switch"]) {

@@ -1,6 +1,7 @@
 "use server";
 
 import { Prisma } from "@prisma/client";
+import { expirePublicVacancies } from "@/lib/public-vacancy-cache";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { writePlatformAuditLog } from "@/lib/audit/security";
@@ -85,6 +86,8 @@ export async function toggleOrganizationFeatureFlagAction(formData: FormData) {
     afterState: next,
   });
 
+  expirePublicVacancies();
+  revalidatePath("/dashboard", "layout");
   revalidatePath(PAGE_PATH);
   revalidatePath(`/platform/organizations/${org.slug}`);
 }

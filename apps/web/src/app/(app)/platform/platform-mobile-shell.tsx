@@ -25,11 +25,15 @@ export default function PlatformMobileShell({
   navItems,
   fullName,
   mode = "admin",
+  appearanceControl,
+  showThemeToggle = true,
 }: {
   children: ReactNode;
   navItems: readonly PlatformNavItem[];
   fullName: string;
   mode?: PlatformMode;
+  appearanceControl?: ReactNode;
+  showThemeToggle?: boolean;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -62,7 +66,7 @@ export default function PlatformMobileShell({
             <PlatformBrand mode={mode} />
 
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-              <HeaderThemeToggle />
+              {showThemeToggle && <HeaderThemeToggle />}
               <button data-workspace-action="true"
                 ref={menuButtonRef}
                 type="button"
@@ -80,6 +84,7 @@ export default function PlatformMobileShell({
           {/* Always-visible mode switch on phones — critical for Admin ↔ Developer */}
           <div className="border-t border-border/70 px-3 py-2 sm:px-4">
             <PlatformModeToggle variant="mobile" className="w-full" />
+            {appearanceControl && <div className="mt-2 flex justify-end">{appearanceControl}</div>}
           </div>
         </header>
 

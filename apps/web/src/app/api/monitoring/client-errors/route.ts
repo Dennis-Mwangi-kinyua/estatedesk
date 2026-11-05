@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getUserSession } from "@/lib/auth/session";
 import { logServerError } from "@/lib/errors/server-error-log";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { PayloadTooLargeError, readBoundedJson } from "@/lib/security/bounded-json";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +21,16 @@ function getClientIp(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const origin = request.headers.get("origin");
+  if (origin && origin !== new URL(request.url).origin) {
+    return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
+  }
   const session = await getUserSession();
 
   if (!session?.userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Public error boundaries also report here. Drop anonymous telemetry
+    // without creating another browser error or writing unauthenticated logs.
+    return new Response(null, { status: 204 });
   }
 
   try {
@@ -38,9 +45,19 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     logServerError("client-errors.rate-limit", error);
+    // Optional telemetry must not bypass the limiter during an outage.
+    return new Response(null, { status: 204 });
   }
 
-  const parsed = clientErrorSchema.safeParse(await request.json().catch(() => null));
+  let payload: unknown;
+  try {
+    payload = await readBoundedJson(request, 4096);
+  } catch (error) {
+    return NextResponse.json({ error: "Invalid client error payload." }, {
+      status: error instanceof PayloadTooLargeError ? 413 : 400,
+    });
+  }
+  const parsed = clientErrorSchema.safeParse(payload);
 
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid client error payload." }, { status: 400 });

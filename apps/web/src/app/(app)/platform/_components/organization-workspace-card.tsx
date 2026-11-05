@@ -38,7 +38,7 @@ type OrganizationWorkspaceCardProps = {
 };
 
 const cardShellClass =
-  "group rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md";
+  "platform-directory-card group rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md";
 
 const organizationColorVariants = [
   {

@@ -11,6 +11,7 @@ export function OrgDetailWorkspace(props: OrgDetailWorkspaceProps) {
       <OrgDetailOverviewSection {...props} />
       <Link href={`/platform/organizations/${props.org.slug}/access`} className="inline-flex min-h-11 items-center rounded-xl border bg-card px-4 py-3 text-sm font-semibold">Manage organization role access</Link>
       <Link href={`/platform/organizations/${props.org.slug}/tenants`} className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground">View tenants and individual records</Link>
+      <Link href="/platform/feature-flags" className="inline-flex min-h-11 items-center rounded-xl border bg-card px-4 py-3 text-sm font-semibold">Manage features and public vacant houses</Link>
       <OrgDetailActivitySection {...props} />
     </div>
   );

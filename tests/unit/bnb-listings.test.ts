@@ -129,3 +129,48 @@ test("successful posting scopes saved data to the active org and attaches upload
   assert.ok(state.refreshed.includes(`/stays/${state.saved?.slug}`));
   delete (globalThis as typeof globalThis & { bnbSaveFixture?: typeof state }).bnbSaveFixture;
 });
+
+test("public stay pages distinguish database outages from empty results and clamp pagination", async () => {
+  const { Prisma } = await import("@prisma/client");
+  const fixture = { error: null as unknown, total: 25, query: null as unknown, failCount: false };
+  const globals = globalThis as typeof globalThis & { publicStayFixture?: typeof fixture };
+  globals.publicStayFixture = fixture;
+  const queries = await load<{ getPublicStayPage: (where: object, page: number) => Promise<{ available: boolean; total: number; page: number; listings: unknown[] }> }>("apps/web/src/features/bnb/public-listings.ts", {
+    "@/lib/prisma": `export const prisma={bnbListing:{
+      count:async()=>{const f=globalThis.publicStayFixture;if(f.failCount)throw f.error;return f.total;},
+      findMany:async(query)=>{const f=globalThis.publicStayFixture;f.query=query;if(f.error)throw f.error;return [{id:'stay'}];}
+    }};`,
+    "@/lib/db/retry": 'export function isTransientDatabaseError(e){return e?.code === "EAI_AGAIN";}',
+  });
+  try {
+    const where = { status: "PUBLISHED" };
+    const result = await queries.getPublicStayPage(where, 999);
+    assert.equal(result.available, true);
+    assert.equal(result.page, 3);
+    assert.deepEqual((fixture.query as { where: object }).where, where);
+    assert.equal((fixture.query as { skip: number }).skip, 24);
+    assert.equal((await queries.getPublicStayPage(where, Infinity)).page, 1);
+    for (const code of ["P2021", "P2022"]) {
+      fixture.error = new Prisma.PrismaClientKnownRequestError("Missing schema", { code, clientVersion: "test" });
+      assert.deepEqual(await queries.getPublicStayPage(where, 1), { available: false, total: 0, page: 1, listings: [] });
+    }
+    fixture.error = Object.assign(new Error("DNS unavailable"), { code: "EAI_AGAIN" });
+    fixture.failCount = true;
+    assert.equal((await queries.getPublicStayPage(where, 1)).available, false);
+    fixture.error = new Error("Unexpected bug");
+    await assert.rejects(queries.getPublicStayPage(where, 1), /Unexpected bug/);
+  } finally {
+    delete globals.publicStayFixture;
+  }
+});
+
+test("anonymous client error reports are discarded without database writes or 401 errors", async () => {
+  const route = await load<{ POST: (request: Request) => Promise<Response> }>("apps/web/src/app/api/monitoring/client-errors/route.ts", {
+    "@/lib/auth/session": "export async function getUserSession(){return null;}",
+    "@/lib/errors/server-error-log": 'export function logServerError(){throw Error("Unexpected anonymous log write");}',
+    "@/lib/rate-limit": 'export function checkRateLimit(){throw Error("Unexpected limiter lookup");}',
+  });
+  const response = await route.POST(new Request("http://localhost/api/monitoring/client-errors", { method: "POST", body: '{}' }));
+  assert.equal(response.status, 204);
+  assert.equal(await response.text(), "");
+});

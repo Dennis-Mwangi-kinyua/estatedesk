@@ -23,11 +23,14 @@ import { isSecurityGatePathname } from "@/lib/auth/security-gate";
 import { prisma } from "@/lib/prisma";
 import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 import { readOrgRolePolicies, rolePolicyBlocksPath, type OrgRolePolicy } from "@/lib/permissions/org-role-policy";
+import { applyFeatureAccess, featureBlocksPath, type OrgFeatureMap } from "@/lib/org/features";
+import { resolveOrgFeatures } from "@/lib/org/features-server";
 import { applyOrganizationPlanAccess } from "@/lib/billing/organization-plan-policy";
 
 export type { OrgRole, PlatformRole, ScopeType };
 
 export type AppSession = {
+  orgFeatures?: OrgFeatureMap;
   orgRolePolicy?: OrgRolePolicy;
   grantedPermissions?: string[];
   userId: string;
@@ -553,17 +556,18 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
     // while avoiding an extra sequential database round trip on every service.
     const [settings, subscription] = activeMembership ? await Promise.all([
       prisma.organizationSettings.findUnique({
-        where: { orgId: activeMembership.orgId }, select: { roleAccess: true },
+        where: { orgId: activeMembership.orgId }, select: { roleAccess: true, features: true },
       }),
       prisma.subscription.findUnique({
         where: { orgId: activeMembership.orgId }, select: { plan: true, metadata: true },
       }),
     ]) : [null, null];
+    const orgFeatures = activeMembership ? await resolveOrgFeatures(settings?.features) : undefined;
     const orgRolePolicy = activeMembership
-      ? applyOrganizationPlanAccess(readOrgRolePolicies(settings?.roleAccess)[activeMembership.role], subscription?.plan ?? "FREE", subscription?.metadata)
+      ? applyFeatureAccess(applyOrganizationPlanAccess(readOrgRolePolicies(settings?.roleAccess)[activeMembership.role], subscription?.plan ?? "FREE", subscription?.metadata), orgFeatures ?? {})
       : undefined;
     // API handlers that read sessions directly must honor blocked sections too.
-    if (pathname.startsWith("/api/") && rolePolicyBlocksPath(orgRolePolicy, pathname)) return null;
+    if (pathname.startsWith("/api/") && (rolePolicyBlocksPath(orgRolePolicy, pathname) || featureBlocksPath(orgFeatures, pathname))) return null;
 
     return {
       userId: user.id,
@@ -576,6 +580,7 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
       activeOrgRole: activeMembership?.role ?? null,
       grantedPermissions: activeMembership?.grantedPermissions ?? [],
       orgRolePolicy,
+      orgFeatures,
       membershipScope: activeMembership
         ? {
             scopeType: activeMembership.scopeType,

@@ -1,3 +1,4 @@
+import { featureBlocksPath, type OrgFeatureMap } from "../org/features";
 import { caretakerCanAccessPath } from "../caretaker/workspace-policy";
 import type { OrgRole, PlatformRole } from "@prisma/client";
 import { canReceiveOrgMandates, type OrgPermission } from "./role-matrix";
@@ -33,7 +34,7 @@ function under(path: string, prefix: string) {
 }
 
 export function canAccessWorkspacePath(
-  session: { platformRole: PlatformRole; activeOrgRole: OrgRole | null; activeOrgId: string | null; membershipScope?: { scopeType: string; scopeId: string } | null; grantedPermissions?: readonly string[]; orgRolePolicy?: OrgRolePolicy; caretakerSections?: readonly string[]; caretakerUnitPaths?: readonly string[] },
+  session: { orgFeatures?: OrgFeatureMap; platformRole: PlatformRole; activeOrgRole: OrgRole | null; activeOrgId: string | null; membershipScope?: { scopeType: string; scopeId: string } | null; grantedPermissions?: readonly string[]; orgRolePolicy?: OrgRolePolicy; caretakerSections?: readonly string[]; caretakerUnitPaths?: readonly string[] },
   pathname: string,
 ) {
   let path: string;
@@ -42,7 +43,7 @@ export function canAccessWorkspacePath(
   } catch {
     return false;
   }
-  if (session.activeOrgId && rolePolicyBlocksPath(session.orgRolePolicy, path)) return false;
+  if (session.activeOrgId && (rolePolicyBlocksPath(session.orgRolePolicy, path) || featureBlocksPath(session.orgFeatures, path))) return false;
   // Provider ownership and hiring are authorised by their resource guards.
   if (path === "/provider" || path === "/service-providers" || /^\/service-providers\/[^/]+$/.test(path)) return true;
   if (["/dashboard", "/profile", "/access-denied"].includes(path) || under(path, "/change-password")) return true;

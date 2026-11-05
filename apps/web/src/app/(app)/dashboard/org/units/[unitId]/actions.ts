@@ -134,6 +134,10 @@ export async function updateUnitVacancyMarketingAction(
     uploadError(unitId, "Unit not found.");
   }
 
+  if (session.orgFeatures?.vacantHouses === false) {
+    uploadError(unitId, "Public vacant-house listings are disabled for this organization.");
+  }
+
   const isPubliclyListed = formData.get("isPubliclyListed") === "on";
 
   const updated = await prisma.unit.update({

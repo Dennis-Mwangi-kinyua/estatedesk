@@ -22,6 +22,7 @@ type ThemeContextValue = {
   theme: Theme;
   resolvedTheme: ResolvedTheme;
   setTheme: (theme: Theme) => void;
+  setThemeOverride: (theme: ResolvedTheme | null) => void;
 };
 
 const THEME_CLASSES: ResolvedTheme[] = ["light", "dark"];
@@ -79,7 +80,8 @@ function applyTheme(theme: Theme, resolvedTheme: ResolvedTheme) {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
-  const resolvedTheme = theme;
+  const [themeOverride, setThemeOverride] = useState<ResolvedTheme | null>(null);
+  const resolvedTheme = themeOverride ?? theme;
 
   useEffect(() => {
     disableTransitionsTemporarily();
@@ -95,6 +97,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       theme,
       resolvedTheme,
       setTheme,
+      setThemeOverride,
     }),
     [resolvedTheme, setTheme, theme],
   );

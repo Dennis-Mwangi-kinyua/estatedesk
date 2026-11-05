@@ -388,6 +388,7 @@ export const modeMeta: Record<
 
 /** Feature flag keys managed from the developer portal. */
 export const PLATFORM_FEATURE_FLAG_KEYS = [
+  "vacantHouses",
   "taxes",
   "waterBilling",
   "inspections",

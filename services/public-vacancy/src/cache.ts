@@ -36,3 +36,9 @@ export function revalidatePublicVacancies(input?: RevalidatePublicVacanciesInput
     }
   }
 }
+/** Access changes must not serve stale public inventory. */
+export function expirePublicVacancies() {
+  revalidateTag(PUBLIC_VACANCIES_CACHE_TAG, { expire: 0 });
+  revalidatePath("/vacancies", "layout");
+  revalidatePath("/", "page");
+}

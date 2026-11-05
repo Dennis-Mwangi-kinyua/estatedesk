@@ -1,0 +1,115 @@
+/* Glass is a fixed appearance, independent of the saved Classic color theme. */
+body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass {
+  --background: #eef2f8;
+  --foreground: #1b2b43;
+  --card: #ffffff;
+  --card-foreground: #1b2b43;
+  --muted: #e9eef6;
+  --muted-foreground: #526178;
+  --border: #d5deeb;
+  --admin-glass: rgb(255 255 255 / 52%);
+  --admin-chrome: rgb(248 251 255 / 62%);
+  --admin-line: rgb(255 255 255 / 78%);
+  --admin-control: rgb(255 255 255 / 94%);
+  --admin-shadow: 0 8px 30px rgb(37 61 103 / 6%), inset 0 1px 0 rgb(255 255 255 / 85%);
+  --admin-canvas: radial-gradient(ellipse at 88% 0%, rgb(165 180 252 / 40%), transparent 52%), radial-gradient(ellipse at 18% 70%, rgb(94 234 212 / 23%), transparent 54%), #eef2f8;
+  --system-glass-control: var(--admin-control);
+  --system-glass-ink: var(--foreground);
+  --system-glass-muted: var(--muted-foreground);
+  --platform-active: #e3edff;
+  --platform-active-ink: #244ca0;
+}
+
+/* Match the layer used by existing important legacy surface rules. */
+@layer utilities {
+  body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass {
+    background: var(--admin-canvas) !important;
+    color: var(--foreground);
+  }
+  body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass :is(.platform-sidebar, .platform-desktop-header, .platform-mobile-header, .platform-navigation-drawer, .platform-mobile-dock, footer.ed-shell-panel) {
+    background: var(--admin-chrome) !important;
+    border-color: var(--admin-line) !important;
+    box-shadow: var(--admin-shadow) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(125%) !important;
+    backdrop-filter: blur(24px) saturate(125%) !important;
+  }
+  body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass .platform-content-frame {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+  body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass :is(.platform-glass-panel, .platform-glass-metric, .platform-glass-hero, .platform-stat-card, .platform-directory-card, .workspace-panel, .page-header, [data-slot="card"]) {
+    background: var(--admin-glass) !important;
+    border: 1px solid var(--admin-line) !important;
+    border-radius: 1.25rem !important;
+    box-shadow: var(--admin-shadow) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(125%) !important;
+    backdrop-filter: blur(20px) saturate(125%) !important;
+  }
+  body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass :is(.platform-glass-inset, .platform-glass-chart, .platform-glass-shortcut) {
+    background: color-mix(in srgb, var(--card) 40%, transparent) !important;
+    border-color: var(--admin-line) !important;
+    box-shadow: none !important;
+  }
+  body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass .platform-sidebar-link[aria-current="page"] {
+    background: var(--platform-active) !important;
+    color: var(--platform-active-ink) !important;
+    box-shadow: inset 3px 0 0 var(--platform-active-ink) !important;
+  }
+  @media (max-width: 639px) {
+    body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass :is(.platform-glass-panel, .platform-glass-metric, .platform-stat-card, .platform-directory-card, .workspace-panel, [data-slot="card"]) {
+      -webkit-backdrop-filter: blur(8px) !important;
+      backdrop-filter: blur(8px) !important;
+    }
+  }
+  @media (prefers-reduced-transparency: reduce), print {
+    body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass {
+      --admin-glass: var(--card) !important;
+      --admin-chrome: var(--card) !important;
+      --admin-shadow: none !important;
+      --admin-canvas: var(--background) !important;
+      --admin-line: var(--border) !important;
+    }
+    body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass :is(.ed-shell-panel, .platform-mobile-dock, .platform-navigation-drawer, .platform-glass-panel, .platform-glass-metric, .platform-glass-hero, .platform-stat-card, .platform-directory-card, .workspace-panel, .page-header, [data-slot="card"]) {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+  }
+  @supports not (backdrop-filter: blur(1px)) {
+    body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass {
+      --admin-glass: var(--card) !important;
+      --admin-chrome: var(--card) !important;
+    }
+  }
+}
+@layer base {
+  body.estate-glass-system .estate-workspace .platform-shell-admin .platform-appearance-switch button[aria-pressed="false"] {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: var(--muted-foreground) !important;
+    box-shadow: none !important;
+  }
+  body.estate-glass-system .estate-workspace .platform-shell-admin .platform-appearance-switch button[aria-pressed="true"] {
+    background: #285ed4 !important;
+    border-color: #285ed4 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+  }
+  body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="file"]), textarea, select, [data-slot="select-trigger"], thead) {
+    background: var(--admin-control) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
+  }
+  body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass .platform-mode-switch button[aria-pressed="false"] {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: var(--muted-foreground) !important;
+    box-shadow: none !important;
+  }
+  body.estate-glass-system .estate-workspace .platform-shell-admin.platform-ui-glass .platform-mode-switch button[aria-pressed="true"] {
+    background: var(--platform-active) !important;
+    border-color: var(--border) !important;
+    color: var(--platform-active-ink) !important;
+  }
+}

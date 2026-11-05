@@ -3,24 +3,11 @@ import { rentalInventorySitemapEntries } from "@/lib/seo/rental-inventory";
 import { APP_URL, buildUrlEntry, formatDate, wrapUrlset } from "@/lib/sitemap-utils";
 import { vacancyPublicSlug } from "./slug";
 
-const publicVacantUnitWhere = {
-  status: "VACANT" as const,
-  isActive: true,
-  deletedAt: null,
-  isPubliclyListed: true,
-  property: {
-    isActive: true,
-    deletedAt: null,
-    org: {
-      status: "ACTIVE" as const,
-      deletedAt: null,
-    },
-  },
-};
+import { getPublicListedVacancyWhere } from "./where-server";
 
 export async function buildVacancyDetailSitemapXml() {
   const units = await prisma.unit.findMany({
-    where: publicVacantUnitWhere,
+    where: await getPublicListedVacancyWhere(),
     select: {
       id: true,
       updatedAt: true,
@@ -55,7 +42,7 @@ export async function buildVacancyDetailSitemapXml() {
 
 export async function buildRentalLandingSitemapXml() {
   const units = await prisma.unit.findMany({
-    where: publicVacantUnitWhere,
+    where: await getPublicListedVacancyWhere(),
     select: {
       type: true,
       updatedAt: true,

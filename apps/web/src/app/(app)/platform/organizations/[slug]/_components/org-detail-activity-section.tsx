@@ -5,6 +5,7 @@ import { Receipt, ChevronDown } from "lucide-react";
 import { UsersRound, Archive, Trash2 } from "@/components/shared/colored-icons";
 import {
   archiveOrganizationAction,
+  reactivateOrganizationAction,
   permanentlyDeleteOrganizationAction,
 } from "../actions";
 import {
@@ -150,18 +151,17 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
         </div>
       </OrgSurface>
 
-      <details className="rounded-2xl border border-border bg-card">
-        <summary className="flex min-h-14 cursor-pointer items-center gap-3 px-5 py-4 text-sm font-semibold text-muted-foreground"><Archive aria-hidden="true" className="h-5 w-5" />Advanced organisation actions<ChevronDown aria-hidden="true" className="ml-auto h-4 w-4" /></summary>
+      <details open className="rounded-2xl border border-border bg-card">
+        <summary className="flex min-h-14 cursor-pointer items-center gap-3 px-5 py-4 text-sm font-semibold text-muted-foreground"><Archive aria-hidden="true" className="h-5 w-5" />Organization access and deletion<ChevronDown aria-hidden="true" className="ml-auto h-4 w-4" /></summary>
       <OrgSurface
         title="Danger zone"
-        description="Archive access or permanently remove this organization."
+        description="Deactivate, reactivate, or permanently remove this organization."
       >
-        <form action={archiveOrganizationAction} className="space-y-4 border-b border-slate-200 p-4 dark:border-white/10">
+        <form action={org.status === "ACTIVE" ? archiveOrganizationAction : reactivateOrganizationAction} className="space-y-4 border-b border-slate-200 p-4 dark:border-white/10">
           <input type="hidden" name="orgId" value={org.id} />
           <input type="hidden" name="expectedSlug" value={org.slug} />
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100">
-            Archive keeps the organization data but terminates service access. Users in
-            <span className="font-semibold"> {org.name}</span> will be directed to a service termination page when they try to log in.
+            {org.status === "ACTIVE" ? "Deactivation keeps organization data, blocks organization access, and removes its public vacant-house listings." : "Reactivation restores organization access. Public listings return when the vacant houses feature is enabled."}
           </div>
           {statusParams?.archiveError ? (
             <p className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm font-medium text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100">
@@ -170,7 +170,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
           ) : null}
           <label className="block max-w-md">
             <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-              Type {org.slug} to archive
+              Type {org.slug} to {org.status === "ACTIVE" ? "deactivate" : "reactivate"}
             </span>
             <input
               name="archiveConfirmation"
@@ -182,7 +182,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
             type="submit"
             className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/20 dark:focus-visible:ring-offset-slate-900 sm:w-auto"
           >
-            <Archive aria-hidden="true" className="mr-2 h-4 w-4" />Archive and terminate access
+            <Archive aria-hidden="true" className="mr-2 h-4 w-4" />{org.status === "ACTIVE" ? "Deactivate organization" : "Reactivate organization"}
           </button>
         </form>
 

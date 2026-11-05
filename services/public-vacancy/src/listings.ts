@@ -1,3 +1,4 @@
+import { getPublicListedVacancyWhere } from "./where-server";
 import { unstable_cache } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { isTransientDatabaseError, retryTransientDatabaseOperation } from "@/lib/db/retry";
@@ -98,7 +99,7 @@ async function queryVacancyListingsPage(params: VacancyListQuery & {
 }): Promise<VacancyListPageResult> {
   const page = normalizePage(params.page);
   const pageSize = normalizePageSize(params.pageSize);
-  const where = buildVacancyListWhere(params);
+  const where = buildVacancyListWhere(params, await getPublicListedVacancyWhere());
   const orderBy = vacancyListOrderBy(params.sort ?? "random");
 
   return retryTransientDatabaseOperation(
@@ -121,7 +122,7 @@ async function queryVacancyListingsPage(params: VacancyListQuery & {
 }
 
 async function queryVacancyListingsCount(params: VacancyListQuery = {}) {
-  const where = buildVacancyListWhere(params);
+  const where = buildVacancyListWhere(params, await getPublicListedVacancyWhere());
   return retryTransientDatabaseOperation(
     () => prisma.unit.count({ where }),
     PUBLIC_VACANCY_RETRY_OPTIONS,

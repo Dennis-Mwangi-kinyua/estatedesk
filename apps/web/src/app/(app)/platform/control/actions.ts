@@ -2,6 +2,7 @@
 
 import { buildAccountStatusDraft } from "@/lib/notifications/recipient-message";
 import { accountLoginUrl } from "@/lib/notifications/account-login-url";
+import { expirePublicVacancies } from "@/lib/public-vacancy-cache";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { BillingPlan, OrganizationStatus, SubscriptionStatus } from "@prisma/client";
@@ -48,6 +49,8 @@ async function requireSuperAdmin() {
 }
 
 function refreshControl() {
+  expirePublicVacancies();
+  revalidatePath("/dashboard", "layout");
   revalidatePath(PAGE);
   revalidatePath("/platform/developer");
   revalidatePath("/platform");

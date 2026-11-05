@@ -1,3 +1,4 @@
+import { getPublicListedVacancyWhere } from "@estatedesk/public-vacancy/where-server";
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -101,8 +102,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Invalid API key." }, { status: 401 });
   }
 
+  const eligibility = await getPublicListedVacancyWhere();
   const units = await prisma.unit.findMany({
     where: {
+      AND: [eligibility],
       isActive: true,
       deletedAt: null,
       status: "VACANT",

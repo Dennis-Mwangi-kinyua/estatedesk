@@ -36,7 +36,9 @@ function colorForOrganization(index: number) {
 }
 
 function readFeature(features: Record<string, boolean>, key: string) {
-  return Boolean(features[key]);
+  return ["vacantHouses", "taxes", "waterBilling", "inspections", "tenantPortal"].includes(key)
+    ? features[key] !== false
+    : Boolean(features[key]);
 }
 
 function FlagToggle({
@@ -63,9 +65,10 @@ function FlagToggle({
       />
       <button data-workspace-action="true"
         type="submit"
+        disabled={globallyForced}
         title={
           globallyForced
-            ? `${featureKey} is globally forced; toggling still updates org storage`
+            ? `${featureKey} is controlled by a platform override; change it in Control center first`
             : `Turn ${featureKey} ${enabled ? "off" : "on"} for ${orgName}`
         }
         className="min-h-8 rounded-full transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500"

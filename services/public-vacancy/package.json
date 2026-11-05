@@ -14,7 +14,8 @@
     "./sitemap": "./src/sitemap.ts",
     "./slug": "./src/slug.ts",
     "./slug-index": "./src/slug-index.ts",
-    "./where": "./src/where.ts"
+    "./where": "./src/where.ts",
+    "./where-server": "./src/where-server.ts"
   },
   "dependencies": {
     "@estatedesk/contracts": "file:../../packages/contracts"

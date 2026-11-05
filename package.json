@@ -21,6 +21,7 @@
     "backup:validate": "bash scripts/validate-backup.sh",
     "restore:drill": "bash scripts/restore-drill.sh",
     "production:check": "node scripts/production-readiness-check.mjs",
+    "database:check": "node --import tsx scripts/check-database.mts",
     "version:set": "node scripts/set-release-version.mjs",
     "postinstall": "prisma generate",
     "seed": "tsx prisma/seed.ts",

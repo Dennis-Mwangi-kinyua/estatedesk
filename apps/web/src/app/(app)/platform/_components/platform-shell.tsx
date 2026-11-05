@@ -5,6 +5,7 @@ import { WorkspaceIdentity } from "@/components/shared/workspace-identity";
 import { PlatformNavigation } from "./platform-navigation";
 
 import "../platform-glass.css";
+import "../admin-glass.css";
 
 import Link from "@/components/navigation/workspace-link";
 import { ReactNode, useMemo, useState } from "react";
@@ -21,6 +22,7 @@ import { DeveloperSensitiveBanner } from "./developer-sensitive-banner";
 import { PlatformModeProvider, usePlatformMode } from "./platform-mode-context";
 import { PlatformModeToggle } from "./platform-mode-toggle";
 import PlatformMobileShell from "../platform-mobile-shell";
+import { PlatformAppearanceSwitch, usePlatformAppearance } from "./platform-appearance-switch";
 
 function PlatformShellInner({
   children,
@@ -45,12 +47,14 @@ function PlatformShellInner({
   );
   const meta = modeMeta[mode];
   const isDeveloper = mode === "developer";
+  const { appearance, isGlass } = usePlatformAppearance(!isDeveloper);
 
   return (
     <div
       className={[
         "app-mobile-canvas ed-mobile-surface h-dvh overflow-hidden text-foreground",
         isDeveloper ? "platform-shell-developer" : "platform-shell-admin",
+        isGlass ? "platform-ui-glass" : "",
       ].join(" ")}
     >
       <div className="flex h-dvh overflow-hidden">
@@ -88,6 +92,8 @@ function PlatformShellInner({
           navItems={navItems}
           fullName={fullName}
           mode={mode}
+          appearanceControl={!isDeveloper ? <PlatformAppearanceSwitch appearance={appearance} /> : undefined}
+          showThemeToggle={!isGlass}
         >
           <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden lg:pl-[280px]">
             <header className="platform-desktop-header ed-shell-panel hidden h-[76px] shrink-0 border-b px-6 lg:block">
@@ -114,7 +120,8 @@ function PlatformShellInner({
                 </div>
 
                 <div className="flex shrink-0 items-center gap-3">
-                  <HeaderThemeToggle />
+                  {!isDeveloper && <PlatformAppearanceSwitch appearance={appearance} />}
+                  {!isGlass && <HeaderThemeToggle />}
                   <WorkspaceIdentity name={fullName} role={isDeveloper ? "Developer" : isSuperAdmin ? "Super admin" : "Platform admin"} />
 
                 </div>
