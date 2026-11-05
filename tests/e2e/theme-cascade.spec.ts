@@ -22,7 +22,7 @@ test.beforeAll(async () => {
 
 test("actual public and workspace theme toggles keep contrasting icons and switch both ways", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("theme", "light"));
-  await page.route("http://theme-controls.test/**", route => route.fulfill({ contentType: "text/html", body: `<html><head><style>${css}</style></head><body class="estate-glass-system"><div id="root"></div><script>${toggleFixture}</script></body></html>` }));
+  await page.route("http://theme-controls.test/**", route => route.fulfill({ contentType: "text/html", body: `<html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>${css}</style></head><body class="estate-glass-system"><div id="root"></div><script>${toggleFixture}</script></body></html>` }));
   await page.goto("http://theme-controls.test/");
   for (const theme of ["light", "dark"] as const) {
     await expect(page.locator("html")).toHaveClass(new RegExp(theme));
@@ -54,7 +54,7 @@ for (const saved of ["light", "dark"] as const) {
     }, saved);
     await page.route("http://appearance.test/**", route => route.fulfill({
       contentType: "text/html",
-      body: `<html><head><style>${css}</style></head><body class="estate-glass-system"><div id="root"></div><script>${appearanceFixture}</script></body></html>`,
+      body: `<html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>${css}</style></head><body class="estate-glass-system"><div id="root"></div><script>${appearanceFixture}</script></body></html>`,
     }));
     await page.goto("http://appearance.test/platform");
     await expect(page.locator("html")).toHaveClass(new RegExp(saved));
@@ -86,7 +86,7 @@ for (const theme of ["light", "dark"] as const) {
   test(`platform admin glass has one appearance with a ${theme} device theme`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: theme });
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.setContent(`<html class="light"><head><style>${css} *,*::before,*::after{transition:none!important}</style></head>
+    await page.setContent(`<html class="light"><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>${css} *,*::before,*::after{transition:none!important}</style></head>
       <body class="estate-glass-system"><div class="estate-workspace"><div class="platform-shell-admin platform-ui-glass" style="min-height:100vh;padding:24px">
         <header class="platform-desktop-header ed-shell-panel" style="padding:20px;border-radius:20px"><p class="text-muted-foreground">ESTATEDESK · PLATFORM ADMIN</p><h1 style="font-size:28px;margin-top:8px">Platform overview</h1></header>
         <main style="max-width:1100px;margin:24px auto">
@@ -142,7 +142,7 @@ for (const theme of ["light", "dark"] as const) {
 for (const deviceTheme of ["light", "dark"] as const) {
   test(`public and dashboard colors follow the selected theme with a ${deviceTheme} device theme`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: deviceTheme, reducedMotion: "reduce" });
-    await page.setContent(`<html class="light"><head><style>${css} *,*::before,*::after{transition:none!important}</style></head>
+    await page.setContent(`<html class="light"><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>${css} *,*::before,*::after{transition:none!important}</style></head>
       <body class="estate-glass-system"><header class="modern-public-header"></header>
       ${["public", "workspace"].map(scope => `<main class="${scope === "workspace" ? "estate-workspace org-theme-content" : ""}">
         <article id="${scope}-card" class="bg-card text-card-foreground">Card</article>
