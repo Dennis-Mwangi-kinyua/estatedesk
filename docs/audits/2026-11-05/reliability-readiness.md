@@ -26,5 +26,13 @@ Theme palette corrections and the stays unavailable state from the preceding wor
 ## Remaining external verification
 
 - Remote database connection attempts were intermittent: one diagnostic timed out, while later checks passed. Connection reuse and request reduction do not establish that the provider/network timeout is eliminated. Restart the development server to load the new pool settings, then monitor repeated checks and real traffic.
-- The npm vulnerability audit was not run: automatic approval review rejected sending locked dependency metadata to an external audit service without specific approval.
+- The local npm vulnerability audit was blocked by automatic approval review. The repository's configured GitHub CI subsequently ran its audit and identified vulnerable Zod and fast-uri versions. The release updates the web runtime to Zod 4.6.7 and fast-uri 3.1.9; CI remains responsible for confirming the audit result.
 - Live payment-provider transactions, delivery/alert integrations, off-site backup retention, and deployed production behavior were not verified. Passing local configuration checks does not certify those external systems.
+
+## Final release updates
+
+- Admin headers offer Classic / Glass. Glass uses a single fixed appearance with 52% white panel fills and backdrop blur; Classic restores the saved light/dark preference. Switching, reloads, navigation cleanup, contrast, mobile width, and reduced transparency pass six browser checks.
+- The platform dashboard heading now renders its decorative icon metadata deterministically, preventing the reported enhancement-before-hydration mismatch. Its browser hydration regression passes.
+- Development realtime streams respect the background-refresh setting. Enabled streams retain reconciliation, typing protection, and reconnect behavior; browser regressions cover both enabled and disabled operation. Realtime direct connections use the shared SSL URL normalization.
+- Capacity workflow temporary paths are initialized during step execution, avoiding unavailable runner context in job-level environment expressions.
+- Final full-suite verification with the patched web dependencies: 689 tests passed, zero failures or skips.
