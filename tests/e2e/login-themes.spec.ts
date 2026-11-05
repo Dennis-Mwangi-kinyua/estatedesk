@@ -41,13 +41,13 @@ test("theme switching preserves visible login fields and the saved choice", asyn
   await page.goto("/login");
   await expect(page.locator("html")).toHaveClass(/light/);
   await page.getByLabel("Email or username").fill("caretaker01");
-  await page.getByRole("button", { name: "Change color theme", exact: true }).click();
+  await page.getByRole("button", { name: /^Switch to (light|dark) mode$/ }).click();
   await expect(page.locator("html")).toHaveClass(/dark/);
   await expect(page.getByLabel("Email or username")).toHaveValue("caretaker01");
   await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   await page.reload();
   await expect(page.locator("html")).toHaveClass(/dark/);
-  await page.getByRole("button", { name: "Change color theme", exact: true }).click();
+  await page.getByRole("button", { name: /^Switch to (light|dark) mode$/ }).click();
   await expect(page.locator("html")).toHaveClass(/light/);
   await expect(page.getByRole("button", { name: "Log in", exact: true })).toBeVisible();
 });
@@ -86,7 +86,7 @@ test("theme toggle has two modes and ignores later device-theme changes", async 
   await page.emulateMedia({ colorScheme: "light" });
   await page.addInitScript(() => { if (!localStorage.getItem("theme")) localStorage.setItem("theme", "light"); });
   await page.goto("/login");
-  const toggle = page.getByRole("button", { name: "Change color theme", exact: true });
+  const toggle = page.getByRole("button", { name: /^Switch to (light|dark) mode$/ });
   await toggle.click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await toggle.click();
