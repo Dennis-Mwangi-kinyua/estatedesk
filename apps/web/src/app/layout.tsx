@@ -28,6 +28,7 @@ import "./system-glass.css";
 import "./modern-ui.css";
 import "./site-experience.css";
 import "./soft-ui.css";
+import "./theme-controls.css";
 import "./public-workspace.css";
 
 const siteUrl = getSiteUrl();

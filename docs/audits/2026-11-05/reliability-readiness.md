@@ -36,3 +36,5 @@ Theme palette corrections and the stays unavailable state from the preceding wor
 - Development realtime streams respect the background-refresh setting. Enabled streams retain reconciliation, typing protection, and reconnect behavior; browser regressions cover both enabled and disabled operation. Realtime direct connections use the shared SSL URL normalization.
 - Capacity workflow temporary paths are initialized during step execution, avoiding unavailable runner context in job-level environment expressions.
 - Final full-suite verification with the patched web dependencies: 689 tests passed, zero failures or skips.
+- Expo SDK patch dependencies were aligned with the compatibility check; the check, mobile/web typechecks, and the 689-test suite pass with that alignment.
+- Added a regression for the actual public/workspace theme controls after reproducing a 1.05:1 light-mode icon contrast failure. Explicit foreground/background styling and 44px targets fix the control. All seven appearance browser checks pass, including switching in both directions and preserving the independent Glass preference.

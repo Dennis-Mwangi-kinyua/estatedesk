@@ -26,7 +26,7 @@ function ThemeToggleButton({
   const label = `Switch to ${isDark ? "light" : "dark"} mode`;
 
   return (
-    <button data-workspace-action="true"
+    <button data-theme-toggle="true" data-workspace-action="true"
       type="button"
       disabled={!isHydrated}
       onClick={() => setTheme(isDark ? "light" : "dark")}

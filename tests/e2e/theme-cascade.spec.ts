@@ -7,14 +7,43 @@ import { build } from "esbuild";
 
 let css: string;
 let appearanceFixture: string;
+let toggleFixture: string;
 test.beforeAll(async () => {
   const base = path.resolve("apps/web/src/app");
   const globals = path.join(base, "globals.css");
   const compiled = await postcss([tailwind()]).process(readFileSync(globals, "utf8"), { from: globals });
-  css = compiled.css + ["system-glass.css", "modern-ui.css", "site-experience.css", "soft-ui.css", "public-workspace.css", "(app)/workspace.css", "(app)/workspace-controls.css", "(app)/platform/platform-glass.css", "(app)/platform/admin-glass.css"]
+  css = compiled.css + ["system-glass.css", "modern-ui.css", "site-experience.css", "soft-ui.css", "theme-controls.css", "public-workspace.css", "(app)/workspace.css", "(app)/workspace-controls.css", "(app)/platform/platform-glass.css", "(app)/platform/admin-glass.css"]
     .map(file => readFileSync(path.join(base, file), "utf8")).join("\n");
   const bundle = await build({ entryPoints: ["tests/e2e/fixtures/platform-appearance.tsx"], bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", tsconfig: "apps/web/tsconfig.json" });
   appearanceFixture = bundle.outputFiles[0].text;
+  const toggles = await build({ entryPoints: ["tests/e2e/fixtures/theme-toggle.tsx"], bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", tsconfig: "apps/web/tsconfig.json" });
+  toggleFixture = toggles.outputFiles[0].text;
+});
+
+test("actual public and workspace theme toggles keep contrasting icons and switch both ways", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("theme", "light"));
+  await page.route("http://theme-controls.test/**", route => route.fulfill({ contentType: "text/html", body: `<html><head><style>${css}</style></head><body class="estate-glass-system"><div id="root"></div><script>${toggleFixture}</script></body></html>` }));
+  await page.goto("http://theme-controls.test/");
+  for (const theme of ["light", "dark"] as const) {
+    await expect(page.locator("html")).toHaveClass(new RegExp(theme));
+    for (const id of ["public-toggle", "workspace-toggle"]) {
+      const button = page.locator(`#${id} button`);
+      await expect(button).toBeVisible();
+      const ratio = await button.evaluate(element => {
+        const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
+        const context = canvas.getContext("2d", { willReadFrequently: true })!;
+        const luminance = (color: string) => { context.fillStyle = color; context.fillRect(0, 0, 1, 1); return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3).map(value => value / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4).reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0); };
+        const values = [luminance(getComputedStyle(element).backgroundColor), luminance(getComputedStyle(element.querySelector("svg")!).color)].sort((a, b) => b - a);
+        return (values[0] + .05) / (values[1] + .05);
+      });
+      expect(ratio, `${id} ${theme} icon contrast`).toBeGreaterThanOrEqual(4.5);
+      const box = await button.boundingBox();
+      expect(box!.width).toBeGreaterThanOrEqual(40);
+      expect(box!.height).toBeGreaterThanOrEqual(40);
+    }
+    await page.locator("#public-toggle button").click();
+  }
+  await expect(page.locator("html")).toHaveClass(/light/);
 });
 
 for (const saved of ["light", "dark"] as const) {
