@@ -3,7 +3,6 @@
 import { PlatformNavigation } from "./_components/platform-navigation";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 
-import Link from "@/components/navigation/workspace-link";
 import { ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -12,12 +11,10 @@ import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import {
-  isNavItemActive,
   type PlatformMode,
   type PlatformNavItem,
 } from "./_lib/nav";
 import { PlatformBrand } from "./_components/platform-brand";
-import { PlatformNavIcon } from "./_components/platform-nav-icon";
 import { PlatformModeToggle } from "./_components/platform-mode-toggle";
 
 export default function PlatformMobileShell({
@@ -40,9 +37,6 @@ export default function PlatformMobileShell({
   const panelId = useId();
   const [query, setQuery] = useState("");
   const drawerRef = useRef<HTMLElement>(null);
-  const tabs = navItems.filter((item) => (mode === "admin"
-    ? ["/platform", "/platform/organizations", "/platform/payments"]
-    : ["/platform/developer", "/platform/system-health", "/platform/jobs"]).includes(item.href));
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   const closeMenu = useCallback(() => {
@@ -89,14 +83,7 @@ export default function PlatformMobileShell({
         </header>
 
         <div inert={open} className="min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
-        <nav aria-label="Quick navigation" inert={open} className="platform-mobile-dock ed-shell-panel grid shrink-0 grid-cols-4 gap-1 border-t border-border px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:hidden">
-          {tabs.map((item) => {
-            const active = isNavItemActive(pathname, item.href);
-            const tone = item.href.includes("payments") || item.href.includes("system-health") ? "emerald" : item.href.includes("organizations") || item.href.includes("jobs") ? "teal" : "sky";
-            return <Link data-dock-tone={tone} key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`platform-dock-item flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary ${active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"}`}><span className="platform-dock-icon"><PlatformNavIcon label={item.href} className="h-6 w-6" /></span><span>{item.href === "/platform/organizations" ? "Orgs" : item.href === "/platform/developer" ? "Home" : item.label}</span></Link>;
-          })}
-          <button data-workspace-action="true" type="button" onClick={() => setOpen(true)} data-dock-tone="slate" aria-label="More navigation" aria-expanded={open} aria-controls={panelId} className="platform-dock-item flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-semibold text-muted-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-primary"><span className="platform-dock-icon"><PlatformNavIcon label="more" className="h-6 w-6" /></span><span>More</span></button>
-        </nav>
+
       </div>
 
       <button data-workspace-action="true"

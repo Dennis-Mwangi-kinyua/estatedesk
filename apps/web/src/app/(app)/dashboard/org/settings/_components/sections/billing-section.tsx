@@ -112,6 +112,8 @@ export function BillingSection({ data }: { data: SettingsPageData }) {
         </div>
       ) : null}
 
+      <a href="/dashboard/org/subscription" className="mt-4 inline-flex min-h-11 items-center rounded-xl border px-4 text-sm font-semibold">View invoices, payments and receipts</a>
+
       <form action={updateBillingAction} className="mt-4 space-y-4">
         <InputField
           label="Billing Email"

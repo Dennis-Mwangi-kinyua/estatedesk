@@ -6,7 +6,6 @@ import type { Metadata, Viewport } from "next";
 import { MarketingAnalytics } from "@/components/marketing/marketing-analytics";
 import { WebVitalsReporter } from "@/components/monitoring/web-vitals-reporter";
 import { MobileSwipeBack } from "@/components/navigation/mobile-swipe-back";
-import { PwaInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { PwaLaunchScreen } from "@/components/pwa/pwa-launch-screen";
 import { PwaExperienceLoader } from "@/components/pwa/pwa-experience-loader";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
@@ -260,7 +259,6 @@ export default async function RootLayout({
           <ServiceWorkerRegistration />
           <ServiceWorkerUpdatePrompt />
           <PwaExperienceLoader />
-          <PwaInstallPrompt />
           <div id="main-content" tabIndex={-1} className="ed-mobile-first-root min-h-dvh w-full min-w-0">
             <Suspense fallback={null}><IncidentBanner /></Suspense>
             {children}

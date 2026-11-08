@@ -107,7 +107,7 @@ export async function createLeaseSignatureEnvelope(input: {
 
 export async function getLeaseSigningContext(token: string) {
   return prisma.leaseSignatureSigner.findUnique({
-    where: { tokenHash: tokenHash(token) },
+    where: { tokenHash: tokenHash(token), envelope: { org: { deletedAt: null, status: "ACTIVE" } } },
     include: {
       envelope: { include: { org: { select: { name: true } }, lease: { include: { unit: { include: { property: true } }, tenant: true, contractDocument: true } }, signers: { orderBy: { role: "asc" } } } },
     },

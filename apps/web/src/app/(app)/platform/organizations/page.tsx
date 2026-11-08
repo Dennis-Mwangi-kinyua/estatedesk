@@ -99,6 +99,7 @@ export default async function PlatformOrganizationsPage({
               <Plus className="h-4 w-4" />
               Add organization
             </Link>
+            <Link href="/platform/organizations/deleted" className="inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold">Deleted organizations</Link>
             <Link
               href="/platform/reports"
               className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-800 shadow-sm transition hover:bg-neutral-50"
@@ -112,7 +113,7 @@ export default async function PlatformOrganizationsPage({
 
       {deletedSlug ? (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 dark:border-emerald-300/30 dark:bg-emerald-300/10 dark:text-emerald-100">
-          Organization /{deletedSlug} was permanently deleted. The directory has been refreshed.
+          Organization /{deletedSlug} was deleted. Its records are retained for 30 days and are visible only to platform admins.
         </div>
       ) : null}
 

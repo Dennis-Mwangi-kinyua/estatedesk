@@ -26,7 +26,7 @@ export const ORG_WORKSPACE_ROLES: Record<string, readonly OrgRole[]> = {
   accounting: FINANCE, expenditures: FINANCE, reports: MANAGEMENT,
   staff: ["ADMIN", "MANAGER"], taxes: ["ADMIN", "ACCOUNTANT"],
   airbnb: ["ADMIN", "MANAGER"],
-  agreements: ["ADMIN", "MANAGER"], settings: ["ADMIN"], "verify-tenant": ["ADMIN"],
+  agreements: ["ADMIN", "MANAGER"], settings: ["ADMIN"], subscription: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"], "verify-tenant": ["ADMIN"],
 };
 
 function under(path: string, prefix: string) {
@@ -57,7 +57,7 @@ export function canAccessWorkspacePath(
   if (scopedMember && under(path, "/dashboard/org")) {
     const section = path.split("/")[3];
     const organizationWideSections = new Set([
-      "accounting", "agreements", "community", "finance-requests", "help",
+      "subscription", "accounting", "agreements", "community", "finance-requests", "help",
       "identity-verification", "imports", "insights", "reports", "service-providers",
       "staff", "support", "taxes", "landlords",
     ]);

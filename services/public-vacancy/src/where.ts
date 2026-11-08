@@ -1,5 +1,17 @@
 import { Prisma, type UnitType } from "@prisma/client";
 
+// JSON-path comparisons return SQL NULL for missing keys. Include missing keys
+// explicitly so changing an unrelated organization feature cannot hide listings.
+function orgSettingDoesNotEqual(key: string, value: boolean): Prisma.OrganizationWhereInput {
+  return { OR: [
+    { settings: { is: null } },
+    { settings: { is: { OR: [
+      { features: { path: [key], not: value } },
+      { features: { path: [key], equals: Prisma.AnyNull } },
+    ] } } },
+  ] };
+}
+
 /** Shared filter for units that should appear on the public vacancies surface. */
 export const publicListedVacancyWhere = {
   isActive: true,
@@ -15,6 +27,7 @@ export const publicListedVacancyWhere = {
         is: {
           status: "ACTIVE" as const,
           deletedAt: null,
+          ...orgSettingDoesNotEqual("publicVacanciesHidden", true),
         },
       },
     },
@@ -27,7 +40,7 @@ export function publicVacancyFeatureWhere(globalFeatures: Record<string, boolean
   if (globalFeatures.vacantHouses === true) return {};
   return {
     property: { is: { org: { is: {
-      NOT: { settings: { is: { features: { path: ["vacantHouses"], equals: false } } } },
+      ...orgSettingDoesNotEqual("vacantHouses", false),
     } } } },
   };
 }

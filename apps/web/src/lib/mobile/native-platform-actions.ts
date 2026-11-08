@@ -42,7 +42,7 @@ const specs: Spec[] = [
   { id: "vault.delete", path: "/platform/api-keys", title: "Delete API key", record: true, destructive: true, run: deletePlatformApiKeyAction },
   { id: "organization.create", path: "/platform/organizations", title: "New organization" },
   { id: "organization.archive", path: "/platform/organizations", title: "Archive organization", record: true, destructive: true, run: archiveOrganizationAction, redirect: "/platform/organizations", successKey: "archived" },
-  { id: "organization.delete", path: "/platform/organizations", title: "Permanently delete organization", record: true, destructive: true, run: permanentlyDeleteOrganizationAction, redirect: "/platform/organizations", successKey: "deleted" },
+  { id: "organization.delete", path: "/platform/organizations", title: "Delete organization (30-day retention)", record: true, destructive: true, run: permanentlyDeleteOrganizationAction, redirect: "/platform/organizations", successKey: "deleted" },
   { id: "expenditure.create", path: "/platform/expenditures", title: "Record expenditure", run: createPlatformExpenditureAction },
   { id: "export.organization", path: "/platform/data-management", title: "Download organization CSV archive" },
   { id: "export.approve", path: "/platform/data-management", title: "Approve export request", record: true, run: approveDataExportRequestAction },

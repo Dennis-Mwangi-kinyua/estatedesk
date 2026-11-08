@@ -23,9 +23,9 @@ async function loadOrganizationDetailData(
   const org = await prisma.organization.findFirst({
     where: {
       OR: [{ slug }, { id: slug }],
-      deletedAt: null,
     },
     include: {
+      auditLogs: { where: { action: "ORGANIZATION_DELETE_REQUESTED", entityType: "Organization" }, take: 1, select: { id: true } },
       subscription: {
         include: {
           planChanges: {

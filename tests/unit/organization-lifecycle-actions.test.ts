@@ -6,20 +6,28 @@ import { createRequire } from "node:module";
 async function fixture() {
   let authorized = true;
   let failure: string | null = null;
-  let state = { status: "ACTIVE", sessions: 2, deleted: false };
+  let state = { status: "ACTIVE", sessions: 2, deleted: false, deletedAt: null as Date | null, apiKeys: true, markers: 0 };
   let expired = 0;
-  const org = { id: "org-a", slug: "estate-a", name: "Estate A", status: "ACTIVE" };
+  const org = { id: "org-a", slug: "estate-a", name: "Estate A", status: "ACTIVE", deletedAt: null as Date | null };
   const db = {
-    organization: { findUnique: async () => org },
+    organization: { findUnique: async () => ({ ...org, status: state.status, deletedAt: state.deletedAt }) },
     $transaction: async (work: (tx: unknown) => Promise<void>) => {
       const before = { ...state };
       try {
         await work({
           organization: {
             update: async ({ data }: any) => { state.status = data.status; },
+            updateMany: async ({ data }: any) => {
+              if (failure) throw Object.assign(new Error("Database failure"), { code: failure });
+              if (state.deletedAt) return { count: 0 };
+              state.status = data.status; state.deletedAt = data.deletedAt;
+              return { count: 1 };
+            },
             delete: async () => { if (failure) throw Object.assign(new Error("Database failure"), { code: failure }); state.deleted = true; },
           },
           userSession: { updateMany: async () => { state.sessions = 0; } },
+          apiKey: { updateMany: async () => { state.apiKeys = false; } },
+          auditLog: { create: async () => { state.markers++; } },
         });
       } catch (error) { state = before; throw error; }
     },
@@ -51,7 +59,7 @@ async function fixture() {
 test("organization deactivation clears workspace selection and expires public inventory", async () => {
   const f = await fixture();
   await assert.rejects(f.actions.archiveOrganizationAction(f.form()), /\/platform\/organizations\/estate-a$/);
-  assert.deepEqual(f.state(), { status: "DISABLED", sessions: 0, deleted: false });
+  assert.deepEqual(f.state(), { status: "DISABLED", sessions: 0, deleted: false, deletedAt: null, apiKeys: true, markers: 0 });
   assert.equal(f.expired(), 1);
 });
 
@@ -63,20 +71,27 @@ test("reactivation restores status without clearing sessions", async () => {
   assert.equal(f.expired(), 1);
 });
 
-test("permanent deletion runs transactionally and expires public inventory", async () => {
+test("deletion retains records, disables access and expires public inventory", async () => {
   const f = await fixture();
   await assert.rejects(f.actions.permanentlyDeleteOrganizationAction(f.form()), /\?deleted=estate-a$/);
-  assert.equal(f.state().deleted, true);
+  assert.equal(f.state().deleted, false);
+  assert.ok(f.state().deletedAt instanceof Date);
+  assert.equal(f.state().apiKeys, false);
+  assert.equal(f.state().markers, 1);
+  const deletedAt = f.state().deletedAt;
+  await assert.rejects(f.actions.permanentlyDeleteOrganizationAction(f.form()), /\?deleted=estate-a$/);
+  assert.equal(f.state().deletedAt, deletedAt);
+  assert.equal(f.state().markers, 1);
   assert.equal(f.state().sessions, 0);
-  assert.equal(f.expired(), 1);
+  assert.equal(f.expired(), 2);
 });
 
 test("foreign key failures roll back session changes and return a useful deletion error", async () => {
   const f = await fixture(); f.fail("P2003");
   await assert.rejects(f.actions.permanentlyDeleteOrganizationAction(f.form()), error => {
-    assert.match(decodeURIComponent((error as Error).message), /deleteError=Deletion was blocked by a linked record/); return true;
+    assert.match(decodeURIComponent((error as Error).message), /deleteError=Unable to delete this organization/); return true;
   });
-  assert.deepEqual(f.state(), { status: "ACTIVE", sessions: 2, deleted: false });
+  assert.deepEqual(f.state(), { status: "ACTIVE", sessions: 2, deleted: false, deletedAt: null, apiKeys: true, markers: 0 });
   assert.equal(f.expired(), 0);
 });
 
@@ -88,8 +103,20 @@ test("unauthorized operators and stale or incorrect confirmations cannot change 
       if (mode === "stale") form.set("expectedSlug", "old-slug");
       if (mode === "confirmation") { form.set("confirmation", "wrong"); form.set("archiveConfirmation", "wrong"); }
       await assert.rejects(f.actions[name](form));
-      assert.deepEqual(f.state(), { status: "ACTIVE", sessions: 2, deleted: false });
+      assert.deepEqual(f.state(), { status: "ACTIVE", sessions: 2, deleted: false, deletedAt: null, apiKeys: true, markers: 0 });
       assert.equal(f.expired(), 0);
     }
   }
+});
+
+
+test("deleted organizations cannot be reactivated during retention", async () => {
+  const f = await fixture();
+  await assert.rejects(f.actions.permanentlyDeleteOrganizationAction(f.form()), /\?deleted=estate-a$/);
+  await assert.rejects(f.actions.reactivateOrganizationAction(f.form()), error => {
+    assert.match(decodeURIComponent((error as Error).message), /Deleted organizations cannot be reactivated/);
+    return true;
+  });
+  assert.equal(f.state().status, "DISABLED");
+  assert.ok(f.state().deletedAt);
 });

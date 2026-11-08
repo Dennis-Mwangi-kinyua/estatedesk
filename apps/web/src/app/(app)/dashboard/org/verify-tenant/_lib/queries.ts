@@ -12,6 +12,7 @@ export async function loadVerifyTenantPageData(
   const incomingTransferRequests = await prisma.tenantTransferRequest.findMany({
     where: {
       sourceOrgId: activeOrgId,
+      targetOrg: { deletedAt: null },
       status: "PENDING",
     },
     orderBy: {
@@ -61,6 +62,7 @@ export async function loadVerifyTenantPageData(
     results = await prisma.tenant.findMany({
       where: {
         deletedAt: null,
+        org: { deletedAt: null },
         OR: [
           { phone: { contains: search, mode: "insensitive" } },
           { email: { contains: search, mode: "insensitive" } },
@@ -168,6 +170,7 @@ export async function loadVerifyTenantPageData(
           select: {
             id: true,
             historyRecords: {
+              where: { org: { deletedAt: null } },
               orderBy: [{ moveOutDate: "desc" }, { createdAt: "desc" }],
               take: 10,
               select: {
@@ -193,6 +196,7 @@ export async function loadVerifyTenantPageData(
               },
             },
             tenants: {
+              where: { deletedAt: null, org: { deletedAt: null } },
               orderBy: {
                 createdAt: "desc",
               },

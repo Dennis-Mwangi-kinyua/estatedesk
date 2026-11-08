@@ -1,3 +1,4 @@
+import { SubmitButton } from "./submit-button";
 import { deletePlatformAdmin } from "../_lib/actions";
 import { formatDate } from "../_lib/helpers";
 import type { AdminRecord } from "../_lib/types";
@@ -9,8 +10,8 @@ export function PageHeader() {
         Platform Admins
       </h1>
       <p className="text-sm leading-6 text-muted-foreground">
-        Manage verified admin usernames, secure login credentials, roles, and
-        platform permissions.
+        Create admin accounts, define responsibilities, and review platform access
+        in one workspace.
       </p>
     </div>
   );
@@ -165,11 +166,13 @@ export function AdminRow({
 
       <PermissionsSection permissions={admin.platformPermissions} />
 
-      <div className="flex flex-col gap-2 border-t border-border pt-3">
+      <details className="group border-t border-border pt-3">
+        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-muted-foreground">Remove account access</summary>
+        <div className="mt-2 space-y-3 rounded-xl border bg-muted/20 p-3">
+        <p className="text-sm text-muted-foreground">Deleting this admin removes their platform account. Review the identity and permissions above before continuing.</p>
         <form action={deletePlatformAdmin} className="w-full">
           <input type="hidden" name="userId" value={admin.id} />
-          <button data-workspace-action="true"
-            type="submit"
+          <SubmitButton pendingLabel="Deleting…"
             disabled={!canDelete}
             title={deleteBlockedReason ?? "Delete this platform admin"}
             className={[
@@ -180,14 +183,15 @@ export function AdminRow({
             ].join(" ")}
           >
             Delete Admin
-          </button>
+          </SubmitButton>
         </form>
         {!canDelete && deleteBlockedReason ? (
           <p className="text-center text-xs leading-5 text-muted-foreground">
             {deleteBlockedReason}
           </p>
         ) : null}
-      </div>
+        </div>
+      </details>
     </article>
   );
 }
@@ -198,8 +202,9 @@ export function PermissionsSection({
   permissions: AdminRecord["platformPermissions"];
 }) {
   return (
-    <div className="space-y-2">
-      <p className="text-sm font-medium text-foreground">Permissions</p>
+    <details className="rounded-xl border bg-muted/20 p-3">
+      <summary className="cursor-pointer text-sm font-medium text-foreground">Review permissions ({permissions.length})</summary>
+      <div className="mt-3">
 
       {permissions.length === 0 ? (
         <p className="text-sm text-muted-foreground">
@@ -213,8 +218,8 @@ export function PermissionsSection({
               className={[
                 "inline-flex max-w-full items-center rounded-lg border px-3 py-1.5 text-xs font-medium",
                 permission.granted
-                  ? "border-green-200 bg-green-50 text-green-700"
-                  : "border-red-200 bg-red-50 text-red-700",
+                  ? "border-green-200 bg-green-50 text-green-700 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-200"
+                  : "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200",
               ].join(" ")}
             >
               {formatRole(permission.permission)} ·{" "}
@@ -223,7 +228,8 @@ export function PermissionsSection({
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </details>
   );
 }
 
@@ -275,9 +281,9 @@ export function Badge({
 }) {
   const variants: Record<typeof variant, string> = {
     default: "border-border bg-muted/40 text-foreground",
-    success: "border-green-200 bg-green-50 text-green-700",
-    danger: "border-red-200 bg-red-50 text-red-700",
-    info: "border-blue-200 bg-blue-50 text-blue-700",
+    success: "border-green-200 bg-green-50 text-green-700 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-200",
+    danger: "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200",
+    info: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200",
     muted: "border-border bg-muted text-muted-foreground",
   };
 

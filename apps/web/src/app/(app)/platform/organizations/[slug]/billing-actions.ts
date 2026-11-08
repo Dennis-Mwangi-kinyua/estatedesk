@@ -35,8 +35,8 @@ export async function organizationBillingAction(
       const id = String(formData.get("paymentId") ?? "");
       const paidAt = String(formData.get("paidAt") ?? "");
       if (reference.length < 3 || reference.length > 120 || !/^[a-f0-9-]{36}$/i.test(id) || !/^\d{4}-\d{2}-\d{2}$/.test(paidAt) || !Number.isFinite(Date.parse(paidAt)) || new Date(paidAt) > now) return {error:"Provide a valid payment reference and payment date."};
-      await recordSubscriptionPayment({orgId,invoiceId:String(formData.get("invoiceId") ?? ""),payment:{id,reference,amountMinor:moneyMinor(String(formData.get("amount") ?? "")),paidAt:new Date(paidAt).toISOString(),recordedAt:now.toISOString(),recordedBy:session.userId}});
-      success = "Payment recorded. Review the balance before renewing the subscription.";
+      const result = await recordSubscriptionPayment({orgId,invoiceId:String(formData.get("invoiceId") ?? ""),payment:{id,reference,amountMinor:moneyMinor(String(formData.get("amount") ?? "")),paidAt:new Date(paidAt).toISOString(),recordedAt:now.toISOString(),recordedBy:session.userId}});
+      success = result.paid ? "Payment confirmed. Invoice paid, receipt issued and subscription automatically extended by 30 days." : "Partial payment confirmed and receipt issued. Subscription renews when the invoice is paid in full.";
     } else if (operation === "invoice") {
       const to = subscription.billingEmail || subscription.org.email;
       const amount = subscriptionInvoiceAmount(subscription.plan, subscription.metadata);
@@ -45,7 +45,7 @@ export async function organizationBillingAction(
       const reference = `ED-${subscription.id}-${subscription.currentPeriodEnd.toISOString().slice(0, 10)}`;
       const saved = await saveSubscriptionInvoice({orgId,actorUserId:session.userId,reference,data:{version:1,organisation:subscription.org.name,plan:APP_PLANS[subscription.plan].name,amountMinor:moneyMinor(amount.toFixed(2)),issuedAt:now.toISOString(),renewalDate:subscription.currentPeriodEnd.toISOString(),paymentInstructions,payments:[]}});
       const snapshot = saved.data;
-      const pdf = await createSubscriptionInvoice({ reference, organisation: snapshot.organisation, plan: snapshot.plan, amount:snapshot.amountMinor / 100, issuedAt:new Date(snapshot.issuedAt), renewalDate:new Date(snapshot.renewalDate), paymentInstructions:snapshot.paymentInstructions });
+      const pdf = await createSubscriptionInvoice({ reference, organisation: snapshot.organisation, plan: snapshot.plan, amount:snapshot.amountMinor / 100, issuedAt:new Date(snapshot.issuedAt), renewalDate:new Date(snapshot.renewalDate), paymentInstructions:snapshot.paymentInstructions, ledger:snapshot });
       invoice = { filename: `${reference}.pdf`, content: Buffer.from(pdf).toString("base64") };
       success = "Invoice ready to download.";
       if (formData.get("sendEmail") === "on") {
@@ -67,7 +67,7 @@ export async function organizationBillingAction(
           deliveryError = "PDF ready, but email delivery failed. Download and share the invoice.";
         }
       }
-      if (formData.get("sendEmail") === "on" && !deliveryError) {
+      {
         const recipients = await prisma.membership.findMany({
           where: { orgId, role: { in: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"] }, user: { deletedAt: null } },
           select: { userId: true },
@@ -77,9 +77,9 @@ export async function organizationBillingAction(
             const id = randomUUID();
             return {
               id, orgId, userId, channel: "IN_APP" as const, type: "GENERAL" as const,
-              title: "Subscription invoice sent", status: "SENT" as const, sentAt: now,
-              message: `Invoice ${reference} for KES ${amount.toLocaleString("en-KE")} has been sent to ${to}. View or download the invoice below.`,
-              providerResponse: { actionUrl: `/api/org/subscription-invoices/${id}`, subscriptionInvoice: invoice },
+              title: "Subscription invoice issued", status: "SENT" as const, sentAt: now,
+              message: `Invoice ${reference} for KES ${amount.toLocaleString("en-KE")} is ready. View its status and download it in subscription billing.`,
+              providerResponse: { actionUrl: "/dashboard/org/subscription", invoiceId: saved.record.id },
             };
           }),
         });
@@ -102,7 +102,7 @@ export async function organizationBillingAction(
       success = "Subscription renewed for 30 days.";
     }
     await writePlatformAuditLog({ actorUserId: session.userId, action: `PLATFORM_SUBSCRIPTION_${operation.toUpperCase()}`, entityType: "Subscription", entityId: subscription.id, metadata: { orgId, slug: subscription.org.slug } });
-    for (const path of [`/platform/billing/${orgId}`, `/platform/billing/${subscription.org.slug}`, `/platform/organizations/${subscription.org.slug}`, "/platform/billing", "/platform/subscriptions", "/dashboard/org/settings", "/dashboard/org/notifications"]) revalidatePath(path);
+    for (const path of [`/platform/billing/${orgId}`, `/platform/billing/${subscription.org.slug}`, `/platform/organizations/${subscription.org.slug}`, "/platform/billing", "/platform/subscriptions", "/dashboard/org/subscription", "/dashboard/org", "/dashboard/org/settings", "/dashboard/org/notifications"]) revalidatePath(path);
     return { success, invoice, error: deliveryError };
   } catch (error) {
     console.error("[organizationBillingAction]", error);

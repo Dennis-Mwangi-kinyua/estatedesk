@@ -68,6 +68,7 @@ export class S3StorageProvider implements StorageProvider {
         Bucket: config.bucket,
         Key: key,
       }),
+      { abortSignal: AbortSignal.timeout(10000) },
     );
   }
 

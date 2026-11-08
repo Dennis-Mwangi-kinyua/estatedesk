@@ -1,0 +1,19 @@
+import Link from "@/components/navigation/workspace-link";
+import { requireOrgRole } from "@/lib/permissions/guards";
+import { prisma } from "@/lib/prisma";
+import { SUBSCRIPTION_INVOICE_ENTITY, invoiceData, invoiceBalance, subscriptionInvoiceStatus } from "@/lib/billing/invoice-ledger";
+import { AcknowledgeForm } from "./acknowledge-form";
+export const dynamic = "force-dynamic";
+const money = (minor: number) => `KES ${(minor / 100).toLocaleString("en-KE", { minimumFractionDigits: 2 })}`;
+const date = (value: string | Date) => new Date(value).toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi" });
+export default async function SubscriptionBillingPage() {
+  const session = await requireOrgRole(["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"]);
+  const [records, subscription] = await Promise.all([
+    prisma.documentRecord.findMany({ where: { orgId: session.activeOrgId!, entityType: SUBSCRIPTION_INVOICE_ENTITY, status: { in: ["ISSUED", "COMPLETED"] } }, orderBy: { createdAt: "desc" }, take: 100 }),
+    prisma.subscription.findUnique({ where: { orgId: session.activeOrgId! } }),
+  ]);
+  return <main className="mx-auto w-full min-w-0 max-w-5xl space-y-5 p-4 sm:p-6"><header><h1 className="text-2xl font-semibold">Subscription billing</h1><p className="mt-2 text-sm text-muted-foreground">Invoices, confirmed payments and receipts for your organization.</p>{subscription ? <p className="mt-3 text-sm">{subscription.plan} · {subscription.status} · Access until {date(subscription.currentPeriodEnd)}</p> : null}<Link href="/dashboard/org" className="inline-flex min-h-11 items-center text-sm font-semibold text-primary">Back to dashboard</Link></header>
+    {records.length ? records.map(record => { const data = invoiceData(record.metadata); return <article key={record.id} className="min-w-0 space-y-4 rounded-2xl border bg-card p-4 sm:p-6"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="break-all font-semibold">{record.serialNumber}</h2><p className="text-sm text-muted-foreground">{data.plan} · Issued {date(data.issuedAt)}</p></div><span className="rounded-full bg-muted px-3 py-2 text-xs font-semibold">{subscriptionInvoiceStatus(data)}</span></div><dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">{[["Invoice total", data.amountMinor], ["Confirmed payments", data.amountMinor - invoiceBalance(data)], ["Outstanding", invoiceBalance(data)]].map(([label, amount]) => <div key={String(label)}><dt className="text-muted-foreground">{label}</dt><dd className="font-semibold">{money(Number(amount))}</dd></div>)}</dl>{data.renewedUntil ? <p className="text-sm">Subscription extended until {date(data.renewedUntil)}.</p> : <p className="text-sm text-muted-foreground">Access extends automatically when EstateDesk confirms full payment.</p>}<a href={`/api/org/subscription-invoices/${record.id}`} className="inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-semibold">Download invoice</a>{invoiceBalance(data) > 0 ? <p className="whitespace-pre-line rounded-lg bg-muted p-3 text-sm">{data.paymentInstructions}</p> : null}
+      {data.payments.map(payment => <section key={payment.id} className="break-words rounded-xl border p-4 text-sm"><h3 className="font-semibold">Payment confirmed · {money(payment.amountMinor)}</h3><p className="mt-2">Reference: {payment.reference} · Paid {date(payment.paidAt)}</p><p>Receipt: {payment.receiptNumber ?? "Available to download"}</p><a href={`/api/org/subscription-invoices/${record.id}?receipt=${encodeURIComponent(payment.id)}`} className="mt-2 inline-flex min-h-11 items-center font-semibold text-primary">Download receipt</a>{payment.acknowledgedAt ? <p>Organization acknowledged on {date(payment.acknowledgedAt)}.</p> : <AcknowledgeForm invoiceId={record.id} paymentId={payment.id}/>}</section>)}</article>; }) : <p className="rounded-xl border p-5 text-sm">No subscription invoices have been issued yet.</p>}
+  </main>;
+}

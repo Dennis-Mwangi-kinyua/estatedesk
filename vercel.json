@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/tenant-credit",
       "schedule": "5 21 * * *"
+    },
+    {
+      "path": "/api/cron/retention",
+      "schedule": "20 21 * * *"
     }
   ]
 }

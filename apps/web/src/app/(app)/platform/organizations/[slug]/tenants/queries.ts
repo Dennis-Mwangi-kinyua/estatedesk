@@ -9,7 +9,7 @@ import { decodePublicId } from "@/lib/public-id";
 export const pageSize = 20;
 export async function getPlatformOrganization(slug: string) {
   const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], { redirectTo: "/dashboard" });
-  const org = await prisma.organization.findFirst({ where: { OR: [{ slug }, { id: slug }], deletedAt: null }, select: { id: true, slug: true, name: true, currencyCode: true } });
+  const org = await prisma.organization.findFirst({ where: { OR: [{ slug }, { id: slug }] }, select: { id: true, slug: true, name: true, currencyCode: true, deletedAt: true } });
   if (!org) notFound();
   return { org, session };
 }

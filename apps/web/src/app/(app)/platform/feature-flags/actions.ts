@@ -1,93 +1,22 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
 import { expirePublicVacancies } from "@/lib/public-vacancy-cache";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { writePlatformAuditLog } from "@/lib/audit/security";
 import { requirePlatformRole } from "@/lib/permissions/guards";
-import {
-  PLATFORM_FEATURE_FLAG_KEYS,
-  type PlatformFeatureFlagKey,
-} from "../_lib/nav";
-
-const PAGE_PATH = "/platform/feature-flags";
-
-function isFeatureKey(value: string): value is PlatformFeatureFlagKey {
-  return (PLATFORM_FEATURE_FLAG_KEYS as readonly string[]).includes(value);
-}
-
-function asFeatureMap(value: unknown): Record<string, boolean> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return {};
-  }
-
-  const result: Record<string, boolean> = {};
-  for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
-    result[key] = Boolean(item);
-  }
-  return result;
-}
+import { isOrganizationFeatureKey } from "@/lib/org/feature-controls";
+import { updateOrganizationFeature } from "@/lib/org/update-feature";
 
 export async function toggleOrganizationFeatureFlagAction(formData: FormData) {
-  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
-    redirectTo: "/dashboard",
-  });
-
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], { redirectTo: "/dashboard" });
   const orgId = String(formData.get("orgId") ?? "").trim();
-  const featureKey = String(formData.get("featureKey") ?? "").trim();
-  const nextEnabled = String(formData.get("nextEnabled") ?? "") === "true";
-
-  if (!orgId || !isFeatureKey(featureKey)) {
-    return;
-  }
-
-  const org = await prisma.organization.findFirst({
-    where: { id: orgId, deletedAt: null },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      settings: { select: { id: true, features: true } },
-    },
-  });
-
+  const key = String(formData.get("featureKey") ?? "").trim();
+  const value = formData.get("nextEnabled");
+  if (!orgId || !isOrganizationFeatureKey(key) || (value !== "true" && value !== "false")) return;
+  const org = await updateOrganizationFeature(prisma, { orgId, actorUserId: session.userId, key, enabled: value === "true" });
   if (!org) return;
-
-  const previous = asFeatureMap(org.settings?.features);
-  const next = { ...previous, [featureKey]: nextEnabled };
-
-  const featuresJson = next as Prisma.InputJsonObject;
-
-  const settings = await prisma.organizationSettings.upsert({
-    where: { orgId },
-    create: {
-      orgId,
-      features: featuresJson,
-    },
-    update: {
-      features: featuresJson,
-    },
-    select: { id: true },
-  });
-
-  await writePlatformAuditLog({
-    actorUserId: session.userId,
-    action: "PLATFORM_FEATURE_FLAG_UPDATED",
-    entityType: "OrganizationSettings",
-    entityId: settings.id,
-    metadata: {
-      orgId,
-      orgSlug: org.slug,
-      featureKey,
-      enabled: nextEnabled,
-    },
-    beforeState: previous,
-    afterState: next,
-  });
-
   expirePublicVacancies();
   revalidatePath("/dashboard", "layout");
-  revalidatePath(PAGE_PATH);
+  revalidatePath("/platform/feature-flags");
   revalidatePath(`/platform/organizations/${org.slug}`);
 }

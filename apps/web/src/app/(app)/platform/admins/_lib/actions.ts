@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { PLATFORM_ADMINS_CACHE_TAG } from "./cache";
 import { hash } from "bcryptjs";
 import {
   PlatformPermissionType,
@@ -141,6 +142,7 @@ export async function createPlatformAdmin(formData: FormData) {
     }
   });
 
+  updateTag(PLATFORM_ADMINS_CACHE_TAG);
   revalidatePath("/platform/admins");
 }
 
@@ -212,6 +214,13 @@ export async function deletePlatformAdmin(formData: FormData) {
     data: { deletedAt: new Date() },
   });
 
+  updateTag(PLATFORM_ADMINS_CACHE_TAG);
   revalidatePath("/platform/admins");
 }
 
+
+export async function refreshPlatformAdmins() {
+  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
+  updateTag(PLATFORM_ADMINS_CACHE_TAG);
+  revalidatePath("/platform/admins");
+}

@@ -1,8 +1,9 @@
 import { encodePublicId } from "@/lib/public-id";
 import Link from "@/components/navigation/workspace-link";
+import { DeleteOrganizationButton } from "./delete-organization-button";
 import { OrgSurface } from "./org-detail-ui";
 import { Receipt, ChevronDown } from "lucide-react";
-import { UsersRound, Archive, Trash2 } from "@/components/shared/colored-icons";
+import { UsersRound, Archive } from "@/components/shared/colored-icons";
 import {
   archiveOrganizationAction,
   reactivateOrganizationAction,
@@ -155,7 +156,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
         <summary className="flex min-h-14 cursor-pointer items-center gap-3 px-5 py-4 text-sm font-semibold text-muted-foreground"><Archive aria-hidden="true" className="h-5 w-5" />Organization access and deletion<ChevronDown aria-hidden="true" className="ml-auto h-4 w-4" /></summary>
       <OrgSurface
         title="Danger zone"
-        description="Deactivate, reactivate, or permanently remove this organization."
+        description="Deactivate, reactivate, or delete this organization with 30-day retention."
       >
         <form action={org.status === "ACTIVE" ? archiveOrganizationAction : reactivateOrganizationAction} className="space-y-4 border-b border-slate-200 p-4 dark:border-white/10">
           <input type="hidden" name="orgId" value={org.id} />
@@ -190,9 +191,9 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
           <input type="hidden" name="orgId" value={org.id} />
           <input type="hidden" name="expectedSlug" value={org.slug} />
           <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-800 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-100">
-            This action deletes properties, units, tenants, leases, payments, water bills,
-            notifications, messages, invitations, assets, settings, and audit records owned by
-            <span className="font-semibold"> {org.name}</span>. It cannot be undone.
+            Deleting <span className="font-semibold">{org.name}</span> immediately blocks access and
+            removes public listings. Its records remain deleted and are visible only to platform admins
+            for 30 days, then are permanently removed. Shared user accounts are preserved.
           </div>
           {statusParams?.deleteError ? (
             <p className="rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-100">
@@ -205,16 +206,12 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
             </span>
             <input
               name="confirmation"
+              required
               autoComplete="off"
               className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-red-300 focus:ring-2 focus:ring-red-100 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:focus:border-red-400 dark:focus:ring-red-400/20"
             />
           </label>
-          <button data-workspace-action="true"
-            type="submit"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-red-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:bg-red-500 dark:text-white dark:hover:bg-red-400 dark:focus-visible:ring-offset-slate-900 sm:w-auto"
-          >
-            <Trash2 aria-hidden="true" className="mr-2 h-4 w-4" />Permanently delete organization
-          </button>
+          <DeleteOrganizationButton />
         </form>
       </OrgSurface>
       </details>

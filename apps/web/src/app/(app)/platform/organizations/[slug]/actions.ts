@@ -46,12 +46,14 @@ async function changeOrganizationStatus(formData: FormData, status: "ACTIVE" | "
 
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
-    select: { id: true, slug: true, status: true },
+    select: { id: true, slug: true, status: true, deletedAt: true },
   });
 
   if (!org) {
     redirect("/platform/organizations");
   }
+
+  if (org.deletedAt) redirectWithArchiveError(org.slug, "Deleted organizations cannot be reactivated.");
 
   if (expectedSlug !== org.slug || confirmation !== org.slug) {
     redirectWithArchiveError(org.slug, `Type ${org.slug} to ${status === "ACTIVE" ? "reactivate" : "deactivate"} this organization.`);
@@ -60,7 +62,7 @@ async function changeOrganizationStatus(formData: FormData, status: "ACTIVE" | "
   try {
     await prisma.$transaction(async (tx) => {
       await tx.organization.update({
-        where: { id: org.id },
+        where: { id: org.id, deletedAt: null },
         data: { status },
       });
 
@@ -89,7 +91,7 @@ async function changeOrganizationStatus(formData: FormData, status: "ACTIVE" | "
 }
 
 export async function permanentlyDeleteOrganizationAction(formData: FormData) {
-  await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/dashboard",
   });
 
@@ -103,7 +105,7 @@ export async function permanentlyDeleteOrganizationAction(formData: FormData) {
 
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
-    select: { id: true, name: true, slug: true },
+    select: { id: true, name: true, slug: true, deletedAt: true },
   });
 
   if (!org) {
@@ -111,7 +113,7 @@ export async function permanentlyDeleteOrganizationAction(formData: FormData) {
   }
 
   if (expectedSlug !== org.slug || confirmation !== org.slug) {
-    redirectWithDeleteError(org.slug, `Type ${org.slug} to permanently delete this organization.`);
+    redirectWithDeleteError(org.slug, `Type ${org.slug} to delete this organization.`);
   }
 
   try {
@@ -127,16 +129,22 @@ export async function permanentlyDeleteOrganizationAction(formData: FormData) {
         },
       });
 
-      await tx.organization.delete({
-        where: { id: org.id },
+      const deletedAt = new Date();
+      // Conditional update makes retries idempotent and preserves the original deadline.
+      const changed = await tx.organization.updateMany({
+        where: { id: org.id, deletedAt: null },
+        data: { status: "DISABLED", deletedAt },
       });
+      await tx.apiKey.updateMany({ where: { orgId: org.id }, data: { isActive: false } });
+      if (changed.count) await tx.auditLog.create({ data: {
+        orgId: org.id, actorUserId: session.userId,
+        action: "ORGANIZATION_DELETE_REQUESTED", entityType: "Organization", entityId: org.id,
+        metadata: { purgeAfter: new Date(deletedAt.getTime() + 30 * 86400000).toISOString() },
+      } });
     });
   } catch (error) {
-    console.error("Permanent organization deletion failed", { orgId: org.id, error });
-    const code = error && typeof error === "object" && "code" in error ? error.code : null;
-    redirectWithDeleteError(org.slug, code === "P2003"
-      ? "Deletion was blocked by a linked record. No organization data was deleted. Review the server log for the affected relation."
-      : "Unable to delete this organization. No organization data was deleted. Please retry.");
+    console.error("Organization deletion failed", { orgId: org.id, error });
+    redirectWithDeleteError(org.slug, "Unable to delete this organization. No organization data was deleted. Please retry.");
   }
 
   expirePublicVacancies();

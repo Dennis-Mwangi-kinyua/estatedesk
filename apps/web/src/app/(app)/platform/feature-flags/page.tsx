@@ -90,14 +90,15 @@ function FlagToggle({
   );
 }
 
-export default async function FeatureFlagsPage() {
+export default async function FeatureFlagsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"], {
     redirectTo: "/dashboard",
   });
 
+  const q = ((await searchParams).q ?? "").trim().slice(0, 150);
   const control = await getPlatformControl();
   const organizations = await prisma.organization.findMany({
-    where: { deletedAt: null },
+    where: { deletedAt: null, ...(q ? { OR: [{ id: q }, { name: { contains: q, mode: "insensitive" as const } }, { slug: { contains: q, mode: "insensitive" as const } }] } : {}) },
     orderBy: { name: "asc" },
     include: { settings: true, kraIntegration: true },
   });
@@ -113,6 +114,7 @@ export default async function FeatureFlagsPage() {
         description="Toggle per-organization capabilities. Global overrides from Website Control win at read time and are highlighted below."
       />
 
+      <form className="flex flex-wrap items-end gap-3 rounded-2xl border border-border bg-card p-4"><label className="min-w-0 flex-1 text-sm font-semibold">Organization scope<input name="q" defaultValue={q} placeholder="Organization ID, name or slug" className="mt-2 min-h-11 w-full rounded-xl border border-border bg-background px-3 font-normal" /></label><button className="min-h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">Filter organizations</button></form>
       <section className="grid min-w-0 grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
         <StatCard label="Organizations" value={organizations.length} />
         <StatCard label="Configured feature sets" value={configured} />

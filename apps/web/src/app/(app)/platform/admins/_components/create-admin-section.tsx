@@ -1,3 +1,4 @@
+import { SubmitButton } from "./submit-button";
 import { PlatformRole, UserStatus } from "@prisma/client";
 import { createPlatformAdmin } from "../_lib/actions";
 import { ALL_PLATFORM_PERMISSIONS } from "../_lib/constants";
@@ -76,6 +77,7 @@ export function CreateAdminSection() {
                 <input
                   id="password"
                   name="password"
+                  autoComplete="new-password"
                   type="password"
                   required
                   minLength={8}
@@ -88,6 +90,7 @@ export function CreateAdminSection() {
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
+                  autoComplete="new-password"
                   type="password"
                   required
                   minLength={8}
@@ -190,17 +193,16 @@ export function CreateAdminSection() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-3 text-sm leading-6 text-blue-800 sm:p-4">
+            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-3 text-sm leading-6 text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200 sm:p-4">
               The admin username and email will be marked as verified
               immediately. The password will be securely hashed before saving.
             </div>
 
-            <button data-workspace-action="true"
-              type="submit"
+            <SubmitButton pendingLabel="Creating admin…"
               className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-foreground px-4 text-sm font-semibold text-background transition hover:opacity-90 sm:w-auto"
             >
               Create Verified Admin
-            </button>
+            </SubmitButton>
           </form>
         </div>
       </details>

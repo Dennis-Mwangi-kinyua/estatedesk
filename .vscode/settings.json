@@ -10,5 +10,8 @@
   },
   "files.exclude": {
     "**/.next": true
+  },
+  "json.schemaDownload.trustedDomains": {
+    "https://openapi.vercel.sh/": true
   }
 }

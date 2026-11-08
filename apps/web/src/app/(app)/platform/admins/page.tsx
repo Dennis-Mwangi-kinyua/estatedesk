@@ -1,3 +1,5 @@
+import { refreshPlatformAdmins } from "./_lib/actions";
+import { SubmitButton } from "./_components/submit-button";
 import type { Metadata } from "next";
 import { requirePlatformRole } from "@/lib/permissions/guards";
 import { privatePageMetadata } from "@/lib/seo";
@@ -24,7 +26,7 @@ export default async function PlatformAdminsPage() {
 
   if (loadFailed || !admins) {
     return (
-      <div className="mx-auto w-full max-w-5xl space-y-4">
+      <div className="mx-auto w-full max-w-6xl space-y-4">
         <div>
           <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Platform Admins
@@ -36,10 +38,11 @@ export default async function PlatformAdminsPage() {
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50">
           <p className="font-semibold">Could not load platform admins right now</p>
           <p className="mt-1">
-            The database request timed out or failed temporarily. Refresh the page in a
-            moment. If this keeps happening, check database connectivity and Neon pooler
-            health.
+            We couldn’t retrieve the admin directory. Please try again in a moment.
           </p>
+          <form action={refreshPlatformAdmins} className="mt-3">
+            <SubmitButton pendingLabel="Retrying…" className="min-h-11 rounded-xl border border-current px-4 text-sm font-medium">Try again</SubmitButton>
+          </form>
         </div>
       </div>
     );

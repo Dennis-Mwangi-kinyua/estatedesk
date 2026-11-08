@@ -1,9 +1,10 @@
 /** SaaS subscription records; separate from tenant rent payments. Amounts use KES cents. */
 export const SUBSCRIPTION_INVOICE_ENTITY = "ESTATEDESK_SUBSCRIPTION_INVOICE";
-export type SubscriptionPayment = { id: string; reference: string; amountMinor: number; paidAt: string; recordedAt: string; recordedBy: string };
+export type SubscriptionPayment = { id: string; reference: string; amountMinor: number; paidAt: string; recordedAt: string; recordedBy: string; receiptNumber?: string; acknowledgedAt?: string; acknowledgedBy?: string };
 export type SubscriptionInvoiceData = {
   version: 1; organisation: string; plan: string; amountMinor: number; issuedAt: string;
   renewalDate: string; paymentInstructions: string; payments: SubscriptionPayment[];
+  renewedUntil?: string; renewedAt?: string;
 };
 export function moneyMinor(value: string) {
   if (!/^\d{1,10}(\.\d{1,2})?$/.test(value)) throw Error("Enter a positive amount with at most two decimal places.");
@@ -34,4 +35,8 @@ export function appendInvoicePayment(data: SubscriptionInvoiceData, payment: Sub
   if (data.payments.some(p=>p.reference.toLowerCase() === payment.reference.toLowerCase())) throw Error("This payment reference has already been recorded.");
   if (payment.amountMinor > invoiceBalance(data)) throw Error("Payment exceeds the invoice's outstanding balance.");
   return invoiceData({...data,payments:[...data.payments,payment]});
+}
+
+export function subscriptionInvoiceStatus(data: SubscriptionInvoiceData) {
+  return invoiceBalance(data) === 0 ? "PAID" : data.payments.length ? "PARTIALLY PAID" : "UNPAID";
 }

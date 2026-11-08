@@ -88,12 +88,19 @@ export async function deleteCloudflareImage(key: string): Promise<boolean> {
   if (decodeURIComponent(segments[1] || "") !== settings.hash || !segments[2]) {
     throw new Error("Cloudflare image belongs to a different account.");
   }
-  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(settings.accountId)}/images/v1/${encodeURIComponent(decodeURIComponent(segments[2]))}`, {
+  await deletePrivateCloudflareImage(decodeURIComponent(segments[2]));
+  return true;
+}
+
+export async function deletePrivateCloudflareImage(imageId: string): Promise<void> {
+  const settings = config();
+  if (!settings) throw new Error("Cloudflare Images is not configured.");
+  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(settings.accountId)}/images/v1/${encodeURIComponent(imageId)}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${settings.token}` },
     signal: AbortSignal.timeout(30_000),
   });
+  if (response.status === 404) return;
   const result = await response.json() as { success?: boolean };
   if (!response.ok || !result.success) throw new Error("Cloudflare image deletion failed.");
-  return true;
 }

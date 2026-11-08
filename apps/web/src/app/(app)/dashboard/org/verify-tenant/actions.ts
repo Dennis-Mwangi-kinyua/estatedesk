@@ -49,6 +49,7 @@ export async function requestTenantTransferAction(formData: FormData) {
     where: {
       id: sourceTenantId,
       deletedAt: null,
+      org: { deletedAt: null, status: "ACTIVE" },
     },
     select: {
       id: true,
@@ -124,6 +125,7 @@ export async function approveTenantTransferAction(formData: FormData) {
       where: {
         id: transferId,
         sourceOrgId: session.activeOrgId,
+        targetOrg: { deletedAt: null, status: "ACTIVE" },
         status: "PENDING",
       },
       include: {
