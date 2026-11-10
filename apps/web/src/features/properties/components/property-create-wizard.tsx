@@ -1,9 +1,9 @@
 "use client";
 import { useStepFocus } from "./_lib/use-step-focus";
-
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { PortfolioHierarchy } from "@/components/portfolio/portfolio-hierarchy";
 import { AccountCreatedShare } from "@/components/shared/account-created-share";
+import { PlanLimitUpgrade } from "@/components/billing/plan-limit-upgrade";
 import { createPropertyAction, type PropertyCreateHandover } from "@/features/properties/actions/create-property-action";
 import { StepBilling } from "./_components/step-billing";
 import { StepLandlord } from "./_components/step-landlord";
@@ -134,7 +134,9 @@ export function PropertyCreateWizard({
 
         <div className="grid gap-0 xl:grid-cols-[minmax(0,1fr)_280px]">
           <div className="px-5 py-6 sm:px-6">
-            {errorMessage ? (
+            {errorMessage?.includes("plan allows") && (helpOrgRole === "ADMIN" || helpOrgRole === "MANAGER") ? (
+              <div className="mb-6"><PlanLimitUpgrade message={errorMessage} /></div>
+            ) : errorMessage ? (
               <div className={`mb-6 ${alertErrorClassName}`}>{errorMessage}</div>
             ) : null}
 

@@ -1,3 +1,4 @@
+import { TodayPanel } from "./today-panel";
 import { AccountPage } from "./account-page";
 import { IssueResolution, LeaseSigningPanel, RewardsPanel, SecurityPanel, TenantInspectionsPanel } from "./native-account-services";
 import { LegalReader } from "./legal-reader";
@@ -23,7 +24,7 @@ import * as api from "../api";
 import { Button, Field, styles } from "./ui";
 import { LeasesPanel, MoveOutsPanel, WorkOrdersPanel, PortfolioPanel } from "./workspace-panels";
 
-type Screen = "account" | "security" | "rewards" | "tenant-inspections" | "profile" | "community" | "expenditures" | "invoices" | "help" | "water-bills" | "native-workspace" | "platform-home" | "home" | "bills" | "issues" | "meters" | "notifications" | "payment" | "history" | "leases" | "move-outs" | "work-orders" | "portfolio" | "documents" | "payment-review" | "inspections" | "visitors" | "gate" | "drafts";
+type Screen = "today" | "account" | "security" | "rewards" | "tenant-inspections" | "profile" | "community" | "expenditures" | "invoices" | "help" | "water-bills" | "native-workspace" | "platform-home" | "home" | "bills" | "issues" | "meters" | "notifications" | "payment" | "history" | "leases" | "move-outs" | "work-orders" | "portfolio" | "documents" | "payment-review" | "inspections" | "visitors" | "gate" | "drafts";
 const screenIcons: Partial<Record<Screen, AppIconName>> = { account: "user", security: "shield", rewards: "gift", "tenant-inspections": "clipboard", profile: "user", community: "volume-2", expenditures: "bar-chart-2", invoices: "file-text", help: "book-open", "water-bills": "droplet", bills: "credit-card", issues: "tool", meters: "droplet", notifications: "bell", payment: "credit-card", history: "clock", leases: "home", "move-outs": "package", "work-orders": "tool", portfolio: "briefcase", documents: "folder", "payment-review": "check-circle", inspections: "clipboard", visitors: "users", gate: "shield", drafts: "hard-drive" };
 type Bill = MobileBills["bills"][number];
 
@@ -193,6 +194,7 @@ export function Workflows({ session, refreshSession, onError, logout, loggingOut
   }, [screen, session.role, tenantTab, selectTenantTab, back]);
 
   return <>
+    {!session.requiresAccountSetup ? <Button label="Today · my work and messages" icon="check-circle" secondary disabled={busy} onPress={() => void load("today")} /> : null}
     <View style={{ flexDirection: "row", alignItems: "center", gap: 10, minHeight: 46, marginBottom: -8 }}>
       <View style={{ width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "#14634e" }}><AppIcon name="home" size={20} color="#ffffff" /></View>
       <Text style={{ color: "#12392f", fontSize: 19, lineHeight: 24, fontWeight: "700", letterSpacing: -0.35 }}>EstateDesk</Text>
@@ -220,6 +222,7 @@ export function Workflows({ session, refreshSession, onError, logout, loggingOut
       <Text style={styles.cardTitle}>Complete account setup</Text>
       {session.mustChangePassword ? <>
         <Field label="Temporary password" secureTextEntry value={currentPassword} onChangeText={setCurrentPassword} editable={!busy} />
+        <Text style={styles.subtitle}>Choose a new password of at least 12 characters.</Text>
         <Field label="New password" secureTextEntry value={newPassword} onChangeText={setNewPassword} editable={!busy} />
         <Field label="Confirm new password" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} editable={!busy} />
       </> : null}
@@ -230,7 +233,10 @@ export function Workflows({ session, refreshSession, onError, logout, loggingOut
         await api.completeSetup({ currentPassword, newPassword, confirmPassword, acceptedTerms: true });
         setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); await refreshSession();
       })} />
-    </View> : loadingScreen ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>{screen.replaceAll("-", " ").replace(/^./, value => value.toUpperCase())}</Text><Text style={styles.subtitle}>Loading your latest information…</Text></View> : loadFailed ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>{screen.replaceAll("-", " ").replace(/^./, value => value.toUpperCase())}</Text><Text accessibilityRole="alert" style={styles.subtitle}>{loadError || "This service could not load. Try again."}</Text><Button label="Try again" onPress={() => void load(screen)} disabled={busy} /></View> : screen === "home" && session.role === "TENANT" ? null : (screen === "platform-home" || screen === "home" && managementAccount) ? null : screen === "home" && session.role === "LANDLORD" ? <>
+    </View> : loadingScreen ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>{screen.replaceAll("-", " ").replace(/^./, value => value.toUpperCase())}</Text><Text style={styles.subtitle}>Loading your latest information…</Text></View> : loadFailed ? <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>{screen.replaceAll("-", " ").replace(/^./, value => value.toUpperCase())}</Text><Text accessibilityRole="alert" style={styles.subtitle}>{loadError || "This service could not load. Try again."}</Text><Button label="Try again" onPress={() => void load(screen)} disabled={busy} /></View> : screen === "today" ? <TodayPanel onError={onError} open={target => {
+      if (target.screen === "workspace") { if (target.kind && target.path) openTool({ kind: target.kind, path: target.path, title: "Today item", emoji: "📋", description: "Continue your next action." }); }
+      else void load(target.screen);
+    }} /> : screen === "home" && session.role === "TENANT" ? null : (screen === "platform-home" || screen === "home" && managementAccount) ? null : screen === "home" && session.role === "LANDLORD" ? <>
       <LandlordHome session={session} busy={busy} refreshKey={homeRevision} active={screen === "home"} open={link => openTool({ kind: "landlord", ...link })} onError={onError} />
     </> : screen === "home" ? <>
       <FieldHome session={session} busy={busy} open={target => void load(target)} refresh={() => void run(refreshSession)} />
@@ -241,7 +247,7 @@ export function Workflows({ session, refreshSession, onError, logout, loggingOut
       : screen === "drafts" ? <DraftsPanel drafts={drafts} busy={busy} run={run} refresh={refreshDrafts} />
       : screen === "inspections" ? <InspectionsPanel inspections={inspections} session={session} busy={busy} run={run} refresh={async () => setInspections(await api.getInspections())} saved={() => setNotice("Inspection draft saved. Open saved field drafts to review and sync.")} onError={onError} />
       : screen === "rewards" && rewards ? <RewardsPanel data={rewards} busy={busy} run={run} refresh={async () => setRewards(await api.getRewards())} />
-      : screen === "security" ? <SecurityPanel sessions={security} busy={busy} run={run} refresh={async () => setSecurity(await api.getSecurity())} tenant={session.role === "TENANT"} />
+      : screen === "security" ? <SecurityPanel sessions={security} busy={busy} run={run} refresh={async () => setSecurity(await api.getSecurity())} onError={onError} />
       : screen === "tenant-inspections" && tenantInspections ? <TenantInspectionsPanel data={tenantInspections} busy={busy} run={run} load={async page => setTenantInspections(await api.getTenantInspections(page))} />
       : screen === "leases" ? <><LeaseSigningPanel requests={leaseSigning} busy={busy} run={run} refresh={async () => { setLeaseSigning(await api.getLeaseSigning()); setLeases(await api.getLeases()); }} /><LeasesPanel leases={leases} currency={session.currencyCode} busy={busy} refresh={() => void load("leases")} /></>
       : screen === "move-outs" ? <MoveOutsPanel notices={moveOuts} busy={busy} refresh={() => void load("move-outs")} run={run} reload={async () => setMoveOuts(await api.getMoveOuts())} />

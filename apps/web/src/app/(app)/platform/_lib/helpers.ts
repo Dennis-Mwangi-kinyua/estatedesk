@@ -177,6 +177,7 @@ export function statusTone(status: string | null | undefined) {
       "overdue",
       "past_due",
       "inactive",
+      "blacklisted",
     ].includes(value)
   ) {
     return "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-300/30 dark:bg-rose-300/10 dark:text-rose-100";

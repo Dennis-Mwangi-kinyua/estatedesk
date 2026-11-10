@@ -1,3 +1,4 @@
+import { blacklistedOrganizationUsers } from "@/lib/organizations/blacklist-policy";
 import { getPublicListedVacancyWhere } from "@estatedesk/public-vacancy/where-server";
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
@@ -88,6 +89,8 @@ export async function GET(request: Request) {
   const apiKey = await prisma.apiKey.findFirst({
     where: {
       keyHash,
+      org: { blacklistedAt: null, status: "ACTIVE", deletedAt: null },
+      createdBy: { NOT: blacklistedOrganizationUsers() },
       isActive: true,
       OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
     },

@@ -75,7 +75,7 @@ Expected responses:
 
 ## Scheduled Production Jobs
 
-- GitHub scheduled notification processing and retention jobs are removed. The authenticated cron API endpoints remain available for an external scheduler.
+- Notification processing has an optional GitHub workflow in `.github/workflows/notifications.yml`, disabled unless repository variable `NOTIFICATIONS_SCHEDULE_ENABLED=true`. Configure repository variable `ESTATEDESK_APP_URL` with the deployed HTTPS origin and repository secret `CRON_SECRET` matching the server. Deploy the endpoint and apply required migrations before enabling it. Retention remains externally scheduled.
 - Configure an external scheduler with the deployed app URL and a bearer token matching the application’s `CRON_SECRET`, if automated processing is needed.
 - Hosting-provider cron is preferred when it offers stronger delivery guarantees; do not enable two schedulers without accepting duplicate idempotent calls.
 - Cron failures are recorded in the jobs table and should alert through `SECURITY_ALERT_WEBHOOK_URL`.

@@ -12,6 +12,11 @@ export async function recordMoveOutRefund(tx: Prisma.TransactionClient, input: {
   if (!proof) throw new Error("Valid refund payment proof is required.");
   const amount = Number(closeout.refundDue);
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid refund amount.");
+  const policy = await tx.orgManagementPolicy.findUnique({ where: { orgId: input.orgId } });
+  if (policy) {
+    const approval = await tx.orgManagementApproval.findFirst({ where: { orgId: input.orgId, kind: "REFUND", targetId: notice.id, status: "APPROVED", amount }, orderBy: { reviewedAt: "desc" } });
+    if (!approval || (approval.snapshot as { version?: string }).version !== JSON.stringify(closeout)) throw new Error("Authorize this deposit refund in the approval centre before recording its payment.");
+  }
   const duplicate = await tx.auditLog.findFirst({ where: { orgId: input.orgId, action: "MOVE_OUT_REFUND_RECORDED", metadata: { path: ["reference"], equals: reference } } });
   if (duplicate) throw new Error("This refund reference has already been used.");
   const journal = await postJournalEntry({ db: tx, orgId: input.orgId, entryDate: new Date(), description: "Tenant move-out deposit refund", memo: reference, sourceType: "ADJUSTMENT", sourceId: `MOVEOUT_REFUND:${notice.id}`, userId: input.actorUserId, lines: [{ systemKey: "TENANT_DEPOSITS", debit: amount, tenantId: notice.tenantId, unitId: notice.lease.unitId }, { systemKey: input.method, credit: amount, tenantId: notice.tenantId, unitId: notice.lease.unitId }] });

@@ -256,7 +256,7 @@ const SHOWCASE_COPY = {
     panelTitle: "A structured workspace for billing, inspections, tenants, staff, and records.",
     status: "Live",
     helperText: "Built for daily property operations.",
-    primaryCta: { href: "/register", label: "Request access" },
+    primaryCta: { href: "/register", label: "Start free" },
     secondaryCta: { href: "/login", label: "Sign in" },
     workspaceTitle: "Workspace overview",
     workspaceSubtitle: "Essential modules at a glance",

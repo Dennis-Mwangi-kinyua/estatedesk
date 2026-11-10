@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { build } from "esbuild";
-import { chromium } from "playwright";
+import { launchTestBrowser } from "../helpers/browser";
 import { createRequire } from "node:module";
 import path from "node:path";
 
@@ -26,7 +26,7 @@ test("native user cards open an organization, retain its filter and return to or
       }));
     } }],
   });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchTestBrowser({ headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await page.setContent('<div id="root"></div>');

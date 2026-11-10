@@ -1,0 +1,7 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    { "name": "EstateDesk desktop / PWA", "type": "pwa-chrome", "request": "launch", "url": "http://localhost:3000", "webRoot": "${workspaceFolder}/apps/web", "preLaunchTask": "EstateDesk: Web and desktop PWA" },
+    { "name": "EstateDesk mobile web", "type": "pwa-chrome", "request": "launch", "url": "http://localhost:3000", "webRoot": "${workspaceFolder}/apps/web", "preLaunchTask": "EstateDesk: Web and desktop PWA", "runtimeArgs": ["--window-size=390,844"] }
+  ]
+}

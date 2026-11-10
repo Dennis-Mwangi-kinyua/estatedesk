@@ -1,4 +1,6 @@
 import { requirePlatformRole } from "@/lib/permissions/guards";
+import { logServerError } from "@/lib/errors/server-error-log";
+import { loadSaasMetrics } from "@/lib/workflow/load-saas-metrics";
 import { OrgDetailWorkspace } from "./_components/org-detail-workspace";
 import { getOrganizationDetailData } from "./_lib/queries";
 import type { PageProps } from "./_lib/types";
@@ -16,6 +18,14 @@ export default async function PlatformOrganizationDetailPage({
   const { slug } = await params;
   const statusParams = await searchParams;
   const data = await getOrganizationDetailData({ slug }, statusParams);
+  let saasMetrics = null;
+  if (!data.org.deletedAt) {
+    try {
+      saasMetrics = await loadSaasMetrics(data.org.id);
+    } catch (error) {
+      logServerError("platform.organization.metrics", error, { orgId: data.org.id });
+    }
+  }
 
-  return <OrgDetailWorkspace {...data} />;
+  return <OrgDetailWorkspace {...data} saasMetrics={saasMetrics} />;
 }

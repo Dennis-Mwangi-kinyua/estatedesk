@@ -59,7 +59,7 @@ export function ChangePasswordForm({
             name="newPassword"
             autoComplete="new-password"
             required
-            minLength={8}
+            minLength={12}
             icon={ShieldCheck}
             shellClassName={fieldShellClassName}
             disabled={pending}
@@ -70,7 +70,7 @@ export function ChangePasswordForm({
             name="confirmPassword"
             autoComplete="new-password"
             required
-            minLength={8}
+            minLength={12}
             icon={ShieldCheck}
             shellClassName={fieldShellClassName}
             disabled={pending}

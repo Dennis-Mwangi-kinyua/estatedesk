@@ -1,5 +1,7 @@
 "use server";
 
+import { changeOrganizationBlacklist } from "@/lib/organizations/blacklist";
+import { logServerError } from "@/lib/errors/server-error-log";
 import { expirePublicVacancies } from "@/lib/public-vacancy-cache";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -46,13 +48,14 @@ async function changeOrganizationStatus(formData: FormData, status: "ACTIVE" | "
 
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
-    select: { id: true, slug: true, status: true, deletedAt: true },
+    select: { id: true, slug: true, status: true, deletedAt: true, blacklistedAt: true },
   });
 
   if (!org) {
     redirect("/platform/organizations");
   }
 
+  if (org.blacklistedAt) redirectWithArchiveError(org.slug, "Remove the blacklist lock before changing organization access.");
   if (org.deletedAt) redirectWithArchiveError(org.slug, "Deleted organizations cannot be reactivated.");
 
   if (expectedSlug !== org.slug || confirmation !== org.slug) {
@@ -62,7 +65,7 @@ async function changeOrganizationStatus(formData: FormData, status: "ACTIVE" | "
   try {
     await prisma.$transaction(async (tx) => {
       await tx.organization.update({
-        where: { id: org.id, deletedAt: null },
+        where: { id: org.id, deletedAt: null, blacklistedAt: null },
         data: { status },
       });
 
@@ -105,13 +108,14 @@ export async function permanentlyDeleteOrganizationAction(formData: FormData) {
 
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
-    select: { id: true, name: true, slug: true, deletedAt: true },
+    select: { id: true, name: true, slug: true, deletedAt: true, blacklistedAt: true },
   });
 
   if (!org) {
     redirect("/platform/organizations");
   }
 
+  if (org.blacklistedAt) redirectWithDeleteError(org.slug, "Remove the blacklist lock before deleting the organization.");
   if (expectedSlug !== org.slug || confirmation !== org.slug) {
     redirectWithDeleteError(org.slug, `Type ${org.slug} to delete this organization.`);
   }
@@ -132,7 +136,7 @@ export async function permanentlyDeleteOrganizationAction(formData: FormData) {
       const deletedAt = new Date();
       // Conditional update makes retries idempotent and preserves the original deadline.
       const changed = await tx.organization.updateMany({
-        where: { id: org.id, deletedAt: null },
+        where: { id: org.id, deletedAt: null, blacklistedAt: null },
         data: { status: "DISABLED", deletedAt },
       });
       await tx.apiKey.updateMany({ where: { orgId: org.id }, data: { isActive: false } });
@@ -153,4 +157,27 @@ export async function permanentlyDeleteOrganizationAction(formData: FormData) {
   revalidatePath("/platform/organizations");
   revalidatePath("/platform/data-management");
   redirect(`/platform/organizations?deleted=${encodeURIComponent(org.slug)}`);
+}
+
+export async function blacklistOrganizationAction(formData: FormData) { return setBlacklist(formData, true); }
+export async function unblacklistOrganizationAction(formData: FormData) { return setBlacklist(formData, false); }
+async function setBlacklist(formData: FormData, locked: boolean) {
+  const session = await requirePlatformRole(["SUPER_ADMIN", "PLATFORM_ADMIN"]);
+  const orgId = formText(formData, "orgId");
+  const org = await prisma.organization.findUnique({ where: { id: orgId }, select: { slug: true, deletedAt: true } });
+  if (!org) redirect("/platform/organizations");
+  const reason = formText(formData, "reason");
+  if (org.deletedAt || formText(formData, "expectedSlug") !== org.slug || formText(formData, "blacklistConfirmation") !== org.slug || reason.length < 5 || reason.length > 1000) {
+    redirectWithArchiveError(org.slug, `Type ${org.slug} and provide a reason of 5–1000 characters to ${locked ? "blacklist" : "unlock"} this organization.`);
+  }
+  try {
+    await changeOrganizationBlacklist({ orgId, actorUserId: session.userId, locked, reason });
+  } catch (error) {
+    logServerError("organization.blacklist", error, { orgId });
+    redirectWithArchiveError(org.slug, "Unable to change the blacklist lock. Refresh and retry.");
+  }
+  expirePublicVacancies();
+  revalidatePath("/dashboard", "layout");
+  revalidatePath("/platform", "layout");
+  redirect(`/platform/organizations/${encodeURIComponent(org.slug)}`);
 }

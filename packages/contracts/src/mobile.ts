@@ -212,3 +212,7 @@ export { nativeVacancyListSchema, nativeVacancyDetailSchema, nativeVacancyInquir
 export { WORKFLOW_PROTOCOL_VERSION } from "./mobile-release";
 
 export * from "./platform-reports";
+
+export const mobileAccountDeletionSchema=z.object({status:z.enum(["NONE","REQUESTED","IN_REVIEW","WITHDRAWN","COMPLETED","DECLINED"]),updatedAt:z.string().nullable()});
+
+export * from "./today";

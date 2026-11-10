@@ -11,6 +11,7 @@ export type OrgRole =
   | "SECURITY";
 
 type SidebarLink = {
+  native?: boolean;
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -18,6 +19,15 @@ type SidebarLink = {
 };
 
 export const SIDEBAR_LINKS: readonly SidebarLink[] = [
+  { label: "Recruitment", href: "/dashboard/org/recruitment", icon: workspaceIconFor("/dashboard/org/staff"), roles: ["ADMIN", "MANAGER"], native: false },
+  { label: "Approval centre", href: "/dashboard/org/approvals", icon: workspaceIconFor("/dashboard/org/accounting"), roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"], native: false },
+  { label: "Arrears follow-ups", href: "/dashboard/org/collections", icon: workspaceIconFor("/dashboard/org/payments"), roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"], native: false },
+  { label: "Lease renewals", href: "/dashboard/org/renewals", icon: workspaceIconFor("/dashboard/org/leases"), roles: ["ADMIN", "MANAGER", "OFFICE"], native: false },
+  { label: "Organization activity", href: "/dashboard/org/activity", icon: workspaceIconFor("/dashboard/org/security"), roles: ["ADMIN", "MANAGER"], native: false },
+  { label: "Staff handovers", href: "/dashboard/org/handovers", icon: workspaceIconFor("/dashboard/org/staff"), roles: ["ADMIN", "MANAGER"], native: false },
+  { label: "Property performance", href: "/dashboard/org/performance", icon: workspaceIconFor("/dashboard/org/reports"), roles: ["ADMIN", "MANAGER", "ACCOUNTANT"], native: false },
+  { label: "Today", href: "/dashboard/today", icon: workspaceIconFor("/dashboard/org"), roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "SECURITY"] },
+  { label: "Customer CRM", href: "/dashboard/org/crm", icon: workspaceIconFor("/dashboard/org/tenants"), roles: ["ADMIN", "MANAGER", "OFFICE"] },
   { label: "Landlords", href: "/dashboard/org/landlords", icon: workspaceIconFor("/dashboard/org/properties"), roles: ["ADMIN", "MANAGER"] },
   { label: "Identity verification", href: "/dashboard/org/identity-verification", icon: workspaceIconFor("/dashboard/org/security"), roles: ["ADMIN", "MANAGER", "OFFICE"] },
   { label: "Service providers", href: "/dashboard/org/service-providers", icon: workspaceIconFor("/dashboard/org/issues"), roles: ["ADMIN", "MANAGER", "OFFICE"] },
@@ -142,6 +152,18 @@ export const SIDEBAR_LINKS: readonly SidebarLink[] = [
     label: "Charges",
     href: "/dashboard/org/charges",
     icon: workspaceIconFor("/dashboard/org/charges"),
+    roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
+  },
+  {
+    label: "This month",
+    href: "/dashboard/org/charges/bills",
+    icon: workspaceIconFor("/dashboard/org/charges/bills"),
+    roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
+  },
+  {
+    label: "Work queue",
+    href: "/dashboard/org/operating-queue",
+    icon: workspaceIconFor("/dashboard/org/operating-queue"),
     roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"],
   },
   {

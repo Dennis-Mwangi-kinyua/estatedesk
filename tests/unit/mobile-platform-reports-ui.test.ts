@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { build } from "esbuild";
-import { chromium } from "playwright";
+import { launchTestBrowser } from "../helpers/browser";
 import { createRequire } from "node:module";
 import path from "node:path";
 
@@ -21,7 +21,7 @@ for (const os of ["ios", "android"]) for (const width of [390, 834]) test(`${os}
       }));
     } }],
   });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchTestBrowser({ headless: true });
   try {
     const page = await browser.newPage();
     await page.setContent('<div id="root"></div>');

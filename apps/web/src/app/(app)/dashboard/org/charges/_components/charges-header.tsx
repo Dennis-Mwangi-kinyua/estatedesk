@@ -2,7 +2,7 @@ import { WorkflowStepCards } from "@/components/help/workflow-step-list";
 import { EmojiSticker as VisualSticker } from "@/components/shared/emoji-sticker";
 import Link from "@/components/navigation/workspace-link";
 import type { OrgRole } from "@prisma/client";
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft, FileText, Receipt } from "lucide-react";
 import { InAppGuideHint } from "@/components/help/in-app-guide-hint";
 import { CHARGES_WORKFLOW_STEPS } from "../_lib/constants";
 import type { ChargesPageData } from "../_lib/types";
@@ -48,8 +48,15 @@ export function ChargesHeader({
               Back to dashboard
             </Link>
             <Link data-workspace-action="true"
-              href="/dashboard/org/leases"
+              href="/dashboard/org/charges/bills"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+            >
+              <Receipt className="h-4 w-4" />
+              This month
+            </Link>
+            <Link data-workspace-action="true"
+              href="/dashboard/org/leases"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted/30"
             >
               <FileText className="h-4 w-4" />
               View leases

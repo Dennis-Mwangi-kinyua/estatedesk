@@ -1,5 +1,7 @@
 "use server";
 
+import { changeAccountPasswordAction } from "@/features/security/password-action";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -231,77 +233,12 @@ export async function updateTenantPasswordAction(
   formData: FormData,
 ): Promise<ProfileActionState> {
   try {
-    const session = await requireTenantAccess();
-
-    if (!session.userId) {
-      return { ok: false, error: "Unauthorized." };
-    }
-
-    const currentPassword = String(formData.get("currentPassword") ?? "");
-    const newPassword = String(formData.get("newPassword") ?? "");
-    const confirmPassword = String(formData.get("confirmPassword") ?? "");
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      return { ok: false, error: "Fill in all password fields." };
-    }
-
-    if (newPassword.length < 8) {
-      return { ok: false, error: "New password must be at least 8 characters." };
-    }
-
-    if (newPassword !== confirmPassword) {
-      return { ok: false, error: "New passwords do not match." };
-    }
-
-    if (newPassword === currentPassword) {
-      return { ok: false, error: "Choose a different password from your current one." };
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: session.userId },
-      select: {
-        id: true,
-        passwordHash: true,
-        status: true,
-      },
-    });
-
-    if (!user || user.status !== "ACTIVE") {
-      return { ok: false, error: "User account not found." };
-    }
-
-    const currentMatches = await bcrypt.compare(
-      currentPassword,
-      user.passwordHash,
-    );
-
-    if (!currentMatches) {
-      return { ok: false, error: "Current password is incorrect." };
-    }
-
-    const passwordHash = await bcrypt.hash(newPassword, 12);
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        passwordHash,
-        mustChangePassword: false,
-        passwordChangedAt: new Date(),
-      },
-    });
-
-    revalidatePath("/dashboard/tenant/profile");
-    revalidatePath("/dashboard/tenant/profile/change-password");
-
+    await requireTenantAccess();
+    const result = await changeAccountPasswordAction({ ok: false }, formData);
+    if (!result.ok) return result;
     redirect("/dashboard/tenant/profile?passwordUpdated=1");
   } catch (error) {
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
-      throw error;
-    }
-
-    return {
-      ok: false,
-      error: "Unable to update your password right now. Please try again.",
-    };
+    if (isRedirectError(error)) throw error;
+    return { ok: false, error: "Unable to update your password right now. Please try again." };
   }
 }

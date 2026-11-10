@@ -11,16 +11,18 @@ import { usePathname } from "next/navigation";
 import { HeaderThemeToggle } from "@/components/theme/theme-toggle";
 
 type PublicAccessHeaderProps = {
-  active?: "home" | "vacancies" | "stays" | "services" | "providers" | "pricing" | "contact" | "faq" | "guides";
+  active?: "home" | "vacancies" | "stays" | "services" | "providers" | "pricing" | "contact" | "faq" | "guides" | "careers";
   loginHref?: string;
   loginLabel?: string;
   showPricing?: boolean;
 };
 
 const publicLinks = [
+  { href: "/careers", label: "Careers & jobs", key: "careers", icon: Search },
   { href: "/service-providers", label: "Service providers", key: "providers", icon: Search },
   { href: "/vacancies", label: "Long-term rentals", key: "vacancies", icon: Home },
   { href: "/stays", label: "Short stays", key: "stays", icon: BedDouble },
+  { href: "/register?intent=demo", label: "Book a free demo", key: "demo", icon: MessageCircleQuestion },
   { href: "/services", label: "Product overview", key: "services", icon: Search },
   { href: "/pricing", label: "Pricing", key: "pricing", icon: WalletCards },
   { href: "/guides", label: "Guides", key: "guides", icon: BookOpen },
@@ -29,9 +31,9 @@ const publicLinks = [
 ] as const;
 
 const navigationGroups = [
-  { label: "Product", keys: ["services", "pricing"] },
+  { label: "Product", keys: ["services", "demo", "pricing"] },
   { label: "Find a property", keys: ["vacancies", "stays"] },
-  { label: "Resources", keys: ["guides", "faq", "contact"] },
+  { label: "Resources", keys: ["careers", "guides", "faq", "contact"] },
 ] as const;
 
 export function PublicAccessHeader({
@@ -184,7 +186,7 @@ export function PublicAccessHeader({
                       className={publicPrimaryAction}
                     >
                       <UserPlus className="h-4 w-4 shrink-0" />
-                      <span className="truncate">Request access</span>
+                      <span className="truncate">Start free</span>
                     </Link>
                   </div>
                 </div>
@@ -231,7 +233,7 @@ export function PublicAccessHeader({
                 className={publicPrimaryAction}
               >
                 <UserPlus className="h-4 w-4 shrink-0" />
-                <span className="truncate">Request access</span>
+                <span className="truncate">Start free</span>
               </Link>
             </div>
           </nav>

@@ -157,7 +157,7 @@ test("native record queries are bounded, scoped, and never serialize private col
       // Prisma requires one field per orderBy entry, including the pagination tie-breaker.
       assert.deepEqual(query.args.orderBy, [{ createdAt: "desc" }, { id: "desc" }]);
     }
-    const paths = [...new Set([...adminNavItems, ...developerNavItems].map(link => link.href))].filter(path => !["/platform", "/platform/developer"].includes(path));
+    const paths = [...new Set([...adminNavItems, ...developerNavItems].filter(link => link.native !== false).map(link => link.href))].filter(path => !["/platform", "/platform/developer"].includes(path));
     paths.push("/platform/service-providers/reports", "/platform/jobs/notifications");
     for (const path of paths) {
       const page = await read({ ...session, platformRole: "SUPER_ADMIN" }, "platform", path, "", 1);

@@ -1,14 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { build } from "esbuild";
-import { chromium } from "playwright";
+import { launchTestBrowser } from "../helpers/browser";
 
 test("development does not open realtime streams when background refresh is disabled", async () => {
   const bundle = await build({ stdin: { contents: `import React from 'react';import{createRoot}from'react-dom/client';import{WorkspaceLiveUpdates}from'./apps/web/src/components/realtime/workspace-live-updates';createRoot(document.getElementById('root')).render(<WorkspaceLiveUpdates/>);`, resolveDir: process.cwd(), loader: "tsx" }, bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", tsconfig: "apps/web/tsconfig.json", define: { "process.env": "{}", "process.env.NODE_ENV": '"development"', "process.env.NEXT_PUBLIC_DEV_BACKGROUND_REFRESH": '"false"' }, plugins: [{ name: "navigation", setup(builder) {
     builder.onResolve({ filter: /^next\/navigation$/ }, () => ({ path: "navigation", namespace: "fixture" }));
     builder.onLoad({ filter: /.*/, namespace: "fixture" }, () => ({ contents: "const router={refresh(){throw Error('Unexpected background read')}};export const useRouter=()=>router;export const usePathname=()=>'/platform';", loader: "js" }));
   } }] });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchTestBrowser({ headless: true });
   try {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -30,7 +30,7 @@ test("live workspace coalesces changes, defers typing, reconnects visible tabs a
     builder.onResolve({ filter: /^next\/navigation$/ }, () => ({ path: "navigation", namespace: "fixture" }));
     builder.onLoad({ filter: /.*/, namespace: "fixture" }, () => ({ contents: `const router={refresh(){window.refreshes++}};export const useRouter=()=>router;export const usePathname=()=>'/dashboard/org';` }));
   } }] });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchTestBrowser({ headless: true });
   try {
     const page = await browser.newPage();
     const errors: string[] = [];

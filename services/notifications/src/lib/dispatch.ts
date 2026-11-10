@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { resolvePushActionUrl } from "./push-action-url";
 import { sendWebPushNotification } from "@/lib/push/web-push";
 import { sendMetaWhatsappText } from "@/lib/whatsapp/meta";
+import { sendTransactionalEmail } from "./email";
 
 type DispatchResult = {
   processed: number;
@@ -52,20 +53,14 @@ async function sendEmail({
   to,
   subject,
   body,
+  notificationId,
 }: {
   to: string;
   subject: string;
   body: string;
+  notificationId: string;
 }) {
-  // Replace this with Resend, SendGrid, SES, or your provider of choice.
-  if (process.env.NODE_ENV !== "production") {
-    console.log("sendNotificationEmail", { to, subject, body });
-  }
-
-  return {
-    provider: "console",
-    status: "sent",
-  };
+  return sendTransactionalEmail(to, subject, body, undefined, { idempotencyKey: `notification-${notificationId}` });
 }
 
 function getWebPushErrorStatusCode(error: unknown) {
@@ -162,6 +157,8 @@ async function sendWebPush({
 export async function dispatchQueuedNotifications(
   limit = 50,
 ): Promise<DispatchResult> {
+  const batchSize = Number.isSafeInteger(limit) ? Math.min(200, Math.max(1, limit)) : 50;
+  const deadline = Date.now() + 20_000;
   const notifications = await prisma.notification.findMany({
     where: {
       status: NotificationStatus.QUEUED,
@@ -171,7 +168,7 @@ export async function dispatchQueuedNotifications(
     orderBy: {
       createdAt: "asc",
     },
-    take: limit,
+    take: batchSize,
     include: {
       user: {
         select: {
@@ -192,8 +189,12 @@ export async function dispatchQueuedNotifications(
 
   let sent = 0;
   let failed = 0;
+  let processed = 0;
+  let next = 0;
 
-  for (const notification of notifications) {
+  async function worker() {
+  while (next < notifications.length && Date.now() < deadline) {
+    const notification = notifications[next++];
     // Atomically claim before provider calls so overlapping workers cannot send twice.
     const claim = await prisma.notification.updateMany({
       where: { id: notification.id, status: NotificationStatus.QUEUED, sentAt: null,
@@ -201,6 +202,7 @@ export async function dispatchQueuedNotifications(
       data: { sentAt: new Date() },
     });
     if (claim.count === 0) continue;
+    processed++;
     try {
       const contact = getRecipientContact(notification);
       const body = `${notification.title}\n\n${notification.message}`;
@@ -218,6 +220,7 @@ export async function dispatchQueuedNotifications(
           to: contact.email,
           subject: notification.title,
           body: notification.message,
+          notificationId: notification.id,
         });
       } else if (notification.channel === NotificationChannel.WEB_PUSH) {
         if (!contact.userId) throw new Error("Recipient has no linked user account.");
@@ -268,9 +271,11 @@ export async function dispatchQueuedNotifications(
       });
     }
   }
+  }
+  await Promise.all(Array.from({ length: Math.min(4, notifications.length) }, worker));
 
   return {
-    processed: notifications.length,
+    processed,
     sent,
     failed,
   };

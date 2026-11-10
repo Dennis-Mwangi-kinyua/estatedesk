@@ -82,6 +82,11 @@ Keyboard (platform shell): **`Alt+Shift+A`** → Admin mode · **`Alt+Shift+D`**
 
 ## Feature map
 
+### Organization management and recruitment
+- Approval centre, arrears payment promises, lease renewals with tenant responses, activity history, staff coverage and property comparisons ([workflows](docs/ORG_MANAGEMENT.md))
+- Platform and organization recruitment: publish public jobs, show the employer/poster, accept applications and private PDF CVs, and review candidates through hiring stages ([recruitment](docs/RECRUITMENT.md))
+- Public careers: `/careers` · hiring: `/platform/recruitment` and `/dashboard/org/recruitment`
+
 ### Portfolio & occupancy
 - Multi-org tenancy with memberships and RBAC  
 - Properties, buildings, units, vacancy publishing  
@@ -105,6 +110,13 @@ Keyboard (platform shell): **`Alt+Shift+A`** → Admin mode · **`Alt+Shift+D`**
 - Chart of accounts, journals, periods, budgets  
 - Payment posting, receivables, owner statements  
 - Period close / year-end close policies  
+
+### Sales & customer CRM
+- Platform sales pipeline with inbound/manual prospects, owners, demo scheduling, deal values and customer organization links
+- Organization and tenant customer directories with interaction histories, email and tenant portal messages
+- Assigned follow-ups, priorities, rescheduling, overdue queues and CRM analytics
+- Platform entry: `/platform/crm` · organization entry: `/dashboard/org/crm`
+- [CRM workflows, permissions and rollout](docs/CRM.md)
 
 ### Platform control plane
 - Admin mode: orgs, users, billing, onboarding, messages  

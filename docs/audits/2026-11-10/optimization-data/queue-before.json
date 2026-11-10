@@ -1,0 +1,405 @@
+{
+  "dataset": {
+    "leases": 2000,
+    "rentCharges": 12000,
+    "issues": 2000,
+    "payments": 2000
+  },
+  "method": "Five local SQL-backed samples; fixture creation excluded; not production latency or concurrent-user capacity.",
+  "samples": [
+    {
+      "ms": 1225.4696829999993,
+      "transferredRows": 14000,
+      "reads": [
+        {
+          "model": "IssueTicket",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "IssueTicket",
+          "operation": "findMany",
+          "rows": 2000
+        },
+        {
+          "model": "LeaseSignatureEnvelope",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "MoveOutNotice",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "Payment",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "MeterReading",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "RentCharge",
+          "operation": "findMany",
+          "rows": 12000
+        },
+        {
+          "model": "Notification",
+          "operation": "findMany",
+          "rows": 0
+        }
+      ],
+      "groups": [
+        {
+          "id": "proofs",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "readings",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "leases",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "arrears",
+          "total": 2000,
+          "preview": 25
+        },
+        {
+          "id": "issues",
+          "total": 2000,
+          "preview": 25
+        },
+        {
+          "id": "move-outs",
+          "total": 0,
+          "preview": 0
+        }
+      ]
+    },
+    {
+      "ms": 655.6774310000001,
+      "transferredRows": 14000,
+      "reads": [
+        {
+          "model": "IssueTicket",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "LeaseSignatureEnvelope",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "Payment",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "MoveOutNotice",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "IssueTicket",
+          "operation": "findMany",
+          "rows": 2000
+        },
+        {
+          "model": "MeterReading",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "RentCharge",
+          "operation": "findMany",
+          "rows": 12000
+        },
+        {
+          "model": "Notification",
+          "operation": "findMany",
+          "rows": 0
+        }
+      ],
+      "groups": [
+        {
+          "id": "proofs",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "readings",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "leases",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "arrears",
+          "total": 2000,
+          "preview": 25
+        },
+        {
+          "id": "issues",
+          "total": 2000,
+          "preview": 25
+        },
+        {
+          "id": "move-outs",
+          "total": 0,
+          "preview": 0
+        }
+      ]
+    },
+    {
+      "ms": 690.5421169999972,
+      "transferredRows": 14000,
+      "reads": [
+        {
+          "model": "IssueTicket",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "LeaseSignatureEnvelope",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "Payment",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "MoveOutNotice",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "MeterReading",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "IssueTicket",
+          "operation": "findMany",
+          "rows": 2000
+        },
+        {
+          "model": "RentCharge",
+          "operation": "findMany",
+          "rows": 12000
+        },
+        {
+          "model": "Notification",
+          "operation": "findMany",
+          "rows": 0
+        }
+      ],
+      "groups": [
+        {
+          "id": "proofs",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "readings",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "leases",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "arrears",
+          "total": 2000,
+          "preview": 25
+        },
+        {
+          "id": "issues",
+          "total": 2000,
+          "preview": 25
+        },
+        {
+          "id": "move-outs",
+          "total": 0,
+          "preview": 0
+        }
+      ]
+    },
+    {
+      "ms": 716.3914980000009,
+      "transferredRows": 14000,
+      "reads": [
+        {
+          "model": "IssueTicket",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "LeaseSignatureEnvelope",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "MeterReading",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "MoveOutNotice",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "IssueTicket",
+          "operation": "findMany",
+          "rows": 2000
+        },
+        {
+          "model": "Payment",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "RentCharge",
+          "operation": "findMany",
+          "rows": 12000
+        },
+        {
+          "model": "Notification",
+          "operation": "findMany",
+          "rows": 0
+        }
+      ],
+      "groups": [
+        {
+          "id": "proofs",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "readings",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "leases",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "arrears",
+          "total": 2000,
+          "preview": 25
+        },
+        {
+          "id": "issues",
+          "total": 2000,
+          "preview": 25
+        },
+        {
+          "id": "move-outs",
+          "total": 0,
+          "preview": 0
+        }
+      ]
+    },
+    {
+      "ms": 699.9727340000027,
+      "transferredRows": 14000,
+      "reads": [
+        {
+          "model": "IssueTicket",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "LeaseSignatureEnvelope",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "MoveOutNotice",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "Payment",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "MeterReading",
+          "operation": "findMany",
+          "rows": 0
+        },
+        {
+          "model": "IssueTicket",
+          "operation": "findMany",
+          "rows": 2000
+        },
+        {
+          "model": "RentCharge",
+          "operation": "findMany",
+          "rows": 12000
+        },
+        {
+          "model": "Notification",
+          "operation": "findMany",
+          "rows": 0
+        }
+      ],
+      "groups": [
+        {
+          "id": "proofs",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "readings",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "leases",
+          "total": 0,
+          "preview": 0
+        },
+        {
+          "id": "arrears",
+          "total": 2000,
+          "preview": 25
+        },
+        {
+          "id": "issues",
+          "total": 2000,
+          "preview": 25
+        },
+        {
+          "id": "move-outs",
+          "total": 0,
+          "preview": 0
+        }
+      ]
+    }
+  ],
+  "unposted": {
+    "count": 2000,
+    "ms": 17.03527799999938
+  }
+}

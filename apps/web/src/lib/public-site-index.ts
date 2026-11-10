@@ -11,6 +11,7 @@ export type PublicSiteIndexItem = {
 };
 
 export const publicSiteIndexItems: readonly PublicSiteIndexItem[] = [
+  { title: "Careers and job opportunities", path: "/careers", description: "Find public jobs posted by EstateDesk and property organizations, and apply directly online.", priority: "0.7", changefreq: "daily" },
   { title: "Middle East property teams", path: "/property-management-software-middle-east", description: "Evaluate rental operations and remote oversight for Middle East owners and teams.", priority: "0.8", changefreq: "monthly", lastmod: "2026-10-21" },
   { title: "Data Processing Agreement", path: "/data-processing-agreement", description: "Unsigned organization-specific DPA template for Afrisilicon Technology Limited, trading as EstateDesk.", priority: "0.5", changefreq: "monthly" },
   { path: "/service-providers", title: "Service providers", description: "Find plumbers, electricians and maintenance professionals by location, compare portfolios and hire for property jobs.", priority: "0.8", changefreq: "daily" },

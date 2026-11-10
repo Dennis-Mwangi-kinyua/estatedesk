@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { requireOrgRole } from "@/lib/permissions/guards";
 import { scopedPropertyWhere, scopedUnitWhere } from "@/lib/permissions/record-scope";
 import { scopedExpenditureWhere } from "@/lib/permissions/expenditure-scope";
+import { enforceFinancialReview } from "@/features/org-management/review-policy";
 
 const PATH = "/dashboard/org/expenditures";
 const DASHBOARD_PATH = "/dashboard/org";
@@ -151,14 +152,15 @@ export async function approveExpenditureAction(formData: FormData) {
     throw new Error("Pending expenditure not found.");
   }
 
-  await prisma.expenditure.update({
-    where: { id: expenditure.id },
-    data: {
-      status: "APPROVED",
-      approvedByUserId: session.userId,
-      approvedAt: new Date(),
-    },
-  });
+  await prisma.$transaction(async tx => {
+    await enforceFinancialReview(tx, session, expenditure.createdByUserId, expenditure.amount);
+    const changed = await tx.expenditure.updateMany({
+      where: { id: expenditure.id, orgId, status: "PENDING_APPROVAL", updatedAt: expenditure.updatedAt },
+      data: { status: "APPROVED", approvedByUserId: session.userId, approvedAt: new Date() },
+    });
+    if (changed.count !== 1) throw new Error("This expenditure changed. Refresh before approving.");
+    await tx.auditLog.create({ data: { orgId, actorUserId: session.userId, action: "EXPENDITURE_APPROVED", entityType: "Expenditure", entityId: expenditure.id } });
+  }, { isolationLevel: "Serializable" });
 
   revalidatePath(PATH);
   revalidatePath(DASHBOARD_PATH);

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { build } from "esbuild";
-import { chromium } from "playwright";
+import { launchTestBrowser } from "../helpers/browser";
 import { createRequire } from "node:module";
 import path from "node:path";
 const require = createRequire(import.meta.url);
@@ -15,7 +15,7 @@ for (const os of ["ios", "android"]) test(`${os}: report filters, drilldown, exp
       : `export class ApiError extends Error{};export async function getNativeWorkspace(kind,path,q,page,id,organization,filters){(window.__reads??=[]).push(filters);if(window.__failRead){window.__failRead=false;throw new Error('Report temporarily unavailable')};return {page:1,hasMore:false,related:[],searchable:false,records:[['organizations','Organizations'],['subscriptions','Subscription health'],['payment-volume','Verified payments'],['issues','Maintenance workload'],['notifications','Notification delivery'],['attention','Needs attention']].map(([id,title])=>({id,title,fields:[{label:'Current',value:'10'},{label:'Change',value:'+5 (100.0%)'}]})),report:{generatedAt:new Date().toISOString(),from:filters.from??'2026-10-01',to:filters.to??'2026-10-22',previousFrom:'2026-09-01',previousTo:'2026-09-22',scopeName:organization?'Alpha':'All organizations',metric:filters.metric,hasMore:!organization&&filters.page===1,organizations:[{id:organization??(filters.page===1?'a':'b'),name:organization?'Alpha':filters.page===1?'Alpha':'Beta',current:10,previous:5,attention:2,amounts:[{currency:'KES',current:'100.00',previous:'50.00'}]}]}}};export async function exportPlatformReport(filters,format){(window.__exports??=[]).push({filters,format});if(window.__failExport){window.__failExport=false;throw new Error('Export temporarily unavailable')}};`,
     }));
   } }] });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchTestBrowser({ headless: true });
   try {
     const page = await browser.newPage(); await page.setContent('<div id="root"></div>'); await page.addScriptTag({ content: bundle.outputFiles[0].text });
     await page.getByText("Report up to date", { exact: true }).waitFor();

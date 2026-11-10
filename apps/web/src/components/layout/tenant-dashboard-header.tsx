@@ -1,3 +1,4 @@
+import { TodayLink } from "@/components/shared/today-link";
 import Link from "@/components/navigation/workspace-link";
 import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
 import { Menu } from "lucide-react";
@@ -42,7 +43,8 @@ export function TenantDashboardHeader({
         </div>
 
         <div className="ml-2 flex shrink-0 items-center gap-2">
-          <HeaderThemeToggle />
+          <TodayLink compact />
+            <HeaderThemeToggle />
 
           <Link data-workspace-action="true"
             href="/dashboard/tenant/notifications"

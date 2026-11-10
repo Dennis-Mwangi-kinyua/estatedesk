@@ -16,6 +16,7 @@ export type WorkspaceIconName =
 export type Sticker = { icon: WorkspaceIconName; tone: StickerTone };
 
 const vocabulary: Array<[RegExp, WorkspaceIconName, StickerTone]> = [
+  [/\bcrm\b|customer relationship|sales pipeline/, "Handshake", "teal"],
   [/community|notice board/, "Megaphone", "peach"],
   [/visitor|gate access|^gate$/, "ShieldCheck", "teal"],
   [/^(more|menu)$/, "LayoutDashboard", "teal"],
@@ -94,7 +95,9 @@ function semanticLabel(label: string) {
   if (hash) return hash.replaceAll("-", " ");
   const segments = path.split("?")[0].split("/").filter(Boolean);
   const sections: Record<string, string> = {
-    "review-queue": "review queue", "identity-verification": "identity verification", "service-providers": "service providers", history: "tenancy history",
+    recruitment: "staff", careers: "staff", approvals: "verification", collections: "collections", renewals: "lease renewal", activity: "audit", handovers: "handover", performance: "reports",
+    crm: "crm", customers: "customer relationships", "privacy-requests": "privacy requests",
+    "review-queue": "review queue", "operating-queue": "work queue", "identity-verification": "identity verification", "service-providers": "service providers", history: "tenancy history",
     community: "community", visitors: "visitors", gate: "gate access",
     tenant: "home", org: "home", platform: "home", caretaker: "home", landlord: "home",
     dashboard: "home", organizations: "organizations", properties: "properties", landlords: "landlord owner", buildings: "buildings",

@@ -27,6 +27,7 @@ import {
   toLedgerNumber,
 } from "@/lib/ledger-utils";
 import { partitionChargesAroundWater } from "@/lib/billing/allocation-priority";
+import { ensureLeasePeriodCharges } from "@/lib/billing/issue-period-charges";
 
 type LedgerDb = PrismaClient | Prisma.TransactionClient;
 type OrgLedgerOptions = {
@@ -249,104 +250,8 @@ export async function allocateCombinedPeriodPayment({
   let appliedWaterBillId: string | null = null;
   let appliedAnyLeaseCharge = false;
 
-  const openingCharge = await db.rentCharge.findFirst({ where: {
-    orgId, leaseId: lease.id, period, chargeType: "OTHER",
-    description: { startsWith: OPENING_ARREARS_PREFIX },
-  }, select: { chargeType: true, description: true } });
-  if (lease.status === "ACTIVE" && !openingCharge) {
-    // Ensure a rent charge exists for the period so rent+water can form one bill.
-    const rentCharge = await db.rentCharge.upsert({
-      where: {
-        leaseId_period_chargeType: {
-          leaseId: lease.id,
-          period,
-          chargeType: "RENT",
-        },
-      },
-      update: {},
-      create: {
-        orgId,
-        leaseId: lease.id,
-        period,
-        amountDue: lease.monthlyRent,
-        amountPaid: 0,
-        balance: lease.monthlyRent,
-        dueDate: dueDateForPeriod(period, lease.dueDay),
-        chargeType: "RENT",
-        status: "UNPAID",
-      },
-      select: {
-        id: true,
-        period: true,
-        amountPaid: true,
-        balance: true,
-        status: true,
-      },
-    });
-
-    try {
-      await postRentChargeAccrual(db, rentCharge.id);
-    } catch {
-      // Accrual posting is best-effort until accounting is initialized.
-    }
-
-    // One row per chargeType per period (unique leaseId+period+chargeType).
-    const garbageAmount = new Prisma.Decimal(lease.unit.garbageFee ?? 0);
-    const securityAmount = new Prisma.Decimal(lease.unit.securityFee ?? 0);
-    const serviceAmount = new Prisma.Decimal(lease.unit.serviceCharge ?? 0);
-
-    const recurringCharges: Array<{
-      chargeType: "SERVICE_CHARGE" | "OTHER" | "SECURITY";
-      amount: Prisma.Decimal;
-      description: string;
-    }> = [];
-
-    if (serviceAmount.gt(0)) {
-      recurringCharges.push({
-        chargeType: "SERVICE_CHARGE",
-        amount: serviceAmount,
-        description: "Monthly service charge",
-      });
-    }
-    if (garbageAmount.gt(0)) {
-      recurringCharges.push({
-        chargeType: "OTHER",
-        amount: garbageAmount,
-        description: "Monthly garbage fee",
-      });
-    }
-    if (securityAmount.gt(0)) {
-      recurringCharges.push({
-        chargeType: "SECURITY",
-        amount: securityAmount,
-        description: "Monthly security fee",
-      });
-    }
-
-    for (const recurring of recurringCharges) {
-      await db.rentCharge.upsert({
-        where: {
-          leaseId_period_chargeType: {
-            leaseId: lease.id,
-            period,
-            chargeType: recurring.chargeType,
-          },
-        },
-        update: {},
-        create: {
-          orgId,
-          leaseId: lease.id,
-          period,
-          amountDue: recurring.amount,
-          amountPaid: 0,
-          balance: recurring.amount,
-          dueDate: dueDateForPeriod(period, lease.dueDay),
-          chargeType: recurring.chargeType,
-          description: recurring.description,
-          status: "UNPAID",
-        },
-      });
-    }
+  if (lease.status === "ACTIVE") {
+    await ensureLeasePeriodCharges(db, { orgId, leaseId: lease.id, period });
   }
 
   const openCharges = await db.rentCharge.findMany({
@@ -1179,7 +1084,6 @@ export async function queueDuePaymentNotifications(
       recipients: [{ tenantId: tenant.id, userId: tenant.userId }],
       channels: [
         NotificationChannel.IN_APP,
-        NotificationChannel.SMS,
         NotificationChannel.WHATSAPP,
         NotificationChannel.EMAIL,
       ],
@@ -1229,7 +1133,6 @@ export async function queueDuePaymentNotifications(
       recipients: [{ tenantId: bill.tenant.id, userId: bill.tenant.userId }],
       channels: [
         NotificationChannel.IN_APP,
-        NotificationChannel.SMS,
         NotificationChannel.WHATSAPP,
         NotificationChannel.EMAIL,
       ],

@@ -1,5 +1,11 @@
 # EstateDesk mobile
 
+## Cross-platform work — 9 November 2026
+
+Native CRM now covers organization/tenant customers, platform sales leads and demos, communication, follow-up task management and reports. Shared server services retain the web permissions and record scopes. Native landlord management, BnB listing/photo editing, account-deletion request/review workflows and privacy-preserving render diagnostics have also been added. New forms negotiate `X-EstateDesk-Forms: 2026-11-09`; older clients receive an update-required response for these operations.
+
+Use [VS Code emulator setup](../../docs/VS_CODE_EMULATORS.md) with the installed Diemas Michiels extension and `npm run mobile:doctor`. The inspected Linux host currently has no Java/Android SDK/virtual device; iOS simulation still requires a Mac with Xcode. See [current readiness and external release gates](../../docs/CROSS_PLATFORM_READINESS.md). Historical build evidence below does not certify the current source on real devices or in app stores.
+
 Production service availability and release verification: [mobile backend release review](../../docs/mobile-production-release-review.md). After building the web backend, run `npm run mobile:deployment:check` from the repository root. Both Vercel configurations run this route-manifest check to reject a deployment missing native service handlers. Simulator device creation does not deploy backend services.
 
 ## Native tenant expansion (2026-10-18)
@@ -215,3 +221,11 @@ The backend must be deployed with every mobile route before the installed app ca
 Run `npm run mobile:deployment:check` after a production build and `npm run mobile:services:check` after deployment. The live check uses no account credentials and does not validate authenticated workflows. See [platform native release evidence](../../docs/platform-native-release.md).
 
 The shared native signature field supports typed, drawn and uploaded signatures in tenant and management action forms. Verify each signing workflow on devices before release. ZIP exports are limited to 27 MB decoded; the web's export row limits still apply. Local source tests and bundle exports do not establish complete signed-in iOS/Android device validation.
+
+### Personal Today
+
+The **Today · my work and messages** button opens the native daily workspace for the signed-in account and selected organization. It shares scoped records with `/dashboard/today`: assigned CRM follow-ups, unread messages, tenant balances, maintenance and permitted team reviews. Refresh, overdue/task/message filters and explicit read acknowledgement use native controls. Provider job summaries are read-only; they do not launch a browser. See [Today behavior and limits](../../docs/TODAY.md). The matching backend must include `/api/mobile/today`; an older backend shows an unavailable message.
+
+### Security Centre
+
+Password changes are available to all roles with personal security access. The current password is required; the shared protected operation rotates this device's credential, signs out other devices and invalidates reset links. The app saves the returned credential in SecureStore before continuing. A storage failure requires sign-in. Security history is owner-only and uses `/api/mobile/security/activity`; the older `/security` session-list response is retained. See [security behavior and deployment compatibility](../../docs/SECURITY_CENTRE.md).

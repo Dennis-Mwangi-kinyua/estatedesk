@@ -1,3 +1,8 @@
+import { PropertyChoice } from "./property-choice";
+import { nativeFieldReview } from "../form-review";
+import { ListingPhotoField } from "./listing-photo-field";
+import { DateTimeField } from "./date-time-field";
+import { OrganizationChoice } from "./organization-choice";
 import { useEffect, useRef, useState, type ComponentRef } from "react";
 import { randomUUID } from "expo-crypto";
 import { ActivityIndicator, Alert, AppState, FlatList, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from "react-native";
@@ -27,7 +32,8 @@ function Choice({ field, value, change, disabled }: { field: NativeActionField; 
   </SafeAreaView></Modal></View>;
 }
 
-function FormField({ field, value, change, disabled, accessCard = false }: { field: NativeActionField; value: string; change: (value: string) => void; disabled: boolean; accessCard?: boolean }) {
+function FormField({ field, value, change, disabled, accessCard = false, values = {} }: { values?: Record<string,string>; field: NativeActionField; value: string; change: (value: string) => void; disabled: boolean; accessCard?: boolean }) {
+  if (field.type === "properties") return <PropertyChoice label={field.label} organization={values[field.organizationField??"orgId"]??""} value={value} change={change} disabled={disabled}/>;
   if (field.type === "signature") {
     const signature: SignatureValue = value ? JSON.parse(value) : { signatureMethod: "TYPED" };
     return <SignatureField value={signature} change={next => change(JSON.stringify(next))} disabled={disabled} />;
@@ -42,9 +48,12 @@ function FormField({ field, value, change, disabled, accessCard = false }: { fie
     })}</View>;
     return <View style={{ gap: 10 }}><Text style={styles.label}>{field.label}</Text>{field.options?.map(option => <Button key={option.value} label={option.label} checked={selected.includes(option.value)} disabled={disabled} secondary onPress={() => change(JSON.stringify(selected.includes(option.value) ? selected.filter(item => item !== option.value) : [...selected, option.value]))} />)}</View>;
   }
+  if (field.type === "photo") return <ListingPhotoField label={field.label} value={value} change={change} disabled={disabled} />;
+  if (field.type === "date" || field.type === "datetime") return <DateTimeField label={`${field.label}${field.required ? " *" : ""}`} value={value} change={change} datetime={field.type === "datetime"} disabled={disabled} />;
+  if (field.type === "organization") return <OrganizationChoice field={field} value={value} change={change} disabled={disabled} />;
   if (field.type === "select") return <Choice field={field} value={value} change={change} disabled={disabled} />;
   if (field.type === "checkbox") return <Button label={field.label} checked={value === "on"} disabled={disabled} secondary onPress={() => change(value === "on" ? "" : "on")} />;
-  return <Field label={`${field.label}${field.required ? " *" : ""}${field.type === "date" ? " (YYYY-MM-DD)" : field.type === "datetime" ? " (ISO 8601 with timezone, e.g. 2026-10-20T14:00:00+03:00)" : ""}`} value={value} onChangeText={change} editable={!disabled} maxLength={field.maxLength ?? 10000} secureTextEntry={field.type === "password"} multiline={field.type === "multiline"}
+  return <Field label={`${field.label}${field.required ? " *" : ""}`} value={value} onChangeText={change} editable={!disabled} maxLength={field.maxLength ?? 10000} secureTextEntry={field.type === "password"} multiline={field.type === "multiline"}
     autoCapitalize={["email", "password"].includes(field.type) ? "none" : "sentences"} autoCorrect={!["email", "password"].includes(field.type)} keyboardType={field.type === "decimal" ? "decimal-pad" : field.type === "integer" ? "number-pad" : field.type === "email" ? "email-address" : field.type === "phone" ? "phone-pad" : "default"} />;
 }
 
@@ -94,7 +103,7 @@ export function NativeActionForm({ request, close, onError, onBusyChange }: { re
     if (current.dirty && !current.draftKey) throw new Error("Local draft storage is unavailable.");
     if (!current.definition || !current.draftKey || !current.dirty || current.savedDraft || current.busy || current.result) return;
     await saveFormDraft(current.draftKey, current.definition, { values: current.values, rows: current.rows, version: formDraftVersion(current.definition) });
-    setDraftMessage("Draft saved on this device. Passwords, signatures and confirmations must be entered again.");
+    setDraftMessage("Draft saved on this device. Passwords, photos, signatures and confirmations must be entered again.");
   }
   useEffect(() => {
     if (!dirty || !draftKey || savedDraft || busy || result) return;
@@ -115,6 +124,7 @@ export function NativeActionForm({ request, close, onError, onBusyChange }: { re
     setDirty(true); setError("");
     const change = (current: Record<string, string>, fields: NativeActionField[]) => {
       const next = { ...current, [field.name]: value };
+      for (const item of fields) if (item.organizationField === field.name && current[field.name] !== value) next[item.name] = "[]";
       for (const item of fields) if (item.when?.field === field.name) next[item.name] = visible(item, next) ? next[item.name] || item.defaultValue || "" : "";
       return next;
     };
@@ -125,6 +135,8 @@ export function NativeActionForm({ request, close, onError, onBusyChange }: { re
     const group = definition!.groups[index];
     const sets = group.repeat ? (rows[group.id] ?? []).map(row => row.values) : [values];
     for (const set of sets) for (const field of group.fields) if (visible(field, set) && field.required && !set[field.name]?.trim()) return `Enter ${field.label.toLowerCase()}.`;
+    for (const set of sets) for (const field of group.fields) if (field.required && ["multiselect","properties"].includes(field.type) && visible(field,set) && !JSON.parse(set[field.name] || "[]").length) return `Choose ${field.label.toLowerCase()}.`;
+    for (const set of sets) for (const field of group.fields) if (visible(field,set) && set[field.name]?.startsWith("draft-date:")) return `Complete a valid ${field.label.toLowerCase()}.`;
     for (const set of sets) for (const field of group.fields) if (field.type === "signature" && visible(field, set) && set[field.name]) {
       const signature = JSON.parse(set[field.name]) as SignatureValue;
       if (signature.signatureMethod !== "TYPED" && !signature.signatureData) return "Draw or choose your signature before continuing.";
@@ -139,7 +151,7 @@ export function NativeActionForm({ request, close, onError, onBusyChange }: { re
     const body: NonNullable<NativeActionRequest["values"]> = {};
     for (const group of definition.groups) for (const field of group.fields) body[field.name] = group.repeat
       ? (rows[group.id] ?? []).map(row => visible(field, row.values) ? row.values[field.name] ?? "" : "")
-      : field.type === "multiselect" ? JSON.parse(values[field.name] || "[]") : visible(field, values) ? values[field.name] ?? "" : "";
+      : ["multiselect","properties"].includes(field.type) ? JSON.parse(values[field.name] || "[]") : visible(field, values) ? values[field.name] ?? "" : "";
     try {
       const payload = JSON.stringify(body);
       if (submission.current?.payload !== payload) submission.current = { payload, id: randomUUID() };
@@ -153,14 +165,14 @@ export function NativeActionForm({ request, close, onError, onBusyChange }: { re
     const shown = items.filter(field => field.type !== "hidden" && visible(field, current));
     if (organizationAccess) return shown.map(field => <View key={field.name} style={s.accessFieldCard}>
       <View style={s.accessFieldHeading}><IconTile name={field.type === "multiselect" ? "eye-off" : "key"} size={15} /><View style={{ flex: 1, minWidth: 0, gap: 3 }}><Text style={styles.label}>{field.label}</Text><Text style={s.accessOptionHint}>{field.type === "multiselect" ? "Choose which workspace sections this role cannot open." : "Choose the default or an explicit access override."}</Text></View></View>
-      <FormField field={field} value={current[field.name] ?? ""} change={value => update(field, value, groupId, key)} disabled={busy || !!savedDraft} accessCard />
+      <FormField field={field} values={current} value={current[field.name] ?? ""} change={value => update(field, value, groupId, key)} disabled={busy || !!savedDraft} accessCard />
     </View>);
     const pairs = [];
     for (let index = 0; index < shown.length;) {
       const count = shown[index].type === "signature" || shown[index + 1]?.type === "signature" ? 1 : 2;
       const pair = shown.slice(index, index + count);
       index += count;
-      pairs.push(<FormColumns key={pair[0].name}>{pair.map(field => <FormField key={field.name} field={field} value={current[field.name] ?? ""} change={value => update(field, value, groupId, key)} disabled={busy || !!savedDraft} />)}</FormColumns>);
+      pairs.push(<FormColumns key={pair[0].name}>{pair.map(field => <FormField key={field.name} field={field} values={current} value={current[field.name] ?? ""} change={value => update(field, value, groupId, key)} disabled={busy || !!savedDraft} />)}</FormColumns>);
     }
     return pairs;
   }
@@ -186,7 +198,7 @@ export function NativeActionForm({ request, close, onError, onBusyChange }: { re
         {organizationAccess ? <View accessibilityLiveRegion="polite" style={s.stepCard}><IconTile name={group?.id === "views" ? "eye-off" : group?.id === "permissions" ? "key" : "check-circle"} size={17} /><View style={{ flex: 1, minWidth: 0, gap: 3 }}><Text style={s.stepEyebrow}>ACCESS CONFIGURATION</Text><Text style={styles.cardTitle}>{group?.title ?? "Review and save"}</Text></View><Text style={s.stepCount}>{Math.min(step + 1, definition.groups.length + 1)} / {definition.groups.length + 1}</Text></View> : <Text accessibilityLiveRegion="polite" style={styles.label}>Step {Math.min(step + 1, definition.groups.length + 1)} of {definition.groups.length + 1} · {group?.title ?? "Review"}</Text>}
         {group ? <View style={{ gap: 16 }}><Text accessibilityRole="header" style={styles.cardTitle}>{group.title}</Text>{group.description ? <Text style={styles.subtitle}>{group.description}</Text> : null}
           {group.repeat ? <>{(rows[group.id] ?? []).map((row, index) => <View key={row.key} style={styles.card}><Text style={styles.cardTitle}>{group.title} · {index + 1}</Text>{fields(group.fields, row.values, group.id, row.key)}<Button label="Remove row" icon="trash-2" secondary disabled={busy || !!savedDraft} onPress={() => { setDirty(true); setRows(current => ({ ...current, [group.id]: current[group.id].filter(item => item.key !== row.key) })); }} /></View>)}<Button label="Add unit mix row" icon="plus" secondary disabled={busy || !!savedDraft} onPress={() => { const key = ++rowId.current; setDirty(true); setRows(current => ({ ...current, [group.id]: [...current[group.id], { key, values: defaults(group.fields) }] })); }} /></> : organizationAccess ? <View style={s.accessFieldGrid}>{fields(group.fields, values)}</View> : <View style={styles.card}>{fields(group.fields, values)}</View>}
-        </View> : <>{definition.groups.map((item, index) => <View key={item.id} style={styles.card}><Text style={styles.cardTitle}>{item.title}</Text>{(item.repeat ? (rows[item.id] ?? []).map(row => row.values) : [values]).map((set, rowIndex) => <View key={rowIndex} style={{ gap: 10 }}>{item.fields.filter(field => field.type !== "hidden" && visible(field, set)).map(field => <View key={field.name} style={{ gap: 3 }}><Text style={styles.label}>{field.label}</Text><Text style={styles.subtitle}>{field.type === "multiselect" ? (JSON.parse(set[field.name] || "[]") as string[]).map(value => field.options?.find(option => option.value === value)?.label ?? value).join(", ") || "None" : field.type === "signature" ? (JSON.parse(set[field.name] || '{"signatureMethod":"TYPED"}') as SignatureValue).signatureMethod.toLowerCase() + " signature" : field.type === "password" ? set[field.name] ? "••••••••" : "—" : field.type === "checkbox" ? set[field.name] === "on" ? "Yes" : "No" : (field.options?.find(option => option.value === set[field.name])?.label ?? set[field.name]) || "—"}</Text></View>)}</View>)}<Button label="Edit section" icon="edit-3" secondary disabled={busy} onPress={() => go(index)} /></View>)}</>}
+        </View> : <>{definition.groups.map((item, index) => <View key={item.id} style={styles.card}><Text style={styles.cardTitle}>{item.title}</Text>{(item.repeat ? (rows[item.id] ?? []).map(row => row.values) : [values]).map((set, rowIndex) => <View key={rowIndex} style={{ gap: 10 }}>{item.fields.filter(field => field.type !== "hidden" && visible(field, set)).map(field => <View key={field.name} style={{ gap: 3 }}><Text style={styles.label}>{field.label}</Text><Text style={styles.subtitle}>{nativeFieldReview(field,set[field.name]??"")}</Text></View>)}</View>)}<Button label="Edit section" icon="edit-3" secondary disabled={busy} onPress={() => go(index)} /></View>)}</>}
         <View style={{ flexDirection: "row", gap: 12, flexWrap: "wrap" }}>{step > 0 ? <Button label="Previous" icon="arrow-left" secondary disabled={busy} onPress={() => go(step - 1)} /> : null}{group ? <Button label="Continue" icon="arrow-right" disabled={busy || !!savedDraft} onPress={() => { const message = groupError(step); if (message) setError(message); else go(step + 1); }} /> : <Button label={busy ? "Submitting…" : definition.submitLabel} icon={definition.destructive ? "trash-2" : "check-circle"} disabled={busy || !!savedDraft || uncertain} onPress={() => Alert.alert(definition.title, definition.confirmation, [{ text: "Cancel", style: "cancel" }, { text: definition.submitLabel, style: definition.destructive ? "destructive" : "default", onPress: () => void submit() }])} />}</View>
       </> : null}
     </ScrollView>

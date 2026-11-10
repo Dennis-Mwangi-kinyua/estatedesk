@@ -1,0 +1,156 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "EstateDesk: Native toolchain check",
+      "type": "shell",
+      "command": "node scripts/android-dev.mjs doctor",
+      "problemMatcher": []
+    },
+    {
+      "label": "EstateDesk: Web and desktop PWA",
+      "type": "shell",
+      "command": "npm run dev -w @estatedesk/web -- --hostname 0.0.0.0",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "next",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting",
+          "endsPattern": "Ready in"
+        }
+      }
+    },
+    {
+      "label": "EstateDesk: Metro for Android emulator",
+      "type": "shell",
+      "command": "npm run start -w @estatedesk/mobile",
+      "options": {
+        "env": {
+          "EXPO_PUBLIC_API_URL": "http://10.0.2.2:3000"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "expo",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting project",
+          "endsPattern": "(Waiting on|Metro waiting on|Using development build)"
+        }
+      }
+    },
+    {
+      "label": "EstateDesk: Build and run Android",
+      "type": "shell",
+      "command": "node scripts/android-dev.mjs run",
+      "options": {
+        "env": {
+          "EXPO_PUBLIC_API_URL": "http://10.0.2.2:3000"
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "EstateDesk: Build and run iOS (Mac)",
+      "type": "shell",
+      "command": "npm run mobile:ios",
+      "options": {
+        "env": {
+          "EXPO_PUBLIC_API_URL": "http://127.0.0.1:3000"
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "EstateDesk: Typecheck all apps",
+      "type": "shell",
+      "command": "npm run typecheck && npm run mobile:typecheck",
+      "problemMatcher": []
+    },
+    {
+      "label": "EstateDesk: Verify release artifacts",
+      "type": "shell",
+      "command": "npm run release:check -- --artifacts-only",
+      "problemMatcher": []
+    },
+    {
+      "label": "EstateDesk: Install portable Android tools (Linux x64)",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "scripts/android-setup.mjs"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "EstateDesk: Review Android SDK licences",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "scripts/android-dev.mjs",
+        "licenses"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "EstateDesk: Install Android SDK packages",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "scripts/android-setup.mjs",
+        "--packages"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "EstateDesk: Build Android emulator APK",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "scripts/android-dev.mjs",
+        "build"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "EstateDesk: List Android devices",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "scripts/android-dev.mjs",
+        "devices"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "EstateDesk: Create Android virtual device",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "scripts/android-setup.mjs",
+        "--emulator"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "EstateDesk: Start Android virtual device",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "scripts/android-dev.mjs",
+        "emulator",
+        "-avd",
+        "EstateDesk_API_36"
+      ],
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

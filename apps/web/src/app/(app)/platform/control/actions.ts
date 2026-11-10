@@ -166,12 +166,13 @@ export async function forceOrgStatusAction(formData: FormData) {
 
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
-    select: { id: true, name: true, slug: true, status: true },
+    select: { id: true, name: true, slug: true, status: true, blacklistedAt: true },
   });
   if (!org) redirect(`${PAGE}?error=org-missing`);
+  if (org.blacklistedAt) redirect(`/platform/organizations/${encodeURIComponent(org.slug)}?archiveError=Remove%20the%20blacklist%20lock%20first.`);
 
   await prisma.organization.update({
-    where: { id: org.id },
+    where: { id: org.id, blacklistedAt: null },
     data: { status },
   });
 
@@ -577,12 +578,13 @@ export async function softDeleteOrgAction(formData: FormData) {
 
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
-    select: { id: true, slug: true, name: true, deletedAt: true },
+    select: { id: true, slug: true, name: true, deletedAt: true, blacklistedAt: true },
   });
   if (!org || org.deletedAt) redirect(`${PAGE}?error=org-missing`);
+  if (org.blacklistedAt) redirect(`/platform/organizations/${encodeURIComponent(org.slug)}?archiveError=Remove%20the%20blacklist%20lock%20first.`);
 
   await prisma.organization.update({
-    where: { id: org.id },
+    where: { id: org.id, blacklistedAt: null },
     data: {
       deletedAt: new Date(),
       status: "DISABLED",
@@ -612,15 +614,15 @@ export async function restoreOrgAction(formData: FormData) {
 
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
-    select: { id: true, slug: true, name: true, deletedAt: true },
+    select: { id: true, slug: true, name: true, deletedAt: true, blacklistedAt: true },
   });
   if (!org) redirect(`${PAGE}?error=org-missing`);
 
   await prisma.organization.update({
-    where: { id: org.id },
+    where: { id: org.id, blacklistedAt: org.blacklistedAt },
     data: {
       deletedAt: null,
-      status: "ACTIVE",
+      status: org.blacklistedAt ? "DISABLED" : "ACTIVE",
     },
   });
 

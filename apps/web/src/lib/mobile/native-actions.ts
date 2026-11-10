@@ -1,3 +1,6 @@
+import { nativePrivacyDefinition } from "./native-privacy";
+import { nativeLandlordPageActions, nativeLandlordDefinition } from "./native-landlord-actions";
+import { nativeCrmDefinition, nativeCrmPageActions } from "./native-crm";
 import "server-only";
 import { nativeResolutionDefinition, nativeResolutionActions } from "./native-resolution-actions";
 import { nativeOperatorPageActions, nativeOperatorRecordActions, nativeOperatorActionDefinition } from "./native-operator-actions";
@@ -28,6 +31,11 @@ const options = (values: readonly string[]) => values.map(value => ({ value, lab
 
 export function nativePageActions(session: AppSession, kind: MobileWorkspaceKind, path: string): NativeActionLink[] {
   if (kind === "landlord") return [];
+  if (kind === "organization" && path === "/dashboard/org/airbnb" && session.membershipScope?.scopeType === "ORG" && ["ADMIN", "MANAGER"].includes(session.activeOrgRole ?? "")) return [{id:"bnb.listing.create",title:"Create BnB listing"}];
+  const landlords = nativeLandlordPageActions(session, kind, path);
+  if (landlords.length) return landlords;
+  const crm = nativeCrmPageActions(kind, path);
+  if (crm.length) return crm;
   const staff = nativeStaffPageActions(session, kind, path);
   if (staff.length) return staff;
   const accounting = nativeAccountingPageActions(session, kind, path);
@@ -80,6 +88,9 @@ export function nativeRecordActions(kind: MobileWorkspaceKind, path: string, sta
 
 export async function nativeActionDefinition(session: AppSession, kind: MobileWorkspaceKind, path: string, actionId: string, recordId?: string): Promise<NativeActionDefinition | null> {
   if (kind === "landlord") return null;
+  if (actionId.startsWith("privacy.")) return nativePrivacyDefinition(session, kind, path, actionId, recordId);
+  if (actionId.startsWith("landlord.")) return nativeLandlordDefinition(session, kind, path, actionId, recordId);
+  if (actionId.startsWith("crm.")) return nativeCrmDefinition(session, kind, path, actionId, recordId);
   const bnb = await nativeBnbActionDefinition(session, path, actionId, recordId);
   if (bnb) return bnb;
   const inquiry = await nativeVacancyInquiryDefinition(session, path, actionId, recordId);

@@ -26,6 +26,7 @@ export const publicListedVacancyWhere = {
       org: {
         is: {
           status: "ACTIVE" as const,
+          blacklistedAt: null,
           deletedAt: null,
           ...orgSettingDoesNotEqual("publicVacanciesHidden", true),
         },
@@ -158,6 +159,7 @@ export function buildVacancyListWhere(params: VacancyListQuery, eligibility: Pri
         org: {
           is: {
             status: "ACTIVE",
+            blacklistedAt: null,
             deletedAt: null,
           },
         },

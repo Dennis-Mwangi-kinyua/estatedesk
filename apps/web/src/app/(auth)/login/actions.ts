@@ -6,6 +6,8 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { prisma } from "@/lib/prisma";
+import { OrganizationBlacklistedError } from "@/lib/organizations/blacklist-policy";
+import { assertUserNotBlacklisted } from "@/lib/organizations/blacklist";
 import { ActiveSessionLimitError, setUserSession } from "@/lib/auth/session";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
 import {
@@ -232,6 +234,8 @@ export async function loginAction(
     }
     if (user.status !== "ACTIVE") redirect("/account-suspended");
 
+    await assertUserNotBlacklisted(user.id);
+
     // Platform admins do not need org membership or tenant profile
     if (
       user.platformRole === "PLATFORM_ADMIN" ||
@@ -403,6 +407,8 @@ export async function loginAction(
     if (isRedirectError(error)) {
       throw error;
     }
+
+    if (error instanceof OrganizationBlacklistedError) return { success: false, error: error.message };
 
     if (error instanceof ActiveSessionLimitError) {
       return {

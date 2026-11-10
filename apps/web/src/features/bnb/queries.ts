@@ -6,7 +6,7 @@ export const bnbReservationDates = { where: { cancelledAt: null, checkedOutAt: n
 export const bnbImages = { where: { deletedAt: null }, orderBy: [{ createdAt: "asc" as const }, { id: "asc" as const }], select: { id: true, key: true, metadata: true } };
 export const publicBnbWhere: Prisma.BnbListingWhereInput = {
   status: "PUBLISHED", deletedAt: null,
-  org: { status: "ACTIVE", deletedAt: null },
+  org: { status: "ACTIVE", deletedAt: null, blacklistedAt: null },
   images: { some: { deletedAt: null } },
 };
 export async function getPublicBnb(slug: string) {

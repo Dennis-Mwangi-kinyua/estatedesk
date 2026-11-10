@@ -312,7 +312,7 @@ export default function PricingPage() {
       <section aria-labelledby="billing-questions" className="mx-auto max-w-4xl px-5 py-12 sm:px-6">
         <h2 id="billing-questions" className="text-2xl font-semibold">Billing and onboarding questions</h2>
         <div className="mt-6 space-y-3">
-          <details className="rounded-xl border border-border bg-card p-5"><summary className="cursor-pointer font-semibold">What happens after I choose a plan?</summary><p className="mt-3 text-sm leading-7 text-muted-foreground">Submit an access request. Our team reviews your portfolio needs and contacts you to agree your workspace setup and sign-in details.</p></details>
+          <details className="rounded-xl border border-border bg-card p-5"><summary className="cursor-pointer font-semibold">What happens after I choose a plan?</summary><p className="mt-3 text-sm leading-7 text-muted-foreground">Free creates the workspace and signs you in during the same visit. Pro, Plus, and Custom send an access request. The team reviews the portfolio and contacts you before that workspace is opened.</p></details>
           <details className="rounded-xl border border-border bg-card p-5"><summary className="cursor-pointer font-semibold">Are payment and setup costs included?</summary><p className="mt-3 text-sm leading-7 text-muted-foreground">The listed amounts are workspace subscription prices. Confirm any payment provider fees, taxes, migration or guided onboarding costs with sales for your setup.</p></details>
           <details className="rounded-xl border border-border bg-card p-5"><summary className="cursor-pointer font-semibold">How do changes, cancellation and refunds work?</summary><p className="mt-3 text-sm leading-7 text-muted-foreground">Review the <Link href="/terms" className="font-semibold underline">terms of service</Link> and confirm the billing, renewal, cancellation and refund terms for your plan with the team before activation.</p></details>
         </div>
@@ -334,7 +334,7 @@ export default function PricingPage() {
               data-conversion-event="pricing_registration_cta_click"
               className={publicPrimaryAction}
             >
-              Request access
+              Start free
             </Link>
 
             <Link

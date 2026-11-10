@@ -2,6 +2,7 @@ import type { OrgRole } from "@prisma/client";
 import type { loadReportsPageData } from "./queries";
 
 export type ReportsSearchParams = {
+  page?: string;
   apartment?: string;
   payment?: string;
   period?: string;

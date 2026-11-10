@@ -1,3 +1,4 @@
+import { AccountDeletionPanel } from "./account-deletion";
 import { useState } from "react";
 import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import type { MobileSession } from "@estatedesk/contracts/mobile";
@@ -101,6 +102,7 @@ export function AccountPage({ session, busy, loggingOut, logout, open, refreshSe
       </Pressable>)}
     </View>
 
+    <AccountDeletionPanel />
     <View style={s.logout}>
       <View style={s.logoutCopy}><Text style={s.logoutTitle}>Sign out</Text><Text style={styles.subtitle}>End this session on this device.</Text></View>
       <Button label={loggingOut ? "Signing out…" : "Sign out"} icon="log-out" onPress={logout} disabled={busy} secondary />

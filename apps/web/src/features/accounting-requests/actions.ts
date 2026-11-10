@@ -12,6 +12,7 @@ import {
   notifyRequestSubmitter,
 } from "@/lib/accounting/request-workflow";
 import { prisma } from "@/lib/prisma";
+import { enforceFinancialReview } from "@/features/org-management/review-policy";
 import { requireOrgRole, requireOrgPermission } from "@/lib/permissions/guards";
 import {
   DEFAULT_EXPENSE_SYSTEM_KEY,
@@ -286,6 +287,7 @@ export async function approveAccountingRequestAction(formData: FormData) {
     }
 
     let vendorBillId: string | null = null;
+    await enforceFinancialReview(tx, session, existing.submittedByUserId, existing.amount);
     let approvalMessage = feedback ?? "Approved by accounts.";
 
     if (postToPayables) {

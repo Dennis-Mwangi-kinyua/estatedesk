@@ -11,6 +11,11 @@ export function organizationPurgeWhere(now = new Date()): Prisma.OrganizationWhe
   } };
 }
 
+export function organizationOwnedWhere(entry: { path: readonly string[]; alternatePaths?: readonly (readonly string[])[] }, orgId: string) {
+  const scopes = [entry.path, ...(entry.alternatePaths ?? [])].map(path => path.reduceRight<Record<string, unknown> | string>((value, key) => ({ [key]: value }), orgId));
+  return scopes.length === 1 ? scopes[0] : { OR: scopes };
+}
+
 /** Every delete is scoped to this organization; shared accounts are never traversed. */
 export async function purgeOrganization(db: PrismaClient, orgId: string, now = new Date()) {
   return db.$transaction(async tx => {
@@ -27,7 +32,7 @@ export async function purgeOrganization(db: PrismaClient, orgId: string, now = n
     ]);
     if (remainingFiles.some(Boolean)) throw new Error("Organization attachments still need cleanup.");
     for (const entry of ORGANIZATION_PURGE_PLAN) {
-      const where = entry.path.reduceRight<Record<string, unknown> | string>((value, key) => ({ [key]: value }), orgId);
+      const where = organizationOwnedWhere(entry, orgId);
       // Generated delegates share deleteMany's contract; the schema coverage test checks the plan.
       const delegate = tx[entry.delegate] as unknown as { deleteMany(args: { where: unknown }): Promise<unknown> };
       await delegate.deleteMany({ where });

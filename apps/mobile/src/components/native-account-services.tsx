@@ -1,3 +1,5 @@
+import { SecurityActivity } from "./security-activity";
+import { AccountDeletionPanel } from "./account-deletion";
 import { useState } from "react";
 import { Alert, Text, View } from "react-native";
 import * as api from "../api";
@@ -59,21 +61,25 @@ export function RewardsPanel({ data, busy, run, refresh }: { data: Awaited<Retur
   </>;
 }
 
-export function SecurityPanel({ sessions, busy, run, refresh, tenant }: { sessions: Awaited<ReturnType<typeof api.getSecurity>>; busy: boolean; run: Run; refresh: () => Promise<void>; tenant: boolean }) {
+export function SecurityPanel({ sessions, busy, run, refresh, onError }: { sessions: Awaited<ReturnType<typeof api.getSecurity>>; busy: boolean; run: Run; refresh: () => Promise<void>; onError: (error: unknown) => void }) {
   const [currentPassword, setCurrent] = useState(""); const [newPassword, setNew] = useState(""); const [confirmPassword, setConfirm] = useState(""); const [message, setMessage] = useState("");
+  const [historyRevision, setHistoryRevision] = useState(0);
   function revoke(sessionId?: string) {
-    Alert.alert("Sign out other devices?", sessionId ? "This device session will end. Your current session stays signed in." : "All other signed-in sessions will end.", [{ text: "Cancel", style: "cancel" }, { text: "Sign out", style: "destructive", onPress: () => void run(async () => { await api.updateSecurity(sessionId ? { action: "revoke", sessionId } : { action: "revoke-others" }); await refresh(); }) }]);
+    Alert.alert("Sign out other devices?", sessionId ? "This device session will end. Your current session stays signed in." : "All other signed-in sessions will end.", [{ text: "Cancel", style: "cancel" }, { text: "Sign out", style: "destructive", onPress: () => void run(async () => { await api.updateSecurity(sessionId ? { action: "revoke", sessionId } : { action: "revoke-others" }); await refresh(); setHistoryRevision(value => value + 1); }) }]);
   }
   return <><Text accessibilityRole="header" style={styles.title}>Security</Text>
     {message ? <Text accessibilityLiveRegion="polite" style={styles.subtitle}>{message}</Text> : null}
-    {tenant ? <View style={styles.card}><Text style={styles.cardTitle}>Change password</Text>
+    <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>Change password</Text>
+      <Text style={styles.subtitle}>Use at least 12 characters. Other devices and outstanding reset links will be invalidated. This device stays signed in.</Text>
       <Field label="Current password" secureTextEntry autoCapitalize="none" value={currentPassword} onChangeText={setCurrent} editable={!busy} />
       <Field label="New password" secureTextEntry autoCapitalize="none" value={newPassword} onChangeText={setNew} editable={!busy} />
       <Field label="Confirm new password" secureTextEntry autoCapitalize="none" value={confirmPassword} onChangeText={setConfirm} editable={!busy} />
-      <Button label="Update password" disabled={busy || !currentPassword || newPassword.length < 8 || newPassword !== confirmPassword || newPassword === currentPassword} onPress={() => void run(async () => {
-        await api.updateSecurity({ action: "password", currentPassword, newPassword, confirmPassword }); setCurrent(""); setNew(""); setConfirm(""); setMessage("Password updated."); await refresh();
+      <Button label="Update password" disabled={busy || !currentPassword || newPassword.length < 12 || newPassword !== confirmPassword || newPassword === currentPassword} onPress={() => void run(async () => {
+        await api.updateSecurity({ action: "password", currentPassword, newPassword, confirmPassword }); setCurrent(""); setNew(""); setConfirm(""); setMessage("Password updated. Other devices have been signed out and reset links invalidated."); await refresh(); setHistoryRevision(value => value + 1);
       })} />
-    </View> : null}
+    </View>
+    <SecurityActivity revision={historyRevision} onError={onError} />
+    <AccountDeletionPanel />
     <Text style={styles.cardTitle}>Signed-in devices</Text>
     {sessions.map(item => <View key={item.id} style={styles.card}><Text style={styles.cardTitle}>{item.isCurrent ? "This device" : "Other device"}</Text><Text selectable style={styles.subtitle}>{item.userAgent ?? "Unknown device"}</Text><Text style={styles.subtitle}>{item.ipAddress ?? "IP unavailable"} · Last active {date(item.lastSeenAt)}</Text><Text style={styles.subtitle}>Expires {date(item.expiresAt)}</Text>
       {!item.isCurrent ? <Button label="Sign out this device" secondary disabled={busy} onPress={() => revoke(item.id)} /> : null}

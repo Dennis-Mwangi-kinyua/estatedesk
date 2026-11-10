@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createRequire } from "node:module";
 import { build } from "esbuild";
-import { chromium } from "playwright";
+import { launchTestBrowser } from "../helpers/browser";
 
 test("platform heading remains hydration-safe after the presentation enhancer runs", async () => {
   const component = "./apps/web/src/app/(app)/platform/_components/platform-dashboard-heading";
@@ -13,7 +13,7 @@ test("platform heading remains hydration-safe after the presentation enhancer ru
     builder.onResolve({ filter: /^next\/navigation$/ }, () => ({ path: "navigation", namespace: "fixture" }));
     builder.onLoad({ filter: /.*/, namespace: "fixture" }, () => ({ contents: "export const usePathname=()=>'/platform';", loader: "js" }));
   } }] });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchTestBrowser({ headless: true });
   try {
     const page = await browser.newPage();
     const warnings: string[] = [];

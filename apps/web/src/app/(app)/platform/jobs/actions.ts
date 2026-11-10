@@ -1,6 +1,6 @@
 "use server";
 
-import { NotificationStatus } from "@prisma/client";
+import { requeueFailedNotifications } from "@/lib/notifications/retry";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
@@ -57,19 +57,7 @@ export async function retryFailedNotificationAction(formData: FormData) {
   }
 
   try {
-    const result = await prisma.notification.updateMany({
-      where: {
-        id: notificationId,
-        status: NotificationStatus.FAILED,
-      },
-      data: {
-        status: NotificationStatus.QUEUED,
-        providerResponse: {
-          retriedAt: new Date().toISOString(),
-          retriedBy: session.userId,
-        },
-      },
-    });
+    const result = await requeueFailedNotifications(prisma, session.userId, notificationId);
 
     await writePlatformAuditLog({
       actorUserId: session.userId,
@@ -94,16 +82,7 @@ export async function retryAllFailedNotificationsAction(formData: FormData) {
   const returnTo = readReturnTo(formData);
 
   try {
-    const result = await prisma.notification.updateMany({
-      where: { status: NotificationStatus.FAILED },
-      data: {
-        status: NotificationStatus.QUEUED,
-        providerResponse: {
-          retriedAt: new Date().toISOString(),
-          retriedBy: session.userId,
-        },
-      },
-    });
+    const result = await requeueFailedNotifications(prisma, session.userId);
 
     await writePlatformAuditLog({
       actorUserId: session.userId,

@@ -42,7 +42,8 @@
     "mobile:deployment:check": "node scripts/check-mobile-deployment.mjs",
     "mobile:services:check": "node scripts/check-live-mobile-services.mjs",
     "mobile:bundle": "node scripts/build-release.mjs mobile",
-    "release:check": "node scripts/check-workflow-release.mjs"
+    "release:check": "node scripts/check-workflow-release.mjs",
+    "mobile:doctor": "node scripts/native-doctor.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1018.0",

@@ -41,7 +41,7 @@ function getFeedback(status?: string) {
       return {
         tone: "error" as const,
         title: "Weak password",
-        message: "Your password must be at least 8 characters and no more than 72 bytes long.",
+        message: "Your password must be at least 12 characters and no more than 72 bytes long.",
       };
     case "missing_token":
       return {
@@ -108,7 +108,7 @@ export default async function ResetPasswordPage({
                 name="password"
                 type="password"
                 required
-                minLength={8}
+                minLength={12}
                 autoComplete="new-password"
                 placeholder="Enter new password"
                 className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-black"
@@ -127,7 +127,7 @@ export default async function ResetPasswordPage({
                 name="confirmPassword"
                 type="password"
                 required
-                minLength={8}
+                minLength={12}
                 autoComplete="new-password"
                 placeholder="Confirm new password"
                 className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-black"

@@ -263,6 +263,8 @@ export async function approveMeterReading(formData: FormData) {
   revalidatePath("/dashboard/org/water-bills");
   revalidatePath("/dashboard/org/water-bills/readings");
   revalidatePath(`/dashboard/org/water-bills/readings/${readingId}`);
+  revalidatePath("/dashboard/org/charges/bills");
+  revalidatePath("/dashboard/org/operating-queue");
   revalidatePath("/dashboard/tenant/invoice");
   revalidatePath("/dashboard/tenant/water-bills");
   revalidatePath("/dashboard/tenant");

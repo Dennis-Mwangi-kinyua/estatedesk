@@ -26,12 +26,12 @@ export function ReportsStatsSection({ data }: { data: ReportsPageData }) {
       <ReportStat
         icon={BadgeCheck}
         label="Paid tenants"
-        value={data.paidRows.length.toLocaleString()}
+        value={data.pagination.paidCount.toLocaleString()}
       />
       <ReportStat
         icon={Users}
         label="Occupants in scope"
-        value={data.filteredRows.length.toLocaleString()}
+        value={data.pagination.totalRows.toLocaleString()}
       />
     </section>
   );

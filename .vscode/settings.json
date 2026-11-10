@@ -13,5 +13,8 @@
   },
   "json.schemaDownload.trustedDomains": {
     "https://openapi.vercel.sh/": true
-  }
+  },
+  "emulator.emulatorPathLinux": "~/Android/Sdk/emulator",
+  "emulator.emulatorPathMac": "~/Library/Android/sdk/emulator",
+  "emulator.androidColdBoot": true
 }

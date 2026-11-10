@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { build } from "esbuild";
-import { chromium } from "playwright";
+import { launchTestBrowser } from "../helpers/browser";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -18,7 +18,7 @@ for (const platform of ["android", "ios"]) test(`${platform}: native cards fit n
     plugins: [{ name: "native-hosts", setup(builder) {
       builder.onResolve({ filter: /^react-native$|^\.\/app-icon$|^\.\.\/(api|photos)$/ }, args => ({ path: args.path, namespace: "fixture" }));
       builder.onLoad({ filter: /.*/, namespace: "fixture" }, args => ({ loader: "tsx", resolveDir: process.cwd(), contents: args.path === "./app-icon" ? `import React from'react';export const AppIcon=()=> <span aria-hidden="true">◈</span>;export const IconTile=()=> <span aria-hidden="true" style={{display:'block',width:48,height:48}}>◈</span>;`
-        : args.path === "../api" ? `export const updateProfilePicture=async()=>{};export const deleteProfilePicture=async()=>{};`
+        : args.path === "../api" ? `export const getAccountDeletion=async()=>({status:"NONE",updatedAt:null});export const updateAccountDeletion=async()=>({ok:true});export const updateProfilePicture=async()=>{};export const deleteProfilePicture=async()=>{};`
         : args.path === "../photos" ? `export const pickPhoto=async()=>null;export const removePickedPhoto=()=>{};` : `import React from'react';
       function style(value){const result=Object.assign({},...[value].flat(Infinity).filter(Boolean));if(typeof result.lineHeight==='number')result.lineHeight=result.lineHeight+'px';return result;}
       export const View=({children,style:s})=><div style={{display:'flex',flexDirection:'column',...style(s)}}>{children}</div>;
@@ -27,7 +27,7 @@ for (const platform of ["android", "ios"]) test(`${platform}: native cards fit n
       export const TextInput=()=> <input/>;export const ActivityIndicator=()=> <span>Loading</span>;export const Alert={alert(){}};export const Image=({style:s})=><img style={style(s)}/>;export const StyleSheet={create:v=>v};export const Platform={OS:'${platform}'};export const PixelRatio={get:()=>2};export const useWindowDimensions=()=>({width:innerWidth,fontScale:1});` }));
     } }],
   });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchTestBrowser({ headless: true });
   try {
     for (const width of [320, 390, 768]) {
       const page = await browser.newPage({ viewport: { width, height: 900 } });

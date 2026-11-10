@@ -16,6 +16,7 @@ test("30-day purge removes linked records while preserving other organizations a
     deletedAt: index === 3 ? null : index === 1 ? new Date(now.getTime() - 29 * 86400000) : old,
   } })));
   const [due, young, legacy, active] = orgs;
+  let salesLeadId: string | undefined;
   try {
     for (const org of [due, young]) await prisma.auditLog.create({ data: { orgId: org.id, actorUserId: user.id, action: "ORGANIZATION_DELETE_REQUESTED", entityType: "Organization", entityId: org.id, createdAt: org.deletedAt! } });
     for (const org of [due, active]) {
@@ -24,8 +25,13 @@ test("30-day purge removes linked records while preserving other organizations a
       await prisma.accountingJournalEntry.create({ data: { orgId: org.id, entryNumber: "J1", entryDate: now, sourceType: "MANUAL", description: "Linked accounting record", lines: { create: { orgId: org.id, accountId: account.id, debit: 100 } } } });
       const property = await prisma.property.create({ data: { orgId: org.id, name: "Retained property" } });
       await prisma.unit.create({ data: { propertyId: property.id, houseNo: "1", rentAmount: 1000 } });
-      await prisma.tenant.create({ data: { orgId: org.id, userId: user.id, fullName: "Retained tenant", phone: org.slug } });
+      const tenant = await prisma.tenant.create({ data: { orgId: org.id, userId: user.id, fullName: "Retained tenant", phone: org.slug } });
+      await prisma.crmActivity.create({ data: { tenantId: tenant.id, scopeOrgId: org.id, authorId: user.id, body: "Organization customer history" } });
+      await prisma.crmActivity.create({ data: { customerOrgId: org.id, authorId: user.id, body: "Platform customer history" } });
     }
+    const salesLead = await prisma.onboardingRequest.create({ data: { fullName: "Platform prospect", companyName: "Platform sales retention", workEmail: "retention@example.invalid", managedPropertyType: "Residential", customerOrgId: due.id } });
+    salesLeadId = salesLead.id;
+    await prisma.crmActivity.create({ data: { leadId: salesLead.id, authorId: user.id, body: "Preserved platform sales history" } });
     assert.deepEqual((await prisma.organization.findMany({ where: organizationPurgeWhere(now), select: { id: true } })).filter(org => orgs.some(item => item.id === org.id)), [{ id: due.id }]);
     const { loadVerifyTenantPageData } = await import("../../apps/web/src/app/(app)/dashboard/org/verify-tenant/_lib/queries");
     assert.equal((await loadVerifyTenantPageData(active.id, { q: due.slug })).results.length, 0, "Other organizations must not see retained deleted tenants");
@@ -42,6 +48,10 @@ test("30-day purge removes linked records while preserving other organizations a
     assert.equal(await prisma.membership.count({ where: { orgId: active.id, userId: user.id } }), 1);
     assert.equal(await prisma.accountingJournalLine.count({ where: { orgId: active.id } }), 1);
     assert.equal(await prisma.tenant.count({ where: { orgId: active.id } }), 1);
+    assert.equal(await prisma.crmActivity.count({ where: { OR: [{ scopeOrgId: due.id }, { customerOrgId: due.id }] } }), 0);
+    assert.equal(await prisma.crmActivity.count({ where: { OR: [{ scopeOrgId: active.id }, { customerOrgId: active.id }] } }), 2);
+    assert.equal((await prisma.onboardingRequest.findUniqueOrThrow({ where: { id: salesLead.id } })).customerOrgId, null);
+    assert.equal(await prisma.crmActivity.count({ where: { leadId: salesLead.id } }), 1);
   } finally {
     // Exercise the same dependency-safe purge for fixture cleanup.
     for (const org of orgs) {
@@ -50,6 +60,7 @@ test("30-day purge removes linked records while preserving other organizations a
       await prisma.auditLog.create({ data: { orgId: org.id, actorUserId: user.id, action: "ORGANIZATION_DELETE_REQUESTED", entityType: "Organization", entityId: org.id, createdAt: old } });
       await purgeOrganization(prisma, org.id, now);
     }
+    if (salesLeadId) await prisma.onboardingRequest.deleteMany({ where: { id: salesLeadId } });
     await prisma.user.delete({ where: { id: user.id } });
     await prisma.$disconnect();
   }

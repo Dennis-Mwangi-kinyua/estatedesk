@@ -108,3 +108,44 @@ test("overlapping dispatch workers claim each delivery once and preserve the sto
   assert.equal(saved.providerResponse?.actionUrl, "/dashboard/tenant/notifications");
   delete (globalThis as typeof globalThis & {dispatchFixture?: object}).dispatchFixture;
 });
+
+test("queued email uses real provider acceptance, stable retry keys and bounded parallel delivery", async () => {
+  const originalFetch = globalThis.fetch, originalKey = process.env.RESEND_API_KEY, originalFrom = process.env.EMAIL_FROM;
+  const claimed = new Set<string>(); const saved: Record<string, { status: string }> = {};
+  const rows = Array.from({ length: 12 }, (_, i) => ({ id: `email-${i}`, orgId: "org", userId: "user", tenantId: null, channel: "EMAIL", title: "Test notification", message: "Test message", user: { id: "user", email: "test@example.invalid", phone: null }, tenant: null }));
+  const state = { db: { notification: {
+    findMany: async () => rows,
+    updateMany: async ({ where }: { where: { id: string } }) => { if (claimed.has(where.id)) return { count: 0 }; claimed.add(where.id); return { count: 1 }; },
+    update: async ({ where, data }: { where: { id: string }; data: { status: string } }) => { saved[where.id] = data; },
+  } } };
+  (globalThis as typeof globalThis & { emailDispatchFixture?: object }).emailDispatchFixture = state;
+  try {
+    process.env.RESEND_API_KEY = "test-only-key"; process.env.EMAIL_FROM = "no-reply@example.invalid";
+    let active = 0, peak = 0; const keys: string[] = [];
+    globalThis.fetch = async (_url, init) => {
+      keys.push(new Headers(init?.headers).get("Idempotency-Key")!);
+      active++; peak = Math.max(peak, active);
+      await new Promise(resolve => setTimeout(resolve, 5)); active--;
+      return new Response('{"id":"accepted"}', { status: 200 });
+    };
+    const { dispatchQueuedNotifications } = await load<{ dispatchQueuedNotifications: () => Promise<{ sent: number; failed: number }> }>("services/notifications/src/lib/dispatch.ts", {
+      "@/lib/prisma": "export const prisma = globalThis.emailDispatchFixture.db;",
+      "@/lib/push/web-push": "export const sendWebPushNotification = async () => {};",
+      "@/lib/whatsapp/meta": "export const sendMetaWhatsappText = async () => {};",
+      "@/lib/errors/server-error-log": "export const logServerError = () => {};",
+      "@/lib/errors/client-safe-error": "export const safeClientMessage = () => 'Failed';",
+    });
+    const result = await dispatchQueuedNotifications();
+    assert.equal(result.sent, 12); assert.ok(peak > 1 && peak <= 4);
+    assert.deepEqual(new Set(keys), new Set(rows.map(row => `notification-${row.id}`)));
+    claimed.clear(); delete process.env.RESEND_API_KEY;
+    const failure = await dispatchQueuedNotifications();
+    assert.equal(failure.sent, 0); assert.equal(failure.failed, 12);
+    assert.ok(Object.values(saved).every(row => row.status === "FAILED"));
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalKey === undefined) delete process.env.RESEND_API_KEY; else process.env.RESEND_API_KEY = originalKey;
+    if (originalFrom === undefined) delete process.env.EMAIL_FROM; else process.env.EMAIL_FROM = originalFrom;
+    delete (globalThis as typeof globalThis & { emailDispatchFixture?: object }).emailDispatchFixture;
+  }
+});

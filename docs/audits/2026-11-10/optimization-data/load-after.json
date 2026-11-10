@@ -1,0 +1,172 @@
+{
+  "environment": "Local production-build processes and isolated local PostgreSQL; not deployed-hosting capacity evidence.",
+  "warmup": "Each route is requested before measurement; later organizations may still have cold data caches.",
+  "concurrency": 16,
+  "instanceCount": 1,
+  "requestsPerUserPerMinute": 1,
+  "durationSecondsPerStage": 60,
+  "results": [
+    {
+      "users": 50,
+      "passed": true,
+      "requestedRpm": 300,
+      "suppliedSessions": 50,
+      "exercisedSessions": 50,
+      "achievedRpm": 304,
+      "completed": 50,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 9.9,
+      "schedulingDelay": {
+        "p95": "1ms",
+        "max": "1ms"
+      },
+      "latency": {
+        "min": "61ms",
+        "p50": "81ms",
+        "p95": "104ms",
+        "p99": "109ms",
+        "max": "109ms"
+      },
+      "statuses": {
+        "200": 50
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org/issues": {
+          "requests": 4,
+          "failures": 0,
+          "errorRatePercent": 0,
+          "averageLatencyMs": 79,
+          "p95LatencyMs": 96,
+          "p99LatencyMs": 96
+        },
+        "/dashboard/org/units": {
+          "requests": 9,
+          "failures": 0,
+          "errorRatePercent": 0,
+          "averageLatencyMs": 69,
+          "p95LatencyMs": 84,
+          "p99LatencyMs": 84
+        },
+        "/dashboard/org/tenants": {
+          "requests": 11,
+          "failures": 0,
+          "errorRatePercent": 0,
+          "averageLatencyMs": 79,
+          "p95LatencyMs": 94,
+          "p99LatencyMs": 94
+        },
+        "/dashboard/org/payments": {
+          "requests": 11,
+          "failures": 0,
+          "errorRatePercent": 0,
+          "averageLatencyMs": 99,
+          "p95LatencyMs": 109,
+          "p99LatencyMs": 109
+        },
+        "/dashboard/org": {
+          "requests": 15,
+          "failures": 0,
+          "errorRatePercent": 0,
+          "averageLatencyMs": 81,
+          "p95LatencyMs": 100,
+          "p99LatencyMs": 100
+        }
+      },
+      "abortReason": null,
+      "routeLatencyFailures": [],
+      "routeCoverageFailures": [],
+      "routeErrorFailures": [],
+      "sampleErrors": [],
+      "monitoringErrors": 0,
+      "processMetrics": {
+        "maxConnections": 6,
+        "maxActiveQueries": 0,
+        "minRssKiB": 383252,
+        "maxRssKiB": 454332
+      }
+    },
+    {
+      "users": 1000,
+      "passed": true,
+      "requestedRpm": 1000,
+      "suppliedSessions": 1000,
+      "exercisedSessions": 1000,
+      "achievedRpm": 1000,
+      "completed": 1000,
+      "failed": 0,
+      "errorRatePercent": 0,
+      "elapsedSeconds": 60,
+      "schedulingDelay": {
+        "p95": "0ms",
+        "max": "1ms"
+      },
+      "latency": {
+        "min": "28ms",
+        "p50": "45ms",
+        "p95": "101ms",
+        "p99": "145ms",
+        "max": "269ms"
+      },
+      "statuses": {
+        "200": 1000
+      },
+      "redirects": {},
+      "routes": {
+        "/dashboard/org": {
+          "requests": 284,
+          "failures": 0,
+          "errorRatePercent": 0,
+          "averageLatencyMs": 49,
+          "p95LatencyMs": 73,
+          "p99LatencyMs": 153
+        },
+        "/dashboard/org/payments": {
+          "requests": 205,
+          "failures": 0,
+          "errorRatePercent": 0,
+          "averageLatencyMs": 78,
+          "p95LatencyMs": 117,
+          "p99LatencyMs": 198
+        },
+        "/dashboard/org/tenants": {
+          "requests": 209,
+          "failures": 0,
+          "errorRatePercent": 0,
+          "averageLatencyMs": 51,
+          "p95LatencyMs": 88,
+          "p99LatencyMs": 138
+        },
+        "/dashboard/org/issues": {
+          "requests": 98,
+          "failures": 0,
+          "errorRatePercent": 0,
+          "averageLatencyMs": 40,
+          "p95LatencyMs": 53,
+          "p99LatencyMs": 111
+        },
+        "/dashboard/org/units": {
+          "requests": 204,
+          "failures": 0,
+          "errorRatePercent": 0,
+          "averageLatencyMs": 36,
+          "p95LatencyMs": 55,
+          "p99LatencyMs": 100
+        }
+      },
+      "abortReason": null,
+      "routeLatencyFailures": [],
+      "routeCoverageFailures": [],
+      "routeErrorFailures": [],
+      "sampleErrors": [],
+      "monitoringErrors": 0,
+      "processMetrics": {
+        "maxConnections": 6,
+        "maxActiveQueries": 5,
+        "minRssKiB": 467112,
+        "maxRssKiB": 984416
+      }
+    }
+  ]
+}

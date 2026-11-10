@@ -7,9 +7,9 @@ import { RegisterStatusToast } from "./register-status-toast";
 import { publicPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = publicPageMetadata({
-  title: "Request Access - EstateDesk",
+  title: "Start a workspace - EstateDesk",
   description:
-    "Request EstateDesk workspace access for property management, tenant records, billing, maintenance, reports, and team onboarding.",
+    "Start a Free EstateDesk workspace, or request a reviewed Pro, Plus, or Custom rollout for property management, billing, and team onboarding.",
   path: "/register",
 });
 
@@ -72,27 +72,29 @@ const operatingHighlights = [
 
 const workflow = [
   {
-    title: "Request access",
-    description: "Share your portfolio size, team setup, and operational needs.",
+    title: "Start free",
+    description: "Create a Free workspace and sign in during the same visit.",
   },
   {
-    title: "Platform review",
-    description: "The EstateDesk team reviews your request and confirms the right setup path.",
+    title: "Or request a reviewed plan",
+    description: "Pro, Plus, and Custom stay with the team so billing and rollout are agreed first.",
   },
   {
-    title: "Guided onboarding",
-    description: "Your organization, roles, properties, and core workflows are prepared for rollout.",
+    title: "Set up the first unit",
+    description: "Add a property, a tenant, and a lease. Import a spreadsheet when the portfolio is already listed.",
   },
   {
-    title: "Operational handover",
-    description: "Your team starts managing tenants, billing, tasks, and reports from one workspace.",
+    title: "Work from the month",
+    description: "Issue the bill, then clear proofs, readings, arrears, issues, and move-outs from one queue.",
   },
 ];
 
 type SearchParams = Promise<{
+  intent?: string;
   request?: string;
   ref?: string;
   referral?: string;
+  plan?: string;
 }>;
 
 type RequestMessage = {
@@ -102,6 +104,7 @@ type RequestMessage = {
 };
 
 function requestMessage(status?: string): RequestMessage | null {
+  if (status === "demo-sent") return { tone: "success", title: "Demo request received", text: "We will contact you to agree a time for your free 30–45 minute walkthrough. No trial has started." };
   if (status === "sent") {
     return {
       tone: "success",
@@ -151,8 +154,10 @@ export default async function RegisterPage({
   searchParams: SearchParams;
 }) {
   const params = await searchParams;
+  const demo = params.intent === "demo";
   const message = requestMessage(params.request);
   const referralCode = (params.ref ?? params.referral ?? "").trim();
+  const initialPlan = (params.plan ?? (demo ? "PRO" : "free")).toUpperCase() === "CUSTOM" ? "ENTERPRISE" : (params.plan ?? (demo ? "PRO" : "FREE")).toUpperCase();
 
   return (
     <main className="ed-theme-page ed-mobile-surface min-h-dvh w-full min-w-0 overflow-x-hidden bg-background text-foreground">
@@ -168,7 +173,7 @@ export default async function RegisterPage({
             </span>
           </Link>
 
-          <nav aria-label="Access request navigation" className="flex items-center justify-end gap-1 sm:gap-2">
+          <nav aria-label="Workspace registration" className="flex items-center justify-end gap-1 sm:gap-2">
             <Link
               href="/vacancies"
               className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-neutral-200 bg-white px-1.5 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 sm:px-3 sm:text-sm"
@@ -186,7 +191,7 @@ export default async function RegisterPage({
               href="#request-access"
               className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-neutral-950 px-1.5 text-xs font-semibold text-white transition hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-700 focus-visible:ring-offset-2 sm:gap-2 sm:px-3 sm:text-sm"
             >
-              Request access
+              {demo ? "Book a demo" : "Start free"}
               <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </a>
           </nav>
@@ -195,14 +200,14 @@ export default async function RegisterPage({
 
       <section className="border-b border-neutral-200 bg-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[minmax(0,1fr)_440px] lg:px-8 lg:py-16 xl:grid-cols-[minmax(0,1fr)_480px]">
-          <div className="min-w-0">
+          <div className="order-2 min-w-0 lg:order-1">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-700">
               <Landmark className="h-3.5 w-3.5" />
               Professional property management platform
             </div>
 
             <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-[1.04] tracking-tight text-neutral-950 sm:text-5xl lg:text-6xl">
-              A controlled operating system for serious property teams.
+              {demo ? "See your next working day in EstateDesk." : "A controlled operating system for serious property teams."}
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-7 text-neutral-600 sm:text-lg">
@@ -216,7 +221,7 @@ export default async function RegisterPage({
                 href="#request-access"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-neutral-800"
               >
-                Request onboarding
+                {demo ? "Request my free demo" : "Request onboarding"}
                 <ArrowRight className="h-4 w-4" />
               </a>
 
@@ -259,7 +264,7 @@ export default async function RegisterPage({
 
           <div
             id="request-access"
-            className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm sm:p-5"
+            className="order-1 min-w-0 scroll-mt-40 rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm sm:p-5 lg:order-2"
           >
             <div className="mb-5 flex items-start gap-3 border-b border-neutral-200 pb-5">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-neutral-950 text-white">
@@ -267,16 +272,15 @@ export default async function RegisterPage({
               </span>
               <div>
                 <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
-                  Request access
+                  {demo ? "Book your free demo" : "Start your workspace"}
                 </h2>
                 <p className="mt-1 text-sm leading-6 text-neutral-500">
-                  Submit your details and the platform team will follow up with
-                  the correct onboarding path for your organization.
+                  {demo ? "30–45 minutes. Sample data. A walkthrough shaped around your portfolio." : "Free signs you in today. Pro and Plus offer a guided 14-day trial; Custom rollout is agreed with the team."}
                 </p>
               </div>
             </div>
 
-            <RegisterRequestForm referralCode={referralCode} />
+            <RegisterRequestForm referralCode={referralCode} initialPlan={initialPlan} demo={demo} />
 
             <p className="mt-4 text-center text-sm text-neutral-500">
               Already have an account?{" "}
@@ -382,8 +386,8 @@ export default async function RegisterPage({
             Ready to bring structure to your property operations?
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-neutral-300 sm:text-base">
-            Share your onboarding request and the EstateDesk team will review
-            the best setup path for your organization.
+            Start on Free today, or send a Pro, Plus, or Custom request for a
+            reviewed rollout.
           </p>
 
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -391,7 +395,7 @@ export default async function RegisterPage({
               href="#request-access"
               className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-100"
             >
-              Request access
+              Start free
               <ArrowRight className="h-4 w-4" />
             </a>
 

@@ -1,3 +1,4 @@
+import { TodayLink } from "@/components/shared/today-link";
 import Link from "@/components/navigation/workspace-link";
 import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
 import { Menu } from "lucide-react";
@@ -54,7 +55,8 @@ export function OrgDashboardHeader({
 
         <div className="ml-2 flex shrink-0 items-center gap-2">
           {showStaffTools && <Link data-workspace-action="true" href="/dashboard/org/search" aria-label="Search organisation" className="ios-button ed-soft-button touch-target flex items-center justify-center border"><Search className="h-4 w-4" /></Link>}
-          <HeaderThemeToggle />
+          <TodayLink compact />
+            <HeaderThemeToggle />
 
           {showStaffTools && <Link data-workspace-action="true"
             href="/dashboard/org/notifications"

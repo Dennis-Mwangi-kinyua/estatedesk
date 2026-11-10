@@ -54,36 +54,26 @@ async function countDeletedBefore(orgId: string, cutoff: Date) {
 }
 
 export async function buildRetentionReport(): Promise<RetentionOrgReport[]> {
-  const organizations = await prisma.organization.findMany({
-    where: {
-      deletedAt: null,
-    },
-    select: {
-      id: true,
-      name: true,
-      dataRetentionDays: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
-
-  const reports = await Promise.all(
-    organizations.map(async (org) => {
-      const cutoff = new Date(Date.now() - org.dataRetentionDays * 24 * 60 * 60 * 1000);
-      const counts = await countDeletedBefore(org.id, cutoff);
-      const total = counts.reduce((sum, item) => sum + item.count, 0);
-
-      return {
-        orgId: org.id,
-        orgName: org.name,
-        retentionDays: org.dataRetentionDays,
-        cutoff: cutoff.toISOString(),
-        counts,
-        total,
-      };
-    }),
-  );
-
-  return reports.filter((report) => report.total > 0);
+  const reports: RetentionOrgReport[] = [];
+  const now = Date.now();
+  let after: string | undefined;
+  for (;;) {
+    const organizations = await prisma.organization.findMany({
+      where: { deletedAt: null, ...(after ? { id: { gt: after } } : {}) },
+      select: { id: true, name: true, dataRetentionDays: true },
+      orderBy: { id: "asc" }, take: 100,
+    });
+    for (let start = 0; start < organizations.length; start += 4) {
+      const batch = await Promise.all(organizations.slice(start, start + 4).map(async org => {
+        const cutoff = new Date(now - org.dataRetentionDays * 86400000);
+        const counts = await countDeletedBefore(org.id, cutoff);
+        return { orgId: org.id, orgName: org.name, retentionDays: org.dataRetentionDays,
+          cutoff: cutoff.toISOString(), counts, total: counts.reduce((sum, item) => sum + item.count, 0) };
+      }));
+      reports.push(...batch.filter(report => report.total > 0));
+    }
+    if (organizations.length < 100) break;
+    after = organizations[organizations.length - 1].id;
+  }
+  return reports.sort((a, b) => a.orgName.localeCompare(b.orgName));
 }

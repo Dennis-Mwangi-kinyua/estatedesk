@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { build } from "esbuild";
-import { chromium } from "playwright";
+import { launchTestBrowser } from "../helpers/browser";
 
 test("notice polling respects disabled background refresh and server retry delays", async () => {
   const bundle = await build({
@@ -15,7 +15,7 @@ test("notice polling respects disabled background refresh and server retry delay
       }));
     } }],
   });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchTestBrowser({ headless: true });
   try {
     for (const interval of [0, 60_000]) {
       const page = await browser.newPage();

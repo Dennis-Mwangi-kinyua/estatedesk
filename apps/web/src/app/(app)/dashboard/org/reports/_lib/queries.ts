@@ -6,6 +6,7 @@ import {
   ratingForTenant,
 } from "./helpers";
 import type { ReportsSearchParams } from "./types";
+import { reportPage } from "./pagination";
 
 export async function loadReportsPageData(
   orgId: string,
@@ -56,8 +57,9 @@ export async function loadReportsPageData(
       ? rows
       : rows.filter((row) => row.propertyName === selectedApartment);
   const filteredRows = filterRowsByPayment(apartmentRows, selectedPayment);
-  const paidRows = filteredRows.filter((row) => row.amountDue > 0 && row.balance <= 0);
-  const notPaidRows = filteredRows.filter((row) => row.amountDue > 0 && row.balance > 0);
+  const pagination = reportPage(filteredRows, searchParams?.page);
+  const paidRows = pagination.pageRows.filter((row) => row.amountDue > 0 && row.balance <= 0);
+  const notPaidRows = pagination.pageRows.filter((row) => row.amountDue > 0 && row.balance > 0);
   const scopedTotals = {
     expected: filteredRows.reduce((sum, row) => sum + row.amountDue, 0),
     paid: filteredRows.reduce((sum, row) => sum + row.amountPaid, 0),
@@ -86,7 +88,8 @@ export async function loadReportsPageData(
     selectedApartment,
     selectedPayment,
     apartmentOptions,
-    filteredRows,
+    filteredRows: pagination.pageRows,
+    pagination: { page: pagination.page, pageCount: pagination.pageCount, totalRows: pagination.totalRows, paidCount: pagination.paidCount },
     paidRows,
     notPaidRows,
     scopedTotals,

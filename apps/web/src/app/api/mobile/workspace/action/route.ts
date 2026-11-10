@@ -1,3 +1,6 @@
+import { executeNativePrivacyAction } from "@/lib/mobile/native-privacy";
+import { executeNativeLandlordAction } from "@/lib/mobile/native-landlord-actions";
+import { executeNativeCrmAction } from "@/lib/mobile/native-crm";
 import { guardedSubmission, submissionIdentity } from "@/lib/workflow/submissions";
 import { executeNativeResolutionAction } from "@/lib/mobile/native-resolution-actions";
 import { nativeActionRequestSchema, nativeActionDefinitionSchema, nativeActionFormData } from "@estatedesk/contracts/mobile";
@@ -41,6 +44,7 @@ export async function GET(request: Request) {
     const input = nativeActionRequestSchema.parse(Object.fromEntries(new URL(request.url).searchParams));
     if (input.kind === "landlord") return mobileJson({ error: "Landlord pages are read-only in this native workspace." }, 403);
     if (!mobileWorkspaceAllowed(session, input.kind) || !nativeWorkspaceEntry(mobileWorkspaceLinks(session, input.kind), input.path)) return mobileJson({ error: "This action is unavailable for your account." }, 403);
+    if (/^(crm\.|landlord\.|privacy\.|bnb\.listing\.)/.test(input.actionId) && request.headers.get("x-estatedesk-forms") !== "2026-11-09") return mobileJson({error:"Update your EstateDesk app to use this workflow."},409);
     const definition = await nativeActionDefinition(session, input.kind, input.path, input.actionId, input.recordId);
     if (definition && request.headers.get("x-estatedesk-signatures") !== "image-v1") {
       definition.groups = definition.groups.map(group => ({ ...group, fields: group.fields.filter(field => field.type !== "signature") }));
@@ -55,6 +59,7 @@ export async function POST(request: Request) {
     const input = nativeActionRequestSchema.parse(await readBoundedJson(request, 640000));
     if (input.kind === "landlord") return mobileJson({ error: "Landlord pages are read-only in this native workspace." }, 403);
     if (!mobileWorkspaceAllowed(session, input.kind) || !nativeWorkspaceEntry(mobileWorkspaceLinks(session, input.kind), input.path)) return mobileJson({ error: "This action is unavailable for your account." }, 403);
+    if (/^(crm\.|landlord\.|privacy\.|bnb\.listing\.)/.test(input.actionId) && request.headers.get("x-estatedesk-forms") !== "2026-11-09") return mobileJson({error:"Update your EstateDesk app to use this workflow."},409);
     const definition = await nativeActionDefinition(session, input.kind, input.path, input.actionId, input.recordId);
     if (!definition) return mobileJson({ error: "This action is unavailable or the record has changed." }, 403);
     let form: FormData;
@@ -63,6 +68,18 @@ export async function POST(request: Request) {
     const kind = input.kind;
     const execute = async () => {
     try {
+      if (input.actionId.startsWith("privacy.")) {
+        const result = await executeNativePrivacyAction(session, kind, input.path, input.actionId, input.recordId, form);
+        return "error" in result ? mobileJson({ error: result.error }, 400) : mobileJson(result);
+      }
+      if (input.actionId.startsWith("landlord.")) {
+        const result = await executeNativeLandlordAction(session, kind, input.path, input.actionId, input.recordId, form);
+        return "error" in result ? mobileJson({ error: result.error }, 400) : mobileJson(result);
+      }
+      if (input.actionId.startsWith("crm.")) {
+        const result = await executeNativeCrmAction(session, kind, input.path, input.actionId, input.recordId, form);
+        return "error" in result ? mobileJson({ error: result.error }, 400) : mobileJson(result);
+      }
       if (input.actionId.startsWith("accounting.")) {
         const result = await executeNativeAccountingAction(kind, input.path, input.actionId, input.recordId, form);
         return result && "error" in result ? mobileJson({ error: result.error }, 400) : result ? mobileJson(result) : mobileJson({ error: "This action is unavailable." }, 403);
@@ -186,7 +203,7 @@ export async function POST(request: Request) {
       throw cause;
     }
     };
-    const guarded = /^(job\.|notification\.retry|accounting\.|identity\.|provider\.)/.test(input.actionId);
+    const guarded = /^(privacy\.|bnb\.|landlord\.|crm\.|job\.|notification\.retry|accounting\.|identity\.|provider\.)/.test(input.actionId);
     return guarded && input.submissionId
       ? guardedSubmission(prisma, submissionIdentity(session.userId, `${session.activeOrgId ?? "platform"}:${input.path}:${input.actionId}:${input.recordId ?? ""}`, input.submissionId, input.values), execute)
       : execute();

@@ -4,13 +4,31 @@ import { prisma } from "@/lib/prisma";
 import { getCachedOrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { getVacancyInquiryAlerts } from "@/features/dashboard/server/get-vacancy-inquiry-alerts";
 import { OrgDashboardWorkspace } from "./_components/org-dashboard-workspace";
+import { SetupChecklist, SetupTeamNudge } from "./_components/setup-checklist";
+import { OperatingQueue } from "./_components/operating-queue";
+import { queueNoticeText } from "./_components/queue-row-action";
+import { SaasMetricsPanel } from "./_components/saas-metrics-panel";
+import { PlanLimitUpgrade } from "@/components/billing/plan-limit-upgrade";
+import { getOrgPlanUsage, planLimitMessage } from "@/lib/billing/access";
 import { mobileWorkspaceLinks } from "@/lib/mobile/workspace-menu";
 import { scopedIssueWhere, scopedUnitWhere } from "@/lib/permissions/record-scope";
+import { loadSetupProgress } from "@/lib/workflow/load-setup-progress";
+import { loadSaasMetrics } from "@/lib/workflow/load-saas-metrics";
+import { getOperatingQueue } from "@/lib/workflow/operating-queue";
 import Link from "@/components/navigation/workspace-link";
 
 export const dynamic = "force-dynamic";
 
-export default async function OrganizationDashboardPage() {
+function planCapMessage(usage: Awaited<ReturnType<typeof getOrgPlanUsage>> | null) {
+  if (!usage) return null;
+  if (usage.properties >= usage.propertiesLimit) return planLimitMessage("property", usage);
+  if (usage.units >= usage.unitsLimit) return planLimitMessage("unit", usage);
+  if (usage.staffUsers >= usage.usersLimit) return planLimitMessage("staff", usage);
+  return null;
+}
+
+export default async function OrganizationDashboardPage({ searchParams }: { searchParams: Promise<{ notice?: string }> }) {
+  const query = await searchParams;
   const session = await requireManagementAccess();
 
   if (!session.activeOrgId) {
@@ -64,6 +82,28 @@ export default async function OrganizationDashboardPage() {
 
   const vacancyInquiries =
     vacancyResult.status === "fulfilled" ? vacancyResult.value : [];
+  const orgWide = !session.membershipScope || session.membershipScope.scopeType === "ORG";
+  const canSetup = session.activeOrgRole === "ADMIN" || session.activeOrgRole === "MANAGER";
+  const [setupResult, queueResult, metricsResult, usageResult] = orgWide
+    ? await Promise.allSettled([
+      loadSetupProgress(orgId),
+      prisma.organization.findUnique({ where: { id: orgId }, select: { currencyCode: true } }).then((org) => getOperatingQueue(orgId, org?.currencyCode ?? "KES")),
+      canSetup ? loadSaasMetrics(orgId) : Promise.resolve(null),
+      canSetup ? getOrgPlanUsage(orgId) : Promise.resolve(null),
+    ])
+    : [];
+  if (setupResult?.status === "rejected") logServerError("org.dashboard.setup", setupResult.reason, { orgId });
+  if (queueResult?.status === "rejected") logServerError("org.dashboard.queue", queueResult.reason, { orgId });
+  if (metricsResult?.status === "rejected") logServerError("org.dashboard.metrics", metricsResult.reason, { orgId });
+  if (usageResult?.status === "rejected") logServerError("org.dashboard.planUsage", usageResult.reason, { orgId });
+  const setup = setupResult?.status === "fulfilled" ? setupResult.value : null;
+  const queue = queueResult?.status === "fulfilled" ? queueResult.value : null;
+  const metrics = metricsResult?.status === "fulfilled" ? metricsResult.value : null;
+  const capMessage = canSetup && usageResult?.status === "fulfilled" ? planCapMessage(usageResult.value) : null;
+  const queueNotice = queueNoticeText(query.notice);
+  const showSetup = Boolean(canSetup && setup && !setup.complete);
+  const teamStep = setup?.steps.find((step) => step.id === "team");
+  const showTeamNudge = Boolean(canSetup && setup?.complete && teamStep && !teamStep.done);
 
   return (
     <OrgDashboardWorkspace
@@ -74,6 +114,15 @@ export default async function OrganizationDashboardPage() {
       orgId={orgId}
       orgRole={session.activeOrgRole}
       interval={30_000}
+      workflow={
+        <>
+          {queueNotice ? <p role="status" className="rounded-xl border border-border bg-card px-4 py-3 text-sm">{queueNotice}</p> : null}
+          {capMessage ? <PlanLimitUpgrade message={capMessage} /> : null}
+          {showTeamNudge && teamStep ? <SetupTeamNudge step={teamStep} /> : null}
+          {showSetup && setup ? <SetupChecklist steps={setup.steps} /> : queue ? <OperatingQueue groups={queue} compact returnPath="/dashboard/org" /> : null}
+        </>
+      }
+      metrics={!showSetup && metrics ? <SaasMetricsPanel metrics={metrics} /> : null}
     />
   );
 }

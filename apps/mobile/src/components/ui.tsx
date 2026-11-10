@@ -13,7 +13,7 @@ export const mobileTheme = {
 
 export function Button({ label, onPress, disabled, secondary, checked, selected, icon }: { label: string; onPress: () => void; disabled?: boolean; secondary?: boolean; checked?: boolean; selected?: boolean; icon?: AppIconName }) {
   return <Pressable accessibilityRole={checked === undefined ? "button" : "checkbox"} accessibilityState={{ disabled: !!disabled, ...(checked === undefined ? {} : { checked }), ...(selected === undefined ? {} : { selected }) }} disabled={disabled} onPress={onPress}
-    style={({ pressed }) => [styles.button, secondary && styles.secondary, (disabled || pressed) && { opacity: 0.55 }]}>
+    style={({ pressed }) => [styles.button, secondary && styles.secondary, (checked || selected) && { backgroundColor: "#d4e9df", borderWidth: 2, borderColor: mobileTheme.color.brand }, (disabled || pressed) && { opacity: 0.55 }]}>
     {icon ? <AppIcon name={icon} color={secondary ? undefined : mobileTheme.color.surface} size={19} /> : null}<Text style={[styles.buttonText, secondary && { color: mobileTheme.color.ink }]}>{label}</Text>
   </Pressable>;
 }

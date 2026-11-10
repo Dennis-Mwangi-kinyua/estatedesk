@@ -1,3 +1,4 @@
+import { AccountProtection } from "./account-protection";
 import { Clock3, ShieldCheck } from "@/components/shared/colored-icons";
 import type { ManagedUserSession } from "@/lib/auth/session";
 import { revokeOtherSessionsAction } from "@/app/(app)/dashboard/security/actions";
@@ -26,7 +27,7 @@ export function SecuritySessionsContent({
               Account security
             </p>
             <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Active sessions
+              Security Centre
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
               EstateDesk sessions expire after 30 days of inactivity. Review signed-in
@@ -38,7 +39,7 @@ export function SecuritySessionsContent({
             <form action={revokeOtherSessionsAction}>
               <button data-workspace-action="true"
                 type="submit"
-                className="inline-flex min-h-10 w-full items-center justify-center rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 sm:w-auto"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 sm:w-auto"
               >
                 Log out other devices
               </button>
@@ -57,7 +58,7 @@ export function SecuritySessionsContent({
           </div>
           <div className="rounded-2xl border border-border bg-muted/10 p-4">
             <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-              Active sessions
+              Security Centre
             </p>
             <p className="mt-2 text-sm font-semibold text-foreground">
               {sessions.length}
@@ -75,6 +76,8 @@ export function SecuritySessionsContent({
         </div>
       </section>
 
+      <a href="/account-deletion" className="inline-flex min-h-11 items-center text-sm underline">Request account deletion</a>
+      <AccountProtection />
       <DevicesPanel sessions={sessions} />
     </div>
   );

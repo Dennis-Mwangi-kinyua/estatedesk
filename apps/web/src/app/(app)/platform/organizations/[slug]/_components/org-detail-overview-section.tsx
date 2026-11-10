@@ -48,7 +48,7 @@ export function OrgDetailOverviewSection(props: OrgDetailWorkspaceProps) {
               </div>
             </div>
             <div className="flex flex-col gap-3 lg:min-w-56">
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card/80 px-4 py-3"><span className="text-xs font-medium text-muted-foreground">Workspace status</span><Badge tone={toneForStatus(org.status)}>{org.status}</Badge></div>
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card/80 px-4 py-3"><span className="text-xs font-medium text-muted-foreground">Workspace status</span><Badge tone={toneForStatus(org.blacklistedAt ? "DISABLED" : org.status)}>{org.blacklistedAt ? "BLACKLISTED" : org.status}</Badge></div>
               <Link data-workspace-action="true" href={`/platform/payment-ops?orgId=${encodeURIComponent(org.slug)}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Receipt aria-hidden="true" className="h-4 w-4" />Payment operations</Link>
               <Link data-workspace-action="true" href="#organisation-audit" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><ShieldCheck aria-hidden="true" className="h-4 w-4" />Audit activity</Link>
             </div>

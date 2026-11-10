@@ -181,7 +181,7 @@ export default async function PlatformOrganizationsPage({
                 slug={org.slug}
                 email={org.email}
                 phone={org.phone}
-                status={org.status}
+                status={org.blacklistedAt ? "BLACKLISTED" : org.status}
                 timezone={org.timezone}
                 createdAt={org.createdAt}
                 metrics={{

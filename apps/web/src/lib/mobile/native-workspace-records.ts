@@ -1,3 +1,6 @@
+import { nativePrivacyRecords } from "./native-privacy";
+import { nativeLandlordRecordActions } from "./native-landlord-actions";
+import { nativeCrmRecords, crmPaths } from "./native-crm";
 import "server-only";
 import { nativeAgreementRecordActions } from "./native-agreement-actions";
 import { getProductionReadinessReport } from "@/lib/ops/production-readiness";
@@ -20,6 +23,7 @@ import { canViewAuditLogs } from "@/lib/permissions/access";
 import { memberHasOrgPermission } from "@/lib/permissions/role-matrix";
 import { getUserOrganizationGroups, userOrganizationWhere } from "@/lib/platform/user-organization-groups";
 import { getReviewQueue, waitingAge } from "@/lib/workflow/review-queue";
+import { getOperatingQueue } from "@/lib/workflow/operating-queue";
 
 type Value = string | number | boolean | Date | null | undefined | { toString(): string };
 function display(value: Value): string {
@@ -33,6 +37,13 @@ function card(id: string, title: string, status: string | undefined, fields: Rec
 
 export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWorkspaceKind, path: string, q: string, page: number, recordId?: string, organization?: string): Promise<{ records: NativeWorkspaceRecord[]; notice?: string; searchable?: boolean }> {
   if (kind === "platform" && !canViewAuditLogs(session.platformRole)) return { records: [], notice: "Platform administrator access is required.", searchable: false };
+  if (kind === "platform" && path === "/platform/landlords/properties") {
+    if (!organization) return {records:[],notice:"Choose an organization first."};
+    const rows=await prisma.property.findMany({where:{orgId:organization,deletedAt:null,isActive:true,...(q?{name:{contains:q,mode:"insensitive"}}:{})},skip:(page-1)*25,take:26,orderBy:[{name:"asc"},{id:"asc"}],select:{id:true,name:true,location:true}});
+    return {records:rows.map(row=>card(row.id,row.name,undefined,{Location:row.location}))};
+  }
+  if (path === "/platform/privacy-requests") return nativePrivacyRecords(session, kind, path, q, page);
+  if (crmPaths(kind).includes(path)) return nativeCrmRecords(session, kind, path, q, page, recordId);
   const orgId = session.activeOrgId!;
   const unit = nativeUnitScope(orgId, session.membershipScope);
   const wide = nativeOrgWideAccess(session.membershipScope);
@@ -41,6 +52,16 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWo
   const contains = { contains: q, mode: "insensitive" as const };
   const section = path === "/api-keys" ? "api-keys" : path.replace(kind === "platform" ? /^\/platform\/?/ : kind === "landlord" ? /^\/dashboard\/landlord\/?/ : /^\/dashboard\/org\/?/, "");
   const restricted = { records: [], notice: "This view requires organization-wide access. Your assigned property, building or unit scope remains in effect." };
+  if (kind === "organization" && section === "operating-queue") {
+    if (!wide) return restricted;
+    const organization = await prisma.organization.findUnique({ where: { id: orgId }, select: { currencyCode: true } });
+    const groups = await getOperatingQueue(orgId, organization?.currencyCode ?? "KES");
+    return { searchable: false, records: groups.map(group => ({ ...card(group.id, group.title, group.total ? "PENDING" : "CLEAR", {
+      Waiting: group.total, Responsible: group.owner, "Next action": group.nextAction,
+      "Oldest waiting": group.items[0] ? waitingAge(group.items[0].since) : "Nothing waiting",
+      ...Object.fromEntries(group.items.map((item, index) => [`${index + 1}. ${item.who}`, `${item.where}${item.amount ? ` · ${item.amount}` : ""} · ${waitingAge(item.since)} · ${item.action}`])),
+    }), links: [{ title: "Open queue", path: group.href, emoji: "📋", description: group.nextAction }] })), notice: "Each row opens the same bill, payment, lease, issue, or move-out used on the website." };
+  }
   if (kind === "platform" && section === "review-queue") {
     const groups = await getReviewQueue(session, "platform");
     return { searchable: false, records: groups.map(group => ({ ...card(group.id, group.title, group.total ? "PENDING" : "CLEAR", {
@@ -57,7 +78,7 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWo
       ...limit, orderBy: newest,
       select: { id: true, displayName: true, email: true, phone: true, isActive: true, user: { select: { username: true, status: true } }, org: { select: { name: true } }, _count: { select: { assignments: { where: { active: true, endedAt: null } } } } },
     });
-    return { records: rows.map(row => card(row.id, row.displayName, row.isActive ? row.user.status : "INACTIVE", { Organization: row.org.name, Username: row.user.username, Email: row.email, Phone: row.phone, Assignments: row._count.assignments })), notice: "Use the web landlord directory to create accounts or change property assignments." };
+    return { records: rows.map(row => ({ ...card(row.id, row.displayName, row.isActive ? row.user.status : "INACTIVE", { Organization: row.org.name, Username: row.user.username, Email: row.email, Phone: row.phone, Assignments: row._count.assignments }), actions: nativeLandlordRecordActions(session, kind, row.isActive && row.user.status === "ACTIVE") })), notice: "Create accounts, assign properties, and manage landlord access from the app." };
   }
   if (section === "help" || section === "developer/docs") {
     const workspace = kind === "platform" ? "platform" : kind === "landlord" ? "landlord" : "org";
@@ -349,11 +370,11 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWo
   if (kind === "platform") {
     switch (section) {
       case "organizations": case "support-access": {
-        const rows = await prisma.organization.findMany({ where: { deletedAt: null, ...(q ? { name: contains } : {}) }, ...limit, orderBy: newest, select: { id: true, name: true, slug: true, status: true, email: true, phone: true, address: true, currencyCode: true, timezone: true, createdAt: true,
+        const rows = await prisma.organization.findMany({ where: { deletedAt: null, ...(q ? { name: contains } : {}) }, ...limit, orderBy: newest, select: { id: true, name: true, slug: true, status: true, blacklistedAt: true, blacklistReason: true, email: true, phone: true, address: true, currencyCode: true, timezone: true, createdAt: true,
           subscription: { select: { plan: true, status: true, currentPeriodEnd: true } },
           documentRecords: { where: { entityType: AGREEMENT_ENTITY, status: { in: ["DRAFT", "ISSUED", "COMPLETED"] } }, orderBy: newest, take: 1, select: { id: true } },
           _count: { select: { properties: { where: { deletedAt: null } }, tenants: { where: { deletedAt: null } }, memberships: { where: { deactivatedAt: null } } } } } });
-        return { records: rows.map(row => { const record = card(row.id, row.name, row.status, { Email: row.email, Phone: row.phone, Address: row.address, Slug: row.slug,
+        return { records: rows.map(row => { const record = card(row.id, row.name, row.blacklistedAt ? "BLACKLISTED" : row.status, { "Blacklist lock": row.blacklistedAt, "Blacklist reason": row.blacklistReason, Email: row.email, Phone: row.phone, Address: row.address, Slug: row.slug,
           Currency: row.currencyCode, Timezone: row.timezone, Properties: row._count.properties, Tenants: row._count.tenants, "Active memberships": row._count.memberships,
           Plan: row.subscription?.plan, "Subscription status": row.subscription?.status, Renewal: row.subscription?.currentPeriodEnd, Registered: row.createdAt });
           record.links = [{ title: "DPA agreement", path: "/platform/agreements", ...(row.documentRecords?.[0] ? { recordId: row.documentRecords[0].id } : {}), emoji: "🤝", description: "Review service terms, signatures and agreement actions." }];

@@ -48,3 +48,8 @@ test("older session payloads cannot implicitly advertise a platform role", () =>
   const parsed = mobileSessionSchema.parse({ fullName: "Tenant", role: "TENANT", organizationName: "Example", requiresAccountSetup: false });
   assert.equal(parsed.platformRole, "USER");
 });
+test("web-only management additions do not advertise unsupported native destinations", () => {
+  const organization = mobileWorkspaceLinks(session("ADMIN"), "organization");
+  for (const section of ["approvals", "collections", "renewals", "activity", "handovers", "performance", "recruitment"]) assert.ok(!organization.some(link => link.path === `/dashboard/org/${section}`));
+  assert.ok(!mobileWorkspaceLinks(session(null, "PLATFORM_ADMIN"), "platform").some(link => link.path === "/platform/recruitment"));
+});

@@ -3,6 +3,19 @@ import { writeFile } from "node:fs/promises";
 const base = new URL(process.env.AUDIT_BASE_URL || "https://estatedesk.co.ke");
 const paths = ["/", "/login", "/services", "/pricing", "/contact", "/guides", "/stays", "/service-providers", "/property-management-software-kenya", "/property-management-software-dubai", "/property-management-software-middle-east", "/guides/manage-kenyan-rentals-from-uae", "/property-management-software-africa", "/remote-property-management-software", "/robots.txt", "/sitemap-index.xml", "/sitemap.xml"];
 const results = [];
+// Audit the entire published static catalog, not just a hand-picked sample.
+try {
+  const response = await fetch(new URL("/sitemap.xml", base), { signal: AbortSignal.timeout(30_000) });
+  if (!response.ok) throw new Error(`Static sitemap returned ${response.status}`);
+  const xml = await response.text();
+  for (const [, location] of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+    const url = new URL(location.replaceAll("&amp;", "&"));
+    if (!paths.includes(url.pathname + url.search)) paths.push(url.pathname + url.search);
+  }
+} catch (error) { results.push({ path: "/sitemap.xml discovery", errors: [error.message] }); }
+for (const path of ["/careers", "/sitemap-careers.xml", "/sitemap-stays.xml", "/sitemap-service-providers.xml", "/sitemap-vacancies.xml", "/sitemap-vacancy-pages.xml", "/sitemap-rental-landings.xml"]) {
+  if (!paths.includes(path)) paths.push(path);
+}
 for (const path of paths) {
   const started = performance.now();
   try {
@@ -25,6 +38,19 @@ for (const path of paths) {
       if (path !== "/login" && !scripts.length) result.errors.push("Missing JSON-LD");
     }
     results.push(result);
+  } catch (error) { results.push({ path, errors: [error.message] }); }
+}
+for (const path of ["/opengraph-image", "/careers?q=manager", "/careers?page=2", "/careers/does-not-exist-seo-audit"]) {
+  try {
+    const response = await fetch(new URL(path, base), { signal: AbortSignal.timeout(30_000) });
+    const text = await response.text();
+    const errors = [];
+    const expectedStatus = path.includes("does-not-exist") ? 404 : 200;
+    if (response.status !== expectedStatus) errors.push(`Expected ${expectedStatus}, got ${response.status}`);
+    if (path === "/opengraph-image" && !response.headers.get("content-type")?.startsWith("image/png")) errors.push("Sharing image must be PNG");
+    if (path.includes("?q=") && !/<meta[^>]+name="robots"[^>]+content="[^"]*noindex/i.test(text)) errors.push("Search results must be noindex");
+    if (path.includes("?page=2") && !/<link rel="canonical" href="[^"]*\/careers\?page=2"/.test(text)) errors.push("Page two must have its own canonical");
+    results.push({ path, status: response.status, errors });
   } catch (error) { results.push({ path, errors: [error.message] }); }
 }
 const report = { checkedAt: new Date().toISOString(), base: base.origin, results };

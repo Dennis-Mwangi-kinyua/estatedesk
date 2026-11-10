@@ -1,5 +1,6 @@
 "use client";
 
+import { TodayLink } from "@/components/shared/today-link";
 import { WorkspaceIdentity } from "@/components/shared/metric-sticker";
 import { Menu } from "lucide-react";
 import { BellRing as Bell } from "@/components/shared/colored-icons";
@@ -61,6 +62,7 @@ export function CaretakerDashboardHeader({
             <DeferredLink href="/dashboard/gate" className="inline-flex min-h-11 items-center rounded-xl border px-3 text-sm">Gate access</DeferredLink>
             <CaretakerLocaleToggle />
             <OfflineQueuePanel compact />
+            <TodayLink compact />
             <HeaderThemeToggle />
             <WorkspaceIdentity name={fullName} role="Caretaker" />
 

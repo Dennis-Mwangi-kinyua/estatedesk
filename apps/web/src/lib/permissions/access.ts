@@ -30,7 +30,7 @@ export function tenantPathRequiresActiveLease(pathname: string) {
 export function tenantCanAccessWorkspacePath(pathname: string) {
   const path = new URL(pathname || "/dashboard", "https://estatedesk.invalid").pathname.replace(/\/+$/, "");
   return path === "/dashboard/tenant" || path.startsWith("/dashboard/tenant/") ||
-    ["/dashboard", "/profile", "/change-password", "/access-denied", "/tenants/notifications", "/tenants/documents", "/tenants/bills", "/tenants/leases", "/tenants/payments"].includes(path);
+    ["/account-deletion", "/dashboard/security", "/dashboard/today", "/dashboard", "/profile", "/change-password", "/access-denied", "/tenants/notifications", "/tenants/documents", "/tenants/bills", "/tenants/leases", "/tenants/payments"].includes(path);
 }
 
 /** Developer mode uses the existing platform operator roles; organization roles never grant audit access. */

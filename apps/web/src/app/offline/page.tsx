@@ -18,7 +18,7 @@ export default function OfflinePage() {
         </p>
         <Link
           href="/"
-          className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
         >
           Try EstateDesk again
         </Link>

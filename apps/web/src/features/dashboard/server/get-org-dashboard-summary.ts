@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { countOnlineUsersForOrg } from "@/lib/auth/presence";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { PENDING_REVIEW_STATUSES } from "@/features/accounting-requests/_lib/constants";
+import { countUnpostedPayments } from "@/lib/accounting/unposted-payments";
 
 export type OrgDashboardActivityItem = {
   id: string;
@@ -94,7 +95,7 @@ export async function getOrgDashboardSummary(
     overdueInspections,
     vacancyInquiries,
     approvedExpendituresAwaitingPayment,
-    verifiedPaymentsForPosting,
+    unpostedPayments,
   ] = await retryTransientDatabaseOperation(
     () =>
       Promise.all([
@@ -341,36 +342,11 @@ export async function getOrgDashboardSummary(
       },
     }),
 
-    prisma.payment.findMany({
-      where: {
-        orgId,
-        verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] },
-      },
-      select: { id: true },
-      take: 500,
-    }),
+    countUnpostedPayments(prisma, orgId),
 
       ]),
     { label: "org-dashboard-summary" },
   );
-
-  const verifiedPaymentIds = verifiedPaymentsForPosting.map(
-    (payment) => payment.id,
-  );
-  const postedPaymentJournals = verifiedPaymentIds.length
-    ? await retryTransientDatabaseOperation(
-        () =>
-          prisma.accountingJournalEntry.findMany({
-            where: {
-              orgId,
-              sourceType: "PAYMENT",
-              sourceId: { in: verifiedPaymentIds },
-            },
-            select: { sourceId: true },
-          }),
-        { label: "org-dashboard-posted-payment-check" },
-      )
-    : [];
 
   const totalUnits = unitGroups.reduce((sum, item) => sum + item._count._all, 0);
 
@@ -438,15 +414,6 @@ export async function getOrgDashboardSummary(
 
   const apartmentMix =
     totalUnits > 0 ? Math.round((totalApartments / totalUnits) * 100) : 0;
-
-  const postedPaymentIds = new Set(
-    postedPaymentJournals
-      .map((entry) => entry.sourceId)
-      .filter((id): id is string => Boolean(id)),
-  );
-  const unpostedPayments = verifiedPaymentsForPosting.filter(
-    (payment) => !postedPaymentIds.has(payment.id),
-  ).length;
 
   const recentActivity: OrgDashboardActivityItem[] = [];
 

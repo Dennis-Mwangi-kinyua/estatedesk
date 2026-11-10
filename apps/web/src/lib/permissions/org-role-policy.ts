@@ -3,6 +3,8 @@ import { ORG_PERMISSIONS } from "./role-matrix";
 
 export const ORGANIZATION_ROLES = ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "SECURITY", "TENANT", "LANDLORD"] as const;
 export const ORG_VIEW_LABELS = {
+  recruitment: "Recruitment and applications",
+  crm: "Customer CRM",
   properties: "Properties, buildings and units", tenants: "Tenants", leases: "Leases",
   payments: "Payments", bills: "Tenant bills and invoices", "water-bills": "Water bills",
   accounting: "Accounting", charges: "Charges", reports: "Reports", issues: "Maintenance requests",
@@ -51,6 +53,7 @@ export function orgViewForPath(pathname: string): OrgView | null {
     if (["bills", "payments", "documents", "leases", "notifications"].includes(segments[1])) section = segments[1];
   }
   const aliases: Record<string, OrgView> = {
+    approvals: "accounting", collections: "payments", renewals: "leases", activity: "staff", handovers: "staff", performance: "reports",
     buildings: "properties", invoice: "bills", invoices: "bills", receipts: "payments",
     "service-agreements": "agreements", "meter-readings": "meters", readings: "meters",
     "water-readings": "meters", "water-meters": "meters", "visitor-passes": "visitors",
@@ -62,5 +65,5 @@ export function orgViewForPath(pathname: string): OrgView | null {
 
 export function rolePolicyBlocksPath(policy: OrgRolePolicy | undefined, pathname: string) {
   const view = orgViewForPath(pathname);
-  return !!view && !!policy?.blockedViews.includes(view);
+  return !!view && (!!policy?.blockedViews.includes(view) || (view === "crm" && !!policy?.blockedViews.includes("tenants")));
 }

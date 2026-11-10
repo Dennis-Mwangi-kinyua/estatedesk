@@ -30,7 +30,7 @@ export function formDraftVersion(definition: NativeActionDefinition) {
   return JSON.stringify(definition.groups.flatMap(group => group.fields.filter(field => field.type === "hidden").map(field => [field.name, field.defaultValue])));
 }
 export function safeFormDraft(definition: NativeActionDefinition, draft: FormDraft): FormDraft {
-  const filter = (values: Record<string, string>, fields: NativeActionDefinition["groups"][number]["fields"]) => Object.fromEntries(fields.filter(field => !["password", "signature", "hidden"].includes(field.type) && !/consent|confirm|password|token|secret/i.test(field.name) && typeof values[field.name] === "string").map(field => [field.name, values[field.name]]));
+  const filter = (values: Record<string, string>, fields: NativeActionDefinition["groups"][number]["fields"]) => Object.fromEntries(fields.filter(field => !["password", "signature", "photo", "hidden"].includes(field.type) && !/consent|confirm|password|token|secret/i.test(field.name) && typeof values[field.name] === "string").map(field => [field.name, values[field.name]]));
   return { version: formDraftVersion(definition), values: filter(draft.values, definition.groups.filter(group => !group.repeat).flatMap(group => group.fields)), rows: Object.fromEntries(definition.groups.filter(group => group.repeat).map(group => [group.id, (draft.rows[group.id] ?? []).map(row => ({ key: row.key, values: filter(row.values, group.fields) }))])) };
 }
 export async function loadFormDraft(key: string): Promise<FormDraft | null> {

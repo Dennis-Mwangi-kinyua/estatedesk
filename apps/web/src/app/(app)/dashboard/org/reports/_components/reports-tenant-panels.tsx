@@ -12,17 +12,17 @@ export function ReportsTenantPanels({
   return (
     <section className="grid gap-5 xl:grid-cols-2">
       <TenantReportCard
-        title="Paid tenants"
-        description="Tenants whose current-period obligations are fully settled."
-        emptyText="No tenants are fully paid yet."
+        title="Paid tenants on this page"
+        description="Tenants on the current page whose obligations are fully settled."
+        emptyText="No fully paid tenants on this page."
         rows={data.paidRows}
         showRentGuideWhenEmpty
         orgRole={orgRole}
       />
       <TenantReportCard
-        title="Not fully paid"
-        description="Tenants with partial, unpaid, overdue, or defaulted balances."
-        emptyText="No open balances for this period."
+        title="Not fully paid on this page"
+        description="Tenants on the current page with partial, unpaid, overdue, or defaulted balances."
+        emptyText="No open balances on this page."
         rows={data.notPaidRows}
         showRentGuideWhenEmpty
         orgRole={orgRole}

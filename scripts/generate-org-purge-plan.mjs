@@ -15,15 +15,27 @@ export function organizationPurgePlan(schema) {
   }));
   // Devices store an organization ID without an Organization foreign key.
   const scopes = new Map([["Organization", ["id"]], ["NativePushDevice", ["orgId"]]]);
+  const alternatives = new Map();
   let changed = true;
   while (changed) {
     changed = false;
     for (const model of models) for (const relation of model.relations) {
       if (!relation.cascade || !scopes.has(relation.parent) || model.name === "Organization") continue;
-      if (relation.keys.length !== 1) throw Error(`Composite ownership needs explicit handling: ${model.name}`);
-      const candidate = relation.parent === "Organization" ? relation.keys : [relation.field, ...scopes.get(relation.parent)];
-      const current = scopes.get(model.name);
-      if (!current || candidate.length < current.length) { scopes.set(model.name, candidate); changed = true; }
+      if (relation.parent === "Organization" && relation.keys.length !== 1) throw Error(`Composite organization ownership needs explicit handling: ${model.name}`);
+      // A relation filter follows the parent even when its foreign key is composite.
+      // Keep all equally short cascade scopes so either owning organization can purge it.
+      for (const parentPath of [scopes.get(relation.parent), ...(alternatives.get(relation.parent) ?? [])]) {
+        const candidate = relation.parent === "Organization" ? relation.keys : [relation.field, ...parentPath];
+        const current = scopes.get(model.name);
+        if (!current || candidate.length < current.length) {
+          scopes.set(model.name, candidate); alternatives.delete(model.name); changed = true;
+        } else if (candidate.length === current.length && JSON.stringify(candidate) !== JSON.stringify(current)) {
+          const extra = alternatives.get(model.name) ?? [];
+          if (!extra.some(path => JSON.stringify(path) === JSON.stringify(candidate))) {
+            alternatives.set(model.name, [...extra, candidate]); changed = true;
+          }
+        }
+      }
     }
   }
   const remaining = models.filter(model => scopes.has(model.name) && model.name !== "Organization");
@@ -31,7 +43,7 @@ export function organizationPurgePlan(schema) {
   while (remaining.length) {
     const leaf = remaining.find(model => !remaining.some(child => child !== model && child.relations.some(relation => relation.parent === model.name && (relation.required || relation.cascade))));
     if (!leaf) throw Error(`Organization deletion dependency cycle: ${remaining.map(model => model.name).join(", ")}`);
-    result.push({ model: leaf.name, delegate: leaf.name[0].toLowerCase() + leaf.name.slice(1), path: scopes.get(leaf.name) });
+    result.push({ model: leaf.name, delegate: leaf.name[0].toLowerCase() + leaf.name.slice(1), path: scopes.get(leaf.name), ...(alternatives.has(leaf.name) ? { alternatePaths: alternatives.get(leaf.name) } : {}) });
     remaining.splice(remaining.indexOf(leaf), 1);
   }
   if (result.some(item => ["User", "ServiceProvider"].includes(item.model))) throw Error("Shared accounts must never be purged with an organization");

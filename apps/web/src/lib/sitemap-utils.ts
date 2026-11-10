@@ -4,6 +4,7 @@ import { getSiteUrl } from './seo'
 export const APP_URL = getSiteUrl()
 
 export const PUBLIC_SITEMAP_PATHS = [
+  '/sitemap-careers.xml',
   '/sitemap.xml',
   '/sitemap-stays.xml',
   '/sitemap-service-providers.xml',

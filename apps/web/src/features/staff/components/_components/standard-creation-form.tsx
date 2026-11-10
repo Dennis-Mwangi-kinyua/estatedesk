@@ -1,3 +1,4 @@
+import { PlanLimitUpgrade } from "@/components/billing/plan-limit-upgrade";
 import { BasicDetailsFields } from "./basic-details-fields";
 import { FormError } from "./form-error";
 import { LoginFields } from "./login-fields";
@@ -38,7 +39,8 @@ export function StandardCreationForm({
 }: StandardCreationFormProps) {
   return (
     <form action={formAction} className="space-y-5">
-      <FormError message={displayedError} />
+      <FormError message={displayedError?.includes("plan allows") ? undefined : displayedError} />
+      <PlanLimitUpgrade message={displayedError} />
 
       <section className={`${STAFF_PANEL_CLASS} p-5 sm:p-6`}>
         {lockedRole ? (

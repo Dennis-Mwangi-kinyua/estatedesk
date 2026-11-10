@@ -1,5 +1,6 @@
 "use server";
 
+import { recordAccountSecurityEvent } from "@/lib/security/account-events";
 import { redeemPasswordLink } from "@/lib/auth/redeem-password-link";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
@@ -8,7 +9,7 @@ import { hashOpaqueToken, legacyHashOpaqueToken } from "@/lib/crypto/tokens";
 import { sendSecurityAlert } from "@/lib/security/alerts";
 
 function isStrongEnough(password: string) {
-  return password.length >= 8 && Buffer.byteLength(password, "utf8") <= 72;
+  return password.length >= 12 && Buffer.byteLength(password, "utf8") <= 72;
 }
 
 export async function resetPasswordAction(formData: FormData) {
@@ -83,6 +84,7 @@ export async function resetPasswordAction(formData: FormData) {
     tokenId: resetToken.id, userId: user.id, email: resetToken.email, passwordHash,
   }));
   if (!redeemed) redirect("/reset-password?status=invalid");
+  await recordAccountSecurityEvent({ userId: user.id, action: "ACCOUNT_PASSWORD_RESET" });
 
   await sendSecurityAlert({
     event: "PASSWORD_RESET_COMPLETED",

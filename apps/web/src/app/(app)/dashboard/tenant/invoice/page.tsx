@@ -3,7 +3,8 @@ import { requireTenantAccess } from "@/lib/permissions/guards";
 import { InvoiceWorkspace } from "./_components/invoice-workspace";
 import { getTenantInvoiceData } from "./_lib/queries";
 
-export default async function TenantInvoicePage() {
+export default async function TenantInvoicePage({ searchParams }: { searchParams: Promise<{ notice?: string }> }) {
+  const query = await searchParams;
   const session = await requireTenantAccess();
 
   if (!session.userId) {
@@ -20,5 +21,5 @@ export default async function TenantInvoicePage() {
     session.fullName,
   );
 
-  return <InvoiceWorkspace data={data} />;
+  return <InvoiceWorkspace data={data} notice={query.notice} />;
 }

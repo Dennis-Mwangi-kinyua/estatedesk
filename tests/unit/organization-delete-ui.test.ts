@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { build } from "esbuild";
-import { chromium } from "playwright";
+import { launchTestBrowser } from "../helpers/browser";
 
 test("organization delete button shows a circular spinner, prevents repeat submits and recovers after completion", async () => {
   const bundle = await build({ stdin: { contents: `import React from 'react';import{createRoot}from'react-dom/client';import{DeleteOrganizationButton}from'./apps/web/src/app/(app)/platform/organizations/[slug]/_components/delete-organization-button';window.submits=0;createRoot(document.getElementById('root')).render(<form action={async()=>{window.submits++;await new Promise(resolve=>{window.completeDelete=resolve})}}><DeleteOrganizationButton/></form>);`, resolveDir: process.cwd(), loader: "tsx" }, bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", tsconfig: "apps/web/tsconfig.json" });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchTestBrowser({ headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 393, height: 851 } });
     const errors: string[] = [];

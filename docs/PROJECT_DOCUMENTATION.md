@@ -39,6 +39,10 @@ It centralizes portfolio structure, occupancy, rent and utility billing, payment
 
 ## Product scope
 
+Organization management includes independent approvals, payment promises, tenant renewal responses, audit browsing, staff assignment coverage and property comparisons. See [Organization management](ORG_MANAGEMENT.md) for permission, accounting and renewal-date behavior.
+
+Employee recruitment is available at platform and organization scope, with public careers pages and actual application intake. PDF CVs are private database-backed attachments, bounded to 1MB; review queries exclude their bytes. See [Recruitment](RECRUITMENT.md) for ownership, publishing, applicant review, privacy and migration details.
+
 | Persona | Primary workspace |
 | --- | --- |
 | Org admin / manager / office / accountant | `/dashboard/org/**` |

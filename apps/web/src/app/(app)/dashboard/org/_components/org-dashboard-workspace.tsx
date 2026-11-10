@@ -1,8 +1,7 @@
 "use client";
 
 
-import Link from "@/components/navigation/workspace-link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { reportClientError } from "@/lib/errors/report-client-error";
 import type { OrgRole } from "@prisma/client";
 import { getLiveOrgDashboardSummaryAction } from "@/features/dashboard/actions/get-live-org-dashboard-summary-action";
@@ -34,6 +33,8 @@ export function OrgDashboardWorkspace({
   orgRole,
   interval = 30_000,
   featureLinks = [],
+  workflow = null,
+  metrics = null,
 }: {
   initialData: OrgDashboardSummary;
   initialVacancyInquiries: VacancyInquiryAlertItem[];
@@ -42,6 +43,8 @@ export function OrgDashboardWorkspace({
   orgRole?: OrgRole | null;
   interval?: number;
   featureLinks?: MobileWorkspaceLink[];
+  workflow?: ReactNode;
+  metrics?: ReactNode;
 }) {
   const [data, setData] = useState(initialData);
   const [vacancyInquiries, setVacancyInquiries] = useState(
@@ -123,23 +126,13 @@ export function OrgDashboardWorkspace({
         organizationName={organizationName}
         orgRole={orgRole}
       />
-      <OrgFeatureGrid features={featureLinks} />
-      {(orgRole === "ADMIN" || orgRole === "MANAGER") && (data.totalProperties === 0 || data.totalUnits === 0 || data.totalTenants === 0 || data.activeLeases === 0 || data.totalPayments === 0) && <section className="rounded-2xl border border-border bg-card p-4" aria-labelledby="setup-progress-title">
-        <h2 id="setup-progress-title" className="font-semibold">Finish setting up your organisation</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Complete these steps to start managing your portfolio.</p>
-        <ol className="mt-3 flex flex-wrap gap-3">{[
-          { label: "Properties", done: data.totalProperties > 0, href: "/dashboard/org/properties" },
-          { label: "Units", done: data.totalUnits > 0, href: "/dashboard/org/units" },
-          { label: "Tenants", done: data.totalTenants > 0, href: "/dashboard/org/tenants" },
-          { label: "Leases", done: data.activeLeases > 0, href: "/dashboard/org/leases" },
-          { label: "Payments", done: data.totalPayments > 0, href: "/dashboard/org/payments" },
-        ].map(item => <li key={item.href}><Link className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border px-3 text-sm" href={item.href}><span aria-hidden="true">{item.done ? "✓" : "○"}</span>{item.label}<span className="sr-only">{item.done ? ": completed" : ": needs setup"}</span></Link></li>)}</ol>
-        {orgRole === "ADMIN" && <Link className="mt-3 inline-block text-sm text-primary underline" href="/dashboard/org/settings">Configure billing and payment collection</Link>}
-      </section>}
+      {workflow}
+      {metrics}
       <OrgDashboardStats data={data} />
       <div className="min-w-0 space-y-5">
         <OrgDashboardSnapshot data={data} />
       </div>
+      <OrgFeatureGrid features={featureLinks} />
     </div>
   );
 }

@@ -8,22 +8,23 @@ const caretaker = (paths: string[]) => paths.map(path => `/dashboard/caretaker${
 const platform = (paths: string[]) => paths.map(path => `/platform${path ? `/${path}` : ""}`);
 
 const platformAccount: NavigationSection[] = [
-  { label: "Access & security", hrefs: platform(["users", "admins", "landlords", "permissions", "identity-verification", "agreements", "security", "audit-logs", "support-access"]) },
+  { label: "Access & security", hrefs: platform(["privacy-requests", "users", "admins", "landlords", "permissions", "identity-verification", "agreements", "security", "audit-logs", "support-access"]) },
   { label: "Settings & help", hrefs: platform(["settings", "help"]) },
 ];
 
 export const WORKSPACE_NAVIGATION: Record<NavigationWorkspace, readonly NavigationSection[]> = {
   org: [
-    { label: "Workspace", hrefs: org(["", "insights"]) },
+    { label: "Management", hrefs: org(["approvals", "collections", "renewals", "activity", "handovers", "performance"]) },
+    { label: "Workspace", hrefs: org(["", "insights", "operating-queue"]) },
     { label: "Portfolio & occupancy", hrefs: org(["properties", "landlords", "buildings", "units", "airbnb", "tenants", "leases", "vacancy-inquiries", "verify-tenant", "identity-verification"]) },
-    { label: "Finance", hrefs: org(["payments", "charges", "water-bills", "accounting", "accounting/requests", "finance-requests", "expenditures", "taxes", "reports"]) },
+    { label: "Finance", hrefs: org(["payments", "charges", "charges/bills", "water-bills", "accounting", "accounting/requests", "finance-requests", "expenditures", "taxes", "reports"]) },
     { label: "Operations", hrefs: [...org(["issues", "issues/resolution-reports", "inspections", "move-outs", "service-providers"]), "/dashboard/gate"] },
-    { label: "Communication", hrefs: org(["notifications", "community"]) },
-    { label: "Administration", hrefs: org(["staff", "imports", "agreements", "settings"]) },
+    { label: "Communication", hrefs: org(["crm", "notifications", "community"]) },
+    { label: "Administration", hrefs: org(["staff", "recruitment", "imports", "agreements", "settings"]) },
     { label: "Account & help", hrefs: [...org(["profile", "security", "support"]), "/dashboard/security"] },
   ],
   tenant: [
-    { label: "My home", hrefs: tenant(["", "lease", "documents", "history"]) },
+    { label: "My home", hrefs: tenant(["", "lease", "renewals", "documents", "history"]) },
     { label: "Payments & bills", hrefs: tenant(["payments", "invoice", "water-bills", "expenditures", "rewards"]) },
     { label: "Living & support", hrefs: tenant(["issues", "inspections", "notices", "visitors", "community", "notifications"]) },
     { label: "My account", hrefs: [...tenant(["profile"]), "/dashboard/security"] },
@@ -41,16 +42,18 @@ export const WORKSPACE_NAVIGATION: Record<NavigationWorkspace, readonly Navigati
     { label: "My account", hrefs: ["/dashboard/security"] },
   ],
   "platform-admin": [
+    { label: "Hiring", hrefs: platform(["recruitment"]) },
     { label: "Workspace", hrefs: platform(["", "search"]) },
-    { label: "Customers & onboarding", hrefs: platform(["review-queue", "organizations", "onboarding", "service-providers"]) },
+    { label: "Customers & onboarding", hrefs: platform(["demos", "crm", "review-queue", "organizations", "onboarding", "service-providers"]) },
     { label: "Finance", hrefs: platform(["payments", "payment-ops", "expenditures", "billing", "subscriptions", "reports"]) },
     { label: "Communication", hrefs: platform(["messages", "broadcasts", "marketing"]) },
     ...platformAccount,
   ],
   "platform-developer": [
+    { label: "Hiring", hrefs: platform(["recruitment"]) },
     { label: "Engineering", hrefs: platform(["developer", "system-health", "jobs", "developer/docs"]) },
     { label: "Integrations & data", hrefs: platform(["api-explorer", "api-keys", "rate-limits", "feature-flags", "data-management", "backups"]) },
-    { label: "Site administration", hrefs: platform(["review-queue", "control", "organizations", "service-providers", "billing", "subscriptions", "broadcasts"]) },
+    { label: "Site administration", hrefs: platform(["demos", "crm", "review-queue", "control", "organizations", "service-providers", "billing", "subscriptions", "broadcasts"]) },
     ...platformAccount,
   ],
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import { TodayLink } from "@/components/shared/today-link";
 import { useWorkspaceAccess } from "@/components/navigation/workspace-link";
 import { canDiscoverWorkspaceHref } from "@/lib/permissions/workspace-access";
 import { SidebarSticker } from "@/components/shared/sidebar-sticker";
@@ -26,6 +27,7 @@ type LandlordDashboardShellProps = {
 };
 
 const navItems = [
+  { label: "Today", href: "/dashboard/today", icon: Home },
   {
     label: "Overview",
     href: "/dashboard/landlord",
@@ -196,6 +198,7 @@ export function LandlordDashboardShell({
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
+            <TodayLink compact />
             <HeaderThemeToggle />
             <WorkspaceIdentity name={displayName} role="Landlord" />
           </div>

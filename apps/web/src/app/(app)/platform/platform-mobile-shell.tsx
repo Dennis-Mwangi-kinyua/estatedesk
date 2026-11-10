@@ -1,5 +1,6 @@
 "use client";
 
+import { TodayLink } from "@/components/shared/today-link";
 import { PlatformNavigation } from "./_components/platform-navigation";
 import { useNavigationDialog } from "@/components/navigation/use-navigation-dialog";
 
@@ -60,7 +61,8 @@ export default function PlatformMobileShell({
             <PlatformBrand mode={mode} />
 
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-              {showThemeToggle && <HeaderThemeToggle />}
+              <TodayLink />
+                  {showThemeToggle && <HeaderThemeToggle />}
               <button data-workspace-action="true"
                 ref={menuButtonRef}
                 type="button"

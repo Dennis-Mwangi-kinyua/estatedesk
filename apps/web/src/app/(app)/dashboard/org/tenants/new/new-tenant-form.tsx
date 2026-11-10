@@ -42,6 +42,7 @@ export function NewTenantForm({
   orgName,
   currencyCode,
   availableUnits,
+  initialUnitId = "",
 }: NewTenantFormProps) {
   const formRef = useRef<HTMLFormElement | null>(null);
   const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
@@ -54,7 +55,9 @@ export function NewTenantForm({
 
   const [step, setStep] = useState<Step>(1);
   const [stepError, setStepError] = useState<string | null>(null);
-  const [selectedUnitId, setSelectedUnitId] = useState<string>("");
+  const [selectedUnitId, setSelectedUnitId] = useState<string>(
+    availableUnits.some((unit) => unit.id === initialUnitId) ? initialUnitId : "",
+  );
   const [existingLease, setExistingLease] = useState(false);
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [accountUsername, setAccountUsername] = useState("");

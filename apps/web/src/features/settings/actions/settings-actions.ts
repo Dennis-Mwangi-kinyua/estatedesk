@@ -2,6 +2,7 @@
 
 import { createHash, randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
@@ -414,9 +415,15 @@ export async function requestPlanUpgradeAction(formData: FormData) {
   });
 
   revalidatePath(SETTINGS_PATH);
+  revalidatePath("/dashboard/org/settings/billing");
   revalidatePath("/platform/billing");
   revalidatePath("/platform/subscriptions");
   revalidatePath("/platform/onboarding");
+}
+
+export async function requestPlanUpgradeFromWorkspaceAction(formData: FormData) {
+  await requestPlanUpgradeAction(formData);
+  redirect("/dashboard/org/settings/billing");
 }
 
 export async function inviteMemberAction(formData: FormData) {

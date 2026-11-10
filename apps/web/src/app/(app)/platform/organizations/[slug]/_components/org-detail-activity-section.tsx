@@ -5,6 +5,8 @@ import { OrgSurface } from "./org-detail-ui";
 import { Receipt, ChevronDown } from "lucide-react";
 import { UsersRound, Archive } from "@/components/shared/colored-icons";
 import {
+  blacklistOrganizationAction,
+  unblacklistOrganizationAction,
   archiveOrganizationAction,
   reactivateOrganizationAction,
   permanentlyDeleteOrganizationAction,
@@ -156,8 +158,21 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
         <summary className="flex min-h-14 cursor-pointer items-center gap-3 px-5 py-4 text-sm font-semibold text-muted-foreground"><Archive aria-hidden="true" className="h-5 w-5" />Organization access and deletion<ChevronDown aria-hidden="true" className="ml-auto h-4 w-4" /></summary>
       <OrgSurface
         title="Danger zone"
-        description="Deactivate, reactivate, or delete this organization with 30-day retention."
+        description="Blacklist, manage access, or delete this organization with 30-day retention."
       >
+        <form id="organization-blacklist-lock" action={org.blacklistedAt ? unblacklistOrganizationAction : blacklistOrganizationAction} className="space-y-4 border-b border-red-200 p-4 sm:p-5">
+          <input type="hidden" name="orgId" value={org.id} />
+          <input type="hidden" name="expectedSlug" value={org.slug} />
+          <div className="rounded-xl border border-red-300 bg-red-50 p-4 text-red-950 dark:border-red-500/40 dark:bg-red-950 dark:text-red-100">
+            <h3 className="font-semibold">{org.blacklistedAt ? "Organization blacklisted — access locked" : "Blacklist organization and lock associated accounts"}</h3>
+            <p className="mt-2 text-sm leading-6">{org.blacklistedAt ? "Remove this lock before reactivating the organization. Revoked sessions and API keys will remain revoked." : "Blocks every currently linked staff member, tenant and landlord across EstateDesk, including users who belong to other organizations. Revokes their web/mobile sessions and affected API keys. Linked platform administrators are also blocked."}</p>
+            {org.blacklistedAt && <p className="mt-2 break-words text-sm">Locked {formatDateTime(org.blacklistedAt)} · {org.blacklistReason}</p>}
+          </div>
+          <label className="block"><span className="text-sm font-semibold">Reason for {org.blacklistedAt ? "removing the lock" : "blacklisting"}</span><textarea name="reason" required minLength={5} maxLength={1000} rows={3} className="mt-2 w-full rounded-xl border border-border bg-background p-3 text-base" /></label>
+          <label className="block"><span className="text-sm font-semibold">Type {org.slug} to confirm</span><input name="blacklistConfirmation" required autoComplete="off" className="mt-2 min-h-12 w-full rounded-xl border border-border bg-background px-3 text-base" /></label>
+          <button type="submit" className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-red-700 px-5 text-sm font-semibold text-white hover:bg-red-800 sm:w-auto">{org.blacklistedAt ? "Remove blacklist lock" : "Blacklist and lock access"}</button>
+        </form>
+        <fieldset disabled={Boolean(org.blacklistedAt)} className="min-w-0 disabled:opacity-60">
         <form action={org.status === "ACTIVE" ? archiveOrganizationAction : reactivateOrganizationAction} className="space-y-4 border-b border-slate-200 p-4 dark:border-white/10">
           <input type="hidden" name="orgId" value={org.id} />
           <input type="hidden" name="expectedSlug" value={org.slug} />
@@ -213,6 +228,7 @@ export function OrgDetailActivitySection(props: OrgDetailWorkspaceProps) {
           </label>
           <DeleteOrganizationButton />
         </form>
+        </fieldset>
       </OrgSurface>
       </details>
     </>

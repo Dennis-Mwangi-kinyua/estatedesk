@@ -1,4 +1,8 @@
-import { Component, type ReactNode } from "react";
+import { Platform } from "react-native";
+import Constants from "expo-constants";
+import { digestStringAsync, CryptoDigestAlgorithm, randomUUID } from "expo-crypto";
+import { reportNativeDiagnostic } from "../api";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "react-native";
 import { Button, styles } from "./ui";
@@ -7,6 +11,12 @@ import { Button, styles } from "./ui";
 export class AppErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean; revision: number }> {
   state = { failed: false, revision: 0 };
   static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch(error:Error,info:ErrorInfo) {
+    if(Platform.OS!=="ios"&&Platform.OS!=="android")return;
+    const platform=Platform.OS;
+    // Send only a fingerprint. Customer content, error messages and stacks stay on device.
+    void digestStringAsync(CryptoDigestAlgorithm.SHA256,`${error.name}:${info.componentStack??"render"}`).then(fingerprint=>reportNativeDiagnostic({eventId:randomUUID(),fingerprint,platform,version:Constants.expoConfig?.version??"unknown",kind:"react-render"})).catch(()=>{});
+  }
   render() {
     if (this.state.failed) return <SafeAreaView style={{ flex: 1, justifyContent: "center", backgroundColor: "#f3f6f3", padding: 24 }}>
       <View style={styles.card}><Text accessibilityRole="header" style={styles.cardTitle}>Let’s reopen your workspace</Text>

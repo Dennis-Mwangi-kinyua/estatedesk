@@ -23,7 +23,7 @@ test("browser logout rejects cross-site requests, revokes the current session an
   assert.equal(state.revoked, 1);
   assert.equal((await post("guest")).status, 200);
   assert.equal(state.revoked, 1);
-  const proxied = await module.exports.POST(new Request("http://internal:3000/api/auth/logout", { method: "POST", headers: { origin: "https://example.com", "x-forwarded-host": "example.com", "sec-fetch-site": "same-origin", "x-estatedesk-logout": "1" }, body: JSON.stringify({ scope: "user" }) }));
+  const proxied = await module.exports.POST(new Request("http://internal:3000/api/auth/logout", { method: "POST", headers: { origin: "https://example.com", "x-forwarded-host": "example.com", "x-forwarded-proto": "https", "sec-fetch-site": "same-origin", "x-estatedesk-logout": "1" }, body: JSON.stringify({ scope: "user" }) }));
   assert.equal(proxied.status, 200);
   assert.equal(state.revoked, 2);
   assert.deepEqual(state.deleted, [{ name: "guest-cookie", path: "/guest-stay" }]);

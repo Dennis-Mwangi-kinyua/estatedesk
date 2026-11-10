@@ -1,3 +1,4 @@
+import { TodayLink } from "@/components/shared/today-link";
 import { useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
@@ -16,6 +17,7 @@ export function CaretakerNavigation({ mobile = false, onNavigate }: { mobile?: b
   const activeHref = activeNavigationHref(pathname, items);
 
   return <nav aria-label="Caretaker navigation">
+    <TodayLink />
     <NavigationSections items={items} sections={WORKSPACE_NAVIGATION.caretaker} renderItem={item => {
       const active = item.href === activeHref;
       return <HoverPrefetchLink href={item.href} prefetch={mobile ? false : undefined} onClick={onNavigate}

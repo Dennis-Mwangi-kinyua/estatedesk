@@ -46,7 +46,7 @@ export function ChangePasswordForm() {
         name="newPassword"
         autoComplete="new-password"
         required
-        minLength={8}
+        minLength={12}
         icon={ShieldCheck}
         shellClassName={fieldShellClassName}
         disabled={pending}
@@ -58,7 +58,7 @@ export function ChangePasswordForm() {
         name="confirmPassword"
         autoComplete="new-password"
         required
-        minLength={8}
+        minLength={12}
         icon={ShieldCheck}
         shellClassName={fieldShellClassName}
         disabled={pending}
@@ -66,7 +66,7 @@ export function ChangePasswordForm() {
       />
 
       <p className="text-sm text-muted-foreground">
-        Use at least 8 characters. Avoid passwords you use on other sites.
+        Use at least 12 characters. Avoid passwords you use on other sites.
       </p>
 
       <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">

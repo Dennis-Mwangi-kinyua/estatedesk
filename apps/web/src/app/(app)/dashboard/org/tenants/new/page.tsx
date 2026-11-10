@@ -47,8 +47,9 @@ function formatUnitTypeLabel(type: string, bedrooms: number | null) {
     .join(" ");
 }
 
-export default async function NewTenantPage() {
+export default async function NewTenantPage({ searchParams }: { searchParams: Promise<{ unitId?: string }> }) {
   const org = await getCurrentOrgContext();
+  const { unitId } = await searchParams;
 
   const availableUnits = await prisma.unit.findMany({
     where: {
@@ -104,6 +105,7 @@ export default async function NewTenantPage() {
       orgName={org.name}
       currencyCode={org.currencyCode}
       availableUnits={units}
+      initialUnitId={unitId}
     />
   );
 }

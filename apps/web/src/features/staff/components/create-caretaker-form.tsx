@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { AccountCreatedShare } from "@/components/shared/account-created-share";
+import { PlanLimitUpgrade } from "@/components/billing/plan-limit-upgrade";
 import { createCaretakerAction, type CreateCaretakerState } from "@/features/staff/actions/create-caretaker-action";
 
 type PropertyOption = {
@@ -62,6 +63,7 @@ export function CreateCaretakerForm({
           {state.error}
         </div>
       ) : null}
+      <PlanLimitUpgrade message={state.error} />
 
       <section className="space-y-4">
         <div>

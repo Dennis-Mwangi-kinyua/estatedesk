@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { build } from "esbuild";
-import { chromium } from "playwright";
+import { launchTestBrowser } from "../helpers/browser";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { readFileSync } from "node:fs";
@@ -92,7 +92,7 @@ test("iOS and Android retain the selected service when refresh availability chan
     } }],
   });
   const bundle = await bundleFor();
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchTestBrowser({ headless: true });
   try {
     for (const platform of ["ios", "android"]) {
       const page = await browser.newPage();

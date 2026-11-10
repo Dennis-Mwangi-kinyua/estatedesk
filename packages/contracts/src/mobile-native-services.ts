@@ -7,7 +7,7 @@ export const mobileSecuritySchema = z.array(z.object({
 export const mobileSecurityInputSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("revoke"), sessionId: z.string().min(1).max(200) }),
   z.object({ action: z.literal("revoke-others") }),
-  z.object({ action: z.literal("password"), currentPassword: z.string().min(1).max(1024), newPassword: z.string().min(8).max(1024), confirmPassword: z.string().min(8).max(1024) }),
+  z.object({ action: z.literal("password"), currentPassword: z.string().min(1).max(1024), newPassword: z.string().min(12).max(1024), confirmPassword: z.string().min(12).max(1024) }),
 ]);
 export type MobileSecurityInput = z.infer<typeof mobileSecurityInputSchema>;
 export const mobileIssueConfirmationSchema = z.object({ issueId: z.string().min(1).max(200), reportId: z.string().min(1).max(200), tenantFeedback: z.string().trim().max(2000) });
@@ -39,4 +39,9 @@ export const mobileTenantInspectionsSchema = z.object({
     inspectorName: z.string(), notes: z.string().nullable(), checklist: z.record(z.string(), z.unknown()).nullable(), reportPath: z.string(),
     photos: z.array(z.object({ id: z.string(), label: z.string() })).default([]),
   })),
+});
+
+export const mobileSecurityActivitySchema = z.object({
+  passwordChangedAt: z.string().datetime().nullable(),
+  events: z.array(z.object({ id: z.string(), label: z.string(), createdAt: z.string().datetime(), ip: z.string().nullable(), device: z.string() })),
 });

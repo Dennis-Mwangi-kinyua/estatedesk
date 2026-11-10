@@ -1,3 +1,7 @@
+import { storeRenewedSession } from "./session-renewal";
+import { mobileSecurityActivitySchema } from "@estatedesk/contracts/mobile";
+import { todaySummarySchema } from "@estatedesk/contracts/mobile";
+import { mobileAccountDeletionSchema } from "@estatedesk/contracts/mobile";
 import { ApiError, readMobileResponse } from "./http-response";
 import { reportExportSchema, type ReportFilters } from "@estatedesk/contracts/mobile";
 import { WORKFLOW_PROTOCOL_VERSION } from "@estatedesk/contracts/mobile";
@@ -74,6 +78,7 @@ async function sendRequest(origin: string, cookie: string | null, path: string, 
         "X-EstateDesk-Client": "native",
         "X-EstateDesk-Capabilities": "2026-10-18",
         "X-EstateDesk-Signatures": "image-v1",
+        "X-EstateDesk-Forms": "2026-11-09",
         ...(options.guestToken ? { "X-EstateDesk-Guest-Token": options.guestToken } : {}),
         ...(cookie ? { Cookie: cookie } : {}),
       },
@@ -224,7 +229,10 @@ export async function switchMembership(membershipId: string) {
   await clearDocumentCache(); await SecureStore.deleteItemAsync(SUPPORT_KEY); await SecureStore.deleteItemAsync(VAULT_KEY); await SecureStore.deleteItemAsync(PROFILE_KEY);
   return result;
 }
-export async function completeSetup(body: { currentPassword: string; newPassword: string; confirmPassword: string; acceptedTerms: true }) { return request("/account/setup", { method: "POST", body }); }
+export async function completeSetup(body: { currentPassword: string; newPassword: string; confirmPassword: string; acceptedTerms: true }) {
+  const result = await request("/account/setup", { method: "POST", body });
+  await saveSecuritySession(result, "Account setup completed. Sign in again to continue.");
+}
 export async function getIssues() { return mobileIssuesSchema.parse(await request("/tenant/issues")); }
 export async function submitIssue(body: { unitId: string; title: string; description: string; priority: string }, photo?: Photo | null) { return request("/tenant/issues", { method: "POST", form: attachmentForm(body, photo ? { photo } : {}) }); }
 export async function getMeters() { return mobileMetersSchema.parse(await request("/caretaker/meters")); }
@@ -260,7 +268,18 @@ export async function getRewards() { return mobileRewardsSchema.parse(await requ
 export async function confirmIssue(issueId: string, reportId: string, tenantFeedback: string) { await request("/tenant/issues/confirm", { method: "POST", body: { issueId, reportId, tenantFeedback } }); }
 export async function requestReward(rewardId: string) { await request("/tenant/rewards", { method: "POST", body: { rewardId } }); }
 export async function getSecurity() { return mobileSecuritySchema.parse(await request("/security")); }
-export async function updateSecurity(body: MobileSecurityInput) { await request("/security", { method: "POST", body }); }
+async function saveSecuritySession(result: unknown, failureMessage?: string) {
+  reads.clear();
+  await storeRenewedSession(result, {
+    save: cookie => SecureStore.setItemAsync(SESSION_KEY, cookie, { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY }),
+    clear: async () => { await Promise.allSettled([clearDrafts(), clearDocumentCache(), ...[SUPPORT_KEY, VAULT_KEY, PROFILE_KEY, SESSION_KEY].map(key => SecureStore.deleteItemAsync(key))]); },
+  }, failureMessage);
+}
+export async function updateSecurity(body: MobileSecurityInput) {
+  const result = await request("/security", { method: "POST", body });
+  if (body.action === "password") await saveSecuritySession(result);
+}
+export async function getSecurityActivity() { return mobileSecurityActivitySchema.parse(await request("/security/activity")); }
 export async function updateMoveOut(body: MobileMoveOutInput) { await request("/tenant/move-outs", { method: "POST", body }); }
 export async function getTenantInspections(page = 1) { return mobileTenantInspectionsSchema.parse(await request(`/tenant/inspections?page=${page}`)); }
 export async function getLeaseSigning() { return mobileLeaseSigningSchema.parse(await request("/tenant/lease-signing")); }
@@ -332,3 +351,10 @@ export async function exportPlatformReport(filters: ReportFilters, format: "pdf"
   if (!await Sharing.isAvailableAsync()) throw new Error("Sharing is unavailable on this device.");
   await Sharing.shareAsync(output.uri, { mimeType: "text/csv", UTI: "public.comma-separated-values-text" });
 }
+
+export async function getAccountDeletion(){return mobileAccountDeletionSchema.parse(await request("/account/deletion"));}
+export async function updateAccountDeletion(body:{action:"request"|"withdraw";confirmation?:string;reason?:string}){return request("/account/deletion",{method:"POST",body});}
+
+export async function reportNativeDiagnostic(body:{eventId:string;fingerprint:string;platform:"ios"|"android";version:string;kind:"react-render"}){if(await hasSavedSession())await request("/diagnostics",{method:"POST",body});}
+
+export async function getToday() { return todaySummarySchema.parse(await request("/today")); }

@@ -12,7 +12,11 @@ export function mobileWorkspaceAllowed(session: Pick<AppSession, "platformRole" 
 }
 
 const presentation: Record<string, [string, string]> = {
+  demos: ["📅", "Demo requests, client contacts, appointments and trial follow-up."],
+  crm: ["🤝", "Customers, leads, conversations, follow-ups and analytics."],
   "review-queue": ["📋", "Pending decisions, waiting times, responsible teams and next actions."],
+  "operating-queue": ["📋", "Proofs, readings, unsigned leases, arrears, overdue issues and move-outs."],
+  bills: ["🧾", "Issue the month, send balances, and close each bill."],
   insights: ["💡", "Review portfolio trends and insights."], profile: ["👤", "Review your profile and contact details."], airbnb: ["🛎️", "Manage short-stay accommodation."],
   "identity-verification": ["🪪", "Review identity verification requests."], "service-providers": ["🧰", "Manage service providers and registrations."],
   "finance-requests": ["💰", "Review finance requests and approvals."], "vacancy-inquiries": ["📨", "Follow up on vacancy inquiries."], "verify-tenant": ["🔎", "Review tenant verification records."],
@@ -37,7 +41,7 @@ const presentation: Record<string, [string, string]> = {
 
 export function mobileWorkspaceLinks(session: AppSession, kind: MobileWorkspaceKind): MobileWorkspaceLink[] {
   if (!mobileWorkspaceAllowed(session, kind)) return [];
-  const candidates = kind === "organization" ? [...SIDEBAR_LINKS.map(item => ({ title: item.label, path: item.href, description: "" })),
+  const candidates = kind === "organization" ? [...SIDEBAR_LINKS.filter(item => item.native !== false).map(item => ({ title: item.label, path: item.href, description: "" })),
     { title: "BnB bookings & guest access", path: "/dashboard/org/airbnb/bookings", description: "Manage stays, guest access and requests in the app." },
     { title: "Help & guides", path: "/dashboard/org/help", description: "Find guides for all organization workflows." },
     { title: "Workspace search", path: "/dashboard/org/search", description: "Search records across your organization." },
@@ -51,17 +55,27 @@ export function mobileWorkspaceLinks(session: AppSession, kind: MobileWorkspaceK
     { title: "Payouts", path: "/dashboard/landlord/payouts", description: "Review owner distributions recorded for your portfolio." },
     { title: "Help & guides", path: "/dashboard/landlord/help", description: "Read landlord workflow guides." },
     { title: "Account security", path: "/dashboard/security", description: "Manage your password and signed-in devices." },
-  ] : [...[...adminNavItems, ...developerNavItems].map(item => ({ title: item.label, path: item.href, description: item.description ?? "" })),
+  ] : [...[...adminNavItems, ...developerNavItems].filter(item => item.native !== false).map(item => ({ title: item.label, path: item.href, description: item.description ?? "" })),
       { title: "Notification queue", path: "/platform/jobs/notifications", description: "Inspect queued and failed deliveries and retry failed notifications." },
+      { title: "Landlord property selection", path: "/platform/landlords/properties", description: "Search properties in the selected customer organization." },
       { title: "Provider reports", path: "/platform/service-providers/reports", description: "Review and resolve reported provider accounts." },
     ];
+  if (kind !== "landlord") {
+    const base = kind === "platform" ? "/platform/crm" : "/dashboard/org/crm";
+    candidates.push(...[
+      ...(kind === "platform" ? [{ title: "CRM customers", path: `${base}/customers`, description: "Customer organizations and subscriptions." }] : []),
+      { title: "CRM tasks", path: `${base}/tasks`, description: "Open, overdue and assigned follow-ups." },
+      { title: "CRM reports", path: `${base}/reports`, description: "Sales, customer and communication analytics." },
+      { title: "CRM activity history", path: `${base}/history`, description: "Customer interactions and message history." },
+    ]);
+  }
   const navigation = kind === "organization" ? WORKSPACE_NAVIGATION.org : kind === "landlord" ? WORKSPACE_NAVIGATION.landlord : [...WORKSPACE_NAVIGATION["platform-admin"], ...WORKSPACE_NAVIGATION["platform-developer"]];
   return [...new Map(candidates.map(item => [item.path, item])).values()]
-    .filter(item => canAccessWorkspacePath(session, item.path))
+    .filter(item => item.path !== "/dashboard/today" && canAccessWorkspacePath(session, item.path))
     .map(item => {
       const key = item.path.split("/")[kind === "organization" ? 3 : 2] ?? "";
       const [emoji, description] = presentation[key] ?? ["🗂️", `Open ${item.title.toLowerCase()} and manage your workspace.`];
-      return { ...item, emoji, description: item.description || description, group: navigation.find(group => group.hrefs.includes(item.path === "/platform/service-providers/reports" ? "/platform/service-providers" : item.path === "/platform/jobs/notifications" ? "/platform/jobs" : item.path))?.label ?? "Workspace tools" };
+      return { ...item, emoji, description: item.description || description, group: navigation.find(group => group.hrefs.includes(item.path.includes("/crm/") ? item.path.split("/crm/")[0] + "/crm" : item.path === "/platform/service-providers/reports" ? "/platform/service-providers" : item.path === "/platform/jobs/notifications" ? "/platform/jobs" : item.path))?.label ?? "Workspace tools" };
     });
 }
 

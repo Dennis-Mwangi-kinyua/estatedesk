@@ -3,13 +3,16 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { tenantDocumentPath, tenantNavigation, tenantWorkspaceEntry, tenantWorkspaceLinks } from "../../packages/contracts/src/tenant-workspace";
 import { isTenantPortalRequest } from "../../apps/web/src/lib/mobile/portal-policy";
+import { TENANT_SIDEBAR_LINKS } from "../../apps/web/src/components/layout/tenant-sidebar-links";
 
 const origin = "https://estatedesk.test";
-test("every web tenant navigation entry is reachable from the mobile workspace menu", () => {
-  const sidebar = readFileSync(new URL("../../apps/web/src/components/layout/tenant-sidebar-links.ts", import.meta.url), "utf8");
-  const paths = [...sidebar.matchAll(/href: "([^"]+)"/g)].map(match => match[1]);
+test("every native-enabled tenant navigation entry has a native screen or workspace entry", () => {
+  const paths = TENANT_SIDEBAR_LINKS.filter(link => link.native !== false).map(link => link.href);
   assert.ok(paths.length >= 17);
   const mobilePaths = new Set<string>(tenantWorkspaceLinks.map(([, path]) => path));
+  // Today is a dedicated native screen, not a legacy portal/menu destination.
+  const workflows = readFileSync(new URL("../../apps/mobile/src/components/workflows.tsx", import.meta.url), "utf8");
+  if (workflows.includes('load("today")') && workflows.includes("<TodayPanel")) mobilePaths.add("/dashboard/today");
   for (const path of paths) assert.ok(mobilePaths.has(path), `Add mobile entry for ${path}`);
 });
 

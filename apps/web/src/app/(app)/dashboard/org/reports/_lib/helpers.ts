@@ -120,16 +120,19 @@ export function reportFilterHref({
   apartment,
   payment,
   period,
+  page,
 }: {
   apartment: string;
   payment: string;
   period?: string;
+  page?: number;
 }) {
   const params = new URLSearchParams();
 
   if (apartment !== "all") params.set("apartment", apartment);
   if (payment !== "all") params.set("payment", payment);
   if (period) params.set("period", period);
+  if (page && page > 1) params.set("page", String(page));
 
   const query = params.toString();
   return query ? `/dashboard/org/reports?${query}` : "/dashboard/org/reports";

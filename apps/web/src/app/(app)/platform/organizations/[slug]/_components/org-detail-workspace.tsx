@@ -2,9 +2,13 @@ import { OrganizationFeatureControls } from "./organization-feature-controls";
 import type { getOrganizationDetailData } from "../_lib/queries";
 import { OrgDetailActivitySection } from "./org-detail-activity-section";
 import { OrgDetailOverviewSection } from "./org-detail-overview-section";
+import { SaasMetricsPanel } from "@/app/(app)/dashboard/org/_components/saas-metrics-panel";
+import type { SaasMetrics } from "@/lib/workflow/saas-metrics";
 import Link from "@/components/navigation/workspace-link";
 
-export type OrgDetailWorkspaceProps = Awaited<ReturnType<typeof getOrganizationDetailData>>;
+export type OrgDetailWorkspaceProps = Awaited<ReturnType<typeof getOrganizationDetailData>> & {
+  saasMetrics?: SaasMetrics | null;
+};
 
 export function OrgDetailWorkspace(props: OrgDetailWorkspaceProps) {
   if (props.org.deletedAt) {
@@ -26,7 +30,9 @@ export function OrgDetailWorkspace(props: OrgDetailWorkspaceProps) {
   return (
     <div className="organisation-detail-page mx-auto w-full max-w-7xl space-y-4 sm:space-y-5">
       <OrgDetailOverviewSection {...props} />
+      {props.saasMetrics ? <SaasMetricsPanel metrics={props.saasMetrics} /> : null}
       <div className="flex flex-wrap gap-3">
+      <a href="#organization-blacklist-lock" className="inline-flex min-h-12 items-center rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-900 dark:border-red-700 dark:bg-red-950 dark:text-red-100">{props.org.blacklistedAt ? "Review blacklist lock" : "Blacklist & access lock"}</a>
       <Link href={`/platform/organizations/${props.org.slug}/access`} className="inline-flex min-h-11 items-center rounded-xl border bg-card px-4 py-3 text-sm font-semibold">Manage organization role access</Link>
       <Link href={`/platform/organizations/${props.org.slug}/tenants`} className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground">View tenants and individual records</Link>
       </div>

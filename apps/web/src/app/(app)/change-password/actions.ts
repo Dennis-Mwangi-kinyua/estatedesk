@@ -1,10 +1,11 @@
 "use server";
 
-import bcrypt from "bcryptjs";
+import { AccountPasswordError, changeAccountPassword } from "@/features/security/_lib/change-password";
+import { createSessionCookieValue, getSessionCookieName, getSessionCookieOptions } from "@/lib/auth/cookies";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireUserSession } from "@/lib/auth/session";
+import { requireUserSession, getCurrentSessionId } from "@/lib/auth/session";
 import { cookies, headers } from "next/headers";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
 import {
@@ -40,7 +41,6 @@ export async function changeInitialPasswordAction(
         where: { id: session.userId },
         select: {
           id: true,
-          passwordHash: true,
           platformRole: true,
           mustChangePassword: true,
         },
@@ -52,55 +52,28 @@ export async function changeInitialPasswordAction(
     return { error: "User account not found." };
   }
 
-  if (user.mustChangePassword) {
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      return { error: "Fill in all password fields." };
-    }
-
-    if (newPassword.length < 8) {
-      return { error: "New password must be at least 8 characters." };
-    }
-
-    if (newPassword !== confirmPassword) {
-      return { error: "New passwords do not match." };
-    }
-
-    if (newPassword === currentPassword) {
-      return { error: "Choose a different password from the temporary one." };
-    }
-  }
-
-  const currentMatches = user.mustChangePassword
-    ? await bcrypt.compare(currentPassword, user.passwordHash)
-    : true;
-
-  if (!currentMatches) {
-    return { error: "Temporary password is incorrect." };
-  }
-
-  const passwordHash = user.mustChangePassword
-    ? await bcrypt.hash(newPassword, 12)
-    : user.passwordHash;
-
   const acceptedAt = new Date();
-  const updatedUser = await retryTransientDatabaseOperation(
-    () =>
-      prisma.user.update({
-        where: { id: user.id },
-        data: {
-          passwordHash,
-          mustChangePassword: false,
-          passwordChangedAt: acceptedAt,
-          termsAcceptedAt: acceptedAt,
-          termsAcceptedVersion: TERMS_VERSION,
-        },
-        select: {
-          mustChangePassword: true,
-          termsAcceptedAt: true,
-        },
-      }),
-    { label: "change-password-update-user" },
-  );
+  let updatedUser: { mustChangePassword: boolean; termsAcceptedAt: Date | null };
+  if (user.mustChangePassword) {
+    const sessionId = await getCurrentSessionId();
+    if (!sessionId) return { error: "Sign in again before completing account setup." };
+    try {
+      const renewed = await changeAccountPassword({ userId: user.id, sessionId, values: { currentPassword, newPassword, confirmPassword }, acceptTermsVersion: TERMS_VERSION });
+      const maxAge = Math.max(1, Math.floor((renewed.expiresAt.getTime() - Date.now()) / 1000));
+      (await cookies()).set(getSessionCookieName(), createSessionCookieValue(renewed.token), getSessionCookieOptions(maxAge));
+      updatedUser = { mustChangePassword: false, termsAcceptedAt: acceptedAt };
+    } catch (error) {
+      return { error: error instanceof AccountPasswordError ? error.message : "Could not complete account setup. Please try again or sign in again." };
+    }
+  } else {
+    // Terms-only acceptance must not overwrite a concurrently changed password
+    // or claim that the password changed at the terms acceptance timestamp.
+    updatedUser = await retryTransientDatabaseOperation(() => prisma.user.update({
+      where: { id: user.id },
+      data: { termsAcceptedAt: acceptedAt, termsAcceptedVersion: TERMS_VERSION },
+      select: { mustChangePassword: true, termsAcceptedAt: true },
+    }), { label: "change-password-accept-terms" });
+  }
 
   if (updatedUser.mustChangePassword || !updatedUser.termsAcceptedAt) {
     return {

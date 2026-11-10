@@ -1,5 +1,7 @@
 "use server";
 
+import { TRIAL_DAYS, trialFollowUps } from "@/lib/sales/demo-policy";
+
 import crypto from "node:crypto";
 import { sendVerificationEmail } from "@/lib/notifications/email";
 import { hashOpaqueToken } from "@/lib/crypto/tokens";
@@ -287,10 +289,19 @@ export async function createOrganizationAction(
           await tx.auditLog.create({ data: { orgId: org.id, actorUserId: session.userId, action: "ORGANIZATION_CREATED", entityType: "Organization", entityId: org.id, metadata: { plan: data.plan, accountType: data.accountType, ownerUserId: adminUser.id, onboardingRequestId: data.onboardingRequestId || null } } });
           const now = new Date();
           const trialEnd = new Date(now);
-          trialEnd.setDate(trialEnd.getDate() + 14);
+          trialEnd.setDate(trialEnd.getDate() + TRIAL_DAYS);
           const plan = data.plan as AppPlan;
           const subscriptionStatus = resolveInitialSubscriptionStatus(plan);
           const onTrial = subscriptionStatus === "TRIALING";
+
+          if (data.onboardingRequestId) {
+            await tx.onboardingRequest.update({ where: { id: data.onboardingRequestId }, data: { customerOrgId: org.id, salesOwnerId: session.userId } });
+          }
+          if (onTrial) {
+            await tx.crmActivity.createMany({ data: trialFollowUps(now).map(task => ({
+              ...task, customerOrgId: org.id, authorId: session.userId, assigneeId: session.userId, kind: "TASK" as const,
+            })) });
+          }
 
           await tx.subscription.create({
             data: {
@@ -317,6 +328,9 @@ export async function createOrganizationAction(
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? "";
       if (appUrl) { await sendVerificationEmail({ to: adminEmail, verifyUrl: `${appUrl}/verify-email?token=${token}` }); verificationSent = true; }
     } catch (error) { logServerError("createOrganizationAction.verification", error); }
+    revalidatePath("/platform/demos");
+    revalidatePath("/platform/crm");
+    revalidatePath("/platform/crm/tasks");
     revalidatePath("/platform/organizations");
     revalidatePath("/platform");
     revalidatePath("/platform/onboarding");

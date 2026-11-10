@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { getSessionCookieName } from "@/lib/auth/cookies";
 import { changeInitialPasswordAction } from "@/app/(app)/change-password/actions";
 import { mobileSetupSchema } from "@estatedesk/contracts/mobile";
 import { mobileJson } from "@/lib/mobile/api";
@@ -7,7 +9,13 @@ import { getURLFromRedirectError } from "next/dist/client/components/redirect";
 
 export async function POST(request: Request) {
   return nativeRoute(request, async session => {
-    if (!session.mustChangePassword && !session.requiresTermsAcceptance) return mobileJson({ ok: true });
+    const complete = async () => {
+      const name = getSessionCookieName();
+      const value = (await cookies()).get(name)?.value;
+      if (!value) return mobileJson({ error: "Setup completed. Sign in again to continue." }, 401);
+      return mobileJson({ ok: true, sessionCookie: `${name}=${value}` });
+    };
+    if (!session.mustChangePassword && !session.requiresTermsAcceptance) return complete();
     const input = await nativeBody(request, mobileSetupSchema);
     const form = new FormData();
     form.set("acceptedTerms", "on");
@@ -19,7 +27,7 @@ export async function POST(request: Request) {
       if (!isRedirectError(error)) throw error;
       const destination = getURLFromRedirectError(error) ?? "";
       if (!destination.startsWith("/dashboard/") && destination !== "/platform" && destination !== "/provider") throw error;
-      return mobileJson({ ok: true });
+      return complete();
     }
   }, { setup: true });
 }

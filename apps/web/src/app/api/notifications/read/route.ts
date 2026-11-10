@@ -1,3 +1,4 @@
+import { isSameOriginBrowserMutation } from "@/lib/security/browser-origin";
 import { NextRequest, NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth/session";
 import { readPersonalNotification, readAllPersonalNotifications, unreadPersonalNotification } from "@/lib/notifications/read";
@@ -12,7 +13,7 @@ const readTargetSchema = z.union([
 
 export async function POST(request: NextRequest) {
   // Cookie-authenticated mutation: only our own origin may acknowledge notifications.
-  if (request.headers.get("origin") !== request.nextUrl.origin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!isSameOriginBrowserMutation(request)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const session = await getUserSession();
   if (!session) return NextResponse.json({ error: "Please sign in." }, { status: 401 });
   let payload: unknown;

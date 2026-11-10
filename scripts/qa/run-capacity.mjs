@@ -24,6 +24,8 @@ const port = Number(process.env.CAPACITY_PORT ?? 3158);
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid local server port.");
 const base = `http://127.0.0.1:${port}`;
 const instanceCount = Number(process.env.CAPACITY_INSTANCES ?? 1);
+const concurrency = Number(process.env.CAPACITY_CONCURRENCY ?? 100);
+if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 1000) throw new Error("Use a concurrency cap between 1 and 1000.");
 if (!Number.isInteger(instanceCount) || instanceCount < 1 || instanceCount > 8 || port + instanceCount > 65535) throw new Error("Use between one and eight local application instances.");
 const folder = await mkdtemp(join(tmpdir(), "estatedesk-capacity-run-"));
 const env = { ...process.env, DOTENV_CONFIG_PATH: "/dev/null", NODE_ENV: "production", DATABASE_URL: db.href, DIRECT_URL: db.href, REALTIME_DATABASE_URL: db.href, APP_URL: base, NEXT_PUBLIC_APP_URL: base };
@@ -82,6 +84,12 @@ try {
     { path: "/dashboard/org/tenants", weight: 2 }, { path: "/dashboard/org/payments", weight: 2 },
     { path: "/dashboard/org/issues", weight: 1 },
   ]));
+  // Warm the production route graph before timing, without hiding redirects or failures.
+  for (const route of JSON.parse(await readFile(routes, "utf8"))) {
+    const response = await fetch(new URL(route.path, base), { headers: { cookie: sessions[0].cookieHeader }, redirect: "manual", signal: AbortSignal.timeout(30000) });
+    const body = await response.text();
+    if (response.status !== 200 || body.includes('<meta id="__next-page-redirect"')) throw new Error(`Warmup did not reach ${route.path}.`);
+  }
   for (const count of [50, ...stages]) {
     const fixture = join(folder, `sessions-${count}.json`);
     const output = join(folder, `report-${count}.json`);
@@ -89,7 +97,7 @@ try {
     metrics = { maxConnections: 0, maxActiveQueries: 0, minRssKiB: Infinity, maxRssKiB: 0 };
     let passed = true;
     try {
-      await run(process.execPath, ["scripts/load-test.mjs"], { cwd: root, env: { ...env, LOAD_BASE_URL: base, LOAD_SESSIONS_FILE: fixture, LOAD_ROUTES_FILE: routes, LOAD_OUTPUT: output, LOAD_PROFILE: count === 50 ? "smoke" : "users1000", LOAD_DURATION_SECONDS: String(count === 50 ? 10 : duration), LOAD_RPM: String(count === 50 ? 300 : count * requestsPerUserPerMinute), LOAD_CONCURRENCY: String(count === 50 ? 4 : 100), LOAD_FAIL_ON_ERROR_RATE: "1", LOAD_FAIL_ON_P95_MS: "1500", LOAD_FAIL_ON_SCHEDULING_P95_MS: "1000", LOAD_FAIL_ON_ROUTE_P95_MS: "1500", LOAD_MIN_REQUESTS_PER_ROUTE: count === 50 ? "" : "10" }, maxBuffer: 2_000_000, timeout: (duration + 120) * 1000 });
+      await run(process.execPath, ["scripts/load-test.mjs"], { cwd: root, env: { ...env, LOAD_BASE_URL: base, LOAD_SESSIONS_FILE: fixture, LOAD_ROUTES_FILE: routes, LOAD_OUTPUT: output, LOAD_PROFILE: count === 50 ? "smoke" : "users1000", LOAD_DURATION_SECONDS: String(count === 50 ? 10 : duration), LOAD_RPM: String(count === 50 ? 300 : count * requestsPerUserPerMinute), LOAD_CONCURRENCY: String(count === 50 ? 4 : concurrency), LOAD_FAIL_ON_ERROR_RATE: "1", LOAD_FAIL_ON_P95_MS: "1500", LOAD_FAIL_ON_SCHEDULING_P95_MS: "1000", LOAD_FAIL_ON_ROUTE_P95_MS: "1500", LOAD_MIN_REQUESTS_PER_ROUTE: count === 50 ? "" : "10" }, maxBuffer: 2_000_000, timeout: (duration + 120) * 1000 });
     } catch { passed = false; }
     let report;
     try { report = JSON.parse(await readFile(output, "utf8")); }
@@ -105,6 +113,6 @@ try {
   for (const server of servers) server.kill("SIGTERM");
   await monitor.end();
   const output = process.env.CAPACITY_REPORT ?? join(folder, "summary.json");
-  await writeFile(output, JSON.stringify({ environment: "Local production-build processes and isolated local PostgreSQL; not deployed-hosting capacity evidence.", instanceCount, requestsPerUserPerMinute, durationSecondsPerStage: duration, results }, null, 2));
+  await writeFile(output, JSON.stringify({ environment: "Local production-build processes and isolated local PostgreSQL; not deployed-hosting capacity evidence.", warmup: "Each route is requested before measurement; later organizations may still have cold data caches.", concurrency, instanceCount, requestsPerUserPerMinute, durationSecondsPerStage: duration, results }, null, 2));
   console.log(`Sanitized capacity report: ${output}`);
 }

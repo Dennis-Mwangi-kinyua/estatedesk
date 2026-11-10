@@ -109,7 +109,7 @@ export async function requireOrgMembership(
 
   const org = await getOrganizationSummary(session.activeOrgId!);
 
-  if (!org || org.deletedAt || org.status !== "ACTIVE") {
+  if (!org || org.deletedAt || org.blacklistedAt || org.status !== "ACTIVE") {
     redirect(
       `/service-terminated${org?.name ? `?organization=${encodeURIComponent(org.name)}` : ""}`,
     );

@@ -1,6 +1,9 @@
 import "server-only";
 
 import crypto from "node:crypto";
+import { OrganizationBlacklistedError } from "@/lib/organizations/blacklist-policy";
+import { assertUserNotBlacklisted } from "@/lib/organizations/blacklist";
+import { recordAccountSecurityEvent } from "@/lib/security/account-events";
 import { Prisma } from "@prisma/client";
 import type {
   OrgRole,
@@ -336,6 +339,7 @@ export async function setUserSession({
   activeMembershipId,
   replaceExistingSessions = false,
 }: SetUserSessionInput): Promise<void> {
+  await assertUserNotBlacklisted(userId);
   const { cookieStore, token: currentToken } = await readSessionTokenFromCookies();
   const currentTokenHash = currentToken ? hashSessionToken(currentToken) : null;
   const { ipAddress, userAgent } = await getRequestMeta();
@@ -425,6 +429,7 @@ export async function setUserSession({
   });
 
   setSessionCookie(cookieStore, token, getSessionMaxAgeSeconds(), true);
+  await recordAccountSecurityEvent({ userId, action: "ACCOUNT_SIGNED_IN", ip: ipAddress, userAgent });
 }
 
 export const getUserSession = cache(async function getUserSession(): Promise<AppSession | null> {
@@ -489,6 +494,14 @@ export const getUserSession = cache(async function getUserSession(): Promise<App
     ]);
 
     if (!user) return null;
+
+    try { await assertUserNotBlacklisted(user.id); } catch (error) {
+      if (error instanceof OrganizationBlacklistedError) {
+        await invalidateStoredSession({ tokenHash, cookieStore });
+        return null;
+      }
+      throw error;
+    }
 
     if (user.status !== "ACTIVE" || user.deletedAt !== null) {
       await invalidateStoredSession({ tokenHash, cookieStore });
@@ -608,6 +621,7 @@ export async function clearUserSession(): Promise<void> {
 
   if (token) {
     const tokenHash = hashSessionToken(token);
+    const { session: signingOut } = await findSessionByToken(token);
 
     await prisma.userSession.deleteMany({
       where: {
@@ -619,6 +633,7 @@ export async function clearUserSession(): Promise<void> {
         ],
       },
     });
+    if (signingOut) await recordAccountSecurityEvent({ userId: signingOut.userId, action: "ACCOUNT_SIGNED_OUT", ip: signingOut.ipAddress, userAgent: signingOut.userAgent });
   }
 
   clearSessionCookie(cookieStore);
@@ -742,6 +757,7 @@ export async function switchActiveMembership(
     redirect("/login");
   }
 
+  await assertUserNotBlacklisted(dbSession.userId);
   const membership = await prisma.membership.findFirst({
     where: {
       id: membershipId,

@@ -11,9 +11,12 @@ const FINANCE: readonly OrgRole[] = ["ADMIN", "MANAGER", "ACCOUNTANT"];
 
 // Shared by server authorization and navigation. Unlisted sections are denied.
 export const ORG_WORKSPACE_ROLES: Record<string, readonly OrgRole[]> = {
+  recruitment: ["ADMIN", "MANAGER"],
+  approvals: MANAGEMENT, collections: MANAGEMENT, renewals: OPERATIONS,
+  activity: ["ADMIN", "MANAGER"], handovers: ["ADMIN", "MANAGER"], performance: FINANCE,
   "identity-verification": OPERATIONS,
   "service-providers": OPERATIONS,
-  community: OPERATIONS,
+  community: OPERATIONS, crm: OPERATIONS,
   insights: MANAGEMENT, profile: MANAGEMENT, help: MANAGEMENT, search: MANAGEMENT,
   security: MANAGEMENT, support: MANAGEMENT,
   landlords: ["ADMIN", "MANAGER"],
@@ -23,6 +26,7 @@ export const ORG_WORKSPACE_ROLES: Record<string, readonly OrgRole[]> = {
   inspections: OPERATIONS, issues: OPERATIONS, notifications: MANAGEMENT,
   imports: OPERATIONS,
   payments: MANAGEMENT, "water-bills": MANAGEMENT, charges: MANAGEMENT,
+  "operating-queue": MANAGEMENT,
   accounting: FINANCE, expenditures: FINANCE, reports: MANAGEMENT,
   staff: ["ADMIN", "MANAGER"], taxes: ["ADMIN", "ACCOUNTANT"],
   airbnb: ["ADMIN", "MANAGER"],
@@ -46,7 +50,7 @@ export function canAccessWorkspacePath(
   if (session.activeOrgId && (rolePolicyBlocksPath(session.orgRolePolicy, path) || featureBlocksPath(session.orgFeatures, path))) return false;
   // Provider ownership and hiring are authorised by their resource guards.
   if (path === "/provider" || path === "/service-providers" || /^\/service-providers\/[^/]+$/.test(path)) return true;
-  if (["/dashboard", "/profile", "/access-denied"].includes(path) || under(path, "/change-password")) return true;
+  if (["/account-deletion", "/dashboard/security", "/dashboard/today", "/dashboard", "/profile", "/access-denied"].includes(path) || under(path, "/change-password")) return true;
   const platform = ["SUPER_ADMIN", "PLATFORM_ADMIN"].includes(session.platformRole);
   if (under(path, "/agreements/verify")) return platform || (Boolean(session.activeOrgId) && (session.activeOrgRole === "ADMIN" || session.activeOrgRole === "MANAGER"));
   if (under(path, "/platform/control")) return session.platformRole === "SUPER_ADMIN";
@@ -59,7 +63,7 @@ export function canAccessWorkspacePath(
     const organizationWideSections = new Set([
       "subscription", "accounting", "agreements", "community", "finance-requests", "help",
       "identity-verification", "imports", "insights", "reports", "service-providers",
-      "staff", "support", "taxes", "landlords",
+      "staff", "support", "taxes", "landlords", "approvals", "collections", "renewals", "activity", "handovers", "performance", "recruitment",
     ]);
     if (organizationWideSections.has(section)) return false;
     if (section === "airbnb" && path.endsWith("/new")) return false;

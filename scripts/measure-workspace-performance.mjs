@@ -4,11 +4,11 @@ import { readFile, writeFile } from "node:fs/promises";
 const base = process.env.AUDIT_BASE_URL || "http://127.0.0.1:3107";
 if (!["127.0.0.1", "localhost"].includes(new URL(base).hostname)) throw new Error("Workspace lab is restricted to local test servers.");
 const fixture = JSON.parse(await readFile(process.env.ROLE_WORKSPACE_FIXTURE || "/tmp/estatedesk-role-workspaces.json", "utf8"));
-const browser = await chromium.launch();
+const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined });
 const results = [];
 try {
   for (const role of ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "TENANT", "LANDLORD", "SECURITY", "PLATFORM_ADMIN", "PROVIDER"]) {
-    const context = await browser.newContext({ ...devices["Desktop Chrome"], viewport: { width: 390, height: 844 }, isMobile: true, storageState: `/tmp/estatedesk-role-state-${role}.json`, serviceWorkers: "block" });
+    const context = await browser.newContext({ ...devices["Desktop Chrome"], viewport: { width: 390, height: 844 }, isMobile: true, storageState: `/tmp/estatedesk-role-state-${role}.json`, ignoreHTTPSErrors: new URL(base).protocol === "https:", serviceWorkers: "block" });
     const page = await context.newPage();
     const cdp = await context.newCDPSession(page);
     await cdp.send("Network.enable");

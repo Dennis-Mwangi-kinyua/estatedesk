@@ -1,5 +1,5 @@
 import { WORKFLOW_PROTOCOL_VERSION } from "@estatedesk/contracts/mobile";
 import { mobileJson } from "@/lib/mobile/api";
 export async function GET() {
-  return mobileJson({ workflowVersion: WORKFLOW_PROTOCOL_VERSION, features: ["review-queue", "submission-receipts", "organization-user-groups"] });
+  return mobileJson({ workflowVersion: WORKFLOW_PROTOCOL_VERSION, features: ["review-queue", "operating-queue", "submission-receipts", "organization-user-groups", "crm", "native-landlord-management", "native-bnb-listings", "account-deletion-requests", "native-diagnostics"] });
 }

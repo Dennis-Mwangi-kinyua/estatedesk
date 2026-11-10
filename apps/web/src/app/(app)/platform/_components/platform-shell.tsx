@@ -1,4 +1,5 @@
 "use client";
+import { TodayLink } from "@/components/shared/today-link";
 import { PlatformBrand } from "./platform-brand";
 import { WorkspaceIdentity } from "@/components/shared/workspace-identity";
 
@@ -29,11 +30,13 @@ function PlatformShellInner({
   fullName,
   isSuperAdmin,
   pendingProviderCount,
+  pendingDemoCount = 0,
 }: {
   children: ReactNode;
   fullName: string;
   isSuperAdmin: boolean;
   pendingProviderCount: number;
+  pendingDemoCount?: number;
 }) {
   const [navQuery, setNavQuery] = useState("");
   const { mode } = usePlatformMode();
@@ -41,9 +44,9 @@ function PlatformShellInner({
     () => getNavItemsForMode(mode, { isSuperAdmin }).map((item) =>
       item.href === "/platform/service-providers"
         ? { ...item, badgeCount: pendingProviderCount }
-        : item,
+        : item.href === "/platform/demos" ? { ...item, badgeCount: pendingDemoCount } : item,
     ),
-    [mode, isSuperAdmin, pendingProviderCount],
+    [mode, isSuperAdmin, pendingProviderCount, pendingDemoCount],
   );
   const meta = modeMeta[mode];
   const isDeveloper = mode === "developer";
@@ -68,6 +71,7 @@ function PlatformShellInner({
 
           <label className="mx-3 mt-3"><span className="sr-only">Find an admin tool</span><input type="search" placeholder="Find a tool…" value={navQuery} onChange={(event) => setNavQuery(event.target.value)} className="w-full rounded-xl border border-border bg-muted/40 px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-primary" /></label>
           <nav aria-label="Platform navigation" className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-4">
+            <TodayLink />
             <PlatformNavigation items={navItems} mode={mode} query={navQuery} />
           </nav>
 
@@ -122,6 +126,7 @@ function PlatformShellInner({
                 <div className="flex shrink-0 items-center gap-3">
                   {!isDeveloper && <PlatformAppearanceSwitch appearance={appearance} />}
                   {!isGlass && <HeaderThemeToggle />}
+                  <TodayLink compact />
                   <WorkspaceIdentity name={fullName} role={isDeveloper ? "Developer" : isSuperAdmin ? "Super admin" : "Platform admin"} />
 
                 </div>
@@ -196,17 +201,19 @@ export function PlatformShell({
   fullName,
   isSuperAdmin,
   pendingProviderCount,
+  pendingDemoCount = 0,
   initialPreferredMode = "admin",
 }: {
   children: ReactNode;
   fullName: string;
   isSuperAdmin: boolean;
   pendingProviderCount: number;
+  pendingDemoCount?: number;
   initialPreferredMode?: PlatformMode;
 }) {
   return (
     <PlatformModeProvider initialPreferredMode={initialPreferredMode}>
-      <PlatformShellInner fullName={fullName} isSuperAdmin={isSuperAdmin} pendingProviderCount={pendingProviderCount}>
+      <PlatformShellInner fullName={fullName} isSuperAdmin={isSuperAdmin} pendingProviderCount={pendingProviderCount} pendingDemoCount={pendingDemoCount}>
         {children}
       </PlatformShellInner>
     </PlatformModeProvider>

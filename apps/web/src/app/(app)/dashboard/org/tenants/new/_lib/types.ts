@@ -51,6 +51,7 @@ export type NewTenantFormProps = {
   orgName: string;
   currencyCode: string;
   availableUnits: AvailableUnit[];
+  initialUnitId?: string;
 };
 
 export type StepItem = {

@@ -26,6 +26,13 @@ export type SystemDocArticle = {
 
 export const systemDocArticles: SystemDocArticle[] = [
   {
+    slug: "management-and-recruitment", title: "Organization management and recruitment", summary: "Approvals, collections, renewals, staff coverage, property reporting and public employee recruitment.", category: "Operations", order: 90, readingMinutes: 5,
+    sections: [
+      { heading: "Organization workflows", paragraphs: ["The org approvals, collections, renewals, activity, handovers and performance workspaces require organization-wide access and respect view/plan policies. Decisions are independently reviewed, source-version checked and audited. Configured financial limits also govern existing finance approval screens. Refund authorization remains separate from actual payment proof.", "Tenant renewal acceptance is owned by the tenant. Administrators finalize accepted terms; changed rent is applied after the old term ends. Staff coverage transfers assignments without granting access, and returns only work still open and owned by the covering person. Property comparisons clearly distinguish the reporting month from current arrears/occupancy snapshots."] },
+      { heading: "Employee recruitment", paragraphs: ["Platform admins publish EstateDesk jobs at /platform/recruitment; organization admins/managers publish their own jobs at /dashboard/org/recruitment. Public /careers pages display employer and poster identity and accept consented applications without requiring an account. Draft, expired, closed and suspended-employer jobs cannot accept public applications.", "Applicants and optional 1MB PDF CVs belong to the job. CV bytes are held privately in PostgreSQL and excluded from listing queries. Downloads require the owning hiring scope and use no-store attachment responses. Reviewer stage changes and interview records use optimistic concurrency and an immutable event history. Interviews and offers do not trigger external invitations. Administrators can delete applicant data with a reason and confirmation.", "Apply the org-management and public-recruitment migrations before matching code deployment. Organization retention purge coverage includes all new tables. Full workflow and limitation references: docs/ORG_MANAGEMENT.md and docs/RECRUITMENT.md."] },
+    ],
+  },
+  {
     slug: "system-overview",
     title: "System overview — how EstateDesk fits together",
     summary:

@@ -15,7 +15,7 @@ import { approveDataExportRequestAction, rejectDataExportRequestAction } from "@
 import { applyUpgradeRequestAction, rejectUpgradeRequestAction } from "@/app/(app)/platform/billing/actions";
 import { organizationBillingAction } from "@/app/(app)/platform/organizations/[slug]/billing-actions";
 import { createOrganizationAction } from "@/app/(app)/platform/organizations/new/actions";
-import { archiveOrganizationAction, permanentlyDeleteOrganizationAction } from "@/app/(app)/platform/organizations/[slug]/actions";
+import { archiveOrganizationAction, permanentlyDeleteOrganizationAction, blacklistOrganizationAction, unblacklistOrganizationAction } from "@/app/(app)/platform/organizations/[slug]/actions";
 import { resetRateLimitBucketAction } from "@/app/(app)/platform/rate-limits/actions";
 import { SUBSCRIPTION_INVOICE_ENTITY } from "@/lib/billing/invoice-ledger";
 import { accountLoginUrl } from "@/lib/notifications/account-login-url";
@@ -41,6 +41,8 @@ const specs: Spec[] = [
   { id: "vault.toggle", path: "/platform/api-keys", title: "Change key status", record: true, run: togglePlatformApiKeyStatusAction },
   { id: "vault.delete", path: "/platform/api-keys", title: "Delete API key", record: true, destructive: true, run: deletePlatformApiKeyAction },
   { id: "organization.create", path: "/platform/organizations", title: "New organization" },
+  { id: "organization.blacklist", path: "/platform/organizations", title: "Blacklist and lock associated accounts", record: true, destructive: true, run: blacklistOrganizationAction, redirect: "/platform/organizations", successKey: "blacklisted" },
+  { id: "organization.unblacklist", path: "/platform/organizations", title: "Remove blacklist lock", record: true, destructive: true, run: unblacklistOrganizationAction, redirect: "/platform/organizations", successKey: "unblacklisted" },
   { id: "organization.archive", path: "/platform/organizations", title: "Archive organization", record: true, destructive: true, run: archiveOrganizationAction, redirect: "/platform/organizations", successKey: "archived" },
   { id: "organization.delete", path: "/platform/organizations", title: "Delete organization (30-day retention)", record: true, destructive: true, run: permanentlyDeleteOrganizationAction, redirect: "/platform/organizations", successKey: "deleted" },
   { id: "expenditure.create", path: "/platform/expenditures", title: "Record expenditure", run: createPlatformExpenditureAction },
@@ -82,7 +84,7 @@ export function nativePlatformPageActions(path: string): NativeActionLink[] {
   return specs.filter(spec => spec.path === path && !spec.record).map(({ id, title, destructive }) => ({ id, title, destructive }));
 }
 export function nativePlatformRecordActions(path: string, status?: string): NativeActionLink[] {
-  return specs.filter(spec => specFor(path, spec.id) && spec.record && (spec.id !== "notification.retry" || status === "FAILED") && (!spec.id.startsWith("export.") || status === "PENDING")).map(({ id, title, destructive }) => ({ id, title, destructive }));
+  return specs.filter(spec => specFor(path, spec.id) && spec.record && (spec.id !== "organization.blacklist" || status !== "BLACKLISTED") && (spec.id !== "organization.unblacklist" || status === "BLACKLISTED") && (!["organization.archive", "organization.delete"].includes(spec.id) || status !== "BLACKLISTED") && (spec.id !== "notification.retry" || status === "FAILED") && (!spec.id.startsWith("export.") || status === "PENDING")).map(({ id, title, destructive }) => ({ id, title, destructive }));
 }
 async function organizations(includeDeleted = false) {
   const rows = await prisma.organization.findMany({ where: includeDeleted ? {} : { deletedAt: null }, orderBy: { name: "asc" }, select: { id: true, name: true, slug: true } });
@@ -126,6 +128,7 @@ export async function nativePlatformActionDefinition(session: AppSession, path: 
   ] };
   if (id === "expenditure.create") fields = [field("description", "Description", { required: true }), field("amount", "Amount", { type: "decimal", required: true }), field("currencyCode", "Currency", { type: "select", required: true, defaultValue: "KES", options: SUPPORTED_CURRENCIES.map(item => ({ value: item.code, label: item.code })) }), select("category", "Category", Object.values(ExpenditureCategory), "OTHER"), field("incurredAt", "Incurred date", { type: "date", required: true }), field("paid", "Already paid", { type: "checkbox" }), field("payee", "Payee"), field("reference", "Reference"), field("paymentMethod", "Payment method"), field("notes", "Notes", { type: "multiline" })];
   if (id.startsWith("organization.") && record.slug) fields = [field(id.endsWith("archive") ? "archiveConfirmation" : "confirmation", `Type ${record.slug} to confirm`, { required: true })];
+  if (["organization.blacklist", "organization.unblacklist"].includes(id) && record.slug) fields = [field("blacklistConfirmation", `Type ${record.slug} to confirm`, { required: true }), field("reason", "Reason (5–1000 characters)", { type: "multiline", required: true, maxLength: 1000 })];
   if (id === "export.organization") fields = [field("orgId", "Organization", { type: "select", required: true, options: await organizations(true) })];
   if (["export.approve", "export.reject"].includes(id)) fields = [field("reviewerNotes", "Reviewer notes", { type: "multiline", defaultValue: record.reviewerNotes ?? "" })];
   if (id.startsWith("billing.")) {
@@ -146,7 +149,7 @@ export async function nativePlatformActionDefinition(session: AppSession, path: 
   }
   if (["control.org-status", "control.subscription", "control.soft-delete", "control.restore"].includes(id)) fields = [field("orgId", "Organization", { type: "select", required: true, options: await organizations(id === "control.restore") }), ...fields];
 
-  return { id, title: spec.title, description: "This native form uses the same server action, authorization, audit and validation as the website.", submitLabel: spec.title, destructive: spec.destructive, confirmation: `${spec.title}? Review the values and confirmation fields before continuing.`, groups: fields.length ? [{ id: "details", title: spec.title, fields }] : [] };
+  return { id, title: spec.title, description: id === "organization.blacklist" ? "Blocks every currently linked staff member, tenant and landlord across EstateDesk, even in other organizations. Revokes sessions and API keys, including for linked platform administrators." : "This native form uses the same server action, authorization, audit and validation as the website.", submitLabel: spec.title, destructive: spec.destructive, confirmation: `${spec.title}? Review the values and confirmation fields before continuing.`, groups: fields.length ? [{ id: "details", title: spec.title, fields }] : [] };
 }
 
 /** Only named specs can execute; never accept an import path or function name from the client. */
@@ -205,6 +208,7 @@ export async function executeNativePlatformAction(session: AppSession, path: str
 export function nativePlatformRedirectResult(path: string, id: string, url: URL) {
   const spec = specFor(path, id);
   if (!spec?.redirect) return null;
+  if (["organization.blacklist", "organization.unblacklist"].includes(id) && url.pathname.startsWith("/platform/organizations/") && !url.searchParams.has("archiveError")) return { ok: true, message: `${spec.title} completed. Removing a lock does not reactivate the organization or restore revoked credentials.` };
   if (url.pathname !== spec.redirect) {
     if (id.startsWith("organization.") && url.pathname.startsWith("/platform/organizations/") && (url.searchParams.has("archiveError") || url.searchParams.has("deleteError"))) return { error: url.searchParams.get("archiveError") ?? url.searchParams.get("deleteError") ?? "Check the confirmation." };
     return null;

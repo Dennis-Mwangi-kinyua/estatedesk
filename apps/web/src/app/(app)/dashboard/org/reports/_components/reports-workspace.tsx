@@ -7,6 +7,8 @@ import { ReportsHeader } from "./reports-header";
 import { ReportsMatrixSection } from "./reports-matrix-section";
 import { ReportsStatsSection } from "./reports-stats-section";
 import { ReportsTenantPanels } from "./reports-tenant-panels";
+import Link from "@/components/navigation/workspace-link";
+import { reportFilterHref } from "../_lib/helpers";
 
 export function ReportsWorkspace({
   data,
@@ -23,6 +25,11 @@ export function ReportsWorkspace({
       <ReportsStatsSection data={data} />
       <ReportsTenantPanels data={data} orgRole={orgRole} />
       <ReportsMatrixSection data={data} />
+      <nav aria-label="Report pages" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4 text-sm">
+        <p>Page {data.pagination.page} of {data.pagination.pageCount} · {data.pagination.totalRows} matching tenants. Totals cover all matches.</p>
+        {data.pagination.page > 1 && <Link className="inline-flex min-h-11 items-center underline" href={reportFilterHref({ apartment: data.selectedApartment, payment: data.selectedPayment, period: data.period, page: data.pagination.page - 1 })}>Previous page</Link>}
+        {data.pagination.page < data.pagination.pageCount && <Link className="inline-flex min-h-11 items-center underline" href={reportFilterHref({ apartment: data.selectedApartment, payment: data.selectedPayment, period: data.period, page: data.pagination.page + 1 })}>Next page</Link>}
+      </nav>
       <ReportsExportsSection data={data} />
       <ReportsGuidance orgRole={orgRole} />
     </div>

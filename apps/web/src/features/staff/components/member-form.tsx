@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { AccountCreatedShare } from "@/components/shared/account-created-share";
+import { PlanLimitUpgrade } from "@/components/billing/plan-limit-upgrade";
 import { STAFF_ROLES, type StaffRole } from "@/features/staff/constants/role-meta";
 import { BasicDetailsFields } from "./_components/basic-details-fields";
 import { CaretakerDetailsStep } from "./_components/caretaker-details-step";
@@ -218,7 +219,8 @@ export function MemberForm({
 
       <StaffWizardStepper currentStep={currentStep} />
 
-      <FormError message={displayedError} />
+      <FormError message={displayedError?.includes("plan allows") ? undefined : displayedError} />
+      <PlanLimitUpgrade message={actionState.message} />
 
       {currentStep === 0 ? (
         <CaretakerSetupStep

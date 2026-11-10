@@ -8,8 +8,9 @@ import { absoluteUrl } from "@/lib/seo";
 import { serializeJsonForHtml } from "@/lib/security/safe-json";
 
 const homepageFaqItems = [
+  { question: "Can I see a demo before starting?", answer: "Yes. Request a free 30–45 minute guided demo using sample data. We agree a time with you. Pro and Plus offer a 14-day trial starting when your workspace is opened with you; requesting a demo does not start a trial." },
   { question: "Who is EstateDesk for?", answer: "EstateDesk helps landlords, property managers and agencies organize rental records and coordinate office staff, caretakers and tenant workflows." },
-  { question: "How do I get workspace access?", answer: "Submit an access request with your portfolio and contact details. Our team reviews it and contacts you to arrange your workspace and sign-in details." },
+  { question: "How do I get workspace access?", answer: "The Free plan creates your workspace and signs you in during the same visit. Pro, Plus, and Custom requests are reviewed by the EstateDesk team before the workspace is opened." },
   { question: "Is there a Free plan?", answer: "Yes. The Free plan covers one property, up to five units and BnB listings combined, and two internal users. Compare the pricing page for included features and paid plans." },
   { question: "Do I need an account to browse listings?", answer: "No. You can browse public rentals, short stays and service provider profiles without signing in. Use the contact or enquiry options on the relevant listing." },
 ];
@@ -22,9 +23,9 @@ const features = [
   { icon: ShieldCheck, title: "Control access to records", body: "Use roles and permissions to give each team member appropriate access." },
 ];
 const steps = [
-  ["Request access", "Tell us whether you manage your own properties or work for an agency, and share your portfolio needs."],
-  ["Agree your setup", "The EstateDesk team reviews your request and contacts you about your workspace, plan and onboarding."],
-  ["Bring your team together", "Set up your properties, tenant records and staff access, then start managing daily work."],
+  ["Start free", "Create a Free workspace and sign in during the same visit. Pro, Plus, and Custom stay with the EstateDesk team."],
+  ["Set up the first unit", "Add a property and unit, then one tenant and lease. Import a spreadsheet when the portfolio is already listed."],
+  ["Issue the first bill", "Generate the month, then clear proofs, readings, unsigned leases, arrears, issues, and move-outs from one queue."],
 ];
 const discoveryLinks = [
   ["Find a rental", "Browse available long-term rentals and enquire with the managing team.", "/vacancies"],
@@ -71,7 +72,7 @@ export default function MarketingHomePage() {
           { "@type": "SiteNavigationElement", position: 1, name: "Login", url: absoluteUrl("/login") },
           { "@type": "SiteNavigationElement", position: 2, name: "Vacancies", url: absoluteUrl("/vacancies") },
           { "@type": "SiteNavigationElement", position: 3, name: "Product overview", url: absoluteUrl("/services") },
-          { "@type": "SiteNavigationElement", position: 4, name: "Request access", url: absoluteUrl("/register") },
+          { "@type": "SiteNavigationElement", position: 4, name: "Start free", url: absoluteUrl("/register") },
           { "@type": "SiteNavigationElement", position: 5, name: "Pricing", url: absoluteUrl("/pricing") },
           { "@type": "SiteNavigationElement", position: 6, name: "Help", url: absoluteUrl("/contact") },
         ],
@@ -91,11 +92,11 @@ export default function MarketingHomePage() {
               <p className="text-sm font-semibold text-primary">For Kenyan landlords and property managers</p>
               <h1 className="mt-4 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">Your properties, rent and team. One workspace.</h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">Keep tenant records, track rent and water bills, and follow up on repairs with EstateDesk. Give your office and field teams a clear view of daily property work.</p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/register" className={button}>Request access<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
-                <Link href="/services" className={secondaryButton}>Explore the product</Link>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Link href="/register" className={button}>Start free<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+                <Link href="/register?intent=demo" className={secondaryButton}>Book a free demo</Link>
               </div>
-              <p className="mt-4 text-sm leading-6 text-muted-foreground">Access requests are reviewed by our team. We will contact you to arrange your workspace and sign-in details.</p>
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">Free opens a workspace on this visit. Pro, Plus, and Custom are reviewed before sign-in is arranged.</p>
               <Link href="/pricing" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4">Compare Free, Pro, Plus and Custom plans</Link>
             </div>
             <aside className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8" aria-label="A typical property workflow">
@@ -110,6 +111,19 @@ export default function MarketingHomePage() {
             </aside>
           </div>
         </section>
+        <section className="border-b border-emerald-200 bg-emerald-50 text-emerald-950 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-50" aria-labelledby="demo-title">
+          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-2 lg:items-center">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest">See EstateDesk in action</p>
+              <h2 id="demo-title" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Your portfolio. Your questions. A guided demo.</h2>
+              <p className="mt-4 leading-7">Explore rent collection, tenant records and team follow-up in a free 30–45 minute walkthrough using sample data.</p>
+              <Link href="/register?intent=demo" className={`${button} mt-6 w-full sm:w-auto`}>Book my free demo<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+            </div>
+            <ol className="grid gap-3" aria-label="Demo and trial steps">
+              {[["01", "Meet your workspace", "We agree a demo time and focus on the workflows your portfolio needs."], ["02", "Try it for 14 days", "When you are ready, our team opens your Pro or Plus trial and helps with your first property."], ["03", "Choose your next step", "Review progress with us, choose a plan and arrange payment before your trial ends."]].map(([number, title, body]) => <li key={number} className="flex gap-4 rounded-2xl border border-emerald-200 bg-white/70 p-5 dark:border-emerald-800 dark:bg-emerald-900/50"><span className="text-lg font-bold opacity-60">{number}</span><div className="min-w-0"><h3 className="font-semibold">{title}</h3><p className="mt-1 text-sm leading-6">{body}</p></div></li>)}
+            </ol>
+          </div>
+        </section>
         <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20" aria-labelledby="features-title">
           <h2 id="features-title" className="text-3xl font-semibold tracking-tight">Less time chasing records. More time managing properties.</h2>
           <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">Start with the tools your portfolio needs. Available features and limits depend on your plan.</p>
@@ -119,7 +133,7 @@ export default function MarketingHomePage() {
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
             <h2 id="setup-title" className="text-3xl font-semibold tracking-tight">A clear path to getting started</h2>
             <ol className="mt-8 grid gap-6 md:grid-cols-3">{steps.map(([title, body], index) => <li key={title}><p className="text-sm font-semibold text-primary">Step {index + 1}</p><h3 className="mt-2 text-xl font-semibold">{title}</h3><p className="mt-3 text-sm leading-7 text-muted-foreground">{body}</p></li>)}</ol>
-            <div className="mt-8 flex flex-wrap gap-3"><Link href="/register" className={button}>Request access</Link><Link href="/contact#contact-sales" className={secondaryButton}>Discuss your portfolio</Link></div>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap"><Link href="/register" className={button}>Start free</Link><Link href="/contact#contact-sales" className={secondaryButton}>Discuss your portfolio</Link></div>
           </div>
         </section>
         <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6" aria-labelledby="discovery-title">

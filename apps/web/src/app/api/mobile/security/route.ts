@@ -1,10 +1,11 @@
+import { cookies } from "next/headers";
+import { getSessionCookieName } from "@/lib/auth/cookies";
+import { changeAccountPasswordAction } from "@/features/security/password-action";
 import { getManagedUserSessions } from "@/lib/auth/session";
-import { nativeRoute, nativeBody, actionResult } from "@/lib/mobile/route";
+import { nativeRoute, nativeBody } from "@/lib/mobile/route";
 import { mobileJson } from "@/lib/mobile/api";
-import { nativeTenantSection } from "@/lib/mobile/tenant-section";
 import { mobileSecurityInputSchema } from "@estatedesk/contracts/mobile";
 import { revokeSessionAction, revokeOtherSessionsAction } from "@/app/(app)/dashboard/security/actions";
-import { updateTenantPasswordAction } from "@/app/(app)/dashboard/tenant/profile/actions";
 import { rolePolicyBlocksPath } from "@/lib/permissions/org-role-policy";
 
 export async function GET(request: Request) {
@@ -18,10 +19,14 @@ export async function POST(request: Request) {
     if (rolePolicyBlocksPath(session.orgRolePolicy, "/dashboard/security")) return mobileJson({ error: "Security access is unavailable." }, 403);
     const input = await nativeBody(request, mobileSecurityInputSchema);
     if (input.action === "password") {
-      if (session.activeOrgRole !== "TENANT" || !await nativeTenantSection(session, "/dashboard/tenant/profile/change-password")) return mobileJson({ error: "Password changes are unavailable for this workspace." }, 403);
       const form = new FormData();
       form.set("currentPassword", input.currentPassword); form.set("newPassword", input.newPassword); form.set("confirmPassword", input.confirmPassword);
-      return actionResult(() => updateTenantPasswordAction({ ok: false }, form), "/dashboard/tenant/profile");
+      const result = await changeAccountPasswordAction({ ok: false }, form);
+      if (!result.ok) return mobileJson({ error: result.error }, 400);
+      const name = getSessionCookieName();
+      const value = (await cookies()).get(name)?.value;
+      if (!value) return mobileJson({ error: "Password updated. Sign in again with your new password." }, 401);
+      return mobileJson({ ok: true, message: result.message, sessionCookie: `${name}=${value}` });
     }
     if (input.action === "revoke-others") await revokeOtherSessionsAction();
     else { const form = new FormData(); form.set("sessionId", input.sessionId); await revokeSessionAction(form); }

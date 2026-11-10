@@ -1,8 +1,12 @@
+import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { getURLFromRedirectError } from "next/dist/client/components/redirect";
+import { BNB_TYPES, BNB_AMENITIES } from "@/features/bnb/validation";
+import type { NativeActionField } from "@estatedesk/contracts/mobile";
 import "server-only";
 import type { AppSession } from "@/lib/auth/session";
 import type { NativeActionDefinition, NativeActionLink } from "@estatedesk/contracts/mobile";
 import { prisma } from "@/lib/prisma";
-import { changeBnbStatusAction } from "@/features/bnb/actions";
+import { saveBnbAction, changeBnbStatusAction } from "@/features/bnb/actions";
 import { changeReservationAction, resolveGuestRequest, saveReservationAction, updateStaySettings } from "@/features/bnb/reservation-actions";
 
 const canManageBnb = (session: AppSession) => !!session.activeOrgId && ["ADMIN", "MANAGER"].includes(session.activeOrgRole ?? "");
@@ -11,12 +15,14 @@ export function nativeBnbRecordActions(session: AppSession, path: string, status
   if (path === "/dashboard/org/airbnb/bookings" && canManageBnb(session)) return [];
   if (path !== "/dashboard/org/airbnb" || !canManageBnb(session)) return [];
   return [
+    ...(status !== "ARCHIVED" ? [{ id: "bnb.listing.edit", title: "Edit listing and photos" }] : []),
     ...(status === "PUBLISHED" ? [{ id: "bnb.pause", title: "Pause listing" }] : status === "PAUSED" || status === "DRAFT" ? [{ id: "bnb.publish", title: "Publish listing" }] : []),
     ...(status !== "ARCHIVED" ? [{ id: "bnb.archive", title: "Archive listing", destructive: true }] : []),
   ];
 }
 
 export async function nativeBnbActionDefinition(session: AppSession, path: string, actionId: string, recordId?: string): Promise<NativeActionDefinition | null> {
+  if (path === "/dashboard/org/airbnb" && actionId.startsWith("bnb.listing.")) return nativeBnbListingDefinition(session, actionId, recordId);
   if (path === "/dashboard/org/airbnb/bookings" && canManageBnb(session) && recordId) {
     if (actionId === "bnb.booking.create" || actionId === "bnb.booking.update" || actionId === "bnb.settings") {
       const stayForEdit = actionId === "bnb.booking.update" ? await prisma.bnbReservation.findFirst({ where: { id: recordId, cancelledAt: null, checkedOutAt: null, listing: { orgId: session.activeOrgId!, deletedAt: null } }, select: { id: true, listingId: true, guestName: true, guestPhone: true, checkIn: true, checkOut: true, checkedInAt: true } }) : null;
@@ -67,6 +73,20 @@ export async function nativeBnbActionDefinition(session: AppSession, path: strin
 }
 
 export async function executeNativeBnbAction(session: AppSession, path: string, actionId: string, recordId: string | undefined, form: FormData) {
+  if (path === "/dashboard/org/airbnb" && actionId.startsWith("bnb.listing.")) {
+    if (!await nativeBnbListingDefinition(session, actionId, recordId)) return { error: "Listing action unavailable." };
+    if (recordId) form.set("id", recordId);
+    const photo=String(form.get("listingPhoto")??"");form.delete("listingPhoto");
+    if(photo){
+      if(photo.length>350200 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(photo)) return { error: "Choose a valid JPEG listing photo under 250 KB." };
+      const bytes=Buffer.from(photo.split(",")[1],"base64");
+      if(bytes.length>250000) return {error:"Choose a smaller listing photo."};
+      form.append("photos",new File([bytes],"listing.jpg",{type:"image/jpeg"}));
+    }
+    try {const result=await saveBnbAction({},form);return {error:result.error??"Check the listing fields."};}
+    catch(error){if(!isRedirectError(error))throw error;const url=new URL(getURLFromRedirectError(error)??"/","https://estatedesk.invalid");if(url.origin==="https://estatedesk.invalid"&&url.pathname==="/dashboard/org/airbnb"&&url.searchParams.get("saved")==="1")return {ok:true as const,message:"Listing saved."};throw error;}
+  }
+
   if (path === "/dashboard/org/airbnb/bookings" && canManageBnb(session) && recordId) {
     const definition = await nativeBnbActionDefinition(session, path, actionId, recordId);
     if (!definition) return { error: "This booking action is unavailable." };
@@ -91,4 +111,18 @@ export async function executeNativeBnbAction(session: AppSession, path: string, 
   form.set("id", recordId!);
   const result = await changeBnbStatusAction({}, form);
   return result.error ? { error: result.error } : { ok: true as const, message: actionId === "bnb.archive" ? "Listing archived." : actionId === "bnb.publish" ? "Listing published." : "Listing paused." };
+}
+
+export async function nativeBnbListingDefinition(session:AppSession,actionId:string,id?:string):Promise<NativeActionDefinition|null>{
+ if(!canManageBnb(session)||session.membershipScope?.scopeType!=="ORG"||!["bnb.listing.create","bnb.listing.edit"].includes(actionId))return null;
+ const row=id?await prisma.bnbListing.findFirst({where:{id,orgId:session.activeOrgId!,deletedAt:null},include:{images:{where:{deletedAt:null},orderBy:{createdAt:"asc"}}}}):null;
+ if(actionId==="bnb.listing.edit"&&!row)return null;
+ const f=(name:string,label:string,extra:Partial<NativeActionField>={}):NativeActionField=>({name,label,type:"text",...extra});
+ const number=(name:string,label:string,value:unknown,decimal=false)=>f(name,label,{type:decimal?"decimal":"integer",required:true,defaultValue:String(value)});
+ const title=row?"Save listing":"Create listing";
+ return {id:actionId,title,description:"Add or update your stay. Add one photo at a time; existing photos can be retained or removed.",submitLabel:title,confirmation:`${title}? Published listings must have at least one photo.`,groups:[
+ {id:"listing",title:"Listing information",fields:[f("title","Title",{required:true,maxLength:120,defaultValue:row?.title}),f("description","Description",{required:true,type:"multiline",maxLength:5000,defaultValue:row?.description}),f("location","Location",{required:true,maxLength:160,defaultValue:row?.location}),f("address","Address",{maxLength:220,defaultValue:row?.address??""}),f("latitude","Latitude",{type:"decimal",defaultValue:row?.latitude?.toString()??""}),f("longitude","Longitude",{type:"decimal",defaultValue:row?.longitude?.toString()??""}),f("propertyType","Property type",{type:"select",defaultValue:row?.propertyType??"APARTMENT",options:BNB_TYPES.map(value=>({value,label:value.replaceAll("_"," ")}))})]},
+ {id:"capacity",title:"Capacity and prices",fields:[number("bedrooms","Bedrooms",row?.bedrooms??1),number("bathrooms","Bathrooms",row?.bathrooms??1),number("beds","Beds",row?.beds??1),number("maxGuests","Maximum guests",row?.maxGuests??2),number("nightlyRate","Nightly rate",row?.nightlyRate??"",true),number("cleaningFee","Cleaning fee",row?.cleaningFee??0,true),number("minimumNights","Minimum nights",row?.minimumNights??1),f("amenities","Amenities",{type:"multiselect",defaultValue:JSON.stringify(row?.amenities??[]),options:BNB_AMENITIES.map(value=>({value,label:value}))}),f("houseRules","House rules",{type:"multiline",maxLength:2000,defaultValue:row?.houseRules??""})]},
+ {id:"contact",title:"Contact and publishing",fields:[f("contactName","Contact name",{required:true,maxLength:100,defaultValue:row?.contactName??session.fullName}),f("contactPhone","Contact phone",{required:true,type:"phone",maxLength:25,defaultValue:row?.contactPhone}),f("contactEmail","Contact email",{type:"email",maxLength:254,defaultValue:row?.contactEmail??""}),f("status","Status",{type:"select",defaultValue:row?.status??"DRAFT",options:["DRAFT","PUBLISHED","PAUSED"].map(value=>({value,label:value}))}),f("retainedImages","Keep existing photos",{type:"multiselect",defaultValue:JSON.stringify(row?.images.map(i=>i.id)??[]),options:row?.images.map((i,index)=>({value:i.id,label:`Photo ${index+1}`}))??[]}),f("listingPhoto","Add a listing photo",{type:"photo",maxLength:350200})]}
+ ]};
 }

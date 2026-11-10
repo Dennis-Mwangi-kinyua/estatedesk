@@ -2,7 +2,8 @@ import { z } from "zod";
 
 export const nativeActionLinkSchema = z.object({ id: z.string(), title: z.string(), destructive: z.boolean().optional() });
 export const nativeActionFieldSchema = z.object({
-  name: z.string(), label: z.string(), type: z.enum(["hidden", "text", "multiline", "email", "phone", "decimal", "integer", "password", "date", "datetime", "select", "multiselect", "checkbox", "signature"]),
+  name: z.string(), label: z.string(), type: z.enum(["hidden", "text", "multiline", "email", "phone", "decimal", "integer", "password", "date", "datetime", "select", "photo", "organization", "properties", "multiselect", "checkbox", "signature"]),
+  organizationField: z.string().max(100).optional(),
   required: z.boolean().optional(), maxLength: z.number().optional(), defaultValue: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
   when: z.object({ field: z.string(), equals: z.string() }).optional(),
@@ -17,7 +18,7 @@ export const nativeActionRequestSchema = z.object({
   values: z.record(z.string().max(100), z.union([z.string().max(350200), z.array(z.string().max(10000)).max(200)])).optional(),
 }).superRefine((input, context) => {
   for (const [name, value] of Object.entries(input.values ?? {})) {
-    if (name !== "signature" && typeof value === "string" && value.length > 60000) context.addIssue({ code: "custom", path: ["values", name], message: "Form text must be at most 60000 characters." });
+    if (!["signature", "listingPhoto"].includes(name) && typeof value === "string" && value.length > 60000) context.addIssue({ code: "custom", path: ["values", name], message: "Form text must be at most 60000 characters." });
   }
 });
 export const nativeActionResultSchema = z.object({
@@ -41,7 +42,7 @@ export type NativeActionResult = z.infer<typeof nativeActionResultSchema>;
 
 /** Whitelist transport keys and retain repeated HTML form fields in row order. */
 export function nativeActionFormData(definition: NativeActionDefinition, values: NonNullable<NativeActionRequest["values"]>) {
-  const fields = new Map(definition.groups.flatMap(group => group.fields.map(field => [field.name, { field, repeat: !!group.repeat || field.type === "multiselect" }] as const)));
+  const fields = new Map(definition.groups.flatMap(group => group.fields.map(field => [field.name, { field, repeat: !!group.repeat || ["multiselect", "properties"].includes(field.type) }] as const)));
   for (const name of Object.keys(values)) if (!fields.has(name)) throw new Error(`Unexpected form field: ${name}`);
   const form = new FormData();
   for (const [name, { field, repeat }] of fields) {

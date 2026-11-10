@@ -1,3 +1,4 @@
+import { AccountProtection } from "@/features/security/_components/account-protection";
 import {
   ErrorStateCard,
 } from "@/app/(app)/dashboard/caretaker/_components/caretaker-ui";
@@ -21,6 +22,7 @@ export function SecurityWorkspace({
           <SecurityStats data={data} />
 
           <div className="min-w-0 space-y-5">
+            <AccountProtection />
             <DevicesPanel sessions={data.sessions} />
             <SecuritySidebar />
           </div>

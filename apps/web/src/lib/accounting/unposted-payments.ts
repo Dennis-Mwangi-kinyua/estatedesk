@@ -2,6 +2,16 @@ import type { PrismaClient } from "@prisma/client";
 
 type AccountingDatabase = Pick<PrismaClient, "$queryRaw" | "payment">;
 
+/** Dashboard counts must include the entire backlog, without transferring payment IDs. */
+export async function countUnpostedPayments(db: Pick<PrismaClient, "$queryRaw">, orgId: string) {
+  const rows = await db.$queryRaw<Array<{ count: bigint }>>`
+    SELECT COUNT(*) AS count FROM "Payment" p
+    WHERE p."orgId" = ${orgId} AND p."verificationStatus" IN ('VERIFIED', 'NOT_REQUIRED')
+      AND NOT EXISTS (SELECT 1 FROM "AccountingJournalEntry" j
+        WHERE j."orgId" = p."orgId" AND j."sourceType" = 'PAYMENT' AND j."sourceId" = p.id)`;
+  return Number(rows[0]?.count ?? 0);
+}
+
 /** Count the complete backlog in SQL; transfer only the eight preview records. */
 export async function getUnpostedPaymentSummary(db: AccountingDatabase, orgId: string) {
   const rows = await db.$queryRaw<Array<{ id: string; totalCount: bigint }>>`
