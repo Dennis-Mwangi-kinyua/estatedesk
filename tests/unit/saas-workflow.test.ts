@@ -58,6 +58,14 @@ describe("workspace setup steps", () => {
     assert.equal(billed.steps.find((step) => step.id === "team")?.href, "/dashboard/org/staff");
   });
 
+  it("keeps imported tenants on their existing records when portal access is missing", () => {
+    const imported = buildSetupSteps({ ...emptyCounts, properties: 1, units: 1, tenants: 1, leases: 1 }, null);
+    assert.equal(imported.steps[0].href, "/dashboard/org/properties");
+    assert.equal(imported.steps[1].href, "/dashboard/org/tenants");
+    assert.equal(imported.steps.find(step => step.id === "team")?.href, "/dashboard/org/tenants");
+    assert.match(imported.steps.find(step => step.id === "team")?.detail ?? "", /do not include login credentials/);
+  });
+
   it("marks the team step done once a tenant can sign in and another person is invited", () => {
     const ready = buildSetupSteps({
       ...emptyCounts,

@@ -1,3 +1,4 @@
+import { executeNativeCollectionAction } from "@/lib/mobile/native-collections";
 import { executeNativePrivacyAction } from "@/lib/mobile/native-privacy";
 import { executeNativeLandlordAction } from "@/lib/mobile/native-landlord-actions";
 import { executeNativeCrmAction } from "@/lib/mobile/native-crm";
@@ -44,7 +45,7 @@ export async function GET(request: Request) {
     const input = nativeActionRequestSchema.parse(Object.fromEntries(new URL(request.url).searchParams));
     if (input.kind === "landlord") return mobileJson({ error: "Landlord pages are read-only in this native workspace." }, 403);
     if (!mobileWorkspaceAllowed(session, input.kind) || !nativeWorkspaceEntry(mobileWorkspaceLinks(session, input.kind), input.path)) return mobileJson({ error: "This action is unavailable for your account." }, 403);
-    if (/^(crm\.|landlord\.|privacy\.|bnb\.listing\.)/.test(input.actionId) && request.headers.get("x-estatedesk-forms") !== "2026-11-09") return mobileJson({error:"Update your EstateDesk app to use this workflow."},409);
+    if (/^(collection\.|crm\.|landlord\.|privacy\.|bnb\.listing\.)/.test(input.actionId) && request.headers.get("x-estatedesk-forms") !== "2026-11-09") return mobileJson({error:"Update your EstateDesk app to use this workflow."},409);
     const definition = await nativeActionDefinition(session, input.kind, input.path, input.actionId, input.recordId);
     if (definition && request.headers.get("x-estatedesk-signatures") !== "image-v1") {
       definition.groups = definition.groups.map(group => ({ ...group, fields: group.fields.filter(field => field.type !== "signature") }));
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
     const input = nativeActionRequestSchema.parse(await readBoundedJson(request, 640000));
     if (input.kind === "landlord") return mobileJson({ error: "Landlord pages are read-only in this native workspace." }, 403);
     if (!mobileWorkspaceAllowed(session, input.kind) || !nativeWorkspaceEntry(mobileWorkspaceLinks(session, input.kind), input.path)) return mobileJson({ error: "This action is unavailable for your account." }, 403);
-    if (/^(crm\.|landlord\.|privacy\.|bnb\.listing\.)/.test(input.actionId) && request.headers.get("x-estatedesk-forms") !== "2026-11-09") return mobileJson({error:"Update your EstateDesk app to use this workflow."},409);
+    if (/^(collection\.|crm\.|landlord\.|privacy\.|bnb\.listing\.)/.test(input.actionId) && request.headers.get("x-estatedesk-forms") !== "2026-11-09") return mobileJson({error:"Update your EstateDesk app to use this workflow."},409);
     const definition = await nativeActionDefinition(session, input.kind, input.path, input.actionId, input.recordId);
     if (!definition) return mobileJson({ error: "This action is unavailable or the record has changed." }, 403);
     let form: FormData;
@@ -75,6 +76,10 @@ export async function POST(request: Request) {
       if (input.actionId.startsWith("landlord.")) {
         const result = await executeNativeLandlordAction(session, kind, input.path, input.actionId, input.recordId, form);
         return "error" in result ? mobileJson({ error: result.error }, 400) : mobileJson(result);
+      }
+      if (input.actionId.startsWith("collection.")) {
+        const result = await executeNativeCollectionAction(session, kind, input.path, input.actionId, input.recordId, form);
+        return "error" in result ? mobileJson({error:result.error},400) : mobileJson(result);
       }
       if (input.actionId.startsWith("crm.")) {
         const result = await executeNativeCrmAction(session, kind, input.path, input.actionId, input.recordId, form);

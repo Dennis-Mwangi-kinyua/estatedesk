@@ -22,6 +22,12 @@ describe("csv utilities", () => {
     ]);
   });
 
+  it("rejects malformed quotes and duplicate headers instead of silently changing data", () => {
+    assert.throws(() => parseCsv('name,notes\nJane,"unfinished'), /unclosed/);
+    assert.throws(() => parseCsv('name,name\nJane,Ali'), /unique/);
+    assert.throws(() => parseCsv('name\nJane,unexpected'), /more values/);
+  });
+
   it("builds escaped CSV output for report downloads", () => {
     const csv = buildCsv(["tenant", "notes"], [
       { tenant: "Jane", notes: "Paid, early" },

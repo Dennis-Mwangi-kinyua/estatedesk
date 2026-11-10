@@ -15,7 +15,7 @@ const platformAccount: NavigationSection[] = [
 export const WORKSPACE_NAVIGATION: Record<NavigationWorkspace, readonly NavigationSection[]> = {
   org: [
     { label: "Management", hrefs: org(["approvals", "collections", "renewals", "activity", "handovers", "performance"]) },
-    { label: "Workspace", hrefs: org(["", "insights", "operating-queue"]) },
+    { label: "Workspace", hrefs: org(["", "setup", "insights", "operating-queue"]) },
     { label: "Portfolio & occupancy", hrefs: org(["properties", "landlords", "buildings", "units", "airbnb", "tenants", "leases", "vacancy-inquiries", "verify-tenant", "identity-verification"]) },
     { label: "Finance", hrefs: org(["payments", "charges", "charges/bills", "water-bills", "accounting", "accounting/requests", "finance-requests", "expenditures", "taxes", "reports"]) },
     { label: "Operations", hrefs: [...org(["issues", "issues/resolution-reports", "inspections", "move-outs", "service-providers"]), "/dashboard/gate"] },

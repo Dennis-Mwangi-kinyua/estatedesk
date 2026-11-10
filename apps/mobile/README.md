@@ -229,3 +229,7 @@ The **Today · my work and messages** button opens the native daily workspace fo
 ### Security Centre
 
 Password changes are available to all roles with personal security access. The current password is required; the shared protected operation rotates this device's credential, signs out other devices and invalidates reset links. The app saves the returned credential in SecureStore before continuing. A storage failure requires sign-in. Security history is owner-only and uses `/api/mobile/security/activity`; the older `/security` session-list response is retained. See [security behavior and deployment compatibility](../../docs/SECURITY_CENTRE.md).
+
+### Collections today
+
+Organization-wide collection staff can open **Collections today** for overdue account cards, contact-due/my-account/unassigned/payment-review filters, owner/date/note assignment, payment promises and outcomes, and previewed reminders. Actions use the same services and tenant/organization boundaries as the web workspace. Reminder approval requires the current balance/contact preview, explicit approval and resolved payment-review flags. Email is queued through the existing dispatcher; in-app reminders are available immediately. Guided spreadsheet imports and the detailed rent statement remain mobile-browser workspaces. See [collections and setup](../../docs/COLLECTIONS.md). Rebuild and deploy the matching app/backend before relying on the new native filters; installed-device acceptance remains separate.

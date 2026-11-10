@@ -3,6 +3,7 @@ import type { ImportResult } from "@/lib/imports/csv-import";
 export type ImportActionState = ImportResult & {
   message: string;
   runId?: string;
+  validationToken?: string;
 };
 
 export const initialImportState: ImportActionState = {

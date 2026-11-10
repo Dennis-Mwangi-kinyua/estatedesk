@@ -1,5 +1,6 @@
 import { nativePrivacyRecords } from "./native-privacy";
 import { nativeLandlordRecordActions } from "./native-landlord-actions";
+import { nativeCollectionRecords, COLLECTION_PATH } from "./native-collections";
 import { nativeCrmRecords, crmPaths } from "./native-crm";
 import "server-only";
 import { nativeAgreementRecordActions } from "./native-agreement-actions";
@@ -43,6 +44,7 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWo
     return {records:rows.map(row=>card(row.id,row.name,undefined,{Location:row.location}))};
   }
   if (path === "/platform/privacy-requests") return nativePrivacyRecords(session, kind, path, q, page);
+  if (kind === "organization" && path === COLLECTION_PATH) return nativeCollectionRecords(session, q, page);
   if (crmPaths(kind).includes(path)) return nativeCrmRecords(session, kind, path, q, page, recordId);
   const orgId = session.activeOrgId!;
   const unit = nativeUnitScope(orgId, session.membershipScope);

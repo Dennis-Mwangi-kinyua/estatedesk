@@ -3,7 +3,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { APP_PLANS, type AppPlan } from "@/lib/billing/plans";
 import type { Prisma } from "@prisma/client";
-import { SUBSCRIPTION_GRACE_DAYS } from "@/lib/billing/subscription-access";
+import { SUBSCRIPTION_GRACE_DAYS } from "@/lib/billing/subscription-policy";
 import { organizationPlanLimits } from "./organization-plan-policy";
 
 const PLAN_ACTIVE_STATUSES = new Set(["ACTIVE"]);

@@ -2,6 +2,7 @@ import { Prisma, PropertyType, TenantStatus, TenantType, UnitStatus, UnitType } 
 import { parseCsv, type CsvRow } from "@/lib/csv";
 import type { ImportKind } from "@/lib/imports/types";
 import { prisma } from "@/lib/prisma";
+import { validateRelatedImportRows } from "./related-validation";
 import { createInitialLeaseCharges } from "@/lib/billing/initial-lease-charges";
 
 export type ImportResult = {
@@ -36,9 +37,9 @@ function required(value: CsvRow, key: string) {
 
 function optionalDecimal(value: string) {
   if (!value) return undefined;
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric) || numeric < 0) return null;
-  return new Prisma.Decimal(numeric);
+  const raw = value.trim();
+  if (!/^\d{1,10}(\.\d{1,2})?$/.test(raw)) return null;
+  return new Prisma.Decimal(raw);
 }
 
 function optionalInt(value: string) {
@@ -63,7 +64,9 @@ function enumValue<T extends Record<string, string>>(
 function parseDate(value: string) {
   if (!value) return undefined;
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
+  if (Number.isNaN(date.getTime())) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value) && date.toISOString().slice(0, 10) !== value) return null;
+  return date;
 }
 
 function validateRows(kind: ImportKind, rows: CsvRow[]) {
@@ -88,6 +91,7 @@ function validateRows(kind: ImportKind, rows: CsvRow[]) {
     }
 
     if (kind === "properties") {
+      for (const key of ["waterRatePerUnit", "waterFixedCharge"]) if (optionalDecimal(row[key] ?? "") === null) pushError(`Line ${line}: ${key} must be a non-negative number.`);
       if (enumValue(PropertyType, row.type ?? "", PropertyType.RESIDENTIAL) === null) {
         pushError(`Line ${line}: invalid property type.`);
       }
@@ -96,6 +100,9 @@ function validateRows(kind: ImportKind, rows: CsvRow[]) {
     }
 
     if (kind === "units") {
+      if (row.floorArea && (!Number.isFinite(Number(row.floorArea)) || Number(row.floorArea) < 0)) pushError(`Line ${line}: floorArea must be a non-negative number.`);
+      if (optionalDecimal(row.depositAmount ?? "") === null) pushError(`Line ${line}: depositAmount must be a non-negative number.`);
+      for (const key of ["bedrooms", "bathrooms", "roomCount"]) if (optionalInt(row[key] ?? "") === null) pushError(`Line ${line}: ${key} must be a non-negative whole number.`);
       if (enumValue(UnitType, row.type ?? "", UnitType.APARTMENT) === null) {
         pushError(`Line ${line}: invalid unit type.`);
       }
@@ -119,6 +126,8 @@ function validateRows(kind: ImportKind, rows: CsvRow[]) {
       if (optionalInt(row.dueDay ?? "") === null) {
         pushError(`Line ${line}: dueDay must be a whole number.`);
       }
+      if (optionalInt(row.dueDay ?? "") !== undefined && (Number(row.dueDay) < 1 || Number(row.dueDay) > 28)) pushError(`Line ${line}: dueDay must be from 1 to 28.`);
+      if (optionalDecimal(row.deposit ?? "") === null) pushError(`Line ${line}: deposit must be a non-negative number.`);
       if (parseDate(row.startDate ?? "") === null) {
         pushError(`Line ${line}: startDate must be a valid date.`);
       }
@@ -148,11 +157,21 @@ export async function importCsv({
   csv: string;
   dryRun: boolean;
 }): Promise<ImportResult> {
-  const rows = parseCsv(csv).slice(0, 500);
+  if (Buffer.byteLength(csv, "utf8") > 512 * 1024) throw new Error("CSV must be 512 KB or smaller.");
+  const rows = parseCsv(csv);
+  if (rows.length > 500) throw new Error("CSV has more than 500 rows. Split the file; no rows were imported.");
   const validation = validateRows(kind, rows);
 
   if (rows.length === 0) {
     validation.errors.push("No CSV rows found.");
+  }
+
+  if (!validation.errors.length) {
+    for (const issue of await validateRelatedImportRows(prisma, orgId, kind, rows)) {
+      validation.errors.push(issue.message);
+      validation.rowResults[issue.index].errors.push(issue.message);
+      validation.rowResults[issue.index].status = "error";
+    }
   }
 
   // Plan limits: reject imports that would exceed property/unit caps.
@@ -183,7 +202,7 @@ export async function importCsv({
       dryRun,
       kind,
       totalRows: rows.length,
-      validRows: Math.max(0, rows.length - validation.errors.length),
+      validRows: validation.errors.length && validation.rowResults.every(row => row.status === "valid") ? 0 : validation.rowResults.filter(row => row.status === "valid").length,
       created: 0,
       errors: validation.errors,
       preview: validation.preview.slice(0, 10),
@@ -197,10 +216,10 @@ export async function importCsv({
   let created = 0;
 
   await prisma.$transaction(async (tx) => {
-    if (kind === "properties" || kind === "units") {
-      const { lockOrgQuota } = await import("@/lib/billing/access");
-      await lockOrgQuota(tx, orgId);
-    }
+    const { lockOrgQuota } = await import("@/lib/billing/access");
+    await lockOrgQuota(tx, orgId);
+    const currentIssues = await validateRelatedImportRows(tx, orgId, kind, rows);
+    if (currentIssues.length) throw new Error(currentIssues[0].message);
     if (kind === "properties") {
       const { assertCanCreateProperty } = await import("@/lib/billing/access");
       await assertCanCreateProperty(orgId, rows.length, tx);
@@ -281,8 +300,7 @@ export async function importCsv({
             kraPin: row.kraPin || null,
             status: enumValue(TenantStatus, row.status ?? "", TenantStatus.ACTIVE)!,
             notes: row.notes || null,
-            dataConsent: true,
-            consentUpdatedAt: new Date(),
+            dataConsent: false,
           },
         });
 
@@ -296,6 +314,7 @@ export async function importCsv({
             select: { id: true, rentAmount: true, depositAmount: true },
           });
 
+          if (!unit) throw new Error(`Unit not found: ${row.propertyName} / ${row.unitHouseNo}`);
           if (unit) {
             const lease = await tx.lease.create({
               data: {
@@ -321,7 +340,7 @@ export async function importCsv({
         created += 1;
       }
     }
-  }, { timeout: 60_000 });
+  }, { timeout: 60_000, isolationLevel: "Serializable" });
 
   return {
     ok: true,

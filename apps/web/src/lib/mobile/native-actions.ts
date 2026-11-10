@@ -1,5 +1,6 @@
 import { nativePrivacyDefinition } from "./native-privacy";
 import { nativeLandlordPageActions, nativeLandlordDefinition } from "./native-landlord-actions";
+import { nativeCollectionDefinition } from "./native-collections";
 import { nativeCrmDefinition, nativeCrmPageActions } from "./native-crm";
 import "server-only";
 import { nativeResolutionDefinition, nativeResolutionActions } from "./native-resolution-actions";
@@ -90,6 +91,7 @@ export async function nativeActionDefinition(session: AppSession, kind: MobileWo
   if (kind === "landlord") return null;
   if (actionId.startsWith("privacy.")) return nativePrivacyDefinition(session, kind, path, actionId, recordId);
   if (actionId.startsWith("landlord.")) return nativeLandlordDefinition(session, kind, path, actionId, recordId);
+  if (actionId.startsWith("collection.")) return nativeCollectionDefinition(session, kind, path, actionId, recordId);
   if (actionId.startsWith("crm.")) return nativeCrmDefinition(session, kind, path, actionId, recordId);
   const bnb = await nativeBnbActionDefinition(session, path, actionId, recordId);
   if (bnb) return bnb;

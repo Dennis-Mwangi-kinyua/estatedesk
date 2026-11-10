@@ -19,7 +19,7 @@ export function SetupChecklist({ steps }: { steps: SetupStep[] }) {
   return (
     <section className="rounded-2xl border border-border bg-card p-4 sm:p-5" aria-labelledby="setup-progress-title">
       <h2 id="setup-progress-title" className="text-lg font-semibold">Finish the first bill</h2>
-      <p className="mt-1 text-sm leading-6 text-muted-foreground">These steps stay here until a rent charge exists. {next ? `Next: ${next.title}.` : "Every step is done."}</p>
+      <p className="mt-1 text-sm leading-6 text-muted-foreground">Use these steps to issue the first bill and prepare your team. {next ? `Next: ${next.title}.` : "Every step is done."}</p>
       <ol className="mt-4 space-y-3">
         {steps.map((step, index) => (
           <li key={step.id} className="rounded-xl border border-border p-3">

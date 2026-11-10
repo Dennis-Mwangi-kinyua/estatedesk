@@ -15,7 +15,7 @@ export async function loadSetupProgress(orgId: string) {
     rentCharges,
     meterReadings,
     tenantLogins,
-    staffMemberships,
+    staffUsers,
     invitations,
     firstUnit,
     subscription,
@@ -27,11 +27,11 @@ export async function loadSetupProgress(orgId: string) {
     prisma.lease.count({ where: { orgId, deletedAt: null } }),
     prisma.rentCharge.count({ where: { orgId, chargeType: "RENT" } }),
     prisma.meterReading.count({ where: { unit: unitWhere } }),
-    prisma.tenant.count({ where: { orgId, deletedAt: null, userId: { not: null } } }),
-    prisma.membership.count({ where: { orgId, employmentEndedAt: null, deactivatedAt: null } }),
-    prisma.invitation.count({ where: { orgId } }),
+    prisma.tenant.count({ where: { orgId, deletedAt: null, userId: { not: null }, user: { status: "ACTIVE", deletedAt: null } } }),
+    prisma.membership.groupBy({ by: ["userId"], where: { orgId, employmentEndedAt: null, deactivatedAt: null, role: { in: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "SECURITY"] }, user: { status: "ACTIVE", deletedAt: null } } }),
+    prisma.invitation.count({ where: { orgId, status: "PENDING", expiresAt: { gt: new Date() }, role: { in: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT", "CARETAKER", "SECURITY"] } } }),
     prisma.unit.findFirst({
-      where: { ...unitWhere, isActive: true },
+      where: { ...unitWhere, isActive: true, status: "VACANT", leases: { none: { status: "ACTIVE", deletedAt: null } } },
       orderBy: [{ status: "asc" }, { createdAt: "asc" }],
       select: { id: true },
     }),
@@ -46,7 +46,7 @@ export async function loadSetupProgress(orgId: string) {
     rentCharges,
     meterReadings,
     tenantLogins,
-    staffMemberships,
+    staffMemberships: staffUsers.length,
     invitations,
   };
   const free = subscription?.plan === "FREE";

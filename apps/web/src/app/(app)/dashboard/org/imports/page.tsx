@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { prisma } from "@/lib/prisma";
 import { logServerError } from "@/lib/errors/server-error-log";
@@ -9,6 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function OrgImportsPage() {
   const session = await requireManagementAccess();
+  if (session.membershipScope?.scopeType !== "ORG" || !canAccessWorkspacePath(session, "/dashboard/org/imports")) redirect("/access-denied");
   let history: ImportHistoryItem[] = [];
   let historyUnavailable = false;
 

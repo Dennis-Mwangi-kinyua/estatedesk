@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { APP_PLANS } from "@/lib/billing/plans";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
-export const SUBSCRIPTION_GRACE_DAYS = 7;
+import { SUBSCRIPTION_GRACE_DAYS } from "./subscription-policy";
+export { SUBSCRIPTION_GRACE_DAYS } from "./subscription-policy";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export type SubscriptionAccessState =

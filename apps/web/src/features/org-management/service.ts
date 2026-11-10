@@ -16,7 +16,7 @@ const activeStaff = (orgId: string) => ({ orgId, scopeType: "ORG" as const, deac
 export { activeStaff };
 const leaseWhere = (orgId: string) => ({ orgId, deletedAt: null, status: "ACTIVE" as const, tenant: { deletedAt: null }, unit: { deletedAt: null, property: { orgId, deletedAt: null } } });
 export { leaseWhere };
-async function assertAssigneeAccess(tx: Tx, session: AppSession, userId: string, paths: string[]) {
+export async function assertAssigneeAccess(tx: Tx, session: AppSession, userId: string, paths: string[]) {
   const orgId = session.activeOrgId!;
   const member = await tx.membership.findFirst({ where: { ...activeStaff(orgId), userId } });
   ensure(member, "The assignee must have active organization-wide access.");

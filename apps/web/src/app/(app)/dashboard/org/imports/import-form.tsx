@@ -8,6 +8,7 @@ import {
   DataCard,
   ResponsiveDataList,
 } from "@/components/ui/responsive-data-list";
+import { parseCsv } from "@/lib/csv";
 import { IMPORT_TEMPLATES } from "@/lib/imports/templates";
 import type { ImportKind } from "@/lib/imports/types";
 import { runCsvImportAction } from "./actions";
@@ -18,12 +19,7 @@ import {
 } from "./import-state";
 
 function countCsvRows(csv: string) {
-  const lines = csv
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  return Math.max(0, lines.length - 1);
+  try { return parseCsv(csv).length; } catch { return 0; }
 }
 
 function downloadTemplate(kind: ImportKind) {
@@ -40,12 +36,18 @@ export function CsvImportForm() {
   const [kind, setKind] = useState<ImportKind>("properties");
   const [csv, setCsv] = useState(IMPORT_TEMPLATES.properties);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [rawState, action, pending] = useActionState(
-    runCsvImportAction,
-    initialImportState,
-  );
+  const [validatedInput, setValidatedInput] = useState<{kind:string;csv:string}|null>(null);
+  const [approved, setApproved] = useState(false);
+  const [fileError, setFileError] = useState<string|null>(null);
+  const [rawState, action, pending] = useActionState(async (previous: typeof initialImportState, form: FormData) => {
+    const result = await runCsvImportAction(previous, form);
+    setValidatedInput(result.ok && result.dryRun && result.validationToken ? {kind:String(form.get("kind")),csv:String(form.get("csv"))} : null);
+    setApproved(false);
+    return result;
+  }, initialImportState);
   const state = useMemo(() => normalizeImportState(rawState), [rawState]);
 
+  const canCommit = Boolean(state.ok && state.dryRun && state.validationToken && validatedInput?.kind === kind && validatedInput?.csv === csv);
   const currentKind = useMemo(
     () => IMPORT_KIND_OPTIONS.find((item) => item.value === kind) ?? IMPORT_KIND_OPTIONS[0],
     [kind],
@@ -75,7 +77,7 @@ export function CsvImportForm() {
       ...rows.map((row) =>
         [
           row.line,
-          `"${String(row.label).replaceAll('"', '""')}"`,
+          `"${(String(row.label).match(/^[=+@-]/) ? "'" + String(row.label) : String(row.label)).replaceAll('"', '""')}"`,
           row.status,
           `"${row.errors.join(" | ").replaceAll('"', '""')}"`,
         ].join(","),
@@ -101,10 +103,11 @@ export function CsvImportForm() {
           action={action}
           className="workspace-panel min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm"
         >
+          <input type="hidden" name="validationToken" value={state.validationToken ?? ""}/>
           <div className="border-b border-border px-5 py-5 sm:px-6">
             <h2 className="flex items-center gap-3 text-base font-semibold text-foreground"><VisualSticker label="Upload files" />Upload workspace</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Select a dataset, load your CSV, then validate before committing.
+              Import properties first, then units, then tenants. Validate and review each CSV before committing; previews expire after 15 minutes.
             </p>
           </div>
 
@@ -132,6 +135,9 @@ export function CsvImportForm() {
                       aria-pressed={selected}
                       type="button"
                       onClick={() => {
+                        setApproved(false);
+                        setValidatedInput(null);
+                        setFileError(null);
                         setKind(option.value);
                         setCsv(IMPORT_TEMPLATES[option.value]);
                         setFileName(null);
@@ -198,7 +204,7 @@ export function CsvImportForm() {
                   {fileName ? fileName : "Choose a CSV file"}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  UTF-8 CSV up to 500 rows
+                  UTF-8 CSV · up to 500 rows · 512 KB
                 </p>
                 <input
                   id="csvFile"
@@ -208,6 +214,9 @@ export function CsvImportForm() {
                   onChange={async (event) => {
                     const file = event.target.files?.[0];
                     if (!file) return;
+                    if (file.size > 512 * 1024) { setValidatedInput(null); setApproved(false); setFileError("CSV must be 512 KB or smaller."); return; }
+                    setFileError(null);
+                    setApproved(false);
                     setFileName(file.name);
                     setCsv(await file.text());
                   }}
@@ -229,6 +238,7 @@ export function CsvImportForm() {
                 name="csv"
                 value={csv}
                 onChange={(event) => {
+                  setApproved(false);
                   setCsv(event.target.value);
                   setFileName(null);
                 }}
@@ -256,11 +266,14 @@ export function CsvImportForm() {
                 "Validate CSV"
               )}
             </button>
+            <label className="flex w-full items-start gap-3 text-sm"><input name="confirmImport" value="yes" type="checkbox" checked={approved} disabled={!canCommit || pending} onChange={event=>setApproved(event.target.checked)} className="mt-1 h-5 w-5 shrink-0"/><span>I reviewed the validated rows and approve creating these records. Imports create records; tenant imports can also create leases and initial charges.</span></label>
+            {!canCommit && <p className="w-full text-xs text-muted-foreground">Validate this exact CSV before committing. Editing the content or dataset requires a new preview.</p>}
+            {fileError && <p role="alert" className="w-full text-sm text-destructive">{fileError}</p>}
             <button data-workspace-action="true"
               type="submit"
               name="mode"
               value="commit"
-              disabled={pending}
+              disabled={pending || !canCommit || !approved}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-60"
             >
               {pending ? (

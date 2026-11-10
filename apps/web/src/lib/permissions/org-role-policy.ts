@@ -58,7 +58,7 @@ export function orgViewForPath(pathname: string): OrgView | null {
     "service-agreements": "agreements", "meter-readings": "meters", readings: "meters",
     "water-readings": "meters", "water-meters": "meters", "visitor-passes": "visitors",
     "lease-agreements": "leases", expenditures: "accounting", "verify-tenant": "identity-verification",
-    lease: "leases", history: "leases", notices: "move-outs", broadcasts: "notifications",
+    setup: "imports", lease: "leases", history: "leases", notices: "move-outs", broadcasts: "notifications",
   };
   return aliases[section] ?? (section in ORG_VIEW_LABELS ? section as OrgView : null);
 }

@@ -13,6 +13,7 @@ export function mobileWorkspaceAllowed(session: Pick<AppSession, "platformRole" 
 
 const presentation: Record<string, [string, string]> = {
   demos: ["📅", "Demo requests, client contacts, appointments and trial follow-up."],
+  collections: ["💰", "Overdue rent, assigned follow-ups, payment reviews and approved reminders."],
   crm: ["🤝", "Customers, leads, conversations, follow-ups and analytics."],
   "review-queue": ["📋", "Pending decisions, waiting times, responsible teams and next actions."],
   "operating-queue": ["📋", "Proofs, readings, unsigned leases, arrears, overdue issues and move-outs."],

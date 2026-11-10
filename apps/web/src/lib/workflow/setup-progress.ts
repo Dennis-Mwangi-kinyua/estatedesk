@@ -38,7 +38,7 @@ export function buildSetupSteps(counts: SetupCounts, unitId: string | null, opti
         detail: portfolioReady
           ? `${counts.properties} properties · ${counts.buildings} buildings · ${counts.units} units`
           : "Add a property, its building, and at least one unit. A spreadsheet import is available when the portfolio is already listed.",
-        href: "/dashboard/org/properties/new",
+        href: portfolioReady ? "/dashboard/org/properties" : "/dashboard/org/properties/new",
         action: portfolioReady ? "Review properties" : "Add a property",
         secondaryHref: "/dashboard/org/imports",
         secondaryLabel: "Import a spreadsheet",
@@ -50,7 +50,7 @@ export function buildSetupSteps(counts: SetupCounts, unitId: string | null, opti
         detail: occupancyReady
           ? `${counts.tenants} tenants · ${counts.leases} leases`
           : "Place one tenant on a unit and record the lease. The unit you just added is selected when it is still vacant.",
-        href: tenantHref,
+        href: occupancyReady ? "/dashboard/org/tenants" : tenantHref,
         action: occupancyReady ? "Review tenants" : "Add a tenant",
         done: occupancyReady,
       },
@@ -71,11 +71,13 @@ export function buildSetupSteps(counts: SetupCounts, unitId: string | null, opti
         title: "Tenant login and one teammate",
         detail: teamReady
           ? "A tenant can sign in, and another person has been invited or added."
+          : counts.tenants > 0 && counts.tenantLogins === 0
+            ? "Imported tenant records do not include login credentials. Review tenant access before arranging portal sign-in and inviting a teammate."
           : options?.free
             ? "The tenant form creates their login. Invite one office user so the bill is not only yours."
             : "The tenant form creates their login. Invite one office or caretaker user so the queue is not only yours.",
-        href: counts.tenantLogins > 0 ? "/dashboard/org/staff" : tenantHref,
-        action: counts.tenantLogins > 0 ? "Invite a teammate" : "Create the tenant login",
+        href: counts.tenantLogins > 0 ? "/dashboard/org/staff" : counts.tenants > 0 ? "/dashboard/org/tenants" : tenantHref,
+        action: counts.tenantLogins > 0 ? "Invite a teammate" : counts.tenants > 0 ? "Review tenant access" : "Create the tenant login",
         secondaryHref: "/dashboard/org/staff",
         secondaryLabel: "Open staff",
         done: teamReady,

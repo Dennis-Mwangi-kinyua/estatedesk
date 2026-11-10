@@ -43,11 +43,14 @@ export function parseCsv(input: string): CsvRow[] {
     field += char;
   }
 
+  if (quoted) throw new Error("CSV contains an unclosed quoted field.");
   current.push(field.trim());
   if (current.some((value) => value.length > 0)) rows.push(current);
   if (rows.length === 0) return [];
 
   const headers = rows[0].map(normalizeHeader);
+  if (headers.some(header => !header) || new Set(headers).size !== headers.length) throw new Error("CSV headers must be non-empty and unique.");
+  if (rows.slice(1).some(row => row.length > headers.length)) throw new Error("A CSV row has more values than its headers.");
 
   return rows.slice(1).map((row) => {
     const record: CsvRow = {};

@@ -387,3 +387,7 @@ Runtime helpers: `packages/config` + `apps/web/src/lib/config/env.ts`.
 ---
 
 *This document reflects the monorepo as of 2026-07-10. Update the date and sections when major domain rules or deploy topology change.*
+
+## Collections and onboarding update — 10 November 2026
+
+The daily collection workspace, rent statements, controlled reminder approval and guided portfolio/import setup are documented in [COLLECTIONS.md](COLLECTIONS.md). Native collection cards/actions share the web services. Spreadsheet commits require a signed preview and confirmation, with transactional revalidation; no new database migration is introduced by this update.
