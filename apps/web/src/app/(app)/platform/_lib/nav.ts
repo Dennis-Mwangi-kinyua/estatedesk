@@ -55,7 +55,7 @@ export type PlatformNavItem = {
  */
 export const siteOpsNavItems: readonly PlatformNavItem[] = [
   { href: "/platform/demos", label: "Demo requests", icon: "Timer", description: "Demo enquiries, appointments and trial follow-up", dualMode: true },
-  { href: "/platform/recruitment", label: "Recruitment", icon: "BriefcaseBusiness", description: "Publish EstateDesk jobs and review applications", dualMode: true, native: false },
+  { href: "/platform/recruitment", label: "Job advertisements", icon: "BriefcaseBusiness", description: "Publish career opportunities and manage the applicant pipeline", dualMode: true, native: false },
   {href:"/platform/privacy-requests",label:"Privacy requests",icon:"ShieldCheck",description:"Account deletion, identity and retention reviews",dualMode:true},
   { href: "/platform/crm", label: "Sales & Customer CRM", icon: "BriefcaseBusiness", description: "Prospects, customers, communication, tasks and reports", dualMode: true },
   { href: "/platform/review-queue", label: "Review queue", icon: "ShieldCheck", description: "Pending reviews, responsible teams and next actions", dualMode: true },

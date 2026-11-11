@@ -20,7 +20,7 @@ type SidebarLink = {
 
 export const SIDEBAR_LINKS: readonly SidebarLink[] = [
   { label: "Guided setup", href: "/dashboard/org/setup", icon: workspaceIconFor("/dashboard/org/imports"), roles: ["ADMIN", "MANAGER", "OFFICE"], native: false },
-  { label: "Recruitment", href: "/dashboard/org/recruitment", icon: workspaceIconFor("/dashboard/org/staff"), roles: ["ADMIN", "MANAGER"], native: false },
+  { label: "Job advertisements", href: "/dashboard/org/recruitment", icon: workspaceIconFor("/dashboard/org/staff"), roles: ["ADMIN", "MANAGER"], native: false },
   { label: "Approval centre", href: "/dashboard/org/approvals", icon: workspaceIconFor("/dashboard/org/accounting"), roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"], native: false },
   { label: "Collections today", href: "/dashboard/org/collections", icon: workspaceIconFor("/dashboard/org/payments"), roles: ["ADMIN", "MANAGER", "OFFICE", "ACCOUNTANT"] },
   { label: "Lease renewals", href: "/dashboard/org/renewals", icon: workspaceIconFor("/dashboard/org/leases"), roles: ["ADMIN", "MANAGER", "OFFICE"], native: false },

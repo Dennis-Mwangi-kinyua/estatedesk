@@ -87,11 +87,24 @@ export async function deleteApplication(session: AppSession, scope: HiringScope,
     await log(tx, session, orgId, "RECRUITMENT_APPLICATION_DELETED", id, { reason });
   });
 }
-export async function hiringJobs(session: AppSession, scope: HiringScope, page: number, q = "") {
+export async function hiringJobs(session: AppSession, scope: HiringScope, page: number, q = "", status = "ALL") {
   const orgId = hiringOrgId(session, scope);
-  const where = { orgId, ...(q ? { title: { contains: q.slice(0, 100), mode: "insensitive" as const } } : {}) };
-  const [jobs, total] = await Promise.all([prisma.recruitmentJob.findMany({ where, include: { _count: { select: { applications: true } } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 20, skip: (page - 1) * 20 }), prisma.recruitmentJob.count({ where })]);
-  return { jobs, total };
+  const now = new Date();
+  const scopeWhere = { orgId };
+  const statusWhere: Prisma.RecruitmentJobWhereInput = status === "EXPIRED"
+    ? { status: "OPEN", closesAt: { lte: now } }
+    : status === "OPEN" ? { status: "OPEN", closesAt: { gt: now } }
+    : status === "DRAFT" || status === "CLOSED" ? { status } : {};
+  const where: Prisma.RecruitmentJobWhereInput = { ...scopeWhere, ...statusWhere, ...(q ? { title: { contains: q.slice(0, 100), mode: "insensitive" } } : {}) };
+  const [jobs, total, draftCount, openCount, applicationCount, reviewCount] = await Promise.all([
+    prisma.recruitmentJob.findMany({ where, include: { _count: { select: { applications: true } } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 20, skip: (page - 1) * 20 }),
+    prisma.recruitmentJob.count({ where }),
+    prisma.recruitmentJob.count({ where: { ...scopeWhere, status: "DRAFT" } }),
+    prisma.recruitmentJob.count({ where: { ...scopeWhere, status: "OPEN", closesAt: { gt: now } } }),
+    prisma.recruitmentApplication.count({ where: { job: scopeWhere } }),
+    prisma.recruitmentApplication.count({ where: { job: scopeWhere, status: "SUBMITTED" } }),
+  ]);
+  return { jobs, total, summary: { draftCount, openCount, applicationCount, reviewCount } };
 }
 export async function hiringJob(session: AppSession, scope: HiringScope, id: string, page: number, status = "ALL", q = "") {
   const orgId = hiringOrgId(session, scope);

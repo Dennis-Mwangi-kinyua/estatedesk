@@ -33,7 +33,8 @@ const publicLinks = [
 const navigationGroups = [
   { label: "Product", keys: ["services", "demo", "pricing"] },
   { label: "Find a property", keys: ["vacancies", "stays"] },
-  { label: "Resources", keys: ["careers", "guides", "faq", "contact"] },
+  { label: "Careers", keys: ["careers"] },
+  { label: "Resources", keys: ["guides", "faq", "contact"] },
 ] as const;
 
 export function PublicAccessHeader({

@@ -31,6 +31,22 @@ test("public recruitment accepts real applications while separating platform and
     orgJob = await prisma.recruitmentJob.findUniqueOrThrow({ where: { id: orgJobId } });
     const platformJob = await prisma.recruitmentJob.findUniqueOrThrow({ where: { id: platformJobId } });
     await service.changeJobStatus(platform, "platform", platformJob.id, "OPEN", platformJob.updatedAt.toISOString());
+    await t.test("advertisement filters and overview counts stay scoped to the hiring employer", async () => {
+      const own = await service.hiringJobs(employer, "organization", 1, tag, "OPEN");
+      assert.equal(own.total, 1);
+      assert.equal(own.jobs[0].id, orgJob.id);
+      assert.equal(own.summary.openCount, 1);
+      assert.equal(own.summary.draftCount, 0);
+      assert.equal((await service.hiringJobs(employer, "organization", 1, tag, "DRAFT")).total, 0);
+      assert.equal((await service.hiringJobs(foreign, "organization", 1)).summary.openCount, 0);
+      assert.equal((await service.hiringJobs(platform, "platform", 1, tag, "OPEN")).jobs[0].id, platformJob.id);
+      const expired = await prisma.recruitmentJob.create({ data: { ...orgJob, id: undefined, slug: `expired-${tag}`, title: `Expired ${tag}`, closesAt: new Date(Date.now() - 86400000) } });
+      try {
+        assert.equal((await service.hiringJobs(employer, "organization", 1, tag, "EXPIRED")).total, 1);
+        assert.equal((await service.hiringJobs(employer, "organization", 1, tag, "OPEN")).total, 1);
+        assert.equal((await service.hiringJobs(employer, "organization", 1)).summary.openCount, 1);
+      } finally { await prisma.recruitmentJob.delete({ where: { id: expired.id } }); }
+    });
     await t.test("public listings identify employers and posters without exposing applicant data", async () => {
       const result = await service.publicJob(orgJob.slug);
       assert.equal(result?.org?.name, org.name); assert.equal(result?.postedByName, owner.fullName);

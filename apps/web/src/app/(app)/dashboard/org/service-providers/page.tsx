@@ -10,8 +10,8 @@ import { createJob, hireForJob, completeJob, cancelJob, reportHiredProvider, rev
 export const dynamic = "force-dynamic";
 
 const applicationStatusLabel: Record<string, string> = {
-  PENDING: "New application", REVIEWING: "Under review", SELECTED: "Offer sent",
-  DECLINED: "Declined", WITHDRAWN: "Withdrawn", CANCELLED: "Job cancelled",
+  PENDING: "New proposal", REVIEWING: "Under review", SELECTED: "Offer sent",
+  DECLINED: "Declined", WITHDRAWN: "Withdrawn", CANCELLED: "Service request cancelled",
 };
 
 function ApplicationStatus({ status }: { status: string }) {
@@ -48,11 +48,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<Dir
     <main className="space-y-8 p-4 sm:p-6">
       <header className={`${panelClass} bg-gradient-to-br from-card to-primary/5`}>
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">EstateDesk marketplace</p>
-        <h1 className="mt-2 text-3xl font-bold">Service providers & jobs</h1>
+        <h1 className="mt-2 text-3xl font-bold">Property services & providers</h1>
         <p className="mt-2 max-w-3xl text-muted-foreground">Publish a clear scope, review proposals, send an offer, and track work through completion. Payment stays between your organisation and the provider. You can optionally record direct payments here so both sides can confirm the history.</p>
         <div className="mt-5 grid grid-cols-2 gap-3 md:max-w-3xl md:grid-cols-3">
-          <Link href="?workflow=open#jobs" className="rounded-xl border border-border bg-background/70 p-4"><p className="text-sm text-muted-foreground">Open jobs</p><p className="mt-1 text-2xl font-bold">{open}</p></Link>
-          <Link href="?workflow=applications#jobs" className="rounded-xl border border-border bg-background/70 p-4"><p className="text-sm text-muted-foreground">Applications to review</p><p className="mt-1 text-2xl font-bold">{awaitingReview}</p></Link>
+          <Link href="?workflow=open#jobs" className="rounded-xl border border-border bg-background/70 p-4"><p className="text-sm text-muted-foreground">Open service requests</p><p className="mt-1 text-2xl font-bold">{open}</p></Link>
+          <Link href="?workflow=applications#jobs" className="rounded-xl border border-border bg-background/70 p-4"><p className="text-sm text-muted-foreground">Proposals to review</p><p className="mt-1 text-2xl font-bold">{awaitingReview}</p></Link>
           <Link href="?workflow=active#jobs" className="rounded-xl border border-border bg-background/70 p-4"><p className="text-sm text-muted-foreground">Active work</p><p className="mt-1 text-2xl font-bold">{activeWork}</p></Link>
         </div>
       </header>
@@ -61,32 +61,32 @@ export default async function Page({ searchParams }: { searchParams: Promise<Dir
 
       <section className={panelClass}>
         <details>
-          <summary className="cursor-pointer text-xl font-bold">Post a service job</summary>
+          <summary className="cursor-pointer text-xl font-bold">Create a service request</summary>
           <div className="mt-5 max-w-2xl">
             <p className="mb-4 text-sm text-muted-foreground">Include measurable work, the property area, access requirements, and a realistic budget range. Don’t include private tenant information.</p>
-            <ActionForm action={createJob} label="Publish job">
-              <Field name="title" label="Job title" maxLength={120} />
+            <ActionForm action={createJob} label="Publish service request">
+              <Field name="title" label="Service request title" maxLength={120} />
               <CategoryField />
-              <Field name="location" label="Job location / area" />
+              <Field name="location" label="Service location / area" />
               <TextField name="description" label="Scope of work" />
               <Field name="budget" label="Indicative budget in KES (optional)" type="number" required={false} />
               <label className="flex items-start gap-3 rounded-xl border border-border p-3 text-sm"><input className="mt-1" type="checkbox" name="paymentTracking" /><span><strong>Track payments in EstateDesk (optional)</strong><span className="mt-1 block text-muted-foreground">Money is still sent directly to the provider. EstateDesk records entries and provider confirmation; it does not collect, hold, or transfer funds.</span></span></label>
               <Field name="agreedAmount" label="Agreed total in KES (optional; for tracking only)" type="number" required={false} />
-              <p className="text-sm text-muted-foreground">Only providers approved by EstateDesk can apply. Providers see the job scope and location, but not private property access details.</p>
+              <p className="text-sm text-muted-foreground">Only providers approved by EstateDesk can apply. Providers see the service scope and location, but not private property access details.</p>
             </ActionForm>
           </div>
         </details>
       </section>
 
       <section id="jobs" aria-labelledby="jobs-title">
-        {workflow ? <Link href="/dashboard/org/service-providers#jobs" className="inline-flex min-h-11 items-center text-sm font-semibold text-primary">Show all jobs</Link> : null}
-        <p className="mb-2 text-xs text-muted-foreground">Most recent {jobs.length} matching jobs shown.</p>
-        <div className="mb-4"><p className="text-sm font-semibold uppercase tracking-wide text-primary">Your activity</p><h2 id="jobs-title" className="mt-1 text-2xl font-bold">Jobs and applications</h2></div>
+        {workflow ? <Link href="/dashboard/org/service-providers#jobs" className="inline-flex min-h-11 items-center text-sm font-semibold text-primary">Show all service requests</Link> : null}
+        <p className="mb-2 text-xs text-muted-foreground">Most recent {jobs.length} matching service requests shown.</p>
+        <div className="mb-4"><p className="text-sm font-semibold uppercase tracking-wide text-primary">Your activity</p><h2 id="jobs-title" className="mt-1 text-2xl font-bold">Service requests and proposals</h2></div>
         <div className="space-y-4">
           {jobs.map(job => <article id={`job-${job.id}`} key={job.id} className={panelClass}>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div><p className="text-sm font-semibold text-primary">{job.category} · {job.location} · {job.status.replaceAll("_", " ")}</p><h3 className="mt-2 text-xl font-bold">{job.title}</h3></div>
-              {!(["COMPLETED", "CANCELLED"].includes(job.status)) ? <ActionForm action={cancelJob} label="Cancel job" danger><input type="hidden" name="jobId" value={job.id} /></ActionForm> : null}
+              {!(["COMPLETED", "CANCELLED"].includes(job.status)) ? <ActionForm action={cancelJob} label="Cancel service request" danger><input type="hidden" name="jobId" value={job.id} /></ActionForm> : null}
             </div>
             <p className="mt-3 whitespace-pre-line text-muted-foreground">{job.description}</p>
             {job.budget ? <p className="mt-2 text-sm font-medium">Indicative budget: KES {job.budget.toNumber().toLocaleString("en-KE")}</p> : null}
@@ -102,20 +102,20 @@ export default async function Page({ searchParams }: { searchParams: Promise<Dir
                   <ActionForm action={reviewProviderJobApplication} label="Mark under review"><input type="hidden" name="applicationId" value={application.id} /><input type="hidden" name="status" value="REVIEWING" /><Field name="reviewNote" label="Optional note" required={false} maxLength={1000} /></ActionForm>
                   <ActionForm action={reviewProviderJobApplication} label="Decline with feedback" danger><input type="hidden" name="applicationId" value={application.id} /><input type="hidden" name="status" value="DECLINED" /><TextField name="reviewNote" label="Feedback for the provider (at least 10 characters)" maxLength={1000} /></ActionForm>
                 </div>
-                {application.provider.status === "ACTIVE" && application.provider.available && application.provider.user.emailVerified ? <ActionForm action={hireForJob} label="Send job offer"><input type="hidden" name="jobId" value={job.id} /><input type="hidden" name="providerId" value={application.provider.id} /></ActionForm> : <p className="text-xs text-muted-foreground">This provider is not currently eligible for a job offer.</p>}
+                {application.provider.status === "ACTIVE" && application.provider.available && application.provider.user.emailVerified ? <ActionForm action={hireForJob} label="Send service offer"><input type="hidden" name="jobId" value={job.id} /><input type="hidden" name="providerId" value={application.provider.id} /></ActionForm> : <p className="text-xs text-muted-foreground">This provider is not currently eligible for a service offer.</p>}
               </div> : null}
-            </article>)}</div></section> : job.status === "OPEN" ? <p className="mt-4 rounded-lg bg-muted/60 p-3 text-sm text-muted-foreground">No applications yet. Matching available providers have been notified.</p> : null}
+            </article>)}</div></section> : job.status === "OPEN" ? <p className="mt-4 rounded-lg bg-muted/60 p-3 text-sm text-muted-foreground">No proposals yet. Matching available providers have been notified.</p> : null}
 
             {job.status === "SUBMITTED" ? <div className="mt-5 max-w-xl rounded-xl border border-sky-500/30 bg-sky-500/5 p-4"><h4 className="font-semibold">Provider submitted work</h4><p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">{job.completionNotes}</p><div className="mt-4"><ActionForm action={completeJob} label="Confirm completion & publish review"><input type="hidden" name="jobId" value={job.id} /><label className="block text-sm">Rating<select name="rating" className={inputClass}>{[5, 4, 3, 2, 1].map(rating => <option key={rating} value={rating}>{rating} / 5</option>)}</select></label><TextField name="comment" label="Public review of the completed work" maxLength={2000} /></ActionForm></div></div> : null}
             {job.review ? <p className="mt-4 rounded-lg bg-muted p-3 text-sm">Your public review: {job.review.rating}/5 · {job.review.comment}</p> : null}
-            {job.provider && !["CANCELLED"].includes(job.status) ? <details className="mt-5"><summary className="cursor-pointer text-sm font-semibold text-destructive">Report this provider to EstateDesk</summary><div className="mt-3 max-w-xl"><ActionForm action={reportHiredProvider} label="Submit report" danger><input type="hidden" name="jobId" value={job.id} /><TextField name="reason" label="Describe the problem (at least 20 characters)" /><p className="text-sm text-muted-foreground">Reports go to platform staff and are not published on the provider’s profile.</p></ActionForm>{job.reports.some(report => !report.resolvedAt) ? <p className="mt-2 text-sm">A report for this job is awaiting platform review.</p> : null}</div></details> : null}
+            {job.provider && !["CANCELLED"].includes(job.status) ? <details className="mt-5"><summary className="cursor-pointer text-sm font-semibold text-destructive">Report this provider to EstateDesk</summary><div className="mt-3 max-w-xl"><ActionForm action={reportHiredProvider} label="Submit report" danger><input type="hidden" name="jobId" value={job.id} /><TextField name="reason" label="Describe the problem (at least 20 characters)" /><p className="text-sm text-muted-foreground">Reports go to platform staff and are not published on the provider’s profile.</p></ActionForm>{job.reports.some(report => !report.resolvedAt) ? <p className="mt-2 text-sm">A report for this service request is awaiting platform review.</p> : null}</div></details> : null}
           </article>)}
-          {!jobs.length ? <p className={panelClass}>No jobs yet. Post a clear scope of work to receive proposals from approved providers.</p> : null}
+          {!jobs.length ? <p className={panelClass}>No service requests yet. Post a clear scope of work to receive proposals from approved providers.</p> : null}
         </div>
-        {jobs.length === 100 ? <p className="mt-4 text-xs text-muted-foreground">Showing the latest 100 jobs.</p> : null}
+        {jobs.length === 100 ? <p className="mt-4 text-xs text-muted-foreground">Showing the latest 100 service requests.</p> : null}
       </section>
 
-      <section aria-labelledby="directory-title"><div className="mb-4"><p className="text-sm font-semibold uppercase tracking-wide text-primary">Discover local talent</p><h2 id="directory-title" className="mt-1 text-2xl font-bold">Approved provider directory</h2><p className="mt-1 text-muted-foreground">Compare portfolios and verified completed-job reviews before sending an offer.</p></div><ProviderDirectory filters={await searchParams} orgView /></section>
+      <section aria-labelledby="directory-title"><div className="mb-4"><p className="text-sm font-semibold uppercase tracking-wide text-primary">Find property specialists</p><h2 id="directory-title" className="mt-1 text-2xl font-bold">Approved provider directory</h2><p className="mt-1 text-muted-foreground">Compare portfolios and verified completed-job reviews before sending an offer.</p></div><ProviderDirectory filters={await searchParams} orgView /></section>
     </main>
   );
 }
