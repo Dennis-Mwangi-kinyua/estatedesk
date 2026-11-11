@@ -1,0 +1,26 @@
+name: Recruitment follow-ups
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+permissions:
+  contents: read
+concurrency:
+  group: recruitment-dispatch
+  cancel-in-progress: false
+jobs:
+  dispatch:
+    if: vars.RECRUITMENT_SCHEDULE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Queue reminders and dispatch approved recruitment emails
+        env:
+          APP_URL: ${{ vars.ESTATEDESK_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          test -n "$APP_URL" && test -n "$CRON_SECRET"
+          case "$APP_URL" in https://*) ;; *) exit 1 ;; esac
+          curl --fail --silent --show-error --max-time 290 --output /dev/null \
+            --header "Authorization: Bearer $CRON_SECRET" \
+            "${APP_URL%/}/api/cron/recruitment"

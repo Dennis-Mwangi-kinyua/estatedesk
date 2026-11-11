@@ -15,7 +15,7 @@ test("public recruitment accepts real applications while separating platform and
   const actor = (platform: boolean, orgId = org.id): AppSession => ({ userId: platform ? admin.id : owner.id, fullName: platform ? admin.fullName : owner.fullName, email: null, platformRole: platform ? "PLATFORM_ADMIN" : "USER", activeOrgId: orgId, activeOrgRole: "ADMIN", membershipScope: { scopeType: "ORG", scopeId: orgId }, mustChangePassword: false, requiresTermsAcceptance: false });
   const platform = actor(true), employer = actor(false), foreign = actor(false, other.id);
   const draft = { title: `Property manager ${tag}`, department: "Operations", location: "Nairobi, Kenya", employmentType: "FULL_TIME", workplace: "ON_SITE", description: "Manage a growing residential property portfolio and coordinate staff.", requirements: "At least two years of relevant property management experience.", salaryMin: "40000", salaryMax: "60000", currencyCode: "KES", salaryPeriod: "MONTH", closingDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10) };
-  const applicant = { fullName: "Applicant Example", email: "Candidate@Example.invalid", phone: "0700000000", coverLetter: "I have experience managing residential properties and coordinating staff.", portfolioUrl: "https://example.invalid/profile", consent: "on" };
+  const applicant = { source: "REFERRAL", fullName: "Applicant Example", email: "Candidate@Example.invalid", phone: "0700000000", coverLetter: "I have experience managing residential properties and coordinating staff.", portfolioUrl: "https://example.invalid/profile", consent: "on" };
   let platformJobId = "";
   try {
     const orgJobId = await service.saveJob(employer, "organization", draft);
@@ -79,9 +79,80 @@ test("public recruitment accepts real applications while separating platform and
       const fresh = await prisma.recruitmentApplication.findUniqueOrThrow({ where: { id: application.id } });
       await assert.rejects(service.reviewApplication(employer, "organization", application.id, "INTERVIEW", "Arrange interview", fresh.updatedAt.toISOString()));
       const appointment = `${new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10)}T10:00`;
-      await service.reviewApplication(employer, "organization", application.id, "INTERVIEW", "Interview arranged separately", fresh.updatedAt.toISOString(), appointment);
+      await service.reviewApplication(employer, "organization", application.id, "INTERVIEW", "Interview arranged separately", fresh.updatedAt.toISOString(), appointment, "Video call: https://example.invalid/meeting. Contact hiring@example.invalid.");
       const event = await prisma.recruitmentApplicationEvent.findFirstOrThrow({ where: { applicationId: application.id, toStatus: "INTERVIEW" } });
       assert.equal(event.interviewAt?.toISOString().slice(11, 16), "07:00");
+    });
+    await t.test("communications need employer approval, keep notes private, and deduplicate reminders", async () => {
+      const communications = await import("../../apps/web/src/features/recruitment/communications");
+      const automation = await import("../../apps/web/src/features/recruitment/automation");
+      const { recruitmentReport } = await import("../../apps/web/src/features/recruitment/reports");
+      const sent: Array<{ to: string; subject: string; body: string; key?: string }> = [];
+      const send = async (to: string, subject: string, body: string, _attachments?: unknown, options?: { idempotencyKey?: string }) => { sent.push({ to, subject, body, key: options?.idempotencyKey }); return { provider: "test", status: "accepted" }; };
+      const receipts = await prisma.recruitmentCommunication.findMany({ where: { applicationId: application.id, kind: "RECEIPT" } });
+      assert.equal(receipts.length, 1);
+      assert.match(receipts[0].body, /ED-/);
+      await automation.deliverRecruitmentMessages({ send });
+      assert.equal(sent.length, 1, "only the receipt may send automatically");
+      let draftMessage = await prisma.recruitmentCommunication.findFirstOrThrow({ where: { applicationId: application.id, kind: "INTERVIEW", status: "DRAFT" } });
+      assert.ok(!draftMessage.body.includes("Arrange interview"), "private review note is excluded");
+      assert.match(draftMessage.body, /Africa\/Nairobi/);
+      await assert.rejects(communications.approveCommunication(foreign, "organization", draftMessage.id, draftMessage.updatedAt.toISOString(), draftMessage.subject, draftMessage.body));
+      await assert.rejects(communications.approveCommunication(platform, "platform", draftMessage.id, draftMessage.updatedAt.toISOString(), draftMessage.subject, draftMessage.body));
+      await communications.approveCommunication(employer, "organization", draftMessage.id, draftMessage.updatedAt.toISOString(), draftMessage.subject, draftMessage.body);
+      await assert.rejects(communications.approveCommunication(employer, "organization", draftMessage.id, draftMessage.updatedAt.toISOString(), draftMessage.subject, draftMessage.body));
+      assert.equal(await prisma.recruitmentCommunication.count({ where: { applicationId: application.id, kind: "INTERVIEW_REMINDER" } }), 1);
+      await assert.rejects(communications.cancelCommunication(foreign, "organization", draftMessage.id));
+      await communications.cancelCommunication(employer, "organization", draftMessage.id);
+      assert.equal(await prisma.recruitmentCommunication.count({ where: { applicationId: application.id, kind: "INTERVIEW_REMINDER", status: "QUEUED" } }), 0);
+      const rescheduled = await prisma.recruitmentApplication.findUniqueOrThrow({ where: { id: application.id } });
+      await service.reviewApplication(employer, "organization", application.id, "INTERVIEW", "Reschedule private review", rescheduled.updatedAt.toISOString(), `${draftMessage.interviewAt!.toISOString().slice(0, 10)}T11:00`, "New meeting location; contact hiring@example.invalid");
+      draftMessage = await prisma.recruitmentCommunication.findFirstOrThrow({ where: { applicationId: application.id, kind: "INTERVIEW", status: "DRAFT" } });
+      await communications.approveCommunication(employer, "organization", draftMessage.id, draftMessage.updatedAt.toISOString(), draftMessage.subject, draftMessage.body + "\nEmployer-approved meeting instructions.");
+      await Promise.all([automation.deliverRecruitmentMessages({ send }), automation.deliverRecruitmentMessages({ send })]);
+      assert.equal(sent.length, 2, "parallel workers must claim the approved invitation once");
+      const reminder = await prisma.recruitmentCommunication.findFirstOrThrow({ where: { applicationId: application.id, kind: "INTERVIEW_REMINDER", status: "QUEUED" } });
+      assert.match(reminder.body, /Employer-approved meeting instructions/);
+      await automation.deliverRecruitmentMessages({ send, now: new Date(reminder.scheduledAt.getTime() + 1000) });
+      assert.equal(sent.length, 3);
+      assert.equal(new Set(sent.map(item => item.key)).size, 3);
+      const latest = await prisma.recruitmentApplication.findUniqueOrThrow({ where: { id: application.id } });
+      await service.reviewApplication(employer, "organization", application.id, "SHORTLISTED", "Private screening reassessment", latest.updatedAt.toISOString());
+      const shortlist = await prisma.recruitmentCommunication.findFirstOrThrow({ where: { applicationId: application.id, kind: "SHORTLIST", status: "DRAFT" } });
+      await communications.approveCommunication(employer, "organization", shortlist.id, shortlist.updatedAt.toISOString(), shortlist.subject, shortlist.body);
+      await prisma.organization.update({ where: { id: org.id }, data: { blacklistedAt: new Date() } });
+      await automation.deliverRecruitmentMessages({ send });
+      assert.equal(sent.length, 3, "blocked employers cannot deliver candidate messages");
+      await prisma.organization.update({ where: { id: org.id }, data: { blacklistedAt: null } });
+      const report = await recruitmentReport(employer, "organization");
+      assert.equal(report.sources.REFERRAL, 1); assert.equal(report.reached.INTERVIEW, 1); assert.equal(report.averageHireDays, null);
+      assert.equal((await recruitmentReport(foreign, "organization")).total, 0);
+      let reviewed = await prisma.recruitmentApplication.findUniqueOrThrow({ where: { id: application.id } });
+      await service.reviewApplication(employer, "organization", application.id, "REJECTED", "Private decision note", reviewed.updatedAt.toISOString());
+      const rejection = await prisma.recruitmentCommunication.findFirstOrThrow({ where: { applicationId: application.id, kind: "REJECTION", status: "DRAFT" } });
+      assert.ok(!rejection.body.includes("Private decision note"));
+      await communications.approveCommunication(employer, "organization", rejection.id, rejection.updatedAt.toISOString(), rejection.subject, rejection.body);
+      reviewed = await prisma.recruitmentApplication.findUniqueOrThrow({ where: { id: application.id } });
+      await service.reviewApplication(employer, "organization", application.id, "SCREENING", "Reopen after clarification", reviewed.updatedAt.toISOString());
+      assert.equal((await prisma.recruitmentCommunication.findUniqueOrThrow({ where: { id: rejection.id } })).status, "CANCELLED");
+      for (const stage of ["SHORTLISTED", "OFFERED", "HIRED"]) {
+        reviewed = await prisma.recruitmentApplication.findUniqueOrThrow({ where: { id: application.id } });
+        await service.reviewApplication(employer, "organization", application.id, stage, "Record hiring decision", reviewed.updatedAt.toISOString());
+      }
+      assert.equal(await prisma.recruitmentCommunication.count({ where: { applicationId: application.id, kind: "OFFER" } }), 1);
+      const hiringReport = await recruitmentReport(employer, "organization");
+      assert.equal(hiringReport.hires, 1); assert.ok(hiringReport.averageHireDays !== null && hiringReport.averageHireDays >= 0);
+      assert.equal(hiringReport.exits.SHORTLISTED, 1);
+      await prisma.user.update({ where: { id: owner.id }, data: { email: `hiring-${tag}@example.invalid` } });
+      await prisma.recruitmentJob.update({ where: { id: orgJob.id }, data: { closesAt: new Date(Date.now() + 36 * 3600000) } });
+      assert.equal(await automation.queueClosingReminders(), 1);
+      assert.equal(await automation.queueClosingReminders(), 0);
+      const closing = await prisma.recruitmentCommunication.findFirstOrThrow({ where: { jobId: orgJob.id, kind: "CLOSING_REMINDER" } });
+      await automation.deliverRecruitmentMessages({ send: async () => { throw new Error("test provider offline"); } });
+      const failedAttempt = await prisma.recruitmentCommunication.findUniqueOrThrow({ where: { id: closing.id } });
+      assert.equal(failedAttempt.status, "QUEUED"); assert.equal(failedAttempt.attempts, 1);
+      await automation.deliverRecruitmentMessages({ send, now: new Date(failedAttempt.scheduledAt.getTime() + 1) });
+      assert.equal(sent.length, 4);
     });
     await t.test("suspended employers, expired jobs and closed jobs cannot accept new applications", async () => {
       await prisma.organization.update({ where: { id: org.id }, data: { status: "SUSPENDED" } });
@@ -100,6 +171,7 @@ test("public recruitment accepts real applications while separating platform and
       await service.deleteApplication(employer, "organization", application.id, "Candidate removal request");
       assert.equal(await prisma.recruitmentApplicationEvent.count({ where: { applicationId: application.id } }), 0);
       assert.equal(await prisma.recruitmentApplication.count({ where: { id: application.id } }), 0);
+      assert.equal(await prisma.recruitmentCommunication.count({ where: { applicationId: application.id } }), 0);
       assert.equal(await prisma.auditLog.count({ where: { orgId: org.id, action: "RECRUITMENT_APPLICATION_DELETED" } }), 1);
     });
   } finally {

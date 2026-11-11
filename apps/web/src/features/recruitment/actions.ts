@@ -1,4 +1,5 @@
 "use server";
+import { approveCommunication, cancelCommunication } from "./communications";
 import { createHash } from "node:crypto";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -22,12 +23,14 @@ export async function hiringAction(_state: HiringState, form: FormData): Promise
     switch (text(form, "operation")) {
       case "saveJob": jobId = await saveJob(session, scope, Object.fromEntries(form), id, text(form, "version")); break;
       case "changeJobStatus": await changeJobStatus(session, scope, id, text(form, "status"), text(form, "version")); break;
-      case "reviewApplication": await reviewApplication(session, scope, id, text(form, "status"), text(form, "note"), text(form, "version"), text(form, "interviewAt")); jobId = text(form, "jobId"); break;
+      case "reviewApplication": await reviewApplication(session, scope, id, text(form, "status"), text(form, "note"), text(form, "version"), text(form, "interviewAt"), text(form, "interviewDetails")); jobId = text(form, "jobId"); break;
+      case "approveMessage": await approveCommunication(session, scope, id, text(form, "version"), text(form, "subject"), text(form, "body")); jobId = text(form, "jobId"); break;
+      case "cancelMessage": await cancelCommunication(session, scope, id); jobId = text(form, "jobId"); break;
       case "deleteApplication": check(text(form, "confirmation") === "DELETE", "Type DELETE to remove the application and CV permanently."); await deleteApplication(session, scope, id, text(form, "reason")); jobId = text(form, "jobId"); break;
       default: return { error: "Unknown recruitment action." };
     }
     revalidatePath(hiringBase(scope)); revalidatePath(`${hiringBase(scope)}/${jobId}`); revalidatePath("/careers", "layout"); revalidatePath("/sitemap-careers.xml");
-    return { message: text(form, "operation") === "saveJob" && !id ? "Draft created. Open it to review and publish." : "Saved successfully.", jobId };
+    return { message: text(form, "operation") === "saveJob" && !id ? "Draft created. Open it to review and publish." : text(form, "operation") === "approveMessage" ? "Approved and queued for email delivery." : "Saved successfully.", jobId };
   } catch (error) {
     return { error: error instanceof RecruitmentError ? error.message : error instanceof ZodError ? error.issues[0].message : safeServerActionError("recruitment.manage", error, "Could not save. Refresh and try again.") };
   }

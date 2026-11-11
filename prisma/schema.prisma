@@ -335,6 +335,7 @@ model RecruitmentJob {
   org Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
   createdBy User @relation(fields: [createdByUserId], references: [id])
   applications RecruitmentApplication[]
+  communications RecruitmentCommunication[]
   @@index([orgId, status, createdAt])
   @@index([status, closesAt, publishedAt])
 }
@@ -351,12 +352,14 @@ model RecruitmentApplication {
   resumeBytes Bytes?
   resumeSize Int?
   status String @default("SUBMITTED")
+  source String @default("UNSPECIFIED")
   consentAt DateTime @default(now())
   consentVersion String @default("2026-11-10")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   job RecruitmentJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
   events RecruitmentApplicationEvent[]
+  communications RecruitmentCommunication[]
   @@unique([jobId, email])
   @@index([jobId, status, createdAt])
 }
@@ -369,10 +372,43 @@ model RecruitmentApplicationEvent {
   toStatus String
   note String
   interviewAt DateTime?
+  interviewDetails String?
   createdAt DateTime @default(now())
   application RecruitmentApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   actor User @relation(fields: [actorUserId], references: [id])
   @@index([applicationId, createdAt])
+}
+
+/// Private recruitment outbox. Candidate stage messages require employer approval.
+model RecruitmentCommunication {
+  id String @id @default(cuid())
+  jobId String
+  applicationId String?
+  dedupeKey String @unique
+  kind String
+  recipient String
+  subject String
+  body String
+  status String @default("DRAFT")
+  expectedVersion DateTime?
+  interviewEventId String?
+  deadlineAt DateTime?
+  interviewAt DateTime?
+  approvedByUserId String?
+  approvedAt DateTime?
+  scheduledAt DateTime @default(now())
+  attempts Int @default(0)
+  lockedAt DateTime?
+  firstAttemptAt DateTime?
+  acceptedAt DateTime?
+  lastError String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  job RecruitmentJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  application RecruitmentApplication? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  @@index([status, scheduledAt])
+  @@index([applicationId, createdAt])
+  @@index([jobId, createdAt])
 }
 
 model OrgManagementPolicy {

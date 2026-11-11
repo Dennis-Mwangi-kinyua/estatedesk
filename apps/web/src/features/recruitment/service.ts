@@ -1,3 +1,4 @@
+import { candidateMessage, stageMessageKinds } from "./communication-policy";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { Prisma } from "@prisma/client";
@@ -55,26 +56,40 @@ export async function submitApplication(slug: string, input: unknown, resume?: {
   const data = applicationSchema.parse(input);
   if (resume) validateResume(resume.bytes);
   return prisma.$transaction(async tx => {
-    const job = await tx.recruitmentJob.findFirst({ where: { ...publicJobWhere(), slug }, select: { id: true, title: true, orgId: true, createdByUserId: true } });
+    const job = await tx.recruitmentJob.findFirst({ where: { ...publicJobWhere(), slug }, select: { id: true, title: true, orgId: true, createdByUserId: true, org: { select: { name: true } } } });
     check(job, "This job is no longer accepting applications.");
     // A duplicate receives the same generic acknowledgement without disclosing a prior application.
-    const inserted = await tx.recruitmentApplication.createMany({ data: [{ jobId: job.id, fullName: data.fullName, email: data.email, phone: data.phone, coverLetter: data.coverLetter, portfolioUrl: data.portfolioUrl || null, ...(resume ? { resumeBytes: new Uint8Array(resume.bytes), resumeFileName: resume.fileName.replace(/[^a-zA-Z0-9._ -]/g, "_").slice(0, 160), resumeSize: resume.bytes.length } : {}) }], skipDuplicates: true });
+    const inserted = await tx.recruitmentApplication.createMany({ data: [{ jobId: job.id, source: data.source, fullName: data.fullName, email: data.email, phone: data.phone, coverLetter: data.coverLetter, portfolioUrl: data.portfolioUrl || null, ...(resume ? { resumeBytes: new Uint8Array(resume.bytes), resumeFileName: resume.fileName.replace(/[^a-zA-Z0-9._ -]/g, "_").slice(0, 160), resumeSize: resume.bytes.length } : {}) }], skipDuplicates: true });
+    if (inserted.count) {
+      const application = await tx.recruitmentApplication.findUniqueOrThrow({ where: { jobId_email: { jobId: job.id, email: data.email } } });
+      const receipt = candidateMessage({ id: application.id, fullName: application.fullName, title: job.title, employer: job.org?.name ?? "EstateDesk", kind: "RECEIPT" });
+      await tx.recruitmentCommunication.create({ data: { jobId: job.id, applicationId: application.id, dedupeKey: `receipt:${application.id}`, kind: "RECEIPT", recipient: application.email, ...receipt, status: "QUEUED" } });
+    }
     if (inserted.count && job.orgId) await tx.notification.create({ data: { orgId: job.orgId, userId: job.createdByUserId, channel: "IN_APP", type: "GENERAL", title: "New job application", message: `A candidate applied for ${job.title}. Review the application in Recruitment.`, status: "SENT", sentAt: new Date() } });
   }, { isolationLevel: "Serializable" });
 }
-export async function reviewApplication(session: AppSession, scope: HiringScope, id: string, status: string, note: string, version: string, interviewDate = "") {
+export async function reviewApplication(session: AppSession, scope: HiringScope, id: string, status: string, note: string, version: string, interviewDate = "", interviewDetails = "") {
   const orgId = hiringOrgId(session, scope);
   check(note.trim().length >= 3 && note.length <= 3000 && Number.isFinite(Date.parse(version)), "Add a review note and refresh the application before saving.");
   const interviewAt = interviewDate ? new Date(`${interviewDate}:00+03:00`) : null;
   if (interviewDate) check(/^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d$/.test(interviewDate) && calendarDate.safeParse(interviewDate.slice(0, 10)).success, "Choose a valid interview date and time.");
   check(!interviewAt || Number.isFinite(interviewAt.getTime()), "Choose a valid interview date and time in Nairobi time.");
-  if (status === "INTERVIEW") check(interviewAt && interviewAt > new Date(), "Choose a future interview appointment.");
+  if (status === "INTERVIEW") {
+    check(interviewAt && interviewAt > new Date(), "Choose a future interview appointment.");
+    check(interviewDetails.trim().length >= 5 && interviewDetails.length <= 1000, "Add the interview location or meeting link and a hiring contact.");
+  }
   await prisma.$transaction(async tx => {
-    const application = await tx.recruitmentApplication.findFirst({ where: { id, job: { orgId }, updatedAt: new Date(version) }, select: { id: true, status: true, updatedAt: true } });
+    const application = await tx.recruitmentApplication.findFirst({ where: { id, job: { orgId }, updatedAt: new Date(version) }, include: { job: { include: { org: { select: { name: true } } } } } });
     check(application, "Application changed or is unavailable. Refresh before reviewing.");
     check(status === application.status || allowedStages(application.status).includes(status as ApplicationStage), "This stage transition is unavailable.");
-    await tx.recruitmentApplication.update({ where: { id }, data: { status, updatedAt: new Date(Math.max(Date.now(), application.updatedAt.getTime() + 1)) } });
-    await tx.recruitmentApplicationEvent.create({ data: { applicationId: id, actorUserId: session.userId, fromStatus: application.status, toStatus: status, note: note.trim(), interviewAt } });
+    const updated = await tx.recruitmentApplication.update({ where: { id }, data: { status, updatedAt: new Date(Math.max(Date.now(), application.updatedAt.getTime() + 1)) } });
+    const event = await tx.recruitmentApplicationEvent.create({ data: { applicationId: id, actorUserId: session.userId, fromStatus: application.status, toStatus: status, note: note.trim(), interviewAt, interviewDetails: status === "INTERVIEW" ? interviewDetails.trim() : null } });
+    await tx.recruitmentCommunication.updateMany({ where: { applicationId: id, kind: { not: "RECEIPT" }, status: { in: ["DRAFT", "QUEUED", "FAILED"] } }, data: { status: "CANCELLED", lastError: "Candidate review changed; use the latest message." } });
+    const kind = stageMessageKinds[status];
+    if (kind) {
+      const message = candidateMessage({ id, fullName: application.fullName, title: application.job.title, employer: application.job.org?.name ?? "EstateDesk", kind, interviewAt, interviewDetails });
+      await tx.recruitmentCommunication.create({ data: { jobId: application.jobId, applicationId: id, dedupeKey: `review:${event.id}`, kind, recipient: application.email, ...message, expectedVersion: updated.updatedAt, interviewEventId: kind === "INTERVIEW" ? event.id : null, interviewAt: kind === "INTERVIEW" ? interviewAt : null } });
+    }
     await log(tx, session, orgId, "RECRUITMENT_APPLICATION_REVIEWED", id, { status });
   }, { isolationLevel: "Serializable" });
 }
@@ -108,11 +123,11 @@ export async function hiringJobs(session: AppSession, scope: HiringScope, page: 
 }
 export async function hiringJob(session: AppSession, scope: HiringScope, id: string, page: number, status = "ALL", q = "") {
   const orgId = hiringOrgId(session, scope);
-  const job = await prisma.recruitmentJob.findFirst({ where: { orgId, id }, include: { org: { select: { name: true } } } });
+  const job = await prisma.recruitmentJob.findFirst({ where: { orgId, id }, include: { org: { select: { name: true } }, communications: { where: { applicationId: null }, orderBy: { createdAt: "desc" }, take: 20 } } });
   check(job, "Job unavailable.");
   const where: Prisma.RecruitmentApplicationWhereInput = { jobId: id, job: { orgId }, ...(status === "ALL" ? {} : { status }), ...(q ? { OR: [{ fullName: { contains: q.slice(0, 100), mode: "insensitive" } }, { email: { contains: q.slice(0, 100), mode: "insensitive" } }] } : {}) };
   const [applications, total, stages] = await Promise.all([
-    prisma.recruitmentApplication.findMany({ where, select: { id: true, fullName: true, email: true, phone: true, coverLetter: true, portfolioUrl: true, resumeFileName: true, resumeSize: true, status: true, createdAt: true, updatedAt: true, events: { select: { id: true, note: true, fromStatus: true, toStatus: true, interviewAt: true, createdAt: true, actor: { select: { fullName: true } } }, orderBy: { createdAt: "desc" }, take: 10 } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 20, skip: (page - 1) * 20 }),
+    prisma.recruitmentApplication.findMany({ where, select: { id: true, source: true, communications: { orderBy: { createdAt: "desc" }, take: 30 }, fullName: true, email: true, phone: true, coverLetter: true, portfolioUrl: true, resumeFileName: true, resumeSize: true, status: true, createdAt: true, updatedAt: true, events: { select: { id: true, note: true, interviewDetails: true, fromStatus: true, toStatus: true, interviewAt: true, createdAt: true, actor: { select: { fullName: true } } }, orderBy: { createdAt: "desc" }, take: 10 } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 20, skip: (page - 1) * 20 }),
     prisma.recruitmentApplication.count({ where }), prisma.recruitmentApplication.groupBy({ by: ["status"], where: { jobId: id, job: { orgId } }, _count: true }),
   ]);
   return { job, applications, total, stages };

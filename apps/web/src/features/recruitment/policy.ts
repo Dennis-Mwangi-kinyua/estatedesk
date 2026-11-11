@@ -14,7 +14,8 @@ export const jobSchema = z.object({
 }).superRefine((v, ctx) => {
   if (!!v.salaryMin !== !!v.salaryMax || (v.salaryMin && Number(v.salaryMax) < Number(v.salaryMin))) ctx.addIssue({ code: "custom", path: ["salaryMin"], message: "Provide both salary bounds, with maximum at least the minimum, or leave both blank." });
 });
-export const applicationSchema = z.object({ fullName: z.string().trim().min(2).max(120), email: z.string().trim().email().max(160).transform(v => v.toLowerCase()), phone: z.string().trim().min(6).max(40), coverLetter: z.string().trim().min(30).max(6000), portfolioUrl: z.union([z.literal(""), z.string().trim().url().max(500).refine(v => /^https?:\/\//i.test(v), "Use an HTTPS or HTTP portfolio link.")]), consent: z.literal("on", { error: "Please consent to sharing your application with this employer." }) });
+export const applicationSources = ["UNSPECIFIED", "CAREERS_BOARD", "REFERRAL", "SOCIAL_MEDIA", "SEARCH_ENGINE", "OTHER"] as const;
+export const applicationSchema = z.object({ source: z.enum(applicationSources).default("UNSPECIFIED"), fullName: z.string().trim().min(2).max(120), email: z.string().trim().email().max(160).transform(v => v.toLowerCase()), phone: z.string().trim().min(6).max(40), coverLetter: z.string().trim().min(30).max(6000), portfolioUrl: z.union([z.literal(""), z.string().trim().url().max(500).refine(v => /^https?:\/\//i.test(v), "Use an HTTPS or HTTP portfolio link.")]), consent: z.literal("on", { error: "Please consent to sharing your application with this employer." }) });
 const transitions: Record<ApplicationStage, readonly ApplicationStage[]> = {
   SUBMITTED: ["SCREENING", "SHORTLISTED", "INTERVIEW", "REJECTED", "WITHDRAWN"],
   SCREENING: ["SHORTLISTED", "INTERVIEW", "REJECTED", "WITHDRAWN"],
