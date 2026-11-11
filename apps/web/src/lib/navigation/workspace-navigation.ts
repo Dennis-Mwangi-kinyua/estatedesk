@@ -7,9 +7,15 @@ const tenant = (paths: string[]) => paths.map(path => `/dashboard/tenant${path ?
 const caretaker = (paths: string[]) => paths.map(path => `/dashboard/caretaker${path ? `/${path}` : ""}`);
 const platform = (paths: string[]) => paths.map(path => `/platform${path ? `/${path}` : ""}`);
 
-const platformAccount: NavigationSection[] = [
-  { label: "Access & security", hrefs: platform(["privacy-requests", "users", "admins", "landlords", "permissions", "identity-verification", "agreements", "security", "audit-logs", "support-access"]) },
-  { label: "Settings & help", hrefs: platform(["settings", "help"]) },
+/** Shared by the web drawer, desktop sidebar and native platform menu. */
+export const PLATFORM_NAVIGATION: readonly NavigationSection[] = [
+  { label: "Overview", hrefs: platform(["", "search", "review-queue"]) },
+  { label: "Customers & growth", hrefs: platform(["demos", "crm", "onboarding", "organizations", "agreements", "marketing"]) },
+  { label: "Revenue & finance", hrefs: platform(["payments", "payment-ops", "expenditures", "billing", "subscriptions", "reports"]) },
+  { label: "People & communication", hrefs: platform(["users", "landlords", "service-providers", "recruitment", "messages", "broadcasts"]) },
+  { label: "Reliability & integrations", hrefs: platform(["system-health", "jobs", "api-explorer", "api-keys", "rate-limits", "feature-flags", "data-management", "backups"]) },
+  { label: "Security & governance", hrefs: platform(["admins", "permissions", "identity-verification", "privacy-requests", "security", "audit-logs", "support-access", "control"]) },
+  { label: "Settings & guidance", hrefs: platform(["settings", "developer/docs", "help"]) },
 ];
 
 export const WORKSPACE_NAVIGATION: Record<NavigationWorkspace, readonly NavigationSection[]> = {
@@ -41,21 +47,8 @@ export const WORKSPACE_NAVIGATION: Record<NavigationWorkspace, readonly Navigati
     { label: "Finance", hrefs: ["/dashboard/landlord/statements", "/dashboard/landlord/payouts"] },
     { label: "My account", hrefs: ["/dashboard/security"] },
   ],
-  "platform-admin": [
-    { label: "Hiring", hrefs: platform(["recruitment"]) },
-    { label: "Workspace", hrefs: platform(["", "search"]) },
-    { label: "Customers & onboarding", hrefs: platform(["demos", "crm", "review-queue", "organizations", "onboarding", "service-providers"]) },
-    { label: "Finance", hrefs: platform(["payments", "payment-ops", "expenditures", "billing", "subscriptions", "reports"]) },
-    { label: "Communication", hrefs: platform(["messages", "broadcasts", "marketing"]) },
-    ...platformAccount,
-  ],
-  "platform-developer": [
-    { label: "Hiring", hrefs: platform(["recruitment"]) },
-    { label: "Engineering", hrefs: platform(["developer", "system-health", "jobs", "developer/docs"]) },
-    { label: "Integrations & data", hrefs: platform(["api-explorer", "api-keys", "rate-limits", "feature-flags", "data-management", "backups"]) },
-    { label: "Site administration", hrefs: platform(["demos", "crm", "review-queue", "control", "organizations", "service-providers", "billing", "subscriptions", "broadcasts"]) },
-    ...platformAccount,
-  ],
+  "platform-admin": PLATFORM_NAVIGATION,
+  "platform-developer": PLATFORM_NAVIGATION,
 };
 
 /** Group the already-authorized links once; retain new routes in a fallback group. */

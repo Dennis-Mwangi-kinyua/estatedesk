@@ -1,7 +1,7 @@
 /** Read-only deployment smoke audit. No authenticated pages or payment requests. */
 import { writeFile } from "node:fs/promises";
 const base = new URL(process.env.AUDIT_BASE_URL || "https://estatedesk.co.ke");
-const paths = ["/", "/login", "/services", "/pricing", "/contact", "/guides", "/stays", "/service-providers", "/property-management-software-kenya", "/property-management-software-dubai", "/property-management-software-middle-east", "/guides/manage-kenyan-rentals-from-uae", "/property-management-software-africa", "/remote-property-management-software", "/robots.txt", "/sitemap-index.xml", "/sitemap.xml"];
+const paths = ["/rent-collection-software", "/property-management-onboarding", "/", "/login", "/services", "/pricing", "/contact", "/guides", "/stays", "/service-providers", "/property-management-software-kenya", "/property-management-software-dubai", "/property-management-software-middle-east", "/guides/manage-kenyan-rentals-from-uae", "/property-management-software-africa", "/remote-property-management-software", "/robots.txt", "/sitemap-index.xml", "/sitemap.xml"];
 const results = [];
 // Audit the entire published static catalog, not just a hand-picked sample.
 try {

@@ -243,6 +243,17 @@ export const developerNavItems: readonly PlatformNavItem[] = [
   ...dualModeNavItems,
 ] as const;
 
+/** One deduplicated catalogue for the unified platform workspace. */
+export const platformNavItems: readonly PlatformNavItem[] = Array.from(
+  new Map([...adminNavItems, ...developerNavItems]
+    .filter(item => item.href !== "/platform/developer")
+    .map(item => [item.href, item])).values(),
+);
+
+export function getPlatformNavItems(options: { isSuperAdmin: boolean }): readonly PlatformNavItem[] {
+  return platformNavItems.filter(item => !item.superAdminOnly || options.isSuperAdmin);
+}
+
 /**
  * Paths that still require SUPER_ADMIN (nuclear site control only).
  * API keys, jobs, data, and backups are available to all platform operators.
@@ -251,50 +262,6 @@ export const superAdminOnlyPaths = ["/platform/control"] as const;
 
 /** Roles allowed for ordinary platform operator tooling. */
 export const PLATFORM_OPERATOR_ROLES = ["SUPER_ADMIN", "PLATFORM_ADMIN"] as const;
-
-const DEVELOPER_EXCLUSIVE_HREFS = new Set(
-  developerNavItems.filter((item) => !item.dualMode).map((item) => item.href),
-);
-
-const DUAL_MODE_HREFS = new Set(dualModeNavItems.map((item) => item.href));
-
-export const PLATFORM_MODE_STORAGE_KEY = "estatedesk.platform.mode";
-export const PLATFORM_MODE_COOKIE_NAME = "estatedesk_platform_mode";
-export const PLATFORM_LAST_PATH_ADMIN_KEY = "estatedesk.platform.lastPath.admin";
-export const PLATFORM_LAST_PATH_DEVELOPER_KEY =
-  "estatedesk.platform.lastPath.developer";
-
-export function isPlatformMode(value: unknown): value is PlatformMode {
-  return value === "admin" || value === "developer";
-}
-
-export function isDualModePath(pathname: string): boolean {
-  for (const href of DUAL_MODE_HREFS) {
-    if (pathname === href || pathname.startsWith(`${href}/`)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-export function isDeveloperExclusivePath(pathname: string): boolean {
-  if (pathname === "/platform/developer" || pathname.startsWith("/platform/developer/")) {
-    return true;
-  }
-
-  for (const href of DEVELOPER_EXCLUSIVE_HREFS) {
-    if (href === "/platform/developer") continue;
-    if (pathname === href || pathname.startsWith(`${href}/`)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-export function isDeveloperPath(pathname: string): boolean {
-  return isDeveloperExclusivePath(pathname) || isDualModePath(pathname);
-}
 
 export function isSuperAdminOnlyPath(pathname: string): boolean {
   for (const href of superAdminOnlyPaths) {
@@ -305,44 +272,18 @@ export function isSuperAdminOnlyPath(pathname: string): boolean {
   return false;
 }
 
-/**
- * Path-forced mode when the route belongs exclusively to one portal.
- * Dual-mode routes return null so the caller's preferred mode sticks.
- */
-export function forcedModeForPath(pathname: string): PlatformMode | null {
-  if (isDeveloperExclusivePath(pathname)) return "developer";
-  if (isDualModePath(pathname)) return null;
-  if (pathname === "/platform" || pathname.startsWith("/platform/")) return "admin";
-  return null;
-}
-
-export function resolvePlatformMode(
-  pathname: string,
-  preferredMode: PlatformMode = "admin",
-): PlatformMode {
-  return forcedModeForPath(pathname) ?? preferredMode;
-}
-
 export function getNavItemsForMode(
   mode: PlatformMode,
   options?: { isSuperAdmin?: boolean },
 ): readonly PlatformNavItem[] {
-  const items = mode === "developer" ? developerNavItems : adminNavItems;
-  if (options?.isSuperAdmin !== false && options?.isSuperAdmin !== true) {
-    return items;
-  }
-  if (options.isSuperAdmin) return items;
-  return items.filter((item) => !item.superAdminOnly);
+  // Legacy callers and saved preferences receive the same unified workspace.
+  void mode;
+  return getPlatformNavItems({ isSuperAdmin: options?.isSuperAdmin === true });
 }
 
 export function getModeHome(mode: PlatformMode): string {
-  return mode === "developer" ? "/platform/developer" : "/platform";
-}
-
-export function lastPathStorageKey(mode: PlatformMode): string {
-  return mode === "developer"
-    ? PLATFORM_LAST_PATH_DEVELOPER_KEY
-    : PLATFORM_LAST_PATH_ADMIN_KEY;
+  void mode;
+  return "/platform";
 }
 
 export function isNavItemActive(pathname: string, href: string): boolean {
@@ -357,41 +298,7 @@ export function isNavItemActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function parsePlatformModeCookie(value: string | undefined | null): PlatformMode | null {
-  if (!value) return null;
-  const normalized = value.trim().toLowerCase();
-  return isPlatformMode(normalized) ? normalized : null;
-}
-
-export const modeMeta: Record<
-  PlatformMode,
-  {
-    label: string;
-    shortLabel: string;
-    brandSubtitle: string;
-    headerTitle: string;
-    headerDescription: string;
-  }
-> = {
-  admin: {
-    label: "Administration",
-    shortLabel: "Admin",
-    brandSubtitle: "Platform administration",
-    headerTitle: "Platform Admin",
-    headerDescription:
-      "Manage organizations, platform users, billing, messages, and reports",
-  },
-  developer: {
-    label: "Developer",
-    shortLabel: "Developer",
-    brandSubtitle: "Developer portal",
-    headerTitle: "Developer Portal",
-    headerDescription:
-      "System health, APIs, jobs, site ops, feature flags, and control-plane tooling",
-  },
-};
-
-/** Feature flag keys managed from the developer portal. */
+/** Feature flag keys managed from platform operations. */
 export const PLATFORM_FEATURE_FLAG_KEYS = [
   "vacantHouses",
   "taxes",

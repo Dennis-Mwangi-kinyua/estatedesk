@@ -61,7 +61,7 @@ export default async function ApiExplorerPage() {
   return (
     <div className="engineering-workspace mx-auto min-w-0 w-full max-w-7xl space-y-6">
       <PageHeader
-        eyebrow="Developer portal"
+        eyebrow="Platform operations"
         title="API & webhooks"
         description="Reference for public APIs, inbound webhooks, cron endpoints, and recent API key activity. Manage credentials under API Keys."
         action={

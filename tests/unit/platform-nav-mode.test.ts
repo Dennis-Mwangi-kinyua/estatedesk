@@ -1,104 +1,33 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import {
-  forcedModeForPath,
-  getModeHome,
-  getNavItemsForMode,
-  isDeveloperExclusivePath,
-  isDualModePath,
-  isNavItemActive,
-  isSuperAdminOnlyPath,
-  resolvePlatformMode,
-} from "../../apps/web/src/app/(app)/platform/_lib/nav";
+import { getModeHome, getNavItemsForMode, getPlatformNavItems, platformNavItems, isSuperAdminOnlyPath, isNavItemActive } from "../../apps/web/src/app/(app)/platform/_lib/nav";
+import { PLATFORM_NAVIGATION, groupNavigation } from "../../apps/web/src/lib/navigation/workspace-navigation";
 
-describe("platform nav mode", () => {
-  it("resolves admin mode for administration routes", () => {
-    assert.equal(resolvePlatformMode("/platform"), "admin");
-    assert.equal(resolvePlatformMode("/platform/organizations"), "admin");
-    assert.equal(resolvePlatformMode("/platform/users/abc"), "admin");
-    assert.equal(resolvePlatformMode("/platform/settings"), "admin");
-    assert.equal(isDeveloperExclusivePath("/platform"), false);
+describe("unified platform navigation", () => {
+  it("exposes business and technical tools together without duplicate destinations", () => {
+    const items = getPlatformNavItems({ isSuperAdmin: true });
+    assert.equal(new Set(items.map(item => item.href)).size, items.length);
+    for (const href of ["/platform", "/platform/demos", "/platform/organizations", "/platform/payments", "/platform/system-health", "/platform/jobs", "/platform/developer/docs"]) {
+      assert.ok(items.some(item => item.href === href), href);
+    }
+    assert.ok(!items.some(item => item.href === "/platform/developer"));
+    assert.deepEqual(getNavItemsForMode("admin"), getNavItemsForMode("developer"));
+    assert.equal(getModeHome("developer"), "/platform");
   });
-
-  it("resolves developer mode for exclusive developer routes", () => {
-    assert.equal(resolvePlatformMode("/platform/developer"), "developer");
-    assert.equal(resolvePlatformMode("/platform/api-keys"), "developer");
-    assert.equal(resolvePlatformMode("/platform/jobs"), "developer");
-    assert.equal(resolvePlatformMode("/platform/system-health"), "developer");
-    assert.equal(resolvePlatformMode("/platform/feature-flags"), "developer");
-    assert.equal(resolvePlatformMode("/platform/rate-limits"), "developer");
-    assert.equal(resolvePlatformMode("/platform/data-management"), "developer");
-    assert.equal(resolvePlatformMode("/platform/backups"), "developer");
-    assert.equal(resolvePlatformMode("/platform/api-explorer"), "developer");
-    assert.equal(resolvePlatformMode("/platform/control"), "developer");
-    assert.equal(isDeveloperExclusivePath("/platform/developer/docs"), true);
-    assert.equal(isSuperAdminOnlyPath("/platform/control"), true);
-  });
-
-  it("keeps dual-mode routes sticky to preferred mode", () => {
-    assert.equal(isDualModePath("/platform/help"), true);
-    assert.equal(isDualModePath("/platform/security"), true);
-    assert.equal(isDualModePath("/platform/audit-logs"), true);
-    assert.equal(forcedModeForPath("/platform/help"), null);
-    assert.equal(resolvePlatformMode("/platform/help", "admin"), "admin");
-    assert.equal(resolvePlatformMode("/platform/help", "developer"), "developer");
-    assert.equal(resolvePlatformMode("/platform/audit-logs", "developer"), "developer");
-    assert.equal(resolvePlatformMode("/platform/security", "admin"), "admin");
-  });
-
-  it("returns distinct nav sets and filters super-admin-only tools", () => {
-    const admin = getNavItemsForMode("admin");
-    const developer = getNavItemsForMode("developer", { isSuperAdmin: true });
-    const developerPlatformAdmin = getNavItemsForMode("developer", {
-      isSuperAdmin: false,
-    });
-
-    assert.ok(admin.some((item) => item.href === "/platform"));
-    assert.ok(admin.some((item) => item.href === "/platform/organizations"));
-    assert.ok(admin.some((item) => item.href === "/platform/help"));
-    assert.ok(admin.some((item) => item.href === "/platform/audit-logs"));
-    assert.ok(!admin.some((item) => item.href === "/platform/api-keys"));
-
-    assert.ok(developer.some((item) => item.href === "/platform/developer"));
-    assert.ok(developer.some((item) => item.href === "/platform/api-keys"));
-    assert.ok(developer.some((item) => item.href === "/platform/api-explorer"));
-    // Site ops (organizations, users, …) are dual-mode so developers can run the business plane.
-    assert.ok(developer.some((item) => item.href === "/platform/organizations"));
-
-    // PLATFORM_ADMIN still sees dual-mode site ops + non-super-admin developer tools.
-    assert.ok(
-      developerPlatformAdmin.some((item) => item.href === "/platform/organizations"),
-    );
-    assert.ok(
-      developerPlatformAdmin.some((item) => item.href === "/platform/api-keys"),
-    );
-    assert.ok(
-      developerPlatformAdmin.some((item) => item.href === "/platform/feature-flags"),
-    );
-    // Website Control remains super-admin only.
-    assert.ok(
-      !developerPlatformAdmin.some((item) => item.href === "/platform/control"),
-    );
-    assert.ok(
-      developer.some((item) => item.href === "/platform/control"),
-    );
-  });
-
-  it("maps mode homes and super-admin paths correctly", () => {
-    assert.equal(getModeHome("admin"), "/platform");
-    assert.equal(getModeHome("developer"), "/platform/developer");
-    // Only Website Control is super-admin exclusive in current product.
+  it("keeps restricted controls exclusive to super admins", () => {
+    assert.ok(!getPlatformNavItems({ isSuperAdmin: false }).some(item => item.superAdminOnly));
+    assert.ok(getPlatformNavItems({ isSuperAdmin: true }).some(item => item.href === "/platform/control"));
+    assert.ok(!getNavItemsForMode("developer").some(item => item.superAdminOnly));
     assert.equal(isSuperAdminOnlyPath("/platform/control"), true);
     assert.equal(isSuperAdminOnlyPath("/platform/api-keys"), false);
-    assert.equal(isSuperAdminOnlyPath("/platform/jobs/retry"), false);
-    assert.equal(isSuperAdminOnlyPath("/platform/feature-flags"), false);
   });
-
-  it("marks nav items active without false positives", () => {
-    assert.equal(isNavItemActive("/platform", "/platform"), true);
-    assert.equal(isNavItemActive("/platform/organizations", "/platform"), false);
-    assert.equal(isNavItemActive("/platform/developer", "/platform/developer"), true);
-    assert.equal(isNavItemActive("/platform/api-keys", "/platform/api-keys"), true);
-    assert.equal(isNavItemActive("/platform/users/123", "/platform/users"), true);
+  it("curates every route into exactly one group", () => {
+    const groups = groupNavigation(platformNavItems, PLATFORM_NAVIGATION);
+    assert.ok(!groups.some(group => group.label === "More tools"));
+    assert.equal(groups.flatMap(group => group.items).length, platformNavItems.length);
+  });
+  it("keeps the home inactive on nested tool pages", () => {
+    assert.equal(isNavItemActive("/platform/jobs", "/platform"), false);
+    assert.equal(isNavItemActive("/platform/jobs/notifications", "/platform/jobs"), true);
   });
 });

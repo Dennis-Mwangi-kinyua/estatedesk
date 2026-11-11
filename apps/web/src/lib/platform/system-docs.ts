@@ -83,14 +83,14 @@ apps/web  (pages, Server Actions, API routes, webhooks, cron)
       {
         heading: "Personas and shells",
         paragraphs: [
-          "Each persona has a dedicated dashboard shell and nav. Platform shell has dual mode (Administration vs Developer) with localStorage + cookie memory and keyboard shortcuts Alt+Shift+A / Alt+Shift+D.",
+          "Each persona has a dedicated dashboard shell and nav. Platform operators share one curated workspace for customer, finance, security and technical operations.",
         ],
         bullets: [
           "Org (ADMIN/MANAGER/OFFICE/ACCOUNTANT) → /dashboard/org",
           "Tenant → /dashboard/tenant",
           "Caretaker → /dashboard/caretaker (unit-scoped allow-list)",
           "Landlord → /dashboard/landlord",
-          "Platform SUPER_ADMIN / PLATFORM_ADMIN → /platform (Admin + Developer modes)",
+          "Platform SUPER_ADMIN / PLATFORM_ADMIN → /platform (unified platform workspace)",
           "Public → /, /vacancies, marketing landings, /guides (public only)",
         ],
       },
@@ -643,7 +643,7 @@ Org approveMeterReading / water-approval-queue
         heading: "Shells",
         paragraphs: [
           "Org/tenant/caretaker/landlord/platform each have layout shells with sidebar + mobile nav. Shared primitives include ed-dashboard-shell patterns (PageShell, SurfaceCard, StatCard) and platform control-plane components under platform/_components.",
-          "Platform shell dual mode (admin/developer) remembers last path per mode when toggling.",
+          "Platform home is /platform. Legacy developer-home bookmarks redirect there; navigation does not depend on mode cookies.",
         ],
       },
       {
@@ -868,7 +868,7 @@ Org approveMeterReading / water-approval-queue
   },
   {
     slug: "developer-tooling-map",
-    title: "Developer portal tooling map",
+    title: "Platform operations tooling map",
     summary:
       "What each developer-mode nav item is for, who can open it, and how it maps to runtime systems.",
     category: "Platform",
@@ -897,14 +897,14 @@ Org approveMeterReading / water-approval-queue
       {
         heading: "Access matrix",
         paragraphs: [
-          "PLATFORM_ADMIN and SUPER_ADMIN both get developer home, health, API explorer, flags, rate-limit ops, system docs, API keys, jobs, data, backups, and dual-mode site ops (orgs, users, admins, permissions, support, billing, subscriptions, broadcasts, settings, help, security, audit). Only Website Control (kill switches / nuclear ops) remains SUPER_ADMIN-only.",
+          "PLATFORM_ADMIN and SUPER_ADMIN both get the unified home, health, API explorer, flags, rate-limit ops, system docs, API keys, jobs, data, backups, and customer operations (orgs, users, admins, permissions, support, billing, subscriptions, broadcasts, settings, help, security, audit). Only Website Control (kill switches / nuclear ops) remains SUPER_ADMIN-only.",
         ],
       },
       {
         heading: "Source files",
         bullets: [
-          "platform/_lib/nav.ts — developerNavItems / adminNavItems",
-          "platform/developer/page.tsx — home snapshot",
+          "platform/_lib/nav.ts — platformNavItems / getPlatformNavItems",
+          "platform/page.tsx — unified home; legacy developer home redirects here",
           "lib/platform/system-docs.ts — articles source of truth",
           "platform/developer/docs/* — hub + [slug] renderers",
           "lib/platform/control.ts — PlatformControl helpers",

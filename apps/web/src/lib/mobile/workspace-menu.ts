@@ -1,7 +1,7 @@
 import type { AppSession } from "@/lib/auth/session";
 import type { MobileWorkspaceKind, MobileWorkspaceLink } from "@estatedesk/contracts/mobile";
 import { SIDEBAR_LINKS } from "@/components/layout/org-sidebar-links";
-import { adminNavItems, developerNavItems } from "@/app/(app)/platform/_lib/nav";
+import { getPlatformNavItems } from "@/app/(app)/platform/_lib/nav";
 import { WORKSPACE_NAVIGATION } from "@/lib/navigation/workspace-navigation";
 import { canAccessWorkspacePath } from "@/lib/permissions/workspace-access";
 
@@ -56,7 +56,7 @@ export function mobileWorkspaceLinks(session: AppSession, kind: MobileWorkspaceK
     { title: "Payouts", path: "/dashboard/landlord/payouts", description: "Review owner distributions recorded for your portfolio." },
     { title: "Help & guides", path: "/dashboard/landlord/help", description: "Read landlord workflow guides." },
     { title: "Account security", path: "/dashboard/security", description: "Manage your password and signed-in devices." },
-  ] : [...[...adminNavItems, ...developerNavItems].filter(item => item.native !== false).map(item => ({ title: item.label, path: item.href, description: item.description ?? "" })),
+  ] : [...getPlatformNavItems({ isSuperAdmin: session.platformRole === "SUPER_ADMIN" }).filter(item => item.native !== false).map(item => ({ title: item.label, path: item.href, description: item.description ?? "" })),
       { title: "Notification queue", path: "/platform/jobs/notifications", description: "Inspect queued and failed deliveries and retry failed notifications." },
       { title: "Landlord property selection", path: "/platform/landlords/properties", description: "Search properties in the selected customer organization." },
       { title: "Provider reports", path: "/platform/service-providers/reports", description: "Review and resolve reported provider accounts." },
@@ -70,7 +70,7 @@ export function mobileWorkspaceLinks(session: AppSession, kind: MobileWorkspaceK
       { title: "CRM activity history", path: `${base}/history`, description: "Customer interactions and message history." },
     ]);
   }
-  const navigation = kind === "organization" ? WORKSPACE_NAVIGATION.org : kind === "landlord" ? WORKSPACE_NAVIGATION.landlord : [...WORKSPACE_NAVIGATION["platform-admin"], ...WORKSPACE_NAVIGATION["platform-developer"]];
+  const navigation = kind === "organization" ? WORKSPACE_NAVIGATION.org : kind === "landlord" ? WORKSPACE_NAVIGATION.landlord : WORKSPACE_NAVIGATION["platform-admin"];
   return [...new Map(candidates.map(item => [item.path, item])).values()]
     .filter(item => item.path !== "/dashboard/today" && canAccessWorkspacePath(session, item.path))
     .map(item => {

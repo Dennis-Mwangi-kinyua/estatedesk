@@ -16,7 +16,6 @@ import {
   type PlatformNavItem,
 } from "./_lib/nav";
 import { PlatformBrand } from "./_components/platform-brand";
-import { PlatformModeToggle } from "./_components/platform-mode-toggle";
 
 export default function PlatformMobileShell({
   children,
@@ -58,7 +57,7 @@ export default function PlatformMobileShell({
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="platform-mobile-header ed-shell-panel flex shrink-0 flex-col border-b pt-safe lg:hidden">
           <div className="flex h-14 items-center justify-between gap-2 px-3 sm:h-16 sm:px-4">
-            <PlatformBrand mode={mode} />
+            <PlatformBrand />
 
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <TodayLink />
@@ -77,11 +76,8 @@ export default function PlatformMobileShell({
             </div>
           </div>
 
-          {/* Always-visible mode switch on phones — critical for Admin ↔ Developer */}
-          <div className="border-t border-border/70 px-3 py-2 sm:px-4">
-            <PlatformModeToggle variant="mobile" className="w-full" />
-            {appearanceControl && <div className="mt-2 flex justify-end">{appearanceControl}</div>}
-          </div>
+          {appearanceControl && <div className="flex justify-end border-t border-border/70 px-3 py-2">{appearanceControl}</div>}
+
         </header>
 
         <div inert={open} className="min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
@@ -112,7 +108,7 @@ export default function PlatformMobileShell({
       >
         <div className="flex h-full flex-col bg-card/95 backdrop-blur-xl">
           <div className="flex items-center justify-between border-b border-border px-4 py-4">
-            <PlatformBrand mode={mode} />
+            <PlatformBrand />
 
             <button data-workspace-action="true"
               type="button"

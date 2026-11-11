@@ -15,13 +15,9 @@ import { InAppHelpNav } from "@/components/help/in-app-help-nav";
 import { HeaderThemeToggle } from "@/components/theme/workspace-theme-toggle";
 import { logoutAction } from "@/features/auth/actions/logout-action";
 import {
-  getNavItemsForMode,
-  modeMeta,
-  type PlatformMode,
+  getPlatformNavItems,
 } from "../_lib/nav";
 import { DeveloperSensitiveBanner } from "./developer-sensitive-banner";
-import { PlatformModeProvider, usePlatformMode } from "./platform-mode-context";
-import { PlatformModeToggle } from "./platform-mode-toggle";
 import PlatformMobileShell from "../platform-mobile-shell";
 import { PlatformAppearanceSwitch, usePlatformAppearance } from "./platform-appearance-switch";
 
@@ -39,34 +35,30 @@ function PlatformShellInner({
   pendingDemoCount?: number;
 }) {
   const [navQuery, setNavQuery] = useState("");
-  const { mode } = usePlatformMode();
+  const mode = "admin" as const;
   const navItems = useMemo(
-    () => getNavItemsForMode(mode, { isSuperAdmin }).map((item) =>
+    () => getPlatformNavItems({ isSuperAdmin }).map((item) =>
       item.href === "/platform/service-providers"
         ? { ...item, badgeCount: pendingProviderCount }
         : item.href === "/platform/demos" ? { ...item, badgeCount: pendingDemoCount } : item,
     ),
-    [mode, isSuperAdmin, pendingProviderCount, pendingDemoCount],
+    [isSuperAdmin, pendingProviderCount, pendingDemoCount],
   );
-  const meta = modeMeta[mode];
-  const isDeveloper = mode === "developer";
-  const { appearance, isGlass } = usePlatformAppearance(!isDeveloper);
+  const meta = { headerTitle: "Platform command centre", shortLabel: "Unified", headerDescription: "Customers, revenue, security and system operations in one place" };
+  const { appearance, isGlass } = usePlatformAppearance(true);
 
   return (
     <div
       className={[
         "app-mobile-canvas ed-mobile-surface h-dvh overflow-hidden text-foreground",
-        isDeveloper ? "platform-shell-developer" : "platform-shell-admin",
+        "platform-shell-admin",
         isGlass ? "platform-ui-glass" : "",
       ].join(" ")}
     >
       <div className="flex h-dvh overflow-hidden">
         <aside aria-label="Platform sidebar" className="platform-sidebar ed-shell-panel fixed bottom-0 left-0 top-0 z-40 hidden w-[280px] border-r lg:flex lg:flex-col">
           <div className="flex h-[76px] shrink-0 items-center border-b border-border px-5">
-            <PlatformBrand mode={mode} />
-          </div>
-          <div className="px-4 pt-4">
-            <PlatformModeToggle variant="sidebar" />
+            <PlatformBrand />
           </div>
 
           <label className="mx-3 mt-3"><span className="sr-only">Find an admin tool</span><input type="search" placeholder="Find a tool…" value={navQuery} onChange={(event) => setNavQuery(event.target.value)} className="w-full rounded-xl border border-border bg-muted/40 px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-primary" /></label>
@@ -96,7 +88,7 @@ function PlatformShellInner({
           navItems={navItems}
           fullName={fullName}
           mode={mode}
-          appearanceControl={!isDeveloper ? <PlatformAppearanceSwitch appearance={appearance} /> : undefined}
+          appearanceControl={<PlatformAppearanceSwitch appearance={appearance} />}
           showThemeToggle={!isGlass}
         >
           <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden lg:pl-[280px]">
@@ -110,9 +102,7 @@ function PlatformShellInner({
                     <span
                       className={[
                         "hidden rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide sm:inline-flex",
-                        isDeveloper
-                          ? "bg-teal-500/15 text-teal-800 dark:text-teal-200"
-                          : "bg-muted text-muted-foreground",
+                        "bg-muted text-muted-foreground",
                       ].join(" ")}
                     >
                       {meta.shortLabel}
@@ -124,10 +114,10 @@ function PlatformShellInner({
                 </div>
 
                 <div className="flex shrink-0 items-center gap-3">
-                  {!isDeveloper && <PlatformAppearanceSwitch appearance={appearance} />}
+                  <PlatformAppearanceSwitch appearance={appearance} />
                   {!isGlass && <HeaderThemeToggle />}
                   <TodayLink compact />
-                  <WorkspaceIdentity name={fullName} role={isDeveloper ? "Developer" : isSuperAdmin ? "Super admin" : "Platform admin"} />
+                  <WorkspaceIdentity name={fullName} role={isSuperAdmin ? "Super platform admin" : "Platform operator"} />
 
                 </div>
               </div>
@@ -146,9 +136,9 @@ function PlatformShellInner({
               <div className="flex h-full items-center justify-between gap-4">
                 <p className="truncate text-xs text-muted-foreground">
                   © {new Date().getFullYear()} EstateDesk{" "}
-                  {isDeveloper ? "developer portal" : "platform control plane"}
+                  platform command centre
                   <span className="ml-2 hidden text-muted-foreground/80 lg:inline">
-                    · Alt+Shift+A/D mode switch
+                    · One platform workspace
                   </span>
                 </p>
 
@@ -156,19 +146,9 @@ function PlatformShellInner({
                   aria-label="Platform footer navigation"
                   className="flex shrink-0 items-center gap-2"
                 >
-                  {isDeveloper ? (
-                    <>
-                      <FooterLink href="/platform/system-health">Health</FooterLink>
-                      <FooterLink href="/platform/api-explorer">APIs</FooterLink>
-                      <FooterLink href="/platform/feature-flags">Flags</FooterLink>
-                    </>
-                  ) : (
-                    <>
-                      <FooterLink href="/platform/organizations">Orgs</FooterLink>
-                      <FooterLink href="/platform/security">Security</FooterLink>
-                      <FooterLink href="/platform/settings">Settings</FooterLink>
-                    </>
-                  )}
+                  <FooterLink href="/platform/organizations">Organizations</FooterLink>
+                  <FooterLink href="/platform/system-health">System health</FooterLink>
+                  <FooterLink href="/platform/security">Security</FooterLink>
                 </nav>
               </div>
             </footer>
@@ -202,20 +182,16 @@ export function PlatformShell({
   isSuperAdmin,
   pendingProviderCount,
   pendingDemoCount = 0,
-  initialPreferredMode = "admin",
 }: {
   children: ReactNode;
   fullName: string;
   isSuperAdmin: boolean;
   pendingProviderCount: number;
   pendingDemoCount?: number;
-  initialPreferredMode?: PlatformMode;
 }) {
   return (
-    <PlatformModeProvider initialPreferredMode={initialPreferredMode}>
       <PlatformShellInner fullName={fullName} isSuperAdmin={isSuperAdmin} pendingProviderCount={pendingProviderCount} pendingDemoCount={pendingDemoCount}>
         {children}
       </PlatformShellInner>
-    </PlatformModeProvider>
   );
 }

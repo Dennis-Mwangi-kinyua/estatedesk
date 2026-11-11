@@ -197,7 +197,7 @@ export default async function PlatformRateLimitsPage() {
   return (
     <div className="engineering-workspace mx-auto min-w-0 w-full max-w-7xl space-y-6">
       <PageHeader
-        eyebrow="Developer portal"
+        eyebrow="Platform operations"
         title="Rate limits"
         description="Live visibility into persistent rate-limit buckets plus super-admin ops to reset individual keys, clear a scope, or purge expired windows."
         action={

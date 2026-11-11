@@ -20,7 +20,7 @@ test("every role opens an authorized work area, even with a historical tenant pr
 test("platform preference and profile-only account fallbacks remain deterministic", () => {
   for (const platformRole of ["SUPER_ADMIN", "PLATFORM_ADMIN"] as const) {
     assert.equal(getRedirectAfterLogin({ ...base, platformRole, activeOrgRole: null }), "/platform");
-    assert.equal(getRedirectAfterLogin({ ...base, platformRole, activeOrgRole: null, preferredPlatformMode: "developer" }), "/platform/developer");
+    assert.equal(getRedirectAfterLogin({ ...base, platformRole, activeOrgRole: null, preferredPlatformMode: "developer" }), "/platform");
   }
   assert.equal(getRedirectAfterLogin({ ...base, activeOrgRole: null, activeOrgId: null, hasTenantProfile: true }), "/dashboard/tenant");
   assert.equal(getRedirectAfterLogin({ ...base, activeOrgRole: null, activeOrgId: null, hasServiceProvider: true }), "/provider");
@@ -36,7 +36,7 @@ test("navigation groups preserve every permitted platform route without empty or
       assert.deepEqual([...destinations].sort(), items.map(item => item.href).sort());
       assert.equal(new Set(destinations).size, destinations.length);
       assert.equal(groups.some(group => !group.items.length || group.label === "More tools"), false);
-      assert.equal(destinations.includes("/platform/control"), mode === "developer" && isSuperAdmin);
+      assert.equal(destinations.includes("/platform/control"), isSuperAdmin);
     }
   }
   assert.deepEqual(groupNavigation([], WORKSPACE_NAVIGATION.org), []);

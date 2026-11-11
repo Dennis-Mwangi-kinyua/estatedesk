@@ -136,7 +136,7 @@ export default async function SystemHealthPage() {
     return (
       <div className="engineering-workspace ed-mobile-first space-y-4">
         <PageHeader
-          eyebrow="Developer portal"
+          eyebrow="Platform operations"
           title="System health"
           description="Live control-plane health indicators."
         />
@@ -150,7 +150,7 @@ export default async function SystemHealthPage() {
   return (
     <div className="engineering-workspace ed-mobile-first mx-auto min-w-0 w-full max-w-7xl space-y-4 sm:space-y-6">
       <PageHeader
-        eyebrow="Developer portal"
+        eyebrow="Platform operations"
         title="System health"
         description="Queues, payment gateways, subscriptions, crons, KRA, and production readiness gates."
         action={

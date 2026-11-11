@@ -23,7 +23,7 @@ type RedirectInput = {
 /** One policy for login, dashboard entry, and workspace home links. */
 export function getRedirectAfterLogin(input: RedirectInput): string {
   if (input.platformRole === "SUPER_ADMIN" || input.platformRole === "PLATFORM_ADMIN") {
-    return input.preferredPlatformMode === "developer" ? "/platform/developer" : "/platform";
+    return "/platform";
   }
   // A historical tenant profile must not override the user's active staff role.
   if (input.activeOrgRole) {

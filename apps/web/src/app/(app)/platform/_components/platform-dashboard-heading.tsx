@@ -4,10 +4,10 @@ import { workspaceHeadingIcon } from "@/components/shared/workspace-heading-icon
 export function PlatformDashboardHeading() {
   const icon = workspaceHeadingIcon("/platform");
   return <div className="min-w-0 flex-1">
-    <p className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">EstateDesk · Platform administration</p>
+    <p className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">EstateDesk · Unified platform workspace</p>
     <h1 data-heading-icon="custom" data-workspace-heading-icon={icon.name}
       style={{ "--workspace-heading-icon": icon.mask, "--workspace-heading-image": icon.image } as CSSProperties}
       className="mt-4 w-full text-[clamp(1.35rem,4.3vw,3.25rem)] font-semibold leading-[1.1] tracking-[-0.04em]">Your platform, in focus.</h1>
-    <p className="mt-4 max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300">A complete view of your organizations, people and payments. Explore a workspace to review records, manage access and keep operations moving.</p>
+    <p className="mt-4 max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300">Run customer onboarding, demo follow-ups, revenue and system operations from one workspace. Review priorities, manage access and keep every organization moving.</p>
   </div>;
 }

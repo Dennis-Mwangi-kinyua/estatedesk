@@ -3,12 +3,12 @@ import { usePathname } from "next/navigation";
 import { HoverPrefetchLink } from "@/components/navigation/app-links";
 import { NavigationSections } from "@/components/navigation/navigation-sections";
 import { SidebarSticker } from "@/components/shared/sidebar-sticker";
-import { WORKSPACE_NAVIGATION, activeNavigationHref } from "@/lib/navigation/workspace-navigation";
+import { PLATFORM_NAVIGATION, activeNavigationHref } from "@/lib/navigation/workspace-navigation";
 import type { PlatformMode, PlatformNavItem } from "../_lib/nav";
 
-export function PlatformNavigation({ items, mode, query, onNavigate, mobile = false }: {
+export function PlatformNavigation({ items, query, onNavigate, mobile = false }: {
   items: readonly PlatformNavItem[];
-  mode: PlatformMode;
+  mode?: PlatformMode;
   query: string;
   onNavigate?: () => void;
   mobile?: boolean;
@@ -21,16 +21,16 @@ export function PlatformNavigation({ items, mode, query, onNavigate, mobile = fa
   // Searching should not make a parent destination appear current.
   const activeHref = activeNavigationHref(pathname, items);
   if (!visible.length) return <p role="status" className="px-3 py-4 text-sm text-muted-foreground">No matching navigation. Try another search.</p>;
-  return <NavigationSections items={visible} sections={WORKSPACE_NAVIGATION[`platform-${mode}`]} renderItem={item => {
+  return <NavigationSections items={visible} sections={PLATFORM_NAVIGATION} renderItem={item => {
     const active = item.href === activeHref;
     return <HoverPrefetchLink href={item.href} prefetch={mobile ? false : undefined} onClick={onNavigate}
       aria-current={active ? "page" : undefined}
-      className={`platform-sidebar-link group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${active ? mode === "developer" ? "bg-teal-600 text-white dark:bg-teal-500" : "ed-nav-item-active bg-primary text-primary-foreground" : "ed-nav-item text-muted-foreground hover:bg-muted/70 hover:text-foreground"}`}>
+      className={`platform-sidebar-link group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${active ? "ed-nav-item-active bg-primary text-primary-foreground" : "ed-nav-item text-muted-foreground hover:bg-muted/70 hover:text-foreground"}`}>
       <SidebarSticker href={item.href} />
       <span className="min-w-0 flex-1">{item.label}</span>
       {item.badgeCount ? (
         <span
-          aria-label={`${item.badgeCount} provider applications awaiting review`}
+          aria-label={`${item.badgeCount} pending ${item.label.toLowerCase()}`}
           className="inline-flex min-w-5 shrink-0 items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white shadow-sm ring-2 ring-background"
         >
           {item.badgeCount > 99 ? "99+" : item.badgeCount}

@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-11-11T11:50:49.328Z",
+  "base": "https://estatedesk.co.ke",
+  "method": "Single cold browser sample per route; mobile viewport; 4x CPU slowdown; 150ms latency; 1.6Mbps download. Three-second observation after DOM readiness. CLS is a page-load sample, not session-window field CLS; INP is not measured. Results depend on runner geography.",
+  "results": [
+    {
+      "path": "/",
+      "status": 200,
+      "lcpMs": 3284,
+      "cls": 0.005774227420911711,
+      "ttfbMs": 363.40000000596046,
+      "domContentLoadedMs": 3320,
+      "transferredBytes": 332086,
+      "horizontalOverflow": false
+    },
+    {
+      "path": "/login",
+      "status": 200,
+      "lcpMs": 1976,
+      "cls": 0,
+      "ttfbMs": 528.6000000014901,
+      "domContentLoadedMs": 1993,
+      "transferredBytes": 315612,
+      "horizontalOverflow": false
+    },
+    {
+      "path": "/services",
+      "status": 200,
+      "lcpMs": 1772,
+      "cls": 0,
+      "ttfbMs": 350.1000000014901,
+      "domContentLoadedMs": 2046.1000000014901,
+      "transferredBytes": 338594,
+      "horizontalOverflow": false
+    }
+  ]
+}

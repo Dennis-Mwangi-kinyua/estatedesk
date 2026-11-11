@@ -28,7 +28,7 @@ import {
 
 const PAGE = "/platform/control";
 const SUPER_REDIRECT = {
-  redirectTo: "/platform/developer?error=super-admin-only",
+  redirectTo: "/platform?error=super-admin-only",
 } as const;
 
 function readString(formData: FormData, key: string) {

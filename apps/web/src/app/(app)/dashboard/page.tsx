@@ -1,9 +1,7 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getUserSession } from "@/lib/auth/session";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
-import { PLATFORM_MODE_COOKIE_NAME, parsePlatformModeCookie } from "../platform/_lib/nav";
 
 export default async function DashboardPage() {
   const session = await getUserSession();
@@ -19,8 +17,5 @@ export default async function DashboardPage() {
     activeOrgId: session.activeOrgId,
     hasTenantProfile: false,
     hasServiceProvider,
-    preferredPlatformMode: isPlatform
-      ? parsePlatformModeCookie((await cookies()).get(PLATFORM_MODE_COOKIE_NAME)?.value)
-      : null,
   }));
 }

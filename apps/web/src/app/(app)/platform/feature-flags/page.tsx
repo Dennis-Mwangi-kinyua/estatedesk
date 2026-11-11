@@ -109,7 +109,7 @@ export default async function FeatureFlagsPage({ searchParams }: { searchParams:
   return (
     <div className="ed-mobile-first min-w-0 max-w-full space-y-4 overflow-x-clip sm:space-y-6">
       <PageHeader
-        eyebrow="Developer portal"
+        eyebrow="Platform operations"
         title="Feature flags"
         description="Toggle per-organization capabilities. Global overrides from Website Control win at read time and are highlighted below."
       />

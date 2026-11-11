@@ -171,7 +171,7 @@ export default async function WebsiteControlCenterPage({
   searchParams: SearchParams;
 }) {
   await requirePlatformRole(["SUPER_ADMIN"], {
-    redirectTo: "/platform/developer?error=super-admin-only",
+    redirectTo: "/platform?error=super-admin-only",
   });
 
   const params = await searchParams;
@@ -231,7 +231,7 @@ export default async function WebsiteControlCenterPage({
     <div className="ed-mobile-first mx-auto w-full max-w-[1600px] space-y-6 pb-8 sm:space-y-8">
       <ControlOrgTableFilter />
       <PageHeader
-        eyebrow="Developer portal · Super admin"
+        eyebrow="Platform operations · Super admin"
         title="Platform control center"
         description="Monitor platform access, manage service availability, and take focused action across organizations. Every change is recorded in the audit log."
         action={
@@ -952,7 +952,7 @@ export default async function WebsiteControlCenterPage({
         <div className="flex items-start gap-2">
           <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <p>
-            Platform shell, security, and audit logs remain available under Developer mode.
+            Platform shell, security, and audit logs remain available in the unified platform workspace.
             Nuclear actions never bypass root super-admin protection or audit trails.
           </p>
         </div>

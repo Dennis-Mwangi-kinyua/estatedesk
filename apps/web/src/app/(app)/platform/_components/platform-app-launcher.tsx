@@ -3,16 +3,16 @@ import { PlatformNavIcon } from "./platform-nav-icon";
 
 const apps = [
   { label: "Organizations", href: "/platform/organizations", tone: "sky" },
-  { label: "Users", href: "/platform/users", tone: "violet" },
+  { label: "Demo requests", href: "/platform/demos", tone: "violet" },
   { label: "Onboarding", href: "/platform/onboarding", tone: "emerald" },
-  { label: "Agreements", href: "/platform/agreements", tone: "amber" },
+  { label: "Security", href: "/platform/security", tone: "amber" },
   { label: "Payments", href: "/platform/payments", tone: "emerald" },
   { label: "Billing center", href: "/platform/billing", tone: "sky" },
-  { label: "Subscriptions", href: "/platform/subscriptions", tone: "violet" },
+  { label: "Jobs & queues", href: "/platform/jobs", tone: "violet" },
   { label: "Reports", href: "/platform/reports", tone: "amber" },
   { label: "Messages", href: "/platform/messages", tone: "sky" },
   { label: "Search platform", href: "/platform/search", tone: "violet" },
-  { label: "Developer portal", href: "/platform/developer", tone: "slate" },
+  { label: "System health", href: "/platform/system-health", tone: "slate" },
   { label: "Add organization", href: "/platform/organizations/new", tone: "emerald" },
 ] as const;
 

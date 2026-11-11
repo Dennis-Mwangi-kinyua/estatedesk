@@ -217,7 +217,7 @@ export default async function PlatformBackupsPage({
   return (
     <div className="engineering-workspace mx-auto min-w-0 w-full max-w-7xl space-y-6">
       <PageHeader
-        eyebrow="Developer portal"
+        eyebrow="Platform operations"
         title="Backup and recovery"
         description="Review recovery records, export activity, and operator-reported backup evidence. Record completed checks here after verifying your backup provider or recovery tools."
         action={<Link href="/platform/data-management" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold">Manage data exports</Link>}

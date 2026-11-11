@@ -8,10 +8,6 @@ import { prisma } from "@/lib/prisma";
 import { requireUserSession, getCurrentSessionId } from "@/lib/auth/session";
 import { cookies, headers } from "next/headers";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
-import {
-  parsePlatformModeCookie,
-  PLATFORM_MODE_COOKIE_NAME,
-} from "@/app/(app)/platform/_lib/nav";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
 export type ChangePasswordState = {
@@ -82,10 +78,6 @@ export async function changeInitialPasswordAction(
     };
   }
 
-  const cookieStore = await cookies();
-  const preferredPlatformMode = parsePlatformModeCookie(
-    cookieStore.get(PLATFORM_MODE_COOKIE_NAME)?.value,
-  );
 
   const destination = getRedirectAfterLogin({
     platformRole: session.platformRole,
@@ -93,7 +85,6 @@ export async function changeInitialPasswordAction(
     activeOrgId: session.activeOrgId,
     hasTenantProfile: session.activeOrgRole === "TENANT",
     hasServiceProvider: !session.activeOrgRole && session.platformRole === "USER" && Boolean(await prisma.serviceProvider.findUnique({ where: { userId: session.userId }, select: { id: true } })),
-    preferredPlatformMode,
   });
 
   revalidatePath("/", "layout");

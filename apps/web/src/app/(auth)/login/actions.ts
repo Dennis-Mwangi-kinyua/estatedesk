@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { verifyLoginPassword } from "@/lib/auth/verify-login-password";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { prisma } from "@/lib/prisma";
@@ -10,10 +10,7 @@ import { OrganizationBlacklistedError } from "@/lib/organizations/blacklist-poli
 import { assertUserNotBlacklisted } from "@/lib/organizations/blacklist";
 import { ActiveSessionLimitError, setUserSession } from "@/lib/auth/session";
 import { getRedirectAfterLogin } from "@/lib/auth/redirect-after-login";
-import {
-  parsePlatformModeCookie,
-  PLATFORM_MODE_COOKIE_NAME,
-} from "@/app/(app)/platform/_lib/nav";
+
 import {
   isTransientDatabaseError,
   retryTransientDatabaseOperation,
@@ -23,13 +20,6 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { sendSecurityAlert } from "@/lib/security/alerts";
 import { isLoginTimingEnabled } from "@/lib/dev/background-refresh";
 import { safeReturnTo } from "@/lib/auth/safe-return-to";
-
-async function getPreferredPlatformMode() {
-  const cookieStore = await cookies();
-  return parsePlatformModeCookie(
-    cookieStore.get(PLATFORM_MODE_COOKIE_NAME)?.value,
-  );
-}
 
 const loginSchema = z.object({
   email: z
@@ -267,7 +257,6 @@ export async function loginAction(
             platformRole: user.platformRole,
             activeOrgRole: null,
             activeOrgId: null,
-            preferredPlatformMode: await getPreferredPlatformMode(),
               hasTenantProfile: false,
           }),
       );
@@ -391,7 +380,6 @@ export async function loginAction(
               platformRole: user.platformRole,
               activeOrgRole: primaryMembership?.role ?? null,
               activeOrgId: primaryMembership?.orgId ?? null,
-              preferredPlatformMode: await getPreferredPlatformMode(),
               hasTenantProfile: Boolean(tenant),
               hasServiceProvider: Boolean(provider),
             }),

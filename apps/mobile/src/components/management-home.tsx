@@ -37,7 +37,7 @@ export function ManagementHome({ session, busy, onError, initialKind, openNative
     // Keep real records visible during refresh; a different account/mode never sees them.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true); setError("");
-    void api.getWorkspaceDashboard(kind, mode === "developer" ? "developer" : "summary").then(value => { if (current) setLoaded({ key: dataKey, value }); }).catch(cause => {
+    void api.getWorkspaceDashboard(kind, "summary").then(value => { if (current) setLoaded({ key: dataKey, value }); }).catch(cause => {
       if (!current) return;
       if (cause instanceof api.ApiError && cause.status === 401) onError(cause);
       else setError(cause instanceof Error ? cause.message : "Unable to load dashboard.");
@@ -66,13 +66,13 @@ export function ManagementHome({ session, busy, onError, initialKind, openNative
   }
   return <View style={s.root} onLayout={grid.onLayout}>
     <View style={styles.card}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}><IconTile name={mode === "organization" ? "briefcase" : mode === "developer" ? "code" : "shield"} /><View style={{ flex: 1, minWidth: 0, gap: 3 }}>
-        <Text style={[s.eyebrow, { color: "#718279" }]}>{mode === "organization" ? "WORKSPACE" : mode === "developer" ? "DEVELOPER" : "PLATFORM"}</Text>
-        <Text accessibilityRole="header" style={[styles.cardTitle, { fontSize: 22, lineHeight: 29 }]}>{mode === "organization" ? session.organizationName ?? "Dashboard" : mode === "developer" ? "Developer portal" : "Platform admin"}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}><IconTile name={mode === "organization" ? "briefcase" : "shield"} /><View style={{ flex: 1, minWidth: 0, gap: 3 }}>
+        <Text style={[s.eyebrow, { color: "#718279" }]}>{mode === "organization" ? "WORKSPACE" : "PLATFORM"}</Text>
+        <Text accessibilityRole="header" style={[styles.cardTitle, { fontSize: 22, lineHeight: 29 }]}>{mode === "organization" ? session.organizationName ?? "Dashboard" : "Platform command centre"}</Text>
       </View></View>
-      <Text style={s.body}>{mode === "organization" ? "Properties and daily operations" : mode === "developer" ? "Developer tools and integrations" : "Organizations, people, and platform services"}</Text>
+      <Text style={s.body}>{mode === "organization" ? "Properties and daily operations" : "Customers, revenue, security and system operations"}</Text>
       <View style={[s.row, { alignItems: "stretch" }]}>
-        {([...organization ? ["organization" as const] : [], ...platform ? ["admin" as const, "developer" as const] : []]).map(value => <Button key={value} label={value === "organization" ? "Dashboard" : value === "admin" ? "Admin" : "Developer"} selected={mode === value} secondary={mode !== value} disabled={busy} onPress={() => { setMode(value); setQuery(""); }} />)}
+        {([...organization ? ["organization" as const] : [], ...platform ? ["admin" as const] : []]).map(value => <Button key={value} label={value === "organization" ? "Organization" : "Platform"} selected={mode === value} secondary={mode !== value} disabled={busy} onPress={() => { setMode(value); setQuery(""); }} />)}
       </View>
     </View>
     {loading ? <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}><ActivityIndicator accessibilityLabel={data ? "Refreshing dashboard" : "Loading dashboard"} color="#14634e" /><Text accessibilityLiveRegion="polite" style={s.caption}>{data ? "Refreshing your latest data…" : "Loading your workspace…"}</Text></View> : null}

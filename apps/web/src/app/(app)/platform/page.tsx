@@ -1,3 +1,4 @@
+import { PlatformOperationsSummary } from "./_components/platform-operations-summary";
 import { getReviewQueue } from "@/lib/workflow/review-queue";
 import { ReviewQueue } from "@/components/shared/review-queue";
 import { UpdateNoticeForm } from "@/features/platform-updates/form";
@@ -16,5 +17,5 @@ export default async function PlatformPage() {
   const data = await getPlatformDashboardData();
 
   const notice = await getUpdateNotice();
-  return <div className="space-y-6"><ReviewQueue groups={await getReviewQueue(session, "platform")} summaryOnly /><PlatformDashboard data={data} /><UpdateNoticeForm current={notice} /></div>;
+  return <div className="space-y-6"><ReviewQueue groups={await getReviewQueue(session, "platform")} summaryOnly /><PlatformDashboard data={data} /><PlatformOperationsSummary /><UpdateNoticeForm current={notice} /></div>;
 }

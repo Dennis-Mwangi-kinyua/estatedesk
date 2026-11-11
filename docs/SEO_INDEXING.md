@@ -1,6 +1,8 @@
 # EstateDesk SEO & Indexing
 
-Last verified: **2026-07-12**
+Last source review: **2026-11-11**
+
+Current delivery is GitHub only. New pages in this release have local browser validation; deployment and search-account verification remain pending. See [the latest handoff](audits/2026-11-11/unified-platform-seo.md).
 
 This document is the operational source of truth for **public indexability**.  
 Google/Bing **cannot** be forced to index pages from the codebase alone — you must submit sitemaps in Search Console. The app is built so public pages are **ready to be indexed**.
@@ -19,8 +21,8 @@ EstateDesk is **Kenya-built property management software**: M-Pesa rent collecti
 | Root metadata | Ready | Title, description, OG/Twitter, `robots: index,follow` |
 | JSON-LD | Ready | Organization, WebSite, SoftwareApplication, FAQ, nav ItemList |
 | `robots.txt` | Ready | Allows `/`, `/llms.txt`; disallows dashboards/API/private |
-| Sitemap index | Ready | `/sitemap-index.xml` lists 4 public shards |
-| Static marketing sitemap | Ready | `/sitemap.xml` (~34 public URLs) |
+| Sitemap index | Ready | `/sitemap-index.xml` lists 7 public shards in source |
+| Static marketing sitemap | Ready | `/sitemap.xml` (generated from the public site manifest) |
 | Vacancy sitemaps | Ready | `/sitemap-vacancies.xml`, `/sitemap-vacancy-pages.xml` |
 | Rental landings sitemap | Ready | `/sitemap-rental-landings.xml` (large town/category set) |
 | Gzip sitemaps | Ready | `*.xml.gz` routes |
@@ -29,7 +31,7 @@ EstateDesk is **Kenya-built property management software**: M-Pesa rent collecti
 | Private dashboards | Ready | `privatePageMetadata` → `noindex,nofollow` + robots disallow |
 | Unit tests | Pass | `seo.test.ts`, `sitemap-utils.test.ts`, `public-rental-seo.test.ts`, `guides.test.ts` |
 
-### Live HTTP smoke (2026-07-10)
+### Historical live HTTP smoke (2026-07-10)
 
 | Path | HTTP | Notes |
 | --- | --- | --- |
