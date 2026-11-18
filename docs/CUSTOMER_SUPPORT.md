@@ -17,3 +17,5 @@ npm run build
 The migration adds `SupportTicket` and `SupportReply`, indexes and foreign keys. No existing message table is changed. User deletion cascades owned tickets and authored replies. Review retention requirements before enabling any separate permanent account-erasure operation.
 
 Validation includes bounded-input/role policy checks, TypeScript, focused lint and disposable-database tests for ownership, foreign-customer denial, platform inbox access, replies and reopening.
+
+The workflow now uses domain/application/infrastructure layers. Web pages and `/api/mobile/support` share the same application service; ownership, setup, validation and throttling are enforced there. See [architecture](architecture/CLEAN_ARCHITECTURE.md). The native HTTP adapter does not by itself add mobile UI.

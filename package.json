@@ -50,7 +50,10 @@
     "desktop:test": "npm run test -w @estatedesk/desktop",
     "desktop:smoke": "node scripts/desktop-smoke.mjs",
     "desktop:package": "npm run package -w @estatedesk/desktop --",
-    "desktop:package:dir": "npm run package:dir -w @estatedesk/desktop --"
+    "desktop:package:dir": "npm run package:dir -w @estatedesk/desktop --",
+    "architecture:check": "node scripts/check-architecture.mjs",
+    "worker:run": "node --env-file-if-exists=.env apps/workers/run.mjs",
+    "worker:test": "node --test apps/workers/run.test.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1018.0",

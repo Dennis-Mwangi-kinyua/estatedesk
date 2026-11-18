@@ -33,8 +33,8 @@ describe("PWA manifest", () => {
     assert.equal(config.id, "/");
     assert.equal(config.start_url, "/login?source=pwa");
     assert.equal(config.orientation, "any");
-    assert.equal(config.background_color, "#f8fafc");
-    assert.equal(config.theme_color, "#f8fafc");
+    assert.equal(config.background_color, "#f3f6f3");
+    assert.equal(config.theme_color, "#14634e");
     assert.deepEqual(config.launch_handler, { client_mode: "navigate-existing" });
     assert.equal(config.share_target?.action, "/share");
     assert.equal(

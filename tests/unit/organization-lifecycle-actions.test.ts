@@ -41,9 +41,9 @@ async function fixture() {
     entryPoints: ["apps/web/src/app/(app)/platform/organizations/[slug]/actions.ts"],
     bundle: true, write: false, platform: "node", format: "cjs", packages: "external", tsconfig: "apps/web/tsconfig.json",
     plugins: [{ name: "lifecycle-fixture", setup(builder) {
-      builder.onResolve({ filter: /^next\/(cache|navigation)$|^@\/lib\/(prisma|permissions\/guards|public-vacancy-cache)$/ }, args => ({ path: args.path, namespace: "fixture" }));
+      builder.onResolve({ filter: /^server-only$|^next\/(cache|navigation)$|^@\/lib\/(prisma|permissions\/guards|public-vacancy-cache)$/ }, args => ({ path: args.path, namespace: "fixture" }));
       builder.onLoad({ filter: /.*/, namespace: "fixture" }, args => ({ contents:
-        args.path === "next/cache" ? "export const revalidatePath=()=>{};" :
+        args.path === "server-only" ? "" : args.path === "next/cache" ? "export const revalidatePath=()=>{};" :
         args.path === "next/navigation" ? "export const redirect=(url)=>{throw new Error(url)};" :
         args.path.endsWith("/prisma") ? "export const prisma=db;" :
         args.path.endsWith("/guards") ? "export const requirePlatformRole=guard;" :

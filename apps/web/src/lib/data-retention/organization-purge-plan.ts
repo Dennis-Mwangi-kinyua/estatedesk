@@ -2,6 +2,7 @@
 export const ORGANIZATION_PURGE_PLAN = [
   {"model":"OrgManagementApproval","delegate":"orgManagementApproval","path":["orgId"]},
   {"model":"RecruitmentApplicationEvent","delegate":"recruitmentApplicationEvent","path":["application","job","orgId"]},
+  {"model":"RecruitmentCommunication","delegate":"recruitmentCommunication","path":["job","orgId"]},
   {"model":"RecruitmentApplication","delegate":"recruitmentApplication","path":["job","orgId"]},
   {"model":"RecruitmentJob","delegate":"recruitmentJob","path":["orgId"]},
   {"model":"OrgManagementPolicy","delegate":"orgManagementPolicy","path":["orgId"]},

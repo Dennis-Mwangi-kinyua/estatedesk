@@ -50,6 +50,7 @@ test("older session payloads cannot implicitly advertise a platform role", () =>
 });
 test("web-only management additions do not advertise unsupported native destinations", () => {
   const organization = mobileWorkspaceLinks(session("ADMIN"), "organization");
-  for (const section of ["approvals", "collections", "renewals", "activity", "handovers", "performance", "recruitment"]) assert.ok(!organization.some(link => link.path === `/dashboard/org/${section}`));
+  for (const section of ["approvals", "renewals", "activity", "handovers", "performance", "recruitment"]) assert.ok(!organization.some(link => link.path === `/dashboard/org/${section}`));
+  assert.ok(organization.some(link => link.path === "/dashboard/org/collections"));
   assert.ok(!mobileWorkspaceLinks(session(null, "PLATFORM_ADMIN"), "platform").some(link => link.path === "/platform/recruitment"));
 });

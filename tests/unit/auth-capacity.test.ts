@@ -25,7 +25,7 @@ async function fixture() {
       findUnique: async () => state.revoked ? null : ({ id: "session", userId: "user", tokenHash: "token", activeMembershipId: "member", lastSeenAt: new Date(), expiresAt: new Date(Date.now() + 30 * 86400000) }),
       deleteMany: async () => { state.deletes++; return { count: 1 }; },
     },
-    user: { findUnique: async () => { await accountReads(); return { id: "user", status: state.status, deletedAt: null, platformRole: "USER", termsAcceptedAt: new Date() }; } },
+    user: { findFirst: async () => null, findUnique: async () => { await accountReads(); return { id: "user", status: state.status, deletedAt: null, platformRole: "USER", termsAcceptedAt: new Date() }; } },
     membership: { findFirst: async (input: unknown) => {
       scopes.push(input); await accountReads();
       return state.membershipRevoked ? null : { orgId: "org", role: "ADMIN", scopeType: "ORG", scopeId: "ORG_SCOPE", grantedPermissions: [] };

@@ -15,9 +15,9 @@ for (const scenario of ["organization", "platform", "statement"] as const) test(
     bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", alias: { react: path.dirname(require.resolve("react/package.json")) },
     define: { "process.env.NODE_ENV": '"test"' },
     plugins: [{ name: "native-hosts", setup(builder) {
-      builder.onResolve({ filter: /^expo-crypto$|^react-native$|^react-native-safe-area-context$|^\.\/app-icon$|^\.\/native-action-form$|^\.\.\/api$/ }, args => ({ path: args.path, namespace: "fixture" }));
+      builder.onResolve({ filter: /^\.\/native-imports$|^expo-crypto$|^react-native$|^react-native-safe-area-context$|^\.\/app-icon$|^\.\/native-action-form$|^\.\.\/api$/ }, args => ({ path: args.path, namespace: "fixture" }));
       builder.onLoad({ filter: /.*/, namespace: "fixture" }, args => ({ loader: "tsx", resolveDir: process.cwd(), contents:
-        args.path === "expo-crypto" ? `export const randomUUID=()=>"00000000-0000-4000-8000-000000000001";` : args.path === "react-native" ? `import React from 'react';
+        args.path === "./native-imports" ? `export const NativeImports=()=>null;` : args.path === "expo-crypto" ? `export const randomUUID=()=>"00000000-0000-4000-8000-000000000001";` : args.path === "react-native" ? `import React from 'react';
           export const View=({children})=><div>{children}</div>;
           export const Modal=({children})=><div role="dialog">{children}</div>;
           export const ScrollView=View;

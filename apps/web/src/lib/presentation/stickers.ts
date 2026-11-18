@@ -95,7 +95,7 @@ function semanticLabel(label: string) {
   if (hash) return hash.replaceAll("-", " ");
   const segments = path.split("?")[0].split("/").filter(Boolean);
   const sections: Record<string, string> = {
-    recruitment: "staff", careers: "staff", approvals: "verification", collections: "collections", renewals: "lease renewal", activity: "audit", handovers: "handover", performance: "reports",
+    demos: "crm", setup: "settings", recruitment: "staff", careers: "staff", approvals: "verification", collections: "collections", renewals: "lease renewal", activity: "audit", handovers: "handover", performance: "reports",
     crm: "crm", customers: "customer relationships", "privacy-requests": "privacy requests",
     "review-queue": "review queue", "operating-queue": "work queue", "identity-verification": "identity verification", "service-providers": "service providers", history: "tenancy history",
     community: "community", visitors: "visitors", gate: "gate access",

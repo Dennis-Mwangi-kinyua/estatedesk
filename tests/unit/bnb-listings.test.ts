@@ -97,7 +97,7 @@ test("public listing lookup excludes drafts, paused listings, archived listings,
   const queries = await load<{ publicBnbWhere: object; getPublicBnb: (slug: string) => Promise<{ where: Record<string, unknown> }> }>("apps/web/src/features/bnb/queries.ts", {
     "@/lib/prisma": 'export const prisma = { bnbListing: { findFirst: async (query) => query } };',
   });
-  assert.deepEqual(queries.publicBnbWhere, { status: "PUBLISHED", deletedAt: null, org: { status: "ACTIVE", deletedAt: null }, images: { some: { deletedAt: null } } });
+  assert.deepEqual(queries.publicBnbWhere, { status: "PUBLISHED", deletedAt: null, org: { status: "ACTIVE", deletedAt: null, blacklistedAt: null }, images: { some: { deletedAt: null } } });
   assert.deepEqual((await queries.getPublicBnb("my-stay")).where, { ...queries.publicBnbWhere, slug: "my-stay" });
 });
 

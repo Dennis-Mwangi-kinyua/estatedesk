@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireUserSession } from "@/lib/auth/session";
-import { prisma } from "@/lib/prisma";
-import { supportTicketWhere, isSupportAgent } from "@/features/customer-support/policy";
+import { customerSupport } from "@/features/customer-support";
+import { isSupportAgent } from "@/features/customer-support/policy";
 import { privatePageMetadata } from "@/lib/seo";
 import { SupportForm } from "./forms";
 export const dynamic = "force-dynamic";
@@ -9,8 +9,7 @@ export const metadata = { ...privatePageMetadata, title: "Customer support" };
 export default async function CustomerSupport({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const session = await requireUserSession();
   const page = Math.min(10000, Math.max(1, Math.floor(Number((await searchParams).page) || 1)));
-  const where = supportTicketWhere(session.userId, session.platformRole);
-  const tickets = await prisma.supportTicket.findMany({ where, orderBy: [{ updatedAt: "desc" }, { id: "desc" }], skip: (page - 1) * 20, take: 21, select: { id: true, subject: true, category: true, status: true } });
+  const tickets = await customerSupport.list(session, page);
   return <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
     <h1 className="text-3xl font-semibold">{isSupportAgent(session.platformRole) ? "Customer support inbox" : "Customer support"}</h1>
     <p>1. Describe your problem. 2. Open your request to track replies. 3. Reply if you need more help, or mark it resolved.</p>

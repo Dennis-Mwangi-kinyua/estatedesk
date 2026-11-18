@@ -65,6 +65,12 @@ jobs:
       - name: Validate Prisma schema
         run: npx prisma validate
 
+      - name: Check architecture boundaries
+        run: npm run architecture:check
+
+      - name: Test worker transport
+        run: npm run worker:test
+
       - name: Typecheck
         run: npm run typecheck
 

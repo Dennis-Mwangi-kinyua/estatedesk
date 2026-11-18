@@ -15,6 +15,8 @@ Start here for development, product workflows, and operations. Reviewed against 
 
 ## Architecture and interfaces
 
+- [Feature boundaries and clean architecture](architecture/CLEAN_ARCHITECTURE.md): implemented layers, worker operation, enforcement and remaining migration backlog.
+
 - [Service architecture](architecture/SERVICES.md): current package boundaries and future extraction plans.
 - [API reference](API.md): HTTP endpoints; many web mutations use Server Actions instead.
 - [Realtime](REALTIME.md): workspace refresh and delivery.

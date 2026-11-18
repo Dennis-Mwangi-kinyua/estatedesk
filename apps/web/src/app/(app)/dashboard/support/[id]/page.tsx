@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUserSession } from "@/lib/auth/session";
-import { prisma } from "@/lib/prisma";
-import { supportTicketWhere } from "@/features/customer-support/policy";
+import { customerSupport } from "@/features/customer-support";
 import { privatePageMetadata } from "@/lib/seo";
 import { SupportForm } from "../forms";
 import { resolveTicket } from "../actions";
@@ -10,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { ...privatePageMetadata, title: "Support request" };
 export default async function SupportThread({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireUserSession();
-  const ticket = await prisma.supportTicket.findFirst({ where: { id: (await params).id, ...supportTicketWhere(session.userId, session.platformRole) }, include: { replies: { orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 100, include: { author: { select: { fullName: true } } } } } });
+  const ticket = await customerSupport.find(session, (await params).id);
   if (!ticket) notFound();
   return <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
     <Link href="/dashboard/support" className="underline">Back to support requests</Link>

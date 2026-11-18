@@ -1,12 +1,12 @@
 # EstateDesk service architecture
 
-Living map of the modular monorepo → microservices migration.
+Current implementation and possible extraction boundaries. See [feature boundaries](CLEAN_ARCHITECTURE.md) for dependency rules and the explicit legacy backlog.
 
 ## Layout
 
 ```
 apps/web              Next.js UI + BFF (current deployable)
-apps/workers          (Phase 2) cron / queue consumers
+apps/workers          standalone authenticated cron runner (HTTP transport; no queue consumers)
 packages/*            shared libraries (config, contracts, auth-sdk, …)
 services/*            domain services (in-process first, then network)
 prisma/               shared schema during transition (legacy)
