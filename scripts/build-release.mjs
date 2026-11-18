@@ -13,7 +13,7 @@ const commands = kind === "web" ? [
   [require.resolve("next/dist/bin/next"), "build", "--webpack"],
 ] : [[path.join(cwd, "node_modules/expo/bin/cli"), "export", "--platform", "all", "--output-dir", "dist"]];
 for (const args of commands) {
-  const result = spawnSync(process.execPath, args, { cwd, stdio: "inherit", env: process.env });
+  const result = spawnSync(process.execPath, args, { cwd, stdio: "inherit", env: { ...process.env, NODE_OPTIONS: process.env.NODE_OPTIONS ?? "--max-old-space-size=4096" } });
   if (result.error) throw result.error;
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
