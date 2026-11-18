@@ -237,3 +237,11 @@ export function channelForMethod(method: string) {
   if (kind === "bank" || kind === "manual_bank") return `bank_${method}`;
   return method;
 }
+
+export const STK_AMOUNT_ERROR = "M-Pesa STK requires whole shillings. Enter a whole amount or choose another payment method.";
+
+export function getStkAmountError(amount: number): string | undefined {
+  if (!Number.isInteger(amount) || amount < 1) {
+    return STK_AMOUNT_ERROR;
+  }
+}

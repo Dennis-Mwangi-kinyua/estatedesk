@@ -18,6 +18,7 @@ import { getPeriodBillForTenant } from "@/lib/billing/period-bill";
 import { verifyPayment } from "@/app/(app)/dashboard/org/payments/_lib/verify-payment";
 import { requirePaymentReviewer } from "@/app/(app)/dashboard/org/payments/_lib/payment-action-shared";
 import { processPeriodBillPayment } from "@/app/(app)/dashboard/tenant/payments/checkout/_lib/handlers/period-bill-payment";
+import { STK_AMOUNT_ERROR } from "@/lib/payments/method-flow";
 import { isMpesaStkConfigured } from "@/lib/mpesa/config";
 import { getMpesaAccessTokenForOrg, MpesaRequestError, normalizeMpesaPhone, requestMpesaStkPush } from "@/lib/mpesa/client";
 
@@ -318,7 +319,10 @@ export async function sendBillStkAction(formData: FormData) {
 
   let paymentId: string | null = null;
   try {
-    const tokenPromise = getMpesaAccessTokenForOrg(orgId);
+    const tokenPromise = getMpesaAccessTokenForOrg(orgId).then(
+      token => ({ ok: true as const, token }),
+      (error: unknown) => ({ ok: false as const, error }),
+    );
     const created = await prisma.$transaction(async (tx) => processPeriodBillPayment({
       tx,
       orgId,
@@ -335,14 +339,15 @@ export async function sendBillStkAction(formData: FormData) {
       sourceId: period,
     }, {}));
     paymentId = created.id;
-    const accessToken = await tokenPromise;
+    const tokenResult = await tokenPromise;
+    if (!tokenResult.ok) throw tokenResult.error;
     const stk = await requestMpesaStkPush({
       orgId,
       amount: Number(created.amount),
       phone,
       accountReference: (created.reference ?? created.id).slice(0, 12),
       transactionDesc: "EstateDesk bill",
-      accessToken,
+      accessToken: tokenResult.token,
     });
     if (!stk.checkoutRequestId) throw new MpesaRequestError(stk.customerMessage || "M-Pesa did not accept the prompt.", true);
     await prisma.payment.update({
@@ -368,6 +373,9 @@ export async function sendBillStkAction(formData: FormData) {
       });
     }
     revalidateBills(leaseId);
+    if (error instanceof Error && error.message === STK_AMOUNT_ERROR) {
+      redirect(billPath(period, leaseId, "stk-amount"));
+    }
     const cleared = error instanceof Error && error.message.includes("already cleared");
     redirect(billPath(period, leaseId, cleared ? "nothing-due" : "stk-failed"));
   }

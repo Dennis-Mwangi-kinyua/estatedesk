@@ -9,10 +9,15 @@ export const dynamic = "force-dynamic";
 
 export default async function TenantInvoiceViewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ period: string }>;
+  searchParams: Promise<{ lease?: string | string[] }>;
 }) {
   const { period } = await params;
+  const { lease } = await searchParams;
+  if (Array.isArray(lease)) notFound();
+  const leaseId = lease || undefined;
   const session = await requireTenantAccess();
 
   if (!session.userId || !session.activeOrgId) {
@@ -23,6 +28,7 @@ export default async function TenantInvoiceViewPage({
     session.userId,
     session.activeOrgId,
     period,
+    leaseId,
   );
 
   if (!context) {
@@ -34,8 +40,8 @@ export default async function TenantInvoiceViewPage({
     pdfData.verificationUrl,
   );
   const waterLine = pdfData.lines.find((line) => line.waterReading);
-  const canPayCombined = periodBill.balance > 0;
-  const canPayWaterOnly =
+  const canPayCombined = !leaseId && periodBill.balance > 0;
+  const canPayWaterOnly = !leaseId &&
     Boolean(waterLine && waterLine.balance > 0 && periodBill.waterBillId) &&
     Boolean(waterBillStatus && isPayableWaterBillStatus(waterBillStatus));
 
@@ -43,6 +49,7 @@ export default async function TenantInvoiceViewPage({
     <InvoiceDocumentView
       data={pdfData}
       period={period}
+      leaseId={leaseId}
       verificationQrDataUrl={verificationQrDataUrl}
       payNowHref={
         canPayCombined

@@ -27,7 +27,13 @@ describe("permission access helpers", () => {
   it("allows tenant history pages without an active lease but protects deeper tenant pages", () => {
     assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant"), false);
     assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/profile"), false);
+    assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/invoice/archive"), false);
+    assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/invoice/2026-11/view"), false);
+    assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/invoice/2026-11/download"), false);
+    assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/move-out/notice-id"), false);
+    assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/payments/status"), false);
     assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/payments"), true);
+    assert.equal(tenantPathRequiresActiveLease("/dashboard/tenant/payments/checkout"), true);
     assert.equal(tenantPathRequiresActiveLease("/dashboard/org/tenants"), false);
   });
 });

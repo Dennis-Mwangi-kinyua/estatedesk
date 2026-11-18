@@ -7,6 +7,7 @@ import {
   isPayableWaterBillStatus,
   tenantVisibleWaterBillWhere,
 } from "@/lib/water-bills/status";
+import { getTenantPaymentInstructions } from "./get-instructions";
 import { buildPaymentReference } from "./reference";
 import type { TenantPaymentCheckoutSummary } from "./types";
 
@@ -178,7 +179,7 @@ export async function getTenantPaymentCheckoutSummary({
     if (!periodBill) return null;
 
     const lineText = periodBill.lines
-      .map((l) => `${l.label} ${l.balance.toFixed(0)}`)
+      .map((l) => `${l.label} ${l.balance.toFixed(2)}`)
       .join(" + ");
 
     return {
@@ -195,4 +196,11 @@ export async function getTenantPaymentCheckoutSummary({
   }
 
   return null;
+}
+
+export async function getTenantPaymentCheckoutData(input: { source: string | null; id: string | null }) {
+  return Promise.all([
+    getTenantPaymentInstructions(),
+    getTenantPaymentCheckoutSummary(input),
+  ]);
 }

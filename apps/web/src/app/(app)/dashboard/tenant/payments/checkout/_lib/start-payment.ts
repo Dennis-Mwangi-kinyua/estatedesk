@@ -16,6 +16,7 @@ import {
 import {
   buildCheckoutTransactionKey,
   getCheckoutSettlementMode,
+  STK_AMOUNT_ERROR,
   isBankCheckoutMethod,
   isGatewayCheckoutMethod,
   mapCheckoutMethodToPaymentMethod,
@@ -249,7 +250,17 @@ export async function startTenantPayment(input: StartPaymentInput) {
     // Gateway STK: prompt phone after payment row exists.
     if (isGateway && method === "mpesa-stk" && paymentId) {
       const accessToken = await stkAccessToken;
-      if (!accessToken?.ok) throw accessToken?.error ?? new Error("Could not authenticate with M-Pesa.");
+      if (!accessToken?.ok) {
+        await prisma.payment.updateMany({
+          where: { id: paymentId, gatewayStatus: "INITIATED", verificationStatus: "NOT_REQUIRED" },
+          data: {
+            gatewayStatus: "FAILED",
+            verificationStatus: "REJECTED",
+            notes: "Could not authenticate with M-Pesa. No prompt was sent.",
+          },
+        });
+        throw accessToken?.error ?? new Error("Could not authenticate with M-Pesa.");
+      }
       const stk = await requestMpesaStkPush({
         orgId: session.activeOrgId!,
         amount: paymentAmount,
@@ -296,11 +307,15 @@ export async function startTenantPayment(input: StartPaymentInput) {
         },
       });
 
-      params.set("status", "stk_sent");
     } else {
       params.set("status", settlementMode === "manual" ? "pending" : "processing");
     }
   } catch (error) {
+    if (method === "mpesa-stk" && paymentId) {
+      revalidatePath("/dashboard/tenant/payments");
+      redirect(`/dashboard/tenant/payments/status?payment=${encodeURIComponent(paymentId)}`);
+    }
+    if (error instanceof Error && error.message === STK_AMOUNT_ERROR) throw error;
     if (isUniqueConstraintError(error)) {
       throw new Error("That transaction ID has already been submitted.");
     }
@@ -318,5 +333,8 @@ export async function startTenantPayment(input: StartPaymentInput) {
   revalidatePath("/dashboard/org/charges");
   revalidatePath("/dashboard/org/notifications");
 
+  if (method === "mpesa-stk" && paymentId) {
+    redirect(`/dashboard/tenant/payments/status?payment=${encodeURIComponent(paymentId)}`);
+  }
   redirect(`/dashboard/tenant/payments?${params.toString()}`);
 }

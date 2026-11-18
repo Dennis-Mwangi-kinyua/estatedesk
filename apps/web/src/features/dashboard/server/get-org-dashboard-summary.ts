@@ -79,9 +79,7 @@ export async function getOrgDashboardSummary(
     issueGroups,
     pendingResolutionReports,
     unreadNotifications,
-    totalPayments,
     paymentMethodGroups,
-    pendingPayments,
     pendingFinanceRequests,
     accountingAccountCount,
     openPayables,
@@ -201,12 +199,6 @@ export async function getOrgDashboardSummary(
       },
     }),
 
-    prisma.payment.count({
-      where: {
-        orgId,
-      },
-    }),
-
     prisma.payment.groupBy({
       by: ["method", "gatewayStatus", "verificationStatus"],
       where: {
@@ -214,23 +206,6 @@ export async function getOrgDashboardSummary(
       },
       _count: {
         _all: true,
-      },
-    }),
-
-    prisma.payment.count({
-      where: {
-        orgId,
-        OR: [
-          {
-            gatewayStatus: {
-              in: ["INITIATED", "PENDING"],
-            },
-          },
-          {
-            gatewayStatus: "SUCCESS",
-            verificationStatus: "PENDING",
-          },
-        ],
       },
     }),
 
@@ -382,26 +357,23 @@ export async function getOrgDashboardSummary(
     .filter((item) => item.priority === "URGENT")
     .reduce((sum, item) => sum + item._count._all, 0);
 
-  const mpesaPayments = paymentMethodGroups
-    .filter((item) => item.method === "MPESA_STK")
-    .reduce((sum, item) => sum + item._count._all, 0);
-
-  const mpesaSuccessfulPayments = paymentMethodGroups
-    .filter(
-      (item) => item.method === "MPESA_STK" && item.gatewayStatus === "SUCCESS",
-    )
-    .reduce((sum, item) => sum + item._count._all, 0);
-
-  const mpesaPendingPayments = paymentMethodGroups
-    .filter(
-      (item) =>
-        item.method === "MPESA_STK" &&
-        (item.gatewayStatus === "INITIATED" ||
-          item.gatewayStatus === "PENDING" ||
-          (item.gatewayStatus === "SUCCESS" &&
-            item.verificationStatus === "PENDING")),
-    )
-    .reduce((sum, item) => sum + item._count._all, 0);
+  let totalPayments = 0;
+  let pendingPayments = 0;
+  let mpesaPayments = 0;
+  let mpesaSuccessfulPayments = 0;
+  let mpesaPendingPayments = 0;
+  for (const group of paymentMethodGroups) {
+    const count = group._count._all;
+    const pending = group.gatewayStatus === "INITIATED" || group.gatewayStatus === "PENDING"
+      || (group.gatewayStatus === "SUCCESS" && group.verificationStatus === "PENDING");
+    totalPayments += count;
+    if (pending) pendingPayments += count;
+    if (group.method === "MPESA_STK") {
+      mpesaPayments += count;
+      if (group.gatewayStatus === "SUCCESS") mpesaSuccessfulPayments += count;
+      if (pending) mpesaPendingPayments += count;
+    }
+  }
 
   const occupancyRate =
     totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;

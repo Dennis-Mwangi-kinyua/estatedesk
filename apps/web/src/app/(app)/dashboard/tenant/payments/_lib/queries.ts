@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getTenantLedger } from "@/lib/ledger";
+import { getTenantLedgerForTenant } from "@/lib/ledger";
 import {
   filterTenantPayments,
   getPaymentCategory,
@@ -29,7 +29,7 @@ export async function getTenantPaymentsData(
   }
 
   const [tenantLedger, taxCharges] = await Promise.all([
-    getTenantLedger(userId, orgId),
+    getTenantLedgerForTenant(orgId, tenant.id),
     getTenantTaxCharges(tenant.id, orgId),
   ]);
   const payments = tenant.payments ?? [];

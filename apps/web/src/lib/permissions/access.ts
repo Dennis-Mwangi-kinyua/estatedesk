@@ -1,9 +1,11 @@
 import type { OrgRole, PlatformRole } from "@/lib/auth/session";
 
-const TENANT_HISTORY_ONLY_PATHS = new Set([
+const TENANT_PATHS_WITHOUT_ACTIVE_LEASE = new Set([
   "/dashboard/tenant/history",
   "/dashboard/tenant",
   "/dashboard/tenant/profile",
+  "/dashboard/tenant/invoice/archive",
+  "/dashboard/tenant/payments/status",
 ]);
 
 export function hasPlatformRole(
@@ -23,7 +25,9 @@ export function hasOrgRole(
 export function tenantPathRequiresActiveLease(pathname: string) {
   return (
     pathname.startsWith("/dashboard/tenant") &&
-    !TENANT_HISTORY_ONLY_PATHS.has(pathname)
+    !TENANT_PATHS_WITHOUT_ACTIVE_LEASE.has(pathname) &&
+    !/^\/dashboard\/tenant\/invoice\/\d{4}-\d{2}\/(?:view|download)$/.test(pathname) &&
+    !/^\/dashboard\/tenant\/move-out\/[^/]+$/.test(pathname)
   );
 }
 

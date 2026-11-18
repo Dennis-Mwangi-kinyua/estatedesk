@@ -19,7 +19,8 @@ export function formatMoney(value: number) {
   return new Intl.NumberFormat("en-KE", {
     style: "currency",
     currency: "KES",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(value);
 }
 

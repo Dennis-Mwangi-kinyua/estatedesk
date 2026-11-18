@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
-import { getTenantLedger } from "@/lib/ledger";
+import { getTenantLedgerForTenant } from "@/lib/ledger";
 import {
   emptyPaymentInstructions,
   parsePaymentInstructions,
@@ -24,7 +25,7 @@ export type TenantPortalContext = {
       address: string | null;
     };
   } | null;
-  paymentHealth: Awaited<ReturnType<typeof getTenantLedger>>["row"] | null;
+  paymentHealth: Awaited<ReturnType<typeof getTenantLedgerForTenant>>["row"] | null;
   paymentInstructions: PaymentInstructions;
   unreadNotificationCount: number;
   pendingLeaseSignatures: Array<{
@@ -101,6 +102,15 @@ async function resolveCaretakerContact(input: {
   return assignment?.caretaker ?? null;
 }
 
+export const getTenantUnreadNotificationCount = cache(async (orgId: string, tenantId: string, userId: string) => {
+  return retryTransientDatabaseOperation(
+    () => prisma.notification.count({
+      where: { orgId, readAt: null, OR: [{ tenantId }, { userId }] },
+    }),
+    { label: "portal-unreadNotificationCount", attempts: 2 },
+  );
+});
+
 export async function getTenantPortalContext(
   userId: string,
   orgId: string | null,
@@ -145,8 +155,6 @@ export async function getTenantPortalContext(
     };
   }
 
-  const activeOrgId = orgId ?? tenant.orgId;
-
   // Optional portal widgets must not take down the whole tenant shell when one
   // query flakes (Neon pooler timeouts often surface as empty Prisma errors).
   async function softQuery<T>(label: string, run: () => Promise<T>, fallback: T): Promise<T> {
@@ -172,10 +180,7 @@ export async function getTenantPortalContext(
   ] = await Promise.all([
     softQuery(
       "paymentLedger",
-      () =>
-        activeOrgId
-          ? getTenantLedger(userId, activeOrgId)
-          : Promise.resolve(null),
+      () => getTenantLedgerForTenant(tenant.orgId, tenant.id),
       null,
     ),
     softQuery(
@@ -187,18 +192,10 @@ export async function getTenantPortalContext(
         }),
       null,
     ),
-    softQuery(
-      "unreadNotificationCount",
-      () =>
-        prisma.notification.count({
-          where: {
-            orgId: tenant.orgId,
-            readAt: null,
-            OR: [{ tenantId: tenant.id }, { userId }],
-          },
-        }),
-      0,
-    ),
+    getTenantUnreadNotificationCount(tenant.orgId, tenant.id, userId).catch(error => {
+      console.warn("[getTenantPortalContext] unreadNotificationCount failed", error);
+      return 0;
+    }),
     softQuery(
       "pendingLeaseSignatures",
       () =>

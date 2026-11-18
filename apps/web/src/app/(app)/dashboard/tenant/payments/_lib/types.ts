@@ -66,7 +66,7 @@ export type TenantTaxChargeItem = Awaited<
 export type TenantPaymentsPageData = {
   tenant: TenantPaymentsResult;
   tenantLedger: Awaited<
-    ReturnType<typeof import("@/lib/ledger").getTenantLedger>
+    ReturnType<typeof import("@/lib/ledger").getTenantLedgerForTenant>
   >;
   filteredPayments: PaymentItem[];
   totalPaid: number;

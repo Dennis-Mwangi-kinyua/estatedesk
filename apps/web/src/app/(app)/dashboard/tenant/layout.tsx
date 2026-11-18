@@ -3,7 +3,7 @@ import { ProductUpdatesBanner } from "@/features/updates/banner";
 import { ReactNode } from "react";
 import { TenantDashboardShell } from "@/components/layout/tenant-dashboard-shell";
 import { getCurrentTenantShell } from "@/lib/tenant/get-current-tenant";
-import { getTenantPortalContext } from "@/lib/tenant/get-tenant-portal-context";
+import { getTenantUnreadNotificationCount } from "@/lib/tenant/get-tenant-portal-context";
 import { requireUserSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import {
@@ -12,7 +12,6 @@ import {
 } from "@/lib/billing/subscription-access";
 import { SubscriptionWarning } from "@/components/billing/subscription-warning";
 import { UnreadNotificationAlertsPanel } from "@/components/notifications/unread-notification-alerts-panel";
-import { emptyPaymentInstructions } from "@/lib/payments/instructions";
 import { redirect } from "next/navigation";
 import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 
@@ -47,17 +46,7 @@ export default async function TenantLayout({
 
   const session = await requireUserSession();
 
-  const emptyPortal: Awaited<ReturnType<typeof getTenantPortalContext>> = {
-    tenant: null,
-    paymentHealth: null,
-    paymentInstructions: emptyPaymentInstructions,
-    unreadNotificationCount: 0,
-    pendingLeaseSignatures: [],
-    caretakerContact: null,
-    leaseDocuments: [],
-  };
-
-  const [activeLeaseResult, portalResult, accessResult] = await Promise.allSettled([
+  const [activeLeaseResult, unreadResult, accessResult] = await Promise.allSettled([
     retryTransientDatabaseOperation(
       () =>
         prisma.lease.findFirst({
@@ -71,15 +60,15 @@ export default async function TenantLayout({
         }),
       { label: "tenant-layout-active-lease" },
     ),
-    getTenantPortalContext(session.userId, tenant.org.id),
+    getTenantUnreadNotificationCount(tenant.org.id, tenant.id, session.userId),
     getSubscriptionAccessState(tenant.org.id),
   ]);
 
   if (activeLeaseResult.status === "rejected") {
     console.warn("[TenantLayout] activeLease lookup failed", activeLeaseResult.reason);
   }
-  if (portalResult.status === "rejected") {
-    console.warn("[TenantLayout] portal context failed", portalResult.reason);
+  if (unreadResult.status === "rejected") {
+    console.warn("[TenantLayout] unread notification count failed", unreadResult.reason);
   }
   if (accessResult.status === "rejected") {
     if (isNextRedirectError(accessResult.reason)) throw accessResult.reason;
@@ -88,9 +77,6 @@ export default async function TenantLayout({
 
   const activeLease =
     activeLeaseResult.status === "fulfilled" ? activeLeaseResult.value : null;
-  const portalContext =
-    portalResult.status === "fulfilled" ? portalResult.value : emptyPortal;
-
   const access: SubscriptionAccessState | null =
     accessResult.status === "fulfilled" ? accessResult.value : null;
 
@@ -108,7 +94,7 @@ export default async function TenantLayout({
       userName={tenant.fullName}
       hasActiveLease={Boolean(activeLease)}
       hasVisitorAccess={hasVisitorAccess}
-      unreadNotificationCount={portalContext.unreadNotificationCount}
+      unreadNotificationCount={unreadResult.status === "fulfilled" ? unreadResult.value : 0}
     >
       {access ? <SubscriptionWarning access={access} /> : null}
       <UnreadNotificationAlertsPanel

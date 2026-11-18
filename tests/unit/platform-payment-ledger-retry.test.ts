@@ -21,9 +21,9 @@ test("platform ledger retries transient water reads and preserves complete total
             export const prisma = {
               organization: {count: async () => 1, findMany: async () => [{id:"org", name:"Greenview", slug:"greenview"}]},
               tenant: {groupBy: async () => [{orgId:"org", _count:{_all:1}}]},
-              rentCharge: {findMany: async () => [{orgId:"org", amountDue:200, balance:100}]},
+              rentCharge: {groupBy: async () => [{orgId:"org", _sum:{amountDue:200, balance:100}}]},
               waterBill: {findMany: async () => {if (++reads === 1) {const error = new Error("Connection closed"); error.code="P1017"; throw error;} return [{id:"bill",orgId:"org",total:100}];}},
-              payment: {findMany: async ({where}) => where.waterBillId ? [{waterBillId:"bill",amount:30,gatewayStatus:"SUCCESS",verificationStatus:"VERIFIED"}] : [{orgId:"org",amount:130,gatewayStatus:"SUCCESS",verificationStatus:"VERIFIED",paidAt:new Date("2026-10-04"),createdAt:new Date("2026-10-04")}]}
+              payment: {groupBy: async () => [{waterBillId:"bill",_sum:{amount:30}}], findMany: async () => [{orgId:"org",amount:130,gatewayStatus:"SUCCESS",verificationStatus:"VERIFIED",paidAt:new Date("2026-10-04"),createdAt:new Date("2026-10-04")}]}
             };`,
         };
         return {contents: mocks[args.path], loader:"js", resolveDir:process.cwd()};

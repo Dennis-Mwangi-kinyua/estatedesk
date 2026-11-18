@@ -5,6 +5,7 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import type { PaymentInstructions } from "@/lib/payments/instructions";
 import { isPaymentMethodAvailable } from "@/lib/payments/instructions";
 import {
+  getStkAmountError,
   isBankCheckoutMethod,
   isGatewayCheckoutMethod,
   isMobileMoneyCheckoutMethod,
@@ -13,8 +14,7 @@ import {
   requiresTransactionIdForCheckout,
   validateCheckoutTransactionId,
 } from "@/lib/payments/method-flow";
-import { getTenantPaymentInstructions } from "../_lib/get-instructions";
-import { getTenantPaymentCheckoutSummary } from "../_lib/get-summary";
+import { getTenantPaymentCheckoutData } from "../_lib/get-summary";
 import { startTenantPayment } from "../_lib/start-payment";
 import type { TenantPaymentCheckoutSummary } from "../_lib/types";
 import { METHOD_LABELS } from "../_lib/constants";
@@ -60,10 +60,7 @@ export function useCheckoutForm(searchParams: {
   useEffect(() => {
     let active = true;
 
-    Promise.all([
-      getTenantPaymentInstructions(),
-      getTenantPaymentCheckoutSummary({ source, id }),
-    ])
+    getTenantPaymentCheckoutData({ source, id })
       .then(([instructions, summary]) => {
         if (active) {
           setPaymentInstructions(instructions);
@@ -77,7 +74,7 @@ export function useCheckoutForm(searchParams: {
               source === "water_bill") &&
             !amountParam
           ) {
-            setAmount(String(Math.round(summary.amount)));
+            setAmount(summary.amount.toFixed(2));
           }
         }
       })
@@ -165,6 +162,13 @@ export function useCheckoutForm(searchParams: {
         );
         return;
       }
+    }
+
+    const requestedAmount = amount.trim() ? Number(amount) : checkoutSummary?.amount;
+    const stkError = method === "mpesa-stk" ? getStkAmountError(requestedAmount ?? 0) : undefined;
+    if (stkError) {
+      setError(stkError);
+      return;
     }
 
     startTransition(async () => {

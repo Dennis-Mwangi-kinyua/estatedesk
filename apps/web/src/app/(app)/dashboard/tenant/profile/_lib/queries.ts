@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getTenantLedger } from "@/lib/ledger";
+import { getTenantLedgerForTenant } from "@/lib/ledger";
 import { parsePaymentInstructions } from "@/lib/payments/instructions";
 
 export async function getTenantProfileData(
@@ -77,7 +77,7 @@ export async function getTenantProfileData(
   }
 
   const [paymentLedger, settings] = await Promise.all([
-    activeOrgId ? getTenantLedger(userId, activeOrgId) : Promise.resolve(null),
+    getTenantLedgerForTenant(tenant.orgId, tenant.id),
     prisma.organizationSettings.findUnique({
       where: { orgId: tenant.orgId },
       select: { customFields: true },

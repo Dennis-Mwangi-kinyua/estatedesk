@@ -1,6 +1,7 @@
 import {
   channelForMethod,
   checkoutMethodLabel,
+  getStkAmountError,
   submissionNotesForMethod,
 } from "@/lib/payments/method-flow";
 import { notifyRecipients } from "@/lib/notifications/notify";
@@ -67,6 +68,8 @@ export async function processPeriodBillPayment(
   }
 
   const amount = Math.round(requested * 100) / 100;
+  const stkError = checkoutMethod === "mpesa-stk" ? getStkAmountError(amount) : undefined;
+  if (stkError) throw new Error(stkError);
   const methodLabel = checkoutMethodLabel(checkoutMethod);
   const isPartial = amount + 0.001 < periodBill.balance;
 
@@ -142,7 +145,7 @@ export async function processPeriodBillPayment(
 
   const lineSummary = periodBill.lines
     .filter((l) => l.balance > 0)
-    .map((l) => `${l.label} ${l.balance.toFixed(0)}`)
+    .map((l) => `${l.label} ${l.balance.toFixed(2)}`)
     .join(" + ");
 
   if (isGateway) {
@@ -152,7 +155,7 @@ export async function processPeriodBillPayment(
       recipients: [{ tenantId: tenant.id, userId }],
       type: "GENERAL",
       title: "Complete M-Pesa prompt",
-      message: `Enter your M-Pesa PIN on your phone to pay ${amount.toFixed(0)} for ${period} (${lineSummary}). Your bill updates automatically when payment succeeds.`,
+      message: `Enter your M-Pesa PIN on your phone to pay ${amount.toFixed(2)} for ${period} (${lineSummary}). Your bill updates automatically when payment succeeds.`,
     });
   } else {
     await notifyRecipients({ actorUserId: userId,
@@ -163,7 +166,7 @@ export async function processPeriodBillPayment(
       title: isPartial
         ? "Partial bill payment submitted"
         : "Bill payment submitted",
-      message: `Your ${period} bill payment of ${amount.toFixed(0)} via ${methodLabel} has been submitted and is awaiting organization verification. (${lineSummary})`,
+      message: `Your ${period} bill payment of ${amount.toFixed(2)} via ${methodLabel} has been submitted and is awaiting organization verification. (${lineSummary})`,
     });
 
     await notifyRecipients({ actorUserId: userId,
@@ -174,7 +177,7 @@ export async function processPeriodBillPayment(
       type: "GENERAL",
       title: "Manual bill payment needs verification",
       actionUrl: "/dashboard/org/payments#pending-payments",
-      message: `${tenant.fullName} submitted ${period} ${methodLabel} payment (${amount.toFixed(0)}) for ${periodBill.propertyName} / Unit ${periodBill.unitHouseNo}${isPartial ? " (partial)" : ""}.`,
+      message: `${tenant.fullName} submitted ${period} ${methodLabel} payment (${amount.toFixed(2)}) for ${periodBill.propertyName} / Unit ${periodBill.unitHouseNo}${isPartial ? " (partial)" : ""}.`,
     });
   }
 

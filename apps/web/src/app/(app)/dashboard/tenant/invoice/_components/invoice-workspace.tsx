@@ -1,3 +1,4 @@
+import Link from "@/components/navigation/workspace-link";
 import { BillHistory } from "./bill-history";
 import { InvoiceHeader } from "./invoice-header";
 import { InvoiceProofForm } from "./invoice-proof-form";
@@ -14,7 +15,29 @@ const proofNotices: Record<string, string> = {
   "proof-image": "Use a JPEG, PNG, or WebP image under 5 MB.",
 };
 
-export function InvoiceWorkspace({ data, notice }: { data: TenantInvoicePageData; notice?: string }) {
+const invoiceFilters = [
+  { id: "all", label: "All" },
+  { id: "unpaid", label: "Unpaid" },
+  { id: "partial", label: "Partially paid" },
+  { id: "paid", label: "Paid" },
+  { id: "awaiting-approval", label: "Awaiting approval" },
+] as const;
+
+export function InvoiceWorkspace({ data, notice, status }: {
+  data: TenantInvoicePageData;
+  notice?: string;
+  status?: string | string[];
+}) {
+  const filter = invoiceFilters.find(({ id }) => id === status)?.id ?? "all";
+  const bills = data.bills.filter((bill) => {
+    switch (filter) {
+      case "unpaid": return !bill.isPaid && bill.balance > 0 && !bill.amountPaid;
+      case "partial": return !bill.isPaid && bill.balance > 0 && (bill.amountPaid ?? 0) > 0;
+      case "paid": return bill.isPaid;
+      case "awaiting-approval": return bill.rawStatus === "PENDING APPROVAL";
+      default: return true;
+    }
+  });
   const openPeriods = new Map<string, number>();
   for (const bill of data.bills) {
     if (bill.isPaid || bill.balance <= 0 || !/^\d{4}-\d{2}$/.test(bill.period)) continue;
@@ -29,13 +52,25 @@ export function InvoiceWorkspace({ data, notice }: { data: TenantInvoicePageData
       <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 xl:px-8">
         <div className="space-y-4 sm:space-y-6">
           <InvoiceHeader data={data} />
+          <Link href="/dashboard/tenant/invoice/archive" className="inline-flex min-h-11 items-center text-sm text-primary underline">Browse invoice archive</Link>
           <InvoiceStats data={data} />
           {message ? <p role="status" className="rounded-[16px] border border-border bg-card px-4 py-3 text-sm">{message}</p> : null}
           {periods.length ? <InvoiceProofForm periods={periods} /> : null}
+          <nav aria-label="Invoice status" className="flex flex-wrap gap-2">
+            {invoiceFilters.map(({ id, label }) => (
+              <Link
+                key={id}
+                href={id === "all" ? "/dashboard/tenant/invoice" : `/dashboard/tenant/invoice?status=${id}`}
+                aria-current={id === filter ? "page" : undefined}
+                className="inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-3 text-sm font-medium aria-[current=page]:border-primary aria-[current=page]:text-primary"
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
           <BillHistory
-            bills={data.bills}
-            totalBilled={data.totalBilled}
-            totalBalance={data.totalBalance}
+            bills={bills}
+            filtered={filter !== "all"}
             organizationName={data.organizationName}
             tenantName={data.tenantName}
           />

@@ -1,3 +1,4 @@
+import { mobileTheme } from "../design-tokens";
 import { cardGridLayout } from "../grid-layout";
 import { useState } from "react";
 import { PixelRatio, StyleSheet, useWindowDimensions, type LayoutChangeEvent } from "react-native";
@@ -20,11 +21,10 @@ export function useCardGrid() {
 export const cardGridStyles = StyleSheet.create({
   grid: { flexDirection: "row", flexWrap: "wrap", alignItems: "stretch", gap: 12 },
   card: {
-    backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#dce6e0",
-    borderRadius: 18, padding: 16, gap: 12, minHeight: 160,
-    boxShadow: "0px 2px 6px rgba(18, 57, 47, 0.06)",
+    backgroundColor: mobileTheme.color.surface, borderWidth: 1, borderColor: mobileTheme.color.border,
+    borderRadius: mobileTheme.radius.card, padding: 16, gap: 12, minHeight: 160,
   },
-  pressed: { backgroundColor: "#edf5f0", borderColor: "#79a38c", transform: [{ scale: 0.98 }] },
+  pressed: { backgroundColor: mobileTheme.color.soft, borderColor: mobileTheme.color.brand },
   disabled: { opacity: 0.5 },
   footer: { marginTop: "auto", paddingTop: 12, borderTopWidth: 1, borderTopColor: "#e8eee9", flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
   footerText: { color: "#236446", fontSize: 12, fontWeight: "600" },

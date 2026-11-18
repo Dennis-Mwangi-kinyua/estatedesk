@@ -9,7 +9,7 @@ export const getOrganizationSummary = cache((orgId: string) =>
   retryTransientDatabaseOperation(
     () => prisma.organization.findUnique({
       where: { id: orgId },
-      select: { name: true, status: true, deletedAt: true, blacklistedAt: true },
+      select: { name: true, currencyCode: true, status: true, deletedAt: true, blacklistedAt: true },
     }),
     { label: "organization-summary" },
   ),

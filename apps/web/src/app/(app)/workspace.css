@@ -27,7 +27,7 @@
   --workspace-sky-ink: #315d99;
   --workspace-mint-ink: #21654b;
   --workspace-peach-ink: #8b571b;
-  --workspace-shadow: 0 8px 28px rgb(34 63 102 / 5%);
+  --workspace-shadow: 0 2px 8px rgb(34 63 102 / 5%);
   background: var(--background);
   color: var(--foreground);
 }
@@ -53,7 +53,7 @@
   --workspace-sky-ink: #b6d6ff;
   --workspace-mint-ink: #a4e3c7;
   --workspace-peach-ink: #f4cf99;
-  --workspace-shadow: 0 8px 28px rgb(0 0 0 / 14%);
+  --workspace-shadow: 0 2px 8px rgb(0 0 0 / 14%);
   background: var(--background);
 }
 .estate-workspace :where(.org-theme-content, .platform-theme-content) {
@@ -72,7 +72,7 @@
 }
 .estate-workspace .ed-shell-panel {
   border-color: var(--border);
-  background: color-mix(in srgb, var(--card) 95%, transparent);
+  background: var(--card);
   color: var(--foreground);
 }
 .estate-workspace :where(nav a[aria-current="page"], .workspace-active-link) {
@@ -86,7 +86,7 @@
   position: relative;
   border-radius: 1.125rem;
   border-color: color-mix(in srgb, var(--metric-ink) 20%, var(--border));
-  background: linear-gradient(135deg, var(--metric-surface), var(--card));
+  background: var(--card);
   box-shadow: var(--workspace-shadow);
 }
 .estate-workspace .workspace-metric:nth-child(3n + 2) { --metric-surface: var(--workspace-mint); --metric-ink: var(--workspace-mint-ink); }

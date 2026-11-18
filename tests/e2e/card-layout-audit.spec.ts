@@ -44,6 +44,7 @@ test("management cards contain long content and remain comfortable beside naviga
       await page.locator("html").evaluate((el, value) => el.setAttribute("class", value), theme);
       // Let theme color transitions settle before measuring contrast.
       await page.waitForTimeout(250);
+      expect(errors).toEqual([]);
       await expect(page.getByRole("heading", { name: "Rent collection report", exact: true })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width} ${theme}: page overflow`).toBe(true);
       await expect(page.getByRole("region", { name: "Notice review queue" })).toBeVisible();

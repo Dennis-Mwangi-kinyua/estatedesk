@@ -312,7 +312,8 @@ export async function verifyPayment(tx: Prisma.TransactionClient, session: AppSe
         message: `Your payment of ${new Intl.NumberFormat("en-KE", {
           style: "currency",
           currency: "KES",
-          maximumFractionDigits: 0,
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
         }).format(Number(payment.amount))} has been verified. Receipt ${receiptNumber} is available in EstateDesk.`,
       });
     }

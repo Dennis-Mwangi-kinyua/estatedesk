@@ -1,6 +1,7 @@
 import {
   channelForMethod,
   checkoutMethodLabel,
+  getStkAmountError,
   submissionNotesForMethod,
 } from "@/lib/payments/method-flow";
 import { notifyRecipients } from "@/lib/notifications/notify";
@@ -105,6 +106,8 @@ export async function processWaterBillPayment(
   }
 
   const amount = Math.round(requested * 100) / 100;
+  const stkError = checkoutMethod === "mpesa-stk" ? getStkAmountError(amount) : undefined;
+  if (stkError) throw new Error(stkError);
   const methodLabel = checkoutMethodLabel(checkoutMethod);
 
   const payment = await tx.payment.create({

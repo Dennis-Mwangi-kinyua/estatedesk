@@ -51,8 +51,9 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWo
   const restricted = { records: [], notice: "This view requires organization-wide access. Your assigned property, building or unit scope remains in effect." };
   if (kind === "organization" && section === "operating-queue") {
     if (!wide) return restricted;
-    const organization = await prisma.organization.findUnique({ where: { id: orgId }, select: { currencyCode: true } });
-    const groups = await getOperatingQueue(orgId, organization?.currencyCode ?? "KES");
+    const currency = prisma.organization.findUnique({ where: { id: orgId }, select: { currencyCode: true } })
+      .then(org => org?.currencyCode ?? "KES");
+    const groups = await getOperatingQueue(orgId, currency);
     return { searchable: false, records: groups.map(group => ({ ...card(group.id, group.title, group.total ? "PENDING" : "CLEAR", {
       Waiting: group.total, Responsible: group.owner, "Next action": group.nextAction,
       "Oldest waiting": group.items[0] ? waitingAge(group.items[0].since) : "Nothing waiting",

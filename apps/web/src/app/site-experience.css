@@ -37,7 +37,6 @@
   .estate-glass-system :where(button:not([role="switch"]), [data-slot="select-trigger"], summary) { min-height: 2.75rem; }
   .estate-glass-system :where(a[class*="items-center"][class*="justify-center"]) { min-height: 2.75rem; }
   .estate-glass-system :where(.workspace-hero) { padding: 1.25rem; }
-  .estate-glass-system :where(.workspace-hero__art) { display: none; }
   .estate-glass-system :where(.workspace-hero__description) { margin-top: .5rem; }
   .estate-glass-system table[data-mobile-cards="true"] {
     display: block;
@@ -171,12 +170,6 @@ body.estate-glass-system .organisation-detail-page :is(.workspace-panel, .org-su
 .dark .visual-sticker[data-sticker-tone="mint"] { --sticker-wash: #203d33; --sticker-edge: #345b49; --sticker-ink: #79edb6; }
 .dark .visual-sticker[data-sticker-tone="peach"] { --sticker-wash: #423224; --sticker-edge: #66503a; --sticker-ink: #ffc48a; }
 .dark .visual-sticker[data-sticker-tone="teal"] { --sticker-wash: #115e59; --sticker-edge: #0d9488; --sticker-ink: #99f6e4; }
-@media (min-width: 1024px) {
-  .estate-workspace .workspace-hero__art { display: block; width: 7rem; height: 4.75rem; }
-  .workspace-hero__art > .visual-sticker { width: 3.5rem; height: 3.5rem; border-width: 2px; border-radius: 1rem; transform: rotate(-6deg); }
-  .workspace-hero__art > .visual-sticker:nth-child(2) { width: 3rem; height: 3rem; transform: rotate(6deg); }
-}
-@media (prefers-reduced-motion: reduce) { .workspace-hero__art > .visual-sticker { transform: none; } }
 @media print { .visual-sticker { display: none !important; } }
 .public-access-nav-link .visual-sticker { width: 1.5rem; height: 1.5rem; border-radius: .5rem; }
 .public-access-nav-link .visual-sticker svg { width: .875rem; height: .875rem; }

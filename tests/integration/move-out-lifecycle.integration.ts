@@ -20,6 +20,16 @@ test("handover applies deposit, preserves history and receipts, and refund settl
     assert.equal(settlement.refundDue, 500); assert.equal(settlement.amountOwed, 0);
     const receipt = await f.prisma.receipt.findUniqueOrThrow({ where: { paymentId: String(settlement.depositPaymentId) } });
     assert.ok(receipt.documentId);
+    const { buildPeriodInvoiceContext, loadVerifiedPeriodInvoiceByCode } = await import("../../apps/web/src/lib/documents/tenant-period-invoice");
+    const invoiceInput = { orgId: f.org.id, tenantId: f.tenant.id, historicalLeaseId: f.lease.id, period: f.period };
+    const archive = await buildPeriodInvoiceContext(invoiceInput);
+    assert.equal(archive?.periodBill.leaseId, f.lease.id);
+    assert.equal(archive?.pdfData.status, "PAID");
+    assert.equal(archive?.pdfData.lines.length, 3);
+    assert.ok(archive?.document.verificationCode);
+    assert.equal((await loadVerifiedPeriodInvoiceByCode(archive.document.verificationCode))?.periodBill.leaseId, f.lease.id);
+    assert.equal(await buildPeriodInvoiceContext({ ...invoiceInput, period: "1990-01" }), null);
+    assert.equal(await buildPeriodInvoiceContext({ ...invoiceInput, historicalLeaseId: "different-lease" }), null);
     assert.equal(Number((await f.prisma.waterBill.findUniqueOrThrow({ where: { id: f.water.id } })).amountPaid), 1000);
     await f.refund();
     await assert.rejects(f.refund(), /no pending deposit refund/);
@@ -120,4 +130,64 @@ test("arrears handover requires approval and preserves debt after admin approval
     assert.equal((await loadMoveOutBalances(f.prisma, f.lease)).totalCents, 350000);
     await assertBalanced(f.prisma, f.org.id);
   } finally { await f.cleanup(); }
+});
+
+test("invoice history batches monthly billing queries without changing balances", { skip }, async () => {
+  const f = await fixture();
+  const [{ PrismaClient }, { PrismaPg }, { addMonthsToPeriod }, billing] = await Promise.all([
+    import("@prisma/client"),
+    import("@prisma/adapter-pg"),
+    import("../../apps/web/src/lib/ledger-utils"),
+    import("../../apps/web/src/lib/billing/period-bill"),
+  ]);
+  const db = new PrismaClient({
+    adapter: new PrismaPg({ connectionString: databaseUrl! }),
+    log: [{ emit: "event", level: "query" }],
+  });
+  let queries = 0;
+  db.$on("query", () => { queries += 1; });
+  try {
+    const periods = Array.from({ length: 12 }, (_, index) => addMonthsToPeriod(f.period, -index));
+    const input = { db, orgId: f.org.id, tenantId: f.tenant.id, showPendingWater: true };
+    const summarize = (bill: Awaited<ReturnType<typeof billing.getPeriodBillForTenant>>) => ({
+      amountDue: bill?.amountDue, amountPaid: bill?.amountPaid, balance: bill?.balance,
+      lines: bill?.lines.map(({ kind, label, balance }) => ({ kind, label, balance })),
+    });
+    const single = [];
+    for (const period of periods) {
+      single.push(summarize(await billing.getPeriodBillForTenant({ ...input, period })));
+    }
+    const individualQueries = queries;
+    queries = 0;
+    const batch = await billing.getPeriodBillsForTenant({ ...input, periods });
+    assert.deepEqual([...batch.values()].map(summarize), single);
+    assert.ok(queries * 6 <= individualQueries, `Batch used ${queries} queries vs ${individualQueries} individually`);
+    console.log(`12-period invoice fixture used ${queries} database queries vs ${individualQueries} individually.`);
+  } finally {
+    await db.$disconnect();
+    await f.cleanup();
+  }
+});
+
+test("platform ledger aggregates rent and recognized water payments in the database", { skip }, async () => {
+  const f = await fixture();
+  try {
+    const { getPlatformPaymentLedger } = await import("../../apps/web/src/lib/ledger");
+    const paidAt = new Date(`${f.period}-15T12:00:00Z`);
+    await f.prisma.payment.createMany({
+      data: [
+        { orgId: f.org.id, payerTenantId: f.tenant.id, waterBillId: f.water.id, method: "CASH", targetType: "WATER", amount: 30.25, gatewayStatus: "SUCCESS", verificationStatus: "VERIFIED", paidAt, createdAt: paidAt },
+        { orgId: f.org.id, payerTenantId: f.tenant.id, waterBillId: f.water.id, method: "BANK", targetType: "WATER", amount: 50, gatewayStatus: "PENDING", verificationStatus: "PENDING", createdAt: paidAt },
+      ],
+    });
+    const ledger = await getPlatformPaymentLedger(f.period, { q: f.org.slug });
+    assert.equal(ledger.rows.length, 1);
+    assert.equal(ledger.rows[0].expected, 11000);
+    assert.equal(ledger.rows[0].paid, 30.25);
+    assert.equal(ledger.rows[0].deficit, 10969.75);
+    assert.equal(ledger.rows[0].paymentCount, 2);
+    assert.equal(ledger.rows[0].lastPaymentAt?.getTime(), paidAt.getTime());
+  } finally {
+    await f.cleanup();
+  }
 });

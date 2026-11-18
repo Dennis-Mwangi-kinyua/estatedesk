@@ -37,7 +37,7 @@ export function CheckoutFormPanel({ form }: CheckoutFormPanelProps) {
   } = form;
 
   return (
-    <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+    <section className="rounded-3xl border border-border bg-card p-3 shadow-sm sm:p-6">
       <div className="mb-6">
         <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-sm font-medium text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/15 dark:text-sky-100">
           <CreditCard className="h-4 w-4" />
@@ -77,8 +77,9 @@ export function CheckoutFormPanel({ form }: CheckoutFormPanelProps) {
               </span>
               <input
                 type="number"
-                min="1"
-                step="1"
+                inputMode={method === "mpesa-stk" ? "numeric" : "decimal"}
+                min={method === "mpesa-stk" ? "1" : "0.01"}
+                step={method === "mpesa-stk" ? "1" : "0.01"}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="h-12 w-full rounded-lg border border-border bg-background px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -111,13 +112,15 @@ export function CheckoutFormPanel({ form }: CheckoutFormPanelProps) {
                 Amount to pay
               </span>
               <p className="mb-2 text-xs text-sky-900/90 dark:text-sky-100/80">
-                Enter the amount to pay. Partial payments reduce your balance;
-                overpayments become credit for your next bills.
+                {method === "mpesa-stk"
+                  ? "M-Pesa STK accepts whole shillings. Choose another method to pay a fractional balance in full."
+                  : "Enter the full balance or make a partial payment."}
               </p>
               <input
                 type="number"
-                min="1"
-                step="1"
+                inputMode={method === "mpesa-stk" ? "numeric" : "decimal"}
+                min={method === "mpesa-stk" ? "1" : "0.01"}
+                step={method === "mpesa-stk" ? "1" : "0.01"}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="h-12 w-full rounded-lg border border-border bg-background px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -129,7 +132,8 @@ export function CheckoutFormPanel({ form }: CheckoutFormPanelProps) {
                   {new Intl.NumberFormat("en-KE", {
                     style: "currency",
                     currency: "KES",
-                    maximumFractionDigits: 0,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2,
                   }).format(checkoutSummary.amount)}
                 </p>
               ) : null}

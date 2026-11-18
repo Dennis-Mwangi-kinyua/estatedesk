@@ -20,7 +20,7 @@ import {
   tenantInvoiceDownloadPath,
   tenantInvoiceViewPath,
 } from "@/app/(app)/dashboard/tenant/invoice/_lib/paths";
-import { getPeriodBillForTenant } from "./period-bill";
+import { getPeriodBillsForTenant, getPeriodInvoiceStatus, type PeriodBill } from "./period-bill";
 
 type MeterReadingRow = {
   period: string;
@@ -125,7 +125,7 @@ function toPreviousBillSummary(bill: CombinedBill): PreviousBillSummary {
 
 function periodBillToCombinedBill(
   period: string,
-  periodBill: NonNullable<Awaited<ReturnType<typeof getPeriodBillForTenant>>>,
+  periodBill: PeriodBill,
   tenant: TenantInvoiceResult,
   readingByPeriod: Map<string, MeterReadingRow>,
 ): CombinedBill {
@@ -165,12 +165,7 @@ function periodBillToCombinedBill(
     };
   });
 
-  const waterPending = waterBill?.status === "PENDING_APPROVAL";
-
-  let status = "UNPAID";
-  if (periodBill.isPaid) status = "PAID";
-  else if (periodBill.amountPaid > 0) status = "PARTIAL";
-  else if (waterPending && !periodBill.balance) status = "PENDING APPROVAL";
+  const status = getPeriodInvoiceStatus(periodBill);
 
   const canPayCombined = periodBill.balance > 0;
   const waterLine = lines.find((line) => line.kind === "WATER");
@@ -238,23 +233,26 @@ export async function buildTenantInvoiceBills({
 
   periods.add(getCurrentPeriod());
 
-  const meterReadings = await db.meterReading.findMany({
-    where: {
-      unitId: activeLease.unitId,
-      period: { in: Array.from(periods) },
-    },
-    select: {
-      period: true,
-      prevReading: true,
-      currentReading: true,
-      unitsUsed: true,
-      status: true,
-      createdAt: true,
-      approvedAt: true,
-      submittedBy: { select: { fullName: true } },
-      approvedBy: { select: { fullName: true } },
-    },
-  });
+  const [periodBills, meterReadings] = await Promise.all([
+    getPeriodBillsForTenant({ db, orgId, tenantId, periods: [...periods], showPendingWater: true }),
+    db.meterReading.findMany({
+      where: {
+        unitId: activeLease.unitId,
+        period: { in: Array.from(periods) },
+      },
+      select: {
+        period: true,
+        prevReading: true,
+        currentReading: true,
+        unitsUsed: true,
+        status: true,
+        createdAt: true,
+        approvedAt: true,
+        submittedBy: { select: { fullName: true } },
+        approvedBy: { select: { fullName: true } },
+      },
+    }),
+  ]);
 
   const readingByPeriod = new Map(
     meterReadings.map((reading) => [reading.period, reading]),
@@ -262,18 +260,9 @@ export async function buildTenantInvoiceBills({
 
   const bills: CombinedBill[] = [];
 
-  for (const period of periods) {
-    const periodBill = await getPeriodBillForTenant({
-      db,
-      orgId,
-      tenantId,
-      period,
-      showPendingWater: true,
-    });
-
-    if (!periodBill) continue;
-
-    const hasWater = tenant.waterBills.some((bill) => bill.period === period);
+  const waterPeriods = new Set(tenant.waterBills.map(bill => bill.period));
+  for (const [period, periodBill] of periodBills) {
+    const hasWater = waterPeriods.has(period);
     const hasCharges = periodBill.amountDue > 0 || hasWater;
 
     if (!hasCharges) continue;

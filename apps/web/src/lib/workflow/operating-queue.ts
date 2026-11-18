@@ -39,7 +39,7 @@ function money(amount: { toString(): string } | number, currency: string) {
   }
 }
 
-export async function getOperatingQueue(orgId: string, currency = "KES", now = new Date(), db: PrismaClient = prisma): Promise<OperatingGroup[]> {
+export async function getOperatingQueue(orgId: string, currency: string | Promise<string> = "KES", now = new Date(), db: PrismaClient = prisma): Promise<OperatingGroup[]> {
   const openIssueWhere = { orgId, status: { in: ["OPEN", "IN_PROGRESS"] as ("OPEN" | "IN_PROGRESS")[] } };
   const overdueIssues = { ...openIssueWhere, OR: ([ ["URGENT", 4], ["HIGH", 24], ["MEDIUM", 72], ["LOW", 168] ] as const).map(([priority, hours]) => ({ priority, createdAt: { lte: new Date(now.getTime() - hours * 3600000) } })) };
   const [
@@ -55,6 +55,7 @@ export async function getOperatingQueue(orgId: string, currency = "KES", now = n
     moveOutCount,
     moveOuts,
     subscription,
+    currencyCode,
   ] = await Promise.all([
     db.payment.count({ where: { orgId, reversedAt: null, verificationStatus: "PENDING", method: { in: ["MPESA_MANUAL", "BANK", "CASH"] } } }),
     db.payment.findMany({
@@ -116,6 +117,7 @@ export async function getOperatingQueue(orgId: string, currency = "KES", now = n
       select: { id: true, status: true, noticeDate: true, tenant: { select: { fullName: true } }, lease: { select: { unit: { select: { houseNo: true } } } } },
     }),
     db.subscription.findUnique({ where: { orgId }, select: { plan: true } }),
+    currency,
   ]);
 
   const issueItems = oldIssues;
@@ -136,7 +138,7 @@ export async function getOperatingQueue(orgId: string, currency = "KES", now = n
           id: payment.id,
           who: payment.payerTenant?.fullName ?? "Payment",
           where,
-          amount: money(payment.amount, currency),
+          amount: money(payment.amount, currencyCode),
           since: payment.createdAt,
           href: leaseId && period ? `/dashboard/org/charges/bills/${leaseId}?period=${period}` : `/dashboard/org/payments?q=${encodeURIComponent(payment.reference || payment.payerTenant?.fullName || "")}`,
           action: "Verify payment",
@@ -196,7 +198,7 @@ export async function getOperatingQueue(orgId: string, currency = "KES", now = n
         id: charge.id,
         who: charge.lease.tenant.fullName,
         where: `Unit ${charge.lease.unit.houseNo}`,
-        amount: money(charge.balance, currency),
+        amount: money(charge.balance, currencyCode),
         since: charge.dueDate,
         href: `/dashboard/org/charges/bills/${charge.leaseId}?period=${charge.period}`,
         action: "Send reminder",

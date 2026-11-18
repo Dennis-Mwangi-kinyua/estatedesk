@@ -166,8 +166,8 @@ function LineItemTable({ bill }: { bill: CombinedBill }) {
 
   return (
     <div className="overflow-hidden rounded-[18px] border border-border/70 bg-card">
-      <table className="min-w-full text-sm">
-        <thead className="bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+      <table className="block w-full text-sm">
+        <thead className="sr-only bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="px-3 py-2.5 font-medium">Charge</th>
             <th className="px-3 py-2.5 font-medium">Billed</th>
@@ -176,13 +176,13 @@ function LineItemTable({ bill }: { bill: CombinedBill }) {
             <th className="px-3 py-2.5 font-medium">Pay</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="block">
           {bill.lines.map((line) => (
             <Fragment key={`${bill.id}-${line.kind}-${line.label}`}>
               <tr
-                className="border-t border-border/60"
+                className="grid grid-cols-2 border-t border-border/60"
               >
-                <td className="px-3 py-3 font-medium text-foreground">
+                <td className="col-span-2 px-3 py-2 font-medium text-foreground">
                   <div className="flex items-center gap-2">
                     {line.kind === "WATER" ? (
                       <Droplets className="h-4 w-4 text-sky-600" />
@@ -191,19 +191,22 @@ function LineItemTable({ bill }: { bill: CombinedBill }) {
                   </div>
                 </td>
                 <td className="px-3 py-3 tabular-nums text-muted-foreground">
+                  <span className="block text-xs text-muted-foreground">Billed</span>
                   {formatMoney(line.amountDue)}
                 </td>
                 <td className="px-3 py-3 tabular-nums text-muted-foreground">
+                  <span className="block text-xs text-muted-foreground">Paid</span>
                   {formatMoney(line.amountPaid)}
                 </td>
                 <td className="px-3 py-3 font-semibold tabular-nums text-foreground">
+                  <span className="block text-xs text-muted-foreground">Balance</span>
                   {formatMoney(line.balance)}
                 </td>
                 <td className="px-3 py-3">
                   {line.payHref && line.balance > 0 ? (
                     <Link
                       href={line.payHref}
-                      className="inline-flex items-center rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted/50"
+                      className="inline-flex min-h-11 items-center rounded-lg border border-border px-2.5 text-xs font-medium text-foreground transition hover:bg-muted/50"
                     >
                       Pay
                     </Link>
@@ -215,8 +218,8 @@ function LineItemTable({ bill }: { bill: CombinedBill }) {
                 </td>
               </tr>
               {line.waterDetail ? (
-                <tr className="border-t border-border/40 bg-sky-50/30">
-                  <td colSpan={5} className="px-3 py-3">
+                <tr className="block border-t border-border/40 bg-sky-50/30">
+                  <td colSpan={5} className="block px-3 py-3">
                     <WaterReadingPanel detail={line.waterDetail} />
                   </td>
                 </tr>
@@ -272,20 +275,19 @@ function BillActions({ bill }: { bill: CombinedBill }) {
         </Link>
       ) : null}
 
-      {bill.isPaid ? (
-        bill.receiptUrl ? (
-          <a download
-            href={bill.receiptUrl}
-            className="inline-flex items-center gap-2 rounded-[16px] bg-neutral-900 px-4 py-3 text-sm font-medium text-white"
-          >
-            <Receipt className="h-4 w-4" />
-            Download Receipt
-          </a>
-        ) : (
-          <span className="inline-flex items-center rounded-[16px] border border-neutral-300 bg-card px-4 py-3 text-sm text-muted-foreground">
-            Paid
-          </span>
-        )
+      {bill.receiptUrl ? (
+        <a
+          download
+          href={bill.receiptUrl}
+          className="inline-flex items-center gap-2 rounded-[16px] bg-neutral-900 px-4 py-3 text-sm font-medium text-white"
+        >
+          <Receipt className="h-4 w-4" />
+          Download payment receipt
+        </a>
+      ) : bill.isPaid ? (
+        <span className="inline-flex items-center rounded-[16px] border border-neutral-300 bg-card px-4 py-3 text-sm text-muted-foreground">
+          Paid
+        </span>
       ) : null}
     </div>
   );
@@ -330,17 +332,16 @@ function BillActionsTable({ bill }: { bill: CombinedBill }) {
         </Link>
       ) : null}
 
-      {bill.isPaid ? (
-        bill.receiptUrl ? (
-          <a download
-            href={bill.receiptUrl}
-            className="inline-flex items-center rounded-xl bg-neutral-900 px-3 py-2 text-sm font-medium text-white"
-          >
-            Receipt
-          </a>
-        ) : (
-          <span className="text-sm text-muted-foreground">Paid</span>
-        )
+      {bill.receiptUrl ? (
+        <a
+          download
+          href={bill.receiptUrl}
+          className="inline-flex items-center rounded-xl bg-neutral-900 px-3 py-2 text-sm font-medium text-white"
+        >
+          Payment receipt
+        </a>
+      ) : bill.isPaid ? (
+        <span className="text-sm text-muted-foreground">Paid</span>
       ) : (
         !bill.invoiceViewUrl &&
           !bill.invoiceUrl &&
@@ -355,19 +356,17 @@ function BillActionsTable({ bill }: { bill: CombinedBill }) {
 
 export function BillHistory({
   bills,
-  totalBilled,
-  totalBalance,
+  filtered,
   organizationName,
   tenantName,
 }: {
   bills: CombinedBill[];
-  totalBilled: number;
-  totalBalance: number;
+  filtered: boolean;
   organizationName: string;
   tenantName: string;
 }) {
   return (
-    <section className="rounded-[28px] ed-theme-card border border-border bg-card p-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:p-6 xl:p-7">
+    <section className="rounded-[28px] ed-theme-card border border-border bg-card p-3 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:p-6 xl:p-7">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h2 className="text-[22px] font-semibold tracking-tight text-foreground">
@@ -391,7 +390,7 @@ export function BillHistory({
             {bills.map((bill) => (
               <article
                 key={`${bill.source}-${bill.id}`}
-                className="rounded-[22px] ed-theme-card border border-border bg-muted/20 p-4"
+                className="rounded-[22px] ed-theme-card border border-border bg-muted/20 p-3"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -538,13 +537,13 @@ export function BillHistory({
                     colSpan={3}
                     className="px-5 py-4 text-sm font-semibold text-foreground"
                   >
-                    Total across all issued bills
+                    {filtered ? "Total for matching bills" : "Total across all issued bills"}
                   </td>
                   <td className="px-5 py-4 text-sm font-semibold text-foreground">
-                    {formatMoney(totalBilled)}
+                    {formatMoney(bills.reduce((sum, bill) => sum + bill.amountDue, 0))}
                   </td>
                   <td className="px-5 py-4 text-sm font-semibold text-foreground">
-                    {formatMoney(totalBalance)}
+                    {formatMoney(bills.reduce((sum, bill) => sum + bill.balance, 0))}
                   </td>
                   <td className="px-5 py-4" />
                   <td className="px-5 py-4" />
@@ -555,7 +554,7 @@ export function BillHistory({
         </>
       ) : (
         <div className="mt-5 ed-theme-muted-panel rounded-[20px] p-4 text-center text-sm text-muted-foreground">
-          <p>No issued bills yet. Rent and water invoices appear here once charges are issued and approved.</p>
+          {filtered ? <p>No bills match this status.</p> : <p>No issued bills yet. Rent and water invoices appear here once charges are issued and approved.</p>}
           <div className="mt-3">
             <InAppGuideLink topic="rent" workspace="tenant" />
           </div>

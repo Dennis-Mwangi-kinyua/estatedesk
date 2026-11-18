@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { BillStatus } from "@prisma/client";
-import { getPeriodBillForTenant } from "@/lib/billing/period-bill";
+import { getPeriodBillsForTenant, getPeriodInvoiceStatus, type PeriodBill } from "@/lib/billing/period-bill";
 import { addMonthsToPeriod } from "@/lib/ledger";
 import { issueDocumentRecord } from "@/lib/documents/registry";
 import type { InvoicePdfData } from "@/lib/documents/invoice-pdf";
@@ -12,11 +12,10 @@ import {
   readInvoiceSnapshot,
 } from "@/lib/documents/invoice-snapshot";
 import { prisma } from "@/lib/prisma";
-
-const PERIOD_PATTERN = /^\d{4}-\d{2}$/;
+import { isBillingPeriod } from "@/lib/billing/period-dates";
 
 export function isValidInvoicePeriod(period: string) {
-  return PERIOD_PATTERN.test(period);
+  return isBillingPeriod(period);
 }
 
 type InvoiceDocumentRecord = {
@@ -45,7 +44,7 @@ export type TenantInvoiceContext = {
     };
   };
   period: string;
-  periodBill: NonNullable<Awaited<ReturnType<typeof getPeriodBillForTenant>>>;
+  periodBill: PeriodBill;
   document: InvoiceDocumentRecord;
   pdfData: InvoicePdfData;
   waterBillStatus: BillStatus | null;
@@ -57,16 +56,17 @@ function parsePeriodBillEntity(document: {
 }) {
   const metadata = document.metadata as {
     tenantId?: string;
+    historicalLeaseId?: string;
     period?: string;
   } | null;
 
   if (metadata?.tenantId && metadata.period && isValidInvoicePeriod(metadata.period)) {
-    return { tenantId: metadata.tenantId, period: metadata.period };
+    return { tenantId: metadata.tenantId, period: metadata.period, historicalLeaseId: metadata.historicalLeaseId };
   }
 
   const [tenantId, period] = document.entityId.split(":");
   if (tenantId && period && isValidInvoicePeriod(period)) {
-    return { tenantId, period };
+    return { tenantId, period, historicalLeaseId: undefined };
   }
 
   return null;
@@ -80,6 +80,7 @@ async function resolveInvoiceDocument({
   propertyName,
   unitHouseNo,
   existingDocument,
+  historicalLeaseId,
 }: {
   orgId: string;
   tenantId: string;
@@ -88,12 +89,13 @@ async function resolveInvoiceDocument({
   propertyName: string;
   unitHouseNo: string;
   existingDocument?: InvoiceDocumentRecord | null;
+  historicalLeaseId?: string;
 }) {
   if (existingDocument) {
     return existingDocument;
   }
 
-  const entityId = `${tenantId}:${period}`;
+  const entityId = historicalLeaseId ? `${tenantId}:${period}:${historicalLeaseId}` : `${tenantId}:${period}`;
   const found = await prisma.documentRecord.findUnique({
     where: {
       orgId_documentType_entityType_entityId_version: {
@@ -124,6 +126,7 @@ async function resolveInvoiceDocument({
         period,
         propertyName,
         unitHouseNo,
+        ...(historicalLeaseId ? { historicalLeaseId } : {}),
       },
     }),
   );
@@ -134,11 +137,13 @@ export async function buildPeriodInvoiceContext({
   tenantId,
   period,
   existingDocument,
+  historicalLeaseId,
 }: {
   orgId: string;
   tenantId: string;
   period: string;
   existingDocument?: InvoiceDocumentRecord | null;
+  historicalLeaseId?: string;
 }): Promise<TenantInvoiceContext | null> {
   if (!isValidInvoicePeriod(period)) {
     return null;
@@ -171,89 +176,40 @@ export async function buildPeriodInvoiceContext({
 
   const previousPeriod = addMonthsToPeriod(period, -1);
 
-  const [periodBill, activeLease, waterBill, meterReading, previousPeriodBill] =
-    await Promise.all([
-      getPeriodBillForTenant({
-        db: prisma,
-        orgId: tenant.org.id,
-        tenantId: tenant.id,
-        period,
-        showPendingWater: true,
-      }),
-      prisma.lease.findFirst({
-        where: {
-          orgId: tenant.org.id,
-          tenantId: tenant.id,
-          status: "ACTIVE",
-          deletedAt: null,
-        },
-        select: {
-          unit: {
-            select: {
-              building: { select: { name: true } },
-            },
-          },
-        },
-      }),
-      prisma.waterBill.findFirst({
-        where: {
-          orgId: tenant.org.id,
-          tenantId: tenant.id,
-          period,
-          status: { not: "CANCELLED" },
-        },
-        select: {
-          id: true,
-          status: true,
-          unitsUsed: true,
-          ratePerUnit: true,
-          fixedCharge: true,
-          unitId: true,
-        },
-      }),
-      prisma.lease
-        .findFirst({
-          where: {
-            orgId: tenant.org.id,
-            tenantId: tenant.id,
-            status: "ACTIVE",
-            deletedAt: null,
-          },
-          select: { unitId: true },
-        })
-        .then((lease) =>
-          lease
-            ? prisma.meterReading.findUnique({
-                where: {
-                  unitId_period: {
-                    unitId: lease.unitId,
-                    period,
-                  },
-                },
-                select: {
-                  prevReading: true,
-                  currentReading: true,
-                  unitsUsed: true,
-                  status: true,
-                  approvedAt: true,
-                  submittedBy: { select: { fullName: true } },
-                  approvedBy: { select: { fullName: true } },
-                },
-              })
-            : null,
-        ),
-      getPeriodBillForTenant({
-        db: prisma,
-        orgId: tenant.org.id,
-        tenantId: tenant.id,
-        period: previousPeriod,
-        showPendingWater: true,
-      }),
-    ]);
+  const bills = await getPeriodBillsForTenant({
+    db: prisma,
+    orgId,
+    tenantId,
+    periods: [period, previousPeriod],
+    showPendingWater: true,
+    historicalLeaseId,
+  });
+  const periodBill = bills.get(period);
+  const previousPeriodBill = bills.get(previousPeriod);
+  if (!periodBill) return null;
 
-  if (!periodBill) {
-    return null;
-  }
+  const [unit, waterBill, meterReading] = await Promise.all([
+    prisma.unit.findUnique({
+      where: { id: periodBill.unitId },
+      select: { building: { select: { name: true } } },
+    }),
+    periodBill.waterBillId ? prisma.waterBill.findUnique({
+      where: { id: periodBill.waterBillId },
+      select: { status: true, unitsUsed: true, ratePerUnit: true, fixedCharge: true },
+    }) : null,
+    periodBill.waterBillId ? prisma.meterReading.findUnique({
+      where: { unitId_period: { unitId: periodBill.unitId, period } },
+      select: {
+        prevReading: true,
+        currentReading: true,
+        unitsUsed: true,
+        status: true,
+        approvedAt: true,
+        submittedBy: { select: { fullName: true } },
+        approvedBy: { select: { fullName: true } },
+      },
+    }) : null,
+  ]);
 
   const document = await resolveInvoiceDocument({
     orgId: tenant.org.id,
@@ -263,6 +219,7 @@ export async function buildPeriodInvoiceContext({
     propertyName: periodBill.propertyName,
     unitHouseNo: periodBill.unitHouseNo,
     existingDocument,
+    historicalLeaseId,
   });
 
   const verificationUrl = absoluteUrl(
@@ -273,11 +230,7 @@ export async function buildPeriodInvoiceContext({
     serialNumber: document.serialNumber,
     verificationCode: document.verificationCode,
     verificationUrl,
-    status: periodBill.isPaid
-      ? "PAID"
-      : periodBill.amountPaid > 0
-        ? "PARTIAL"
-        : "UNPAID",
+    status: getPeriodInvoiceStatus(periodBill),
     issuedAt: document.issuedAt,
     dueDate: periodBill.dueDate,
     period,
@@ -289,7 +242,7 @@ export async function buildPeriodInvoiceContext({
     tenantIdentifier: tenant.slug,
     propertyName: periodBill.propertyName,
     unitName: periodBill.unitHouseNo,
-    buildingName: activeLease?.unit.building?.name ?? null,
+    buildingName: unit?.building?.name ?? null,
     currencyCode: tenant.org.currencyCode,
     amountDue: periodBill.amountDue,
     amountPaid: periodBill.amountPaid,
@@ -312,11 +265,7 @@ export async function buildPeriodInvoiceContext({
             waterTotal:
               previousPeriodBill.lines.find((line) => line.kind === "WATER")?.amountDue ??
               null,
-            status: previousPeriodBill.isPaid
-              ? "PAID"
-              : previousPeriodBill.amountPaid > 0
-                ? "PARTIAL"
-                : "UNPAID",
+            status: getPeriodInvoiceStatus(previousPeriodBill),
           }
         : null,
     lines: periodBill.lines.map((line) => ({
@@ -375,6 +324,7 @@ export async function loadTenantPeriodInvoice(
   userId: string,
   orgId: string,
   period: string,
+  historicalLeaseId?: string,
 ): Promise<TenantInvoiceContext | null> {
   const tenant = await prisma.tenant.findFirst({
     where: {
@@ -391,6 +341,7 @@ export async function loadTenantPeriodInvoice(
     orgId,
     tenantId: tenant.id,
     period,
+    historicalLeaseId,
   });
 }
 
@@ -421,6 +372,7 @@ export async function loadVerifiedPeriodInvoiceByCode(
     tenantId: entity.tenantId,
     period: entity.period,
     existingDocument: document,
+    historicalLeaseId: entity.historicalLeaseId,
   });
 
   if (context) {
@@ -479,7 +431,8 @@ export async function loadVerifiedPeriodInvoiceByCode(
       amountDue: snapshot.amountDue,
       amountPaid: snapshot.amountPaid,
       balance: snapshot.balance,
-      isPaid: snapshot.balance <= 0 && snapshot.amountDue > 0,
+      isPaid: snapshot.status === "PAID",
+      waterPendingApproval: snapshot.lines.some((line) => line.waterReading?.billStatus === "PENDING APPROVAL"),
       rentChargeId: null,
       waterBillId: null,
     },

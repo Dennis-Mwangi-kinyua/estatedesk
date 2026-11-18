@@ -71,8 +71,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ not
   });
   if (!notice) return new NextResponse("Not found", { status: 404 });
 
-  const balances = await loadMoveOutBalances(prisma, notice.lease);
   const closed = notice.status === "CLOSED";
+  const balances = await loadMoveOutBalances(prisma, notice.lease, closed ? notice.actualMoveOutDate ?? notice.moveOutDate : undefined);
   const settlement = notice.closeout && typeof notice.closeout === "object" && !Array.isArray(notice.closeout) ? notice.closeout : {};
   const issues = closed ? [] : await finalBillingIssues(prisma, notice.lease, notice.moveOutDate);
   const reading = await prisma.meterReading.findUnique({ where: { unitId_period: { unitId: notice.lease.unitId, period: nairobiDate(notice.actualMoveOutDate ?? notice.moveOutDate).slice(0, 7) } } });

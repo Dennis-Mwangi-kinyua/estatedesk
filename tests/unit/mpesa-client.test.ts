@@ -31,6 +31,7 @@ test("STK transport rejects refused requests and preserves unknown provider resu
     await assert.rejects(requestMpesaStkPush(input), error => error instanceof MpesaRequestError && error.rejected);
     reply = { ResponseCode: "0", CheckoutRequestID: "accepted", MerchantRequestID: "merchant" };
     assert.equal((await requestMpesaStkPush(input)).checkoutRequestId, "accepted");
+    assert.equal(bodies.at(-1)?.Amount, input.amount);
     assert.equal(bodies.at(-1)?.PhoneNumber, "254712345678");
     assert.equal(bodies.at(-1)?.BusinessShortCode, "174379");
     reply = { errorCode: "500.001.1001", errorMessage: "" };
@@ -48,6 +49,7 @@ test("STK transport rejects refused requests and preserves unknown provider resu
     const requests = bodies.length;
     await assert.rejects(queryMpesaStkPush("another-org", "accepted"));
     await assert.rejects(requestMpesaStkPush({ ...input, phone: "123" }));
+    await assert.rejects(requestMpesaStkPush({ ...input, amount: 1.25 }), /whole number of shillings/);
     assert.equal(bodies.length, requests);
   } finally {
     globalThis.fetch = originalFetch;

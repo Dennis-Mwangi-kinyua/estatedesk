@@ -11,8 +11,7 @@ export function ManualPaymentForm({ data }: { data: TenantPaymentsPageData }) {
   }
 
   const period = tenantLedger.period || getCurrentPeriod();
-  const balance = tenantLedger.row?.deficit ?? Number(activeLease.monthlyRent);
-  const payHref = `/dashboard/tenant/payments/new?source=period_bill&id=${encodeURIComponent(period)}&amount=${Math.max(Math.round(balance), 1)}`;
+  const payHref = `/dashboard/tenant/payments/new?source=period_bill&id=${encodeURIComponent(period)}`;
 
   return (
     <SurfaceCard className="p-5 sm:p-6 lg:p-7">

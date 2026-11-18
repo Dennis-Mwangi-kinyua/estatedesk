@@ -22,7 +22,9 @@ export async function GET(
   { params }: { params: Promise<{ period: string }> },
 ) {
   const { period } = await params;
-  const viewInline = new URL(request.url).searchParams.get("view") === "1";
+  const query = new URL(request.url).searchParams;
+  const viewInline = query.get("view") === "1";
+  const leaseId = query.get("lease") || undefined;
 
   const session = await requireTenantAccess();
 
@@ -34,6 +36,7 @@ export async function GET(
     session.userId,
     session.activeOrgId,
     period,
+    leaseId,
   );
 
   if (!context) {
@@ -87,7 +90,7 @@ export async function GET(
       "X-Content-Type-Options": "nosniff",
       "X-Document-Serial": document.serialNumber,
       "X-Document-SHA256": contentHash,
-      Link: `<${tenantInvoiceDownloadPath(period)}>; rel="alternate"; title="Download invoice PDF"`,
+      Link: `<${tenantInvoiceDownloadPath(period, { leaseId })}>; rel="alternate"; title="Download invoice PDF"`,
     },
   });
 }

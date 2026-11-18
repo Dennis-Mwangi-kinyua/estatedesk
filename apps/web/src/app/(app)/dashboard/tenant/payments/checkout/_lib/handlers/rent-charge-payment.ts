@@ -1,6 +1,7 @@
 import {
   channelForMethod,
   checkoutMethodLabel,
+  getStkAmountError,
   submissionNotesForMethod,
 } from "@/lib/payments/method-flow";
 import { notifyRecipients } from "@/lib/notifications/notify";
@@ -84,6 +85,8 @@ export async function processRentChargePayment(
   }
 
   const amount = Math.round(requested * 100) / 100;
+  const stkError = checkoutMethod === "mpesa-stk" ? getStkAmountError(amount) : undefined;
+  if (stkError) throw new Error(stkError);
   const methodLabel = checkoutMethodLabel(checkoutMethod);
 
   const payment = await tx.payment.create({
@@ -139,7 +142,7 @@ export async function processRentChargePayment(
       recipients: [{ tenantId: tenant.id, userId }],
       type: "GENERAL",
       title: "Complete M-Pesa prompt",
-      message: `Enter your M-Pesa PIN to pay ${amount.toFixed(0)} for ${charge.period}. Your bill updates automatically when payment succeeds.`,
+      message: `Enter your M-Pesa PIN to pay ${amount.toFixed(2)} for ${charge.period}. Your bill updates automatically when payment succeeds.`,
     });
   } else {
     await notifyRecipients({ actorUserId: userId,

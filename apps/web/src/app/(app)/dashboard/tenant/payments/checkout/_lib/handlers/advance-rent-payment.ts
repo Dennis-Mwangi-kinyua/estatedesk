@@ -1,6 +1,7 @@
 import {
   channelForMethod,
   checkoutMethodLabel,
+  getStkAmountError,
   submissionNotesForMethod,
 } from "@/lib/payments/method-flow";
 import { getCurrentPeriod } from "@/lib/ledger";
@@ -66,6 +67,8 @@ export async function processAdvanceRentPayment(
     throw new Error("Active lease not found.");
   }
 
+  const stkError = checkoutMethod === "mpesa-stk" ? getStkAmountError(amount) : undefined;
+  if (stkError) throw new Error(stkError);
   const methodLabel = checkoutMethodLabel(checkoutMethod);
 
   const payment = await tx.payment.create({

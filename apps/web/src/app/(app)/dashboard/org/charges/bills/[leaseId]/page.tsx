@@ -34,6 +34,7 @@ const notices: Record<string, string> = {
   "payment-verified": "The proof is verified and the receipt is on this bill.",
   "stk-sent": "The M-Pesa prompt was sent to the tenant's phone.",
   "stk-waiting": "An M-Pesa prompt for this month is already waiting.",
+  "stk-amount": "M-Pesa STK requires a whole-shilling balance. Use another payment method for this bill.",
   "stk-phone": "Enter a valid Kenyan M-Pesa phone number.",
   "stk-unconfigured": "M-Pesa prompt is not set up for this organisation.",
   "stk-failed": "M-Pesa did not send the prompt. Check the number and try again.",

@@ -1,3 +1,4 @@
+import Link from "@/components/navigation/workspace-link";
 import { InitialChargesPanel } from "@/features/charges/components/initial-charges-panel";
 import { PageShell } from "@/components/theme/ed-dashboard-shell";
 import { redirect } from "next/navigation";
@@ -39,6 +40,7 @@ export default async function TenantPaymentsPage() {
     <PageShell>
       <div className="space-y-4 sm:space-y-6">
         <PaymentsHeader data={data} />
+        <Link href="/dashboard/tenant/payments/status" className="inline-flex min-h-11 items-center text-sm text-primary underline">Track M-Pesa payments</Link>
         <InitialChargesPanel canPay orgId={session.activeOrgId} tenantId={data.tenant.id} />
         <ManualPaymentForm data={data} />
         <PaymentsStats data={data} />

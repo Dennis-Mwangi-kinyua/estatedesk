@@ -1,5 +1,6 @@
 import { requireManagementAccess } from "@/lib/permissions/guards";
 import { logServerError } from "@/lib/errors/server-error-log";
+import { getOrganizationSummary } from "@/lib/organizations/summary";
 import { prisma } from "@/lib/prisma";
 import { getCachedOrgDashboardSummary } from "@/features/dashboard/server/get-org-dashboard-summary";
 import { getVacancyInquiryAlerts } from "@/features/dashboard/server/get-vacancy-inquiry-alerts";
@@ -48,14 +49,17 @@ export default async function OrganizationDashboardPage({ searchParams }: { sear
     return <main className="space-y-6 p-4 sm:p-6"><header><p className="text-sm text-muted-foreground">Assigned workspace</p><h1 className="text-3xl font-semibold">{organization?.name ?? "Organisation"}</h1><p className="mt-2 text-muted-foreground">Summary for your assigned properties and units.</p></header><section className="grid gap-4 sm:grid-cols-3"><article className="rounded-2xl border bg-card p-5"><p className="text-sm text-muted-foreground">Assigned units</p><p className="mt-2 text-3xl font-semibold">{unitCount}</p></article><article className="rounded-2xl border bg-card p-5"><p className="text-sm text-muted-foreground">Active leases</p><p className="mt-2 text-3xl font-semibold">{activeLeaseCount}</p></article><article className="rounded-2xl border bg-card p-5"><p className="text-sm text-muted-foreground">Open issues</p><p className="mt-2 text-3xl font-semibold">{openIssueCount}</p></article></section><Link href="/dashboard/org/units" className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 font-medium text-primary-foreground">Open assigned units</Link></main>;
   }
 
-  const [dataResult, vacancyResult, organizationResult] =
+  const organization = getOrganizationSummary(orgId);
+  const canSetup = session.activeOrgRole === "ADMIN" || session.activeOrgRole === "MANAGER";
+  const [dataResult, vacancyResult, organizationResult, setupResult, queueResult, metricsResult, usageResult] =
     await Promise.allSettled([
       getCachedOrgDashboardSummary(orgId),
       getVacancyInquiryAlerts(orgId),
-      prisma.organization.findUnique({
-        where: { id: orgId },
-        select: { name: true },
-      }),
+      organization,
+      loadSetupProgress(orgId),
+      getOperatingQueue(orgId, organization.then(org => org?.currencyCode ?? "KES")),
+      canSetup ? loadSaasMetrics(orgId) : Promise.resolve(null),
+      canSetup ? getOrgPlanUsage(orgId) : Promise.resolve(null),
     ]);
 
   if (dataResult.status === "rejected") {
@@ -82,24 +86,14 @@ export default async function OrganizationDashboardPage({ searchParams }: { sear
 
   const vacancyInquiries =
     vacancyResult.status === "fulfilled" ? vacancyResult.value : [];
-  const orgWide = !session.membershipScope || session.membershipScope.scopeType === "ORG";
-  const canSetup = session.activeOrgRole === "ADMIN" || session.activeOrgRole === "MANAGER";
-  const [setupResult, queueResult, metricsResult, usageResult] = orgWide
-    ? await Promise.allSettled([
-      loadSetupProgress(orgId),
-      prisma.organization.findUnique({ where: { id: orgId }, select: { currencyCode: true } }).then((org) => getOperatingQueue(orgId, org?.currencyCode ?? "KES")),
-      canSetup ? loadSaasMetrics(orgId) : Promise.resolve(null),
-      canSetup ? getOrgPlanUsage(orgId) : Promise.resolve(null),
-    ])
-    : [];
-  if (setupResult?.status === "rejected") logServerError("org.dashboard.setup", setupResult.reason, { orgId });
-  if (queueResult?.status === "rejected") logServerError("org.dashboard.queue", queueResult.reason, { orgId });
-  if (metricsResult?.status === "rejected") logServerError("org.dashboard.metrics", metricsResult.reason, { orgId });
-  if (usageResult?.status === "rejected") logServerError("org.dashboard.planUsage", usageResult.reason, { orgId });
-  const setup = setupResult?.status === "fulfilled" ? setupResult.value : null;
-  const queue = queueResult?.status === "fulfilled" ? queueResult.value : null;
-  const metrics = metricsResult?.status === "fulfilled" ? metricsResult.value : null;
-  const capMessage = canSetup && usageResult?.status === "fulfilled" ? planCapMessage(usageResult.value) : null;
+  if (setupResult.status === "rejected") logServerError("org.dashboard.setup", setupResult.reason, { orgId });
+  if (queueResult.status === "rejected") logServerError("org.dashboard.queue", queueResult.reason, { orgId });
+  if (metricsResult.status === "rejected") logServerError("org.dashboard.metrics", metricsResult.reason, { orgId });
+  if (usageResult.status === "rejected") logServerError("org.dashboard.planUsage", usageResult.reason, { orgId });
+  const setup = setupResult.status === "fulfilled" ? setupResult.value : null;
+  const queue = queueResult.status === "fulfilled" ? queueResult.value : null;
+  const metrics = metricsResult.status === "fulfilled" ? metricsResult.value : null;
+  const capMessage = canSetup && usageResult.status === "fulfilled" ? planCapMessage(usageResult.value) : null;
   const queueNotice = queueNoticeText(query.notice);
   const showSetup = Boolean(canSetup && setup && !setup.complete);
   const teamStep = setup?.steps.find((step) => step.id === "team");

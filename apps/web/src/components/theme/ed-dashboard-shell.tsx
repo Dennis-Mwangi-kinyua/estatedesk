@@ -37,7 +37,7 @@ export function SurfaceCard({
   return (
     <section
       className={[
-        "ed-theme-card rounded-[28px] border border-border bg-card/90 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-sm dark:shadow-[0_10px_30px_rgba(0,0,0,0.28)]",
+        "min-w-0 rounded-2xl border border-border bg-card text-card-foreground shadow-sm",
         className,
       ].join(" ")}
     >

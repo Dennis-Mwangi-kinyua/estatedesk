@@ -490,7 +490,11 @@ export async function getOrgLedger(
       orderBy: {
         fullName: "asc",
       },
-      include: {
+      select: {
+        id: true,
+        fullName: true,
+        phone: true,
+        email: true,
         leases: {
           where: {
             status: { in: ["ACTIVE", "TERMINATED"] },
@@ -536,13 +540,6 @@ export async function getOrgLedger(
             dueDate: true,
             total: true,
             amountPaid: true,
-            payments: {
-              select: {
-                amount: true,
-                gatewayStatus: true,
-                verificationStatus: true,
-              },
-            },
             unit: {
               select: {
                 houseNo: true,
@@ -702,22 +699,10 @@ export async function getOrgLedger(
   };
 }
 
-export async function getTenantLedger(userId: string, orgId: string) {
+export async function getTenantLedgerForTenant(orgId: string, tenantId: string) {
   const period = getCurrentPeriod();
-  const tenant = await prisma.tenant.findFirst({
-    where: { userId, orgId, deletedAt: null },
-    select: { id: true },
-  });
-
-  if (!tenant) {
-    return {
-      period,
-      row: null,
-    };
-  }
-
   const ledger = await getOrgLedger(orgId, period, {
-    tenantId: tenant.id,
+    tenantId,
     includeRecentPayments: false,
   });
 
@@ -803,7 +788,8 @@ async function loadPlatformPaymentLedger(
 
   const orgIds = orgs.map((org) => org.id);
 
-  const [tenantCounts, rentCharges, waterBills, periodPayments] =
+  const waterBillWhere = { orgId: { in: orgIds }, period, status: { not: "CANCELLED" } } satisfies Prisma.WaterBillWhereInput;
+  const [tenantCounts, rentTotals, waterBills, periodPayments, waterPayments] =
     await Promise.all([
       prisma.tenant.groupBy({
         by: ["orgId"],
@@ -815,24 +801,17 @@ async function loadPlatformPaymentLedger(
           _all: true,
         },
       }),
-      prisma.rentCharge.findMany({
+      prisma.rentCharge.groupBy({
+        by: ["orgId"],
         where: {
           orgId: { in: orgIds },
           period,
           status: { not: "WAIVED" },
         },
-        select: {
-          orgId: true,
-          amountDue: true,
-          balance: true,
-        },
+        _sum: { amountDue: true, balance: true },
       }),
       prisma.waterBill.findMany({
-        where: {
-          orgId: { in: orgIds },
-          period,
-          status: { not: "CANCELLED" },
-        },
+        where: waterBillWhere,
         select: {
           id: true,
           orgId: true,
@@ -856,76 +835,48 @@ async function loadPlatformPaymentLedger(
           createdAt: true,
         },
       }),
+      prisma.payment.groupBy({
+        by: ["waterBillId"],
+        where: {
+          waterBill: waterBillWhere,
+          OR: [
+            { gatewayStatus: "SUCCESS" },
+            { verificationStatus: { in: ["VERIFIED", "NOT_REQUIRED"] } },
+          ],
+        },
+        _sum: { amount: true },
+      }),
     ]);
-
-  const waterBillIds = waterBills.map((bill) => bill.id);
-  const waterBillPayments =
-    waterBillIds.length === 0
-      ? []
-      : await prisma.payment.findMany({
-          where: {
-            waterBillId: { in: waterBillIds },
-          },
-          select: {
-            waterBillId: true,
-            amount: true,
-            gatewayStatus: true,
-            verificationStatus: true,
-          },
-        });
 
   const tenantCountByOrg = new Map(
     tenantCounts.map((entry) => [entry.orgId, entry._count._all]),
   );
-  const rentChargesByOrg = groupRowsByOrgId(rentCharges);
+  const rentByOrg = new Map(rentTotals.map(entry => [entry.orgId, entry._sum]));
   const waterBillsByOrg = groupRowsByOrgId(waterBills);
   const periodPaymentsByOrg = groupRowsByOrgId(periodPayments);
-  const waterBillPaymentsByBillId = new Map<
-    string,
-    Array<(typeof waterBillPayments)[number]>
-  >();
-
-  for (const payment of waterBillPayments) {
-    if (!payment.waterBillId) continue;
-
-    const existing = waterBillPaymentsByBillId.get(payment.waterBillId) ?? [];
-    existing.push(payment);
-    waterBillPaymentsByBillId.set(payment.waterBillId, existing);
-  }
+  const waterPaidByBill = new Map(waterPayments.map(entry => [entry.waterBillId, toLedgerNumber(entry._sum.amount)]));
 
   const rows = orgs.map((org) => {
-    const orgRentCharges = rentChargesByOrg.get(org.id) ?? [];
+    const rent = rentByOrg.get(org.id);
     const orgWaterBills = waterBillsByOrg.get(org.id) ?? [];
     const orgPeriodPayments = periodPaymentsByOrg.get(org.id) ?? [];
 
-    const rentDue = orgRentCharges.reduce(
-      (sum, charge) => sum + toLedgerNumber(charge.amountDue),
-      0,
-    );
-    const rentBalance = orgRentCharges.reduce(
-      (sum, charge) => sum + toLedgerNumber(charge.balance),
-      0,
-    );
+    const rentDue = toLedgerNumber(rent?.amountDue);
+    const rentBalance = toLedgerNumber(rent?.balance);
     const waterDue = orgWaterBills.reduce(
       (sum, bill) => sum + toLedgerNumber(bill.total),
       0,
     );
-    const waterPaid = orgWaterBills.reduce((sum, bill) => {
-      const billPayments = waterBillPaymentsByBillId.get(bill.id) ?? [];
-
-      return (
-        sum +
-        billPayments
-          .filter(isRecognizedPayment)
-          .reduce(
-            (paymentSum, payment) => paymentSum + toLedgerNumber(payment.amount),
-            0,
-          )
-      );
-    }, 0);
-    const paid = orgPeriodPayments
-      .filter(isRecognizedPayment)
-      .reduce((sum, payment) => sum + toLedgerNumber(payment.amount), 0);
+    const waterPaid = orgWaterBills.reduce((sum, bill) => sum + (waterPaidByBill.get(bill.id) ?? 0), 0);
+    let paid = 0;
+    let latestPayment: (typeof orgPeriodPayments)[number] | undefined;
+    for (const payment of orgPeriodPayments) {
+      if (!isRecognizedPayment(payment)) continue;
+      paid += toLedgerNumber(payment.amount);
+      if (!latestPayment || (payment.paidAt ?? payment.createdAt) > (latestPayment.paidAt ?? latestPayment.createdAt)) {
+        latestPayment = payment;
+      }
+    }
     const expected = rentDue + waterDue;
     const deficit = Math.max(rentBalance + Math.max(waterDue - waterPaid, 0), 0);
 
@@ -938,14 +889,7 @@ async function loadPlatformPaymentLedger(
       paid,
       deficit,
       paymentCount: orgPeriodPayments.length,
-      lastPaymentAt:
-        orgPeriodPayments
-          .filter(isRecognizedPayment)
-          .sort(
-            (a, b) =>
-              (b.paidAt ?? b.createdAt).getTime() -
-              (a.paidAt ?? a.createdAt).getTime(),
-          )[0]?.paidAt ?? null,
+      lastPaymentAt: latestPayment?.paidAt ?? null,
     };
   });
 

@@ -149,7 +149,7 @@ export async function requestMpesaStkPush(
         Password: password,
         Timestamp: timestamp,
         TransactionType: "CustomerPayBillOnline",
-        Amount: Math.round(input.amount),
+        Amount: input.amount,
         PartyA: phone,
         PartyB: shortcode,
         PhoneNumber: phone,

@@ -33,3 +33,8 @@ export function nairobiMonthStart(now = new Date()) {
   const { year, month } = nairobiDateParts(now);
   return new Date(`${year}-${month}-01T00:00:00+03:00`);
 }
+
+export function nairobiBillingPeriod(date: Date) {
+  const { year, month } = nairobiDateParts(date);
+  return `${year}-${month}`;
+}

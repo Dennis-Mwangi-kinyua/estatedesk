@@ -13,7 +13,8 @@ export function formatMoney(value: Prisma.Decimal | number | null | undefined) {
   return new Intl.NumberFormat("en-KE", {
     style: "currency",
     currency: "KES",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(Number(value));
 }
 

@@ -3,7 +3,7 @@ import { retryTransientDatabaseOperation } from "@/lib/db/retry";
 import { tenantVisibleWaterBillWhere } from "@/lib/water-bills/status";
 
 export async function getTenantDashboardData(tenantId: string, unitId?: string) {
-  const [recentPayments, waterBills, notifications] = await retryTransientDatabaseOperation(
+  const dashboard = retryTransientDatabaseOperation(
     () =>
       Promise.all([
         prisma.payment.findMany({
@@ -70,8 +70,8 @@ export async function getTenantDashboardData(tenantId: string, unitId?: string) 
     { label: "get-tenant-dashboard-data" },
   );
 
-  const issues = unitId
-    ? await retryTransientDatabaseOperation(
+  const issueQuery = unitId
+    ? retryTransientDatabaseOperation(
         () =>
           prisma.issueTicket.findMany({
             where: {
@@ -91,7 +91,9 @@ export async function getTenantDashboardData(tenantId: string, unitId?: string) 
           }),
         { label: "get-tenant-dashboard-issues" },
       )
-    : [];
+    : Promise.resolve([]);
+
+  const [[recentPayments, waterBills, notifications], issues] = await Promise.all([dashboard, issueQuery]);
 
   return {
     recentPayments,

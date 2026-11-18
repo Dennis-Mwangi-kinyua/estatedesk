@@ -368,7 +368,8 @@ export async function settleGatewayPayment({
       message: `Your payment of ${new Intl.NumberFormat("en-KE", {
         style: "currency",
         currency: "KES",
-        maximumFractionDigits: 0,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
       }).format(Number(payment.amount))} was confirmed and applied to your bill${
         receiptNumber ? `. Receipt ${receiptNumber}` : ""
       }.`,

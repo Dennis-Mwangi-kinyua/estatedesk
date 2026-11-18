@@ -5,6 +5,7 @@ import { tenantInvoiceDownloadPath } from "../../../_lib/paths";
 type InvoiceDocumentViewProps = {
   data: InvoicePdfData;
   period: string;
+  leaseId?: string;
   verificationQrDataUrl: string;
   payNowHref: string | null;
   payWaterHref: string | null;
@@ -13,6 +14,7 @@ type InvoiceDocumentViewProps = {
 export function InvoiceDocumentView({
   data,
   period,
+  leaseId,
   verificationQrDataUrl,
   payNowHref,
   payWaterHref,
@@ -22,9 +24,9 @@ export function InvoiceDocumentView({
       <InvoiceDocumentDisplay
         data={data}
         verificationQrDataUrl={verificationQrDataUrl}
-        downloadHref={tenantInvoiceDownloadPath(period)}
-        openPdfHref={tenantInvoiceDownloadPath(period, { view: true })}
-        backLink={{ href: "/dashboard/tenant/invoice", label: "Back to bills" }}
+        downloadHref={tenantInvoiceDownloadPath(period, { leaseId })}
+        openPdfHref={tenantInvoiceDownloadPath(period, { view: true, leaseId })}
+        backLink={{ href: leaseId ? "/dashboard/tenant/invoice/archive" : "/dashboard/tenant/invoice", label: leaseId ? "Back to invoice archive" : "Back to bills" }}
         payNowHref={payNowHref}
         payWaterHref={payWaterHref}
       />

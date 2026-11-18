@@ -9,7 +9,7 @@ import { mpesaFailureMessage } from "@/lib/mpesa/result-message";
 export async function checkTenantStkStatus(paymentId: string) {
   const session = await requireTenantAccess();
   const payment = await prisma.payment.findFirst({
-    where: { id: paymentId, orgId: session.activeOrgId!, method: "MPESA_STK", payerTenant: { userId: session.userId, deletedAt: null } },
+    where: { id: paymentId, orgId: session.activeOrgId!, method: "MPESA_STK", reversedAt: null, payerTenant: { userId: session.userId, deletedAt: null } },
     select: { id: true, orgId: true, checkoutRequestId: true, gatewayStatus: true, verificationStatus: true },
   });
   if (!payment) return { message: "Payment not found." };
@@ -23,13 +23,14 @@ export async function checkTenantStkStatus(paymentId: string) {
     if (result.resultCode === 0) return { message: "M-Pesa reports success. Waiting for the receipt callback to confirm the amount and clear your bill." };
     const message = mpesaFailureMessage(result.resultCode, result.description);
     // A callback may have settled the payment while the query was in flight.
-    await prisma.payment.updateMany({
+    const update = await prisma.payment.updateMany({
       where: { id: payment.id, gatewayStatus: { in: ["PENDING", "INITIATED"] }, verificationStatus: "NOT_REQUIRED", reversedAt: null },
       data: { gatewayStatus: "FAILED", verificationStatus: "REJECTED", notes: message },
     });
     revalidatePath("/dashboard/tenant/payments");
+    revalidatePath("/dashboard/tenant/payments/status");
     revalidatePath("/dashboard/org/payments");
-    return { message };
+    return { message: update.count ? message : "This payment changed while checking. See the updated status above." };
   } catch (error) {
     return { message: error instanceof MpesaRequestError ? error.message : "M-Pesa status is temporarily unavailable. No new request was sent. Check again shortly." };
   }
