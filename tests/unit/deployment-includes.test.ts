@@ -42,3 +42,17 @@ test("web deployment excludes native build artifacts while retaining app sources
     assert.equal(deploymentIgnore.ignores(file), false, `${file} remains available to the workspace build`);
   }
 });
+
+
+test("Vercel schedules remain compatible with daily-only hosting plans", () => {
+  for (const filename of ["vercel.json", "apps/web/vercel.json"]) {
+    const config = JSON.parse(readFileSync(path.join(root, filename), "utf8"));
+    for (const job of config.crons) {
+      const fields = job.schedule.trim().split(/\s+/);
+      assert.equal(fields.length, 5);
+      assert.match(fields[0], /^\d+$/, `${filename}: no subdaily minute schedules`);
+      assert.match(fields[1], /^\d+$/, `${filename}: no subdaily hour schedules`);
+    }
+    assert.equal(config.crons.some((job: { path: string }) => job.path === "/api/cron/notifications"), false);
+  }
+});

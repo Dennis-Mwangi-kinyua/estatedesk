@@ -46,7 +46,7 @@ Select `signed=true` in **Cross-platform artifacts** to require signing rather t
 
 ## Scheduled delivery
 
-Both Vercel configurations now schedule `/api/cron/notifications` every 15 minutes. This invokes reminder generation, lease-signing lifecycle processing, queued channel delivery and native push receipt reconciliation. Deployment must support this schedule and supply `CRON_SECRET` and the relevant provider credentials. The source configuration does not establish that the deployed scheduler has run successfully.
+Vercel configurations keep daily schedules only, so Hobby deployments are accepted. Frequent notifications use the separate `.github/workflows/notifications.yml` scheduler (opt-in) or a VPS scheduler calling `/api/cron/notifications` with `CRON_SECRET`. This invokes reminder generation, lease-signing lifecycle processing, queued channel delivery and native push receipt reconciliation. Deployment must support this schedule and supply `CRON_SECRET` and the relevant provider credentials. Configure the scheduler URL/secret and explicitly enable it before relying on delivery. The source configuration does not establish that the deployed scheduler has run successfully.
 
 ## Outstanding acceptance and feature work
 
