@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { getOrganizationSummary } from "@/lib/organizations/summary";
 import { WorkspaceAccessProvider } from "@/components/navigation/workspace-link";
@@ -100,6 +101,7 @@ export default async function AppLayout({
       <WorkspaceThemeScope />
       <SensitiveDataWatermark orgLabel={orgLabel} timestamp={new Date().toISOString()} />
       {children}
+      {isSecurityGateRoute ? null : <Link href="/dashboard/help" aria-label="Help and support for my workspace" className="fixed bottom-24 right-4 z-40 inline-flex min-h-11 items-center rounded-full border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-md lg:bottom-6">Help</Link>}
       {isSecurityGateRoute ? null : <PwaAppBadgeSync />}
       {isSecurityGateRoute ? null : <AppActionFeedback />}
       {isSecurityGateRoute ? null : <WorkspaceLiveUpdates key={`${session.userId}:${session.activeOrgId}:${session.platformRole}:${session.activeOrgRole}`} />}

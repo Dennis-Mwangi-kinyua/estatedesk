@@ -70,7 +70,16 @@ export function InAppGuideHub({
         </p>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2">
+      <section className={cardClassName} aria-labelledby="help-start">
+        <h2 id="help-start" className="text-lg font-semibold">Get help in three steps</h2>
+        <ol className="mt-4 list-decimal space-y-3 pl-6 text-sm leading-6">
+          <li><a href="#help-topics" className="font-medium underline">Choose your topic below</a> for a guide that matches your workspace.</li>
+          <li>Follow the guide, then return to your workspace and try the task. Check the selected organization and any required approval.</li>
+          <li>If you are still stuck, {workspace === "org" ? <Link href="/dashboard/org/support" className="font-medium underline">open a support request</Link> : <Link href="/contact" className="font-medium underline">contact EstateDesk for an application problem</Link>}. For rent, repairs or tenancy decisions, contact your property office. Include the page name, what you tried and the error message; never send passwords, verification codes or payment PINs.</li>
+        </ol>
+        <Link href="/dashboard" className="mt-4 inline-flex min-h-11 items-center rounded-xl border px-4 text-sm font-medium">Return to my workspace</Link>
+      </section>
+      <section id="help-topics" aria-label="Help topics" className="grid scroll-mt-24 gap-4 sm:grid-cols-2">
         {topics.map((topic) => (
           <GuideHubCard key={topic} topic={topic} workspace={workspace} />
         ))}

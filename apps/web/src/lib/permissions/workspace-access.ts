@@ -50,7 +50,7 @@ export function canAccessWorkspacePath(
   if (session.activeOrgId && (rolePolicyBlocksPath(session.orgRolePolicy, path) || featureBlocksPath(session.orgFeatures, path))) return false;
   // Provider ownership and hiring are authorised by their resource guards.
   if (path === "/provider" || path === "/service-providers" || /^\/service-providers\/[^/]+$/.test(path)) return true;
-  if (["/account-deletion", "/dashboard/security", "/dashboard/today", "/dashboard", "/profile", "/access-denied"].includes(path) || under(path, "/change-password")) return true;
+  if (["/account-deletion", "/dashboard/security", "/dashboard/today", "/dashboard/help", "/dashboard", "/profile", "/access-denied"].includes(path) || under(path, "/change-password")) return true;
   const platform = ["SUPER_ADMIN", "PLATFORM_ADMIN"].includes(session.platformRole);
   if (under(path, "/agreements/verify")) return platform || (Boolean(session.activeOrgId) && (session.activeOrgRole === "ADMIN" || session.activeOrgRole === "MANAGER"));
   if (under(path, "/platform/control")) return session.platformRole === "SUPER_ADMIN";

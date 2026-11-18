@@ -24,6 +24,7 @@ describe("personal Today", () => {
     for (const role of ["TENANT", "SECURITY", "LANDLORD", "CARETAKER", "OFFICE", "MANAGER", "ACCOUNTANT", "ADMIN"] as const) {
       const session = { platformRole: "USER" as const, activeOrgId: "org", activeOrgRole: role, membershipScope: { scopeType: "UNIT", scopeId: "own-unit" } };
       assert.equal(canAccessWorkspacePath(session, "/dashboard/today"), true, role);
+      assert.equal(canAccessWorkspacePath(session, "/dashboard/help"), true, role);
       if (role !== "ADMIN") assert.equal(canAccessWorkspacePath(session, "/dashboard/org/settings"), false, role);
     }
     assert.equal(tenantCanAccessWorkspacePath("/dashboard/today"), true);
