@@ -98,6 +98,7 @@ export default function MarketingHomePage() {
               </div>
               <p className="mt-4 text-sm leading-6 text-muted-foreground">Free opens a workspace on this visit. Pro, Plus, and Custom are reviewed before sign-in is arranged.</p>
               <Link href="/pricing" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4">Compare Free, Pro, Plus and Custom plans</Link>
+              <p><Link href="/features" className="inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4">Explore all features and device support</Link></p>
             </div>
             <aside className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8" aria-label="A typical property workflow">
               <p className="text-sm font-semibold text-primary">How daily work connects</p>

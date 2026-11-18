@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     const vaultOpen = kind === "platform" && path === "/platform/api-keys" ? await isPlatformApiKeysUnlocked(session.userId) : false;
     return mobileJson(nativeWorkspacePageSchema.parse({ ...entry, ...data, page,
       actions: nativePageActions(session, kind, path).filter(action => path !== "/platform/api-keys" || (vaultOpen ? action.id !== "vault.unlock" : action.id === "vault.unlock")),
-      hasMore: data.records.length > 25, records: data.records.slice(0, 25).map(record => ({ ...record, links: record.links?.filter(link => nativeWorkspaceEntry(links, link.path)), actions: record.organizationGroup ? [] : record.actions ?? nativeRecordActions(kind, path, record.status) })),
+      hasMore: ("hasMore" in data ? data.hasMore : undefined) ?? data.records.length > 25, records: data.records.slice(0, 25).map(record => ({ ...record, links: record.links?.filter(link => nativeWorkspaceEntry(links, link.path)), actions: record.organizationGroup ? [] : record.actions ?? nativeRecordActions(kind, path, record.status) })),
       related: links.filter(link => link.path !== path && !["/platform", "/platform/developer", "/dashboard/org"].includes(link.path) && link.group === entry.group).slice(0, 8),
     }));
   });

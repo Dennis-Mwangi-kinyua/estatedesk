@@ -10,15 +10,15 @@
     min-width: 44px !important;
     min-height: 44px !important;
     padding: 0 !important;
-    background: #fff !important;
-    color: #21314b !important;
-    border: 1px solid #c7d2e4 !important;
+    background: var(--card) !important;
+    color: var(--foreground) !important;
+    border: 1px solid var(--border) !important;
     box-shadow: 0 1px 3px rgb(24 40 68 / 8%) !important;
   }
   .dark body.estate-glass-system button[data-theme-toggle][data-workspace-action="true"] {
-    background: #223149 !important;
-    color: #f2f6ff !important;
-    border-color: #465675 !important;
+    background: var(--card) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
   }
   body.estate-glass-system button[data-theme-toggle][data-workspace-action="true"] svg {
     color: inherit !important;
@@ -26,7 +26,7 @@
     opacity: 1;
   }
   body.estate-glass-system button[data-theme-toggle]:focus-visible {
-    outline: 2px solid #285ed4;
+    outline: 2px solid var(--ring);
     outline-offset: 3px;
   }
 }

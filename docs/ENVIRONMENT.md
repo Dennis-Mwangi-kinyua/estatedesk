@@ -1,8 +1,8 @@
 # Environment Variables
 
-This document groups EstateDesk environment variables by concern. Copy `.env.example` to `.env.local` for local development.
+This document groups EstateDesk environment variables by concern. Copy the root `.env.example` to the root `.env` for CLI commands, and expose the same configuration to `apps/web` for Next.js. See [developer onboarding](DEVELOPER_ONBOARDING.md) for setup options.
 
-For runtime validation logic, see `src/lib/config/env.ts`. The health endpoint reports missing required values via `GET /api/health`.
+For runtime validation logic, see `apps/web/src/lib/config/env.ts`. The health endpoint reports missing required values via `GET /api/health`.
 
 ## Quick reference
 

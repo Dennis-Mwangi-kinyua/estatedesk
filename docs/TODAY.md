@@ -29,3 +29,9 @@ All displayed dates use Africa/Nairobi. Today adds no tables or migrations and c
 Unit checks cover Nairobi boundaries, date-only bills, role access, native-only navigation, and browser-origin protection. Disposable-database scenarios cover user/organization/property isolation, read-only retrieval, active-lease gates, tenant bill/request ownership, provider job ownership and shared response validation. Browser scenarios cover native API parity, small-phone/tablet layouts, overdue/message filters, profile/menu visibility, cross-site rejection, recipient isolation and actual read acknowledgement.
 
 Build and test outcomes are recorded in the development audit. JavaScript exports and browser/native-HTTP tests do not substitute for installed iOS/Android device checks.
+
+## Native provider job actions — 18 November 2026
+
+Provider job cards now include structured job identity/status fields. On mobile, assigned jobs offer accept/start and decline actions; in-progress jobs accept 10–3,000 characters of completion notes and submit for organization review. Every action requires confirmation and a connection. The new authenticated, bounded and rate-limited `POST /api/mobile/provider/jobs` endpoint resolves the provider from the session, accepts only approved provider states, and reuses the existing transactional ownership and status checks. The client cannot choose its provider identity. Submission does not approve work or settle payment. Refresh Today after an uncertain result before retrying.
+
+Deploy the matching Today response and provider endpoint alongside the rebuilt mobile client. Older backends omit the optional job action data, so newer clients continue to show summaries. Earlier read-only statements in this guide describe the older implementation.

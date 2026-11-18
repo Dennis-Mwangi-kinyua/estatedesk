@@ -1,3 +1,4 @@
+import { nativeRentStatement, RENT_STATEMENT_PATH } from "./native-rent-statement";
 import { nativePrivacyRecords } from "./native-privacy";
 import { nativeLandlordRecordActions } from "./native-landlord-actions";
 import { nativeCollectionRecords, COLLECTION_PATH } from "./native-collections";
@@ -36,7 +37,7 @@ function card(id: string, title: string, status: string | undefined, fields: Rec
   return { id, title, status, subtitle, fields: Object.entries(fields).map(([label, value]) => ({ label, value: display(value) })) };
 }
 
-export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWorkspaceKind, path: string, q: string, page: number, recordId?: string, organization?: string): Promise<{ records: NativeWorkspaceRecord[]; notice?: string; searchable?: boolean }> {
+export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWorkspaceKind, path: string, q: string, page: number, recordId?: string, organization?: string): Promise<{ records: NativeWorkspaceRecord[]; notice?: string; searchable?: boolean; hasMore?: boolean }> {
   if (kind === "platform" && !canViewAuditLogs(session.platformRole)) return { records: [], notice: "Platform administrator access is required.", searchable: false };
   if (kind === "platform" && path === "/platform/landlords/properties") {
     if (!organization) return {records:[],notice:"Choose an organization first."};
@@ -44,6 +45,7 @@ export async function nativeWorkspaceRecords(session: AppSession, kind: MobileWo
     return {records:rows.map(row=>card(row.id,row.name,undefined,{Location:row.location}))};
   }
   if (path === "/platform/privacy-requests") return nativePrivacyRecords(session, kind, path, q, page);
+  if (kind === "organization" && path === RENT_STATEMENT_PATH) return nativeRentStatement(session, recordId, page);
   if (kind === "organization" && path === COLLECTION_PATH) return nativeCollectionRecords(session, q, page);
   if (crmPaths(kind).includes(path)) return nativeCrmRecords(session, kind, path, q, page, recordId);
   const orgId = session.activeOrgId!;

@@ -43,7 +43,14 @@
     "mobile:services:check": "node scripts/check-live-mobile-services.mjs",
     "mobile:bundle": "node scripts/build-release.mjs mobile",
     "release:check": "node scripts/check-workflow-release.mjs",
-    "mobile:doctor": "node scripts/native-doctor.mjs"
+    "mobile:doctor": "node scripts/native-doctor.mjs",
+    "design:tokens": "node scripts/generate-design-tokens.mjs",
+    "design:check": "node scripts/generate-design-tokens.mjs --check",
+    "desktop:start": "npm run start -w @estatedesk/desktop --",
+    "desktop:test": "npm run test -w @estatedesk/desktop",
+    "desktop:smoke": "node scripts/desktop-smoke.mjs",
+    "desktop:package": "npm run package -w @estatedesk/desktop --",
+    "desktop:package:dir": "npm run package:dir -w @estatedesk/desktop --"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1018.0",
@@ -58,7 +65,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.7.0",
-    "next": "^16.4.1",
+    "next": "^16.4.5",
     "next-themes": "^0.4.6",
     "pdf-lib": "^1.17.1",
     "pg": "^8.20.0",
@@ -99,6 +106,13 @@
     },
     "prisma": {
       "mysql2": "^3.24.6"
-    }
+    },
+    "app-builder-lib": {
+      "minimatch": "^11.0.1"
+    },
+    "@electron/universal": {
+      "minimatch": "^11.0.1"
+    },
+    "fast-xml-parser": "^5.12.1"
   }
 }

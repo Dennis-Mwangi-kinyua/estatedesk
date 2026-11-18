@@ -273,11 +273,13 @@ If a migration was applied manually and Prisma marks it failed, use
 
 EstateDesk is **index-ready** for public marketing and vacancy discovery.
 
+The [feature catalogue](FEATURE_CATALOGUE.md) documents current workflows and release qualifications. [Mobile compatibility](MOBILE_COMPATIBILITY.md) defines the full app’s browser baseline, lightweight older-phone overview and acceptance checks. Public `/features` content, structured feature names and crawler discovery share one source inventory.
+
 | Asset | Role |
 | --- | --- |
 | `/robots.txt` | Allow public; disallow dashboards/API |
 | `/sitemap-index.xml` | **Submit this** to Google/Bing |
-| `/sitemap.xml` | ~34 core marketing URLs |
+| `/sitemap.xml` | Core marketing URLs and guides from the public site manifest |
 | `/sitemap-rental-landings.xml` | 700+ location/category landings |
 | `/sitemap-vacancies.xml` | Vacant unit pages |
 | `/llms.txt` | LLM/crawler discovery |

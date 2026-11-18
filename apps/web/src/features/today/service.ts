@@ -81,7 +81,7 @@ export async function getTodaySummary(session: AppSession, now = new Date()): Pr
     const provider = await prisma.serviceProvider.findFirst({ where: { userId: session.userId, status: "ACTIVE" }, select: { id: true } });
     if (provider) {
       const jobs = await prisma.serviceJob.findMany({ where: { providerId: provider.id, status: { in: ["ASSIGNED", "IN_PROGRESS", "SUBMITTED"] } }, orderBy: [{ updatedAt: "asc" }, { id: "asc" }], take: LIMIT + 1, select: { id: true, title: true, status: true, location: true, description: true } });
-      add("work", "Your service jobs", jobs.map(job => ({ id: `job:${job.id}`, title: job.title, detail: `${job.status.replaceAll("_", " ")} · ${job.location}\n${job.description}`, href: "/provider#jobs", action: "Review job", dueAt: null, urgency: "normal", native: null })));
+      add("work", "Your service jobs", jobs.map(job => ({ id: `job:${job.id}`, title: job.title, detail: `${job.status.replaceAll("_", " ")} · ${job.location}\n${job.description}`, href: "/provider#jobs", action: "Review job", dueAt: null, urgency: "normal", providerJob: { id: job.id, status: job.status as "ASSIGNED" | "IN_PROGRESS" | "SUBMITTED" }, native: null })));
     }
   }
   // Include only destinations that the same workspace guard authorizes.

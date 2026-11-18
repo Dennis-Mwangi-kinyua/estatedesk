@@ -22,7 +22,7 @@ function Button({ label, onPress, disabled = false, secondary = false }: {
 }) {
   return <Pressable accessibilityRole="button" disabled={disabled} onPress={onPress}
     style={({ pressed }) => [styles.button, secondary && styles.secondary, (disabled || pressed) && { opacity: 0.55 }]}>
-    <Text style={[styles.buttonText, secondary && { color: "#12392f" }]}>{label}</Text>
+    <Text style={[styles.buttonText, secondary && { color: mobileTheme.color.ink }]}>{label}</Text>
   </Pressable>;
 }
 
@@ -125,14 +125,14 @@ function Workspace() {
       <ScrollView ref={scroll} contentContainerStyle={[styles.content, { paddingHorizontal: width < 360 ? 16 : width >= 768 ? 32 : 24 }, session && { maxWidth: ["home", "platform-home", "native-workspace"].includes(activeScreen) ? 1100 : 760 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
         // Keep this child mounted: adding/removing RefreshControl changes the
         // native ScrollView tree and remounts Workflows, resetting its screen.
-        refreshControl={<RefreshControl refreshing={!!canRefreshTenant && busy} enabled={!!canRefreshTenant && !busy} tintColor={canRefreshTenant ? "#14634e" : "transparent"} colors={canRefreshTenant ? ["#14634e"] : ["transparent"]} onRefresh={() => { if (canRefreshTenant && !busy) { setBusy(true); void restore(); } }} />}>
+        refreshControl={<RefreshControl refreshing={!!canRefreshTenant && busy} enabled={!!canRefreshTenant && !busy} tintColor={canRefreshTenant ? mobileTheme.color.brand : "transparent"} colors={canRefreshTenant ? [mobileTheme.color.brand] : ["transparent"]} onRefresh={() => { if (canRefreshTenant && !busy) { setBusy(true); void restore(); } }} />}>
         {!session || offline ? <View style={styles.brand}>
           <View style={styles.logo}><AppIcon name="home" size={22} color="#ffffff" /></View>
           <Text style={styles.brandText}>EstateDesk</Text>
         </View> : null}
         {!session ? <Text style={styles.eyebrow}>YOUR PROPERTY WORKSPACE</Text> : null}
         {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
-        {busy ? <ActivityIndicator accessibilityLabel="Loading" color="#14634e" style={{ marginVertical: 12 }} /> : null}
+        {busy ? <ActivityIndicator accessibilityLabel="Loading" color={mobileTheme.color.brand} style={{ marginVertical: 12 }} /> : null}
 
       {!session && guestMode ? <NativeGuestStay back={() => { setGuestMode(false); setError(""); }} /> : !session && vacancyMode ? <NativeVacancies back={() => { setVacancyMode(false); setError(""); }} /> : !session && passwordRecoveryMode ? <NativePasswordRecovery back={() => { setPasswordRecoveryMode(false); setError(""); }} /> : !session ? <>
           <Text style={styles.title}>{retrySession ? "Reconnect to your workspace" : "Welcome back"}</Text>
@@ -163,8 +163,8 @@ function Workspace() {
 
       </ScrollView>
       {Platform.OS === "ios" ? <InputAccessoryView nativeID="estatedesk-input-toolbar">
-        <View style={{ backgroundColor: "#f6f8f7", borderTopWidth: 1, borderTopColor: "#dce6df", paddingHorizontal: 16, paddingVertical: 6, alignItems: "flex-end" }}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Dismiss keyboard" onPress={Keyboard.dismiss} style={{ minHeight: 44, minWidth: 64, alignItems: "center", justifyContent: "center" }}><Text style={{ color: "#14634e", fontSize: 16, fontWeight: "600" }}>Done</Text></Pressable>
+        <View style={{ backgroundColor: mobileTheme.color.canvas, borderTopWidth: 1, borderTopColor: mobileTheme.color.border, paddingHorizontal: 16, paddingVertical: 6, alignItems: "flex-end" }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Dismiss keyboard" onPress={Keyboard.dismiss} style={{ minHeight: 44, minWidth: 64, alignItems: "center", justifyContent: "center" }}><Text style={{ color: mobileTheme.color.brand, fontSize: 16, fontWeight: "600" }}>Done</Text></Pressable>
         </View>
       </InputAccessoryView> : null}
     </KeyboardAvoidingView>
@@ -184,19 +184,19 @@ const styles = StyleSheet.create({
   brand: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4, marginBottom: 8 },
   logo: { width: 38, height: 38, backgroundColor: mobileTheme.color.brand, alignItems: "center", justifyContent: "center", borderRadius: mobileTheme.radius.control },
   brandText: { fontSize: 19, lineHeight: 24, fontWeight: "700", letterSpacing: -0.35, color: mobileTheme.color.ink },
-  eyebrow: { fontSize: 11, letterSpacing: 2, color: "#597066", fontWeight: "700" },
-  title: { fontSize: 32, fontWeight: "700", color: "#12392f" },
-  subtitle: { fontSize: 16, lineHeight: 24, color: "#53675e" },
-  card: { backgroundColor: "white", padding: 22, borderRadius: 20, borderWidth: 1, borderColor: "#dee6df", gap: 14 },
-  cardTitle: { fontSize: 20, color: "#12392f", fontWeight: "600" },
-  label: { color: "#243d33", fontSize: 15, fontWeight: "500" },
-  input: { minHeight: 50, borderWidth: 1, borderColor: "#a4b7ab", borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, color: "#12392f", fontSize: 17 },
-  button: { backgroundColor: "#14634e", borderRadius: 12, minHeight: 50, padding: 14, alignItems: "center", justifyContent: "center" },
-  secondary: { backgroundColor: "#e3ece5" },
+  eyebrow: { fontSize: 11, letterSpacing: 2, color: mobileTheme.color.muted, fontWeight: "700" },
+  title: { fontSize: 32, fontWeight: "700", color: mobileTheme.color.ink },
+  subtitle: { fontSize: 16, lineHeight: 24, color: mobileTheme.color.text },
+  card: { backgroundColor: "white", padding: 22, borderRadius: 20, borderWidth: 1, borderColor: mobileTheme.color.border, gap: 14 },
+  cardTitle: { fontSize: 20, color: mobileTheme.color.ink, fontWeight: "600" },
+  label: { color: mobileTheme.color.ink, fontSize: 15, fontWeight: "500" },
+  input: { minHeight: 50, borderWidth: 1, borderColor: mobileTheme.color.input, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, color: mobileTheme.color.ink, fontSize: 17 },
+  button: { backgroundColor: mobileTheme.color.brand, borderRadius: 12, minHeight: 50, padding: 14, alignItems: "center", justifyContent: "center" },
+  secondary: { backgroundColor: mobileTheme.color.soft },
   buttonText: { color: "white", fontSize: 16, fontWeight: "600" },
   error: { backgroundColor: "#fce9e7", color: "#8f261f", padding: 16, borderRadius: 12, lineHeight: 22 },
-  balance: { backgroundColor: "#12392f", borderRadius: 20, padding: 24, gap: 8 },
+  balance: { backgroundColor: mobileTheme.color.ink, borderRadius: 20, padding: 24, gap: 8 },
   balanceLabel: { color: "#d9e9df", fontSize: 14 },
   balanceAmount: { color: "white", fontSize: 32, fontWeight: "700" },
-  status: { color: "#14634e", fontWeight: "600", fontSize: 13 },
+  status: { color: mobileTheme.color.brand, fontWeight: "600", fontSize: 13 },
 });

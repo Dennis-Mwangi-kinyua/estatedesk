@@ -4,7 +4,7 @@ import { Building2 } from "@/components/shared/colored-icons";
 const groups = [
   { title: "Product", links: [["Overview", "/services"], ["Pricing", "/pricing"], ["For landlords", "/landlord-software"], ["Rent tracking", "/rent-tracking-software"], ["Collections", "/rent-collection-software"], ["Spreadsheet onboarding", "/property-management-onboarding"], ["Water billing", "/water-billing-software"]] },
   { title: "Discover", links: [["Careers & jobs", "/careers"], ["Long-term rentals", "/vacancies"], ["Short stays", "/stays"], ["Service providers", "/service-providers"], ["List your services", "/service-providers/register"]] },
-  { title: "Help & resources", links: [["Guides", "/guides"], ["FAQ", "/faq"], ["Contact & support", "/contact"], ["System status", "/status"], ["Markets", "/property-management-markets"]] },
+  { title: "Help & resources", links: [["All features", "/features"], ["Lightweight overview", "/basic.html"], ["Guides", "/guides"], ["FAQ", "/faq"], ["Contact & support", "/contact"], ["System status", "/status"], ["Markets", "/property-management-markets"]] },
   { title: "Trust & legal", links: [["Security", "/security"], ["Privacy", "/privacy"], ["Terms", "/terms"], ["Data processing", "/data-processing"]] },
 ];
 

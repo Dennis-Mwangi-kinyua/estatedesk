@@ -1,3 +1,4 @@
+import designTokens from "../../packages/design-tokens/tokens.json";
 import type { ExpoConfig } from "expo/config";
 
 const config: ExpoConfig = {
@@ -17,7 +18,7 @@ const config: ExpoConfig = {
   android: { allowBackup: false, package: "ke.co.estatedesk.mobile" },
   plugins: ["expo-dev-client", "expo-secure-store", "expo-notifications", "expo-sharing",
     "./plugins/with-release-signing.cjs",
-    ["expo-splash-screen", { image: "./assets/splash.png", imageWidth: 200, resizeMode: "contain", backgroundColor: "#0f766e" }],
+    ["expo-splash-screen", { image: "./assets/splash.png", imageWidth: 200, resizeMode: "contain", backgroundColor: designTokens.light.brandDark }],
     ["expo-camera", { cameraPermission: "Allow EstateDesk to take report photos and scan visitor QR passes.", microphonePermission: false, recordAudioAndroid: false }],
     ["expo-image-picker", { photosPermission: "Choose a profile photo or evidence photos for EstateDesk reports.", cameraPermission: "Allow EstateDesk to take report photos and scan visitor QR passes.", microphonePermission: false }]],
   extra: process.env.EXPO_PROJECT_ID

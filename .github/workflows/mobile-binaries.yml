@@ -1,0 +1,52 @@
+name: Mobile installable builds
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Target platform
+        type: choice
+        options: [android, ios, all]
+        default: android
+      profile:
+        description: Preview installs or production store binaries
+        type: choice
+        options: [preview, production]
+        default: preview
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_PROJECT_ID: ${{ vars.EXPO_PROJECT_ID }}
+      EXPO_PUBLIC_API_URL: https://estatedesk.co.ke
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Check cloud build configuration
+        shell: bash
+        run: |
+          test -n "$EXPO_TOKEN" || { echo 'Configure the EXPO_TOKEN repository secret.'; exit 1; }
+          test -n "$EXPO_PROJECT_ID" || { echo 'Configure the EXPO_PROJECT_ID repository variable.'; exit 1; }
+      - run: npm ci
+      - run: npm run mobile:typecheck
+      - run: npm run check -w @estatedesk/mobile
+      - name: Build installable binaries on EAS
+        working-directory: apps/mobile
+        run: npx --yes eas-cli@18 build --platform "${{ inputs.platform }}" --profile "${{ inputs.profile }}" --non-interactive --wait --json > build-results.json
+      - name: Preserve build result and download URLs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-build-results
+          path: apps/mobile/build-results.json
+          if-no-files-found: warn
+          retention-days: 14

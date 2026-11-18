@@ -1,4 +1,26 @@
+## CSV file selection update — 18 November 2026
+
+Native imports now offer a CSV document picker with a 1 MB file limit, a 250,000-character content limit, BOM removal and rejection of binary content. Files still require server validation and explicit import confirmation. Temporary picker copies are deleted after reading. Excel workbooks must first be exported as UTF-8 CSV. This adds a native dependency and requires rebuilding the app; installed-device picker acceptance remains outstanding. See [installable release instructions](INSTALLABLE_RELEASES.md). Earlier dated statements about missing file selection below are historical.
+
 # Cross-platform readiness — 9 November 2026
+
+## Development update — 17 November 2026
+
+Desktop execution follow-up: `npm run desktop:smoke` now launches the source Electron application using a disposable localhost fixture and profile. It passed on the local Linux graphical session, covering renderer isolation, sandbox preferences, notification denial, same-origin navigation, file selection, popup reuse and reload. The cross-platform artifacts workflow now runs this check on Linux (Xvfb), Windows and macOS before packaging. Windows/macOS workflow execution and packaged-binary acceptance remain unverified; this does not establish installed-client or production workflow sign-off.
+
+The repository now includes `apps/desktop`, a sandboxed Electron client for the hosted workspace, with Windows NSIS, macOS DMG and Linux AppImage/Debian packaging targets. Desktop continues to use the web backend and permissions. See [desktop setup and limitations](../apps/desktop/README.md). This adds installer source; it does not certify signed distribution or execution on Windows/macOS.
+
+Native organization collections now link to paginated rent statements. Web and native use the same organization-scoped query, rent-only filters, aggregate totals, stable ordering and 25-row pages. Collection access still requires organization-wide scope and an active subscription at the entry point. Statements omit water, deposits and unapplied cash.
+
+Native imports now support choosing properties/units/tenants, viewing example CSV headers, pasting CSV, validating, reviewing row outcomes and explicitly confirming creation. They reuse the web import action, plan limits, permission checks, 15-minute preview receipt and import history. Editing CSV or changing the record type invalidates the local preview. Server receipts bind the preview to the exact CSV, actor, organization and type. Submission guards prevent repeating a completed operation with the same identifier. CSV and preview tokens stay in memory; there is no native spreadsheet file picker yet. An uncertain commit requires checking history before another attempt.
+
+The manual **Cross-platform artifacts** workflow prepares unsigned desktop review artifacts on Windows/macOS/Linux and exports both native JavaScript bundles. It does not deploy the backend, sign applications or publish to stores. Quality CI also runs the desktop navigation policy tests.
+
+Verified during development: web/native TypeScript checks, focused server lint, Android/iOS Hermes exports, database integration checks for collection isolation and CSV preview behavior, native UI browser-host checks for import confirmation and preview invalidation, and a signed-in local end-to-end scenario covering statements, foreign-organization isolation, native CSV validation/commit, altered-preview rejection and duplicate-submission protection. Browser-host verification does not replace installed-device execution. The patched production web build and artifact-only release checks also pass: both source fingerprints match and all 53 mobile API handlers are present. The signed-in collections/statement/import scenario passes against both development and production-mode local servers; the production fixture uses the hardened secure session cookie. Production database migration history and the deployed backend were not certified by these artifact checks.
+
+Linux review artifacts were generated locally: `apps/desktop/release/EstateDesk-0.2.1-x86_64.AppImage` and `EstateDesk-0.2.1-amd64.deb`. Debian metadata identifies `estatedesk`, version `0.2.1`, architecture `amd64`. The packaged application archive contains only `main.cjs`, `policy.cjs` and package metadata; packaged client code matches the source. These builds have not been launched on a desktop display. Web now resolves Next.js 16.4.6, including the patch for [GHSA-mfr8-8qww-v76h](https://github.com/advisories/GHSA-mfr8-8qww-v76h). Web and desktop production dependency audits both reported zero vulnerabilities. This does not claim that the full development dependency tree is advisory-free. The web development command now uses a Node launcher for Windows/macOS/Linux, and its typecheck has an explicit 4 GB heap limit.
+
+Remaining platform work includes signed Windows/macOS builds and execution, Android/iOS device acceptance, native-process crash reporting validation, desktop hardware/push permissions and binary updates, signing/store credentials and store disclosures. The local doctor still reports missing Java, Android platform/build/NDK/CMake tools and a device; an SDK directory exists but does not establish a working toolchain. Linux has no iOS simulator. Existing historical evidence below must not be treated as sign-off for these new changes.
 
 EstateDesk targets desktop/mobile browsers and an installable PWA, plus native iOS and Android through Expo/React Native. The current implementation uses shared backend permissions and business operations; native screens do not embed web pages.
 
@@ -48,7 +70,7 @@ The current requested stage is development. Signing, production deployment and s
 4. **Device acceptance:** complete signed-in iPhone/iPad/Android phone/tablet scenarios, camera/files/permissions, push delivery, logout/revocation, organization switching, large text, keyboard/safe areas, VoiceOver/TalkBack and performance. Validate native-process crash reporting before store release.
 5. **Rollout:** the CRM migration is applied and checksums match. Publish the matching backend with target configuration, verify live backend/client protocol and routes, and release the matching native binary. Local test builds must not be mistaken for a production rollout.
 6. **Store review:** finalize the actual store listings, screenshots, data disclosures, reviewer access and retention/account-closure process. No store-compliance certification is implied by implementing a request form.
-7. **Desktop packaging:** the desktop application is the installable PWA. There is no signed standalone Windows/macOS/Linux installer project; add one if the distribution requirement extends beyond the PWA.
+7. **Desktop packaging:** see the 17 November update and `apps/desktop`. Installer source now exists; signed Windows/macOS distribution and execution remain unverified. The installable PWA remains available.
 
 See [VS Code emulator setup](VS_CODE_EMULATORS.md) and [CRM workflows](CRM.md).
 

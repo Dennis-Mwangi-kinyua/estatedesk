@@ -16,7 +16,7 @@ body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surfa
   --foreground: #24262b;
   --card: #fff;
   --card-foreground: #24262b;
-  --primary: #285ed4;
+  --primary: var(--ed-brand, #14634e);
   --primary-foreground: #fff;
   --secondary: #f0fdfa;
   --secondary-foreground: #115e59;
@@ -24,7 +24,7 @@ body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surfa
   --muted-foreground: #515864;
   --border: #e7e9ef;
   --input: #e0e3eb;
-  --ring: #285ed4;
+  --ring: var(--ed-brand, #14634e);
   --workspace-sky: #f0fdfa;
   --workspace-mint: #f1f7f5;
   --workspace-peach: #faf5ef;
@@ -45,7 +45,7 @@ body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surfa
   --foreground: #f0f1f5;
   --card: #202227;
   --card-foreground: #f0f1f5;
-  --primary: #285ed4;
+  --primary: var(--ed-brand, #14634e);
   --primary-foreground: #fff;
   --secondary: #134e4a;
   --secondary-foreground: #ccfbf1;
@@ -53,7 +53,7 @@ body.estate-glass-system :is(.estate-workspace, .ed-theme-page, .ed-mobile-surfa
   --muted-foreground: #c1c7d0;
   --border: #33363e;
   --input: #3b3e47;
-  --ring: #85a9ff;
+  --ring: var(--ed-ring, #14634e);
   --workspace-sky: #102f35;
   --workspace-mint: #25342f;
   --workspace-peach: #363029;
@@ -292,25 +292,25 @@ html.dark body.estate-glass-system .subscription-warning {
   color: #fef3c7 !important;
 }
 
-/* One blue action palette in Light and Dark; logout keeps its red exception. */
+/* Legacy unclassified actions use the shared brand; variants retain their hierarchy. */
 body.estate-glass-system {
-  --primary: #285ed4;
+  --primary: var(--ed-brand, #14634e);
   --primary-foreground: #fff;
-  --ring: #85a9ff;
+  --ring: var(--ed-ring, #14634e);
 }
-body.estate-glass-system :is(button, summary[role="button"], .public-action, a[data-workspace-action="true"], a[data-page-button="true"]):not([class*="inset-0"]):not([class*="inset-x-0"]):not([aria-label*="overlay"]):not([role="switch"]):not(.workspace-navigation-backdrop):not([data-logout-form] *) {
-  background-color: #285ed4 !important;
+body.estate-glass-system :is(button, summary[role="button"], .public-action, a[data-workspace-action="true"], a[data-page-button="true"]):not([class*="inset-0"]):not([class*="inset-x-0"]):not([aria-label*="overlay"]):not([role="switch"]):not(.workspace-navigation-backdrop):not([data-logout-form] *):not([data-variant]):not([data-theme-toggle]):not(.public-action-secondary) {
+  background-color: var(--ed-brand, #14634e) !important;
   background-image: none !important;
-  border-color: #285ed4 !important;
-  color: #fff !important;
+  border-color: var(--ed-brand, #14634e) !important;
+  color: var(--ed-onBrand, #fff) !important;
   border-radius: .75rem;
   transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
-body.estate-glass-system :is(button, summary[role="button"], .public-action, a[data-workspace-action="true"], a[data-page-button="true"]):not([class*="inset-0"]):not([class*="inset-x-0"]):not([aria-label*="overlay"]):not([role="switch"]):not(.workspace-navigation-backdrop):not([data-logout-form] *):hover {
-  background-color: #204fb7 !important;
-  border-color: #204fb7 !important;
+body.estate-glass-system :is(button, summary[role="button"], .public-action, a[data-workspace-action="true"], a[data-page-button="true"]):not([class*="inset-0"]):not([class*="inset-x-0"]):not([aria-label*="overlay"]):not([role="switch"]):not(.workspace-navigation-backdrop):not([data-logout-form] *):not([data-variant]):not([data-theme-toggle]):not(.public-action-secondary):hover {
+  background-color: var(--ed-brandHover, #104f3f) !important;
+  border-color: var(--ed-brandHover, #104f3f) !important;
 }
-/* Action labels and icons must follow the blue control's white foreground.
+/* Action labels and icons follow their control's foreground.
    Keep this in utilities alongside the legacy important text mappings. */
 @layer utilities {
   body.estate-glass-system :is(button, .public-action, a[data-workspace-action="true"], a[data-page-button="true"]) :is(span, svg) {

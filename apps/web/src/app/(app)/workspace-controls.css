@@ -1,15 +1,15 @@
 /* One action system for all authenticated workspaces, including legacy controls. */
 :is(.estate-workspace, body[data-workspace-theme="true"]) {
-  --workspace-action-primary: #285ed4;
-  --workspace-action-primary-ink: #ffffff;
+  --workspace-action-primary: var(--ed-brand, #14634e);
+  --workspace-action-primary-ink: var(--ed-onBrand, #ffffff);
   --workspace-action-danger: #b42332;
   --workspace-action-danger-ink: #ffffff;
   --workspace-action-radius: .85rem;
   --workspace-action-height: 2.75rem;
 }
 .dark :is(.estate-workspace, body[data-workspace-theme="true"]) {
-  --workspace-action-primary: #285ed4;
-  --workspace-action-primary-ink: #ffffff;
+  --workspace-action-primary: var(--ed-brand, #14634e);
+  --workspace-action-primary-ink: var(--ed-onBrand, #ffffff);
   --workspace-action-danger: #ffb4ba;
   --workspace-action-danger-ink: #4b111a;
 }

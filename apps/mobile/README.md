@@ -1,4 +1,14 @@
+## CSV file selection update — 18 November 2026
+
+Native imports now offer a CSV document picker with a 1 MB file limit, a 250,000-character content limit, BOM removal and rejection of binary content. Files still require server validation and explicit import confirmation. Temporary picker copies are deleted after reading. Excel workbooks must first be exported as UTF-8 CSV. This adds a native dependency and requires rebuilding the app; installed-device picker acceptance remains outstanding. See [installable release instructions](../../docs/INSTALLABLE_RELEASES.md). Earlier dated statements about missing file selection below are historical.
+
 # EstateDesk mobile
+
+## Cross-platform additions — 17 November 2026
+
+Collection account details now open a native rent statement with totals, allocated payments, balances and pagination, backed by the same scoped query as the website. Organization Imports now provides a native CSV workflow: choose a type, inspect example headers, paste CSV, validate, review and confirm. Creation reuses web permissions, subscription limits and exact-content preview receipts; completed submissions cannot execute twice with the same submission identifier. Editing CSV invalidates its preview. CSV contents and preview tokens are not persisted as local drafts. Native spreadsheet file selection remains future work.
+
+Deploy `/api/mobile/imports` and the updated workspace screen/menu handlers alongside the matching mobile bundle. Existing installed binaries do not gain these screens from backend deployment alone. Signed-in local API/browser checks and native bundle exports do not establish physical-device acceptance. See [current cross-platform status](../../docs/CROSS_PLATFORM_READINESS.md).
 
 ## Cross-platform work — 9 November 2026
 
@@ -232,4 +242,4 @@ Password changes are available to all roles with personal security access. The c
 
 ### Collections today
 
-Organization-wide collection staff can open **Collections today** for overdue account cards, contact-due/my-account/unassigned/payment-review filters, owner/date/note assignment, payment promises and outcomes, and previewed reminders. Actions use the same services and tenant/organization boundaries as the web workspace. Reminder approval requires the current balance/contact preview, explicit approval and resolved payment-review flags. Email is queued through the existing dispatcher; in-app reminders are available immediately. Guided spreadsheet imports and the detailed rent statement remain mobile-browser workspaces. See [collections and setup](../../docs/COLLECTIONS.md). Rebuild and deploy the matching app/backend before relying on the new native filters; installed-device acceptance remains separate.
+Organization-wide collection staff can open **Collections today** for overdue account cards, contact-due/my-account/unassigned/payment-review filters, owner/date/note assignment, payment promises and outcomes, and previewed reminders. Actions use the same services and tenant/organization boundaries as the web workspace. Reminder approval requires the current balance/contact preview, explicit approval and resolved payment-review flags. Email is queued through the existing dispatcher; in-app reminders are available immediately. CSV validation/imports and detailed rent statements now have native screens; spreadsheet file selection remains unavailable. See [collections and setup](../../docs/COLLECTIONS.md). Rebuild and deploy the matching app/backend before relying on the new native filters; installed-device acceptance remains separate.

@@ -63,3 +63,6 @@ next-env.d.ts
 
 # Local private uploads, including browser-test evidence
 **/.private/
+
+# Desktop installers and unpacked runtime
+/apps/desktop/release/

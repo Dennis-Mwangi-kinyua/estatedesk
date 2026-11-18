@@ -36,6 +36,8 @@
     }
   },
   "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
     "apps/web/**/*.ts",
     "apps/web/**/*.tsx",
     "apps/web/next-env.d.ts",

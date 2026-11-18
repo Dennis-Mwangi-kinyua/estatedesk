@@ -6,7 +6,6 @@ import { WorkspaceIdentity } from "@/components/shared/workspace-identity";
 import { PlatformNavigation } from "./platform-navigation";
 
 import "../platform-glass.css";
-import "../admin-glass.css";
 
 import Link from "@/components/navigation/workspace-link";
 import { ReactNode, useMemo, useState } from "react";
@@ -19,7 +18,6 @@ import {
 } from "../_lib/nav";
 import { DeveloperSensitiveBanner } from "./developer-sensitive-banner";
 import PlatformMobileShell from "../platform-mobile-shell";
-import { PlatformAppearanceSwitch, usePlatformAppearance } from "./platform-appearance-switch";
 
 function PlatformShellInner({
   children,
@@ -45,15 +43,10 @@ function PlatformShellInner({
     [isSuperAdmin, pendingProviderCount, pendingDemoCount],
   );
   const meta = { headerTitle: "Platform command centre", shortLabel: "Unified", headerDescription: "Customers, revenue, security and system operations in one place" };
-  const { appearance, isGlass } = usePlatformAppearance(true);
 
   return (
     <div
-      className={[
-        "app-mobile-canvas ed-mobile-surface h-dvh overflow-hidden text-foreground",
-        "platform-shell-admin",
-        isGlass ? "platform-ui-glass" : "",
-      ].join(" ")}
+      className="app-mobile-canvas ed-mobile-surface platform-shell-admin h-dvh overflow-hidden text-foreground"
     >
       <div className="flex h-dvh overflow-hidden">
         <aside aria-label="Platform sidebar" className="platform-sidebar ed-shell-panel fixed bottom-0 left-0 top-0 z-40 hidden w-[280px] border-r lg:flex lg:flex-col">
@@ -88,8 +81,6 @@ function PlatformShellInner({
           navItems={navItems}
           fullName={fullName}
           mode={mode}
-          appearanceControl={<PlatformAppearanceSwitch appearance={appearance} />}
-          showThemeToggle={!isGlass}
         >
           <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden lg:pl-[280px]">
             <header className="platform-desktop-header ed-shell-panel hidden h-[76px] shrink-0 border-b px-6 lg:block">
@@ -114,8 +105,7 @@ function PlatformShellInner({
                 </div>
 
                 <div className="flex shrink-0 items-center gap-3">
-                  <PlatformAppearanceSwitch appearance={appearance} />
-                  {!isGlass && <HeaderThemeToggle />}
+                  <HeaderThemeToggle />
                   <TodayLink compact />
                   <WorkspaceIdentity name={fullName} role={isSuperAdmin ? "Super platform admin" : "Platform operator"} />
 

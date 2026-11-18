@@ -1,3 +1,4 @@
+import { mobileImportResultSchema, mobileImportTemplateSchema } from "@estatedesk/contracts/mobile";
 import { storeRenewedSession } from "./session-renewal";
 import { mobileSecurityActivitySchema } from "@estatedesk/contracts/mobile";
 import { todaySummarySchema } from "@estatedesk/contracts/mobile";
@@ -358,3 +359,14 @@ export async function updateAccountDeletion(body:{action:"request"|"withdraw";co
 export async function reportNativeDiagnostic(body:{eventId:string;fingerprint:string;platform:"ios"|"android";version:string;kind:"react-render"}){if(await hasSavedSession())await request("/diagnostics",{method:"POST",body});}
 
 export async function getToday() { return todaySummarySchema.parse(await request("/today")); }
+
+export async function getImportTemplate(kind: import("@estatedesk/contracts/mobile").MobileImportKind) {
+  return mobileImportTemplateSchema.parse(await request(`/imports?kind=${kind}`));
+}
+export async function runImport(input: import("@estatedesk/contracts/mobile").MobileImportRequest) {
+  return mobileImportResultSchema.parse(await request("/imports", { method: "POST", body: input }));
+}
+
+export async function updateProviderJob(jobId: string, operation: "accept" | "decline" | "submit", completionNotes?: string) {
+  await request("/provider/jobs", { method: "POST", body: { jobId, operation, ...(operation === "submit" ? { completionNotes } : {}) } });
+}

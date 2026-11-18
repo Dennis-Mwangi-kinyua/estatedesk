@@ -11,6 +11,7 @@ export type PublicSiteIndexItem = {
 };
 
 export const publicSiteIndexItems: readonly PublicSiteIndexItem[] = [
+  { title: "EstateDesk features and device support", path: "/features", description: "Explore rent statements, payments, water billing, accounting, CRM, recruitment, imports, security and cross-platform availability.", priority: "0.9", changefreq: "monthly", lastmod: "2026-11-17" },
   {"title": "Move property records from spreadsheets into EstateDesk", "path": "/property-management-onboarding", "description": "Set up your property workspace with a guided checklist and reviewed CSV imports for properties, units and tenants.", "priority": "0.8", "changefreq": "monthly", "lastmod": "2026-11-11"},
   {"title": "Rent collection software for property teams in Kenya", "path": "/rent-collection-software", "description": "Turn overdue rent into a clear daily follow-up queue. Review balances, assign ownership, track promises to pay and check payment evidence in EstateDesk.", "priority": "0.8", "changefreq": "monthly", "lastmod": "2026-11-11"},
   { title: "Careers and job opportunities", path: "/careers", description: "Find public jobs posted by EstateDesk and property organizations, and apply directly online.", priority: "0.7", changefreq: "daily" },

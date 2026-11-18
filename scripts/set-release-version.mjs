@@ -15,10 +15,12 @@ async function updateJson(path, updater) {
 
 await updateJson("package.json", (value) => { value.version = version; });
 await updateJson("apps/web/package.json", (value) => { value.version = version; });
+await updateJson("apps/desktop/package.json", (value) => { value.version = version; });
 await updateJson("package-lock.json", (value) => {
   value.version = version;
   value.packages[""].version = version;
   value.packages["apps/web"].version = version;
+  value.packages["apps/desktop"].version = version;
 });
 
 const serviceWorkerPath = "apps/web/public/sw.js";

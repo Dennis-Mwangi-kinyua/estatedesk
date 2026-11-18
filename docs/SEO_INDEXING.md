@@ -1,6 +1,22 @@
 # EstateDesk SEO & Indexing
 
-Last source review: **2026-11-11**
+Last source review: **2026-11-17**
+
+## Feature coverage and mobile-first delivery
+
+`/features` is the canonical, server-rendered feature catalogue, covering the newer collections/statements, native CSV import, CRM, recruitment, Personal Today, security/privacy and desktop/mobile work. The shared inventory in `apps/web/src/lib/product-features.ts` supplies visible catalogue content, root SoftwareApplication feature names and `/llms.txt`. `/features` is included through the public site manifest in `/sitemap.xml`, with links from home, services and the footer. See [feature documentation](FEATURE_CATALOGUE.md) and [browser support and acceptance](MOBILE_COMPATIBILITY.md).
+
+Public mobile pages use the same URLs, core content, canonical metadata and structured data as desktop. This follows [Google’s mobile-first indexing guidance](https://developers.google.com/search/docs/crawling-indexing/mobile/mobile-sites-mobile-first-indexing). The static `/basic.html` overview serves older browsers without JavaScript; it is `noindex,follow` and intentionally excluded from sitemaps. It does not replace the primary mobile page for indexing.
+
+### Content and release procedure
+
+1. Confirm the capability in source and update the shared feature inventory, relevant workflow guide and basic summary if affected. Keep plan, integration and unreleased-platform qualifications visible.
+2. Give each new public page a unique descriptive title, description and self-canonical using `publicPageMetadata`. Register it in `public-site-index.ts` and link it from a relevant existing page. Do not add authenticated records or private identifiers to discovery feeds.
+3. Run TypeScript, SEO unit checks and the mobile/SEO browser scenarios below. Inspect initial HTML with scripts disabled; verify JSON-LD matches visible content. Use Google Rich Results Test for applicable schema after deployment; schema alone does not guarantee enhanced search results.
+4. After an authorised deployment, verify production responses, canonical host, robots and sitemap contents. Submit the sitemap index in Google/Bing owner accounts and inspect representative URLs.
+5. Review Search Console indexing, query/page impressions, clicks and mobile Core Web Vitals monthly. Investigate duplicate canonicals, soft 404s and accidental private-page indexability. Record dates and evidence separately from source readiness.
+
+Additional browser command: `npx playwright test tests/e2e/features-mobile-seo.spec.ts --project=chromium --workers=1`. Responsive emulation establishes layout evidence, not certification of every smartphone or browser version.
 
 Current delivery is GitHub only. New pages in this release have local browser validation; deployment and search-account verification remain pending. See [the latest handoff](audits/2026-11-11/unified-platform-seo.md).
 

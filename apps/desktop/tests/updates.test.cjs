@@ -1,0 +1,24 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { EventEmitter } = require('node:events');
+const { installUpdates } = require('../updates.cjs');
+test('updates require consent to download and restart and never install on quit', async () => {
+  const app = new EventEmitter(); app.isPackaged = true;
+  const updater = new EventEmitter(); let checked = 0, downloaded = 0, installed = 0;
+  updater.checkForUpdates = async () => { checked++; };
+  updater.downloadUpdate = async () => { downloaded++; };
+  updater.quitAndInstall = () => { installed++; };
+  let response = 0;
+  installUpdates({ app, updater, dialog: { showMessageBox: async () => ({ response }) }, getWindow: () => null });
+  assert.equal(checked, 1);
+  assert.equal(updater.autoDownload, false);
+  assert.equal(updater.autoInstallOnAppQuit, false);
+  const settle = () => new Promise(resolve => setImmediate(resolve));
+  updater.emit('update-available', { version: '1.0.0' }); await settle();
+  assert.equal(downloaded, 0);
+  response = 1; updater.emit('update-available', { version: '1.0.0' }); await settle();
+  assert.equal(downloaded, 1);
+  response = 0; updater.emit('update-downloaded'); await settle(); assert.equal(installed, 0);
+  response = 1; updater.emit('update-downloaded'); await settle(); assert.equal(installed, 1);
+  app.emit('before-quit');
+});

@@ -1,5 +1,7 @@
 # EstateDesk
 
+[Documentation hub](docs/README.md) · [Developer onboarding](docs/DEVELOPER_ONBOARDING.md)
+
 **Multi-tenant property operations SaaS** for landlords, property managers, office staff, accountants, caretakers, and tenants — built Kenya-first (M-Pesa, water meters, caretaker field work), usable across East Africa and global rental markets.
 
 EstateDesk is an **operating system for rental revenue, service, and accountability**: portfolio structure, occupancy, **combined rent + water billing**, payments (M-Pesa STK + manual proof), issues, inspections, notices, accounting, documents/receipts, notifications, public vacancy SEO, and a platform control plane — in one secure product.
@@ -59,6 +61,8 @@ EstateDesk lets a **property organization** run day-to-day operations without sp
 **Public discovery** (vacancies, landings, guides) sits next to **authenticated workspaces** that are never sitemapped and use `noindex`.
 
 The **Expo mobile app** lives in `apps/mobile` and targets Android and iOS. Native workspaces include tenant billing, payments, lease history and move-out progress; caretaker meters and maintenance work orders; and a scoped staff unit directory. See [mobile setup and current feature scope](apps/mobile/README.md) for development builds, backend configuration, and release requirements. Current validation and remaining external launch gates are recorded in [17 October readiness evidence](docs/audits/2026-10-17/README.md).
+
+The **desktop client** in `apps/desktop` uses the shared hosted workspace and provides Windows NSIS, macOS DMG and Linux AppImage/Debian packaging targets. See [desktop setup](apps/desktop/README.md) and [current cross-platform readiness](docs/CROSS_PLATFORM_READINESS.md) for validation and distribution limits. The manual **Cross-platform artifacts** workflow prepares unsigned review artifacts; it does not publish releases.
 
 ---
 

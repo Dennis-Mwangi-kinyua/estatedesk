@@ -1,3 +1,4 @@
+import { NativeImports } from "./native-imports";
 import { NativePlatformReports } from "./native-platform-reports";
 import { FeatureCard } from "./feature-card";
 import { useEffect, useRef, useState } from "react";
@@ -31,6 +32,7 @@ function NativeRecordWorkspace({ target, open, onBack, onError, reviewPayments, 
   const [detailBusy, setDetailBusy] = useState(false);
   const [detailError, setDetailError] = useState("");
   const detailRequest = useRef(0);
+  const rentStatement = target.kind === "organization" && target.path === "/dashboard/org/collections/statement";
   const userDirectory = target.kind === "platform" && target.path === "/platform/users";
   const platformReports = target.kind === "platform" && target.path === "/platform/reports";
   const jobQueue = target.kind === "platform" && ["/platform/jobs", "/platform/jobs/notifications"].includes(target.path);
@@ -65,7 +67,7 @@ function NativeRecordWorkspace({ target, open, onBack, onError, reviewPayments, 
     setBusy(true); setError("");
     if (changedQuery) { setData(null); setExpanded(null); setUserDetail(null); setDetailError(""); setDetailBusy(false); }
     void (help ? api.getHelp(search, page) : api.getNativeWorkspace(target.kind, target.path, search, page, target.recordId, organizationId)).then(result => {
-      if (active) { setData(result); if (target.recordId && result.records.some(record => record.id === target.recordId)) setExpanded(target.recordId); }
+      if (active) { setData(result); if (!rentStatement && target.recordId && result.records.some(record => record.id === target.recordId)) setExpanded(target.recordId); }
     }).catch(cause => {
       if (!active) return;
       if (cause instanceof api.ApiError && cause.status === 401) onError(cause);
@@ -76,7 +78,7 @@ function NativeRecordWorkspace({ target, open, onBack, onError, reviewPayments, 
   const applySearch = () => { if (!busy) { Keyboard.dismiss(); setPage(1); setSearch(query.trim()); setRevision(value => value + 1); } };
   const actionForm = action ? <NativeActionForm request={{ kind: target.kind, path: target.path, ...action }} onError={onError} onBusyChange={onMutationBusy} close={(completed, contextChanged) => { setAction(null); if (contextChanged && onContextChange) void onContextChange().catch(onError); else if (completed) setRevision(value => value + 1); }} /> : null;
   return <View style={{ gap: 22 }} onLayout={grid.onLayout}>
-    {detail ? <WorkspaceRecordPage record={detail} workspace={userDirectory && organization ? `${organization.name} users` : target.title} emoji={target.emoji} close={() => target.recordId ? onBack() : closeDetail()} open={link => { closeDetail(); open({ ...link, kind: target.kind }); }} act={(actionId, recordId) => setAction({ actionId, recordId })}>
+    {detail ? <WorkspaceRecordPage record={detail} workspace={userDirectory && organization ? `${organization.name} users` : target.title} emoji={target.emoji} close={() => target.recordId && !rentStatement ? onBack() : closeDetail()} open={link => { closeDetail(); open({ ...link, kind: target.kind }); }} act={(actionId, recordId) => setAction({ actionId, recordId })}>
       {detailBusy ? <View style={styles.card}><ActivityIndicator accessibilityLabel="Loading user identity details" /><Text style={styles.subtitle}>Loading identity details…</Text></View> : null}
       {detailError ? <View style={styles.card}><Text accessibilityRole="alert" style={styles.subtitle}>{detailError}</Text><Button label="Retry user details" onPress={() => { if (expanded) void openUser(expanded); }} /></View> : null}
       {actionForm}
@@ -122,7 +124,13 @@ function NativeRecordWorkspace({ target, open, onBack, onError, reviewPayments, 
 }
 
 export function NativeWorkspace(props: Parameters<typeof NativeRecordWorkspace>[0]) {
+  if (props.target.kind === "organization" && props.target.path === "/dashboard/org/imports") return <NativeImportWorkspace {...props} />;
   return props.target.kind === "platform" && props.target.path === "/platform/reports"
     ? <NativePlatformReports onError={props.onError} />
     : <NativeRecordWorkspace {...props} />;
+}
+
+function NativeImportWorkspace(props: Parameters<typeof NativeRecordWorkspace>[0]) {
+  const [revision, setRevision] = useState(0);
+  return <View style={{ gap: 16 }}><NativeImports onError={props.onError} onMutationBusy={props.onMutationBusy} onCommitted={() => setRevision(value => value + 1)} /><NativeRecordWorkspace key={revision} {...props} /></View>;
 }

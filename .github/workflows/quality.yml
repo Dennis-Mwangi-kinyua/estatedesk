@@ -71,6 +71,9 @@ jobs:
       - name: Typecheck native application
         run: npm run mobile:typecheck
 
+      - name: Check desktop navigation policy
+        run: npm run desktop:test
+
       - name: Check Expo SDK dependency compatibility
         run: npm run check -w @estatedesk/mobile
 

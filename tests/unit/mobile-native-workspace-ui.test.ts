@@ -6,27 +6,30 @@ import { createRequire } from "node:module";
 import path from "node:path";
 
 const require = createRequire(import.meta.url);
-for (const kind of ["organization", "platform"] as const) test(`native ${kind} records open details, paginate, search and recover from a failed read`, async () => {
+for (const scenario of ["organization", "platform", "statement"] as const) test(`native ${scenario} records open details, paginate, search and recover from a failed read`, async () => {
+  const kind = scenario === "statement" ? "organization" : scenario;
+  const targetPath = scenario === "statement" ? "/dashboard/org/collections/statement" : "/dashboard/org/tenants";
+  const recordContext = scenario === "statement" ? ",recordId:'tenant-account'" : "";
   const bundle = await build({
-    stdin: { contents: `import React from 'react'; import {createRoot} from 'react-dom/client'; import {NativeWorkspace} from './apps/mobile/src/components/native-workspace'; createRoot(document.getElementById('root')).render(<NativeWorkspace target={{kind:'${kind}',path:'/dashboard/org/tenants',title:'Tenants',description:'Tenant directory',emoji:'users'}} open={()=>{}} onError={()=>{window.__unauthorized=true}}/>);`, resolveDir: process.cwd(), loader: "tsx" },
+    stdin: { contents: `import React from 'react'; import {createRoot} from 'react-dom/client'; import {NativeWorkspace} from './apps/mobile/src/components/native-workspace'; createRoot(document.getElementById('root')).render(<NativeWorkspace target={{kind:'${kind}',path:'${targetPath}'${recordContext},title:'Tenants',description:'Tenant directory',emoji:'users'}} open={()=>{}} onBack={()=>{window.__backCalled=true}} onError={()=>{window.__unauthorized=true}}/>);`, resolveDir: process.cwd(), loader: "tsx" },
     bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", alias: { react: path.dirname(require.resolve("react/package.json")) },
     define: { "process.env.NODE_ENV": '"test"' },
     plugins: [{ name: "native-hosts", setup(builder) {
-      builder.onResolve({ filter: /^react-native$|^react-native-safe-area-context$|^\.\/app-icon$|^\.\/native-action-form$|^\.\.\/api$/ }, args => ({ path: args.path, namespace: "fixture" }));
+      builder.onResolve({ filter: /^expo-crypto$|^react-native$|^react-native-safe-area-context$|^\.\/app-icon$|^\.\/native-action-form$|^\.\.\/api$/ }, args => ({ path: args.path, namespace: "fixture" }));
       builder.onLoad({ filter: /.*/, namespace: "fixture" }, args => ({ loader: "tsx", resolveDir: process.cwd(), contents:
-        args.path === "react-native" ? `import React from 'react';
+        args.path === "expo-crypto" ? `export const randomUUID=()=>"00000000-0000-4000-8000-000000000001";` : args.path === "react-native" ? `import React from 'react';
           export const View=({children})=><div>{children}</div>;
           export const Modal=({children})=><div role="dialog">{children}</div>;
           export const ScrollView=View;
           export const Text=({children,accessibilityRole})=><span role={accessibilityRole==='alert'?'alert':undefined}>{children}</span>;
           export const Pressable=({children,onPress,disabled,accessibilityLabel,accessibilityState})=><button aria-label={accessibilityLabel} aria-expanded={accessibilityState?.expanded} disabled={disabled} onClick={onPress}>{children}</button>;
           export const TextInput=({value,onChangeText,accessibilityLabel,...props})=><input aria-label={accessibilityLabel} value={value} onChange={event=>onChangeText(event.target.value)} onKeyDown={event=>{if(event.key==='Enter')props.onSubmitEditing?.()}}/>;
-          export const ActivityIndicator=()=> <span>Loading</span>;
+          export const Alert={alert(){}}; export const ActivityIndicator=()=> <span>Loading</span>;
           export const StyleSheet={create:value=>value};export const Platform={OS:'ios'};export const Keyboard={dismiss(){}};export const PixelRatio={get:()=>2};export const useWindowDimensions=()=>({width:834,fontScale:1});`
           : args.path === "react-native-safe-area-context" ? `import React from "react"; export const SafeAreaView=({children})=><div>{children}</div>;`
           : args.path === "./native-action-form" ? `import React from 'react'; export const NativeActionForm=({request,close})=><div role="dialog" aria-label="Record action"><span>Editing {request.recordId}</span><button onClick={()=>close(false)}>Cancel edit</button></div>;`
           : args.path === "./app-icon" ? `export const AppIcon=()=>null;export const IconTile=()=>null;`
-          : `export class ApiError extends Error {status=401};
+          : `export class ApiError extends Error {status=401};export const getImportTemplate=async()=>({template:""});export const runImport=async()=>({});export const exportPlatformReport=async()=>{};
           export const getHelp=async()=>({records:[],related:[],page:1,hasMore:false});
           export async function getNativeWorkspace(kind,path,q,page){
             window.__calls=(window.__calls||0)+1;
@@ -82,5 +85,6 @@ for (const kind of ["organization", "platform"] as const) test(`native ${kind} r
     await page.getByRole("button", { name: "Try again", exact: true }).click();
     await page.getByRole("button", { name: "Example Tenant", exact: true }).waitFor();
     assert.equal(await page.evaluate(() => (window as Window & { __unauthorized?: boolean }).__unauthorized), undefined);
+    assert.equal(await page.evaluate(() => (window as any).__backCalled), undefined);
   } finally { await browser.close(); }
 });

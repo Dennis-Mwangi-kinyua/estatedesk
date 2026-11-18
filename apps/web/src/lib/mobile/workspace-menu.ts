@@ -43,6 +43,7 @@ const presentation: Record<string, [string, string]> = {
 export function mobileWorkspaceLinks(session: AppSession, kind: MobileWorkspaceKind): MobileWorkspaceLink[] {
   if (!mobileWorkspaceAllowed(session, kind)) return [];
   const candidates = kind === "organization" ? [...SIDEBAR_LINKS.filter(item => item.native !== false).map(item => ({ title: item.label, path: item.href, description: "" })),
+    { title: "Rent statements", path: "/dashboard/org/collections/statement", description: "Open a collection account to review its rent charges and allocations." },
     { title: "BnB bookings & guest access", path: "/dashboard/org/airbnb/bookings", description: "Manage stays, guest access and requests in the app." },
     { title: "Help & guides", path: "/dashboard/org/help", description: "Find guides for all organization workflows." },
     { title: "Workspace search", path: "/dashboard/org/search", description: "Search records across your organization." },

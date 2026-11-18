@@ -9,6 +9,7 @@ import { requireActiveSubscription } from "@/lib/billing/subscription-access";
 import { createPromise, resolvePromise } from "@/features/org-management/service";
 import { ManagementError } from "@/features/org-management/policy";
 import { ZodError } from "zod";
+import { RENT_STATEMENT_PATH } from "./native-rent-statement";
 export const COLLECTION_PATH="/dashboard/org/collections";
 const date=(v:string)=>new Intl.DateTimeFormat("en-KE",{dateStyle:"medium",timeZone:"Africa/Nairobi"}).format(new Date(v));
 async function dataFor(session:AppSession,query:{q?:string;view?:string;page?:string;tenantId?:string}) { await requireActiveSubscription(session.activeOrgId!);return collectionsData(session,query,new Date(),true); }
@@ -20,6 +21,7 @@ export async function nativeCollectionRecords(session:AppSession,q:string,page:n
   {label:"Follow-up",value:row.tasks.map(t=>`${t.owner} · ${t.dueAt?date(t.dueAt):"No date"}: ${t.body}`).join("\n")||(row.owner?`Promise follow-up: ${row.owner} · ${row.nextContactAt?date(row.nextContactAt):"date needed"}`:"Assign an owner and next contact date")},
   {label:"Payment reviews",value:String(row.reviews)},{label:"Promises",value:row.promises.map(p=>`${money(p.amount)} by ${date(p.dueAt)} · ${p.status} · paid ${money(p.received)}`).join("\n")||"No open promise"},
   {label:"Recent reminders",value:row.notifications.map(n=>`${date(n.createdAt)} · ${n.channel} · ${n.status}`).join("\n")||"No recent reminders in this view"}],
+  links:[{title:"Rent statement",path:RENT_STATEMENT_PATH,recordId:row.id,emoji:"🧾",description:"Review rent charges, allocated payments and balances."}],
   actions:[{id:"collection.assign",title:"Assign or reschedule follow-up"},{id:"collection.promise",title:"Record a payment promise"},...(row.promises.length?[{id:"collection.resolvePromise",title:"Record promise outcome"}]:[]),...(row.tasks.length?[{id:"collection.complete",title:"Mark contacted"}]:[]),...(row.reviews===0&&(row.email||row.userId)&&canAccessWorkspacePath(session,"/dashboard/org/notifications")?[{id:"collection.remind",title:"Preview and approve reminder"}]:[])],
  }));
  return {records,notice:`${data.date} · Overdue ${money(data.overdue)} across ${data.accounts} accounts. Rent collected today ${money(data.collectedToday)}; this month ${money(data.collectedMonth)}. ${data.keptPromises} promises recorded fulfilled this month. Check pending/unmatched payments before chasing a tenant. Amounts exclude water, deposits and unapplied cash.`};

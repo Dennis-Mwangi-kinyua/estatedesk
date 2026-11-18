@@ -12,7 +12,7 @@ test.beforeAll(async () => {
   const base = path.resolve("apps/web/src/app");
   const globals = path.join(base, "globals.css");
   const compiled = await postcss([tailwind()]).process(readFileSync(globals, "utf8"), { from: globals });
-  css = compiled.css + ["system-glass.css", "modern-ui.css", "site-experience.css", "soft-ui.css", "theme-controls.css", "public-workspace.css", "(app)/workspace.css", "(app)/workspace-controls.css", "(app)/platform/platform-glass.css", "(app)/platform/admin-glass.css"]
+  css = compiled.css + ["system-glass.css", "modern-ui.css", "site-experience.css", "soft-ui.css", "theme-controls.css", "public-workspace.css", "(app)/workspace.css", "(app)/workspace-controls.css", "(app)/platform/platform-glass.css", "brand-tokens.css", "brand-ui.css"]
     .map(file => readFileSync(path.join(base, file), "utf8")).join("\n");
   const bundle = await build({ entryPoints: ["tests/e2e/fixtures/platform-appearance.tsx"], bundle: true, write: false, platform: "browser", format: "iife", jsx: "automatic", tsconfig: "apps/web/tsconfig.json" });
   appearanceFixture = bundle.outputFiles[0].text;
@@ -47,7 +47,7 @@ test("actual public and workspace theme toggles keep contrasting icons and switc
 });
 
 for (const saved of ["light", "dark"] as const) {
-  test(`Classic and Glass switch independently of the saved ${saved} theme`, async ({ page }) => {
+  test(`platform admin keeps one interface and respects the saved ${saved} theme`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: saved === "light" ? "dark" : "light" });
     await page.addInitScript(saved => {
       if (!localStorage.getItem("theme")) localStorage.setItem("theme", saved);
@@ -58,84 +58,17 @@ for (const saved of ["light", "dark"] as const) {
     }));
     await page.goto("http://appearance.test/platform");
     await expect(page.locator("html")).toHaveClass(new RegExp(saved));
-    await expect(page.locator('button[aria-label^="Switch to"]')).toBeVisible();
-    await page.getByRole("button", { name: "Glass", exact: true }).click();
-    await expect(page.locator("html")).toHaveClass(/light/);
-    await expect(page.locator(".platform-ui-glass")).toBeVisible();
-    await expect(page.locator('button[aria-label^="Switch to"]')).toHaveCount(0);
-    expect(await page.evaluate(() => localStorage.getItem("theme"))).toBe(saved);
-    expect(await page.evaluate(() => document.cookie)).toContain(`estatedesk-theme=${saved}`);
-    await page.reload();
-    await expect(page.locator("html")).toHaveClass(/light/);
-    await expect(page.getByRole("button", { name: "Glass", exact: true })).toHaveAttribute("aria-pressed", "true");
-    expect(await page.evaluate(() => localStorage.getItem("theme"))).toBe(saved);
-    await page.getByRole("button", { name: "Classic", exact: true }).click();
-    await expect(page.locator("html")).toHaveClass(new RegExp(saved));
+    await expect(page.getByRole("button", { name: "Classic", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Glass", exact: true })).toHaveCount(0);
     await expect(page.locator(".platform-ui-glass")).toHaveCount(0);
     await expect(page.locator('button[aria-label^="Switch to"]')).toBeVisible();
     await expect(page.locator("#appearance-panel")).toHaveCSS("backdrop-filter", "none");
-    await page.getByRole("button", { name: "Glass", exact: true }).click();
-    await expect(page.locator("html")).toHaveClass(/light/);
+    const nextTheme = saved === "light" ? "dark" : "light";
+    await page.getByRole("button", { name: `Switch to ${nextTheme} mode` }).click();
+    await expect(page.locator("html")).toHaveClass(new RegExp(nextTheme));
+    expect(await page.evaluate(() => localStorage.getItem("theme"))).toBe(nextTheme);
     await page.getByRole("button", { name: "Leave platform", exact: true }).click();
-    await expect(page.locator("html")).toHaveClass(new RegExp(saved));
-    expect(await page.evaluate(() => localStorage.getItem("theme"))).toBe(saved);
-  });
-}
-
-for (const theme of ["light", "dark"] as const) {
-  test(`platform admin glass has one appearance with a ${theme} device theme`, async ({ page }) => {
-    await page.emulateMedia({ colorScheme: theme });
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await page.setContent(`<html class="light"><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>${css} *,*::before,*::after{transition:none!important}</style></head>
-      <body class="estate-glass-system"><div class="estate-workspace"><div class="platform-shell-admin platform-ui-glass" style="min-height:100vh;padding:24px">
-        <header class="platform-desktop-header ed-shell-panel" style="padding:20px;border-radius:20px"><p class="text-muted-foreground">ESTATEDESK · PLATFORM ADMIN</p><h1 style="font-size:28px;margin-top:8px">Platform overview</h1></header>
-        <main style="max-width:1100px;margin:24px auto">
-          <section class="page-header" style="padding:24px"><p class="text-muted-foreground">Your workspace, at a glance</p><h2 style="font-size:24px;margin:8px 0">A clear view of your operations.</h2><p class="text-muted-foreground">Sample preview · Organizations, activity and platform health.</p></section>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:20px;margin-top:20px">
-            <article id="admin-card" class="platform-glass-panel" style="padding:24px"><p class="text-muted-foreground">Organizations</p><h2 style="font-size:36px;margin:16px 0">128</h2><p>All workspaces in one place</p></article>
-            <article class="platform-glass-panel" style="padding:24px"><p class="text-muted-foreground">Platform health</p><h2 style="font-size:28px;margin:16px 0">Operational</h2><p>Monitor services and activity</p></article>
-          </div>
-          <section class="workspace-panel" style="padding:24px;margin-top:20px"><h2 style="font-size:20px;margin-bottom:16px">Find an organization</h2><input id="admin-input" placeholder="Search by name" style="padding:12px;border:1px solid;border-radius:12px;width:100%;max-width:420px">
-            <div class="platform-mode-switch" style="display:flex;gap:8px;margin-top:20px"><button aria-pressed="true" style="padding:12px 20px">Admin</button><button aria-pressed="false" style="padding:12px 20px">Developer</button></div>
-          </section>
-        </main>
-      </div></div></body></html>`);
-    await expect(page.locator("#admin-card")).toHaveCSS("backdrop-filter", "blur(20px) saturate(1.25)");
-    await expect(page.locator("#admin-card")).toHaveCSS("background-color", "rgba(255, 255, 255, 0.52)");
-    await expect(page.locator("#admin-input")).toHaveCSS("background-color", "rgba(255, 255, 255, 0.94)");
-    const active = page.locator('[aria-pressed="true"]');
-    const inactive = page.locator('[aria-pressed="false"]');
-    expect(await active.evaluate(el => getComputedStyle(el).backgroundColor)).not.toEqual(await inactive.evaluate(el => getComputedStyle(el).backgroundColor));
-    const contrast = await page.evaluate(() => {
-      const canvas = document.createElement("canvas");
-      canvas.width = canvas.height = 1;
-      const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
-      const luminance = () => [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3)
-        .map(value => value / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4)
-        .reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
-      return [...document.querySelectorAll("#admin-card p, #admin-card h2, #admin-input, .platform-mode-switch button")].map(element => {
-        ctx.clearRect(0, 0, 1, 1);
-        const ancestors = [];
-        for (let node: Element | null = element; node; node = node.parentElement) ancestors.unshift(node);
-        for (const node of ancestors) {
-          ctx.fillStyle = getComputedStyle(node).backgroundColor;
-          ctx.fillRect(0, 0, 1, 1);
-        }
-        const background = luminance();
-        ctx.fillStyle = getComputedStyle(element).color;
-        ctx.fillRect(0, 0, 1, 1);
-        const text = luminance();
-        return (Math.max(text, background) + .05) / (Math.min(text, background) + .05);
-      });
-    });
-    for (const ratio of contrast) expect(ratio).toBeGreaterThanOrEqual(4.5);
-    await page.screenshot({ path: `/tmp/estatedesk-admin-glass-${theme}.png`, fullPage: true });
-    await page.setViewportSize({ width: 390, height: 844 });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-    const cdp = await page.context().newCDPSession(page);
-    await cdp.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-transparency", value: "reduce" }] });
-    await expect(page.locator("#admin-card")).toHaveCSS("backdrop-filter", "none");
-    await expect(page.locator("#admin-card")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    await expect(page.locator("html")).toHaveClass(new RegExp(nextTheme));
   });
 }
 
@@ -154,7 +87,7 @@ for (const deviceTheme of ["light", "dark"] as const) {
     for (const theme of ["light", "dark", "light"] as const) {
       await page.evaluate(value => document.documentElement.className = value, theme);
       for (const scope of ["public", "workspace"]) {
-        await expect(page.locator(`#${scope}-card`)).toHaveCSS("background-color", theme === "dark" ? "rgb(32, 34, 39)" : "rgb(255, 255, 255)");
+        await expect(page.locator(`#${scope}-card`)).toHaveCSS("background-color", theme === "dark" ? "rgb(25, 43, 36)" : "rgb(255, 255, 255)");
         const contrasts = await page.evaluate(scope => {
           const canvas = document.createElement("canvas");
           canvas.width = canvas.height = 1;
@@ -178,5 +111,20 @@ for (const deviceTheme of ["light", "dark"] as const) {
         for (const { id, ratio } of contrasts) expect(ratio, `${scope} ${theme} ${id}`).toBeGreaterThanOrEqual(4.5);
       }
     }
+  });
+}
+
+for (const theme of ['light', 'dark']) {
+  test(`EstateDesk action hierarchy and focus remain readable in ${theme}`, async ({ page }) => {
+    await page.setContent(`<html class="${theme}"><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>${css}</style></head><body class="estate-glass-system"><main class="estate-workspace" style="padding:24px"><h1>EstateDesk</h1><p>Your properties. One clear workspace.</p><div style="display:flex;gap:12px;flex-wrap:wrap">${['default','outline','secondary','ghost','destructive'].map(variant => `<button data-slot="button" data-workspace-action="true" data-variant="${variant}">${variant}</button>`).join('')}</div><label>Property name<input aria-label="Property name"></label></main></body></html>`);
+    const primary = page.locator('[data-variant="default"]');
+    await expect(primary).toHaveCSS('background-color', theme === 'light' ? 'rgb(20, 99, 78)' : 'rgb(121, 213, 180)');
+    await expect(page.locator('[data-variant="outline"]')).toHaveCSS('background-color', theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(25, 43, 36)');
+    await expect(page.locator('[data-variant="ghost"]')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    await page.keyboard.press('Tab');
+    await expect(primary).toBeFocused();
+    await expect(primary).toHaveCSS('outline-style', 'solid');
+    expect(await primary.evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 }

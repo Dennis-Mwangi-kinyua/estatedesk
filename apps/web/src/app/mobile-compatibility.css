@@ -1,0 +1,38 @@
+/* Keep sizing usable without dynamic viewport units. Wide data tables retain
+   their own scroll containers; do not suppress overflow globally. */
+body.ed-mobile-first,
+.ed-mobile-first-root,
+.ed-mobile-surface { min-height: 100vh; }
+@supports (min-height: 100dvh) {
+  body.ed-mobile-first,
+  .ed-mobile-first-root,
+  .ed-mobile-surface { min-height: 100dvh; }
+}
+.ed-mobile-surface :where(section, article, nav, form, fieldset) { min-width: 0; }
+.ed-mobile-surface :where(h1, h2, h3, p, a) { overflow-wrap: break-word; }
+@media (max-width: 767px) {
+  .ed-mobile-surface :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea) {
+    font-size: 16px;
+    min-height: 44px;
+    max-width: 100%;
+  }
+  .ed-mobile-surface :where(button, summary, [role="button"]) { min-height: 44px; }
+}
+@media (max-width: 359px) {
+  .public-access-footer nav { min-width: 0; }
+  .public-access-footer nav a { overflow-wrap: anywhere; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  body.ed-mobile-first *, body.ed-mobile-first *::before, body.ed-mobile-first *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  body.ed-mobile-first *, body.ed-mobile-first *::before, body.ed-mobile-first *::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}

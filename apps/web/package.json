@@ -3,11 +3,11 @@
   "version": "0.2.1",
   "private": true,
   "scripts": {
-    "dev": "WATCHPACK_POLLING=true next dev --webpack",
+    "dev": "node ../../scripts/dev-web.mjs",
     "build": "node ../../scripts/build-release.mjs web",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node --max-old-space-size=4096 ../../node_modules/typescript/bin/tsc --noEmit",
     "test": "node --import tsx --test --test-force-exit ../../tests/**/*.test.ts",
     "test:integration": "node --import tsx --test ../../tests/integration/*.integration.ts",
     "qa:tenant-portal": "tsx ../../scripts/tenant-portal-visual-qa.ts"
@@ -21,7 +21,7 @@
     "@estatedesk/notifications": "file:../../services/notifications",
     "@estatedesk/public-vacancy": "file:../../services/public-vacancy",
     "@estatedesk/service-client": "file:../../packages/service-client",
-    "next": "^16.4.1",
+    "next": "^16.4.5",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   }

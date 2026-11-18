@@ -1,4 +1,5 @@
 import { guidePublicIndexItems } from "@/lib/guides";
+import { productFeatures } from "@/lib/product-features";
 import { publicSiteIndexWithUrls } from "@/lib/public-site-index";
 import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "@/lib/seo";
 
@@ -27,6 +28,7 @@ export async function GET() {
     "Kenya is EstateDesk's home operating market. Owners abroad can review records shared by their Kenyan managing team. For properties operating elsewhere in Africa or the Middle East, confirm currency, payments, statutory reporting and language requirements before rollout. English regional pages do not imply local integrations or Arabic application support.",
     "",
     "## What EstateDesk Does",
+    ...productFeatures.map(feature => `- ${feature.title}: ${feature.description}`),
     "- Full property management OS: tenants, leases, units, staff roles, reports",
     "- Kenya-first payments: M-Pesa STK/paybill, KCB IPN, multi-bank virtual accounts",
     "- Combined period bills allocating service/garbage/security/water before rent",

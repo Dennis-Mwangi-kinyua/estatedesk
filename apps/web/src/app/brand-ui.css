@@ -1,0 +1,76 @@
+/* Shared interaction and surface rules; colors come from brand-tokens.css. */
+body.estate-glass-system {
+  font-family: var(--font-system-sans);
+  line-height: 1.5;
+  background: var(--background);
+  color: var(--foreground);
+}
+body.estate-glass-system :is(.page-header, .workspace-hero) {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 1.125rem;
+}
+body.estate-glass-system :is([data-slot="card"], .workspace-panel, .workspace-metric) {
+  border-radius: 1.125rem;
+}
+body.estate-glass-system :is([data-slot="button"], .public-action) {
+  min-height: 2.75rem;
+  white-space: normal;
+  border-radius: .75rem;
+  line-height: 1.4;
+}
+body.estate-glass-system :is([data-slot="button"][data-size^="icon"]) {
+  min-width: 2.75rem;
+}
+body.estate-glass-system :is([data-slot="button"][data-variant="default"], .public-action-primary) {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+body.estate-glass-system :is([data-slot="button"][data-variant="outline"], .public-action-secondary) {
+  background: var(--card) !important;
+  border-color: var(--input) !important;
+  color: var(--foreground) !important;
+}
+body.estate-glass-system [data-slot="button"][data-variant="secondary"] {
+  background: var(--secondary) !important;
+  border-color: transparent !important;
+  color: var(--secondary-foreground) !important;
+}
+body.estate-glass-system [data-slot="button"]:is([data-variant="ghost"], [data-variant="link"]) {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--primary) !important;
+}
+body.estate-glass-system [data-slot="button"][data-variant="destructive"] {
+  background: var(--ed-danger) !important;
+  border-color: var(--ed-danger) !important;
+  color: var(--ed-onDanger) !important;
+}
+body.estate-glass-system :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+}
+body.estate-glass-system :is(button, a)[aria-current="page"] {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+@media (hover: hover) {
+  body.estate-glass-system :is([data-slot="button"][data-variant="default"], .public-action-primary):hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--ed-brandHover) !important;
+    border-color: var(--ed-brandHover) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  body.estate-glass-system :is(button, a, input, textarea, select) { transition: none !important; }
+}
+@media (forced-colors: active) {
+  body.estate-glass-system :is(button, .public-action) { border: 1px solid ButtonText !important; }
+}
+/* Legacy workspace text mappings must not recolor labels inside actions. */
+@layer utilities {
+  html body.estate-glass-system :is(.estate-workspace, .platform-theme-content, .org-theme-content) :is(button, .public-action, a[data-workspace-action="true"]) :is(span, svg) {
+    color: inherit !important;
+  }
+}

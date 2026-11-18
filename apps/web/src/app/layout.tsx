@@ -14,6 +14,7 @@ import { SkipToMain } from "@/components/layout/skip-to-main";
 import { IncidentBanner } from "@/components/marketing/incident-banner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { APP_PLANS } from "@/lib/billing/plans";
+import { productFeatureNames } from "@/lib/product-features";
 import {
   SEO_KEYWORDS,
   SITE_DESCRIPTION,
@@ -29,6 +30,9 @@ import "./site-experience.css";
 import "./soft-ui.css";
 import "./theme-controls.css";
 import "./public-workspace.css";
+import "./brand-tokens.css";
+import "./brand-ui.css";
+import "./mobile-compatibility.css";
 
 const siteUrl = getSiteUrl();
 const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
@@ -118,8 +122,8 @@ export const viewport: Viewport = {
   userScalable: true,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0f766e" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b1220" },
+    { media: "(prefers-color-scheme: light)", color: "#14634e" },
+    { media: "(prefers-color-scheme: dark)", color: "#101c18" },
   ],
 };
 
@@ -178,6 +182,7 @@ const structuredData = [
       "@id": `${siteUrl}/#organization`,
     },
     featureList: [
+      ...productFeatureNames,
       "Tenant and lease management",
       "M-Pesa and multi-bank rent collection",
       "Combined period bills with service-before-rent allocation",

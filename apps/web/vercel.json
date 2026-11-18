@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/retention",
       "schedule": "20 21 * * *"
+    },
+    {
+      "path": "/api/cron/notifications",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

@@ -21,6 +21,15 @@ test("collections queue, follow-ups and approved reminders preserve payment and 
   const otherTenant=await prisma.tenant.create({data:{orgId:foreign.id,fullName:"Foreign tenant",phone:"0700000001"}});
   const lease=await prisma.lease.create({data:{orgId:org.id,unitId:unit.id,tenantId:tenant.id,startDate:past,monthlyRent:1000}});
   const charge=await prisma.rentCharge.create({data:{orgId:org.id,leaseId:lease.id,period:"2026-10",amountDue:1000,amountPaid:0,balance:1000,dueDate:past,status:"OVERDUE"}});
+  const {rentStatement}=await import("../../apps/web/src/features/collections/statement");
+  const statement=await rentStatement(session,tenant.id);
+  assert.equal(statement?.count,1);assert.equal(Number(statement?.totals._sum.balance),1000);
+  assert.equal(await rentStatement(session,otherTenant.id),null);
+  await assert.rejects(rentStatement({...session,membershipScope:{scopeType:"UNIT",scopeId:unit.id}},tenant.id));
+  const water=await prisma.rentCharge.create({data:{orgId:org.id,leaseId:lease.id,period:"2026-10",chargeType:"WATER",amountDue:50,balance:50,dueDate:past,status:"UNPAID"}});
+  assert.equal((await rentStatement(session,tenant.id))?.count,1);
+  await prisma.rentCharge.delete({where:{id:water.id}});
+  assert.equal((await rentStatement(session,tenant.id,2))?.charges.length,0);
   let data=await collectionsData(session,{});assert.equal(data.accounts,1);assert.equal(data.overdue,1000);assert.equal(data.total,1);
   const date=new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Nairobi"}).format(now);
   const task={tenantId:tenant.id,assigneeId:staff.id,date,note:"Call and confirm payment details",requestKey:randomUUID()};

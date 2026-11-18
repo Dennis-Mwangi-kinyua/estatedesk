@@ -34,7 +34,7 @@ A successful preview issues a signed token bound to the exact organization, user
 
 ## Native and release scope
 
-Native organization navigation includes Collections today, native queue filters, account cards, owner/date/note assignment, completion, payment-promise creation/outcomes and reminder preview/approval. It uses the same scoped services and requires the existing `X-EstateDesk-Forms: 2026-11-09` header. Guided spreadsheet upload/setup and the detailed rent statement are web/mobile-browser workspaces; native cards include their relevant balances and promise/payment-review summaries.
+Native organization navigation includes Collections today, native queue filters, account cards, owner/date/note assignment, completion, payment-promise creation/outcomes and reminder preview/approval. It uses the same scoped services and requires the existing `X-EstateDesk-Forms: 2026-11-09` header. Native collection accounts now link to paginated detailed rent statements, using the same query and totals as the web. Native Imports supports choosing a record type, inspecting example CSV headers, pasting CSV, validation, row review and explicit confirmation; spreadsheet file selection remains unavailable. Preview receipts and import permissions are shared with the web.
 
 No new schema migration or provider credential is introduced by this feature. The prior CRM and organization-management migrations must already be applied. Publish the matching backend and rebuild the native application for its new filters. The existing notification dispatcher must be configured before email reminders can be delivered.
 

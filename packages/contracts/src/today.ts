@@ -5,6 +5,7 @@ export const todayItemSchema = z.object({
   href: z.string().regex(/^\/(?!\/)/),
   urgency: z.enum(["overdue", "today", "normal"]),
   dueAt: z.string().datetime().nullable(),
+  providerJob: z.object({ id: z.string(), status: z.enum(["ASSIGNED", "IN_PROGRESS", "SUBMITTED"]) }).optional(),
   native: z.object({
     screen: z.enum(["notifications", "bills", "issues", "work-orders", "gate", "portfolio", "leases", "workspace"]),
     kind: z.enum(["organization", "platform", "landlord"]).optional(),

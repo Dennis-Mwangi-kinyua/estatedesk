@@ -25,9 +25,11 @@ test("one platform shell exposes all tools on desktop and phone despite an old d
   const styles = await page.locator('link[rel="stylesheet"]').evaluateAll(links => links.map(link => (link as HTMLLinkElement).href));
   await setFixtureContent(page, `<html><head><meta name="viewport" content="width=device-width, initial-scale=1">${styles.map(href => `<link rel="stylesheet" href="${href}">`).join("")}</head><body class="estate-glass-system estate-workspace"><div id="fixture"></div></body></html>`);
   await installWorkspaceStyles(page);
-  for (const file of ["platform-glass.css", "admin-glass.css"]) await page.addStyleTag({ content: readFileSync(path.resolve("apps/web/src/app/(app)/platform", file), "utf8") });
+  await page.addStyleTag({ content: readFileSync(path.resolve("apps/web/src/app/(app)/platform/platform-glass.css"), "utf8") });
   await page.addScriptTag({ content: bundle.outputFiles[0].text });
-  await expect(page.getByRole("heading", { name: "Your platform, in focus." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Platform overview" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Classic", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Glass", exact: true })).toHaveCount(0);
   const mobile = (page.viewportSize()?.width ?? 0) < 1024;
   if (mobile) await page.getByRole("button", { name: "Open menu", exact: true }).click();
   const nav = page.getByRole("navigation", { name: mobile ? "Platform menu" : "Platform navigation", exact: true });
