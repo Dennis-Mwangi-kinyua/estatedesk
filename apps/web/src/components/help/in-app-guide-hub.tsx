@@ -71,6 +71,7 @@ export function InAppGuideHub({
       </section>
 
       <section className={cardClassName} aria-labelledby="help-start">
+        <Link href="/dashboard/support" className="mb-4 inline-flex min-h-11 items-center rounded-xl bg-primary px-4 font-semibold text-primary-foreground">Contact customer support</Link>
         <h2 id="help-start" className="text-lg font-semibold">Get help in three steps</h2>
         <ol className="mt-4 list-decimal space-y-3 pl-6 text-sm leading-6">
           <li><a href="#help-topics" className="font-medium underline">Choose your topic below</a> for a guide that matches your workspace.</li>

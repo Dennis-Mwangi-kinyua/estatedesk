@@ -48,6 +48,7 @@ export function canAccessWorkspacePath(
     return false;
   }
   if (session.activeOrgId && (rolePolicyBlocksPath(session.orgRolePolicy, path) || featureBlocksPath(session.orgFeatures, path))) return false;
+  if (under(path, "/dashboard/support")) return true;
   // Provider ownership and hiring are authorised by their resource guards.
   if (path === "/provider" || path === "/service-providers" || /^\/service-providers\/[^/]+$/.test(path)) return true;
   if (["/account-deletion", "/dashboard/security", "/dashboard/today", "/dashboard/help", "/dashboard", "/profile", "/access-denied"].includes(path) || under(path, "/change-password")) return true;

@@ -17,6 +17,7 @@ export default async function PersonalHelpPage() {
   if (workspace) return <InAppGuideHub workspace={workspace} orgRole={session.activeOrgRole} />;
   return <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
     <h1 className="text-3xl font-semibold">Help and support</h1>
+    <Link href="/dashboard/support" className="inline-flex min-h-11 items-center rounded-xl border px-4">Contact customer support</Link>
     <p>Start with the task you need help with. Your account permissions still apply.</p>
     <ol className="list-decimal space-y-4 pl-6">
       <li><Link className="underline" href="/dashboard/today">Open Today</Link> to review your work and messages. Gate staff should check visitor details before confirming admission. Providers can accept assignments and submit completed work for review.</li>

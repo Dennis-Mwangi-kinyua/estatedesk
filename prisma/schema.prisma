@@ -11,6 +11,8 @@ datasource db {
 
 /// Application user account. May belong to many organizations through Membership.
 model User {
+  supportTickets SupportTicket[]
+  supportReplies SupportReply[]
   recruitmentJobs RecruitmentJob[]
   recruitmentReviews RecruitmentApplicationEvent[]
   salesLeads OnboardingRequest[] @relation("SalesOwner")
@@ -3687,4 +3689,29 @@ model CrmActivity {
   @@index([customerOrgId, createdAt])
   @@index([scopeOrgId, completedAt, dueAt])
   @@index([assigneeId, completedAt, dueAt])
+}
+
+model SupportTicket {
+  id String @id @default(cuid())
+  ownerId String
+  subject String @db.VarChar(160)
+  category String @db.VarChar(30)
+  status String @default("OPEN") @db.VarChar(20)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  replies SupportReply[]
+  @@index([ownerId, updatedAt])
+  @@index([status, updatedAt])
+}
+
+model SupportReply {
+  id String @id @default(cuid())
+  ticketId String
+  authorId String
+  body String @db.VarChar(4000)
+  createdAt DateTime @default(now())
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  @@index([ticketId, createdAt])
 }

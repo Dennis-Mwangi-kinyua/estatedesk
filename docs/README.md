@@ -25,6 +25,8 @@ The web application in `apps/web` is the primary backend and browser client. Mob
 
 ## Business workflows
 
+- [Customer support](CUSTOMER_SUPPORT.md): private requests, customer conversations and platform inbox.
+
 | Domain | Documentation |
 | --- | --- |
 | Collections, statements and onboarding | [Collections](COLLECTIONS.md) |
