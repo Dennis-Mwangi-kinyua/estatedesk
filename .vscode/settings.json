@@ -16,5 +16,6 @@
   },
   "emulator.emulatorPathLinux": "~/Android/Sdk/emulator",
   "emulator.emulatorPathMac": "~/Library/Android/sdk/emulator",
-  "emulator.androidColdBoot": true
+  "emulator.androidColdBoot": true,
+  "typescript.tsserver.maxTsServerMemory": 4096
 }
