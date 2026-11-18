@@ -16,7 +16,7 @@ const config: ExpoConfig = {
     config: { usesNonExemptEncryption: false },
   },
   android: { allowBackup: false, package: "ke.co.estatedesk.mobile" },
-  plugins: ["expo-dev-client", "expo-secure-store", "expo-notifications", "expo-sharing",
+  plugins: ["expo-status-bar", "expo-dev-client", "expo-secure-store", "expo-notifications", "expo-sharing",
     "./plugins/with-release-signing.cjs",
     ["expo-splash-screen", { image: "./assets/splash.png", imageWidth: 200, resizeMode: "contain", backgroundColor: designTokens.light.brandDark }],
     ["expo-camera", { cameraPermission: "Allow EstateDesk to take report photos and scan visitor QR passes.", microphonePermission: false, recordAudioAndroid: false }],
