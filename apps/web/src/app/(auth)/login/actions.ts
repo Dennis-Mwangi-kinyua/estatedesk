@@ -46,7 +46,9 @@ const GENERIC_LOGIN_ERROR_MESSAGE =
   "Unable to sign in right now. Please try again.";
 const DATABASE_UNAVAILABLE_MESSAGE =
   "The database is taking too long to respond. Please try again in a moment.";
-const LOGIN_RATE_LIMIT_TIMEOUT_MS = 2_500;
+const LOGIN_RATE_LIMIT_TIMEOUT_MS = 8_000;
+
+class LoginRateLimitTimeoutError extends Error {}
 
 async function withTimeout<T>(
   promise: Promise<T>,
@@ -60,7 +62,7 @@ async function withTimeout<T>(
       promise,
       new Promise<never>((_, reject) => {
         timeoutId = setTimeout(() => {
-          reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+          reject(new LoginRateLimitTimeoutError(`${label} timed out after ${timeoutMs}ms`));
         }, timeoutMs);
       }),
     ]);
@@ -118,7 +120,7 @@ async function getLoginRateLimitError({
     const message =
       error instanceof Error ? error.message : "login rate limit check failed";
     console.warn("login rate limit unavailable:", message);
-    return { success: false, error: GENERIC_LOGIN_ERROR_MESSAGE };
+    throw error;
   }
 
   return null;
@@ -224,7 +226,9 @@ export async function loginAction(
     }
     if (user.status !== "ACTIVE") redirect("/account-suspended");
 
-    await assertUserNotBlacklisted(user.id);
+    await retryTransientLoginDbOperation("login-check-organization-blacklist", () =>
+      assertUserNotBlacklisted(user.id),
+    );
 
     // Platform admins do not need org membership or tenant profile
     if (
@@ -405,7 +409,7 @@ export async function loginAction(
       };
     }
 
-    if (isTransientDatabaseError(error)) {
+    if (error instanceof LoginRateLimitTimeoutError || isTransientDatabaseError(error)) {
       console.error("loginAction database unavailable:", error);
 
       return {

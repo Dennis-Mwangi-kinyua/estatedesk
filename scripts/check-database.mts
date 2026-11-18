@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { readdir, readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import dns from "node:dns";
+import { setDefaultAutoSelectFamily } from "node:net";
 import nextEnv from "@next/env";
 import { config } from "dotenv";
 import pg from "pg";
@@ -10,6 +11,7 @@ import { getDatabaseUrl } from "../packages/config/src/env.ts";
 
 // Match Next's app environment, then fill missing values from the repo root.
 dns.setDefaultResultOrder("ipv4first");
+setDefaultAutoSelectFamily(false);
 nextEnv.loadEnvConfig(resolve("apps/web"), process.env.NODE_ENV !== "production");
 config({ path: resolve(".env"), quiet: true });
 
